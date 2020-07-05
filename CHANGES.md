@@ -7,6 +7,22 @@
 - Added const overloads of `IntArray::begin` and `IntArray::end`.
 - Added `std::hash` implementation for `EncryptionParameters` (in addition to `parms_id_type`) so it is possible to create e.g. `std::unordered_map` of `EncryptionParameters`.
 
+## Version 3.5.5
+
+### New features
+
+- Added a struct `seal::util::MultiplyUIntModOperand` in [native/src/seal/util/uintarithsmallmod.h](native/src/seal/util/uintarithsmallmod.h).
+This struct handles precomputation data for Barrett style modular multiplication.
+- Added new overloads for modular arithmetic in [native/src/seal/util/uintarithsmallmod.h](native/src/seal/util/uintarithsmallmod.h) where one operand is replaced by a `MultiplyUIntModOperand` instance for improved performance when the same operand is used repeatedly. 
+- Changed the name of `seal::util::barrett_reduce_63` to `seal::util::barrett_reduce_64`; the name was misleading and only referred to the size of the modulus.
+- Added `seal::util::StrideIter` in [native/src/seal/util/iterator.h](native/src/seal/util/iterator.h).
+- Added macros `SEAL_ALLOCATE_GET_PTR_ITER` and `SEAL_ALLOCATE_GET_STRIDE_ITER` in [native/src/seal/util/defines.h](native/src/seal/util/defines.h).
+
+### Other
+
+- Significant performance improvements from merging pull request [(PR 185)](https://github.com/microsoft/SEAL/pull/185) and implementing other improvements of the same style (see above).
+- Removed a lot of old and unused code.
+
 ## Version 3.5.4
 
 ### Bug Fixes

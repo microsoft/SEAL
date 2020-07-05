@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 #include "seal/util/ntt.h"
-#include "seal/util/polyarith.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/uintarithsmallmod.h"
 #include <algorithm>

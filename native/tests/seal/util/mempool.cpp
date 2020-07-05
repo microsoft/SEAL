@@ -287,67 +287,6 @@ namespace sealtest
             }
         }
 
-        TEST(MemoryPoolTests, DuplicateIfNeededMT)
-        {
-            {
-                unique_ptr<uint64_t[]> allocation(new uint64_t[2]);
-                allocation[0] = 0x1234567812345678;
-                allocation[1] = 0x8765432187654321;
-
-                MemoryPoolMT pool;
-                Pointer<uint64_t> p1 = duplicate_if_needed(allocation.get(), 2, false, pool);
-                ASSERT_TRUE(p1.is_set());
-                ASSERT_TRUE(p1.get() == allocation.get());
-                ASSERT_TRUE(0LL == pool.pool_count());
-
-                p1 = duplicate_if_needed(allocation.get(), 2, true, pool);
-                ASSERT_TRUE(p1.is_set());
-                ASSERT_FALSE(p1.get() == allocation.get());
-                ASSERT_TRUE(1LL == pool.pool_count());
-                ASSERT_TRUE(p1.get()[0] == 0x1234567812345678);
-                ASSERT_TRUE(p1.get()[1] == 0x8765432187654321);
-                p1.release();
-            }
-            {
-                unique_ptr<int64_t[]> allocation(new int64_t[2]);
-                allocation[0] = 0x234567812345678;
-                allocation[1] = 0x765432187654321;
-
-                MemoryPoolMT pool;
-                Pointer<int64_t> p1 = duplicate_if_needed(allocation.get(), 2, false, pool);
-                ASSERT_TRUE(p1.is_set());
-                ASSERT_TRUE(p1.get() == allocation.get());
-                ASSERT_TRUE(0LL == pool.pool_count());
-
-                p1 = duplicate_if_needed(allocation.get(), 2, true, pool);
-                ASSERT_TRUE(p1.is_set());
-                ASSERT_FALSE(p1.get() == allocation.get());
-                ASSERT_TRUE(1LL == pool.pool_count());
-                ASSERT_TRUE(p1.get()[0] == 0x234567812345678);
-                ASSERT_TRUE(p1.get()[1] == 0x765432187654321);
-                p1.release();
-            }
-            {
-                unique_ptr<int[]> allocation(new int[2]);
-                allocation[0] = 0x123;
-                allocation[1] = 0x876;
-
-                MemoryPoolMT pool;
-                Pointer<int> p1 = duplicate_if_needed(allocation.get(), 2, false, pool);
-                ASSERT_TRUE(p1.is_set());
-                ASSERT_TRUE(p1.get() == allocation.get());
-                ASSERT_TRUE(0LL == pool.pool_count());
-
-                p1 = duplicate_if_needed(allocation.get(), 2, true, pool);
-                ASSERT_TRUE(p1.is_set());
-                ASSERT_FALSE(p1.get() == allocation.get());
-                ASSERT_TRUE(1LL == pool.pool_count());
-                ASSERT_TRUE(p1.get()[0] == 0x123);
-                ASSERT_TRUE(p1.get()[1] == 0x876);
-                p1.release();
-            }
-        }
-
         TEST(MemoryPoolTests, TestMemoryPoolST)
         {
             {
@@ -612,67 +551,6 @@ namespace sealtest
                 ASSERT_TRUE(p4.get() == allocation1);
                 p3.release();
                 p4.release();
-            }
-        }
-
-        TEST(MemoryPoolTests, DuplicateIfNeededST)
-        {
-            {
-                unique_ptr<uint64_t[]> allocation(new uint64_t[2]);
-                allocation[0] = 0x1234567812345678;
-                allocation[1] = 0x8765432187654321;
-
-                MemoryPoolST pool;
-                Pointer<uint64_t> p1 = duplicate_if_needed(allocation.get(), 2, false, pool);
-                ASSERT_TRUE(p1.is_set());
-                ASSERT_TRUE(p1.get() == allocation.get());
-                ASSERT_TRUE(0LL == pool.pool_count());
-
-                p1 = duplicate_if_needed(allocation.get(), 2, true, pool);
-                ASSERT_TRUE(p1.is_set());
-                ASSERT_FALSE(p1.get() == allocation.get());
-                ASSERT_TRUE(1LL == pool.pool_count());
-                ASSERT_TRUE(p1.get()[0] == 0x1234567812345678);
-                ASSERT_TRUE(p1.get()[1] == 0x8765432187654321);
-                p1.release();
-            }
-            {
-                unique_ptr<int64_t[]> allocation(new int64_t[2]);
-                allocation[0] = 0x234567812345678;
-                allocation[1] = 0x765432187654321;
-
-                MemoryPoolST pool;
-                Pointer<int64_t> p1 = duplicate_if_needed(allocation.get(), 2, false, pool);
-                ASSERT_TRUE(p1.is_set());
-                ASSERT_TRUE(p1.get() == allocation.get());
-                ASSERT_TRUE(0LL == pool.pool_count());
-
-                p1 = duplicate_if_needed(allocation.get(), 2, true, pool);
-                ASSERT_TRUE(p1.is_set());
-                ASSERT_FALSE(p1.get() == allocation.get());
-                ASSERT_TRUE(1LL == pool.pool_count());
-                ASSERT_TRUE(p1.get()[0] == 0x234567812345678);
-                ASSERT_TRUE(p1.get()[1] == 0x765432187654321);
-                p1.release();
-            }
-            {
-                unique_ptr<int[]> allocation(new int[2]);
-                allocation[0] = 0x123;
-                allocation[1] = 0x876;
-
-                MemoryPoolST pool;
-                Pointer<int> p1 = duplicate_if_needed(allocation.get(), 2, false, pool);
-                ASSERT_TRUE(p1.is_set());
-                ASSERT_TRUE(p1.get() == allocation.get());
-                ASSERT_TRUE(0LL == pool.pool_count());
-
-                p1 = duplicate_if_needed(allocation.get(), 2, true, pool);
-                ASSERT_TRUE(p1.is_set());
-                ASSERT_FALSE(p1.get() == allocation.get());
-                ASSERT_TRUE(1LL == pool.pool_count());
-                ASSERT_TRUE(p1.get()[0] == 0x123);
-                ASSERT_TRUE(p1.get()[1] == 0x876);
-                p1.release();
             }
         }
 

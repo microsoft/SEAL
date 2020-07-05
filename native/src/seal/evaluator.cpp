@@ -337,13 +337,13 @@ namespace seal
             ntt_negacyclic_harvey_lazy(get<1>(I), base_q_size, base_q_ntt_tables);
 
             // Allocate temporary space for a polynomial in the Bsk U {m_tilde} base
-            auto temp(allocate_poly(coeff_count, base_Bsk_m_tilde_size, pool));
+            SEAL_ALLOCATE_GET_RNS_ITER(temp, coeff_count, base_Bsk_m_tilde_size, pool);
 
             // (1) Convert from base q to base Bsk U {m_tilde}
-            rns_tool->fastbconv_m_tilde(get<0>(I), temp.get(), pool);
+            rns_tool->fastbconv_m_tilde(get<0>(I), temp, pool);
 
             // (2) Reduce q-overflows in with Montgomery reduction, switching base to Bsk
-            rns_tool->sm_mrq(temp.get(), get<2>(I), pool);
+            rns_tool->sm_mrq(temp, get<2>(I), pool);
 
             // Transform to NTT form in base Bsk
             // Lazy reduction
@@ -433,13 +433,13 @@ namespace seal
             multiply_poly_scalar_coeffmod(get<1>(I), base_Bsk_size, plain_modulus, base_Bsk, temp_q_Bsk + base_q_size);
 
             // Allocate yet another temporary for fast divide-and-floor result in base Bsk
-            auto temp_Bsk(allocate_poly(coeff_count, base_Bsk_size, pool));
+            SEAL_ALLOCATE_GET_RNS_ITER(temp_Bsk, coeff_count, base_Bsk_size, pool);
 
             // Step (7): divide by q and floor, producing a result in base Bsk
-            rns_tool->fast_floor(temp_q_Bsk, temp_Bsk.get(), pool);
+            rns_tool->fast_floor(temp_q_Bsk, temp_Bsk, pool);
 
             // Step (8): use Shenoy-Kumaresan method to convert the result to base q and write to encrypted1
-            rns_tool->fastbconv_sk(temp_Bsk.get(), get<2>(I), pool);
+            rns_tool->fastbconv_sk(temp_Bsk, get<2>(I), pool);
         });
     }
 
@@ -621,13 +621,13 @@ namespace seal
             ntt_negacyclic_harvey_lazy(get<1>(I), base_q_size, base_q_ntt_tables);
 
             // Allocate temporary space for a polynomial in the Bsk U {m_tilde} base
-            auto temp(allocate_poly(coeff_count, base_Bsk_m_tilde_size, pool));
+            SEAL_ALLOCATE_GET_RNS_ITER(temp, coeff_count, base_Bsk_m_tilde_size, pool);
 
             // (1) Convert from base q to base Bsk U {m_tilde}
-            rns_tool->fastbconv_m_tilde(get<0>(I), temp.get(), pool);
+            rns_tool->fastbconv_m_tilde(get<0>(I), temp, pool);
 
             // (2) Reduce q-overflows in with Montgomery reduction, switching base to Bsk
-            rns_tool->sm_mrq(temp.get(), get<2>(I), pool);
+            rns_tool->sm_mrq(temp, get<2>(I), pool);
 
             // Transform to NTT form in base Bsk
             // Lazy reduction
@@ -690,13 +690,13 @@ namespace seal
             multiply_poly_scalar_coeffmod(get<1>(I), base_Bsk_size, plain_modulus, base_Bsk, temp_q_Bsk + base_q_size);
 
             // Allocate yet another temporary for fast divide-and-floor result in base Bsk
-            auto temp_Bsk(allocate_poly(coeff_count, base_Bsk_size, pool));
+            SEAL_ALLOCATE_GET_RNS_ITER(temp_Bsk, coeff_count, base_Bsk_size, pool);
 
             // Step (7): divide by q and floor, producing a result in base Bsk
-            rns_tool->fast_floor(temp_q_Bsk, temp_Bsk.get(), pool);
+            rns_tool->fast_floor(temp_q_Bsk, temp_Bsk, pool);
 
             // Step (8): use Shenoy-Kumaresan method to convert the result to base q and write to encrypted1
-            rns_tool->fastbconv_sk(temp_Bsk.get(), get<2>(I), pool);
+            rns_tool->fastbconv_sk(temp_Bsk, get<2>(I), pool);
         });
     }
 
@@ -1337,7 +1337,7 @@ namespace seal
         {
         case scheme_type::BFV:
         {
-            multiply_add_plain_with_scaling_variant(plain, context_data, encrypted.data());
+            multiply_add_plain_with_scaling_variant(plain, context_data, *iter(encrypted));
             break;
         }
 
@@ -1411,7 +1411,7 @@ namespace seal
         {
         case scheme_type::BFV:
         {
-            multiply_sub_plain_with_scaling_variant(plain, context_data, encrypted.data());
+            multiply_sub_plain_with_scaling_variant(plain, context_data, *iter(encrypted));
             break;
         }
 
@@ -1556,8 +1556,7 @@ namespace seal
 
         if (!context_data.qualifiers().using_fast_plain_lift)
         {
-            // Semantic misuse of RNSIter here, but this works well
-            RNSIter temp_iter(temp.get(), coeff_modulus_size);
+            StrideIter<uint64_t *> temp_iter(temp.get(), coeff_modulus_size);
 
             SEAL_ITERATE(iter(plain.data(), temp_iter), plain_coeff_count, [&](auto I) {
                 auto plain_value = get<0>(I);

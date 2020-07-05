@@ -173,7 +173,7 @@ namespace seal
                         u.get() + i * coeff_count, public_key.data().data(j) + i * coeff_count, coeff_count,
                         coeff_modulus[i], destination.data(j) + i * coeff_count);
 
-                    // addition with e_0, e_1 is in non-NTT form.
+                    // Addition with e_0, e_1 is in non-NTT form.
                     if (!is_ntt_form)
                     {
                         inverse_ntt_negacyclic_harvey(destination.data(j) + i * coeff_count, ntt_tables[i]);
@@ -188,7 +188,7 @@ namespace seal
                 sample_poly_normal(rng, parms, u.get());
                 for (size_t i = 0; i < coeff_modulus_size; i++)
                 {
-                    // addition with e_0, e_1 is in NTT form.
+                    // Addition with e_0, e_1 is in NTT form.
                     if (is_ntt_form)
                     {
                         ntt_negacyclic_harvey(u.get() + i * coeff_count, ntt_tables[i]);

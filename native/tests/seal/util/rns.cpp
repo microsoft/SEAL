@@ -408,7 +408,7 @@ namespace sealtest
             auto bct_test = [&](const BaseConverter &bct, const vector<uint64_t> &in, const vector<uint64_t> &out) {
                 uint64_t in_array[3 * 3], out_array[3 * 3];
                 copy(in.cbegin(), in.cend(), in_array);
-                bct.fast_convert_array(in.data(), 3, out_array, pool);
+                bct.fast_convert_array(ConstRNSIter(in.data(), 3), RNSIter(out_array, 3), pool);
                 for (size_t i = 0; i < out.size(); i++)
                 {
                     ASSERT_EQ(out[i], out_array[i]);
@@ -473,7 +473,9 @@ namespace sealtest
                 vector<uint64_t> in(poly_modulus_degree * rns_tool->base_q()->size());
                 vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk_m_tilde()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool->fastbconv_m_tilde(in.data(), out.data(), pool);
+                ConstRNSIter in_iter(in.data(), poly_modulus_degree);
+                RNSIter out_iter(out.data(), poly_modulus_degree);
+                rns_tool->fastbconv_m_tilde(in_iter, out_iter, pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
@@ -481,7 +483,7 @@ namespace sealtest
 
                 in[0] = 1;
                 in[1] = 2;
-                rns_tool->fastbconv_m_tilde(in.data(), out.data(), pool);
+                rns_tool->fastbconv_m_tilde(in_iter, out_iter, pool);
 
                 // These are results for fase base conversion for a length-2 array ((m_tilde), (2*m_tilde))
                 // before reduction to target base.
@@ -504,7 +506,9 @@ namespace sealtest
                 vector<uint64_t> in(poly_modulus_degree * coeff_modulus_size);
                 vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk_m_tilde()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool->fastbconv_m_tilde(in.data(), out.data(), pool);
+                ConstRNSIter in_iter(in.data(), poly_modulus_degree);
+                RNSIter out_iter(out.data(), poly_modulus_degree);
+                rns_tool->fastbconv_m_tilde(in_iter, out_iter, pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
@@ -514,7 +518,7 @@ namespace sealtest
                 in[1] = 1;
                 in[2] = 2;
                 in[3] = 2;
-                rns_tool->fastbconv_m_tilde(in.data(), out.data(), pool);
+                rns_tool->fastbconv_m_tilde(in_iter, out_iter, pool);
                 uint64_t m_tilde = rns_tool->m_tilde().value();
 
                 // This is the result of fast base conversion for a length-2 array
@@ -551,7 +555,9 @@ namespace sealtest
                 vector<uint64_t> in(poly_modulus_degree * rns_tool->base_Bsk_m_tilde()->size());
                 vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool->sm_mrq(in.data(), out.data(), pool);
+                ConstRNSIter in_iter(in.data(), poly_modulus_degree);
+                RNSIter out_iter(out.data(), poly_modulus_degree);
+                rns_tool->sm_mrq(in_iter, out_iter, pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
@@ -570,7 +576,7 @@ namespace sealtest
                 in[5] = 0;
 
                 // This should simply get rid of the m_tilde factor
-                rns_tool->sm_mrq(in.data(), out.data(), pool);
+                rns_tool->sm_mrq(in_iter, out_iter, pool);
 
                 ASSERT_EQ(1, out[0]);
                 ASSERT_EQ(2, out[1]);
@@ -585,7 +591,7 @@ namespace sealtest
                 in[4] = (*rns_tool->base_q())[0].value();
                 in[5] = (*rns_tool->base_q())[0].value();
 
-                rns_tool->sm_mrq(in.data(), out.data(), pool);
+                rns_tool->sm_mrq(in_iter, out_iter, pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
@@ -599,7 +605,9 @@ namespace sealtest
                 vector<uint64_t> in(poly_modulus_degree * rns_tool->base_Bsk_m_tilde()->size());
                 vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool->sm_mrq(in.data(), out.data(), pool);
+                ConstRNSIter in_iter(in.data(), poly_modulus_degree);
+                RNSIter out_iter(out.data(), poly_modulus_degree);
+                rns_tool->sm_mrq(in_iter, out_iter, pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
@@ -620,7 +628,7 @@ namespace sealtest
                 in[7] = 0;
 
                 // This should simply get rid of the m_tilde factor
-                rns_tool->sm_mrq(in.data(), out.data(), pool);
+                rns_tool->sm_mrq(in_iter, out_iter, pool);
 
                 ASSERT_EQ(1, out[0]);
                 ASSERT_EQ(2, out[1]);
@@ -639,7 +647,7 @@ namespace sealtest
                 in[6] = 15;
                 in[7] = 30;
 
-                rns_tool->sm_mrq(in.data(), out.data(), pool);
+                rns_tool->sm_mrq(in_iter, out_iter, pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
@@ -655,7 +663,7 @@ namespace sealtest
                 in[6] = 2 * rns_tool->m_tilde().value() + 15;
                 in[7] = 2 * rns_tool->m_tilde().value() + 30;
 
-                rns_tool->sm_mrq(in.data(), out.data(), pool);
+                rns_tool->sm_mrq(in_iter, out_iter, pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(2, val);
@@ -680,7 +688,9 @@ namespace sealtest
                 vector<uint64_t> in(poly_modulus_degree * (rns_tool->base_Bsk()->size() + rns_tool->base_q()->size()));
                 vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool->fast_floor(in.data(), out.data(), pool);
+                ConstRNSIter in_iter(in.data(), poly_modulus_degree);
+                RNSIter out_iter(out.data(), poly_modulus_degree);
+                rns_tool->fast_floor(in_iter, out_iter, pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
@@ -695,7 +705,7 @@ namespace sealtest
                 in[5] = 3;
 
                 // We get an exact result in this case since input base only has size 1
-                rns_tool->fast_floor(in.data(), out.data(), pool);
+                rns_tool->fast_floor(in_iter, out_iter, pool);
                 ASSERT_EQ(5ULL, out[0]);
                 ASSERT_EQ(1ULL, out[1]);
                 ASSERT_EQ(5ULL, out[2]);
@@ -710,7 +720,7 @@ namespace sealtest
                 in[5] = 4;
 
                 // We get an exact result in this case since input base only has size 1
-                rns_tool->fast_floor(in.data(), out.data(), pool);
+                rns_tool->fast_floor(in_iter, out_iter, pool);
                 ASSERT_EQ(5ULL, out[0]);
                 ASSERT_EQ(1ULL, out[1]);
                 ASSERT_EQ(5ULL, out[2]);
@@ -724,7 +734,9 @@ namespace sealtest
                 vector<uint64_t> in(poly_modulus_degree * (rns_tool->base_Bsk()->size() + rns_tool->base_q()->size()));
                 vector<uint64_t> out(poly_modulus_degree * rns_tool->base_Bsk()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool->fast_floor(in.data(), out.data(), pool);
+                ConstRNSIter in_iter(in.data(), poly_modulus_degree);
+                RNSIter out_iter(out.data(), poly_modulus_degree);
+                rns_tool->fast_floor(in_iter, out_iter, pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
@@ -743,7 +755,7 @@ namespace sealtest
                 in[9] = 30;
 
                 // We get an exact result in this case
-                rns_tool->fast_floor(in.data(), out.data(), pool);
+                rns_tool->fast_floor(in_iter, out_iter, pool);
                 ASSERT_EQ(1ULL, out[0]);
                 ASSERT_EQ(2ULL, out[1]);
                 ASSERT_EQ(1ULL, out[2]);
@@ -764,7 +776,7 @@ namespace sealtest
                 in[9] = 32;
 
                 // The result is not exact but differs at most by 1
-                rns_tool->fast_floor(in.data(), out.data(), pool);
+                rns_tool->fast_floor(in_iter, out_iter, pool);
                 ASSERT_TRUE(fabs(1ULL - out[0]) <= 1);
                 ASSERT_TRUE(fabs(2ULL - out[1]) <= 1);
                 ASSERT_TRUE(fabs(1ULL - out[2]) <= 1);
@@ -790,7 +802,9 @@ namespace sealtest
                 vector<uint64_t> in(poly_modulus_degree * rns_tool->base_Bsk()->size());
                 vector<uint64_t> out(poly_modulus_degree * rns_tool->base_q()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool->fastbconv_sk(in.data(), out.data(), pool);
+                ConstRNSIter in_iter(in.data(), poly_modulus_degree);
+                RNSIter out_iter(out.data(), poly_modulus_degree);
+                rns_tool->fastbconv_sk(in_iter, out_iter, pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
@@ -802,7 +816,7 @@ namespace sealtest
                 in[2] = 1;
                 in[3] = 2;
 
-                rns_tool->fastbconv_sk(in.data(), out.data(), pool);
+                rns_tool->fastbconv_sk(in_iter, out_iter, pool);
                 ASSERT_EQ(1ULL, out[0]);
                 ASSERT_EQ(2ULL, out[1]);
             }
@@ -814,7 +828,9 @@ namespace sealtest
                 vector<uint64_t> in(poly_modulus_degree * rns_tool->base_Bsk()->size());
                 vector<uint64_t> out(poly_modulus_degree * rns_tool->base_q()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool->fastbconv_sk(in.data(), out.data(), pool);
+                ConstRNSIter in_iter(in.data(), poly_modulus_degree);
+                RNSIter out_iter(out.data(), poly_modulus_degree);
+                rns_tool->fastbconv_sk(in_iter, out_iter, pool);
                 for (auto val : out)
                 {
                     ASSERT_EQ(0, val);
@@ -828,7 +844,7 @@ namespace sealtest
                 in[4] = 1;
                 in[5] = 2;
 
-                rns_tool->fastbconv_sk(in.data(), out.data(), pool);
+                rns_tool->fastbconv_sk(in_iter, out_iter, pool);
                 ASSERT_EQ(1ULL, out[0]);
                 ASSERT_EQ(2ULL, out[1]);
                 ASSERT_EQ(1ULL, out[2]);
@@ -850,7 +866,9 @@ namespace sealtest
             vector<uint64_t> in(poly_modulus_degree * rns_tool->base_Bsk()->size());
             vector<uint64_t> out(poly_modulus_degree * rns_tool->base_q()->size());
             set_zero_uint(in.size(), in.data());
-            rns_tool->decrypt_scale_and_round(in.data(), out.data(), pool);
+            ConstRNSIter in_iter(in.data(), poly_modulus_degree);
+            CoeffIter out_iter(out.data());
+            rns_tool->decrypt_scale_and_round(in_iter, out_iter, pool);
             for (auto val : out)
             {
                 ASSERT_EQ(0, val);
@@ -863,7 +881,7 @@ namespace sealtest
             in[3] = 70;
 
             // We expect to get a zero output in this case
-            rns_tool->decrypt_scale_and_round(in.data(), out.data(), pool);
+            rns_tool->decrypt_scale_and_round(in_iter, out_iter, pool);
             ASSERT_EQ(0ULL, out[0]);
             ASSERT_EQ(0ULL, out[1]);
 
@@ -875,7 +893,7 @@ namespace sealtest
 
             // Here 29 will scale and round to 2 and 30 will scale and round to 0.
             // The added 35 should not make a difference.
-            rns_tool->decrypt_scale_and_round(in.data(), out.data(), pool);
+            rns_tool->decrypt_scale_and_round(in_iter, out_iter, pool);
             ASSERT_EQ(2ULL, out[0]);
             ASSERT_EQ(0ULL, out[1]);
         }
@@ -895,7 +913,8 @@ namespace sealtest
 
                 vector<uint64_t> in(poly_modulus_degree * rns_tool->base_q()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool->divide_and_round_q_last_inplace(in.data(), pool);
+                RNSIter in_iter(in.data(), poly_modulus_degree);
+                rns_tool->divide_and_round_q_last_inplace(in_iter, pool);
                 ASSERT_EQ(0ULL, in[0]);
                 ASSERT_EQ(0ULL, in[1]);
 
@@ -906,7 +925,7 @@ namespace sealtest
                 in[3] = 2;
 
                 // We expect to get a zero output also in this case
-                rns_tool->divide_and_round_q_last_inplace(in.data(), pool);
+                rns_tool->divide_and_round_q_last_inplace(in_iter, pool);
                 ASSERT_EQ(0ULL, in[0]);
                 ASSERT_EQ(0ULL, in[1]);
 
@@ -916,7 +935,7 @@ namespace sealtest
                 in[2] = 4;
                 in[3] = 3;
 
-                rns_tool->divide_and_round_q_last_inplace(in.data(), pool);
+                rns_tool->divide_and_round_q_last_inplace(in_iter, pool);
                 ASSERT_EQ(4ULL, in[0]);
                 ASSERT_EQ(3ULL, in[1]);
 
@@ -926,7 +945,7 @@ namespace sealtest
                 in[2] = 5;
                 in[3] = 1;
 
-                rns_tool->divide_and_round_q_last_inplace(in.data(), pool);
+                rns_tool->divide_and_round_q_last_inplace(in_iter, pool);
                 ASSERT_EQ(3ULL, in[0]);
                 ASSERT_EQ(2ULL, in[1]);
             }
@@ -939,7 +958,8 @@ namespace sealtest
 
                 vector<uint64_t> in(poly_modulus_degree * rns_tool->base_q()->size());
                 set_zero_uint(in.size(), in.data());
-                rns_tool->divide_and_round_q_last_inplace(in.data(), pool);
+                RNSIter in_iter(in.data(), poly_modulus_degree);
+                rns_tool->divide_and_round_q_last_inplace(in_iter, pool);
                 ASSERT_EQ(0ULL, in[0]);
                 ASSERT_EQ(0ULL, in[1]);
                 ASSERT_EQ(0ULL, in[2]);
@@ -958,7 +978,7 @@ namespace sealtest
                 in[7] = 2;
 
                 // We expect to get a zero output also in this case
-                rns_tool->divide_and_round_q_last_inplace(in.data(), pool);
+                rns_tool->divide_and_round_q_last_inplace(in_iter, pool);
                 ASSERT_EQ(0ULL, in[0]);
                 ASSERT_EQ(0ULL, in[1]);
                 ASSERT_EQ(0ULL, in[2]);
@@ -977,7 +997,7 @@ namespace sealtest
                 in[7] = 4;
 
                 // We get only approximate result in this case
-                rns_tool->divide_and_round_q_last_inplace(in.data(), pool);
+                rns_tool->divide_and_round_q_last_inplace(in_iter, pool);
                 ASSERT_TRUE((3ULL + 2ULL - in[0]) % 3ULL <= 1);
                 ASSERT_TRUE((3ULL + 0ULL - in[1]) % 3ULL <= 1);
                 ASSERT_TRUE((5ULL + 0ULL - in[2]) % 5ULL <= 1);
@@ -1003,7 +1023,8 @@ namespace sealtest
 
             vector<uint64_t> in(poly_modulus_degree * rns_tool->base_q()->size());
             set_zero_uint(in.size(), in.data());
-            rns_tool->divide_and_round_q_last_inplace(in.data(), pool);
+            RNSIter in_iter(in.data(), poly_modulus_degree);
+            rns_tool->divide_and_round_q_last_inplace(in_iter, pool);
             ASSERT_EQ(0ULL, in[0]);
             ASSERT_EQ(0ULL, in[1]);
 
@@ -1016,7 +1037,7 @@ namespace sealtest
             ntt_negacyclic_harvey(in.data() + poly_modulus_degree, ntt[1]);
 
             // We expect to get a zero output also in this case
-            rns_tool->divide_and_round_q_last_ntt_inplace(in.data(), ntt, pool);
+            rns_tool->divide_and_round_q_last_ntt_inplace(in_iter, ntt, pool);
             inverse_ntt_negacyclic_harvey(in.data(), ntt[0]);
             ASSERT_EQ(0ULL, in[0]);
             ASSERT_EQ(0ULL, in[1]);
@@ -1029,7 +1050,7 @@ namespace sealtest
             ntt_negacyclic_harvey(in.data(), ntt[0]);
             ntt_negacyclic_harvey(in.data() + poly_modulus_degree, ntt[1]);
 
-            rns_tool->divide_and_round_q_last_ntt_inplace(in.data(), ntt, pool);
+            rns_tool->divide_and_round_q_last_ntt_inplace(in_iter, ntt, pool);
             inverse_ntt_negacyclic_harvey(in.data(), ntt[0]);
             ASSERT_TRUE((53ULL + 1ULL - in[0]) % 53ULL <= 1);
             ASSERT_TRUE((53ULL + 2ULL - in[1]) % 53ULL <= 1);
@@ -1042,7 +1063,7 @@ namespace sealtest
             ntt_negacyclic_harvey(in.data(), ntt[0]);
             ntt_negacyclic_harvey(in.data() + poly_modulus_degree, ntt[1]);
 
-            rns_tool->divide_and_round_q_last_ntt_inplace(in.data(), ntt, pool);
+            rns_tool->divide_and_round_q_last_ntt_inplace(in_iter, ntt, pool);
             inverse_ntt_negacyclic_harvey(in.data(), ntt[0]);
             ASSERT_TRUE((53ULL + 2ULL - in[0]) % 53ULL <= 1);
             ASSERT_TRUE((53ULL + 3ULL - in[1]) % 53ULL <= 1);

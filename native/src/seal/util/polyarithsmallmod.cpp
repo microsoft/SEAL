@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/util/polyarith.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/uintcore.h"
@@ -12,7 +11,7 @@ namespace seal
 {
     namespace util
     {
-        void multiply_poly_scalar_coeffmod(
+        void add_poly_scalar_coeffmod(
             ConstCoeffIter poly, size_t coeff_count, uint64_t scalar, const Modulus &modulus, CoeffIter result)
         {
 #ifdef SEAL_DEBUG
@@ -29,13 +28,38 @@ namespace seal
                 throw invalid_argument("modulus");
             }
 #endif
-            // scalar must be first reduced modulo modulus
-            MultiplyUIntModOperand temp_scalar;
-            temp_scalar.set(barrett_reduce_64(scalar, modulus), modulus);
+            // Scalar must be first reduced modulo modulus
+            scalar = barrett_reduce_64(scalar, modulus);
 
             SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
                 const uint64_t x = get<0>(I);
-                get<1>(I) = multiply_uint_mod(x, temp_scalar, modulus);
+                get<1>(I) = add_uint_mod(x, scalar, modulus);
+            });
+        }
+
+        void sub_poly_scalar_coeffmod(
+            ConstCoeffIter poly, size_t coeff_count, uint64_t scalar, const Modulus &modulus, CoeffIter result)
+        {
+#ifdef SEAL_DEBUG
+            if (!poly && coeff_count > 0)
+            {
+                throw invalid_argument("poly");
+            }
+            if (!result && coeff_count > 0)
+            {
+                throw invalid_argument("result");
+            }
+            if (modulus.is_zero())
+            {
+                throw invalid_argument("modulus");
+            }
+#endif
+            // Scalar must be first reduced modulo modulus
+            scalar = barrett_reduce_64(scalar, modulus);
+
+            SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
+                const uint64_t x = get<0>(I);
+                get<1>(I) = sub_uint_mod(x, scalar, modulus);
             });
         }
 
