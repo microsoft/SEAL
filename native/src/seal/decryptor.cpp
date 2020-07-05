@@ -22,8 +22,8 @@ namespace seal
     namespace
     {
         void poly_infty_norm_coeffmod(
-            StrideIter<const uint64_t *> poly, size_t coeff_count, const uint64_t *modulus,
-            uint64_t *result, MemoryPool &pool)
+            StrideIter<const uint64_t *> poly, size_t coeff_count, const uint64_t *modulus, uint64_t *result,
+            MemoryPool &pool)
         {
             size_t coeff_uint64_count = poly.stride();
 
@@ -51,7 +51,7 @@ namespace seal
                 }
             });
         }
-    }
+    } // namespace
 
     Decryptor::Decryptor(shared_ptr<SEALContext> context, const SecretKey &secret_key) : context_(move(context))
     {
@@ -347,8 +347,7 @@ namespace seal
 
         // Next we compute the infinity norm mod parms.coeff_modulus()
         StrideIter<const uint64_t *> wide_noise_poly((*noise_poly).ptr(), coeff_modulus_size);
-        poly_infty_norm_coeffmod(
-            wide_noise_poly, coeff_count, context_data.total_coeff_modulus(), norm.get(), pool_);
+        poly_infty_norm_coeffmod(wide_noise_poly, coeff_count, context_data.total_coeff_modulus(), norm.get(), pool_);
 
         // The -1 accounts for scaling the invariant noise by 2;
         // note that we already took plain_modulus into account in compose
