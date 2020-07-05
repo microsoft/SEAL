@@ -60,8 +60,7 @@ namespace seal
         given through the SEALContext object support batching.
 
         @param[in] context The SEALContext
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid for batching
+        @throws std::invalid_argument if the encryption parameters are not valid for batching
         @throws std::invalid_argument if scheme is not scheme_type::BFV
         */
         BatchEncoder(SEALContext context);

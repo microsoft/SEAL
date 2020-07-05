@@ -50,8 +50,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="publicKey">The public key</param>
         /// <param name="secretKey">The secret key</param>
         /// <exception cref="ArgumentNullException">if context is null</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
-        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid</exception>
         /// <exception cref="ArgumentException">if publicKey is not valid</exception>
         /// <exception cref="ArgumentException">if secretKey is not null and not valid</exception>
         public Encryptor(SEALContext context, PublicKey publicKey, SecretKey secretKey = null)
@@ -86,8 +85,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="context">The SEALContext</param>
         /// <param name="secretKey">The secret key</param>
         /// <exception cref="ArgumentNullException">if context is null</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
-        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid</exception>
         /// <exception cref="ArgumentException">if secretKey is not valid</exception>
         public Encryptor(SEALContext context, SecretKey secretKey)
         {

@@ -88,8 +88,7 @@ namespace Microsoft.Research.SEAL
         ///
         /// <param name="context">The SEALContext</param>
         /// <exception cref="ArgumentNullException">if context is null</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
-        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid</exception>
         public Evaluator(SEALContext context)
         {
             if (null == context)

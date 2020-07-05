@@ -73,8 +73,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="context">The SEALContext</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if context is null</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
-        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public Ciphertext(SEALContext context, MemoryPoolHandle pool = null)
         {
@@ -96,8 +95,7 @@ namespace Microsoft.Research.SEAL
         /// parameters to be used</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either context or parmsId are null</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
-        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid</exception>
         /// <exception cref="ArgumentException">if parmsId is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
@@ -124,8 +122,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="sizeCapacity">The capacity</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if either context or parmsId are null</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
-        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid</exception>
         /// <exception cref="ArgumentException">if parmsId is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if sizeCapacity is less than 2 or too large</exception>
@@ -194,8 +191,7 @@ namespace Microsoft.Research.SEAL
         /// parameters to be used</param>
         /// <param name="sizeCapacity">The capacity</param>
         /// <exception cref="ArgumentNullException">if either context or parmsId are null</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
-        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid</exception>
         /// <exception cref="ArgumentException">if parmsId is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if sizeCapacity is less than 2 or too large</exception>
@@ -218,8 +214,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="context">The SEALContext</param>
         /// <param name="sizeCapacity">The capacity</param>
         /// <exception cref="ArgumentNullException">if context is null</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
-        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid</exception>
         /// <exception cref="ArgumentException">if sizeCapacity is less than 2 or too large</exception>
         public void Reserve(SEALContext context, ulong sizeCapacity)
         {
@@ -256,8 +251,7 @@ namespace Microsoft.Research.SEAL
         /// parameters to be used</param>
         /// <param name="size">The new size</param>
         /// <exception cref="ArgumentNullException">if either context or parmsId are null</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
-        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid</exception>
         /// <exception cref="ArgumentException">if parmsId is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if size is less than 2 or too large</exception>
@@ -285,8 +279,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="context">The SEALContext</param>
         /// <param name="size">The new size</param>
         /// <exception cref="ArgumentNullException">if context is null</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
-        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid</exception>
         /// <exception cref="ArgumentException">if size is less than 2 or too large</exception>
         public void Resize(SEALContext context, ulong size)
         {
@@ -552,8 +545,7 @@ namespace Microsoft.Research.SEAL
         /// null</exception>
         /// <exception cref="ArgumentException">if the stream is closed or does not
         /// support reading</exception>
-        /// <exception cref="ArgumentException">if context is not set or encryption
-        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid</exception>
         /// <exception cref="EndOfStreamException">if the stream ended
         /// unexpectedly</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
@@ -584,8 +576,7 @@ namespace Microsoft.Research.SEAL
         /// null</exception>
         /// <exception cref="ArgumentException">if the stream is closed or does not
         /// support reading</exception>
-        /// <exception cref="ArgumentException">if context is not set or encryption
-        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid</exception>
         /// <exception cref="EndOfStreamException">if the stream ended
         /// unexpectedly</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>

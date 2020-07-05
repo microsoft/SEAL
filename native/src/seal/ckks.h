@@ -68,8 +68,7 @@ namespace seal
         Creates a CKKSEncoder instance initialized with the specified SEALContext.
 
         @param[in] context The SEALContext
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if scheme is not scheme_type::CKKS
         */
         CKKSEncoder(SEALContext context);

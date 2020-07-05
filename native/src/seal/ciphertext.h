@@ -73,8 +73,7 @@ namespace seal
 
         @param[in] context The SEALContext
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if pool is uninitialized
         */
         explicit Ciphertext(const SEALContext &context, MemoryPoolHandle pool = MemoryManager::GetPool())
@@ -93,8 +92,7 @@ namespace seal
         @param[in] parms_id The parms_id corresponding to the encryption
         parameters to be used
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         @throws std::invalid_argument if pool is uninitialized
@@ -118,8 +116,7 @@ namespace seal
         parameters to be used
         @param[in] size_capacity The capacity
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         @throws std::invalid_argument if size_capacity is less than 2 or too large
@@ -170,8 +167,7 @@ namespace seal
         @param[in] parms_id The parms_id corresponding to the encryption
         parameters to be used
         @param[in] size_capacity The capacity
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         @throws std::invalid_argument if size_capacity is less than 2 or too large
@@ -186,8 +182,7 @@ namespace seal
 
         @param[in] context The SEALContext
         @param[in] size_capacity The capacity
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if size_capacity is less than 2 or too large
         */
         inline void reserve(const SEALContext &context, std::size_t size_capacity)
@@ -226,8 +221,7 @@ namespace seal
         @param[in] parms_id The parms_id corresponding to the encryption
         parameters to be used
         @param[in] size The new size
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         @throws std::invalid_argument if size is less than 2 or too large
@@ -247,8 +241,7 @@ namespace seal
 
         @param[in] context The SEALContext
         @param[in] size The new size
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if size is less than 2 or too large
         */
         inline void resize(const SEALContext &context, std::size_t size)
@@ -499,8 +492,7 @@ namespace seal
 
         @param[in] context The SEALContext
         @param[in] stream The stream to load the ciphertext from
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
@@ -517,8 +509,7 @@ namespace seal
 
         @param[in] context The SEALContext
         @param[in] stream The stream to load the ciphertext from
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
@@ -566,8 +557,7 @@ namespace seal
         @param[in] context The SEALContext
         @param[in] in The memory location to load the ciphertext from
         @param[in] size The number of bytes available in the given memory location
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if the data cannot be loaded by this version of
@@ -588,8 +578,7 @@ namespace seal
         @param[in] context The SEALContext
         @param[in] in The memory location to load the ciphertext from
         @param[in] size The number of bytes available in the given memory location
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if the data cannot be loaded by this version of

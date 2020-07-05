@@ -35,7 +35,6 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="context">The SEALContext</param>
         /// <exception cref="ArgumentNullException">if context is null</exception>
-        /// <exception cref="ArgumentException">if the context is not set</exception>
         /// <exception cref="ArgumentException">if the PlainModulus set in context is not
         /// at least 2</exception>
         public IntegerEncoder(SEALContext context)

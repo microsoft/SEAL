@@ -55,8 +55,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="context">The SEALContext</param>
         /// @param[in] context
         /// <exception cref="ArgumentNullException">if context is null.</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
-        /// parameters are not valid for batching</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid for batching</exception>
         /// <exception cref="ArgumentException">if scheme is not SchemeType.BFV</exception>
         public BatchEncoder(SEALContext context)
         {

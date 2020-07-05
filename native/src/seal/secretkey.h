@@ -142,8 +142,7 @@ namespace seal
 
         @param[in] context The SEALContext
         @param[in] stream The stream to load the SecretKey from
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
@@ -163,8 +162,7 @@ namespace seal
 
         @param[in] context The SEALContext
         @param[in] stream The stream to load the SecretKey from
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
@@ -209,8 +207,7 @@ namespace seal
         @param[in] context The SEALContext
         @param[in] in The memory location to load the SecretKey from
         @param[in] size The number of bytes available in the given memory location
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if the data cannot be loaded by this version of
@@ -234,8 +231,7 @@ namespace seal
         @param[in] context The SEALContext
         @param[in] in The memory location to load the SecretKey from
         @param[in] size The number of bytes available in the given memory location
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if the data cannot be loaded by this version of

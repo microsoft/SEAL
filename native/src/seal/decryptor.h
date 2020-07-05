@@ -56,8 +56,7 @@ namespace seal
 
         @param[in] context The SEALContext
         @param[in] secret_key The secret key
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if secret_key is not valid
         */
         Decryptor(SEALContext context, const SecretKey &secret_key);
