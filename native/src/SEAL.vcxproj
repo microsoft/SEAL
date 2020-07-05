@@ -109,8 +109,6 @@
     <ClCompile Include="seal\util\iterator.cpp" />
     <ClCompile Include="seal\util\mempool.cpp" />
     <ClCompile Include="seal\util\numth.cpp" />
-    <ClCompile Include="seal\util\polyarith.cpp" />
-    <ClCompile Include="seal\util\polyarithmod.cpp" />
     <ClCompile Include="seal\util\polyarithsmallmod.cpp" />
     <ClCompile Include="seal\util\rlwe.cpp" />
     <ClCompile Include="seal\util\scalingvariant.cpp" />
