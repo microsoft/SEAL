@@ -17,7 +17,7 @@ namespace sealtest
         Modulus modulus(0xFFFFFFFFFFFFFFF);
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_plain_modulus(modulus);
-        auto context = SEALContext::Create(parms);
+        SEALContext context(parms);
         IntegerEncoder encoder(context);
 
         BigUInt value(64);
@@ -79,7 +79,7 @@ namespace sealtest
 
         modulus = 1024;
         parms.set_plain_modulus(modulus);
-        auto context2 = SEALContext::Create(parms);
+        SEALContext context2(parms);
         IntegerEncoder encoder2(context2);
         Plaintext poly7(4);
         poly7[0] = 1023; // -1   (*1)
@@ -95,7 +95,7 @@ namespace sealtest
         Modulus modulus(0xFFFFFFFFFFFFFFF);
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_plain_modulus(modulus);
-        auto context = SEALContext::Create(parms);
+        SEALContext context(parms);
         IntegerEncoder encoder(context);
 
         Plaintext poly = encoder.encode(static_cast<uint64_t>(0));
@@ -149,7 +149,7 @@ namespace sealtest
 
         modulus = 1024;
         parms.set_plain_modulus(modulus);
-        auto context2 = SEALContext::Create(parms);
+        SEALContext context2(parms);
         IntegerEncoder encoder2(context2);
         Plaintext poly7(4);
         poly7[0] = 1023; // -1   (*1)
@@ -164,7 +164,7 @@ namespace sealtest
         Modulus modulus(0xFFFFFFFFFFFFFFF);
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_plain_modulus(modulus);
-        auto context = SEALContext::Create(parms);
+        SEALContext context(parms);
         IntegerEncoder encoder(context);
 
         Plaintext poly = encoder.encode(static_cast<uint32_t>(0));
@@ -218,7 +218,7 @@ namespace sealtest
 
         modulus = 1024;
         parms.set_plain_modulus(modulus);
-        auto context2 = SEALContext::Create(parms);
+        SEALContext context2(parms);
         IntegerEncoder encoder2(context2);
         Plaintext poly7(4);
         poly7[0] = 1023; // -1   (*1)
@@ -233,7 +233,7 @@ namespace sealtest
         Modulus modulus(0x7FFFFFFFFFFFF);
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_plain_modulus(modulus);
-        auto context = SEALContext::Create(parms);
+        SEALContext context(parms);
         IntegerEncoder encoder(context);
 
         Plaintext poly = encoder.encode(static_cast<int64_t>(0));
@@ -320,7 +320,7 @@ namespace sealtest
 
         modulus = 0xFFFF;
         parms.set_plain_modulus(modulus);
-        auto context2 = SEALContext::Create(parms);
+        SEALContext context2(parms);
         IntegerEncoder encoder2(context2);
         Plaintext poly11(6);
         poly11[0] = 1;
@@ -339,7 +339,7 @@ namespace sealtest
         Modulus modulus(0x7FFFFFFFFFFFFF);
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_plain_modulus(modulus);
-        auto context = SEALContext::Create(parms);
+        SEALContext context(parms);
         IntegerEncoder encoder(context);
 
         Plaintext poly = encoder.encode(static_cast<int32_t>(0));
@@ -426,7 +426,7 @@ namespace sealtest
 
         modulus = 0xFFFF;
         parms.set_plain_modulus(modulus);
-        auto context2 = SEALContext::Create(parms);
+        SEALContext context2(parms);
         IntegerEncoder encoder2(context2);
         Plaintext poly11(6);
         poly11[0] = 1;

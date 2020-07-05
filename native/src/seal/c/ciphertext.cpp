@@ -62,14 +62,14 @@ SEAL_C_FUNC Ciphertext_Create2(void *copy, void **ciphertext)
 
 SEAL_C_FUNC Ciphertext_Create3(void *context, void *pool, void **ciphertext)
 {
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     IfNullRet(ciphertext, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
-        Ciphertext *cipher = new Ciphertext(sharedctx, *pool_ptr);
+        Ciphertext *cipher = new Ciphertext(*ctx, *pool_ptr);
         *ciphertext = cipher;
         return S_OK;
     }
@@ -81,8 +81,8 @@ SEAL_C_FUNC Ciphertext_Create3(void *context, void *pool, void **ciphertext)
 
 SEAL_C_FUNC Ciphertext_Create4(void *context, uint64_t *parms_id, void *pool, void **ciphertext)
 {
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
     IfNullRet(ciphertext, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
@@ -92,7 +92,7 @@ SEAL_C_FUNC Ciphertext_Create4(void *context, uint64_t *parms_id, void *pool, vo
         parms_id_type parmsid;
         CopyParmsId(parms_id, parmsid);
 
-        Ciphertext *cipher = new Ciphertext(sharedctx, parmsid, *pool_ptr);
+        Ciphertext *cipher = new Ciphertext(*ctx, parmsid, *pool_ptr);
         *ciphertext = cipher;
         return S_OK;
     }
@@ -104,8 +104,8 @@ SEAL_C_FUNC Ciphertext_Create4(void *context, uint64_t *parms_id, void *pool, vo
 
 SEAL_C_FUNC Ciphertext_Create5(void *context, uint64_t *parms_id, uint64_t capacity, void *pool, void **ciphertext)
 {
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
     IfNullRet(ciphertext, E_POINTER);
     unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
@@ -115,7 +115,7 @@ SEAL_C_FUNC Ciphertext_Create5(void *context, uint64_t *parms_id, uint64_t capac
         parms_id_type parmsid;
         CopyParmsId(parms_id, parmsid);
 
-        Ciphertext *cipher = new Ciphertext(sharedctx, parmsid, capacity, *pool_ptr);
+        Ciphertext *cipher = new Ciphertext(*ctx, parmsid, capacity, *pool_ptr);
         *ciphertext = cipher;
         return S_OK;
     }
@@ -127,8 +127,8 @@ SEAL_C_FUNC Ciphertext_Create5(void *context, uint64_t *parms_id, uint64_t capac
 
 SEAL_C_FUNC Ciphertext_Reserve1(void *thisptr, void *context, uint64_t *parms_id, uint64_t size_capacity)
 {
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
@@ -138,7 +138,7 @@ SEAL_C_FUNC Ciphertext_Reserve1(void *thisptr, void *context, uint64_t *parms_id
 
     try
     {
-        cipher->reserve(sharedctx, parms, size_capacity);
+        cipher->reserve(*ctx, parms, size_capacity);
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -149,14 +149,14 @@ SEAL_C_FUNC Ciphertext_Reserve1(void *thisptr, void *context, uint64_t *parms_id
 
 SEAL_C_FUNC Ciphertext_Reserve2(void *thisptr, void *context, uint64_t size_capacity)
 {
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
 
     try
     {
-        cipher->reserve(sharedctx, size_capacity);
+        cipher->reserve(*ctx, size_capacity);
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -263,18 +263,17 @@ SEAL_C_FUNC Ciphertext_SetParmsId(void *thisptr, uint64_t *parms_id)
 
 SEAL_C_FUNC Ciphertext_Resize1(void *thisptr, void *context, uint64_t *parms_id, uint64_t size)
 {
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
-
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
 
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
 
     try
     {
-        cipher->resize(sharedctx, parms, size);
+        cipher->resize(*ctx, parms, size);
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -285,15 +284,14 @@ SEAL_C_FUNC Ciphertext_Resize1(void *thisptr, void *context, uint64_t *parms_id,
 
 SEAL_C_FUNC Ciphertext_Resize2(void *thisptr, void *context, uint64_t size)
 {
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
 
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
-
     try
     {
-        cipher->resize(sharedctx, size);
+        cipher->resize(*ctx, size);
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -509,17 +507,17 @@ SEAL_C_FUNC Ciphertext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8
 
 SEAL_C_FUNC Ciphertext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(inptr, E_POINTER);
     IfNullRet(in_bytes, E_POINTER);
 
     try
     {
         *in_bytes = util::safe_cast<int64_t>(
-            cipher->unsafe_load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
+            cipher->unsafe_load(*ctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -538,17 +536,17 @@ SEAL_C_FUNC Ciphertext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, 
 
 SEAL_C_FUNC Ciphertext_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(inptr, E_POINTER);
     IfNullRet(in_bytes, E_POINTER);
 
     try
     {
         *in_bytes = util::safe_cast<int64_t>(
-            cipher->load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
+            cipher->load(*ctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)

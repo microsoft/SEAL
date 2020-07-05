@@ -42,7 +42,7 @@ namespace seal
         @throws std::invalid_argument if the plain_modulus set in context is not
         at least 2
         */
-        IntegerEncoder(std::shared_ptr<SEALContext> context);
+        IntegerEncoder(SEALContext context);
 
         /**
         Destroys the IntegerEncoder.
@@ -213,7 +213,7 @@ namespace seal
         */
         SEAL_NODISCARD inline const Modulus &plain_modulus() const
         {
-            auto &context_data = *context_->first_context_data();
+            auto &context_data = *context_.first_context_data();
             return context_data.parms().plain_modulus();
         }
 
@@ -226,7 +226,7 @@ namespace seal
 
         IntegerEncoder &operator=(IntegerEncoder &&assign) = delete;
 
-        std::shared_ptr<SEALContext> context_{ nullptr };
+        SEALContext context_;
 
         std::uint64_t coeff_neg_threshold_;
 

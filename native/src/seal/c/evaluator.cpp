@@ -24,21 +24,19 @@ struct seal::Evaluator::EvaluatorPrivateHelper
 {
     static bool using_keyswitching(const Evaluator &ev)
     {
-        return ev.context_->using_keyswitching();
+        return ev.context_.using_keyswitching();
     }
 };
 
-SEAL_C_FUNC Evaluator_Create(void *sealContext, void **evaluator)
+SEAL_C_FUNC Evaluator_Create(void *context, void **evaluator)
 {
-    SEALContext *context = FromVoid<SEALContext>(sealContext);
-    IfNullRet(context, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(sealContext);
-    IfNullRet(sharedctx.get(), E_POINTER);
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     IfNullRet(evaluator, E_POINTER);
 
     try
     {
-        Evaluator *eval = new Evaluator(sharedctx);
+        Evaluator *eval = new Evaluator(*ctx);
         *evaluator = eval;
         return S_OK;
     }

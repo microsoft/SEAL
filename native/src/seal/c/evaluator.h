@@ -13,7 +13,7 @@
 #include "seal/c/defines.h"
 #include <stdint.h>
 
-SEAL_C_FUNC Evaluator_Create(void *sealContext, void **evaluator);
+SEAL_C_FUNC Evaluator_Create(void *context, void **evaluator);
 
 SEAL_C_FUNC Evaluator_Destroy(void *thisptr);
 

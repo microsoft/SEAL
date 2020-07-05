@@ -128,7 +128,7 @@ namespace seal
         }
 
         void encrypt_zero_asymmetric(
-            const PublicKey &public_key, shared_ptr<SEALContext> context, parms_id_type parms_id, bool is_ntt_form,
+            const PublicKey &public_key, const SEALContext &context, parms_id_type parms_id, bool is_ntt_form,
             Ciphertext &destination)
         {
 #ifdef SEAL_DEBUG
@@ -140,7 +140,7 @@ namespace seal
             // We use a fresh memory pool with `clear_on_destruction' enabled.
             MemoryPoolHandle pool = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
 
-            auto &context_data = *context->get_context_data(parms_id);
+            auto &context_data = *context.get_context_data(parms_id);
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
             size_t coeff_modulus_size = coeff_modulus.size();
@@ -201,7 +201,7 @@ namespace seal
         }
 
         void encrypt_zero_symmetric(
-            const SecretKey &secret_key, shared_ptr<SEALContext> context, parms_id_type parms_id, bool is_ntt_form,
+            const SecretKey &secret_key, const SEALContext &context, parms_id_type parms_id, bool is_ntt_form,
             bool save_seed, Ciphertext &destination)
         {
 #ifdef SEAL_DEBUG
@@ -213,7 +213,7 @@ namespace seal
             // We use a fresh memory pool with `clear_on_destruction' enabled.
             MemoryPoolHandle pool = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
 
-            auto &context_data = *context->get_context_data(parms_id);
+            auto &context_data = *context.get_context_data(parms_id);
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
             size_t coeff_modulus_size = coeff_modulus.size();

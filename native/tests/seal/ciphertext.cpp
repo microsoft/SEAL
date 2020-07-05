@@ -22,7 +22,7 @@ namespace sealtest
         parms.set_poly_modulus_degree(2);
         parms.set_coeff_modulus(CoeffModulus::Create(2, { 30 }));
         parms.set_plain_modulus(2);
-        auto context = SEALContext::Create(parms, false, sec_level_type::none);
+        SEALContext context(parms, false, sec_level_type::none);
 
         Ciphertext ctxt(context);
         ctxt.reserve(10);
@@ -30,7 +30,7 @@ namespace sealtest
         ASSERT_EQ(0ULL, ctxt.int_array().size());
         ASSERT_EQ(10ULL * 2 * 1, ctxt.int_array().capacity());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
-        ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());
+        ASSERT_TRUE(ctxt.parms_id() == context.first_parms_id());
         ASSERT_FALSE(ctxt.is_ntt_form());
         const uint64_t *ptr = ctxt.data();
 
@@ -40,7 +40,7 @@ namespace sealtest
         ASSERT_EQ(5ULL * 2 * 1, ctxt.int_array().capacity());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
         ASSERT_TRUE(ptr != ctxt.data());
-        ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());
+        ASSERT_TRUE(ctxt.parms_id() == context.first_parms_id());
         ptr = ctxt.data();
 
         ctxt.reserve(10);
@@ -49,7 +49,7 @@ namespace sealtest
         ASSERT_EQ(10ULL * 2 * 1, ctxt.int_array().capacity());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
         ASSERT_TRUE(ptr != ctxt.data());
-        ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());
+        ASSERT_TRUE(ctxt.parms_id() == context.first_parms_id());
         ASSERT_FALSE(ctxt.is_ntt_form());
         ptr = ctxt.data();
 
@@ -59,7 +59,7 @@ namespace sealtest
         ASSERT_EQ(0ULL, ctxt.int_array().size());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
         ASSERT_TRUE(ptr != ctxt.data());
-        ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());
+        ASSERT_TRUE(ctxt.parms_id() == context.first_parms_id());
         ASSERT_FALSE(ctxt.is_ntt_form());
         ptr = ctxt.data();
 
@@ -69,7 +69,7 @@ namespace sealtest
         ASSERT_EQ(0ULL, ctxt.int_array().size());
         ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
         ASSERT_TRUE(ptr != ctxt.data());
-        ASSERT_TRUE(ctxt.parms_id() == context->first_parms_id());
+        ASSERT_TRUE(ctxt.parms_id() == context.first_parms_id());
         ASSERT_FALSE(ctxt.is_ntt_form());
 
         Ciphertext ctxt2{ ctxt };
@@ -98,7 +98,7 @@ namespace sealtest
         parms.set_coeff_modulus(CoeffModulus::Create(2, { 30 }));
         parms.set_plain_modulus(2);
 
-        auto context = SEALContext::Create(parms, false, sec_level_type::none);
+        SEALContext context(parms, false, sec_level_type::none);
 
         Ciphertext ctxt(context);
         Ciphertext ctxt2;
@@ -111,7 +111,7 @@ namespace sealtest
         parms.set_poly_modulus_degree(1024);
         parms.set_coeff_modulus(CoeffModulus::BFVDefault(1024));
         parms.set_plain_modulus(0xF0F0);
-        context = SEALContext::Create(parms, false);
+        context = SEALContext(parms, false);
         KeyGenerator keygen(context);
         Encryptor encryptor(context, keygen.public_key());
         encryptor.encrypt(Plaintext("Ax^10 + 9x^9 + 8x^8 + 7x^7 + 6x^6 + 5x^5 + 4x^4 + 3x^3 + 2x^2 + 1"), ctxt);

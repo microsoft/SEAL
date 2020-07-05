@@ -18,7 +18,6 @@
 #include "seal/util/pointer.h"
 #include "seal/util/uintarithsmallmod.h"
 #include <map>
-#include <memory>
 #include <stdexcept>
 #include <vector>
 
@@ -98,7 +97,7 @@ namespace seal
         @throws std::invalid_argument if the context is not set or encryption
         parameters are not valid
         */
-        Evaluator(std::shared_ptr<SEALContext> context);
+        Evaluator(SEALContext context);
 
         /**
         Negates a ciphertext.
@@ -1058,7 +1057,7 @@ namespace seal
             Ciphertext &encrypted, int steps, const GaloisKeys &galois_keys,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            if (context_->key_context_data()->parms().scheme() != scheme_type::BFV)
+            if (context_.key_context_data()->parms().scheme() != scheme_type::BFV)
             {
                 throw std::logic_error("unsupported scheme");
             }
@@ -1131,7 +1130,7 @@ namespace seal
         inline void rotate_columns_inplace(
             Ciphertext &encrypted, const GaloisKeys &galois_keys, MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            if (context_->key_context_data()->parms().scheme() != scheme_type::BFV)
+            if (context_.key_context_data()->parms().scheme() != scheme_type::BFV)
             {
                 throw std::logic_error("unsupported scheme");
             }
@@ -1202,7 +1201,7 @@ namespace seal
             Ciphertext &encrypted, int steps, const GaloisKeys &galois_keys,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            if (context_->key_context_data()->parms().scheme() != scheme_type::CKKS)
+            if (context_.key_context_data()->parms().scheme() != scheme_type::CKKS)
             {
                 throw std::logic_error("unsupported scheme");
             }
@@ -1269,7 +1268,7 @@ namespace seal
         inline void complex_conjugate_inplace(
             Ciphertext &encrypted, const GaloisKeys &galois_keys, MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            if (context_->key_context_data()->parms().scheme() != scheme_type::CKKS)
+            if (context_.key_context_data()->parms().scheme() != scheme_type::CKKS)
             {
                 throw std::logic_error("unsupported scheme");
             }
@@ -1343,7 +1342,7 @@ namespace seal
         inline void conjugate_internal(Ciphertext &encrypted, const GaloisKeys &galois_keys, MemoryPoolHandle pool)
         {
             // Verify parameters.
-            auto context_data_ptr = context_->get_context_data(encrypted.parms_id());
+            auto context_data_ptr = context_.get_context_data(encrypted.parms_id());
             if (!context_data_ptr)
             {
                 throw std::invalid_argument("encrypted is not valid for encryption parameters");
@@ -1372,7 +1371,7 @@ namespace seal
 
         void populate_Zmstar_to_generator();
 
-        std::shared_ptr<SEALContext> context_{ nullptr };
+        SEALContext context_;
 
         std::map<std::uint64_t, std::pair<std::uint64_t, std::uint64_t>> Zmstar_to_generator_{};
     };

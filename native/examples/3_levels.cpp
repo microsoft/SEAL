@@ -89,7 +89,7 @@ void example_levels()
     */
     parms.set_plain_modulus(PlainModulus::Batching(poly_modulus_degree, 20));
 
-    auto context = SEALContext::Create(parms);
+    SEALContext context(parms);
     print_parameters(context);
     cout << endl;
 
@@ -109,7 +109,7 @@ void example_levels()
     /*
     First print the key level parameter information.
     */
-    auto context_data = context->key_context_data();
+    auto context_data = context.key_context_data();
     cout << "----> Level (chain index): " << context_data->chain_index();
     cout << " ...... key_context_data()" << endl;
     cout << "      parms_id: " << context_data->parms_id() << endl;
@@ -126,15 +126,15 @@ void example_levels()
     /*
     Next iterate over the remaining (data) levels.
     */
-    context_data = context->first_context_data();
+    context_data = context.first_context_data();
     while (context_data)
     {
         cout << " Level (chain index): " << context_data->chain_index();
-        if (context_data->parms_id() == context->first_parms_id())
+        if (context_data->parms_id() == context.first_parms_id())
         {
             cout << " ...... first_context_data()" << endl;
         }
-        else if (context_data->parms_id() == context->last_parms_id())
+        else if (context_data->parms_id() == context.last_parms_id())
         {
             cout << " ...... last_context_data()" << endl;
         }
@@ -206,7 +206,7 @@ void example_levels()
     */
     print_line(__LINE__);
     cout << "Perform modulus switching on encrypted and print." << endl;
-    context_data = context->first_context_data();
+    context_data = context.first_context_data();
     cout << "---->";
     while (context_data->next_context_data())
     {
@@ -300,9 +300,9 @@ void example_levels()
     /*
     In BFV modulus switching is not necessary and in some cases the user might
     not want to create the modulus switching chain, except for the highest two
-    levels. This can be done by passing a bool `false' to SEALContext::Create.
+    levels. This can be done by passing a bool `false' to SEALContext constructor.
     */
-    context = SEALContext::Create(parms, false);
+    context = SEALContext(parms, false);
 
     /*
     We can check that indeed the modulus switching chain has been created only
@@ -313,7 +313,7 @@ void example_levels()
     print_line(__LINE__);
     cout << "Print the modulus switching chain." << endl;
     cout << "---->";
-    for (context_data = context->key_context_data(); context_data; context_data = context_data->next_context_data())
+    for (context_data = context.key_context_data(); context_data; context_data = context_data->next_context_data())
     {
         cout << " Level (chain index): " << context_data->chain_index() << endl;
         cout << "      parms_id: " << context_data->parms_id() << endl;

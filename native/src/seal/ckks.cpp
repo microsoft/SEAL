@@ -12,19 +12,15 @@ using namespace seal::util;
 
 namespace seal
 {
-    CKKSEncoder::CKKSEncoder(shared_ptr<SEALContext> context) : context_(context)
+    CKKSEncoder::CKKSEncoder(SEALContext context) : context_(context)
     {
         // Verify parameters
-        if (!context_)
-        {
-            throw invalid_argument("invalid context");
-        }
-        if (!context_->parameters_set())
+        if (!context_.parameters_set())
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
 
-        auto &context_data = *context_->first_context_data();
+        auto &context_data = *context_.first_context_data();
         if (context_data.parms().scheme() != scheme_type::CKKS)
         {
             throw invalid_argument("unsupported scheme");
@@ -81,7 +77,7 @@ namespace seal
         double value, parms_id_type parms_id, double scale, Plaintext &destination, MemoryPoolHandle pool)
     {
         // Verify parameters.
-        auto context_data_ptr = context_->get_context_data(parms_id);
+        auto context_data_ptr = context_.get_context_data(parms_id);
         if (!context_data_ptr)
         {
             throw invalid_argument("parms_id is not valid for encryption parameters");
@@ -221,7 +217,7 @@ namespace seal
     void CKKSEncoder::encode_internal(int64_t value, parms_id_type parms_id, Plaintext &destination)
     {
         // Verify parameters.
-        auto context_data_ptr = context_->get_context_data(parms_id);
+        auto context_data_ptr = context_.get_context_data(parms_id);
         if (!context_data_ptr)
         {
             throw invalid_argument("parms_id is not valid for encryption parameters");

@@ -64,7 +64,7 @@ namespace seal
         parameters are not valid for batching
         @throws std::invalid_argument if scheme is not scheme_type::BFV
         */
-        BatchEncoder(std::shared_ptr<SEALContext> context);
+        BatchEncoder(SEALContext context);
 
         /**
         Creates a plaintext from a given matrix. This function "batches" a given matrix
@@ -276,7 +276,7 @@ namespace seal
 
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
 
-        std::shared_ptr<SEALContext> context_{ nullptr };
+        SEALContext context_;
 
         std::size_t slots_;
 

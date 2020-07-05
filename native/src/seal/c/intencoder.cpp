@@ -15,13 +15,13 @@ using namespace seal::c;
 
 SEAL_C_FUNC IntegerEncoder_Create(void *context, void **encoder)
 {
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     IfNullRet(encoder, E_POINTER);
 
     try
     {
-        IntegerEncoder *intEncoder = new IntegerEncoder(sharedctx);
+        IntegerEncoder *intEncoder = new IntegerEncoder(*ctx);
         *encoder = intEncoder;
         return S_OK;
     }

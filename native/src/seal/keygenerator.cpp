@@ -20,14 +20,10 @@ using namespace seal::util;
 
 namespace seal
 {
-    KeyGenerator::KeyGenerator(shared_ptr<SEALContext> context) : context_(move(context))
+    KeyGenerator::KeyGenerator(SEALContext context) : context_(context)
     {
         // Verify parameters
-        if (!context_)
-        {
-            throw invalid_argument("invalid context");
-        }
-        if (!context_->parameters_set())
+        if (!context_.parameters_set())
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
@@ -39,14 +35,10 @@ namespace seal
         generate_sk();
     }
 
-    KeyGenerator::KeyGenerator(shared_ptr<SEALContext> context, const SecretKey &secret_key) : context_(move(context))
+    KeyGenerator::KeyGenerator(SEALContext context, const SecretKey &secret_key) : context_(context)
     {
         // Verify parameters
-        if (!context_)
-        {
-            throw invalid_argument("invalid context");
-        }
-        if (!context_->parameters_set())
+        if (!context_.parameters_set())
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
@@ -66,7 +58,7 @@ namespace seal
     void KeyGenerator::generate_sk(bool is_initialized)
     {
         // Extract encryption parameters.
-        auto &context_data = *context_->key_context_data();
+        auto &context_data = *context_.key_context_data();
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
@@ -110,7 +102,7 @@ namespace seal
         }
 
         // Extract encryption parameters.
-        auto &context_data = *context_->key_context_data();
+        auto &context_data = *context_.key_context_data();
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
@@ -148,7 +140,7 @@ namespace seal
         }
 
         // Extract encryption parameters.
-        auto &context_data = *context_->key_context_data();
+        auto &context_data = *context_.key_context_data();
         auto &parms = context_data.parms();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_size = parms.coeff_modulus().size();
@@ -186,7 +178,7 @@ namespace seal
         }
 
         // Extract encryption parameters.
-        auto &context_data = *context_->key_context_data();
+        auto &context_data = *context_.key_context_data();
         if (!context_data.qualifiers().using_batching)
         {
             throw logic_error("encryption parameters do not support batching");
@@ -324,14 +316,14 @@ namespace seal
 
     void KeyGenerator::generate_one_kswitch_key(ConstRNSIter new_key, vector<PublicKey> &destination, bool save_seed)
     {
-        if (!context_->using_keyswitching())
+        if (!context_.using_keyswitching())
         {
             throw logic_error("keyswitching is not supported by the context");
         }
 
-        size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
-        size_t decomp_mod_count = context_->first_context_data()->parms().coeff_modulus().size();
-        auto &key_context_data = *context_->key_context_data();
+        size_t coeff_count = context_.key_context_data()->parms().poly_modulus_degree();
+        size_t decomp_mod_count = context_.first_context_data()->parms().coeff_modulus().size();
+        auto &key_context_data = *context_.key_context_data();
         auto &key_parms = key_context_data.parms();
         auto &key_modulus = key_parms.coeff_modulus();
 
@@ -360,8 +352,8 @@ namespace seal
     void KeyGenerator::generate_kswitch_keys(
         ConstPolyIter new_keys, size_t num_keys, KSwitchKeys &destination, bool save_seed)
     {
-        size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
-        auto &key_context_data = *context_->key_context_data();
+        size_t coeff_count = context_.key_context_data()->parms().poly_modulus_degree();
+        auto &key_context_data = *context_.key_context_data();
         auto &key_parms = key_context_data.parms();
         size_t coeff_modulus_size = key_parms.coeff_modulus().size();
 

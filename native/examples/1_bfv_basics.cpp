@@ -124,7 +124,7 @@ void example_bfv_basics()
     object. This is a heavy class that checks the validity and properties of the
     parameters we just set.
     */
-    auto context = SEALContext::Create(parms);
+    SEALContext context(parms);
 
     /*
     Print the parameters that we have chosen.
@@ -137,7 +137,7 @@ void example_bfv_basics()
     When parameters are used to create SEALContext, Microsoft SEAL will first
     validate those parameters. The parameters chosen here are valid.
     */
-    cout << "Parameter validation (success): " << context->parameter_error_message() << endl;
+    cout << "Parameter validation (success): " << context.parameter_error_message() << endl;
 
     cout << endl;
     cout << "~~~~~~ A naive way to calculate 4(x^2+1)(x+1)^2. ~~~~~~" << endl;
@@ -418,9 +418,9 @@ void example_bfv_basics()
     print_line(__LINE__);
     cout << "An example of invalid parameters" << endl;
     parms.set_poly_modulus_degree(2048);
-    context = SEALContext::Create(parms);
+    context = SEALContext(parms);
     print_parameters(context);
-    cout << "Parameter validation (failed): " << context->parameter_error_message() << endl << endl;
+    cout << "Parameter validation (failed): " << context.parameter_error_message() << endl << endl;
 
     /*
     This information is helpful to fix invalid encryption parameters.

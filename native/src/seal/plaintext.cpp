@@ -228,14 +228,10 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
-    void Plaintext::load_members(shared_ptr<SEALContext> context, istream &stream)
+    void Plaintext::load_members(const SEALContext &context, istream &stream)
     {
         // Verify parameters
-        if (!context)
-        {
-            throw invalid_argument("invalid context");
-        }
-        if (!context->parameters_set())
+        if (!context.parameters_set())
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }

@@ -33,24 +33,24 @@ struct seal::KeyGenerator::KeyGeneratorPrivateHelper
 
     static const GaloisTool *galois_tool(KeyGenerator *keygen)
     {
-        return keygen->context_->key_context_data()->galois_tool();
+        return keygen->context_.key_context_data()->galois_tool();
     }
 
     static bool using_keyswitching(const KeyGenerator &keygen)
     {
-        return keygen.context_->using_keyswitching();
+        return keygen.context_.using_keyswitching();
     }
 };
 
-SEAL_C_FUNC KeyGenerator_Create1(void *sealContext, void **key_generator)
+SEAL_C_FUNC KeyGenerator_Create1(void *context, void **key_generator)
 {
-    const auto &sharedctx = SharedContextFromVoid(sealContext);
-    IfNullRet(sharedctx.get(), E_POINTER);
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     IfNullRet(key_generator, E_POINTER);
 
     try
     {
-        KeyGenerator *keygen = new KeyGenerator(sharedctx);
+        KeyGenerator *keygen = new KeyGenerator(*ctx);
         *key_generator = keygen;
         return S_OK;
     }
@@ -60,17 +60,17 @@ SEAL_C_FUNC KeyGenerator_Create1(void *sealContext, void **key_generator)
     }
 }
 
-SEAL_C_FUNC KeyGenerator_Create2(void *sealContext, void *secret_key, void **key_generator)
+SEAL_C_FUNC KeyGenerator_Create2(void *context, void *secret_key, void **key_generator)
 {
-    const auto &sharedctx = SharedContextFromVoid(sealContext);
-    IfNullRet(sharedctx.get(), E_POINTER);
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     SecretKey *secret_key_ptr = FromVoid<SecretKey>(secret_key);
     IfNullRet(secret_key_ptr, E_POINTER);
     IfNullRet(key_generator, E_POINTER);
 
     try
     {
-        KeyGenerator *keygen = new KeyGenerator(sharedctx, *secret_key_ptr);
+        KeyGenerator *keygen = new KeyGenerator(*ctx, *secret_key_ptr);
         *key_generator = keygen;
         return S_OK;
     }

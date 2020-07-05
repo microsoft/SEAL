@@ -7,7 +7,6 @@
 #include "seal/context.h"
 #include "seal/valcheck.h"
 #include <iostream>
-#include <memory>
 
 namespace seal
 {
@@ -124,10 +123,10 @@ namespace seal
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, std::istream &stream)
+        inline std::streamoff unsafe_load(const SEALContext &context, std::istream &stream)
         {
             Ciphertext new_pk(pk_.pool());
-            auto in_size = new_pk.unsafe_load(std::move(context), stream);
+            auto in_size = new_pk.unsafe_load(context, stream);
             std::swap(pk_, new_pk);
             return in_size;
         }
@@ -144,11 +143,11 @@ namespace seal
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(std::shared_ptr<SEALContext> context, std::istream &stream)
+        inline std::streamoff load(const SEALContext &context, std::istream &stream)
         {
             PublicKey new_pk(pool());
             auto in_size = new_pk.unsafe_load(context, stream);
-            if (!is_valid_for(new_pk, std::move(context)))
+            if (!is_valid_for(new_pk, context))
             {
                 throw std::logic_error("PublicKey data is invalid");
             }
@@ -192,10 +191,10 @@ namespace seal
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff unsafe_load(const SEALContext &context, const SEAL_BYTE *in, std::size_t size)
         {
             Ciphertext new_pk(pk_.pool());
-            auto in_size = new_pk.unsafe_load(std::move(context), in, size);
+            auto in_size = new_pk.unsafe_load(context, in, size);
             std::swap(pk_, new_pk);
             return in_size;
         }
@@ -216,11 +215,11 @@ namespace seal
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff load(const SEALContext &context, const SEAL_BYTE *in, std::size_t size)
         {
             PublicKey new_pk(pool());
             auto in_size = new_pk.unsafe_load(context, in, size);
-            if (!is_valid_for(new_pk, std::move(context)))
+            if (!is_valid_for(new_pk, context))
             {
                 throw std::logic_error("PublicKey data is invalid");
             }

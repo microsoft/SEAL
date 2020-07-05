@@ -36,19 +36,15 @@ namespace seal
         return *this;
     }
 
-    void Ciphertext::reserve(shared_ptr<SEALContext> context, parms_id_type parms_id, size_t size_capacity)
+    void Ciphertext::reserve(const SEALContext &context, parms_id_type parms_id, size_t size_capacity)
     {
         // Verify parameters
-        if (!context)
-        {
-            throw invalid_argument("invalid context");
-        }
-        if (!context->parameters_set())
+        if (!context.parameters_set())
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
 
-        auto context_data_ptr = context->get_context_data(parms_id);
+        auto context_data_ptr = context.get_context_data(parms_id);
         if (!context_data_ptr)
         {
             throw invalid_argument("parms_id is not valid for encryption parameters");
@@ -81,19 +77,15 @@ namespace seal
         coeff_modulus_size_ = coeff_modulus_size;
     }
 
-    void Ciphertext::resize(shared_ptr<SEALContext> context, parms_id_type parms_id, size_t size)
+    void Ciphertext::resize(const SEALContext &context, parms_id_type parms_id, size_t size)
     {
         // Verify parameters
-        if (!context)
-        {
-            throw invalid_argument("invalid context");
-        }
-        if (!context->parameters_set())
+        if (!context.parameters_set())
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
 
-        auto context_data_ptr = context->get_context_data(parms_id);
+        auto context_data_ptr = context.get_context_data(parms_id);
         if (!context_data_ptr)
         {
             throw invalid_argument("parms_id is not valid for encryption parameters");
@@ -123,9 +115,9 @@ namespace seal
         coeff_modulus_size_ = coeff_modulus_size;
     }
 
-    void Ciphertext::expand_seed(shared_ptr<SEALContext> context, const random_seed_type &seed)
+    void Ciphertext::expand_seed(const SEALContext &context, const random_seed_type &seed)
     {
-        auto context_data_ptr = context->get_context_data(parms_id_);
+        auto context_data_ptr = context.get_context_data(parms_id_);
 
         // Set up the BlakePRNG with a given seed.
         // Rejection sampling to generate a uniform random polynomial.
@@ -225,14 +217,10 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
-    void Ciphertext::load_members(shared_ptr<SEALContext> context, istream &stream)
+    void Ciphertext::load_members(const SEALContext &context, istream &stream)
     {
         // Verify parameters
-        if (!context)
-        {
-            throw invalid_argument("invalid context");
-        }
-        if (!context->parameters_set())
+        if (!context.parameters_set())
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
@@ -305,7 +293,7 @@ namespace seal
                 random_seed_type seed;
                 stream.read(reinterpret_cast<char *>(&seed), sizeof(random_seed_type));
                 new_data.data_.resize(total_uint64_count);
-                new_data.expand_seed(move(context), seed);
+                new_data.expand_seed(context, seed);
             }
 
             // Verify that the buffer is correct

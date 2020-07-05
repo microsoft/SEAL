@@ -16,7 +16,6 @@
 #include "seal/util/locks.h"
 #include "seal/util/ntt.h"
 #include "seal/util/rns.h"
-#include <memory>
 
 namespace seal
 {
@@ -61,7 +60,7 @@ namespace seal
         parameters are not valid
         @throws std::invalid_argument if secret_key is not valid
         */
-        Decryptor(std::shared_ptr<SEALContext> context, const SecretKey &secret_key);
+        Decryptor(SEALContext context, const SecretKey &secret_key);
 
         /*
         Decrypts a Ciphertext and stores the result in the destination parameter.
@@ -124,7 +123,7 @@ namespace seal
         // We use a fresh memory pool with `clear_on_destruction' enabled.
         MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
 
-        std::shared_ptr<SEALContext> context_{ nullptr };
+        SEALContext context_;
 
         std::size_t secret_key_array_size_ = 0;
 

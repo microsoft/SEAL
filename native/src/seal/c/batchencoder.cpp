@@ -18,13 +18,13 @@ using namespace seal::c;
 
 SEAL_C_FUNC BatchEncoder_Create(void *context, void **batch_encoder)
 {
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx, E_POINTER);
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     IfNullRet(batch_encoder, E_POINTER);
 
     try
     {
-        BatchEncoder *encoder = new BatchEncoder(sharedctx);
+        BatchEncoder *encoder = new BatchEncoder(*ctx);
         *batch_encoder = encoder;
         return S_OK;
     }

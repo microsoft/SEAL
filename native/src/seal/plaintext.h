@@ -15,7 +15,6 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
-#include <memory>
 #include <stdexcept>
 #include <string>
 #ifdef SEAL_USE_MSGSL
@@ -586,10 +585,10 @@ namespace seal
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, std::istream &stream)
+        inline std::streamoff unsafe_load(const SEALContext &context, std::istream &stream)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Plaintext::load_members, this, std::move(context), _1), stream);
+            return Serialization::Load(std::bind(&Plaintext::load_members, this, context, _1), stream);
         }
 
         /**
@@ -604,11 +603,11 @@ namespace seal
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(std::shared_ptr<SEALContext> context, std::istream &stream)
+        inline std::streamoff load(const SEALContext &context, std::istream &stream)
         {
             Plaintext new_data(pool());
             auto in_size = new_data.unsafe_load(context, stream);
-            if (!is_valid_for(new_data, std::move(context)))
+            if (!is_valid_for(new_data, context))
             {
                 throw std::logic_error("Plaintext data is invalid");
             }
@@ -654,10 +653,10 @@ namespace seal
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff unsafe_load(const SEALContext &context, const SEAL_BYTE *in, std::size_t size)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Plaintext::load_members, this, std::move(context), _1), in, size);
+            return Serialization::Load(std::bind(&Plaintext::load_members, this, context, _1), in, size);
         }
 
         /**
@@ -675,11 +674,11 @@ namespace seal
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff load(const SEALContext &context, const SEAL_BYTE *in, std::size_t size)
         {
             Plaintext new_data(pool());
             auto in_size = new_data.unsafe_load(context, in, size);
-            if (!is_valid_for(new_data, std::move(context)))
+            if (!is_valid_for(new_data, context))
             {
                 throw std::logic_error("Plaintext data is invalid");
             }
@@ -752,7 +751,7 @@ namespace seal
     private:
         void save_members(std::ostream &stream) const;
 
-        void load_members(std::shared_ptr<SEALContext> context, std::istream &stream);
+        void load_members(const SEALContext &context, std::istream &stream);
 
         parms_id_type parms_id_ = parms_id_zero;
 

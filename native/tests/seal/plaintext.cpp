@@ -91,7 +91,7 @@ namespace sealtest
             parms.set_poly_modulus_degree(4);
             parms.set_coeff_modulus(CoeffModulus::Create(4, { 20 }));
 
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
 
             plain.save(stream);
             plain2.unsafe_load(context, stream);
@@ -117,7 +117,7 @@ namespace sealtest
             ASSERT_EQ(0ULL, plain2[3]);
             ASSERT_FALSE(plain2.is_ntt_form());
 
-            plain.parms_id() = context->first_parms_id();
+            plain.parms_id() = context.first_parms_id();
             plain.save(stream);
             plain2.unsafe_load(context, stream);
             ASSERT_TRUE(plain2.is_ntt_form());
@@ -129,7 +129,7 @@ namespace sealtest
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 30 }));
             parms.set_plain_modulus(65537);
 
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
 
             plain.parms_id() = parms_id_zero;
             plain = "1x^63 + 2x^62 + Fx^32 + Ax^9 + 1x^1 + 1";
@@ -139,7 +139,7 @@ namespace sealtest
             ASSERT_FALSE(plain2.is_ntt_form());
 
             Evaluator evaluator(context);
-            evaluator.transform_to_ntt_inplace(plain, context->first_parms_id());
+            evaluator.transform_to_ntt_inplace(plain, context.first_parms_id());
             plain.save(stream);
             plain2.load(context, stream);
             ASSERT_TRUE(plain.data() != plain2.data());
@@ -150,7 +150,7 @@ namespace sealtest
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 30 }));
 
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             CKKSEncoder encoder(context);
 
             encoder.encode(vector<double>{ 0.1, 2.3, 34.4 }, pow(2.0, 20), plain);

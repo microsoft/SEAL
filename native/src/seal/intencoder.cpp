@@ -15,18 +15,12 @@ using namespace seal::util;
 
 namespace seal
 {
-    IntegerEncoder::IntegerEncoder(shared_ptr<SEALContext> context) : context_(move(context))
+    IntegerEncoder::IntegerEncoder(SEALContext context) : context_(context)
     {
-        // Verify parameters
-        if (!context_)
-        {
-            throw invalid_argument("invalid context");
-        }
-
-        // Unlike in other classes, we do not check "context_->parameters_set()".
+        // Unlike in other classes, we do not check "context_.parameters_set()".
         // The IntegerEncoder should function without valid encryption parameters
         // as long as the scheme is BFV and the plaintext modulus is at least 2.
-        auto &context_data = *context_->first_context_data();
+        auto &context_data = *context_.first_context_data();
         if (context_data.parms().scheme() != scheme_type::BFV)
         {
             throw invalid_argument("unsupported scheme");

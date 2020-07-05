@@ -215,10 +215,10 @@ namespace seal
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, std::istream &stream)
+        inline std::streamoff unsafe_load(const SEALContext &context, std::istream &stream)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&KSwitchKeys::load_members, this, std::move(context), _1), stream);
+            return Serialization::Load(std::bind(&KSwitchKeys::load_members, this, context, _1), stream);
         }
 
         /**
@@ -233,12 +233,12 @@ namespace seal
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(std::shared_ptr<SEALContext> context, std::istream &stream)
+        inline std::streamoff load(const SEALContext &context, std::istream &stream)
         {
             KSwitchKeys new_keys;
             new_keys.pool_ = pool_;
             auto in_size = new_keys.unsafe_load(context, stream);
-            if (!is_valid_for(new_keys, std::move(context)))
+            if (!is_valid_for(new_keys, context))
             {
                 throw std::logic_error("KSwitchKeys data is invalid");
             }
@@ -285,10 +285,10 @@ namespace seal
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff unsafe_load(const SEALContext &context, const SEAL_BYTE *in, std::size_t size)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&KSwitchKeys::load_members, this, std::move(context), _1), in, size);
+            return Serialization::Load(std::bind(&KSwitchKeys::load_members, this, context, _1), in, size);
         }
 
         /**
@@ -307,12 +307,12 @@ namespace seal
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff load(const SEALContext &context, const SEAL_BYTE *in, std::size_t size)
         {
             KSwitchKeys new_keys;
             new_keys.pool_ = pool_;
             auto in_size = new_keys.unsafe_load(context, in, size);
-            if (!is_valid_for(new_keys, std::move(context)))
+            if (!is_valid_for(new_keys, context))
             {
                 throw std::logic_error("KSwitchKeys data is invalid");
             }
@@ -331,7 +331,7 @@ namespace seal
     private:
         void save_members(std::ostream &stream) const;
 
-        void load_members(std::shared_ptr<SEALContext> context, std::istream &stream);
+        void load_members(const SEALContext &context, std::istream &stream);
 
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
 

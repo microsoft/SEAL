@@ -482,8 +482,6 @@ namespace seal
             std::size_t chain_index_ = 0;
         };
 
-        SEALContext() = delete;
-
         /**
         Creates an instance of SEALContext and performs several pre-computations
         on the given EncryptionParameters.
@@ -494,13 +492,39 @@ namespace seal
         @param[in] sec_level Determines whether a specific security level should be
         enforced according to HomomorphicEncryption.org security standard
         */
-        SEAL_NODISCARD static auto Create(
+        SEALContext(
             const EncryptionParameters &parms, bool expand_mod_chain = true,
-            sec_level_type sec_level = sec_level_type::tc128)
-        {
-            return std::shared_ptr<SEALContext>(
-                new SEALContext(parms, expand_mod_chain, sec_level, MemoryManager::GetPool()));
-        }
+            sec_level_type sec_level = sec_level_type::tc128) :
+        SEALContext(parms, expand_mod_chain, sec_level, MemoryManager::GetPool())
+        {}
+
+        /**
+        Constructs a new SEALContext by copying a given one.
+
+        @param[in] copy The SEALContext to copy from
+        */
+        SEALContext(const SEALContext &copy) = default;
+
+        /**
+        Creates a new SEALContext by moving a given one.
+
+        @param[in] source The SEALContext to move from
+        */
+        SEALContext(SEALContext &&source) = default;
+
+        /**
+        Copies a given SEALContext to the current one.
+
+        @param[in] assign The SEALContext to copy from
+        */
+        SEALContext &operator=(const SEALContext &assign) = default;
+
+        /**
+        Moves a given SEALContext to the current one.
+
+        @param[in] assign The SEALContext to move from
+        */
+        SEALContext &operator=(SEALContext &&assign) = default;
 
         /**
         Returns the ContextData corresponding to encryption parameters with a given
@@ -611,14 +635,6 @@ namespace seal
         }
 
     private:
-        SEALContext(const SEALContext &copy) = delete;
-
-        SEALContext(SEALContext &&source) = delete;
-
-        SEALContext &operator=(const SEALContext &assign) = delete;
-
-        SEALContext &operator=(SEALContext &&assign) = delete;
-
         /**
         Creates an instance of SEALContext, and performs several pre-computations
         on the given EncryptionParameters.

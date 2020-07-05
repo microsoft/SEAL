@@ -23,7 +23,7 @@ namespace sealtest
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(65537);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60 }));
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
             ASSERT_THROW(RelinKeys evk = keygen.relin_keys_local(), logic_error);
@@ -33,11 +33,11 @@ namespace sealtest
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(65537);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60 }));
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
             RelinKeys evk = keygen.relin_keys_local();
-            ASSERT_TRUE(evk.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(evk.parms_id() == context.key_parms_id());
             ASSERT_EQ(1ULL, evk.key(2).size());
             for (auto &a : evk.data())
             {
@@ -58,12 +58,12 @@ namespace sealtest
             }
             ASSERT_TRUE(is_valid_for(galks, context));
 
-            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_EQ(1ULL, galks.key(3).size());
             ASSERT_EQ(10ULL, galks.size());
 
             galks = keygen.galois_keys_local(vector<uint32_t>{ 1, 3, 5, 7 });
-            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(3));
             ASSERT_TRUE(galks.has_key(5));
@@ -77,7 +77,7 @@ namespace sealtest
             ASSERT_EQ(4ULL, galks.size());
 
             galks = keygen.galois_keys_local(vector<uint32_t>{ 1 });
-            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_FALSE(galks.has_key(3));
             ASSERT_FALSE(galks.has_key(127));
@@ -85,7 +85,7 @@ namespace sealtest
             ASSERT_EQ(1ULL, galks.size());
 
             galks = keygen.galois_keys_local(vector<uint32_t>{ 127 });
-            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(127));
             ASSERT_EQ(1ULL, galks.key(127).size());
@@ -96,11 +96,11 @@ namespace sealtest
             parms.set_plain_modulus(65537);
             parms.set_coeff_modulus(CoeffModulus::Create(256, { 60, 30, 30 }));
 
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
             RelinKeys evk = keygen.relin_keys_local();
-            ASSERT_TRUE(evk.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(evk.parms_id() == context.key_parms_id());
             ASSERT_EQ(2ULL, evk.key(2).size());
 
             for (auto &a : evk.data())
@@ -122,12 +122,12 @@ namespace sealtest
             }
             ASSERT_TRUE(is_valid_for(galks, context));
 
-            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_EQ(2ULL, galks.key(3).size());
             ASSERT_EQ(14ULL, galks.size());
 
             galks = keygen.galois_keys_local(vector<uint32_t>{ 1, 3, 5, 7 });
-            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(3));
             ASSERT_TRUE(galks.has_key(5));
@@ -141,7 +141,7 @@ namespace sealtest
             ASSERT_EQ(4ULL, galks.size());
 
             galks = keygen.galois_keys_local(vector<uint32_t>{ 1 });
-            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_FALSE(galks.has_key(3));
             ASSERT_FALSE(galks.has_key(511));
@@ -149,7 +149,7 @@ namespace sealtest
             ASSERT_EQ(1ULL, galks.size());
 
             galks = keygen.galois_keys_local(vector<uint32_t>{ 511 });
-            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(511));
             ASSERT_EQ(2ULL, galks.key(511).size());
@@ -163,7 +163,7 @@ namespace sealtest
         {
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60 }));
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
             ASSERT_THROW(RelinKeys evk = keygen.relin_keys_local(), logic_error);
@@ -173,11 +173,11 @@ namespace sealtest
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60 }));
 
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
             RelinKeys evk = keygen.relin_keys_local();
-            ASSERT_TRUE(evk.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(evk.parms_id() == context.key_parms_id());
             ASSERT_EQ(1ULL, evk.key(2).size());
             for (auto &a : evk.data())
             {
@@ -198,12 +198,12 @@ namespace sealtest
             }
             ASSERT_TRUE(is_valid_for(galks, context));
 
-            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_EQ(1ULL, galks.key(3).size());
             ASSERT_EQ(10ULL, galks.size());
 
             galks = keygen.galois_keys_local(vector<uint32_t>{ 1, 3, 5, 7 });
-            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(3));
             ASSERT_TRUE(galks.has_key(5));
@@ -217,7 +217,7 @@ namespace sealtest
             ASSERT_EQ(4ULL, galks.size());
 
             galks = keygen.galois_keys_local(vector<uint32_t>{ 1 });
-            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_FALSE(galks.has_key(3));
             ASSERT_FALSE(galks.has_key(127));
@@ -225,7 +225,7 @@ namespace sealtest
             ASSERT_EQ(1ULL, galks.size());
 
             galks = keygen.galois_keys_local(vector<uint32_t>{ 127 });
-            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(127));
             ASSERT_EQ(1ULL, galks.key(127).size());
@@ -235,11 +235,11 @@ namespace sealtest
             parms.set_poly_modulus_degree(256);
             parms.set_coeff_modulus(CoeffModulus::Create(256, { 60, 30, 30 }));
 
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
             RelinKeys evk = keygen.relin_keys_local();
-            ASSERT_TRUE(evk.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(evk.parms_id() == context.key_parms_id());
             ASSERT_EQ(2ULL, evk.key(2).size());
             for (auto &a : evk.data())
             {
@@ -260,12 +260,12 @@ namespace sealtest
             }
             ASSERT_TRUE(is_valid_for(galks, context));
 
-            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_EQ(2ULL, galks.key(3).size());
             ASSERT_EQ(14ULL, galks.size());
 
             galks = keygen.galois_keys_local(vector<uint32_t>{ 1, 3, 5, 7 });
-            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(3));
             ASSERT_TRUE(galks.has_key(5));
@@ -279,7 +279,7 @@ namespace sealtest
             ASSERT_EQ(4ULL, galks.size());
 
             galks = keygen.galois_keys_local(vector<uint32_t>{ 1 });
-            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_FALSE(galks.has_key(3));
             ASSERT_FALSE(galks.has_key(511));
@@ -287,7 +287,7 @@ namespace sealtest
             ASSERT_EQ(1ULL, galks.size());
 
             galks = keygen.galois_keys_local(vector<uint32_t>{ 511 });
-            ASSERT_TRUE(galks.parms_id() == context->key_parms_id());
+            ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(511));
             ASSERT_EQ(2ULL, galks.key(511).size());
@@ -301,7 +301,7 @@ namespace sealtest
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(65537);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 60, 50, 40 }));
-        auto context = SEALContext::Create(parms, false, sec_level_type::none);
+        SEALContext context(parms, false, sec_level_type::none);
         Evaluator evaluator(context);
 
         KeyGenerator keygen(context);

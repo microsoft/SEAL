@@ -13,7 +13,6 @@
 #include <cmath>
 #include <complex>
 #include <limits>
-#include <memory>
 #include <type_traits>
 #include <vector>
 #ifdef SEAL_USE_MSGSL
@@ -73,7 +72,7 @@ namespace seal
         parameters are not valid
         @throws std::invalid_argument if scheme is not scheme_type::CKKS
         */
-        CKKSEncoder(std::shared_ptr<SEALContext> context);
+        CKKSEncoder(SEALContext context);
 
         /**
         Encodes a vector of double-precision floating-point real or complex numbers
@@ -137,7 +136,7 @@ namespace seal
             const std::vector<T> &values, double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encode(values, context_->first_parms_id(), scale, destination, std::move(pool));
+            encode(values, context_.first_parms_id(), scale, destination, std::move(pool));
         }
 #ifdef SEAL_USE_MSGSL
         /**
@@ -203,7 +202,7 @@ namespace seal
             gsl::span<const T> values, double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encode(values, context_->first_parms_id(), scale, destination, std::move(pool));
+            encode(values, context_.first_parms_id(), scale, destination, std::move(pool));
         }
 #endif
         /**
@@ -253,7 +252,7 @@ namespace seal
         inline void encode(
             double value, double scale, Plaintext &destination, MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encode(value, context_->first_parms_id(), scale, destination, std::move(pool));
+            encode(value, context_.first_parms_id(), scale, destination, std::move(pool));
         }
 
         /**
@@ -303,7 +302,7 @@ namespace seal
             std::complex<double> value, double scale, Plaintext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            encode(value, context_->first_parms_id(), scale, destination, std::move(pool));
+            encode(value, context_.first_parms_id(), scale, destination, std::move(pool));
         }
 
         /**
@@ -333,7 +332,7 @@ namespace seal
         */
         inline void encode(std::int64_t value, Plaintext &destination)
         {
-            encode(value, context_->first_parms_id(), destination);
+            encode(value, context_.first_parms_id(), destination);
         }
 
         /**
@@ -407,7 +406,7 @@ namespace seal
             MemoryPoolHandle pool)
         {
             // Verify parameters.
-            auto context_data_ptr = context_->get_context_data(parms_id);
+            auto context_data_ptr = context_.get_context_data(parms_id);
             if (!context_data_ptr)
             {
                 throw std::invalid_argument("parms_id is not valid for encryption parameters");
@@ -640,7 +639,7 @@ namespace seal
                 throw std::invalid_argument("pool is uninitialized");
             }
 
-            auto &context_data = *context_->get_context_data(plain.parms_id());
+            auto &context_data = *context_.get_context_data(plain.parms_id());
             auto &parms = context_data.parms();
             std::size_t coeff_modulus_size = parms.coeff_modulus().size();
             std::size_t coeff_count = parms.poly_modulus_degree();
@@ -764,7 +763,7 @@ namespace seal
 
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
 
-        std::shared_ptr<SEALContext> context_{ nullptr };
+        SEALContext context_;
 
         std::size_t slots_;
 

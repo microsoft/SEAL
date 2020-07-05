@@ -14,7 +14,6 @@
 #include "seal/util/defines.h"
 #include "seal/util/iterator.h"
 #include "seal/util/ntt.h"
-#include <memory>
 #include <random>
 
 namespace seal
@@ -40,7 +39,7 @@ namespace seal
         @throws std::invalid_argument if the context is not set or encryption
         parameters are not valid
         */
-        KeyGenerator(std::shared_ptr<SEALContext> context);
+        KeyGenerator(SEALContext context);
 
         /**
         Creates an KeyGenerator instance initialized with the specified SEALContext
@@ -55,7 +54,7 @@ namespace seal
         @throws std::invalid_argument if secret_key is not valid for encryption
         parameters
         */
-        KeyGenerator(std::shared_ptr<SEALContext> context, const SecretKey &secret_key);
+        KeyGenerator(SEALContext context, const SecretKey &secret_key);
 
         /**
         Returns a const reference to the secret key.
@@ -179,7 +178,7 @@ namespace seal
         */
         SEAL_NODISCARD inline GaloisKeys galois_keys_local(const std::vector<int> &steps)
         {
-            return galois_keys_local(context_->key_context_data()->galois_tool()->get_elts_from_steps(steps));
+            return galois_keys_local(context_.key_context_data()->galois_tool()->get_elts_from_steps(steps));
         }
 
         /**
@@ -205,7 +204,7 @@ namespace seal
         */
         SEAL_NODISCARD inline Serializable<GaloisKeys> galois_keys(const std::vector<int> &steps)
         {
-            return galois_keys(context_->key_context_data()->galois_tool()->get_elts_from_steps(steps));
+            return galois_keys(context_.key_context_data()->galois_tool()->get_elts_from_steps(steps));
         }
 
         /**
@@ -223,7 +222,7 @@ namespace seal
         */
         SEAL_NODISCARD inline GaloisKeys galois_keys_local()
         {
-            return galois_keys_local(context_->key_context_data()->galois_tool()->get_elts_all());
+            return galois_keys_local(context_.key_context_data()->galois_tool()->get_elts_all());
         }
 
         /**
@@ -244,7 +243,7 @@ namespace seal
         */
         SEAL_NODISCARD inline Serializable<GaloisKeys> galois_keys()
         {
-            return galois_keys(context_->key_context_data()->galois_tool()->get_elts_all());
+            return galois_keys(context_.key_context_data()->galois_tool()->get_elts_all());
         }
 
         /**
@@ -322,7 +321,7 @@ namespace seal
         // We use a fresh memory pool with `clear_on_destruction' enabled.
         MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
 
-        std::shared_ptr<SEALContext> context_{ nullptr };
+        SEALContext context_;
 
         SecretKey secret_key_;
 

@@ -17,7 +17,6 @@
 #include <functional>
 #include <iostream>
 #include <iterator>
-#include <memory>
 #include <stdexcept>
 #include <string>
 
@@ -78,11 +77,11 @@ namespace seal
         parameters are not valid
         @throws std::invalid_argument if pool is uninitialized
         */
-        explicit Ciphertext(std::shared_ptr<SEALContext> context, MemoryPoolHandle pool = MemoryManager::GetPool())
+        explicit Ciphertext(const SEALContext &context, MemoryPoolHandle pool = MemoryManager::GetPool())
             : data_(std::move(pool))
         {
             // Allocate memory but don't resize
-            reserve(std::move(context), 2);
+            reserve(context, 2);
         }
 
         /**
@@ -101,12 +100,12 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         */
         explicit Ciphertext(
-            std::shared_ptr<SEALContext> context, parms_id_type parms_id,
+            const SEALContext &context, parms_id_type parms_id,
             MemoryPoolHandle pool = MemoryManager::GetPool())
             : data_(std::move(pool))
         {
             // Allocate memory but don't resize
-            reserve(std::move(context), parms_id, 2);
+            reserve(context, parms_id, 2);
         }
 
         /**
@@ -127,12 +126,12 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         */
         explicit Ciphertext(
-            std::shared_ptr<SEALContext> context, parms_id_type parms_id, std::size_t size_capacity,
+            const SEALContext &context, parms_id_type parms_id, std::size_t size_capacity,
             MemoryPoolHandle pool = MemoryManager::GetPool())
             : data_(std::move(pool))
         {
             // Allocate memory but don't resize
-            reserve(std::move(context), parms_id, size_capacity);
+            reserve(context, parms_id, size_capacity);
         }
 
         /**
@@ -177,7 +176,7 @@ namespace seal
         parameters
         @throws std::invalid_argument if size_capacity is less than 2 or too large
         */
-        void reserve(std::shared_ptr<SEALContext> context, parms_id_type parms_id, std::size_t size_capacity);
+        void reserve(const SEALContext &context, parms_id_type parms_id, std::size_t size_capacity);
 
         /**
         Allocates enough memory to accommodate the backing array of a ciphertext
@@ -191,16 +190,10 @@ namespace seal
         parameters are not valid
         @throws std::invalid_argument if size_capacity is less than 2 or too large
         */
-        inline void reserve(std::shared_ptr<SEALContext> context, std::size_t size_capacity)
+        inline void reserve(const SEALContext &context, std::size_t size_capacity)
         {
-            // Verify parameters
-            if (!context)
-            {
-                throw std::invalid_argument("invalid context");
-            }
-
-            auto parms_id = context->first_parms_id();
-            reserve(std::move(context), parms_id, size_capacity);
+            auto parms_id = context.first_parms_id();
+            reserve(context, parms_id, size_capacity);
         }
 
         /**
@@ -239,7 +232,7 @@ namespace seal
         parameters
         @throws std::invalid_argument if size is less than 2 or too large
         */
-        void resize(std::shared_ptr<SEALContext> context, parms_id_type parms_id, std::size_t size);
+        void resize(const SEALContext &context, parms_id_type parms_id, std::size_t size);
 
         /**
         Resizes the ciphertext to given size, reallocating if the capacity
@@ -258,16 +251,10 @@ namespace seal
         parameters are not valid
         @throws std::invalid_argument if size is less than 2 or too large
         */
-        inline void resize(std::shared_ptr<SEALContext> context, std::size_t size)
+        inline void resize(const SEALContext &context, std::size_t size)
         {
-            // Verify parameters
-            if (!context)
-            {
-                throw std::invalid_argument("invalid context");
-            }
-
-            auto parms_id = context->first_parms_id();
-            resize(std::move(context), parms_id, size);
+            auto parms_id = context.first_parms_id();
+            resize(context, parms_id, size);
         }
 
         /**
@@ -518,10 +505,10 @@ namespace seal
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, std::istream &stream)
+        inline std::streamoff unsafe_load(const SEALContext &context, std::istream &stream)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Ciphertext::load_members, this, std::move(context), _1), stream);
+            return Serialization::Load(std::bind(&Ciphertext::load_members, this, context, _1), stream);
         }
 
         /**
@@ -536,11 +523,11 @@ namespace seal
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(std::shared_ptr<SEALContext> context, std::istream &stream)
+        inline std::streamoff load(const SEALContext &context, std::istream &stream)
         {
             Ciphertext new_data(pool());
             auto in_size = new_data.unsafe_load(context, stream);
-            if (!is_valid_for(new_data, std::move(context)))
+            if (!is_valid_for(new_data, context))
             {
                 throw std::logic_error("ciphertext data is invalid");
             }
@@ -587,10 +574,10 @@ namespace seal
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff unsafe_load(const SEALContext &context, const SEAL_BYTE *in, std::size_t size)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Ciphertext::load_members, this, std::move(context), _1), in, size);
+            return Serialization::Load(std::bind(&Ciphertext::load_members, this, context, _1), in, size);
         }
 
         /**
@@ -609,11 +596,11 @@ namespace seal
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff load(const SEALContext &context, const SEAL_BYTE *in, std::size_t size)
         {
             Ciphertext new_data(pool());
             auto in_size = new_data.unsafe_load(context, in, size);
-            if (!is_valid_for(new_data, std::move(context)))
+            if (!is_valid_for(new_data, context))
             {
                 throw std::logic_error("ciphertext data is invalid");
             }
@@ -695,11 +682,11 @@ namespace seal
 
         void resize_internal(std::size_t size, std::size_t poly_modulus_degree, std::size_t coeff_modulus_size);
 
-        void expand_seed(std::shared_ptr<SEALContext> context, const random_seed_type &seed);
+        void expand_seed(const SEALContext &context, const random_seed_type &seed);
 
         void save_members(std::ostream &stream) const;
 
-        void load_members(std::shared_ptr<SEALContext> context, std::istream &stream);
+        void load_members(const SEALContext &context, std::istream &stream);
 
         inline bool has_seed_marker() const noexcept
         {

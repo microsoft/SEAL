@@ -82,7 +82,7 @@ void example_ckks_basics()
     */
     double scale = pow(2.0, 40);
 
-    auto context = SEALContext::Create(parms);
+    SEALContext context(parms);
     print_parameters(context);
     cout << endl;
 
@@ -204,11 +204,11 @@ void example_ckks_basics()
     print_line(__LINE__);
     cout << "Parameters used by all three terms are different." << endl;
     cout << "    + Modulus chain index for x3_encrypted: "
-         << context->get_context_data(x3_encrypted.parms_id())->chain_index() << endl;
+         << context.get_context_data(x3_encrypted.parms_id())->chain_index() << endl;
     cout << "    + Modulus chain index for x1_encrypted: "
-         << context->get_context_data(x1_encrypted.parms_id())->chain_index() << endl;
+         << context.get_context_data(x1_encrypted.parms_id())->chain_index() << endl;
     cout << "    + Modulus chain index for plain_coeff0: "
-         << context->get_context_data(plain_coeff0.parms_id())->chain_index() << endl;
+         << context.get_context_data(plain_coeff0.parms_id())->chain_index() << endl;
     cout << endl;
 
     /*

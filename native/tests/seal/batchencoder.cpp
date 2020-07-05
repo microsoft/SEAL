@@ -22,8 +22,8 @@ namespace sealtest
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 60 }));
         parms.set_plain_modulus(257);
 
-        auto context = SEALContext::Create(parms, false, sec_level_type::none);
-        ASSERT_TRUE(context->first_context_data()->qualifiers().using_batching);
+        SEALContext context(parms, false, sec_level_type::none);
+        ASSERT_TRUE(context.first_context_data()->qualifiers().using_batching);
 
         BatchEncoder batch_encoder(context);
         ASSERT_EQ(64ULL, batch_encoder.slot_count());
@@ -75,8 +75,8 @@ namespace sealtest
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 60 }));
         parms.set_plain_modulus(257);
 
-        auto context = SEALContext::Create(parms, false, sec_level_type::none);
-        ASSERT_TRUE(context->first_context_data()->qualifiers().using_batching);
+        SEALContext context(parms, false, sec_level_type::none);
+        ASSERT_TRUE(context.first_context_data()->qualifiers().using_batching);
 
         BatchEncoder batch_encoder(context);
         ASSERT_EQ(64ULL, batch_encoder.slot_count());
@@ -128,8 +128,8 @@ namespace sealtest
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 60 }));
         parms.set_plain_modulus(257);
 
-        auto context = SEALContext::Create(parms, false, sec_level_type::none);
-        ASSERT_TRUE(context->first_context_data()->qualifiers().using_batching);
+        SEALContext context(parms, false, sec_level_type::none);
+        ASSERT_TRUE(context.first_context_data()->qualifiers().using_batching);
 
         BatchEncoder batch_encoder(context);
         ASSERT_EQ(64ULL, batch_encoder.slot_count());
