@@ -222,7 +222,7 @@ namespace seal
             // floor(2^64 / mod) == floor( floor(2^128 / mod) )
             unsigned long long tmp[2];
             const std::uint64_t *const_ratio = modulus.const_ratio().data();
-            multiply_uint64(input, const_ratio[1], tmp);
+            multiply_uint64_hw64(input, const_ratio[1], tmp + 1);
 
             // Barrett subtraction
             tmp[0] = input - tmp[1] * modulus.value();
