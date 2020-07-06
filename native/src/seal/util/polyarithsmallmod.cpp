@@ -27,9 +27,11 @@ namespace seal
             {
                 throw invalid_argument("modulus");
             }
+            if (scalar >= modulus.value())
+            {
+                throw invalid_argument("scalar");
+            }
 #endif
-            // Scalar must be first reduced modulo modulus
-            scalar = barrett_reduce_64(scalar, modulus);
 
             SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
                 const uint64_t x = get<0>(I);
@@ -53,9 +55,11 @@ namespace seal
             {
                 throw invalid_argument("modulus");
             }
+            if (scalar >= modulus.value())
+            {
+                throw invalid_argument("scalar");
+            }
 #endif
-            // Scalar must be first reduced modulo modulus
-            scalar = barrett_reduce_64(scalar, modulus);
 
             SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
                 const uint64_t x = get<0>(I);

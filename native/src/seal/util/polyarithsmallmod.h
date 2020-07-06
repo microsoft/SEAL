@@ -388,10 +388,16 @@ namespace seal
             });
         }
 
+        /**
+        @param[in] scalar Must be less than modulus.value().
+        */
         void add_poly_scalar_coeffmod(
             ConstCoeffIter poly, std::size_t coeff_count, std::uint64_t scalar, const Modulus &modulus,
             CoeffIter result);
 
+        /**
+        @param[in] scalar Must be less than modulus.value().
+        */
         inline void add_poly_scalar_coeffmod(
             ConstRNSIter poly, std::size_t coeff_modulus_size, std::uint64_t scalar, ConstModulusIter modulus,
             RNSIter result)
@@ -420,6 +426,9 @@ namespace seal
             });
         }
 
+        /**
+        @param[in] scalar Must be less than modulus.value().
+        */
         inline void add_poly_scalar_coeffmod(
             ConstPolyIter poly_array, std::size_t size, std::uint64_t scalar, ConstModulusIter modulus, PolyIter result)
         {
@@ -447,10 +456,16 @@ namespace seal
             });
         }
 
+        /**
+        @param[in] scalar Must be less than modulus.value().
+        */
         void sub_poly_scalar_coeffmod(
             ConstCoeffIter poly, std::size_t coeff_count, std::uint64_t scalar, const Modulus &modulus,
             CoeffIter result);
 
+        /**
+        @param[in] scalar Must be less than modulus.value().
+        */
         inline void sub_poly_scalar_coeffmod(
             ConstRNSIter poly, std::size_t coeff_modulus_size, std::uint64_t scalar, ConstModulusIter modulus,
             RNSIter result)
@@ -479,6 +494,9 @@ namespace seal
             });
         }
 
+        /**
+        @param[in] scalar Must be less than modulus.value().
+        */
         inline void sub_poly_scalar_coeffmod(
             ConstPolyIter poly_array, std::size_t size, std::uint64_t scalar, ConstModulusIter modulus, PolyIter result)
         {
