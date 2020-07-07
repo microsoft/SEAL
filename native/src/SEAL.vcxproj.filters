@@ -18,9 +18,6 @@
     <Filter Include="Other">
       <UniqueIdentifier>{8585bc5e-eaa9-481a-a6ee-c38be1319a32}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Other\cmake">
-      <UniqueIdentifier>{aaf838b1-cab2-4ccc-a016-a81c7edf506e}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Other\seal">
       <UniqueIdentifier>{31fb1149-1a6f-438b-a86a-744384986d21}</UniqueIdentifier>
     </Filter>
@@ -289,12 +286,6 @@
     <ClCompile Include="seal\util\numth.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
-    <ClCompile Include="seal\util\polyarith.cpp">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\util\polyarithmod.cpp">
-      <Filter>Source Files\util</Filter>
-    </ClCompile>
     <ClCompile Include="seal\util\polyarithsmallmod.cpp">
       <Filter>Source Files\util</Filter>
     </ClCompile>
@@ -338,14 +329,8 @@
     </Text>
   </ItemGroup>
   <ItemGroup>
-    <None Include="cmake\SEALConfig.cmake.in">
-      <Filter>Other\cmake</Filter>
-    </None>
     <None Include="seal\util\config.h.in">
       <Filter>Other\seal\util</Filter>
-    </None>
-    <None Include="cmake\FindMSGSL.cmake">
-      <Filter>Other\cmake</Filter>
     </None>
     <None Include="CMakeConfig.cmd">
       <Filter>Other</Filter>

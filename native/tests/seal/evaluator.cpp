@@ -174,8 +174,8 @@ namespace sealtest
             Plaintext plain;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
             const double delta = static_cast<double>(1 << 16);
             encoder.encode(input, context->first_parms_id(), delta, plain);
 
@@ -215,10 +215,10 @@ namespace sealtest
             Plaintext plain2;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
-            std::vector<std::complex<double>> input2(slot_size, 0.0);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input2(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
 
             int data_bound = (1 << 30);
             const double delta = static_cast<double>(1 << 16);
@@ -275,10 +275,10 @@ namespace sealtest
             Plaintext plain2;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
-            std::vector<std::complex<double>> input2(slot_size, 0.0);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input2(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
 
             int data_bound = (1 << 30);
             const double delta = static_cast<double>(1 << 16);
@@ -337,8 +337,8 @@ namespace sealtest
             Plaintext plain;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
             const double delta = static_cast<double>(1 << 16);
             encoder.encode(input, context->first_parms_id(), delta, plain);
 
@@ -377,10 +377,10 @@ namespace sealtest
             Plaintext plain2;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
-            std::vector<std::complex<double>> input2(slot_size, 0.0);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input2(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
 
             int data_bound = (1 << 8);
             const double delta = static_cast<double>(1ULL << 16);
@@ -435,10 +435,10 @@ namespace sealtest
             Plaintext plain2;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input1(slot_size, 0.0);
             double input2;
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
 
             int data_bound = (1 << 8);
             const double delta = static_cast<double>(1ULL << 16);
@@ -493,10 +493,10 @@ namespace sealtest
             Plaintext plain2;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input1(slot_size, 0.0);
             double input2;
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
 
             int data_bound = (1 << 8);
             const double delta = static_cast<double>(1ULL << 16);
@@ -555,8 +555,8 @@ namespace sealtest
             Plaintext plain;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
             const double delta = static_cast<double>(1 << 16);
             encoder.encode(input, context->first_parms_id(), delta, plain);
 
@@ -595,10 +595,10 @@ namespace sealtest
             Plaintext plain2;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
-            std::vector<std::complex<double>> input2(slot_size, 0.0);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input2(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
 
             int data_bound = (1 << 8);
             const double delta = static_cast<double>(1ULL << 16);
@@ -653,10 +653,10 @@ namespace sealtest
             Plaintext plain2;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
-            std::vector<std::complex<double>> input2(slot_size, 0.0);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input2(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
 
             int data_bound = (1 << 8);
             const double delta = static_cast<double>(1ULL << 16);
@@ -1407,8 +1407,8 @@ namespace sealtest
             Plaintext plain;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
             const double delta = static_cast<double>(1 << 30);
             encoder.encode(input, context->first_parms_id(), delta, plain);
 
@@ -1446,10 +1446,10 @@ namespace sealtest
             Plaintext plain2;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
-            std::vector<std::complex<double>> input2(slot_size, 0.0);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input2(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
             const double delta = static_cast<double>(1ULL << 40);
 
             int data_bound = (1 << 10);
@@ -1504,10 +1504,10 @@ namespace sealtest
             Plaintext plain2;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
-            std::vector<std::complex<double>> input2(slot_size, 0.0);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input2(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
             const double delta = static_cast<double>(1ULL << 40);
 
             int data_bound = (1 << 10);
@@ -1566,9 +1566,9 @@ namespace sealtest
             Plaintext plain2;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input1(slot_size, 0.0);
             int64_t input2;
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
 
             int data_bound = (1 << 10);
             srand(static_cast<unsigned>(time(NULL)));
@@ -1582,7 +1582,7 @@ namespace sealtest
                     expected[i] = input1[i] * static_cast<double>(input2);
                 }
 
-                std::vector<std::complex<double>> output(slot_size);
+                vector<complex<double>> output(slot_size);
                 const double delta = static_cast<double>(1ULL << 40);
                 encoder.encode(input1, context->first_parms_id(), delta, plain1);
                 encoder.encode(input2, context->first_parms_id(), plain2);
@@ -1623,9 +1623,9 @@ namespace sealtest
             Plaintext plain2;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input1(slot_size, 0.0);
             int64_t input2;
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
 
             int data_bound = (1 << 10);
             srand(static_cast<unsigned>(time(NULL)));
@@ -1639,7 +1639,7 @@ namespace sealtest
                     expected[i] = input1[i] * static_cast<double>(input2);
                 }
 
-                std::vector<std::complex<double>> output(slot_size);
+                vector<complex<double>> output(slot_size);
                 const double delta = static_cast<double>(1ULL << 40);
                 encoder.encode(input1, context->first_parms_id(), delta, plain1);
                 encoder.encode(input2, context->first_parms_id(), plain2);
@@ -1680,10 +1680,10 @@ namespace sealtest
             Plaintext plain2;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input1(slot_size, 0.0);
             double input2;
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
 
             int data_bound = (1 << 10);
             srand(static_cast<unsigned>(time(NULL)));
@@ -1737,10 +1737,10 @@ namespace sealtest
             Plaintext plain2;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 2.1);
+            vector<complex<double>> input1(slot_size, 2.1);
             double input2;
-            std::vector<std::complex<double>> expected(slot_size, 2.1);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> expected(slot_size, 2.1);
+            vector<complex<double>> output(slot_size);
 
             int data_bound = (1 << 10);
             srand(static_cast<unsigned>(time(NULL)));
@@ -1802,9 +1802,9 @@ namespace sealtest
             Plaintext plain2;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
-            std::vector<std::complex<double>> input2(slot_size, 0.0);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input2(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
             int data_bound = 1 << 10;
 
             for (int round = 0; round < 50; round++)
@@ -1817,7 +1817,7 @@ namespace sealtest
                     expected[i] = input1[i] * input2[i];
                 }
 
-                std::vector<std::complex<double>> output(slot_size);
+                vector<complex<double>> output(slot_size);
                 const double delta = static_cast<double>(1ULL << 40);
                 encoder.encode(input1, context->first_parms_id(), delta, plain1);
                 encoder.encode(input2, context->first_parms_id(), delta, plain2);
@@ -1865,9 +1865,9 @@ namespace sealtest
             Plaintext plain2;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
-            std::vector<std::complex<double>> input2(slot_size, 0.0);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input2(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
             int data_bound = 1 << 10;
 
             for (int round = 0; round < 50; round++)
@@ -1880,7 +1880,7 @@ namespace sealtest
                     expected[i] = input1[i] * input2[i];
                 }
 
-                std::vector<std::complex<double>> output(slot_size);
+                vector<complex<double>> output(slot_size);
                 const double delta = static_cast<double>(1ULL << 40);
                 encoder.encode(input1, context->first_parms_id(), delta, plain1);
                 encoder.encode(input2, context->first_parms_id(), delta, plain2);
@@ -1928,10 +1928,10 @@ namespace sealtest
             Plaintext plain2;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
-            std::vector<std::complex<double>> input2(slot_size, 0.0);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input2(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
             int data_bound = 1 << 10;
             const double delta = static_cast<double>(1ULL << 40);
 
@@ -1993,8 +1993,8 @@ namespace sealtest
             Plaintext plain;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input(slot_size, 0.0);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> input(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
 
             int data_bound = 1 << 7;
             srand(static_cast<unsigned>(time(NULL)));
@@ -2007,7 +2007,7 @@ namespace sealtest
                     expected[i] = input[i] * input[i];
                 }
 
-                std::vector<std::complex<double>> output(slot_size);
+                vector<complex<double>> output(slot_size);
                 const double delta = static_cast<double>(1ULL << 40);
                 encoder.encode(input, context->first_parms_id(), delta, plain);
 
@@ -2049,8 +2049,8 @@ namespace sealtest
             Plaintext plain;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input(slot_size, 0.0);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> input(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
 
             int data_bound = 1 << 7;
             srand(static_cast<unsigned>(time(NULL)));
@@ -2063,7 +2063,7 @@ namespace sealtest
                     expected[i] = input[i] * input[i];
                 }
 
-                std::vector<std::complex<double>> output(slot_size);
+                vector<complex<double>> output(slot_size);
                 const double delta = static_cast<double>(1ULL << 40);
                 encoder.encode(input, context->first_parms_id(), delta, plain);
 
@@ -2105,8 +2105,8 @@ namespace sealtest
             Plaintext plain;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input(slot_size, 0.0);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> input(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
 
             int data_bound = 1 << 7;
             srand(static_cast<unsigned>(time(NULL)));
@@ -2119,7 +2119,7 @@ namespace sealtest
                     expected[i] = input[i] * input[i];
                 }
 
-                std::vector<std::complex<double>> output(slot_size);
+                vector<complex<double>> output(slot_size);
                 const double delta = static_cast<double>(1ULL << 40);
                 encoder.encode(input, context->first_parms_id(), delta, plain);
 
@@ -2170,9 +2170,9 @@ namespace sealtest
             Plaintext plain2;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
-            std::vector<std::complex<double>> input2(slot_size, 0.0);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input2(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
 
             for (int round = 0; round < 100; round++)
             {
@@ -2185,7 +2185,7 @@ namespace sealtest
                     expected[i] = input1[i] * input2[i];
                 }
 
-                std::vector<std::complex<double>> output(slot_size);
+                vector<complex<double>> output(slot_size);
                 double delta = static_cast<double>(1ULL << 40);
                 encoder.encode(input1, context->first_parms_id(), delta, plain1);
                 encoder.encode(input2, context->first_parms_id(), delta, plain2);
@@ -2238,9 +2238,9 @@ namespace sealtest
             Plaintext plain2;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
-            std::vector<std::complex<double>> input2(slot_size, 0.0);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input2(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
 
             for (int round = 0; round < 100; round++)
             {
@@ -2253,7 +2253,7 @@ namespace sealtest
                     expected[i] = input1[i] * input2[i];
                 }
 
-                std::vector<std::complex<double>> output(slot_size);
+                vector<complex<double>> output(slot_size);
                 double delta = static_cast<double>(1ULL << 40);
                 encoder.encode(input1, context->first_parms_id(), delta, plain1);
                 encoder.encode(input2, context->first_parms_id(), delta, plain2);
@@ -2305,9 +2305,9 @@ namespace sealtest
             Plaintext plain2;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
-            std::vector<std::complex<double>> input2(slot_size, 0.0);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input2(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
 
             for (int round = 0; round < 100; round++)
             {
@@ -2320,7 +2320,7 @@ namespace sealtest
                     expected[i] = input1[i] * input2[i] * input2[i];
                 }
 
-                std::vector<std::complex<double>> output(slot_size);
+                vector<complex<double>> output(slot_size);
                 double delta = static_cast<double>(1ULL << 60);
                 encoder.encode(input1, context->first_parms_id(), delta, plain1);
                 encoder.encode(input2, context->first_parms_id(), delta, plain2);
@@ -2367,7 +2367,7 @@ namespace sealtest
                     expected[i] = input1[i] * input2[i] * input2[i];
                 }
 
-                std::vector<std::complex<double>> output(slot_size);
+                vector<complex<double>> output(slot_size);
                 double delta = static_cast<double>(1ULL << 50);
                 encoder.encode(input1, context->first_parms_id(), delta, plain1);
                 encoder.encode(input2, context->first_parms_id(), delta, plain2);
@@ -2429,9 +2429,9 @@ namespace sealtest
             Plaintext plain;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> input(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
+            vector<complex<double>> expected(slot_size, 0.0);
             int data_bound = 1 << 8;
 
             for (int round = 0; round < 100; round++)
@@ -2488,9 +2488,9 @@ namespace sealtest
             Plaintext plain;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> input(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
+            vector<complex<double>> expected(slot_size, 0.0);
             int data_bound = 1 << 8;
 
             for (int round = 0; round < 100; round++)
@@ -2549,8 +2549,8 @@ namespace sealtest
             int data_bound = 1 << 30;
             srand(static_cast<unsigned>(time(NULL)));
 
-            std::vector<std::complex<double>> input(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
 
             Ciphertext encrypted;
             Plaintext plain;
@@ -2621,8 +2621,8 @@ namespace sealtest
             int data_bound = 1 << 30;
             srand(static_cast<unsigned>(time(NULL)));
 
-            std::vector<std::complex<double>> input(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
 
             Ciphertext encrypted;
             Plaintext plain;
@@ -2693,8 +2693,8 @@ namespace sealtest
             int data_bound = 1 << 30;
             srand(static_cast<unsigned>(time(NULL)));
 
-            std::vector<std::complex<double>> input(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
 
             Ciphertext encrypted;
             Plaintext plain;
@@ -2775,10 +2775,10 @@ namespace sealtest
             Plaintext plain3;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
-            std::vector<std::complex<double>> input2(slot_size, 0.0);
-            std::vector<std::complex<double>> input3(slot_size, 0.0);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input2(slot_size, 0.0);
+            vector<complex<double>> input3(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
 
             for (int round = 0; round < 100; round++)
             {
@@ -2791,7 +2791,7 @@ namespace sealtest
                     expected[i] = input1[i] * input2[i] + input3[i];
                 }
 
-                std::vector<std::complex<double>> output(slot_size);
+                vector<complex<double>> output(slot_size);
                 double delta = static_cast<double>(1ULL << 40);
                 encoder.encode(input1, context->first_parms_id(), delta, plain1);
                 encoder.encode(input2, context->first_parms_id(), delta, plain2);
@@ -2858,11 +2858,11 @@ namespace sealtest
             Plaintext plain3;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input1(slot_size, 0.0);
-            std::vector<std::complex<double>> input2(slot_size, 0.0);
-            std::vector<std::complex<double>> input3(slot_size, 0.0);
-            std::vector<std::complex<double>> expected(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input1(slot_size, 0.0);
+            vector<complex<double>> input2(slot_size, 0.0);
+            vector<complex<double>> input3(slot_size, 0.0);
+            vector<complex<double>> expected(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
 
             for (int round = 0; round < 100; round++)
             {
@@ -2940,11 +2940,11 @@ namespace sealtest
             Ciphertext encrypted;
             Plaintext plain;
 
-            vector<std::complex<double>> input{ std::complex<double>(1, 1), std::complex<double>(2, 2),
-                                                std::complex<double>(3, 3), std::complex<double>(4, 4) };
+            vector<complex<double>> input{ complex<double>(1, 1), complex<double>(2, 2), complex<double>(3, 3),
+                                           complex<double>(4, 4) };
             input.resize(slot_size);
 
-            vector<std::complex<double>> output(slot_size, 0);
+            vector<complex<double>> output(slot_size, 0);
 
             encoder.encode(input, context->first_parms_id(), delta, plain);
             int shift = 1;
@@ -3011,11 +3011,11 @@ namespace sealtest
             Ciphertext encrypted;
             Plaintext plain;
 
-            vector<std::complex<double>> input{ std::complex<double>(1, 1), std::complex<double>(2, 2),
-                                                std::complex<double>(3, 3), std::complex<double>(4, 4) };
+            vector<complex<double>> input{ complex<double>(1, 1), complex<double>(2, 2), complex<double>(3, 3),
+                                           complex<double>(4, 4) };
             input.resize(slot_size);
 
-            vector<std::complex<double>> output(slot_size, 0);
+            vector<complex<double>> output(slot_size, 0);
 
             encoder.encode(input, context->first_parms_id(), delta, plain);
             int shift = 1;
@@ -3083,16 +3083,16 @@ namespace sealtest
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
             CKKSEncoder encoder(context);
-            const double delta = std::pow(2.0, 70);
+            const double delta = pow(2.0, 70);
 
             Ciphertext encrypted;
             Plaintext plain;
 
-            vector<std::complex<double>> input{ std::complex<double>(1, 1), std::complex<double>(2, 2),
-                                                std::complex<double>(3, 3), std::complex<double>(4, 4) };
+            vector<complex<double>> input{ complex<double>(1, 1), complex<double>(2, 2), complex<double>(3, 3),
+                                           complex<double>(4, 4) };
             input.resize(slot_size);
 
-            vector<std::complex<double>> output(slot_size, 0);
+            vector<complex<double>> output(slot_size, 0);
 
             encoder.encode(input, context->first_parms_id(), delta, plain);
             int shift = 1;
@@ -3158,16 +3158,16 @@ namespace sealtest
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
             CKKSEncoder encoder(context);
-            const double delta = std::pow(2, 70);
+            const double delta = pow(2, 70);
 
             Ciphertext encrypted;
             Plaintext plain;
 
-            vector<std::complex<double>> input{ std::complex<double>(1, 1), std::complex<double>(2, 2),
-                                                std::complex<double>(3, 3), std::complex<double>(4, 4) };
+            vector<complex<double>> input{ complex<double>(1, 1), complex<double>(2, 2), complex<double>(3, 3),
+                                           complex<double>(4, 4) };
             input.resize(slot_size);
 
-            vector<std::complex<double>> output(slot_size, 0);
+            vector<complex<double>> output(slot_size, 0);
 
             encoder.encode(input, context->first_parms_id(), delta, plain);
             int shift = 1;

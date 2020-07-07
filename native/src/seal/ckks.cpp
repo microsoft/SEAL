@@ -141,14 +141,16 @@ namespace seal
                 {
                     fill_n(
                         destination.data() + (j * coeff_count), coeff_count,
-                        negate_uint_mod(coeffu % coeff_modulus[j].value(), coeff_modulus[j]));
+                        negate_uint_mod(barrett_reduce_64(coeffu, coeff_modulus[j]), coeff_modulus[j]));
                 }
             }
             else
             {
                 for (size_t j = 0; j < coeff_modulus_size; j++)
                 {
-                    fill_n(destination.data() + (j * coeff_count), coeff_count, coeffu % coeff_modulus[j].value());
+                    fill_n(
+                        destination.data() + (j * coeff_count), coeff_count,
+                        barrett_reduce_64(coeffu, coeff_modulus[j]));
                 }
             }
         }
@@ -255,7 +257,7 @@ namespace seal
             {
                 uint64_t tmp = static_cast<uint64_t>(value);
                 tmp += coeff_modulus[j].value();
-                tmp %= coeff_modulus[j].value();
+                tmp = barrett_reduce_64(tmp, coeff_modulus[j]);
                 fill_n(destination.data() + (j * coeff_count), coeff_count, tmp);
             }
         }
@@ -264,7 +266,7 @@ namespace seal
             for (size_t j = 0; j < coeff_modulus_size; j++)
             {
                 uint64_t tmp = static_cast<uint64_t>(value);
-                tmp %= coeff_modulus[j].value();
+                tmp = barrett_reduce_64(tmp, coeff_modulus[j]);
                 fill_n(destination.data() + (j * coeff_count), coeff_count, tmp);
             }
         }

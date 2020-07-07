@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 #include "seal/util/common.h"
-#include "seal/util/iterator.h"
 #include "seal/util/numth.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/rns.h"
@@ -75,8 +74,8 @@ namespace seal
             punctured_prod_array_ = allocate_uint(size_ * size_, pool_);
             set_uint(copy.punctured_prod_array_.get(), size_ * size_, punctured_prod_array_.get());
 
-            inv_punctured_prod_mod_base_array_ = allocate_uint(size_, pool_);
-            set_uint(copy.inv_punctured_prod_mod_base_array_.get(), size_, inv_punctured_prod_mod_base_array_.get());
+            inv_punctured_prod_mod_base_array_ = allocate<MultiplyUIntModOperand>(size_, pool_);
+            copy_n(copy.inv_punctured_prod_mod_base_array_.get(), size_, inv_punctured_prod_mod_base_array_.get());
         }
 
         bool RNSBase::contains(const Modulus &value) const noexcept
@@ -162,7 +161,7 @@ namespace seal
         {
             if (size_ == 1)
             {
-                throw std::logic_error("cannot drop from base of size 1");
+                throw logic_error("cannot drop from base of size 1");
             }
 
             // Copy over this base
@@ -181,7 +180,7 @@ namespace seal
         {
             if (size_ == 1)
             {
-                throw std::logic_error("cannot drop from base of size 1");
+                throw logic_error("cannot drop from base of size 1");
             }
             if (!contains(value))
             {
@@ -220,7 +219,7 @@ namespace seal
 
             base_prod_ = allocate_uint(size_, pool_);
             punctured_prod_array_ = allocate_zero_uint(size_ * size_, pool_);
-            inv_punctured_prod_mod_base_array_ = allocate_uint(size_, pool_);
+            inv_punctured_prod_mod_base_array_ = allocate<MultiplyUIntModOperand>(size_, pool_);
 
             if (size_ > 1)
             {
@@ -228,8 +227,7 @@ namespace seal
                 SEAL_ITERATE(iter(base_, rnsbase_values), size_, [&](auto I) { get<1>(I) = get<0>(I).value(); });
 
                 // Create punctured products
-                // Semantic misuse of RNSIter
-                RNSIter punctured_prod(punctured_prod_array_.get(), size_);
+                StrideIter<uint64_t *> punctured_prod(punctured_prod_array_.get(), size_);
                 SEAL_ITERATE(iter(punctured_prod, size_t(0)), size_, [&](auto I) {
                     multiply_many_uint64_except(rnsbase_values.get(), size_, get<1>(I), get<0>(I).ptr(), pool_);
                 });
@@ -242,8 +240,9 @@ namespace seal
                 // Compute inverses of punctured products mod primes
                 bool invertible = true;
                 SEAL_ITERATE(iter(punctured_prod, base_, inv_punctured_prod_mod_base_array_), size_, [&](auto I) {
-                    get<2>(I) = modulo_uint(get<0>(I), size_, get<1>(I));
-                    invertible = invertible && try_invert_uint_mod(get<2>(I), get<1>(I), get<2>(I));
+                    uint64_t temp = modulo_uint(get<0>(I), size_, get<1>(I));
+                    invertible = invertible && try_invert_uint_mod(temp, get<1>(I), temp);
+                    get<2>(I).set(temp, get<1>(I));
                 });
 
                 return invertible;
@@ -252,7 +251,7 @@ namespace seal
             // Case of a single prime
             base_prod_[0] = base_[0].value();
             punctured_prod_array_[0] = 1;
-            inv_punctured_prod_mod_base_array_[0] = 1;
+            inv_punctured_prod_mod_base_array_[0].set(1, base_[0]);
 
             return true;
         }
@@ -300,9 +299,9 @@ namespace seal
 
                 // Decompose an array of multi-precision integers into an array of arrays, one per each base element
 
-                // Copy the input array
-                // Semantic misuse of RNSIter
-                SEAL_ALLOCATE_GET_RNS_ITER(value_copy, size_, count, pool);
+                // Copy the input array into a temporary location and set a StrideIter pointing to it
+                // Note that the stride size is size_
+                SEAL_ALLOCATE_GET_STRIDE_ITER(value_copy, uint64_t, count, size_, pool);
                 set_uint(value, count * size_, value_copy);
 
                 // Note how value_copy and value_out have size_ and count reversed
@@ -339,8 +338,7 @@ namespace seal
                 // Clear the result
                 set_zero_uint(size_, value);
 
-                // Semantic misuse of RNSIter
-                RNSIter punctured_prod(punctured_prod_array_.get(), size_);
+                StrideIter<uint64_t *> punctured_prod(punctured_prod_array_.get(), size_);
 
                 // Compose an array of integers (one per base element) into a single multi-precision integer
                 auto temp_mpi(allocate_uint(size_, pool));
@@ -384,10 +382,9 @@ namespace seal
                 // Clear the result
                 set_zero_uint(count * size_, value);
 
-                // Semantic misuse of RNSIter
-                RNSIter temp_array_iter(temp_array.get(), size_);
-                RNSIter value_iter(value, size_);
-                RNSIter punctured_prod(punctured_prod_array_.get(), size_);
+                StrideIter<uint64_t *> temp_array_iter(temp_array.get(), size_);
+                StrideIter<uint64_t *> value_iter(value, size_);
+                StrideIter<uint64_t *> punctured_prod(punctured_prod_array_.get(), size_);
 
                 // Compose an array of RNS integers into a single array of multi-precision integers
                 auto temp_mpi(allocate_uint(size_, pool));
@@ -402,50 +399,67 @@ namespace seal
             }
         }
 
-        void BaseConverter::fast_convert(const uint64_t *in, uint64_t *out, MemoryPoolHandle pool) const
+        void BaseConverter::fast_convert(ConstCoeffIter in, CoeffIter out, MemoryPoolHandle pool) const
         {
             size_t ibase_size = ibase_.size();
             size_t obase_size = obase_.size();
 
-            auto temp(allocate_uint(ibase_size, pool));
-            for (size_t i = 0; i < ibase_size; i++)
-            {
-                temp[i] = multiply_uint_mod(in[i], ibase_.inv_punctured_prod_mod_base_array()[i], ibase_[i]);
-            }
+            SEAL_ALLOCATE_GET_COEFF_ITER(temp, ibase_size, pool);
+            SEAL_ITERATE(
+                iter(temp, in, ibase_.inv_punctured_prod_mod_base_array(), ibase_.base()), ibase_size,
+                [&](auto I) { get<0>(I) = multiply_uint_mod(get<1>(I), get<2>(I), get<3>(I)); });
 
-            for (size_t j = 0; j < obase_size; j++)
-            {
-                out[j] = dot_product_mod(temp.get(), base_change_matrix_[j].get(), ibase_size, obase_[j]);
-            }
+            // for (size_t j = 0; j < obase_size; j++)
+            SEAL_ITERATE(iter(out, base_change_matrix_, obase_.base()), obase_size, [&](auto I) {
+                get<0>(I) = dot_product_mod(temp, get<1>(I).get(), ibase_size, get<2>(I));
+            });
         }
 
-        void BaseConverter::fast_convert_array(
-            const uint64_t *in, size_t count, uint64_t *out, MemoryPoolHandle pool) const
+        void BaseConverter::fast_convert_array(ConstRNSIter in, RNSIter out, MemoryPoolHandle pool) const
         {
+#ifdef SEAL_DEBUG
+            if (in.poly_modulus_degree() != out.poly_modulus_degree())
+            {
+                throw invalid_argument("in and out are incompatible");
+            }
+#endif
             size_t ibase_size = ibase_.size();
             size_t obase_size = obase_.size();
+            size_t count = in.poly_modulus_degree();
 
-            auto temp(allocate_poly(count, ibase_size, pool));
-            for (size_t i = 0; i < ibase_size; i++)
-            {
-                uint64_t inv_ibase_punctured_prod_mod_ibase_elt = ibase_.inv_punctured_prod_mod_base_array()[i];
-                Modulus ibase_elt = ibase_[i];
-                uint64_t *temp_ptr = temp.get() + i;
-                for (size_t k = 0; k < count; k++, in++, temp_ptr += ibase_size)
-                {
-                    *temp_ptr = multiply_uint_mod(*in, inv_ibase_punctured_prod_mod_ibase_elt, ibase_elt);
-                }
-            }
+            // Note that the stride size is ibase_size
+            SEAL_ALLOCATE_GET_STRIDE_ITER(temp, uint64_t, count, ibase_size, pool);
 
-            for (size_t j = 0; j < obase_size; j++)
-            {
-                uint64_t *temp_ptr = temp.get();
-                Modulus obase_elt = obase_[j];
-                for (size_t k = 0; k < count; k++, out++, temp_ptr += ibase_size)
-                {
-                    *out = dot_product_mod(temp_ptr, base_change_matrix_[j].get(), ibase_size, obase_elt);
-                }
-            }
+            SEAL_ITERATE(
+                iter(in, ibase_.inv_punctured_prod_mod_base_array(), ibase_.base(), size_t(0)), ibase_size,
+                [&](auto I) {
+                    // The current ibase index
+                    size_t ibase_index = get<3>(I);
+
+                    if (get<1>(I).operand == 1)
+                    {
+                        // No multiplication needed
+                        SEAL_ITERATE(iter(get<0>(I), temp), count, [&](auto J) {
+                            // Reduce modulo ibase element
+                            get<1>(J)[ibase_index] = barrett_reduce_64(get<0>(J), get<2>(I));
+                        });
+                    }
+                    else
+                    {
+                        // Multiplication needed
+                        SEAL_ITERATE(iter(get<0>(I), temp), count, [&](auto J) {
+                            // Multiply coefficient of in with ibase_.inv_punctured_prod_mod_base_array_ element
+                            get<1>(J)[ibase_index] = multiply_uint_mod(get<0>(J), get<1>(I), get<2>(I));
+                        });
+                    }
+                });
+
+            SEAL_ITERATE(iter(out, base_change_matrix_, obase_.base()), obase_size, [&](auto I) {
+                SEAL_ITERATE(iter(get<0>(I), temp), count, [&](auto J) {
+                    // Compute the base conversion sum modulo obase element
+                    get<0>(J) = dot_product_mod(get<1>(J), get<1>(I).get(), ibase_size, get<2>(I));
+                });
+            });
         }
 
         void BaseConverter::initialize()
@@ -456,23 +470,19 @@ namespace seal
                 throw logic_error("invalid parameters");
             }
 
-            auto ibase_values = allocate<uint64_t>(ibase_.size(), pool_);
-            for (size_t i = 0; i < ibase_.size(); i++)
-            {
-                ibase_values[i] = ibase_[i].value();
-            }
-
-            // Compute the base-change matrix
+            // Create the base-change matrix rows
             base_change_matrix_ = allocate<Pointer<uint64_t>>(obase_.size(), pool_);
-            for (size_t i = 0; i < obase_.size(); i++)
-            {
-                base_change_matrix_[i] = allocate_uint(ibase_.size(), pool_);
-                for (size_t j = 0; j < ibase_.size(); j++)
-                {
-                    base_change_matrix_[i][j] =
-                        modulo_uint(ibase_.punctured_prod_array() + (j * ibase_.size()), ibase_.size(), obase_[i]);
-                }
-            }
+
+            SEAL_ITERATE(iter(base_change_matrix_, obase_.base()), obase_.size(), [&](auto I) {
+                // Create the base-change matrix columns
+                get<0>(I) = allocate_uint(ibase_.size(), pool_);
+
+                StrideIter<const uint64_t *> ibase_punctured_prod_array(ibase_.punctured_prod_array(), ibase_.size());
+                SEAL_ITERATE(iter(get<0>(I), ibase_punctured_prod_array), ibase_.size(), [&](auto J) {
+                    // Base-change matrix contains the punctured products of ibase elements modulo the obase
+                    get<0>(J) = modulo_uint(get<1>(J), ibase_.size(), get<1>(I));
+                });
+            });
         }
 
         RNSTool::RNSTool(
@@ -592,148 +602,149 @@ namespace seal
 
             // Compute prod(B) mod q
             prod_B_mod_q_ = allocate_uint(base_q_size, pool_);
-            for (size_t i = 0; i < base_q_size; i++)
-            {
-                prod_B_mod_q_[i] = modulo_uint(base_B_->base_prod(), base_B_size, (*base_q_)[i]);
-            }
+            SEAL_ITERATE(iter(prod_B_mod_q_, base_q_->base()), base_q_size, [&](auto I) {
+                get<0>(I) = modulo_uint(base_B_->base_prod(), base_B_size, get<1>(I));
+            });
+
+            uint64_t temp;
 
             // Compute prod(q)^(-1) mod Bsk
-            inv_prod_q_mod_Bsk_ = allocate_uint(base_Bsk_size, pool_);
+            inv_prod_q_mod_Bsk_ = allocate<MultiplyUIntModOperand>(base_Bsk_size, pool_);
             for (size_t i = 0; i < base_Bsk_size; i++)
             {
-                inv_prod_q_mod_Bsk_[i] = modulo_uint(base_q_->base_prod(), base_q_size, (*base_Bsk_)[i]);
-                if (!try_invert_uint_mod(inv_prod_q_mod_Bsk_[i], (*base_Bsk_)[i], inv_prod_q_mod_Bsk_[i]))
+                temp = modulo_uint(base_q_->base_prod(), base_q_size, (*base_Bsk_)[i]);
+                if (!try_invert_uint_mod(temp, (*base_Bsk_)[i], temp))
                 {
                     throw logic_error("invalid rns bases");
                 }
+                inv_prod_q_mod_Bsk_[i].set(temp, (*base_Bsk_)[i]);
             }
 
             // Compute prod(B)^(-1) mod m_sk
-            inv_prod_B_mod_m_sk_ = modulo_uint(base_B_->base_prod(), base_B_size, m_sk_);
-            if (!try_invert_uint_mod(inv_prod_B_mod_m_sk_, m_sk_, inv_prod_B_mod_m_sk_))
+            temp = modulo_uint(base_B_->base_prod(), base_B_size, m_sk_);
+            if (!try_invert_uint_mod(temp, m_sk_, temp))
             {
                 throw logic_error("invalid rns bases");
             }
+            inv_prod_B_mod_m_sk_.set(temp, m_sk_);
 
             // Compute m_tilde^(-1) mod Bsk
-            inv_m_tilde_mod_Bsk_ = allocate_uint(base_Bsk_size, pool_);
-            for (size_t i = 0; i < base_Bsk_size; i++)
-            {
-                if (!try_invert_uint_mod(
-                        m_tilde_.value() % (*base_Bsk_)[i].value(), (*base_Bsk_)[i], inv_m_tilde_mod_Bsk_[i]))
+            inv_m_tilde_mod_Bsk_ = allocate<MultiplyUIntModOperand>(base_Bsk_size, pool_);
+            SEAL_ITERATE(iter(inv_m_tilde_mod_Bsk_, base_Bsk_->base()), base_Bsk_size, [&](auto I) {
+                if (!try_invert_uint_mod(barrett_reduce_64(m_tilde_.value(), get<1>(I)), get<1>(I), temp))
                 {
                     throw logic_error("invalid rns bases");
                 }
-            }
+                get<0>(I).set(temp, get<1>(I));
+            });
 
             // Compute prod(q)^(-1) mod m_tilde
-            inv_prod_q_mod_m_tilde_ = modulo_uint(base_q_->base_prod(), base_q_size, m_tilde_);
-            if (!try_invert_uint_mod(inv_prod_q_mod_m_tilde_, m_tilde_, inv_prod_q_mod_m_tilde_))
+            temp = modulo_uint(base_q_->base_prod(), base_q_size, m_tilde_);
+            if (!try_invert_uint_mod(temp, m_tilde_, temp))
             {
                 throw logic_error("invalid rns bases");
             }
+            neg_inv_prod_q_mod_m_tilde_.set(negate_uint_mod(temp, m_tilde_), m_tilde_);
 
             // Compute prod(q) mod Bsk
             prod_q_mod_Bsk_ = allocate_uint(base_Bsk_size, pool_);
-            for (size_t i = 0; i < base_Bsk_size; i++)
-            {
-                prod_q_mod_Bsk_[i] = modulo_uint(base_q_->base_prod(), base_q_size, (*base_Bsk_)[i]);
-            }
+            SEAL_ITERATE(iter(prod_q_mod_Bsk_, base_Bsk_->base()), base_Bsk_size, [&](auto I) {
+                get<0>(I) = modulo_uint(base_q_->base_prod(), base_q_size, get<1>(I));
+            });
 
             if (base_t_gamma_)
             {
                 // Compute gamma^(-1) mod t
-                if (!try_invert_uint_mod(gamma_.value() % t_.value(), t_, inv_gamma_mod_t_))
+                if (!try_invert_uint_mod(barrett_reduce_64(gamma_.value(), t_), t_, temp))
                 {
                     throw logic_error("invalid rns bases");
                 }
+                inv_gamma_mod_t_.set(temp, t_);
 
                 // Compute prod({t, gamma}) mod q
-                prod_t_gamma_mod_q_ = allocate_uint(base_q_size, pool_);
-                for (size_t i = 0; i < base_q_size; i++)
-                {
-                    prod_t_gamma_mod_q_[i] =
-                        multiply_uint_mod((*base_t_gamma_)[0].value(), (*base_t_gamma_)[1].value(), (*base_q_)[i]);
-                }
+                prod_t_gamma_mod_q_ = allocate<MultiplyUIntModOperand>(base_q_size, pool_);
+                SEAL_ITERATE(iter(prod_t_gamma_mod_q_, base_q_->base()), base_q_size, [&](auto I) {
+                    get<0>(I).set(
+                        multiply_uint_mod((*base_t_gamma_)[0].value(), (*base_t_gamma_)[1].value(), get<1>(I)),
+                        get<1>(I));
+                });
 
                 // Compute -prod(q)^(-1) mod {t, gamma}
-                neg_inv_q_mod_t_gamma_ = allocate_uint(base_t_gamma_size, pool_);
-                for (size_t i = 0; i < base_t_gamma_size; i++)
-                {
-                    neg_inv_q_mod_t_gamma_[i] = modulo_uint(base_q_->base_prod(), base_q_size, (*base_t_gamma_)[i]);
-                    if (!try_invert_uint_mod(neg_inv_q_mod_t_gamma_[i], (*base_t_gamma_)[i], neg_inv_q_mod_t_gamma_[i]))
+                neg_inv_q_mod_t_gamma_ = allocate<MultiplyUIntModOperand>(base_t_gamma_size, pool_);
+                SEAL_ITERATE(iter(neg_inv_q_mod_t_gamma_, base_t_gamma_->base()), base_t_gamma_size, [&](auto I) {
+                    get<0>(I).operand = modulo_uint(base_q_->base_prod(), base_q_size, get<1>(I));
+                    if (!try_invert_uint_mod(get<0>(I).operand, get<1>(I), get<0>(I).operand))
                     {
                         throw logic_error("invalid rns bases");
                     }
-                    neg_inv_q_mod_t_gamma_[i] = negate_uint_mod(neg_inv_q_mod_t_gamma_[i], (*base_t_gamma_)[i]);
-                }
+                    get<0>(I).set(negate_uint_mod(get<0>(I).operand, get<1>(I)), get<1>(I));
+                });
             }
 
             // Compute q[last]^(-1) mod q[i] for i = 0..last-1
             // This is used by modulus switching and rescaling
-            inv_q_last_mod_q_ = allocate_uint(base_q_size - 1, pool_);
-            for (size_t i = 0; i < base_q_size - 1; i++)
-            {
-                if (!try_invert_uint_mod((*base_q_)[base_q_size - 1].value(), (*base_q_)[i], inv_q_last_mod_q_[i]))
+            inv_q_last_mod_q_ = allocate<MultiplyUIntModOperand>(base_q_size - 1, pool_);
+            SEAL_ITERATE(iter(inv_q_last_mod_q_, base_q_->base()), base_q_size - 1, [&](auto I) {
+                if (!try_invert_uint_mod((*base_q_)[base_q_size - 1].value(), get<1>(I), temp))
                 {
                     throw logic_error("invalid rns bases");
                 }
-            }
+                get<0>(I).set(temp, get<1>(I));
+            });
         }
 
-        void RNSTool::divide_and_round_q_last_inplace(uint64_t *input, MemoryPoolHandle pool) const
+        void RNSTool::divide_and_round_q_last_inplace(RNSIter input, MemoryPoolHandle pool) const
         {
 #ifdef SEAL_DEBUG
             if (!input)
             {
                 throw invalid_argument("input cannot be null");
+            }
+            if (input.poly_modulus_degree() != coeff_count_)
+            {
+                throw invalid_argument("input is not valid for encryption parameters");
             }
             if (!pool)
             {
                 throw invalid_argument("pool is uninitialized");
             }
 #endif
-            auto base_q_size = base_q_->size();
-            uint64_t *last_ptr = input + (base_q_size - 1) * coeff_count_;
+            size_t base_q_size = base_q_->size();
+            CoeffIter last_input = input[base_q_size - 1];
 
             // Add (qi-1)/2 to change from flooring to rounding
             Modulus last_modulus = (*base_q_)[base_q_size - 1];
             uint64_t half = last_modulus.value() >> 1;
-            for (size_t j = 0; j < coeff_count_; j++)
-            {
-                last_ptr[j] = barrett_reduce_63(last_ptr[j] + half, last_modulus);
-            }
+            add_poly_scalar_coeffmod(last_input, coeff_count_, half, last_modulus, last_input);
 
-            auto temp(allocate_uint(coeff_count_, pool));
-            uint64_t *temp_ptr = temp.get();
-            for (size_t i = 0; i < base_q_size - 1; i++)
-            {
+            SEAL_ALLOCATE_GET_COEFF_ITER(temp, coeff_count_, pool);
+            SEAL_ITERATE(iter(input, inv_q_last_mod_q_, base_q_->base()), base_q_size - 1, [&](auto I) {
                 // (ct mod qk) mod qi
-                modulo_poly_coeffs_63(last_ptr, coeff_count_, (*base_q_)[i], temp_ptr);
+                modulo_poly_coeffs(last_input, coeff_count_, get<2>(I), temp);
 
-                uint64_t half_mod = barrett_reduce_63(half, (*base_q_)[i]);
-                for (size_t j = 0; j < coeff_count_; j++)
-                {
-                    temp_ptr[j] = sub_uint64_mod(temp_ptr[j], half_mod, (*base_q_)[i]);
-                }
+                // Subtract rounding correction here; the negative sign will turn into a plus in the next subtraction
+                uint64_t half_mod = barrett_reduce_64(half, get<2>(I));
+                sub_poly_scalar_coeffmod(temp, coeff_count_, half_mod, get<2>(I), temp);
 
-                sub_poly_coeffmod(
-                    input + (i * coeff_count_), temp_ptr, coeff_count_, (*base_q_)[i], input + (i * coeff_count_));
+                // (ct mod qi) - (ct mod qk) mod qi
+                sub_poly_coeffmod(get<0>(I), temp, coeff_count_, get<2>(I), get<0>(I));
 
                 // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
-                multiply_poly_scalar_coeffmod(
-                    input + (i * coeff_count_), coeff_count_, inv_q_last_mod_q_[i], (*base_q_)[i],
-                    input + (i * coeff_count_));
-            }
+                multiply_poly_scalar_coeffmod(get<0>(I), coeff_count_, get<1>(I), get<2>(I), get<0>(I));
+            });
         }
 
         void RNSTool::divide_and_round_q_last_ntt_inplace(
-            uint64_t *input, const NTTTables *rns_ntt_tables, MemoryPoolHandle pool) const
+            RNSIter input, ConstNTTTablesIter rns_ntt_tables, MemoryPoolHandle pool) const
         {
 #ifdef SEAL_DEBUG
             if (!input)
             {
                 throw invalid_argument("input cannot be null");
+            }
+            if (input.poly_modulus_degree() != coeff_count_)
+            {
+                throw invalid_argument("input is not valid for encryption parameters");
             }
             if (!rns_ntt_tables)
             {
@@ -744,75 +755,76 @@ namespace seal
                 throw invalid_argument("pool is uninitialized");
             }
 #endif
-            auto base_q_size = base_q_->size();
-            uint64_t *last_ptr = input + (base_q_size - 1) * coeff_count_;
+            size_t base_q_size = base_q_->size();
+            CoeffIter last_input = input[base_q_size - 1];
 
             // Convert to non-NTT form
-            inverse_ntt_negacyclic_harvey(last_ptr, rns_ntt_tables[base_q_size - 1]);
+            inverse_ntt_negacyclic_harvey(last_input, rns_ntt_tables[base_q_size - 1]);
 
             // Add (qi-1)/2 to change from flooring to rounding
             Modulus last_modulus = (*base_q_)[base_q_size - 1];
             uint64_t half = last_modulus.value() >> 1;
-            for (size_t j = 0; j < coeff_count_; j++)
-            {
-                last_ptr[j] = barrett_reduce_63(last_ptr[j] + half, last_modulus);
-            }
+            add_poly_scalar_coeffmod(last_input, coeff_count_, half, last_modulus, last_input);
 
-            auto temp(allocate_uint(coeff_count_, pool));
-            uint64_t *temp_ptr = temp.get();
-            for (size_t i = 0; i < base_q_size - 1; i++)
-            {
-                const uint64_t qi = (*base_q_)[i].value();
+            SEAL_ALLOCATE_GET_COEFF_ITER(temp, coeff_count_, pool);
+            SEAL_ITERATE(iter(input, inv_q_last_mod_q_, base_q_->base(), rns_ntt_tables), base_q_size - 1, [&](auto I) {
                 // (ct mod qk) mod qi
-                if (qi < last_modulus.value())
+                if (get<2>(I).value() < last_modulus.value())
                 {
-                    modulo_poly_coeffs_63(last_ptr, coeff_count_, (*base_q_)[i], temp_ptr);
+                    modulo_poly_coeffs(last_input, coeff_count_, get<2>(I), temp);
                 }
                 else
                 {
-                    set_uint(last_ptr, coeff_count_, temp_ptr);
+                    set_uint(last_input, coeff_count_, temp);
                 }
 
-                // lazy subtraction here. ntt_negacyclic_harvey_lazy can take 0 < x < 4*qi input.
-                const uint64_t neg_half_mod = qi - barrett_reduce_63(half, (*base_q_)[i]);
-                std::transform(temp_ptr, temp_ptr + coeff_count_, temp_ptr, [neg_half_mod](uint64_t u) {
-                    return u + neg_half_mod;
-                });
+                // Lazy subtraction here. ntt_negacyclic_harvey_lazy can take 0 < x < 4*qi input.
+                const uint64_t neg_half_mod = get<2>(I).value() - barrett_reduce_64(half, get<2>(I));
+
+                // Note: lambda function parameter must be passed by reference here
+                SEAL_ITERATE(temp, coeff_count_, [&](auto &J) { J += neg_half_mod; });
 #if SEAL_USER_MOD_BIT_COUNT_MAX <= 60
-                // Since now SEAL use at most 60bit moduli, so 8*qi < 2^63.
+                // Since SEAL uses at most 60-bit moduli, 8*qi < 2^63.
                 // This ntt_negacyclic_harvey_lazy results in [0, 4*qi).
-                const uint64_t qi_lazy = qi << 2;
-                ntt_negacyclic_harvey_lazy(temp_ptr, rns_ntt_tables[i]);
+                const uint64_t qi_lazy = get<2>(I).value() << 2;
+                ntt_negacyclic_harvey_lazy(temp, get<3>(I));
 #else
                 // 2^60 < pi < 2^62, then 4*pi < 2^64, we perfrom one reduction from [0, 4*qi) to [0, 2*qi) after ntt.
-                const uint64_t qi_lazy = qi << 1;
-                ntt_negacyclic_harvey_lazy(temp_ptr, rns_ntt_tables[i]);
-                std::transform(temp_ptr, temp_ptr + coeff_count_, temp_ptr, [qi_lazy](uint64_t u) {
-                    return u -= (qi_lazy & static_cast<uint64_t>(-static_cast<int64_t>(u >= qi_lazy)));
+                const uint64_t qi_lazy = get<2>(I).value() << 1;
+                ntt_negacyclic_harvey_lazy(temp, get<3>(I));
+
+                // Note: lambda function parameter must be passed by reference here
+                SEAL_ITERATE(temp, coeff_count_, [&](auto &J) {
+                    J -= (qi_lazy & static_cast<uint64_t>(-static_cast<int64_t>(J >= qi_lazy)));
                 });
 #endif
                 // Lazy subtraction again, results in [0, 2*qi_lazy),
                 // The reduction [0, 2*qi_lazy) -> [0, qi) is done implicitly in multiply_poly_scalar_coeffmod.
-                std::transform(input, input + coeff_count_, temp_ptr, input, [qi_lazy](uint64_t u, uint64_t v) {
-                    return u + qi_lazy - v;
-                });
+                SEAL_ITERATE(iter(get<0>(I), temp), coeff_count_, [&](auto J) { get<0>(J) += qi_lazy - get<1>(J); });
 
                 // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
-                multiply_poly_scalar_coeffmod(input, coeff_count_, inv_q_last_mod_q_[i], (*base_q_)[i], input);
-                input += coeff_count_;
-            }
+                multiply_poly_scalar_coeffmod(get<0>(I), coeff_count_, get<1>(I), get<2>(I), get<0>(I));
+            });
         }
 
-        void RNSTool::fastbconv_sk(const uint64_t *input, uint64_t *destination, MemoryPoolHandle pool) const
+        void RNSTool::fastbconv_sk(ConstRNSIter input, RNSIter destination, MemoryPoolHandle pool) const
         {
 #ifdef SEAL_DEBUG
             if (!input)
             {
                 throw invalid_argument("input cannot be null");
             }
+            if (input.poly_modulus_degree() != coeff_count_)
+            {
+                throw invalid_argument("input is not valid for encryption parameters");
+            }
             if (!destination)
             {
                 throw invalid_argument("destination cannot be null");
+            }
+            if (destination.poly_modulus_degree() != coeff_count_)
+            {
+                throw invalid_argument("destination is not valid for encryption parameters");
             }
             if (!pool)
             {
@@ -824,67 +836,71 @@ namespace seal
             Ensure: Output in base q
             */
 
-            auto base_q_size = base_q_->size();
-            auto base_B_size = base_B_->size();
+            size_t base_q_size = base_q_->size();
+            size_t base_B_size = base_B_->size();
 
             // Fast convert B -> q; input is in Bsk but we only use B
-            base_B_to_q_conv_->fast_convert_array(input, coeff_count_, destination, pool);
+            base_B_to_q_conv_->fast_convert_array(input, destination, pool);
 
             // Compute alpha_sk
             // Fast convert B -> {m_sk}; input is in Bsk but we only use B
-            auto temp(allocate_uint(coeff_count_, pool));
-            base_B_to_m_sk_conv_->fast_convert_array(input, coeff_count_, temp.get(), pool);
+            SEAL_ALLOCATE_GET_COEFF_ITER(temp, coeff_count_, pool);
+            base_B_to_m_sk_conv_->fast_convert_array(input, RNSIter(temp, coeff_count_), pool);
 
             // Take the m_sk part of input, subtract from temp, and multiply by inv_prod_B_mod_m_sk_
-            // input_sk is allocated in input + (base_B_size * coeff_count_)
-            const uint64_t *input_ptr = input + (base_B_size * coeff_count_);
-            auto alpha_sk(allocate_uint(coeff_count_, pool));
-            uint64_t *alpha_sk_ptr = alpha_sk.get();
-            uint64_t *temp_ptr = temp.get();
-            const uint64_t m_sk_value = m_sk_.value();
-            for (size_t i = 0; i < coeff_count_; i++)
-            {
+            // Note: input_sk is allocated in input[base_B_size]
+            SEAL_ALLOCATE_GET_COEFF_ITER(alpha_sk, coeff_count_, pool);
+            SEAL_ITERATE(iter(alpha_sk, temp, input[base_B_size]), coeff_count_, [&](auto I) {
                 // It is not necessary for the negation to be reduced modulo the small prime
-                alpha_sk_ptr[i] =
-                    multiply_uint_mod(temp_ptr[i] + (m_sk_value - input_ptr[i]), inv_prod_B_mod_m_sk_, m_sk_);
-            }
+                get<0>(I) = multiply_uint_mod(get<1>(I) + (m_sk_.value() - get<2>(I)), inv_prod_B_mod_m_sk_, m_sk_);
+            });
 
             // alpha_sk is now ready for the Shenoy-Kumaresan conversion; however, note that our
             // alpha_sk here is not a centered reduction, so we need to apply a correction below.
-            const uint64_t m_sk_div_2 = m_sk_value >> 1;
-            for (size_t i = 0; i < base_q_size; i++)
-            {
-                Modulus base_q_elt = (*base_q_)[i];
-                uint64_t prod_B_mod_q_elt = prod_B_mod_q_[i];
-                for (size_t k = 0; k < coeff_count_; k++, destination++)
-                {
+            const uint64_t m_sk_div_2 = m_sk_.value() >> 1;
+            SEAL_ITERATE(iter(prod_B_mod_q_, base_q_->base(), destination), base_q_size, [&](auto I) {
+                // Set up the multiplication helpers
+                MultiplyUIntModOperand prod_B_mod_q_elt;
+                prod_B_mod_q_elt.set(get<0>(I), get<1>(I));
+
+                MultiplyUIntModOperand neg_prod_B_mod_q_elt;
+                neg_prod_B_mod_q_elt.set(get<1>(I).value() - get<0>(I), get<1>(I));
+
+                SEAL_ITERATE(iter(alpha_sk, get<2>(I)), coeff_count_, [&](auto J) {
                     // Correcting alpha_sk since it represents a negative value
-                    if (alpha_sk_ptr[k] > m_sk_div_2)
+                    if (get<0>(J) > m_sk_div_2)
                     {
-                        *destination = multiply_add_uint_mod(
-                            prod_B_mod_q_elt, m_sk_value - alpha_sk_ptr[k], *destination, base_q_elt);
+                        get<1>(J) = multiply_add_uint_mod(
+                            negate_uint_mod(get<0>(J), m_sk_), prod_B_mod_q_elt, get<1>(J), get<1>(I));
                     }
                     // No correction needed
                     else
                     {
                         // It is not necessary for the negation to be reduced modulo the small prime
-                        *destination = multiply_add_uint_mod(
-                            base_q_elt.value() - prod_B_mod_q_[i], alpha_sk_ptr[k], *destination, base_q_elt);
+                        get<1>(J) = multiply_add_uint_mod(get<0>(J), neg_prod_B_mod_q_elt, get<1>(J), get<1>(I));
                     }
-                }
-            }
+                });
+            });
         }
 
-        void RNSTool::sm_mrq(const uint64_t *input, uint64_t *destination, MemoryPoolHandle pool) const
+        void RNSTool::sm_mrq(ConstRNSIter input, RNSIter destination, MemoryPoolHandle pool) const
         {
 #ifdef SEAL_DEBUG
             if (input == nullptr)
             {
                 throw invalid_argument("input cannot be null");
             }
-            if (destination == nullptr)
+            if (input.poly_modulus_degree() != coeff_count_)
+            {
+                throw invalid_argument("input is not valid for encryption parameters");
+            }
+            if (!destination)
             {
                 throw invalid_argument("destination cannot be null");
+            }
+            if (destination.poly_modulus_degree() != coeff_count_)
+            {
+                throw invalid_argument("destination is not valid for encryption parameters");
             }
             if (!pool)
             {
@@ -896,53 +912,57 @@ namespace seal
             Ensure: Output in base Bsk
             */
 
-            auto base_Bsk_size = base_Bsk_->size();
+            size_t base_Bsk_size = base_Bsk_->size();
 
             // The last component of the input is mod m_tilde
-            const uint64_t *input_m_tilde_ptr = input + (coeff_count_ * base_Bsk_size);
+            ConstCoeffIter input_m_tilde = input[base_Bsk_size];
             const uint64_t m_tilde_div_2 = m_tilde_.value() >> 1;
 
             // Compute r_m_tilde
-            auto r_m_tilde(allocate_uint(coeff_count_, pool));
-            for (size_t i = 0; i < coeff_count_; i++)
-            {
-                uint64_t temp = multiply_uint_mod(input_m_tilde_ptr[i], inv_prod_q_mod_m_tilde_, m_tilde_);
-                r_m_tilde[i] = negate_uint_mod(temp, m_tilde_);
-            }
+            SEAL_ALLOCATE_GET_COEFF_ITER(r_m_tilde, coeff_count_, pool);
+            multiply_poly_scalar_coeffmod(
+                input_m_tilde, coeff_count_, neg_inv_prod_q_mod_m_tilde_, m_tilde_, r_m_tilde);
 
-            for (size_t k = 0; k < base_Bsk_size; k++)
-            {
-                Modulus base_Bsk_elt = (*base_Bsk_)[k];
-                uint64_t inv_m_tilde_mod_Bsk_elt = inv_m_tilde_mod_Bsk_[k];
-                uint64_t prod_q_mod_Bsk_elt = prod_q_mod_Bsk_[k];
-                for (size_t i = 0; i < coeff_count_; i++, destination++, input++)
-                {
-                    // We need centered reduction of r_m_tilde modulo Bsk. Note that m_tilde is chosen
-                    // to be a power of two so we have '>=' below.
-                    uint64_t temp = r_m_tilde[i];
-                    if (temp >= m_tilde_div_2)
-                    {
-                        temp += base_Bsk_elt.value() - m_tilde_.value();
-                    }
+            SEAL_ITERATE(
+                iter(input, prod_q_mod_Bsk_, inv_m_tilde_mod_Bsk_, base_Bsk_->base(), destination), base_Bsk_size,
+                [&](auto I) {
+                    MultiplyUIntModOperand prod_q_mod_Bsk_elt;
+                    prod_q_mod_Bsk_elt.set(get<1>(I), get<3>(I));
+                    SEAL_ITERATE(iter(get<0>(I), r_m_tilde, get<4>(I)), coeff_count_, [&](auto J) {
+                        // We need centered reduction of r_m_tilde modulo Bsk. Note that m_tilde is chosen
+                        // to be a power of two so we have '>=' below.
+                        uint64_t temp = get<1>(J);
+                        if (temp >= m_tilde_div_2)
+                        {
+                            temp += get<3>(I).value() - m_tilde_.value();
+                        }
 
-                    // Compute (input + q*r_m_tilde)*m_tilde^(-1) mod Bsk
-                    *destination = multiply_uint_mod(
-                        multiply_add_uint_mod(prod_q_mod_Bsk_elt, temp, *input, base_Bsk_elt), inv_m_tilde_mod_Bsk_elt,
-                        base_Bsk_elt);
-                }
-            }
+                        // Compute (input + q*r_m_tilde)*m_tilde^(-1) mod Bsk
+                        get<2>(J) = multiply_uint_mod(
+                            multiply_add_uint_mod(temp, prod_q_mod_Bsk_elt, get<0>(J), get<3>(I)), get<2>(I),
+                            get<3>(I));
+                    });
+                });
         }
 
-        void RNSTool::fast_floor(const uint64_t *input, uint64_t *destination, MemoryPoolHandle pool) const
+        void RNSTool::fast_floor(ConstRNSIter input, RNSIter destination, MemoryPoolHandle pool) const
         {
 #ifdef SEAL_DEBUG
             if (input == nullptr)
             {
                 throw invalid_argument("input cannot be null");
             }
-            if (destination == nullptr)
+            if (input.poly_modulus_degree() != coeff_count_)
+            {
+                throw invalid_argument("input is not valid for encryption parameters");
+            }
+            if (!destination)
             {
                 throw invalid_argument("destination cannot be null");
+            }
+            if (destination.poly_modulus_degree() != coeff_count_)
+            {
+                throw invalid_argument("destination is not valid for encryption parameters");
             }
             if (!pool)
             {
@@ -954,37 +974,40 @@ namespace seal
             Ensure: Output in base Bsk
             */
 
-            auto base_q_size = base_q_->size();
-            auto base_Bsk_size = base_Bsk_->size();
+            size_t base_q_size = base_q_->size();
+            size_t base_Bsk_size = base_Bsk_->size();
 
             // Convert q -> Bsk
-            base_q_to_Bsk_conv_->fast_convert_array(input, coeff_count_, destination, pool);
+            base_q_to_Bsk_conv_->fast_convert_array(input, destination, pool);
 
             // Move input pointer to past the base q components
-            input += base_q_size * coeff_count_;
-            for (size_t i = 0; i < base_Bsk_size; i++)
-            {
-                Modulus base_Bsk_elt = (*base_Bsk_)[i];
-                uint64_t inv_prod_q_mod_Bsk_elt = inv_prod_q_mod_Bsk_[i];
-                for (size_t k = 0; k < coeff_count_; k++, input++, destination++)
-                {
+            input += base_q_size;
+            SEAL_ITERATE(iter(input, inv_prod_q_mod_Bsk_, base_Bsk_->base(), destination), base_Bsk_size, [&](auto I) {
+                SEAL_ITERATE(iter(get<0>(I), get<3>(I)), coeff_count_, [&](auto J) {
                     // It is not necessary for the negation to be reduced modulo base_Bsk_elt
-                    *destination = multiply_uint_mod(
-                        *input + (base_Bsk_elt.value() - *destination), inv_prod_q_mod_Bsk_elt, base_Bsk_elt);
-                }
-            }
+                    get<1>(J) = multiply_uint_mod(get<0>(J) + (get<2>(I).value() - get<1>(J)), get<1>(I), get<2>(I));
+                });
+            });
         }
 
-        void RNSTool::fastbconv_m_tilde(const uint64_t *input, uint64_t *destination, MemoryPoolHandle pool) const
+        void RNSTool::fastbconv_m_tilde(ConstRNSIter input, RNSIter destination, MemoryPoolHandle pool) const
         {
 #ifdef SEAL_DEBUG
             if (input == nullptr)
             {
                 throw invalid_argument("input cannot be null");
             }
-            if (destination == nullptr)
+            if (input.poly_modulus_degree() != coeff_count_)
+            {
+                throw invalid_argument("input is not valid for encryption parameters");
+            }
+            if (!destination)
             {
                 throw invalid_argument("destination cannot be null");
+            }
+            if (destination.poly_modulus_degree() != coeff_count_)
+            {
+                throw invalid_argument("destination is not valid for encryption parameters");
             }
             if (!pool)
             {
@@ -996,57 +1019,65 @@ namespace seal
             Ensure: Output in Bsk U {m_tilde}
             */
 
-            auto base_q_size = base_q_->size();
-            auto base_Bsk_size = base_Bsk_->size();
+            size_t base_q_size = base_q_->size();
+            size_t base_Bsk_size = base_Bsk_->size();
 
             // We need to multiply first the input with m_tilde mod q
             // This is to facilitate Montgomery reduction in the next step of multiplication
             // This is NOT an ideal approach: as mentioned in BEHZ16, multiplication by
             // m_tilde can be easily merge into the base conversion operation; however, then
             // we could not use the BaseConvTool as below without modifications.
-            auto temp(allocate_poly(coeff_count_, base_q_size, pool));
-            for (size_t i = 0; i < base_q_size; i++)
-            {
-                multiply_poly_scalar_coeffmod(
-                    input + (i * coeff_count_), coeff_count_, m_tilde_.value(), (*base_q_)[i],
-                    temp.get() + (i * coeff_count_));
-            }
+            SEAL_ALLOCATE_GET_RNS_ITER(temp, coeff_count_, base_q_size, pool);
+            multiply_poly_scalar_coeffmod(input, base_q_size, m_tilde_.value(), base_q_->base(), temp);
 
             // Now convert to Bsk
-            base_q_to_Bsk_conv_->fast_convert_array(temp.get(), coeff_count_, destination, pool);
+            base_q_to_Bsk_conv_->fast_convert_array(temp, destination, pool);
 
             // Finally convert to {m_tilde}
-            base_q_to_m_tilde_conv_->fast_convert_array(
-                temp.get(), coeff_count_, destination + (base_Bsk_size * coeff_count_), pool);
+            base_q_to_m_tilde_conv_->fast_convert_array(temp, destination + base_Bsk_size, pool);
         }
 
-        void RNSTool::decrypt_scale_and_round(const uint64_t *input, uint64_t *destination, MemoryPoolHandle pool) const
+        void RNSTool::decrypt_scale_and_round(ConstRNSIter input, CoeffIter destination, MemoryPoolHandle pool) const
         {
-            auto base_q_size = base_q_->size();
-            auto base_t_gamma_size = base_t_gamma_->size();
+#ifdef SEAL_DEBUG
+            if (input == nullptr)
+            {
+                throw invalid_argument("input cannot be null");
+            }
+            if (input.poly_modulus_degree() != coeff_count_)
+            {
+                throw invalid_argument("input is not valid for encryption parameters");
+            }
+            if (!destination)
+            {
+                throw invalid_argument("destination cannot be null");
+            }
+            if (!pool)
+            {
+                throw invalid_argument("pool is uninitialized");
+            }
+#endif
+            size_t base_q_size = base_q_->size();
+            size_t base_t_gamma_size = base_t_gamma_->size();
 
             // Compute |gamma * t|_qi * ct(s)
-            auto temp(allocate_poly(coeff_count_, base_q_size, pool));
-            for (size_t i = 0; i < base_q_size; i++)
-            {
-                multiply_poly_scalar_coeffmod(
-                    input + (i * coeff_count_), coeff_count_, prod_t_gamma_mod_q_[i], (*base_q_)[i],
-                    temp.get() + (i * coeff_count_));
-            }
+            SEAL_ALLOCATE_GET_RNS_ITER(temp, coeff_count_, base_q_size, pool);
+            SEAL_ITERATE(iter(input, prod_t_gamma_mod_q_, base_q_->base(), temp), base_q_size, [&](auto I) {
+                multiply_poly_scalar_coeffmod(get<0>(I), coeff_count_, get<1>(I), get<2>(I), get<3>(I));
+            });
 
             // Make another temp destination to get the poly in mod {t, gamma}
-            auto temp_t_gamma(allocate_poly(coeff_count_, base_t_gamma_size, pool));
+            SEAL_ALLOCATE_GET_RNS_ITER(temp_t_gamma, coeff_count_, base_t_gamma_size, pool);
 
             // Convert from q to {t, gamma}
-            base_q_to_t_gamma_conv_->fast_convert_array(temp.get(), coeff_count_, temp_t_gamma.get(), pool);
+            base_q_to_t_gamma_conv_->fast_convert_array(temp, temp_t_gamma, pool);
 
             // Multiply by -prod(q)^(-1) mod {t, gamma}
-            for (size_t i = 0; i < base_t_gamma_size; i++)
-            {
-                multiply_poly_scalar_coeffmod(
-                    temp_t_gamma.get() + (i * coeff_count_), coeff_count_, neg_inv_q_mod_t_gamma_[i],
-                    (*base_t_gamma_)[i], temp_t_gamma.get() + (i * coeff_count_));
-            }
+            SEAL_ITERATE(
+                iter(temp_t_gamma, neg_inv_q_mod_t_gamma_, base_t_gamma_->base(), temp_t_gamma), base_t_gamma_size,
+                [&](auto I) {
+                    multiply_poly_scalar_coeffmod(get<0>(I), coeff_count_, get<1>(I), get<2>(I), get<3>(I));
+                });
 
             // Need to correct values in temp_t_gamma (gamma component only) which are
             // larger than floor(gamma/2)
@@ -1054,28 +1085,26 @@ namespace seal
 
             // Now compute the subtraction to remove error and perform final multiplication by
             // gamma inverse mod t
-            for (size_t i = 0; i < coeff_count_; i++)
-            {
+            SEAL_ITERATE(iter(temp_t_gamma[0], temp_t_gamma[1], destination), coeff_count_, [&](auto I) {
                 // Need correction because of centered mod
-                if (temp_t_gamma[i + coeff_count_] > gamma_div_2)
+                if (get<1>(I) > gamma_div_2)
                 {
                     // Compute -(gamma - a) instead of (a - gamma)
-                    destination[i] = add_uint64_mod(
-                        temp_t_gamma[i], (gamma_.value() - temp_t_gamma[i + coeff_count_]) % t_.value(), t_);
+                    get<2>(I) = add_uint_mod(get<0>(I), barrett_reduce_64(gamma_.value() - get<1>(I), t_), t_);
                 }
                 // No correction needed
                 else
                 {
-                    destination[i] = sub_uint64_mod(temp_t_gamma[i], temp_t_gamma[i + coeff_count_] % t_.value(), t_);
+                    get<2>(I) = sub_uint_mod(get<0>(I), barrett_reduce_64(get<1>(I), t_), t_);
                 }
 
                 // If this coefficient was non-zero, multiply by t^(-1)
-                if (0 != destination[i])
+                if (0 != get<2>(I))
                 {
                     // Perform final multiplication by gamma inverse mod t
-                    destination[i] = multiply_uint_mod(destination[i], inv_gamma_mod_t_, t_);
+                    get<2>(I) = multiply_uint_mod(get<2>(I), inv_gamma_mod_t_, t_);
                 }
-            }
+            });
         }
     } // namespace util
 } // namespace seal

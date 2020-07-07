@@ -49,7 +49,7 @@ namespace seal
     {
         if (unsigned_gt(value.size(), numeric_limits<int>::max() / bits_per_uint64))
         {
-            throw std::invalid_argument("value has too large size");
+            throw invalid_argument("value has too large size");
         }
         value_ = decltype(value_)::Aliasing(value.data());
         bit_count_ = static_cast<int>(value.size()) * bits_per_uint64;

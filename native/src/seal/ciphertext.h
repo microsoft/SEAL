@@ -685,7 +685,7 @@ namespace seal
         }
 
         /**
-        Enables access to private members of seal::Ciphertext for .NET wrapper.
+        Enables access to private members of seal::Ciphertext for SEAL_C.
         */
         struct CiphertextPrivateHelper;
 

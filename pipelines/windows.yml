@@ -26,10 +26,10 @@ steps:
 
 - ${{ if eq(parameters.configuration, 'Release') }}:
   - task: UseDotNet@2
-    displayName: 'Get .NET Core 2.0 SDK'
+    displayName: 'Get .NET Core 2.1 SDK'
     inputs:
       packageType: 'sdk'
-      version: '2.0.x'
+      version: '2.1.x'
 
 - task: UseDotNet@2
   displayName: 'Get .NET Core 3.1 SDK'

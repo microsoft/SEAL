@@ -48,15 +48,9 @@
 
 #ifdef SEAL_USE__UMUL128
 #pragma intrinsic(_umul128)
-#define SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64) \
-    {                                                       \
-        _umul128(operand1, operand2, hw64);                 \
-    }
+#define SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64) _umul128(operand1, operand2, hw64);
 
-#define SEAL_MULTIPLY_UINT64(operand1, operand2, result128)         \
-    {                                                               \
-        result128[0] = _umul128(operand1, operand2, result128 + 1); \
-    }
+#define SEAL_MULTIPLY_UINT64(operand1, operand2, result128) result128[0] = _umul128(operand1, operand2, result128 + 1);
 #endif
 
 #ifdef SEAL_USE__BITSCANREVERSE64

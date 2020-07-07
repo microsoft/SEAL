@@ -5,7 +5,6 @@
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
 #include "seal/util/pointer.h"
-#include "seal/util/polyarith.h"
 #include "seal/util/uintarithsmallmod.h"
 #include <algorithm>
 #include <cmath>

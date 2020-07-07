@@ -338,7 +338,7 @@ namespace seal
         }
 
         /**
-        Enables access to private members of seal::Encryptor for .NET wrapper.
+        Enables access to private members of seal::Encryptor for SEAL_C.
         */
         struct EncryptorPrivateHelper;
 

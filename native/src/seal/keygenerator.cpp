@@ -322,8 +322,7 @@ namespace seal
         secret_key_array_.acquire(secret_key_array);
     }
 
-    void KeyGenerator::generate_one_kswitch_key(
-        ConstRNSIter new_key, std::vector<PublicKey> &destination, bool save_seed)
+    void KeyGenerator::generate_one_kswitch_key(ConstRNSIter new_key, vector<PublicKey> &destination, bool save_seed)
     {
         if (!context_->using_keyswitching())
         {
@@ -349,7 +348,7 @@ namespace seal
             SEAL_ALLOCATE_GET_COEFF_ITER(temp, coeff_count, pool_);
             encrypt_zero_symmetric(
                 secret_key_, context_, key_context_data.parms_id(), true, save_seed, get<2>(I).data());
-            uint64_t factor = barrett_reduce_63(key_modulus.back().value(), get<1>(I));
+            uint64_t factor = barrett_reduce_64(key_modulus.back().value(), get<1>(I));
             multiply_poly_scalar_coeffmod(get<0>(I), coeff_count, factor, get<1>(I), temp);
 
             // We use the SeqIter at get<3>(I) to find the i-th RNS factor of the first destination polynomial.

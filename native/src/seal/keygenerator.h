@@ -248,7 +248,7 @@ namespace seal
         }
 
         /**
-        Enables access to private members of seal::KeyGenerator for .NET wrapper.
+        Enables access to private members of seal::KeyGenerator for SEAL_C.
         */
         struct KeyGeneratorPrivateHelper;
 

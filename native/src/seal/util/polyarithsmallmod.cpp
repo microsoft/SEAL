@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/util/polyarith.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/uintcore.h"
@@ -12,7 +11,7 @@ namespace seal
 {
     namespace util
     {
-        void multiply_poly_scalar_coeffmod(
+        void add_poly_scalar_coeffmod(
             ConstCoeffIter poly, size_t coeff_count, uint64_t scalar, const Modulus &modulus, CoeffIter result)
         {
 #ifdef SEAL_DEBUG
@@ -28,35 +27,67 @@ namespace seal
             {
                 throw invalid_argument("modulus");
             }
+            if (scalar >= modulus.value())
+            {
+                throw invalid_argument("scalar");
+            }
 #endif
-            const uint64_t modulus_value = modulus.value();
-            const uint64_t const_ratio_0 = modulus.const_ratio()[0];
-            const uint64_t const_ratio_1 = modulus.const_ratio()[1];
+
             SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
-                unsigned long long z[2], tmp1, tmp2[2], tmp3, carry;
-                multiply_uint64(get<0>(I), scalar, z);
+                const uint64_t x = get<0>(I);
+                get<1>(I) = add_uint_mod(x, scalar, modulus);
+            });
+        }
 
-                // Reduces z using base 2^64 Barrett reduction
+        void sub_poly_scalar_coeffmod(
+            ConstCoeffIter poly, size_t coeff_count, uint64_t scalar, const Modulus &modulus, CoeffIter result)
+        {
+#ifdef SEAL_DEBUG
+            if (!poly && coeff_count > 0)
+            {
+                throw invalid_argument("poly");
+            }
+            if (!result && coeff_count > 0)
+            {
+                throw invalid_argument("result");
+            }
+            if (modulus.is_zero())
+            {
+                throw invalid_argument("modulus");
+            }
+            if (scalar >= modulus.value())
+            {
+                throw invalid_argument("scalar");
+            }
+#endif
 
-                // Multiply input and const_ratio
-                // Round 1
-                multiply_uint64_hw64(z[0], const_ratio_0, &carry);
-                multiply_uint64(z[0], const_ratio_1, tmp2);
-                tmp3 = tmp2[1] + add_uint64(tmp2[0], carry, &tmp1);
+            SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
+                const uint64_t x = get<0>(I);
+                get<1>(I) = sub_uint_mod(x, scalar, modulus);
+            });
+        }
 
-                // Round 2
-                multiply_uint64(z[1], const_ratio_0, tmp2);
-                carry = tmp2[1] + add_uint64(tmp1, tmp2[0], &tmp1);
-
-                // This is all we care about
-                tmp1 = z[1] * const_ratio_1 + tmp3 + carry;
-
-                // Barrett subtraction
-                tmp3 = z[0] - tmp1 * modulus_value;
-
-                // Claim: One more subtraction is enough
-                get<1>(I) =
-                    tmp3 - (modulus_value & static_cast<uint64_t>(-static_cast<int64_t>(tmp3 >= modulus_value)));
+        void multiply_poly_scalar_coeffmod(
+            ConstCoeffIter poly, size_t coeff_count, MultiplyUIntModOperand scalar, const Modulus &modulus,
+            CoeffIter result)
+        {
+#ifdef SEAL_DEBUG
+            if (!poly && coeff_count > 0)
+            {
+                throw invalid_argument("poly");
+            }
+            if (!result && coeff_count > 0)
+            {
+                throw invalid_argument("result");
+            }
+            if (modulus.is_zero())
+            {
+                throw invalid_argument("modulus");
+            }
+#endif
+            SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
+                const uint64_t x = get<0>(I);
+                get<1>(I) = multiply_uint_mod(x, scalar, modulus);
             });
         }
 
@@ -89,6 +120,7 @@ namespace seal
             const uint64_t modulus_value = modulus.value();
             const uint64_t const_ratio_0 = modulus.const_ratio()[0];
             const uint64_t const_ratio_1 = modulus.const_ratio()[1];
+
             SEAL_ITERATE(iter(operand1, operand2, result), coeff_count, [&](auto I) {
                 // Reduces z using base 2^64 Barrett reduction
                 unsigned long long z[2], tmp1, tmp2[2], tmp3, carry;
@@ -135,7 +167,7 @@ namespace seal
             // [-modulus,modulus). Keep track of the max.
             uint64_t result = 0;
             SEAL_ITERATE(operand, coeff_count, [&](auto I) {
-                uint64_t poly_coeff = I % modulus.value();
+                uint64_t poly_coeff = barrett_reduce_64(I, modulus);
                 if (poly_coeff >= modulus_neg_threshold)
                 {
                     poly_coeff = modulus.value() - poly_coeff;

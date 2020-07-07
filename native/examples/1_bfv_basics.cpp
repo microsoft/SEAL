@@ -420,7 +420,7 @@ void example_bfv_basics()
     parms.set_poly_modulus_degree(2048);
     context = SEALContext::Create(parms);
     print_parameters(context);
-    cout << "Parameter validation (failed): " << context->parameter_error_message() << endl;
+    cout << "Parameter validation (failed): " << context->parameter_error_message() << endl << endl;
 
     /*
     This information is helpful to fix invalid encryption parameters.

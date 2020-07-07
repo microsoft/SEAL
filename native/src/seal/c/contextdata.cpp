@@ -91,7 +91,7 @@ SEAL_C_FUNC ContextData_CoeffDivPlainModulus(void *thisptr, uint64_t *count, uin
 
     for (uint64_t i = 0; i < *count; i++)
     {
-        coeff_div[i] = cont_data->coeff_div_plain_modulus()[i];
+        coeff_div[i] = cont_data->coeff_div_plain_modulus()[i].operand;
     }
 
     return S_OK;
