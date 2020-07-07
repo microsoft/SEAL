@@ -433,7 +433,7 @@ namespace seal
 
             SeqIter(const self_type &copy) = default;
 
-            inline self_type &operator=(const self_type &assign) = default;
+            self_type &operator=(const self_type &assign) = default;
 
             SEAL_NODISCARD inline reference operator*() const noexcept
             {
@@ -977,10 +977,11 @@ namespace seal
             {}
 
             template <typename S>
-            self_type &operator=(const StrideIter<S *> &assign)
+            inline self_type &operator=(const StrideIter<S *> &assign)
             {
                 ptr_it_ = assign;
                 step_size_ = assign.stride();
+                return *this;
             }
 
             SEAL_NODISCARD inline reference operator*() const noexcept
@@ -1155,10 +1156,11 @@ namespace seal
             {}
 
             template <typename S>
-            self_type &operator=(const StrideIter<S *> &assign)
+            inline self_type &operator=(const StrideIter<S *> &assign)
             {
                 ptr_it_ = assign;
                 step_size_ = assign.stride();
+                return *this;
             }
 
             SEAL_NODISCARD inline reference operator*() const noexcept
