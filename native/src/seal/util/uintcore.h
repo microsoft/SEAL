@@ -343,86 +343,6 @@ namespace seal
             return static_cast<int>(result);
         }
 
-        SEAL_NODISCARD inline int get_power_of_two_minus_one(std::uint64_t value)
-        {
-            if (value == 0xFFFFFFFFFFFFFFFF)
-            {
-                return bits_per_uint64;
-            }
-            return get_power_of_two(value + 1);
-        }
-
-        SEAL_NODISCARD inline int get_power_of_two_uint(const std::uint64_t *operand, std::size_t uint64_count)
-        {
-#ifdef SEAL_DEBUG
-            if (!operand && uint64_count)
-            {
-                throw std::invalid_argument("operand");
-            }
-#endif
-            operand += uint64_count;
-            int long_index = safe_cast<int>(uint64_count), local_result = -1;
-            for (; (long_index >= 1) && (local_result == -1); long_index--)
-            {
-                operand--;
-                local_result = get_power_of_two(*operand);
-            }
-
-            // If local_result != -1, we've found a power-of-two highest order block,
-            // in which case need to check that rest are zero.
-            // If local_result == -1, operand is not power of two.
-            if (local_result == -1)
-            {
-                return -1;
-            }
-
-            int zeros = 1;
-            for (int j = long_index; j >= 1; j--)
-            {
-                zeros &= (*--operand == 0);
-            }
-
-            return add_safe(mul_safe(zeros, add_safe(local_result, mul_safe(long_index, bits_per_uint64))), zeros, -1);
-        }
-
-        SEAL_NODISCARD inline int get_power_of_two_minus_one_uint(
-            const std::uint64_t *operand, std::size_t uint64_count)
-        {
-#ifdef SEAL_DEBUG
-            if (!operand && uint64_count)
-            {
-                throw std::invalid_argument("operand");
-            }
-            if (unsigned_geq(uint64_count, std::numeric_limits<int>::max()))
-            {
-                throw std::invalid_argument("uint64_count");
-            }
-#endif
-            operand += uint64_count;
-            int long_index = safe_cast<int>(uint64_count), local_result = 0;
-            for (; (long_index >= 1) && (local_result == 0); long_index--)
-            {
-                operand--;
-                local_result = get_power_of_two_minus_one(*operand);
-            }
-
-            // If local_result != -1, we've found a power-of-two-minus-one highest
-            // order block, in which case need to check that rest are ~0.
-            // If local_result == -1, operand is not power of two minus one.
-            if (local_result == -1)
-            {
-                return -1;
-            }
-
-            int ones = 1;
-            for (int j = long_index; j >= 1; j--)
-            {
-                ones &= (~*--operand == 0);
-            }
-
-            return add_safe(mul_safe(ones, add_safe(local_result, mul_safe(long_index, bits_per_uint64))), ones, -1);
-        }
-
         inline void filter_highbits_uint(std::uint64_t *operand, std::size_t uint64_count, int bit_count)
         {
             std::size_t bits_per_uint64_sz = static_cast<std::size_t>(bits_per_uint64);
@@ -465,7 +385,7 @@ namespace seal
                 return ConstPointer<std::uint64_t>::Aliasing(input);
             }
 
-            auto allocation(allocate<std::uint64_t>(new_uint64_count, pool));
+            auto allocation(allocate_uint(new_uint64_count, pool));
             set_uint(input, uint64_count, new_uint64_count, allocation.get());
             return ConstPointer<std::uint64_t>(std::move(allocation));
         }
@@ -563,12 +483,6 @@ namespace seal
             return compare_uint(operand1, operand2, uint64_count) == 0;
         }
 
-        SEAL_NODISCARD inline bool is_not_equal_uint(
-            const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t uint64_count)
-        {
-            return compare_uint(operand1, operand2, uint64_count) != 0;
-        }
-
         SEAL_NODISCARD inline bool is_greater_than_uint(
             const std::uint64_t *operand1, std::size_t operand1_uint64_count, const std::uint64_t *operand2,
             std::size_t operand2_uint64_count)
@@ -602,46 +516,6 @@ namespace seal
             std::size_t operand2_uint64_count)
         {
             return compare_uint(operand1, operand1_uint64_count, operand2, operand2_uint64_count) == 0;
-        }
-
-        SEAL_NODISCARD inline bool is_not_equal_uint(
-            const std::uint64_t *operand1, std::size_t operand1_uint64_count, const std::uint64_t *operand2,
-            std::size_t operand2_uint64_count)
-        {
-            return compare_uint(operand1, operand1_uint64_count, operand2, operand2_uint64_count) != 0;
-        }
-
-        SEAL_NODISCARD inline std::uint64_t hamming_weight(std::uint64_t value)
-        {
-            std::uint64_t res = 0;
-            while (value)
-            {
-                res++;
-                value &= value - 1;
-            }
-            return res;
-        }
-
-        SEAL_NODISCARD inline std::uint64_t hamming_weight_split(std::uint64_t value)
-        {
-            std::uint64_t hwx = hamming_weight(value);
-            std::uint64_t target = (hwx + 1) >> 1;
-            std::uint64_t now = 0;
-            std::uint64_t result = 0;
-
-            for (int i = 0; i < bits_per_uint64; i++)
-            {
-                std::uint64_t xbit = value & 1;
-                value = value >> 1;
-                now += xbit;
-                result += (xbit << i);
-
-                if (now >= target)
-                {
-                    break;
-                }
-            }
-            return result;
         }
     } // namespace util
 } // namespace seal

@@ -5,8 +5,10 @@
 
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"
+#include "seal/util/iterator.h"
 #include "seal/util/ntt.h"
 #include "seal/util/pointer.h"
+#include "seal/util/uintarithsmallmod.h"
 #include <cstddef>
 #include <cstdint>
 #include <functional>
@@ -95,7 +97,7 @@ namespace seal
                 return punctured_prod_array_.get();
             }
 
-            SEAL_NODISCARD inline const std::uint64_t *inv_punctured_prod_mod_base_array() const noexcept
+            SEAL_NODISCARD inline const MultiplyUIntModOperand *inv_punctured_prod_mod_base_array() const noexcept
             {
                 return inv_punctured_prod_mod_base_array_.get();
             }
@@ -121,7 +123,7 @@ namespace seal
 
             Pointer<std::uint64_t> punctured_prod_array_;
 
-            Pointer<std::uint64_t> inv_punctured_prod_mod_base_array_;
+            Pointer<MultiplyUIntModOperand> inv_punctured_prod_mod_base_array_;
         };
 
         class BaseConverter
@@ -158,10 +160,9 @@ namespace seal
                 return obase_;
             }
 
-            void fast_convert(const std::uint64_t *in, std::uint64_t *out, MemoryPoolHandle pool) const;
+            void fast_convert(ConstCoeffIter in, CoeffIter out, MemoryPoolHandle pool) const;
 
-            void fast_convert_array(
-                const std::uint64_t *in, std::size_t count, std::uint64_t *out, MemoryPoolHandle pool) const;
+            void fast_convert_array(ConstRNSIter in, RNSIter out, MemoryPoolHandle pool) const;
 
         private:
             BaseConverter(const BaseConverter &copy) = delete;
@@ -195,35 +196,38 @@ namespace seal
                 std::size_t poly_modulus_degree, const RNSBase &coeff_modulus, const Modulus &plain_modulus,
                 MemoryPoolHandle pool);
 
-            void divide_and_round_q_last_inplace(std::uint64_t *input, MemoryPoolHandle pool) const;
+            /**
+            @param[in] input Must be in RNS form, i.e. coefficient must be less than the associated modulus.
+            */
+            void divide_and_round_q_last_inplace(RNSIter input, MemoryPoolHandle pool) const;
 
             void divide_and_round_q_last_ntt_inplace(
-                std::uint64_t *input, const NTTTables *rns_ntt_tables, MemoryPoolHandle pool) const;
+                RNSIter input, ConstNTTTablesIter rns_ntt_tables, MemoryPoolHandle pool) const;
 
             /**
             Shenoy-Kumaresan conversion from Bsk to q
             */
-            void fastbconv_sk(const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
+            void fastbconv_sk(ConstRNSIter input, RNSIter destination, MemoryPoolHandle pool) const;
 
             /**
             Montgomery reduction mod q; changes base from Bsk U {m_tilde} to Bsk
             */
-            void sm_mrq(const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
+            void sm_mrq(ConstRNSIter input, RNSIter destination, MemoryPoolHandle pool) const;
 
             /**
             Divide by q and fast floor from q U Bsk to Bsk
             */
-            void fast_floor(const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
+            void fast_floor(ConstRNSIter input, RNSIter destination, MemoryPoolHandle pool) const;
 
             /**
             Fast base conversion from q to Bsk U {m_tilde}
             */
-            void fastbconv_m_tilde(const std::uint64_t *input, std::uint64_t *destination, MemoryPoolHandle pool) const;
+            void fastbconv_m_tilde(ConstRNSIter input, RNSIter destination, MemoryPoolHandle pool) const;
 
             /**
             Compute round(t/q * |input|_q) mod t exactly
             */
-            void decrypt_scale_and_round(const uint64_t *phase, uint64_t *destination, MemoryPoolHandle pool) const;
+            void decrypt_scale_and_round(ConstRNSIter phase, CoeffIter destination, MemoryPoolHandle pool) const;
 
             SEAL_NODISCARD inline auto inv_q_last_mod_q() const noexcept
             {
@@ -324,34 +328,34 @@ namespace seal
             Pointer<BaseConverter> base_q_to_t_gamma_conv_;
 
             // prod(q)^(-1) mod Bsk
-            Pointer<std::uint64_t> inv_prod_q_mod_Bsk_;
+            Pointer<MultiplyUIntModOperand> inv_prod_q_mod_Bsk_;
 
             // prod(q)^(-1) mod m_tilde
-            std::uint64_t inv_prod_q_mod_m_tilde_ = 0;
+            MultiplyUIntModOperand neg_inv_prod_q_mod_m_tilde_;
 
             // prod(B)^(-1) mod m_sk
-            std::uint64_t inv_prod_B_mod_m_sk_ = 0;
+            MultiplyUIntModOperand inv_prod_B_mod_m_sk_;
 
             // gamma^(-1) mod t
-            std::uint64_t inv_gamma_mod_t_ = 0;
+            MultiplyUIntModOperand inv_gamma_mod_t_;
 
             // prod(B) mod q
             Pointer<std::uint64_t> prod_B_mod_q_;
 
             // m_tilde^(-1) mod Bsk
-            Pointer<std::uint64_t> inv_m_tilde_mod_Bsk_;
+            Pointer<MultiplyUIntModOperand> inv_m_tilde_mod_Bsk_;
 
             // prod(q) mod Bsk
             Pointer<std::uint64_t> prod_q_mod_Bsk_;
 
             // -prod(q)^(-1) mod {t, gamma}
-            Pointer<std::uint64_t> neg_inv_q_mod_t_gamma_;
+            Pointer<MultiplyUIntModOperand> neg_inv_q_mod_t_gamma_;
 
             // prod({t, gamma}) mod q
-            Pointer<std::uint64_t> prod_t_gamma_mod_q_;
+            Pointer<MultiplyUIntModOperand> prod_t_gamma_mod_q_;
 
             // q[last]^(-1) mod q[i] for i = 0..last-1
-            Pointer<std::uint64_t> inv_q_last_mod_q_;
+            Pointer<MultiplyUIntModOperand> inv_q_last_mod_q_;
 
             // NTTTables for Bsk
             Pointer<NTTTables> base_Bsk_ntt_tables_;

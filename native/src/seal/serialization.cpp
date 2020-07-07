@@ -25,11 +25,11 @@ namespace seal
 
     // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to ensure
     // symbol is created.
-    constexpr std::uint16_t Serialization::seal_magic;
+    constexpr uint16_t Serialization::seal_magic;
 
     // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to ensure
     // symbol is created.
-    constexpr std::uint8_t Serialization::seal_header_size;
+    constexpr uint8_t Serialization::seal_header_size;
 
     namespace
     {

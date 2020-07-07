@@ -344,7 +344,7 @@ namespace seal
             {
                 throw std::out_of_range("index must be within [0, byte count)");
             }
-            return *util::get_uint64_byte(value_.get(), index);
+            return reinterpret_cast<const SEAL_BYTE *>(value_.get())[index];
         }
 
         /**
@@ -365,7 +365,7 @@ namespace seal
             {
                 throw std::out_of_range("index must be within [0, byte count)");
             }
-            return *util::get_uint64_byte(value_.get(), index);
+            return reinterpret_cast<SEAL_BYTE *>(value_.get())[index];
         }
 
         /**

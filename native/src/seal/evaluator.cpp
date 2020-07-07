@@ -337,13 +337,13 @@ namespace seal
             ntt_negacyclic_harvey_lazy(get<1>(I), base_q_size, base_q_ntt_tables);
 
             // Allocate temporary space for a polynomial in the Bsk U {m_tilde} base
-            auto temp(allocate_poly(coeff_count, base_Bsk_m_tilde_size, pool));
+            SEAL_ALLOCATE_GET_RNS_ITER(temp, coeff_count, base_Bsk_m_tilde_size, pool);
 
             // (1) Convert from base q to base Bsk U {m_tilde}
-            rns_tool->fastbconv_m_tilde(get<0>(I), temp.get(), pool);
+            rns_tool->fastbconv_m_tilde(get<0>(I), temp, pool);
 
             // (2) Reduce q-overflows in with Montgomery reduction, switching base to Bsk
-            rns_tool->sm_mrq(temp.get(), get<2>(I), pool);
+            rns_tool->sm_mrq(temp, get<2>(I), pool);
 
             // Transform to NTT form in base Bsk
             // Lazy reduction
@@ -418,8 +418,9 @@ namespace seal
         });
 
         // Perform BEHZ step (5): transform data from NTT form
-        inverse_ntt_negacyclic_harvey(temp_dest_q, dest_size, base_q_ntt_tables);
-        inverse_ntt_negacyclic_harvey(temp_dest_Bsk, dest_size, base_Bsk_ntt_tables);
+        // Lazy reduction here. The following multiply_poly_scalar_coeffmod will correct the value back to [0, p)
+        inverse_ntt_negacyclic_harvey_lazy(temp_dest_q, dest_size, base_q_ntt_tables);
+        inverse_ntt_negacyclic_harvey_lazy(temp_dest_Bsk, dest_size, base_Bsk_ntt_tables);
 
         // Perform BEHZ steps (6)-(8)
         SEAL_ITERATE(iter(temp_dest_q, temp_dest_Bsk, encrypted1), dest_size, [&](auto I) {
@@ -432,13 +433,13 @@ namespace seal
             multiply_poly_scalar_coeffmod(get<1>(I), base_Bsk_size, plain_modulus, base_Bsk, temp_q_Bsk + base_q_size);
 
             // Allocate yet another temporary for fast divide-and-floor result in base Bsk
-            auto temp_Bsk(allocate_poly(coeff_count, base_Bsk_size, pool));
+            SEAL_ALLOCATE_GET_RNS_ITER(temp_Bsk, coeff_count, base_Bsk_size, pool);
 
             // Step (7): divide by q and floor, producing a result in base Bsk
-            rns_tool->fast_floor(temp_q_Bsk, temp_Bsk.get(), pool);
+            rns_tool->fast_floor(temp_q_Bsk, temp_Bsk, pool);
 
             // Step (8): use Shenoy-Kumaresan method to convert the result to base q and write to encrypted1
-            rns_tool->fastbconv_sk(temp_Bsk.get(), get<2>(I), pool);
+            rns_tool->fastbconv_sk(temp_Bsk, get<2>(I), pool);
         });
     }
 
@@ -620,13 +621,13 @@ namespace seal
             ntt_negacyclic_harvey_lazy(get<1>(I), base_q_size, base_q_ntt_tables);
 
             // Allocate temporary space for a polynomial in the Bsk U {m_tilde} base
-            auto temp(allocate_poly(coeff_count, base_Bsk_m_tilde_size, pool));
+            SEAL_ALLOCATE_GET_RNS_ITER(temp, coeff_count, base_Bsk_m_tilde_size, pool);
 
             // (1) Convert from base q to base Bsk U {m_tilde}
-            rns_tool->fastbconv_m_tilde(get<0>(I), temp.get(), pool);
+            rns_tool->fastbconv_m_tilde(get<0>(I), temp, pool);
 
             // (2) Reduce q-overflows in with Montgomery reduction, switching base to Bsk
-            rns_tool->sm_mrq(temp.get(), get<2>(I), pool);
+            rns_tool->sm_mrq(temp, get<2>(I), pool);
 
             // Transform to NTT form in base Bsk
             // Lazy reduction
@@ -689,13 +690,13 @@ namespace seal
             multiply_poly_scalar_coeffmod(get<1>(I), base_Bsk_size, plain_modulus, base_Bsk, temp_q_Bsk + base_q_size);
 
             // Allocate yet another temporary for fast divide-and-floor result in base Bsk
-            auto temp_Bsk(allocate_poly(coeff_count, base_Bsk_size, pool));
+            SEAL_ALLOCATE_GET_RNS_ITER(temp_Bsk, coeff_count, base_Bsk_size, pool);
 
             // Step (7): divide by q and floor, producing a result in base Bsk
-            rns_tool->fast_floor(temp_q_Bsk, temp_Bsk.get(), pool);
+            rns_tool->fast_floor(temp_q_Bsk, temp_Bsk, pool);
 
             // Step (8): use Shenoy-Kumaresan method to convert the result to base q and write to encrypted1
-            rns_tool->fastbconv_sk(temp_Bsk.get(), get<2>(I), pool);
+            rns_tool->fastbconv_sk(temp_Bsk, get<2>(I), pool);
         });
     }
 
@@ -1336,7 +1337,7 @@ namespace seal
         {
         case scheme_type::BFV:
         {
-            multiply_add_plain_with_scaling_variant(plain, context_data, encrypted.data());
+            multiply_add_plain_with_scaling_variant(plain, context_data, *iter(encrypted));
             break;
         }
 
@@ -1410,7 +1411,7 @@ namespace seal
         {
         case scheme_type::BFV:
         {
-            multiply_sub_plain_with_scaling_variant(plain, context_data, encrypted.data());
+            multiply_sub_plain_with_scaling_variant(plain, context_data, *iter(encrypted));
             break;
         }
 
@@ -1555,8 +1556,7 @@ namespace seal
 
         if (!context_data.qualifiers().using_fast_plain_lift)
         {
-            // Semantic misuse of RNSIter here, but this works well
-            RNSIter temp_iter(temp.get(), coeff_modulus_size);
+            StrideIter<uint64_t *> temp_iter(temp.get(), coeff_modulus_size);
 
             SEAL_ITERATE(iter(plain.data(), temp_iter), plain_coeff_count, [&](auto I) {
                 auto plain_value = get<0>(I);
@@ -2116,7 +2116,7 @@ namespace seal
                     // Perform RNS conversion (modular reduction)
                     else
                     {
-                        modulo_poly_coeffs_63(t_target[J], coeff_count, key_modulus[key_index], t_ntt);
+                        modulo_poly_coeffs(t_target[J], coeff_count, key_modulus[key_index], t_ntt);
                     }
                     // NTT conversion lazy outputs in [0, 4q)
                     ntt_negacyclic_harvey_lazy(t_ntt, key_ntt_tables[key_index]);
@@ -2189,7 +2189,7 @@ namespace seal
             const uint64_t qk = key_modulus[key_modulus_size - 1].value();
             const uint64_t qk_half = qk >> 1;
             SEAL_ITERATE(t_last, coeff_count, [&](auto J) {
-                J = barrett_reduce_63(J + qk_half, key_modulus[key_modulus_size - 1]);
+                J = barrett_reduce_64(J + qk_half, key_modulus[key_modulus_size - 1]);
             });
 
             SEAL_ITERATE(iter(I, key_modulus, key_ntt_tables, modswitch_factors), decomp_modulus_size, [&](auto J) {
@@ -2199,15 +2199,16 @@ namespace seal
                 const uint64_t qi = get<1>(J).value();
                 if (qk > qi)
                 {
-                    modulo_poly_coeffs_63(t_last, coeff_count, get<1>(J), t_ntt);
+                    // This cannot be spared. NTT only tolerates input that is less than 4*modulus (i.e. qk <=4*qi).
+                    modulo_poly_coeffs(t_last, coeff_count, get<1>(J), t_ntt);
                 }
                 else
                 {
                     set_uint(t_last, coeff_count, t_ntt);
                 }
 
-                // Lazy substraction, results in [0, 2*qi).
-                const uint64_t fix = qi - barrett_reduce_63(qk_half, get<1>(J));
+                // Lazy substraction, results in [0, 2*qi), since fix is in [0, qi].
+                const uint64_t fix = qi - barrett_reduce_64(qk_half, get<1>(J));
                 SEAL_ITERATE(t_ntt, coeff_count, [fix](auto K) { K += fix; });
 
                 uint64_t qi_lazy = qi << 1; // some multiples of qi

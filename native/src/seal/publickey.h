@@ -253,7 +253,7 @@ namespace seal
         }
 
         /**
-        Enables access to private members of seal::PublicKey for .NET wrapper.
+        Enables access to private members of seal::PublicKey for SEAL_C.
         */
         struct PublicKeyPrivateHelper;
 

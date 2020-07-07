@@ -745,7 +745,7 @@ namespace seal
         }
 
         /**
-        Enables access to private members of seal::Plaintext for .NET wrapper.
+        Enables access to private members of seal::Plaintext for SEAL_C.
         */
         struct PlaintextPrivateHelper;
 

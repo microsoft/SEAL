@@ -28,19 +28,22 @@
 __extension__ typedef __int128 int128_t;
 __extension__ typedef unsigned __int128 uint128_t;
 #define SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64)                                 \
+    do                                                                                      \
     {                                                                                       \
         *hw64 = static_cast<unsigned long long>(                                            \
             ((static_cast<uint128_t>(operand1) * static_cast<uint128_t>(operand2)) >> 64)); \
-    }
+    } while (false)
 
 #define SEAL_MULTIPLY_UINT64(operand1, operand2, result128)              \
+    do                                                                   \
     {                                                                    \
         uint128_t product = static_cast<uint128_t>(operand1) * operand2; \
         result128[0] = static_cast<unsigned long long>(product);         \
         result128[1] = static_cast<unsigned long long>(product >> 64);   \
-    }
+    } while (false)
 
 #define SEAL_DIVIDE_UINT128_UINT64(numerator, denominator, result)                                 \
+    do                                                                                             \
     {                                                                                              \
         uint128_t n, q;                                                                            \
         n = (static_cast<uint128_t>(numerator[1]) << 64) | (static_cast<uint128_t>(numerator[0])); \
@@ -50,7 +53,7 @@ __extension__ typedef unsigned __int128 uint128_t;
         numerator[1] = 0;                                                                          \
         result[0] = static_cast<std::uint64_t>(q);                                                 \
         result[1] = static_cast<std::uint64_t>(q >> 64);                                           \
-    }
+    } while (false)
 #endif
 
 #ifdef SEAL_USE__ADDCARRY_U64

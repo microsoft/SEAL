@@ -136,16 +136,6 @@ namespace seal
                 return;
             }
 
-            // More fast cases
-            // if (result_uint64_count == 2 && operand1_uint64_count > 1)
-            //{
-            //    unsigned long long temp_result;
-            //    multiply_uint64(*operand1, operand2, &temp_result);
-            //    *result = temp_result;
-            //    *(result + 1) += *(operand1 + 1) * operand2;
-            //    return;
-            //}
-
             // Clear out result.
             set_zero_uint(result_uint64_count, result);
 
@@ -544,81 +534,6 @@ namespace seal
             {
                 right_shift_uint192(numerator, denominator_shift, numerator);
             }
-        }
-
-        void exponentiate_uint(
-            const uint64_t *operand, size_t operand_uint64_count, const uint64_t *exponent,
-            size_t exponent_uint64_count, size_t result_uint64_count, uint64_t *result, MemoryPool &pool)
-        {
-#ifdef SEAL_DEBUG
-            if (!operand)
-            {
-                throw invalid_argument("operand");
-            }
-            if (!operand_uint64_count)
-            {
-                throw invalid_argument("operand_uint64_count");
-            }
-            if (!exponent)
-            {
-                throw invalid_argument("exponent");
-            }
-            if (!exponent_uint64_count)
-            {
-                throw invalid_argument("exponent_uint64_count");
-            }
-            if (!result)
-            {
-                throw invalid_argument("result");
-            }
-            if (!result_uint64_count)
-            {
-                throw invalid_argument("result_uint64_count");
-            }
-#endif
-            // Fast cases
-            if (is_zero_uint(exponent, exponent_uint64_count))
-            {
-                set_uint(1, result_uint64_count, result);
-                return;
-            }
-            if (is_equal_uint(exponent, exponent_uint64_count, 1))
-            {
-                set_uint(operand, operand_uint64_count, result_uint64_count, result);
-                return;
-            }
-
-            // Need to make a copy of exponent
-            auto exponent_copy(allocate_uint(exponent_uint64_count, pool));
-            set_uint(exponent, exponent_uint64_count, exponent_copy.get());
-
-            // Perform binary exponentiation.
-            auto big_alloc(allocate_uint(result_uint64_count + result_uint64_count + result_uint64_count, pool));
-
-            uint64_t *powerptr = big_alloc.get();
-            uint64_t *productptr = powerptr + result_uint64_count;
-            uint64_t *intermediateptr = productptr + result_uint64_count;
-
-            set_uint(operand, operand_uint64_count, result_uint64_count, powerptr);
-            set_uint(1, result_uint64_count, intermediateptr);
-
-            // Initially: power = operand and intermediate = 1, product is not initialized.
-            while (true)
-            {
-                if ((*exponent_copy.get() % 2) == 1)
-                {
-                    multiply_truncate_uint(powerptr, intermediateptr, result_uint64_count, productptr);
-                    swap(productptr, intermediateptr);
-                }
-                right_shift_uint(exponent_copy.get(), 1, exponent_uint64_count, exponent_copy.get());
-                if (is_zero_uint(exponent_copy.get(), exponent_uint64_count))
-                {
-                    break;
-                }
-                multiply_truncate_uint(powerptr, powerptr, result_uint64_count, productptr);
-                swap(productptr, powerptr);
-            }
-            set_uint(intermediateptr, result_uint64_count, result);
         }
 
         uint64_t exponentiate_uint_safe(uint64_t operand, uint64_t exponent)

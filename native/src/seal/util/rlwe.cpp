@@ -109,21 +109,20 @@ namespace seal
             // Set up source of randomness that produces 32 bit random things.
             RandomToStandardAdapter engine(rng);
 
-            // We sample numbers up to 2^63-1 to use barrett_reduce_63
-            constexpr uint64_t max_random = static_cast<uint64_t>(0x7FFFFFFFFFFFFFFFULL);
+            constexpr uint64_t max_random = static_cast<uint64_t>(0xFFFFFFFFFFFFFFFFULL);
             for (size_t j = 0; j < coeff_modulus_size; j++)
             {
                 auto &modulus = coeff_modulus[j];
-                uint64_t max_multiple = max_random - barrett_reduce_63(max_random, modulus) - 1;
+                uint64_t max_multiple = max_random - barrett_reduce_64(max_random, modulus) - 1;
                 for (size_t i = 0; i < coeff_count; i++)
                 {
                     // This ensures uniform distribution.
                     uint64_t rand;
                     do
                     {
-                        rand = (static_cast<uint64_t>(engine()) << 31) | (static_cast<uint64_t>(engine() >> 1));
+                        rand = (static_cast<uint64_t>(engine()) << 32) | static_cast<uint64_t>(engine());
                     } while (rand >= max_multiple);
-                    destination[i + j * coeff_count] = barrett_reduce_63(rand, modulus);
+                    destination[i + j * coeff_count] = barrett_reduce_64(rand, modulus);
                 }
             }
         }
@@ -174,7 +173,7 @@ namespace seal
                         u.get() + i * coeff_count, public_key.data().data(j) + i * coeff_count, coeff_count,
                         coeff_modulus[i], destination.data(j) + i * coeff_count);
 
-                    // addition with e_0, e_1 is in non-NTT form.
+                    // Addition with e_0, e_1 is in non-NTT form.
                     if (!is_ntt_form)
                     {
                         inverse_ntt_negacyclic_harvey(destination.data(j) + i * coeff_count, ntt_tables[i]);
@@ -189,7 +188,7 @@ namespace seal
                 sample_poly_normal(rng, parms, u.get());
                 for (size_t i = 0; i < coeff_modulus_size; i++)
                 {
-                    // addition with e_0, e_1 is in NTT form.
+                    // Addition with e_0, e_1 is in NTT form.
                     if (is_ntt_form)
                     {
                         ntt_negacyclic_harvey(u.get() + i * coeff_count, ntt_tables[i]);
