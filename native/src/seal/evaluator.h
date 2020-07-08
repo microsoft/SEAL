@@ -96,7 +96,7 @@ namespace seal
         @param[in] context The SEALContext
         @throws std::invalid_argument if the encryption parameters are not valid
         */
-        Evaluator(SEALContext context);
+        Evaluator(const SEALContext &context);
 
         /**
         Negates a ciphertext.

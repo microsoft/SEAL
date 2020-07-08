@@ -15,7 +15,7 @@ using namespace seal::util;
 
 namespace seal
 {
-    IntegerEncoder::IntegerEncoder(SEALContext context) : context_(context)
+    IntegerEncoder::IntegerEncoder(const SEALContext &context) : context_(context)
     {
         // Unlike in other classes, we do not check "context_.parameters_set()".
         // The IntegerEncoder should function without valid encryption parameters

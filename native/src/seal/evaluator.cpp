@@ -28,7 +28,7 @@ namespace seal
         }
     } // namespace
 
-    Evaluator::Evaluator(SEALContext context) : context_(context)
+    Evaluator::Evaluator(const SEALContext &context) : context_(context)
     {
         // Verify parameters
         if (!context_.parameters_set())

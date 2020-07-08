@@ -12,7 +12,7 @@ using namespace seal::util;
 
 namespace seal
 {
-    CKKSEncoder::CKKSEncoder(SEALContext context) : context_(context)
+    CKKSEncoder::CKKSEncoder(const SEALContext &context) : context_(context)
     {
         // Verify parameters
         if (!context_.parameters_set())

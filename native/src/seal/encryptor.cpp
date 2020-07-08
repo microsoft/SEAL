@@ -24,7 +24,7 @@ using namespace seal::util;
 
 namespace seal
 {
-    Encryptor::Encryptor(SEALContext context, const PublicKey &public_key) : context_(context)
+    Encryptor::Encryptor(const SEALContext &context, const PublicKey &public_key) : context_(context)
     {
         // Verify parameters
         if (!context_.parameters_set())
@@ -46,7 +46,7 @@ namespace seal
         }
     }
 
-    Encryptor::Encryptor(SEALContext context, const SecretKey &secret_key) : context_(context)
+    Encryptor::Encryptor(const SEALContext &context, const SecretKey &secret_key) : context_(context)
     {
         // Verify parameters
         if (!context_.parameters_set())
@@ -68,7 +68,7 @@ namespace seal
         }
     }
 
-    Encryptor::Encryptor(SEALContext context, const PublicKey &public_key, const SecretKey &secret_key)
+    Encryptor::Encryptor(const SEALContext &context, const PublicKey &public_key, const SecretKey &secret_key)
         : context_(context)
     {
         // Verify parameters

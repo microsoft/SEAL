@@ -71,7 +71,7 @@ namespace seal
         @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if scheme is not scheme_type::CKKS
         */
-        CKKSEncoder(SEALContext context);
+        CKKSEncoder(const SEALContext &context);
 
         /**
         Encodes a vector of double-precision floating-point real or complex numbers

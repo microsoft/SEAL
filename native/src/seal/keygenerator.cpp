@@ -20,7 +20,7 @@ using namespace seal::util;
 
 namespace seal
 {
-    KeyGenerator::KeyGenerator(SEALContext context) : context_(context)
+    KeyGenerator::KeyGenerator(const SEALContext &context) : context_(context)
     {
         // Verify parameters
         if (!context_.parameters_set())
@@ -35,7 +35,7 @@ namespace seal
         generate_sk();
     }
 
-    KeyGenerator::KeyGenerator(SEALContext context, const SecretKey &secret_key) : context_(context)
+    KeyGenerator::KeyGenerator(const SEALContext &context, const SecretKey &secret_key) : context_(context)
     {
         // Verify parameters
         if (!context_.parameters_set())
