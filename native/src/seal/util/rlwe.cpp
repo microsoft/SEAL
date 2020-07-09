@@ -300,11 +300,9 @@ namespace seal
 
             if (save_seed)
             {
-                random_seed_type seed = ciphertext_rng->seed();
-
                 // Write random seed to destination.data(1).
                 c1[0] = static_cast<uint64_t>(0xFFFFFFFFFFFFFFFFULL);
-                copy_n(seed.cbegin(), seed.size(), c1 + 1);
+                copy_n(public_rng_seed.cbegin(), public_rng_seed.size(), c1 + 1);
             }
         }
     } // namespace util
