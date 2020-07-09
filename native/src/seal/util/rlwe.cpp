@@ -232,9 +232,16 @@ namespace seal
             destination.is_ntt_form() = is_ntt_form;
             destination.scale() = 1.0;
 
-            auto rng_error = parms.random_generator()->create();
-            shared_ptr<UniformRandomGenerator> rng_ciphertext;
-            rng_ciphertext = BlakePRNGFactory().create();
+            // Create an instance of a random number generator. We use this for sampling a seed for a second BlakePRNG
+            // used for sampling u (the seed can be public information. This RNG is also used for sampling the error.
+            auto bootstrap_rng = parms.random_generator()->create();
+
+            // Sample a seed for generating uniform randomness for the ciphertext; this seed is public information
+            random_seed_type public_rng_seed;
+            bootstrap_rng->generate(sizeof(random_seed_type), reinterpret_cast<SEAL_BYTE *>(public_rng_seed.data()));
+
+            // Create a BlakePRNG for sampling u
+            auto ciphertext_rng = BlakePRNGFactory(public_rng_seed).create();
 
             // Generate ciphertext: (c[0], c[1]) = ([-(as+e)]_q, a)
             uint64_t *c0 = destination.data();
@@ -243,13 +250,13 @@ namespace seal
             // Sample a uniformly at random
             if (is_ntt_form || !save_seed)
             {
-                // sample the NTT form directly
-                sample_poly_uniform(rng_ciphertext, parms, c1);
+                // Sample the NTT form directly
+                sample_poly_uniform(ciphertext_rng, parms, c1);
             }
             else if (save_seed)
             {
-                // sample non-NTT form and store the seed
-                sample_poly_uniform(rng_ciphertext, parms, c1);
+                // Sample non-NTT form and store the seed
+                sample_poly_uniform(ciphertext_rng, parms, c1);
                 for (size_t i = 0; i < coeff_modulus_size; i++)
                 {
                     // Transform the c1 into NTT representation.
@@ -259,9 +266,9 @@ namespace seal
 
             // Sample e <-- chi
             auto noise(allocate_poly(coeff_count, coeff_modulus_size, pool));
-            sample_poly_normal(rng_error, parms, noise.get());
+            sample_poly_normal(bootstrap_rng, parms, noise.get());
 
-            // calculate -(a*s + e) (mod q) and store in c[0]
+            // Calculate -(a*s + e) (mod q) and store in c[0]
             for (size_t i = 0; i < coeff_modulus_size; i++)
             {
                 dyadic_product_coeffmod(
@@ -293,7 +300,8 @@ namespace seal
 
             if (save_seed)
             {
-                random_seed_type seed = rng_ciphertext->seed();
+                random_seed_type seed = ciphertext_rng->seed();
+
                 // Write random seed to destination.data(1).
                 c1[0] = static_cast<uint64_t>(0xFFFFFFFFFFFFFFFFULL);
                 copy_n(seed.cbegin(), seed.size(), c1 + 1);
