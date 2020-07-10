@@ -7,7 +7,6 @@ using namespace std;
 
 namespace seal
 {
-    unique_ptr<MMProf> MemoryManager::mm_prof_{ new MMProfGlobal };
 #ifndef _M_CEE
     mutex MemoryManager::switch_mutex_;
 #else

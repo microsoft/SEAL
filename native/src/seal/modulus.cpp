@@ -118,13 +118,13 @@ namespace seal
         switch (sec_level)
         {
         case sec_level_type::tc128:
-            return global_variables::default_coeff_modulus_128.at(poly_modulus_degree);
+            return global_variables::GetDefaultCoeffModulus128().at(poly_modulus_degree);
 
         case sec_level_type::tc192:
-            return global_variables::default_coeff_modulus_192.at(poly_modulus_degree);
+            return global_variables::GetDefaultCoeffModulus192().at(poly_modulus_degree);
 
         case sec_level_type::tc256:
-            return global_variables::default_coeff_modulus_256.at(poly_modulus_degree);
+            return global_variables::GetDefaultCoeffModulus256().at(poly_modulus_degree);
 
         default:
             throw runtime_error("invalid security level");
