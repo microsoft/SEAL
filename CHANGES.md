@@ -6,10 +6,26 @@
 
 - Added const overloads of `IntArray::begin` and `IntArray::end`.
 - Added `std::hash` implementation for `EncryptionParameters` (in addition to `parms_id_type`) so it is possible to create e.g. `std::unordered_map` of `EncryptionParameters`.
+- Added overloads to `Evaluator::add_plain*`, `Evaluator::sub_plain*`, and `Evaluator::multiply_plain*` for plaintext-plaintext computations.
+Most users should probably avoid this functionality; usually it's much more efficient to perform plaintext computations on raw data before encoding. 
+However, since CKKS encoding can be slow, there are a situations where it can be advantageous to instead operate on `Plaintext` objects.
+- Removed `BatchEncoder` API for encoding and decoding `Plaintext` objects inplace.
+This is because a `Plaintext` object with slot-data written into the coefficients is (confusingly) not valid to be used for encryption or unencrypted arithmetic.
+
+### Other
+
+- Moved all files related to pkg-config to `pkgconfig/` subdirectory.
+
+### Bug Fixes
+
+- Fixed a bug where setting a PRNG factory to use a constant seed did actually not result in deterministic ciphertexts or public keys.
+The problem was that the specified PRNG factory was not used to create a PRNG, but instead a fresh (secure) PRNG was always created instead.
+- Fixed a bug where the `parms_id` of a `Plaintext` was not cleared correctly before resizing in `Decryptor::bfv_decrypt`.
+As a result, a plaintext in NTT form could not be used as the destination for decrypting a BFV ciphertext.
 
 ## Version 3.5.5
 
-### New features
+### New Features
 
 - Added a struct `seal::util::MultiplyUIntModOperand` in [native/src/seal/util/uintarithsmallmod.h](native/src/seal/util/uintarithsmallmod.h).
 This struct handles precomputation data for Barrett style modular multiplication.

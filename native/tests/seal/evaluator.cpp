@@ -158,7 +158,7 @@ namespace sealtest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            // adding two zero vectors
+            // Adding two zero vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 30, 30, 30, 30, 30 }));
@@ -182,13 +182,11 @@ namespace sealtest
             encryptor.encrypt(plain, encrypted);
             evaluator.add_inplace(encrypted, encrypted);
 
-            // check correctness of encryption
+            // Check correctness of encryption
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             decryptor.decrypt(encrypted, plainRes);
-
             encoder.decode(plainRes, output);
-
             for (size_t i = 0; i < slot_size; i++)
             {
                 auto tmp = abs(input[i].real() - output[i].real());
@@ -196,7 +194,7 @@ namespace sealtest
             }
         }
         {
-            // adding two random vectors 100 times
+            // Adding two random vectors 100 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
@@ -241,13 +239,11 @@ namespace sealtest
                 encryptor.encrypt(plain2, encrypted2);
                 evaluator.add_inplace(encrypted1, encrypted2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
-
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -256,7 +252,7 @@ namespace sealtest
             }
         }
         {
-            // adding two random vectors 100 times
+            // Adding two random vectors 100 times
             size_t slot_size = 8;
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60 }));
@@ -301,13 +297,11 @@ namespace sealtest
                 encryptor.encrypt(plain2, encrypted2);
                 evaluator.add_inplace(encrypted1, encrypted2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
-
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -320,7 +314,7 @@ namespace sealtest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            // adding two zero vectors
+            // Adding two zero vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 30, 30, 30, 30, 30 }));
@@ -345,13 +339,20 @@ namespace sealtest
             encryptor.encrypt(plain, encrypted);
             evaluator.add_plain_inplace(encrypted, plain);
 
-            // check correctness of encryption
+            // Check correctness of encryption
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             decryptor.decrypt(encrypted, plainRes);
-
             encoder.decode(plainRes, output);
+            for (size_t i = 0; i < slot_size; i++)
+            {
+                auto tmp = abs(input[i].real() - output[i].real());
+                ASSERT_TRUE(tmp < 0.5);
+            }
 
+            // Adding plaintexts
+            evaluator.add_plain(plain, plain, plainRes);
+            encoder.decode(plainRes, output);
             for (size_t i = 0; i < slot_size; i++)
             {
                 auto tmp = abs(input[i].real() - output[i].real());
@@ -359,7 +360,7 @@ namespace sealtest
             }
         }
         {
-            // adding two random vectors 50 times
+            // Adding two random vectors 50 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
@@ -402,13 +403,20 @@ namespace sealtest
                 encryptor.encrypt(plain1, encrypted1);
                 evaluator.add_plain_inplace(encrypted1, plain2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
-
                 encoder.decode(plainRes, output);
+                for (size_t i = 0; i < slot_size; i++)
+                {
+                    auto tmp = abs(expected[i].real() - output[i].real());
+                    ASSERT_TRUE(tmp < 0.5);
+                }
 
+                // Adding plaintexts
+                evaluator.add_plain(plain1, plain2, plainRes);
+                encoder.decode(plainRes, output);
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -417,7 +425,7 @@ namespace sealtest
             }
         }
         {
-            // adding two random vectors 50 times
+            // Adding two random vectors 50 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
@@ -460,13 +468,20 @@ namespace sealtest
                 encryptor.encrypt(plain1, encrypted1);
                 evaluator.add_plain_inplace(encrypted1, plain2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
-
                 encoder.decode(plainRes, output);
+                for (size_t i = 0; i < slot_size; i++)
+                {
+                    auto tmp = abs(expected[i].real() - output[i].real());
+                    ASSERT_TRUE(tmp < 0.5);
+                }
 
+                // Adding plaintexts
+                evaluator.add_plain(plain1, plain2, plainRes);
+                encoder.decode(plainRes, output);
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -475,7 +490,7 @@ namespace sealtest
             }
         }
         {
-            // adding two random vectors 50 times
+            // Adding two random vectors 50 times
             size_t slot_size = 8;
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60 }));
@@ -518,13 +533,20 @@ namespace sealtest
                 encryptor.encrypt(plain1, encrypted1);
                 evaluator.add_plain_inplace(encrypted1, plain2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
-
                 encoder.decode(plainRes, output);
+                for (size_t i = 0; i < slot_size; i++)
+                {
+                    auto tmp = abs(expected[i].real() - output[i].real());
+                    ASSERT_TRUE(tmp < 0.5);
+                }
 
+                // Adding plaintexts
+                evaluator.add_plain(plain1, plain2, plainRes);
+                encoder.decode(plainRes, output);
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -538,7 +560,7 @@ namespace sealtest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            // adding two zero vectors
+            // Subtracting two zero vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 30, 30, 30, 30, 30 }));
@@ -563,13 +585,20 @@ namespace sealtest
             encryptor.encrypt(plain, encrypted);
             evaluator.add_plain_inplace(encrypted, plain);
 
-            // check correctness of encryption
+            // Check correctness of encryption
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             decryptor.decrypt(encrypted, plainRes);
-
             encoder.decode(plainRes, output);
+            for (size_t i = 0; i < slot_size; i++)
+            {
+                auto tmp = abs(input[i].real() - output[i].real());
+                ASSERT_TRUE(tmp < 0.5);
+            }
 
+            // Subtracting plaintexts
+            evaluator.sub_plain(plain, plain, plainRes);
+            encoder.decode(plainRes, output);
             for (size_t i = 0; i < slot_size; i++)
             {
                 auto tmp = abs(input[i].real() - output[i].real());
@@ -577,7 +606,7 @@ namespace sealtest
             }
         }
         {
-            // adding two random vectors 100 times
+            // Subtracting two random vectors 100 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
@@ -620,13 +649,20 @@ namespace sealtest
                 encryptor.encrypt(plain1, encrypted1);
                 evaluator.sub_plain_inplace(encrypted1, plain2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
-
                 encoder.decode(plainRes, output);
+                for (size_t i = 0; i < slot_size; i++)
+                {
+                    auto tmp = abs(expected[i].real() - output[i].real());
+                    ASSERT_TRUE(tmp < 0.5);
+                }
 
+                // Subtracting plaintexts
+                evaluator.sub_plain(plain1, plain2, plainRes);
+                encoder.decode(plainRes, output);
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -635,7 +671,7 @@ namespace sealtest
             }
         }
         {
-            // adding two random vectors 100 times
+            // Subtracting two random vectors 100 times
             size_t slot_size = 8;
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60 }));
@@ -678,13 +714,20 @@ namespace sealtest
                 encryptor.encrypt(plain1, encrypted1);
                 evaluator.sub_plain_inplace(encrypted1, plain2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
-
                 encoder.decode(plainRes, output);
+                for (size_t i = 0; i < slot_size; i++)
+                {
+                    auto tmp = abs(expected[i].real() - output[i].real());
+                    ASSERT_TRUE(tmp < 0.5);
+                }
 
+                // Subtracting plaintexts
+                evaluator.sub_plain(plain1, plain2, plainRes);
+                encoder.decode(plainRes, output);
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -807,6 +850,23 @@ namespace sealtest
         decryptor.decrypt(encrypted1, plain);
         ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
+
+        // Adding plaintexts
+        plain = encoder.encode(0);
+        evaluator.add_plain_inplace(plain, encoder.encode(0));
+        ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
+
+        plain = encoder.encode(0);
+        evaluator.add_plain_inplace(plain, encoder.encode(5));
+        ASSERT_EQ(static_cast<uint64_t>(5), encoder.decode_uint64(plain));
+
+        plain = encoder.encode(5);
+        evaluator.add_plain_inplace(plain, encoder.encode(-3));
+        ASSERT_EQ(static_cast<uint64_t>(2), encoder.decode_uint64(plain));
+
+        plain = encoder.encode(0x54321);
+        evaluator.add_plain_inplace(plain, encoder.encode(0x12345678));
+        ASSERT_EQ(static_cast<uint64_t>(0x12399999), encoder.decode_uint64(plain));
     }
 
     TEST(EvaluatorTest, BFVEncryptSubPlainDecrypt)
@@ -861,6 +921,23 @@ namespace sealtest
         decryptor.decrypt(encrypted1, plain);
         ASSERT_TRUE(static_cast<int64_t>(-9) == encoder.decode_int64(plain));
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
+
+        // Subtracting plaintexts
+        plain = encoder.encode(0);
+        evaluator.sub_plain_inplace(plain, encoder.encode(0));
+        ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
+
+        plain = encoder.encode(0);
+        evaluator.sub_plain_inplace(plain, encoder.encode(5));
+        ASSERT_EQ(static_cast<int64_t>(-5), encoder.decode_int64(plain));
+
+        plain = encoder.encode(5);
+        evaluator.sub_plain_inplace(plain, encoder.encode(-3));
+        ASSERT_EQ(static_cast<uint64_t>(8), encoder.decode_uint64(plain));
+
+        plain = encoder.encode(0x12345678);
+        evaluator.sub_plain_inplace(plain, encoder.encode(0x54321));
+        ASSERT_EQ(static_cast<uint64_t>(0x122F1357), encoder.decode_uint64(plain));
     }
 
     TEST(EvaluatorTest, BFVEncryptMultiplyPlainDecrypt)
@@ -930,6 +1007,34 @@ namespace sealtest
             decryptor.decrypt(encrypted, plain);
             ASSERT_TRUE(static_cast<int64_t>(-14) == encoder.decode_int64(plain));
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
+
+            // Multiplying plaintexts
+            plain = encoder.encode(5);
+            ASSERT_THROW(evaluator.multiply_plain_inplace(plain, plain), invalid_argument);
+
+            evaluator.transform_to_ntt_inplace(plain, context.first_parms_id());
+            evaluator.multiply_plain_inplace(plain, plain);
+            encryptor.encrypt(Plaintext("1"), encrypted);
+            evaluator.transform_to_ntt_inplace(encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain);
+            evaluator.transform_from_ntt_inplace(encrypted);
+            decryptor.decrypt(encrypted, plain);
+            ASSERT_EQ(static_cast<uint64_t>(25), encoder.decode_uint64(plain));
+
+            plain = encoder.encode(13);
+            Plaintext plain2 = encoder.encode(25);
+            evaluator.transform_to_ntt_inplace(plain, context.first_parms_id());
+            ASSERT_THROW(evaluator.multiply_plain_inplace(plain, plain2), invalid_argument);
+            ASSERT_THROW(evaluator.multiply_plain_inplace(plain2, plain), invalid_argument);
+
+            evaluator.transform_to_ntt_inplace(plain2, context.first_parms_id());
+            evaluator.multiply_plain_inplace(plain, plain2);
+            encryptor.encrypt(Plaintext("1"), encrypted);
+            evaluator.transform_to_ntt_inplace(encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain);
+            evaluator.transform_from_ntt_inplace(encrypted);
+            decryptor.decrypt(encrypted, plain);
+            ASSERT_EQ(static_cast<uint64_t>(325), encoder.decode_uint64(plain));
         }
         {
             EncryptionParameters parms(scheme_type::BFV);
@@ -960,6 +1065,34 @@ namespace sealtest
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(static_cast<uint64_t>(0x5B05B058), encoder.decode_uint64(plain));
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
+
+            // Multiplying plaintexts
+            plain = encoder.encode(5);
+            ASSERT_THROW(evaluator.multiply_plain_inplace(plain, plain), invalid_argument);
+
+            evaluator.transform_to_ntt_inplace(plain, context.first_parms_id());
+            evaluator.multiply_plain_inplace(plain, plain);
+            encryptor.encrypt(Plaintext("1"), encrypted);
+            evaluator.transform_to_ntt_inplace(encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain);
+            evaluator.transform_from_ntt_inplace(encrypted);
+            decryptor.decrypt(encrypted, plain);
+            ASSERT_EQ(static_cast<uint64_t>(25), encoder.decode_uint64(plain));
+
+            plain = encoder.encode(13);
+            Plaintext plain2 = encoder.encode(25);
+            evaluator.transform_to_ntt_inplace(plain, context.first_parms_id());
+            ASSERT_THROW(evaluator.multiply_plain_inplace(plain, plain2), invalid_argument);
+            ASSERT_THROW(evaluator.multiply_plain_inplace(plain2, plain), invalid_argument);
+
+            evaluator.transform_to_ntt_inplace(plain2, context.first_parms_id());
+            evaluator.multiply_plain_inplace(plain, plain2);
+            encryptor.encrypt(Plaintext("1"), encrypted);
+            evaluator.transform_to_ntt_inplace(encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain);
+            evaluator.transform_from_ntt_inplace(encrypted);
+            decryptor.decrypt(encrypted, plain);
+            ASSERT_EQ(static_cast<uint64_t>(325), encoder.decode_uint64(plain));
         }
         {
             EncryptionParameters parms(scheme_type::BFV);
@@ -990,6 +1123,34 @@ namespace sealtest
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(static_cast<uint64_t>(0x5B05B058), encoder.decode_uint64(plain));
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
+
+            // Multiplying plaintexts
+            plain = encoder.encode(5);
+            ASSERT_THROW(evaluator.multiply_plain_inplace(plain, plain), invalid_argument);
+
+            evaluator.transform_to_ntt_inplace(plain, context.first_parms_id());
+            evaluator.multiply_plain_inplace(plain, plain);
+            encryptor.encrypt(Plaintext("1"), encrypted);
+            evaluator.transform_to_ntt_inplace(encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain);
+            evaluator.transform_from_ntt_inplace(encrypted);
+            decryptor.decrypt(encrypted, plain);
+            ASSERT_EQ(static_cast<uint64_t>(25), encoder.decode_uint64(plain));
+
+            plain = encoder.encode(13);
+            Plaintext plain2 = encoder.encode(25);
+            evaluator.transform_to_ntt_inplace(plain, context.first_parms_id());
+            ASSERT_THROW(evaluator.multiply_plain_inplace(plain, plain2), invalid_argument);
+            ASSERT_THROW(evaluator.multiply_plain_inplace(plain2, plain), invalid_argument);
+
+            evaluator.transform_to_ntt_inplace(plain2, context.first_parms_id());
+            evaluator.multiply_plain_inplace(plain, plain2);
+            encryptor.encrypt(Plaintext("1"), encrypted);
+            evaluator.transform_to_ntt_inplace(encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain);
+            evaluator.transform_from_ntt_inplace(encrypted);
+            decryptor.decrypt(encrypted, plain);
+            ASSERT_EQ(static_cast<uint64_t>(325), encoder.decode_uint64(plain));
         }
         {
             EncryptionParameters parms(scheme_type::BFV);
@@ -1390,7 +1551,7 @@ namespace sealtest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            // multiplying two zero vectors
+            // Multiplying two zero vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 30, 30, 30, 30 }));
@@ -1415,7 +1576,7 @@ namespace sealtest
             encryptor.encrypt(plain, encrypted);
             evaluator.multiply_inplace(encrypted, encrypted);
 
-            // check correctness of encryption
+            // Check correctness of encryption
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             decryptor.decrypt(encrypted, plainRes);
@@ -1427,7 +1588,7 @@ namespace sealtest
             }
         }
         {
-            // multiplying two random vectors
+            // Multiplying two random vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
@@ -1470,13 +1631,11 @@ namespace sealtest
                 encryptor.encrypt(plain2, encrypted2);
                 evaluator.multiply_inplace(encrypted1, encrypted2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
-
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -1485,7 +1644,7 @@ namespace sealtest
             }
         }
         {
-            // multiplying two random vectors
+            // Multiplying two random vectors
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60 }));
@@ -1528,13 +1687,11 @@ namespace sealtest
                 encryptor.encrypt(plain2, encrypted2);
                 evaluator.multiply_inplace(encrypted1, encrypted2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
-
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -1548,7 +1705,7 @@ namespace sealtest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            // multiplying two random vectors by an integer
+            // Multiplying two random vectors by an integer
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 40 }));
@@ -1590,13 +1747,11 @@ namespace sealtest
                 encryptor.encrypt(plain1, encrypted1);
                 evaluator.multiply_plain_inplace(encrypted1, plain2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
-
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -1605,7 +1760,7 @@ namespace sealtest
             }
         }
         {
-            // multiplying two random vectors by an integer
+            // Multiplying two random vectors by an integer
             size_t slot_size = 8;
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60 }));
@@ -1647,13 +1802,11 @@ namespace sealtest
                 encryptor.encrypt(plain1, encrypted1);
                 evaluator.multiply_plain_inplace(encrypted1, plain2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
-
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -1662,7 +1815,7 @@ namespace sealtest
             }
         }
         {
-            // multiplying two random vectors by a double
+            // Multiplying two random vectors by a double
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
@@ -1704,13 +1857,11 @@ namespace sealtest
                 encryptor.encrypt(plain1, encrypted1);
                 evaluator.multiply_plain_inplace(encrypted1, plain2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
-
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -1719,7 +1870,7 @@ namespace sealtest
             }
         }
         {
-            // multiplying two random vectors by a double
+            // Multiplying two random vectors by a double
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60 }));
@@ -1761,13 +1912,11 @@ namespace sealtest
                 encryptor.encrypt(plain1, encrypted1);
                 evaluator.multiply_plain_inplace(encrypted1, plain2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
-
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -1781,7 +1930,7 @@ namespace sealtest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            // multiplying two random vectors 50 times
+            // Multiplying two random vectors 50 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
@@ -1825,9 +1974,9 @@ namespace sealtest
                 encryptor.encrypt(plain1, encrypted1);
                 encryptor.encrypt(plain2, encrypted2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted2.parms_id() == context.first_parms_id());
 
                 evaluator.multiply_inplace(encrypted1, encrypted2);
@@ -1835,7 +1984,6 @@ namespace sealtest
 
                 decryptor.decrypt(encrypted1, plainRes);
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -1844,7 +1992,7 @@ namespace sealtest
             }
         }
         {
-            // multiplying two random vectors 50 times
+            // Multiplying two random vectors 50 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 30, 30, 30 }));
@@ -1888,9 +2036,9 @@ namespace sealtest
                 encryptor.encrypt(plain1, encrypted1);
                 encryptor.encrypt(plain2, encrypted2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted2.parms_id() == context.first_parms_id());
 
                 evaluator.multiply_inplace(encrypted1, encrypted2);
@@ -1898,7 +2046,6 @@ namespace sealtest
 
                 decryptor.decrypt(encrypted1, plainRes);
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -1907,7 +2054,7 @@ namespace sealtest
             }
         }
         {
-            // multiplying two random vectors 50 times
+            // Multiplying two random vectors 50 times
             size_t slot_size = 2;
             parms.set_poly_modulus_degree(8);
             parms.set_coeff_modulus(CoeffModulus::Create(8, { 60, 30, 30, 30 }));
@@ -1951,17 +2098,16 @@ namespace sealtest
                 encryptor.encrypt(plain1, encrypted1);
                 encryptor.encrypt(plain2, encrypted2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted2.parms_id() == context.first_parms_id());
 
                 evaluator.multiply_inplace(encrypted1, encrypted2);
-                // evaluator.relinearize_inplace(encrypted1, rlk);
+                // Evaluator.relinearize_inplace(encrypted1, rlk);
 
                 decryptor.decrypt(encrypted1, plainRes);
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -1975,7 +2121,7 @@ namespace sealtest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            // squaring two random vectors 100 times
+            // Squaring two random vectors 100 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60 }));
@@ -2013,16 +2159,15 @@ namespace sealtest
 
                 encryptor.encrypt(plain, encrypted);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-                // evaluator.square_inplace(encrypted);
+                // Evaluator.square_inplace(encrypted);
                 evaluator.multiply_inplace(encrypted, encrypted);
                 evaluator.relinearize_inplace(encrypted, rlk);
 
                 decryptor.decrypt(encrypted, plainRes);
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -2031,7 +2176,7 @@ namespace sealtest
             }
         }
         {
-            // squaring two random vectors 100 times
+            // Squaring two random vectors 100 times
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 30, 30, 30 }));
@@ -2069,16 +2214,15 @@ namespace sealtest
 
                 encryptor.encrypt(plain, encrypted);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-                // evaluator.square_inplace(encrypted);
+                // Evaluator.square_inplace(encrypted);
                 evaluator.multiply_inplace(encrypted, encrypted);
                 evaluator.relinearize_inplace(encrypted, rlk);
 
                 decryptor.decrypt(encrypted, plainRes);
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -2087,7 +2231,7 @@ namespace sealtest
             }
         }
         {
-            // squaring two random vectors 100 times
+            // Squaring two random vectors 100 times
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 30, 30, 30 }));
@@ -2125,16 +2269,15 @@ namespace sealtest
 
                 encryptor.encrypt(plain, encrypted);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-                // evaluator.square_inplace(encrypted);
+                // Evaluator.square_inplace(encrypted);
                 evaluator.multiply_inplace(encrypted, encrypted);
                 evaluator.relinearize_inplace(encrypted, rlk);
 
                 decryptor.decrypt(encrypted, plainRes);
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -2148,7 +2291,7 @@ namespace sealtest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            // multiplying two random vectors 100 times
+            // Multiplying two random vectors 100 times
             size_t slot_size = 64;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 30, 30, 30, 30, 30, 30 }));
@@ -2193,21 +2336,20 @@ namespace sealtest
                 encryptor.encrypt(plain1, encrypted1);
                 encryptor.encrypt(plain2, encrypted2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted2.parms_id() == context.first_parms_id());
 
                 evaluator.multiply_inplace(encrypted1, encrypted2);
                 evaluator.relinearize_inplace(encrypted1, rlk);
                 evaluator.rescale_to_next_inplace(encrypted1);
 
-                // check correctness of modulus switching
+                // Check correctness of modulus switching
                 ASSERT_TRUE(encrypted1.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted1, plainRes);
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -2216,7 +2358,7 @@ namespace sealtest
             }
         }
         {
-            // multiplying two random vectors 100 times
+            // Multiplying two random vectors 100 times
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(128);
             parms.set_coeff_modulus(CoeffModulus::Create(128, { 30, 30, 30, 30, 30 }));
@@ -2261,21 +2403,20 @@ namespace sealtest
                 encryptor.encrypt(plain1, encrypted1);
                 encryptor.encrypt(plain2, encrypted2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted2.parms_id() == context.first_parms_id());
 
                 evaluator.multiply_inplace(encrypted1, encrypted2);
                 evaluator.relinearize_inplace(encrypted1, rlk);
                 evaluator.rescale_to_next_inplace(encrypted1);
 
-                // check correctness of modulus switching
+                // Check correctness of modulus switching
                 ASSERT_TRUE(encrypted1.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted1, plainRes);
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -2284,7 +2425,7 @@ namespace sealtest
             }
         }
         {
-            // multiplying two random vectors 100 times
+            // Multiplying two random vectors 100 times
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(128);
             parms.set_coeff_modulus(CoeffModulus::Create(128, { 60, 60, 60, 60, 60 }));
@@ -2328,9 +2469,9 @@ namespace sealtest
                 encryptor.encrypt(plain1, encrypted1);
                 encryptor.encrypt(plain2, encrypted2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted2.parms_id() == context.first_parms_id());
 
                 evaluator.multiply_inplace(encrypted1, encrypted2);
@@ -2342,12 +2483,11 @@ namespace sealtest
                 auto target_parms = context.first_context_data()->next_context_data()->next_context_data()->parms_id();
                 evaluator.rescale_to_inplace(encrypted1, target_parms);
 
-                // check correctness of modulus switching
+                // Check correctness of modulus switching
                 ASSERT_TRUE(encrypted1.parms_id() == target_parms);
 
                 decryptor.decrypt(encrypted1, plainRes);
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -2375,9 +2515,9 @@ namespace sealtest
                 encryptor.encrypt(plain1, encrypted1);
                 encryptor.encrypt(plain2, encrypted2);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted2.parms_id() == context.first_parms_id());
 
                 evaluator.multiply_inplace(encrypted1, encrypted2);
@@ -2391,12 +2531,11 @@ namespace sealtest
                 // Relinearize now
                 evaluator.relinearize_inplace(encrypted1, rlk);
 
-                // check correctness of modulus switching
+                // Check correctness of modulus switching
                 ASSERT_TRUE(encrypted1.parms_id() == target_parms);
 
                 decryptor.decrypt(encrypted1, plainRes);
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -2410,7 +2549,7 @@ namespace sealtest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            // squaring two random vectors 100 times
+            // Squaring two random vectors 100 times
             size_t slot_size = 64;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 50, 50, 50 }));
@@ -2448,19 +2587,18 @@ namespace sealtest
 
                 encryptor.encrypt(plain, encrypted);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
                 evaluator.square_inplace(encrypted);
                 evaluator.relinearize_inplace(encrypted, rlk);
                 evaluator.rescale_to_next_inplace(encrypted);
 
-                // check correctness of modulus switching
+                // Check correctness of modulus switching
                 ASSERT_TRUE(encrypted.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted, plainRes);
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -2469,7 +2607,7 @@ namespace sealtest
             }
         }
         {
-            // squaring two random vectors 100 times
+            // Squaring two random vectors 100 times
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(128);
             parms.set_coeff_modulus(CoeffModulus::Create(128, { 50, 50, 50 }));
@@ -2507,19 +2645,18 @@ namespace sealtest
 
                 encryptor.encrypt(plain, encrypted);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
                 evaluator.square_inplace(encrypted);
                 evaluator.relinearize_inplace(encrypted, rlk);
                 evaluator.rescale_to_next_inplace(encrypted);
 
-                // check correctness of modulus switching
+                // Check correctness of modulus switching
                 ASSERT_TRUE(encrypted.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted, plainRes);
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -2532,7 +2669,7 @@ namespace sealtest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            // modulus switching without rescaling for random vectors
+            // Modulus switching without rescaling for random vectors
             size_t slot_size = 64;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 60, 60, 60, 60, 60 }));
@@ -2568,14 +2705,14 @@ namespace sealtest
 
                 encryptor.encrypt(plain, encrypted);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
                 // Not inplace
                 Ciphertext destination;
                 evaluator.mod_switch_to_next(encrypted, destination);
 
-                // check correctness of modulus switching
+                // Check correctness of modulus switching
                 ASSERT_TRUE(destination.parms_id() == next_parms_id);
 
                 decryptor.decrypt(destination, plainRes);
@@ -2590,12 +2727,11 @@ namespace sealtest
                 // Inplace
                 evaluator.mod_switch_to_next_inplace(encrypted);
 
-                // check correctness of modulus switching
+                // Check correctness of modulus switching
                 ASSERT_TRUE(encrypted.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted, plainRes);
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(input[i].real() - output[i].real());
@@ -2604,7 +2740,7 @@ namespace sealtest
             }
         }
         {
-            // modulus switching without rescaling for random vectors
+            // Modulus switching without rescaling for random vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 40, 40, 40, 40, 40 }));
@@ -2640,14 +2776,14 @@ namespace sealtest
 
                 encryptor.encrypt(plain, encrypted);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
                 // Not inplace
                 Ciphertext destination;
                 evaluator.mod_switch_to_next(encrypted, destination);
 
-                // check correctness of modulus switching
+                // Check correctness of modulus switching
                 ASSERT_TRUE(destination.parms_id() == next_parms_id);
 
                 decryptor.decrypt(destination, plainRes);
@@ -2662,12 +2798,11 @@ namespace sealtest
                 // Inplace
                 evaluator.mod_switch_to_next_inplace(encrypted);
 
-                // check correctness of modulus switching
+                // Check correctness of modulus switching
                 ASSERT_TRUE(encrypted.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted, plainRes);
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(input[i].real() - output[i].real());
@@ -2676,7 +2811,7 @@ namespace sealtest
             }
         }
         {
-            // modulus switching without rescaling for random vectors
+            // Modulus switching without rescaling for random vectors
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(128);
             parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40, 40, 40 }));
@@ -2712,14 +2847,14 @@ namespace sealtest
 
                 encryptor.encrypt(plain, encrypted);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
                 // Not inplace
                 Ciphertext destination;
                 evaluator.mod_switch_to_next(encrypted, destination);
 
-                // check correctness of modulus switching
+                // Check correctness of modulus switching
                 ASSERT_TRUE(destination.parms_id() == next_parms_id);
 
                 decryptor.decrypt(destination, plainRes);
@@ -2734,12 +2869,11 @@ namespace sealtest
                 // Inplace
                 evaluator.mod_switch_to_next_inplace(encrypted);
 
-                // check correctness of modulus switching
+                // Check correctness of modulus switching
                 ASSERT_TRUE(encrypted.parms_id() == next_parms_id);
 
                 decryptor.decrypt(encrypted, plainRes);
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(input[i].real() - output[i].real());
@@ -2752,7 +2886,7 @@ namespace sealtest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            // multiplication and addition without rescaling for random vectors
+            // Multiplication and addition without rescaling for random vectors
             size_t slot_size = 64;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 50, 50, 50 }));
@@ -2801,32 +2935,29 @@ namespace sealtest
                 encryptor.encrypt(plain2, encrypted2);
                 encryptor.encrypt(plain3, encrypted3);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted2.parms_id() == context.first_parms_id());
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted3.parms_id() == context.first_parms_id());
 
-                // enc1*enc2
+                // Enc1*enc2
                 evaluator.multiply_inplace(encrypted1, encrypted2);
                 evaluator.relinearize_inplace(encrypted1, rlk);
                 evaluator.rescale_to_next_inplace(encrypted1);
 
-                // check correctness of modulus switching with rescaling
+                // Check correctness of modulus switching with rescaling
                 ASSERT_TRUE(encrypted1.parms_id() == next_parms_id);
 
-                // move enc3 to the level of enc1 * enc2
+                // Move enc3 to the level of enc1 * enc2
                 evaluator.rescale_to_inplace(encrypted3, next_parms_id);
 
-                // enc1*enc2 + enc3
+                // Enc1*enc2 + enc3
                 evaluator.add_inplace(encrypted1, encrypted3);
 
-                // decryption
                 decryptor.decrypt(encrypted1, plainRes);
-                // decoding
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -2835,7 +2966,7 @@ namespace sealtest
             }
         }
         {
-            // multiplication and addition without rescaling for random vectors
+            // Multiplication and addition without rescaling for random vectors
             size_t slot_size = 16;
             parms.set_poly_modulus_degree(128);
             parms.set_coeff_modulus(CoeffModulus::Create(128, { 50, 50, 50 }));
@@ -2884,32 +3015,29 @@ namespace sealtest
                 encryptor.encrypt(plain2, encrypted2);
                 encryptor.encrypt(plain3, encrypted3);
 
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted2.parms_id() == context.first_parms_id());
-                // check correctness of encryption
+                // Check correctness of encryption
                 ASSERT_TRUE(encrypted3.parms_id() == context.first_parms_id());
 
-                // enc1*enc2
+                // Enc1*enc2
                 evaluator.multiply_inplace(encrypted1, encrypted2);
                 evaluator.relinearize_inplace(encrypted1, rlk);
                 evaluator.rescale_to_next_inplace(encrypted1);
 
-                // check correctness of modulus switching with rescaling
+                // Check correctness of modulus switching with rescaling
                 ASSERT_TRUE(encrypted1.parms_id() == next_parms_id);
 
-                // move enc3 to the level of enc1 * enc2
+                // Move enc3 to the level of enc1 * enc2
                 evaluator.rescale_to_inplace(encrypted3, next_parms_id);
 
-                // enc1*enc2 + enc3
+                // Enc1*enc2 + enc3
                 evaluator.add_inplace(encrypted1, encrypted3);
 
-                // decryption
                 decryptor.decrypt(encrypted1, plainRes);
-                // decoding
                 encoder.decode(plainRes, output);
-
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     auto tmp = abs(expected[i].real() - output[i].real());
@@ -2922,7 +3050,7 @@ namespace sealtest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            // maximal number of slots
+            // Maximal number of slots
             size_t slot_size = 4;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 40, 40, 40, 40 }));
@@ -3070,7 +3198,7 @@ namespace sealtest
     {
         EncryptionParameters parms(scheme_type::CKKS);
         {
-            // maximal number of slots
+            // Maximal number of slots
             size_t slot_size = 4;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 40, 40, 40, 40 }));
@@ -3810,10 +3938,10 @@ namespace sealtest
     }
     TEST(EvaluatorTest, BFVEncryptModSwitchToNextDecrypt)
     {
-        // the common parameters: the plaintext and the polynomial moduli
+        // The common parameters: the plaintext and the polynomial moduli
         Modulus plain_modulus(1 << 6);
 
-        // the parameters and the context of the higher level
+        // The parameters and the context of the higher level
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
@@ -3893,10 +4021,10 @@ namespace sealtest
 
     TEST(EvaluatorTest, BFVEncryptModSwitchToDecrypt)
     {
-        // the common parameters: the plaintext and the polynomial moduli
+        // The common parameters: the plaintext and the polynomial moduli
         Modulus plain_modulus(1 << 6);
 
-        // the parameters and the context of the higher level
+        // The parameters and the context of the higher level
         EncryptionParameters parms(scheme_type::BFV);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);

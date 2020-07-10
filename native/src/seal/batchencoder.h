@@ -138,25 +138,6 @@ namespace seal
         void encode(gsl::span<const std::int64_t> values, Plaintext &destination);
 #endif
         /**
-        Creates a plaintext from a given matrix. This function "batches" a given matrix
-        of integers modulo the plaintext modulus in-place into a plaintext ready to be
-        encrypted. The matrix is given as a plaintext element whose first N/2 coefficients
-        represent the first row of the matrix, and the second N/2 coefficients represent the
-        second row, where N denotes the degree of the polynomial modulus. The input plaintext
-        must have degress less than the polynomial modulus, and coefficients less than the
-        plaintext modulus, i.e. it must be a valid plaintext for the encryption parameters.
-        Dynamic memory allocations in the process are allocated from the memory pool pointed
-        to by the given MemoryPoolHandle.
-
-        @param[in] plain The matrix of integers modulo plaintext modulus to batch
-        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if plain is not valid for the encryption parameters
-        @throws std::invalid_argument if plain is in NTT form
-        @throws std::invalid_argument if pool is uninitialized
-        */
-        void encode(Plaintext &plain, MemoryPoolHandle pool = MemoryManager::GetPool());
-
-        /**
         Inverse of encode. This function "unbatches" a given plaintext into a matrix
         of integers modulo the plaintext modulus, and stores the result in the destination
         parameter. The input plaintext must have degress less than the polynomial modulus,
@@ -234,22 +215,6 @@ namespace seal
             const Plaintext &plain, gsl::span<std::int64_t> destination,
             MemoryPoolHandle pool = MemoryManager::GetPool());
 #endif
-        /**
-        Inverse of encode. This function "unbatches" a given plaintext in-place into
-        a matrix of integers modulo the plaintext modulus. The input plaintext must have
-        degress less than the polynomial modulus, and coefficients less than the plaintext
-        modulus, i.e. it must be a valid plaintext for the encryption parameters. Dynamic
-        memory allocations in the process are allocated from the memory pool pointed to by
-        the given MemoryPoolHandle.
-
-        @param[in] plain The plaintext polynomial to unbatch
-        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if plain is not valid for the encryption parameters
-        @throws std::invalid_argument if plain is in NTT form
-        @throws std::invalid_argument if pool is uninitialized
-        */
-        void decode(Plaintext &plain, MemoryPoolHandle pool = MemoryManager::GetPool());
-
         /**
         Returns the number of slots.
         */

@@ -98,8 +98,7 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         */
         explicit Ciphertext(
-            const SEALContext &context, parms_id_type parms_id,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            const SEALContext &context, parms_id_type parms_id, MemoryPoolHandle pool = MemoryManager::GetPool())
             : data_(std::move(pool))
         {
             // Allocate memory but don't resize

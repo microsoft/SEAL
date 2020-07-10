@@ -85,8 +85,7 @@ namespace sealtest
                                       const SEALContext &context) {
             auto compare_error = [](const Ciphertext &a_ct, const Ciphertext &b_ct, const SecretKey &sk1,
                                     const SEALContext &context1) {
-                auto get_error = [](const Ciphertext &encrypted, const SecretKey &sk2,
-                                    const SEALContext &context2) {
+                auto get_error = [](const Ciphertext &encrypted, const SecretKey &sk2, const SEALContext &context2) {
                     auto pool = MemoryManager::GetPool();
                     auto &context_data = *context2.get_context_data(encrypted.parms_id());
                     auto &parms = context_data.parms();

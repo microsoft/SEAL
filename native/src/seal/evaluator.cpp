@@ -22,9 +22,29 @@ namespace seal
     namespace
     {
         template <typename T, typename S>
-        inline bool are_same_scale(const T &value1, const S &value2) noexcept
+        SEAL_NODISCARD inline bool are_same_scale(const T &value1, const S &value2) noexcept
         {
             return util::are_close<double>(value1.scale(), value2.scale());
+        }
+
+        SEAL_NODISCARD inline bool is_scale_within_bounds(
+            double scale, const SEALContext::ContextData &context_data) noexcept
+        {
+            int scale_bit_count_bound = 0;
+            switch (context_data.parms().scheme())
+            {
+            case scheme_type::BFV:
+                scale_bit_count_bound = context_data.parms().plain_modulus().bit_count();
+                break;
+            case scheme_type::CKKS:
+                scale_bit_count_bound = context_data.total_coeff_modulus_bit_count();
+                break;
+            default:
+                // Unsupported scheme; check will fail
+                scale_bit_count_bound = -1;
+            };
+
+            return !(scale <= 0 || (static_cast<int>(log2(scale)) >= scale_bit_count_bound));
         }
     } // namespace
 
@@ -279,8 +299,16 @@ namespace seal
         size_t base_q_size = parms.coeff_modulus().size();
         size_t encrypted1_size = encrypted1.size();
         size_t encrypted2_size = encrypted2.size();
-
         uint64_t plain_modulus = parms.plain_modulus().value();
+
+        double new_scale = encrypted1.scale() * encrypted2.scale();
+
+        // Check that scale is positive and not too large
+        if (new_scale <= 0 || (static_cast<int>(log2(new_scale)) >= parms.plain_modulus().bit_count()))
+        {
+            throw invalid_argument("scale out of bounds");
+        }
+
         auto rns_tool = context_data.rns_tool();
         size_t base_Bsk_size = rns_tool->base_Bsk()->size();
         size_t base_Bsk_m_tilde_size = rns_tool->base_Bsk_m_tilde()->size();
@@ -437,6 +465,9 @@ namespace seal
             // Step (8): use Shenoy-Kumaresan method to convert the result to base q and write to encrypted1
             rns_tool->fastbconv_sk(temp_Bsk, get<2>(I), pool);
         });
+
+        // Set the scale
+        encrypted1.scale() = new_scale;
     }
 
     void Evaluator::ckks_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool)
@@ -455,9 +486,7 @@ namespace seal
         size_t encrypted2_size = encrypted2.size();
 
         double new_scale = encrypted1.scale() * encrypted2.scale();
-
-        // Check that scale is positive and not too large
-        if (new_scale <= 0 || (static_cast<int>(log2(new_scale)) >= context_data.total_coeff_modulus_bit_count()))
+        if (!is_scale_within_bounds(new_scale, context_data))
         {
             throw invalid_argument("scale out of bounds");
         }
@@ -565,8 +594,14 @@ namespace seal
         size_t coeff_count = parms.poly_modulus_degree();
         size_t base_q_size = parms.coeff_modulus().size();
         size_t encrypted_size = encrypted.size();
-
         uint64_t plain_modulus = parms.plain_modulus().value();
+
+        double new_scale = encrypted.scale();
+        if (!is_scale_within_bounds(new_scale, context_data))
+        {
+            throw invalid_argument("scale out of bounds");
+        }
+
         auto rns_tool = context_data.rns_tool();
         size_t base_Bsk_size = rns_tool->base_Bsk()->size();
         size_t base_Bsk_m_tilde_size = rns_tool->base_Bsk_m_tilde()->size();
@@ -694,6 +729,9 @@ namespace seal
             // Step (8): use Shenoy-Kumaresan method to convert the result to base q and write to encrypted1
             rns_tool->fastbconv_sk(temp_Bsk, get<2>(I), pool);
         });
+
+        // Set the scale
+        encrypted.scale() = new_scale;
     }
 
     void Evaluator::ckks_square(Ciphertext &encrypted, MemoryPoolHandle pool)
@@ -718,9 +756,7 @@ namespace seal
         }
 
         double new_scale = encrypted.scale() * encrypted.scale();
-
-        // Check that scale is positive and not too large
-        if (new_scale <= 0 || (static_cast<int>(log2(new_scale)) >= context_data.total_coeff_modulus_bit_count()))
+        if (!is_scale_within_bounds(new_scale, context_data))
         {
             throw invalid_argument("scale out of bounds");
         }
@@ -899,9 +935,7 @@ namespace seal
         auto &next_context_data = *context_data_ptr->next_context_data();
         auto &next_parms = next_context_data.parms();
 
-        // Check that scale is positive and not too large
-        if (encrypted.scale() <= 0 ||
-            (static_cast<int>(log2(encrypted.scale())) >= next_context_data.total_coeff_modulus_bit_count()))
+        if (!is_scale_within_bounds(encrypted.scale(), next_context_data))
         {
             throw invalid_argument("scale out of bounds");
         }
@@ -969,9 +1003,7 @@ namespace seal
         auto &next_context_data = *context_data_ptr->next_context_data();
         auto &next_parms = context_data_ptr->next_context_data()->parms();
 
-        // Check that scale is positive and not too large
-        if (plain.scale() <= 0 ||
-            (static_cast<int>(log2(plain.scale())) >= next_context_data.total_coeff_modulus_bit_count()))
+        if (!is_scale_within_bounds(plain.scale(), next_context_data))
         {
             throw invalid_argument("scale out of bounds");
         }
@@ -1357,6 +1389,61 @@ namespace seal
 #endif
     }
 
+    void Evaluator::add_plain_inplace(Plaintext &plain1, const Plaintext &plain2)
+    {
+        // Verify parameters.
+        if (!is_metadata_valid_for(plain1, context_) || !is_buffer_valid(plain1))
+        {
+            throw invalid_argument("plain1 is not valid for encryption parameters");
+        }
+        if (!is_metadata_valid_for(plain2, context_) || !is_buffer_valid(plain2))
+        {
+            throw invalid_argument("plain2 is not valid for encryption parameters");
+        }
+
+        bool ntt_form = plain1.is_ntt_form();
+        if (ntt_form != plain2.is_ntt_form())
+        {
+            throw invalid_argument("NTT form mismatch");
+        }
+        if (ntt_form && (plain1.parms_id() != plain2.parms_id()))
+        {
+            throw invalid_argument("plain1 and plain2 parameter mismatch");
+        }
+        if (!are_same_scale(plain1, plain2))
+        {
+            throw invalid_argument("scale mismatch");
+        }
+
+        if (ntt_form)
+        {
+            // Extract encryption parameters.
+            auto &parms = context_.get_context_data(plain1.parms_id())->parms();
+            auto &coeff_modulus = parms.coeff_modulus();
+            size_t coeff_count = parms.poly_modulus_degree();
+            size_t coeff_modulus_size = coeff_modulus.size();
+
+            RNSIter plain1_iter(plain1.data(), coeff_count);
+            ConstRNSIter plain2_iter(plain2.data(), coeff_count);
+
+            // Add the RNS polynomials coefficient-wise
+            add_poly_coeffmod(plain1_iter, plain2_iter, coeff_modulus_size, coeff_modulus, plain1_iter);
+        }
+        else
+        {
+            // Extract encryption parameters.
+            auto &parms = context_.first_context_data()->parms();
+            auto &plain_modulus = parms.plain_modulus();
+
+            // Resize plain1 to the larger of the input sizes; pad with zeros if size is extended
+            size_t coeff_count_max = max(plain1.coeff_count(), plain2.coeff_count());
+            plain1.resize(coeff_count_max);
+
+            // Add the polynomials modulo plain_modulus
+            add_poly_coeffmod(plain1.data(), plain2.data(), plain2.coeff_count(), plain_modulus, plain1.data());
+        }
+    }
+
     void Evaluator::sub_plain_inplace(Ciphertext &encrypted, const Plaintext &plain)
     {
         // Verify parameters.
@@ -1431,6 +1518,61 @@ namespace seal
 #endif
     }
 
+    void Evaluator::sub_plain_inplace(Plaintext &plain1, const Plaintext &plain2)
+    {
+        // Verify parameters.
+        if (!is_metadata_valid_for(plain1, context_) || !is_buffer_valid(plain1))
+        {
+            throw invalid_argument("plain1 is not valid for encryption parameters");
+        }
+        if (!is_metadata_valid_for(plain2, context_) || !is_buffer_valid(plain2))
+        {
+            throw invalid_argument("plain2 is not valid for encryption parameters");
+        }
+
+        bool ntt_form = plain1.is_ntt_form();
+        if (ntt_form != plain2.is_ntt_form())
+        {
+            throw invalid_argument("NTT form mismatch");
+        }
+        if (ntt_form && (plain1.parms_id() != plain2.parms_id()))
+        {
+            throw invalid_argument("plain1 and plain2 parameter mismatch");
+        }
+        if (!are_same_scale(plain1, plain2))
+        {
+            throw invalid_argument("scale mismatch");
+        }
+
+        if (ntt_form)
+        {
+            // Extract encryption parameters.
+            auto &parms = context_.get_context_data(plain1.parms_id())->parms();
+            auto &coeff_modulus = parms.coeff_modulus();
+            size_t coeff_count = parms.poly_modulus_degree();
+            size_t coeff_modulus_size = coeff_modulus.size();
+
+            RNSIter plain1_iter(plain1.data(), coeff_count);
+            ConstRNSIter plain2_iter(plain2.data(), coeff_count);
+
+            // Subtract the RNS polynomials coefficient-wise
+            sub_poly_coeffmod(plain1_iter, plain2_iter, coeff_modulus_size, coeff_modulus, plain1_iter);
+        }
+        else
+        {
+            // Extract encryption parameters.
+            auto &parms = context_.first_context_data()->parms();
+            auto &plain_modulus = parms.plain_modulus();
+
+            // Resize plain1 to the larger of the input sizes; pad with zeros if size is extended
+            size_t coeff_count_max = max(plain1.coeff_count(), plain2.coeff_count());
+            plain1.resize(coeff_count_max);
+
+            // Subtract the polynomials modulo plain_modulus
+            sub_poly_coeffmod(plain1.data(), plain2.data(), plain2.coeff_count(), plain_modulus, plain1.data());
+        }
+    }
+
     void Evaluator::multiply_plain_inplace(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool)
     {
         // Verify parameters.
@@ -1477,9 +1619,9 @@ namespace seal
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_size = coeff_modulus.size();
 
-        auto plain_upper_half_threshold = context_data.plain_upper_half_threshold();
+        uint64_t plain_upper_half_threshold = context_data.plain_upper_half_threshold();
         auto plain_upper_half_increment = context_data.plain_upper_half_increment();
-        auto ntt_tables = context_data.small_ntt_tables();
+        auto ntt_tables = iter(context_data.small_ntt_tables());
 
         size_t encrypted_size = encrypted.size();
         size_t plain_coeff_count = plain.coeff_count();
@@ -1492,15 +1634,10 @@ namespace seal
         }
 
         double new_scale = encrypted.scale() * plain.scale();
-
-        // Check that scale is positive and not too large
-        if (new_scale <= 0 || (static_cast<int>(log2(new_scale)) >= context_data.total_coeff_modulus_bit_count()))
+        if (!is_scale_within_bounds(new_scale, context_data))
         {
             throw invalid_argument("scale out of bounds");
         }
-
-        // Set the scale
-        encrypted.scale() = new_scale;
 
         /*
         Optimizations for constant / monomial multiplication can lead to the presence of a timing side-channel in
@@ -1542,6 +1679,9 @@ namespace seal
                 negacyclic_multiply_poly_mono_coeffmod(
                     encrypted, encrypted_size, plain[mono_exponent], mono_exponent, coeff_modulus, encrypted, pool);
             }
+
+            // Set the scale
+            encrypted.scale() = new_scale;
 
             return;
         }
@@ -1594,6 +1734,9 @@ namespace seal
                 inverse_ntt_negacyclic_harvey(get<0>(J), get<3>(J));
             });
         });
+
+        // Set the scale
+        encrypted.scale() = new_scale;
     }
 
     void Evaluator::multiply_plain_ntt(Ciphertext &encrypted_ntt, const Plaintext &plain_ntt)
@@ -1623,9 +1766,7 @@ namespace seal
         }
 
         double new_scale = encrypted_ntt.scale() * plain_ntt.scale();
-
-        // Check that scale is positive and not too large
-        if (new_scale <= 0 || (static_cast<int>(log2(new_scale)) >= context_data.total_coeff_modulus_bit_count()))
+        if (!is_scale_within_bounds(new_scale, context_data))
         {
             throw invalid_argument("scale out of bounds");
         }
@@ -1637,6 +1778,53 @@ namespace seal
 
         // Set the scale
         encrypted_ntt.scale() = new_scale;
+    }
+
+    void Evaluator::multiply_plain_inplace(Plaintext &plain1, const Plaintext &plain2)
+    {
+        // Verify parameters.
+        if (!is_metadata_valid_for(plain1, context_) || !is_buffer_valid(plain1))
+        {
+            throw invalid_argument("plain1 is not valid for encryption parameters");
+        }
+        if (!is_metadata_valid_for(plain2, context_) || !is_buffer_valid(plain2))
+        {
+            throw invalid_argument("plain2 is not valid for encryption parameters");
+        }
+        if (!plain1.is_ntt_form())
+        {
+            throw invalid_argument("plain1 is not in NTT form");
+        }
+        if (!plain2.is_ntt_form())
+        {
+            throw invalid_argument("plain2 is not in NTT form");
+        }
+        if (plain1.parms_id() != plain2.parms_id())
+        {
+            throw invalid_argument("plain1 and plain2 parameter mismatch");
+        }
+
+        // Extract encryption parameters.
+        auto &context_data = *context_.get_context_data(plain1.parms_id());
+        auto &parms = context_data.parms();
+        auto &coeff_modulus = parms.coeff_modulus();
+        size_t coeff_count = parms.poly_modulus_degree();
+        size_t coeff_modulus_size = coeff_modulus.size();
+
+        double new_scale = plain1.scale() * plain2.scale();
+        if (!is_scale_within_bounds(new_scale, context_data))
+        {
+            throw invalid_argument("scale out of bounds");
+        }
+
+        RNSIter plain1_iter(plain1.data(), coeff_count);
+        ConstRNSIter plain2_iter(plain2.data(), coeff_count);
+
+        // Multiply the polynomials coefficient-wise modulo coeff_modulus
+        dyadic_product_coeffmod(plain1_iter, plain2_iter, coeff_modulus_size, coeff_modulus, plain1_iter);
+
+        // Set the scale
+        plain1.scale() = new_scale;
     }
 
     void Evaluator::transform_to_ntt_inplace(Plaintext &plain, parms_id_type parms_id, MemoryPoolHandle pool)
@@ -1669,10 +1857,10 @@ namespace seal
         size_t coeff_modulus_size = coeff_modulus.size();
         size_t plain_coeff_count = plain.coeff_count();
 
-        auto plain_upper_half_threshold = context_data.plain_upper_half_threshold();
+        uint64_t plain_upper_half_threshold = context_data.plain_upper_half_threshold();
         auto plain_upper_half_increment = context_data.plain_upper_half_increment();
 
-        auto coeff_modulus_ntt_tables = context_data.small_ntt_tables();
+        auto ntt_tables = iter(context_data.small_ntt_tables());
 
         // Size check
         if (!product_fits_in(coeff_count, coeff_modulus_size))
@@ -1728,7 +1916,7 @@ namespace seal
         }
 
         // Transform to NTT domain
-        ntt_negacyclic_harvey(plain_iter, coeff_modulus_size, coeff_modulus_ntt_tables);
+        ntt_negacyclic_harvey(plain_iter, coeff_modulus_size, ntt_tables);
 
         plain.parms_id() = parms_id;
     }
@@ -1759,7 +1947,7 @@ namespace seal
         size_t coeff_modulus_size = coeff_modulus.size();
         size_t encrypted_size = encrypted.size();
 
-        auto coeff_modulus_ntt_tables = context_data.small_ntt_tables();
+        auto ntt_tables = iter(context_data.small_ntt_tables());
 
         // Size check
         if (!product_fits_in(coeff_count, coeff_modulus_size))
@@ -1768,7 +1956,7 @@ namespace seal
         }
 
         // Transform each polynomial to NTT domain
-        ntt_negacyclic_harvey(encrypted, encrypted_size, coeff_modulus_ntt_tables);
+        ntt_negacyclic_harvey(encrypted, encrypted_size, ntt_tables);
 
         // Finally change the is_ntt_transformed flag
         encrypted.is_ntt_form() = true;
@@ -1806,7 +1994,7 @@ namespace seal
         size_t coeff_modulus_size = parms.coeff_modulus().size();
         size_t encrypted_ntt_size = encrypted_ntt.size();
 
-        auto coeff_modulus_ntt_tables = context_data.small_ntt_tables();
+        auto ntt_tables = iter(context_data.small_ntt_tables());
 
         // Size check
         if (!product_fits_in(coeff_count, coeff_modulus_size))
@@ -1815,7 +2003,7 @@ namespace seal
         }
 
         // Transform each polynomial from NTT domain
-        inverse_ntt_negacyclic_harvey(encrypted_ntt, encrypted_ntt_size, coeff_modulus_ntt_tables);
+        inverse_ntt_negacyclic_harvey(encrypted_ntt, encrypted_ntt_size, ntt_tables);
 
         // Finally change the is_ntt_transformed flag
         encrypted_ntt.is_ntt_form() = false;
@@ -2043,7 +2231,7 @@ namespace seal
         auto &key_modulus = key_parms.coeff_modulus();
         size_t key_modulus_size = key_modulus.size();
         size_t rns_modulus_size = decomp_modulus_size + 1;
-        auto key_ntt_tables = key_context_data.small_ntt_tables();
+        auto key_ntt_tables = iter(key_context_data.small_ntt_tables());
         auto modswitch_factors = key_context_data.rns_tool()->inv_q_last_mod_q();
 
         // Size check
