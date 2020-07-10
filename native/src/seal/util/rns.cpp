@@ -779,18 +779,18 @@ namespace seal
                 }
 
                 // Lazy subtraction here. ntt_negacyclic_harvey_lazy can take 0 < x < 4*qi input.
-                const uint64_t neg_half_mod = get<2>(I).value() - barrett_reduce_64(half, get<2>(I));
+                uint64_t neg_half_mod = get<2>(I).value() - barrett_reduce_64(half, get<2>(I));
 
                 // Note: lambda function parameter must be passed by reference here
                 SEAL_ITERATE(temp, coeff_count_, [&](auto &J) { J += neg_half_mod; });
 #if SEAL_USER_MOD_BIT_COUNT_MAX <= 60
                 // Since SEAL uses at most 60-bit moduli, 8*qi < 2^63.
                 // This ntt_negacyclic_harvey_lazy results in [0, 4*qi).
-                const uint64_t qi_lazy = get<2>(I).value() << 2;
+                uint64_t qi_lazy = get<2>(I).value() << 2;
                 ntt_negacyclic_harvey_lazy(temp, get<3>(I));
 #else
                 // 2^60 < pi < 2^62, then 4*pi < 2^64, we perfrom one reduction from [0, 4*qi) to [0, 2*qi) after ntt.
-                const uint64_t qi_lazy = get<2>(I).value() << 1;
+                uint64_t qi_lazy = get<2>(I).value() << 1;
                 ntt_negacyclic_harvey_lazy(temp, get<3>(I));
 
                 // Note: lambda function parameter must be passed by reference here
