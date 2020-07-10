@@ -16,7 +16,7 @@ using namespace seal::util;
 
 namespace seal
 {
-    BatchEncoder::BatchEncoder(SEALContext context) : context_(context)
+    BatchEncoder::BatchEncoder(const SEALContext &context) : context_(context)
     {
         // Verify parameters
         if (!context_.parameters_set())

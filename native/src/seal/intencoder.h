@@ -40,7 +40,7 @@ namespace seal
         @param[in] context The SEALContext
         @throws std::invalid_argument if the plain_modulus set in context is not at least 2
         */
-        IntegerEncoder(SEALContext context);
+        IntegerEncoder(const SEALContext &context);
 
         /**
         Destroys the IntegerEncoder.

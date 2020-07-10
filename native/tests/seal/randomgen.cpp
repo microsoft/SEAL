@@ -52,6 +52,8 @@ namespace sealtest
     TEST(RandomGenerator, UniformRandomCreateDefault)
     {
         shared_ptr<UniformRandomGenerator> generator(UniformRandomGeneratorFactory::DefaultFactory()->create());
+        ASSERT_TRUE(UniformRandomGeneratorFactory::DefaultFactory()->use_random_seed());
+
         bool lower_half = false;
         bool upper_half = false;
         bool even = false;
@@ -82,6 +84,23 @@ namespace sealtest
         ASSERT_TRUE(odd);
     }
 
+    TEST(RandomGenerator, RandomGeneratorFactorySeed)
+    {
+        shared_ptr<UniformRandomGeneratorFactory> factory(make_shared<BlakePRNGFactory>());
+        ASSERT_TRUE(factory->use_random_seed());
+
+        factory = make_shared<BlakePRNGFactory>(random_seed_type{});
+        ASSERT_FALSE(factory->use_random_seed());
+        ASSERT_EQ(random_seed_type{} , factory->default_seed());
+
+        factory = make_shared<BlakePRNGFactory>(random_seed_type{1, 2, 3, 4, 5, 6, 7, 8});
+        ASSERT_FALSE(factory->use_random_seed());
+        ASSERT_EQ(random_seed_type({ 1, 2, 3, 4, 5, 6, 7, 8 }), factory->default_seed());
+
+        factory = make_shared<BlakePRNGFactory>();
+        ASSERT_TRUE(factory->use_random_seed());
+    }
+
     TEST(RandomGenerator, SequentialRandomGenerator)
     {
         unique_ptr<UniformRandomGenerator> sgen = make_unique<SequentialRandomGenerator>();
@@ -108,6 +127,7 @@ namespace sealtest
     TEST(RandomGenerator, SeededRNG)
     {
         auto generator1(UniformRandomGeneratorFactory::DefaultFactory()->create({}));
+
         array<uint32_t, 20> values1;
         generator1->generate(sizeof(values1), reinterpret_cast<SEAL_BYTE *>(values1.data()));
 

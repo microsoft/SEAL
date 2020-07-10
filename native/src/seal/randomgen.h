@@ -183,6 +183,25 @@ namespace seal
         */
         static auto DefaultFactory() -> const std::shared_ptr<UniformRandomGeneratorFactory>;
 
+        /**
+        Returns whether the random number generator factory creates random number
+        generators seeded with a random seed, or if a default seed is used.
+        */
+        SEAL_NODISCARD inline bool use_random_seed() noexcept
+        {
+            return use_random_seed_;
+        }
+
+        /**
+        Returns the default seed used to seed every random number generator created
+        by this random number generator factory. If use_random_seed() is false, then
+        the returned seed has no meaning.
+        */
+        SEAL_NODISCARD inline random_seed_type default_seed() noexcept
+        {
+            return default_seed_;
+        }
+
     protected:
         SEAL_NODISCARD virtual auto create_impl(random_seed_type seed) -> std::shared_ptr<UniformRandomGenerator> = 0;
 

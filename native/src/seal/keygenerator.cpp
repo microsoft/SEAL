@@ -20,7 +20,7 @@ using namespace seal::util;
 
 namespace seal
 {
-    KeyGenerator::KeyGenerator(SEALContext context) : context_(context)
+    KeyGenerator::KeyGenerator(const SEALContext &context) : context_(context)
     {
         // Verify parameters
         if (!context_.parameters_set())
@@ -35,7 +35,7 @@ namespace seal
         generate_sk();
     }
 
-    KeyGenerator::KeyGenerator(SEALContext context, const SecretKey &secret_key) : context_(context)
+    KeyGenerator::KeyGenerator(const SEALContext &context, const SecretKey &secret_key) : context_(context)
     {
         // Verify parameters
         if (!context_.parameters_set())
@@ -71,11 +71,9 @@ namespace seal
             sk_generated_ = false;
             secret_key_.data().resize(mul_safe(coeff_count, coeff_modulus_size));
 
-            shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
-
             // Generate secret key
             RNSIter secret_key(secret_key_.data().data(), coeff_count);
-            sample_poly_ternary(random, parms, secret_key);
+            sample_poly_ternary(parms.random_generator()->create(), parms, secret_key);
 
             // Transform the secret s into NTT representation.
             auto ntt_tables = context_data.small_ntt_tables();
@@ -118,7 +116,6 @@ namespace seal
         // PublicKey data allocated from pool given by MemoryManager::GetPool.
         PublicKey public_key;
 
-        shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
         encrypt_zero_symmetric(secret_key_, context_, context_data.parms_id(), true, false, public_key.data());
 
         // Set the parms_id for public key
@@ -150,8 +147,6 @@ namespace seal
         {
             throw logic_error("invalid parameters");
         }
-
-        shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
 
         // Make sure we have enough secret keys computed
         compute_secret_key_array(context_data, count + 1);
@@ -224,7 +219,6 @@ namespace seal
             // Initialize Galois key
             // This is the location in the galois_keys vector
             size_t index = GaloisKeys::get_index(galois_elt);
-            shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
 
             // Create Galois keys.
             generate_one_kswitch_key(rotated_secret_key, galois_keys.data()[index], save_seed);

@@ -38,7 +38,7 @@ namespace seal
         @param[in] context The SEALContext
         @throws std::invalid_argument if the encryption parameters are not valid
         */
-        KeyGenerator(SEALContext context);
+        KeyGenerator(const SEALContext &context);
 
         /**
         Creates an KeyGenerator instance initialized with the specified SEALContext
@@ -53,7 +53,7 @@ namespace seal
         @throws std::invalid_argument if secret_key is not valid for encryption
         parameters
         */
-        KeyGenerator(SEALContext context, const SecretKey &secret_key);
+        KeyGenerator(const SEALContext &context, const SecretKey &secret_key);
 
         /**
         Returns a const reference to the secret key.

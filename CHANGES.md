@@ -11,6 +11,7 @@ Most users should probably avoid this functionality; usually it's much more effi
 However, since CKKS encoding can be slow, there are a situations where it can be advantageous to instead operate on `Plaintext` objects.
 - Removed `BatchEncoder` API for encoding and decoding `Plaintext` objects inplace.
 This is because a `Plaintext` object with slot-data written into the coefficients is (confusingly) not valid to be used for encryption or unencrypted arithmetic.
+- Added API to `UniformRandomGeneratorFactory` to find whether the factory uses a default seed (absolutely only for debugging purposes!), and to retrieve that seed.
 
 ### Other
 
@@ -29,7 +30,7 @@ As a result, a plaintext in NTT form could not be used as the destination for de
 
 - Added a struct `seal::util::MultiplyUIntModOperand` in [native/src/seal/util/uintarithsmallmod.h](native/src/seal/util/uintarithsmallmod.h).
 This struct handles precomputation data for Barrett style modular multiplication.
-- Added new overloads for modular arithmetic in [native/src/seal/util/uintarithsmallmod.h](native/src/seal/util/uintarithsmallmod.h) where one operand is replaced by a `MultiplyUIntModOperand` instance for improved performance when the same operand is used repeatedly. 
+- Added new overloads for modular arithmetic in [native/src/seal/util/uintarithsmallmod.h](native/src/seal/util/uintarithsmallmod.h) where one operand is replaced by a `MultiplyUIntModOperand` instance for improved performance when the same operand is used repeatedly.
 - Changed the name of `seal::util::barrett_reduce_63` to `seal::util::barrett_reduce_64`; the name was misleading and only referred to the size of the modulus.
 - Added `seal::util::StrideIter` in [native/src/seal/util/iterator.h](native/src/seal/util/iterator.h).
 - Added macros `SEAL_ALLOCATE_GET_PTR_ITER` and `SEAL_ALLOCATE_GET_STRIDE_ITER` in [native/src/seal/util/defines.h](native/src/seal/util/defines.h).

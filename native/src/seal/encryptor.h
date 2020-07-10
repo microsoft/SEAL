@@ -56,7 +56,7 @@ namespace seal
         @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if public_key is not valid
         */
-        Encryptor(SEALContext context, const PublicKey &public_key);
+        Encryptor(const SEALContext &context, const PublicKey &public_key);
 
         /**
         Creates an Encryptor instance initialized with the specified SEALContext
@@ -67,7 +67,7 @@ namespace seal
         @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if secret_key is not valid
         */
-        Encryptor(SEALContext context, const SecretKey &secret_key);
+        Encryptor(const SEALContext &context, const SecretKey &secret_key);
 
         /**
         Creates an Encryptor instance initialized with the specified SEALContext,
@@ -79,7 +79,7 @@ namespace seal
         @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if public_key or secret_key is not valid
         */
-        Encryptor(SEALContext context, const PublicKey &public_key, const SecretKey &secret_key);
+        Encryptor(const SEALContext &context, const PublicKey &public_key, const SecretKey &secret_key);
 
         /**
         Give a new instance of public key.

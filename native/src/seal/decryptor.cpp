@@ -53,7 +53,7 @@ namespace seal
         }
     } // namespace
 
-    Decryptor::Decryptor(SEALContext context, const SecretKey &secret_key) : context_(context)
+    Decryptor::Decryptor(const SEALContext &context, const SecretKey &secret_key) : context_(context)
     {
         // Verify parameters
         if (!context_.parameters_set())
