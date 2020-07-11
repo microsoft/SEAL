@@ -164,7 +164,7 @@ void example_serialization()
         */
         parms_stream.seekg(0, parms_stream.beg);
 
-        auto context = SEALContext::Create(parms);
+        SEALContext context(parms);
 
         KeyGenerator keygen(context);
         auto sk = keygen.secret_key();
@@ -298,7 +298,7 @@ void example_serialization()
         EncryptionParameters parms;
         parms.load(parms_stream);
         parms_stream.seekg(0, parms_stream.beg);
-        auto context = SEALContext::Create(parms);
+        SEALContext context(parms);
 
         Evaluator evaluator(context);
 
@@ -347,7 +347,7 @@ void example_serialization()
         EncryptionParameters parms;
         parms.load(parms_stream);
         parms_stream.seekg(0, parms_stream.beg);
-        auto context = SEALContext::Create(parms);
+        SEALContext context(parms);
 
         /*
         Load back the secret key from sk_stream.

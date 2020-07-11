@@ -3,11 +3,13 @@
 
 #include "seal/memorymanager.h"
 
+using namespace std;
+
 namespace seal
 {
-    std::unique_ptr<MMProf> MemoryManager::mm_prof_{ new MMProfGlobal };
+    unique_ptr<MMProf> MemoryManager::mm_prof_{ new MMProfGlobal };
 #ifndef _M_CEE
-    std::mutex MemoryManager::switch_mutex_;
+    mutex MemoryManager::switch_mutex_;
 #else
 #pragma message("WARNING: MemoryManager compiled thread-unsafe and MMProfGuard disabled to support /clr")
 #endif

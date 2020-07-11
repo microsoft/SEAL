@@ -223,6 +223,14 @@ namespace seal
         /**
         Returns a constant pointer to the beginning of the array data.
         */
+        SEAL_NODISCARD inline const T *begin() const noexcept
+        {
+            return cbegin();
+        }
+
+        /**
+        Returns a constant pointer to the beginning of the array data.
+        */
         SEAL_NODISCARD inline const T *cbegin() const noexcept
         {
             return data_.get();
@@ -234,6 +242,14 @@ namespace seal
         SEAL_NODISCARD inline T *end() noexcept
         {
             return size_ ? begin() + size_ : begin();
+        }
+
+        /**
+        Returns a constant pointer to the end of the array data.
+        */
+        SEAL_NODISCARD inline const T *end() const noexcept
+        {
+            return cend();
         }
 
         /**

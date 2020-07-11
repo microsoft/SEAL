@@ -7,7 +7,6 @@
 #include "seal/context.h"
 #include "seal/valcheck.h"
 #include <iostream>
-#include <memory>
 
 namespace seal
 {
@@ -118,16 +117,15 @@ namespace seal
 
         @param[in] context The SEALContext
         @param[in] stream The stream to load the PublicKey from
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, std::istream &stream)
+        inline std::streamoff unsafe_load(const SEALContext &context, std::istream &stream)
         {
             Ciphertext new_pk(pk_.pool());
-            auto in_size = new_pk.unsafe_load(std::move(context), stream);
+            auto in_size = new_pk.unsafe_load(context, stream);
             std::swap(pk_, new_pk);
             return in_size;
         }
@@ -138,17 +136,16 @@ namespace seal
 
         @param[in] context The SEALContext
         @param[in] stream The stream to load the PublicKey from
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(std::shared_ptr<SEALContext> context, std::istream &stream)
+        inline std::streamoff load(const SEALContext &context, std::istream &stream)
         {
             PublicKey new_pk(pool());
             auto in_size = new_pk.unsafe_load(context, stream);
-            if (!is_valid_for(new_pk, std::move(context)))
+            if (!is_valid_for(new_pk, context))
             {
                 throw std::logic_error("PublicKey data is invalid");
             }
@@ -184,18 +181,17 @@ namespace seal
         @param[in] context The SEALContext
         @param[in] in The memory location to load the PublicKey from
         @param[in] size The number of bytes available in the given memory location
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff unsafe_load(const SEALContext &context, const SEAL_BYTE *in, std::size_t size)
         {
             Ciphertext new_pk(pk_.pool());
-            auto in_size = new_pk.unsafe_load(std::move(context), in, size);
+            auto in_size = new_pk.unsafe_load(context, in, size);
             std::swap(pk_, new_pk);
             return in_size;
         }
@@ -208,19 +204,18 @@ namespace seal
         @param[in] context The SEALContext
         @param[in] in The memory location to load the PublicKey from
         @param[in] size The number of bytes available in the given memory location
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff load(const SEALContext &context, const SEAL_BYTE *in, std::size_t size)
         {
             PublicKey new_pk(pool());
             auto in_size = new_pk.unsafe_load(context, in, size);
-            if (!is_valid_for(new_pk, std::move(context)))
+            if (!is_valid_for(new_pk, context))
             {
                 throw std::logic_error("PublicKey data is invalid");
             }
@@ -253,7 +248,7 @@ namespace seal
         }
 
         /**
-        Enables access to private members of seal::PublicKey for .NET wrapper.
+        Enables access to private members of seal::PublicKey for SEAL_C.
         */
         struct PublicKeyPrivateHelper;
 

@@ -18,13 +18,13 @@ using namespace seal::c;
 
 SEAL_C_FUNC BatchEncoder_Create(void *context, void **batch_encoder)
 {
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx, E_POINTER);
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     IfNullRet(batch_encoder, E_POINTER);
 
     try
     {
-        BatchEncoder *encoder = new BatchEncoder(sharedctx);
+        BatchEncoder *encoder = new BatchEncoder(*ctx);
         *batch_encoder = encoder;
         return S_OK;
     }
@@ -93,25 +93,6 @@ SEAL_C_FUNC BatchEncoder_Encode2(void *thisptr, uint64_t count, int64_t *values,
     }
 }
 
-SEAL_C_FUNC BatchEncoder_Encode3(void *thisptr, void *plain, void *pool)
-{
-    BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
-    IfNullRet(encoder, E_POINTER);
-    Plaintext *plainptr = FromVoid<Plaintext>(plain);
-    IfNullRet(plainptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
-
-    try
-    {
-        encoder->encode(*plainptr, *handle);
-        return S_OK;
-    }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-}
-
 SEAL_C_FUNC BatchEncoder_Decode1(void *thisptr, void *plain, uint64_t *count, uint64_t *destination, void *pool)
 {
     BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
@@ -172,25 +153,6 @@ SEAL_C_FUNC BatchEncoder_Decode2(void *thisptr, void *plain, uint64_t *count, in
     }
 
     return S_OK;
-}
-
-SEAL_C_FUNC BatchEncoder_Decode3(void *thisptr, void *plain, void *pool)
-{
-    BatchEncoder *encoder = FromVoid<BatchEncoder>(thisptr);
-    IfNullRet(encoder, E_POINTER);
-    Plaintext *plainptr = FromVoid<Plaintext>(plain);
-    IfNullRet(plainptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
-
-    try
-    {
-        encoder->decode(*plainptr, *handle);
-        return S_OK;
-    }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
 }
 
 SEAL_C_FUNC BatchEncoder_GetSlotCount(void *thisptr, uint64_t *slot_count)

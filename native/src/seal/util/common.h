@@ -355,23 +355,15 @@ namespace seal
 
         constexpr int bytes_per_uint64 = sizeof(std::uint64_t);
 
-        constexpr int bytes_per_uint32 = sizeof(std::uint32_t);
-
-        constexpr int uint32_per_uint64 = 2;
-
         constexpr int bits_per_nibble = 4;
 
         constexpr int bits_per_byte = 8;
 
         constexpr int bits_per_uint64 = bytes_per_uint64 * bits_per_byte;
 
-        constexpr int bits_per_uint32 = bytes_per_uint32 * bits_per_byte;
-
         constexpr int nibbles_per_byte = 2;
 
         constexpr int nibbles_per_uint64 = bytes_per_uint64 * nibbles_per_byte;
-
-        constexpr std::uint64_t uint64_high_bit = std::uint64_t(1) << (bits_per_uint64 - 1);
 
         template <typename T, typename = std::enable_if_t<is_uint32_v<T> || is_uint64_v<T>>>
         SEAL_NODISCARD inline constexpr T reverse_bits(T operand) noexcept
@@ -515,28 +507,6 @@ namespace seal
             throw std::invalid_argument("hex");
 #endif
             return -1;
-        }
-
-        SEAL_NODISCARD inline SEAL_BYTE *get_uint64_byte(std::uint64_t *value, std::size_t byte_index)
-        {
-#ifdef SEAL_DEBUG
-            if (value == nullptr)
-            {
-                throw std::invalid_argument("value");
-            }
-#endif
-            return reinterpret_cast<SEAL_BYTE *>(value) + byte_index;
-        }
-
-        SEAL_NODISCARD inline const SEAL_BYTE *get_uint64_byte(const std::uint64_t *value, std::size_t byte_index)
-        {
-#ifdef SEAL_DEBUG
-            if (value == nullptr)
-            {
-                throw std::invalid_argument("value");
-            }
-#endif
-            return reinterpret_cast<const SEAL_BYTE *>(value) + byte_index;
         }
 
         SEAL_NODISCARD inline int get_hex_string_bit_count(const char *hex_string, int char_count)

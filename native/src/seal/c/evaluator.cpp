@@ -24,21 +24,19 @@ struct seal::Evaluator::EvaluatorPrivateHelper
 {
     static bool using_keyswitching(const Evaluator &ev)
     {
-        return ev.context_->using_keyswitching();
+        return ev.context_.using_keyswitching();
     }
 };
 
-SEAL_C_FUNC Evaluator_Create(void *sealContext, void **evaluator)
+SEAL_C_FUNC Evaluator_Create(void *context, void **evaluator)
 {
-    SEALContext *context = FromVoid<SEALContext>(sealContext);
-    IfNullRet(context, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(sealContext);
-    IfNullRet(sharedctx.get(), E_POINTER);
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     IfNullRet(evaluator, E_POINTER);
 
     try
     {
-        Evaluator *eval = new Evaluator(sharedctx);
+        Evaluator *eval = new Evaluator(*ctx);
         *evaluator = eval;
         return S_OK;
     }
@@ -139,7 +137,7 @@ SEAL_C_FUNC Evaluator_AddMany(void *thisptr, uint64_t count, void **encrypteds, 
     }
 }
 
-SEAL_C_FUNC Evaluator_AddPlain(void *thisptr, void *encrypted, void *plain, void *destination)
+SEAL_C_FUNC Evaluator_AddPlain1(void *thisptr, void *encrypted, void *plain, void *destination)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -153,6 +151,32 @@ SEAL_C_FUNC Evaluator_AddPlain(void *thisptr, void *encrypted, void *plain, void
     try
     {
         eval->add_plain(*encrypted_ptr, *plain_ptr, *destination_ptr);
+        return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
+    }
+    catch (const logic_error &)
+    {
+        return COR_E_INVALIDOPERATION;
+    }
+}
+
+SEAL_C_FUNC Evaluator_AddPlain2(void *thisptr, void *plain1, void *plain2, void *destination)
+{
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
+    IfNullRet(eval, E_POINTER);
+    Plaintext *plain1_ptr = FromVoid<Plaintext>(plain1);
+    IfNullRet(plain1_ptr, E_POINTER);
+    Plaintext *plain2_ptr = FromVoid<Plaintext>(plain2);
+    IfNullRet(plain2_ptr, E_POINTER);
+    Plaintext *destination_ptr = FromVoid<Plaintext>(destination);
+    IfNullRet(destination_ptr, E_POINTER);
+
+    try
+    {
+        eval->add_plain(*plain1_ptr, *plain2_ptr, *destination_ptr);
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -191,7 +215,7 @@ SEAL_C_FUNC Evaluator_Sub(void *thisptr, void *encrypted1, void *encrypted2, voi
     }
 }
 
-SEAL_C_FUNC Evaluator_SubPlain(void *thisptr, void *encrypted, void *plain, void *destination)
+SEAL_C_FUNC Evaluator_SubPlain1(void *thisptr, void *encrypted, void *plain, void *destination)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -205,6 +229,32 @@ SEAL_C_FUNC Evaluator_SubPlain(void *thisptr, void *encrypted, void *plain, void
     try
     {
         eval->sub_plain(*encrypted_ptr, *plain_ptr, *destination_ptr);
+        return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
+    }
+    catch (const logic_error &)
+    {
+        return COR_E_INVALIDOPERATION;
+    }
+}
+
+SEAL_C_FUNC Evaluator_SubPlain2(void *thisptr, void *plain1, void *plain2, void *destination)
+{
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
+    IfNullRet(eval, E_POINTER);
+    Plaintext *plain1_ptr = FromVoid<Plaintext>(plain1);
+    IfNullRet(plain1_ptr, E_POINTER);
+    Plaintext *plain2_ptr = FromVoid<Plaintext>(plain2);
+    IfNullRet(plain2_ptr, E_POINTER);
+    Plaintext *destination_ptr = FromVoid<Plaintext>(destination);
+    IfNullRet(destination_ptr, E_POINTER);
+
+    try
+    {
+        eval->sub_plain(*plain1_ptr, *plain2_ptr, *destination_ptr);
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -280,7 +330,7 @@ SEAL_C_FUNC Evaluator_MultiplyMany(
     }
 }
 
-SEAL_C_FUNC Evaluator_MultiplyPlain(void *thisptr, void *encrypted, void *plain, void *destination, void *pool)
+SEAL_C_FUNC Evaluator_MultiplyPlain1(void *thisptr, void *encrypted, void *plain, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
     IfNullRet(eval, E_POINTER);
@@ -295,6 +345,32 @@ SEAL_C_FUNC Evaluator_MultiplyPlain(void *thisptr, void *encrypted, void *plain,
     try
     {
         eval->multiply_plain(*encrypted_ptr, *plain_ptr, *destination_ptr, *pool_ptr);
+        return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
+    }
+    catch (const logic_error &)
+    {
+        return COR_E_INVALIDOPERATION;
+    }
+}
+
+SEAL_C_FUNC Evaluator_MultiplyPlain2(void *thisptr, void *plain1, void *plain2, void *destination)
+{
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
+    IfNullRet(eval, E_POINTER);
+    Plaintext *plain1_ptr = FromVoid<Plaintext>(plain1);
+    IfNullRet(plain1_ptr, E_POINTER);
+    Plaintext *plain2_ptr = FromVoid<Plaintext>(plain2);
+    IfNullRet(plain2_ptr, E_POINTER);
+    Plaintext *destination_ptr = FromVoid<Plaintext>(destination);
+    IfNullRet(destination_ptr, E_POINTER);
+
+    try
+    {
+        eval->multiply_plain(*plain1_ptr, *plain2_ptr, *destination_ptr);
         return S_OK;
     }
     catch (const invalid_argument &)

@@ -6,14 +6,14 @@
 using namespace std;
 using namespace seal;
 
-void bfv_performance_test(shared_ptr<SEALContext> context)
+void bfv_performance_test(SEALContext context)
 {
     chrono::high_resolution_clock::time_point time_start, time_end;
 
     print_parameters(context);
     cout << endl;
 
-    auto &parms = context->first_context_data()->parms();
+    auto &parms = context.first_context_data()->parms();
     auto &plain_modulus = parms.plain_modulus();
     size_t poly_modulus_degree = parms.poly_modulus_degree();
 
@@ -27,7 +27,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
     RelinKeys relin_keys;
     GaloisKeys gal_keys;
     chrono::microseconds time_diff;
-    if (context->using_keyswitching())
+    if (context.using_keyswitching())
     {
         /*
         Generate relinearization keys.
@@ -39,7 +39,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         cout << "Done [" << time_diff.count() << " microseconds]" << endl;
 
-        if (!context->key_context_data()->qualifiers().using_batching)
+        if (!context.key_context_data()->qualifiers().using_batching)
         {
             cout << "Given encryption parameters do not support batching." << endl;
             return;
@@ -204,7 +204,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         time_end = chrono::high_resolution_clock::now();
         time_square_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
-        if (context->using_keyswitching())
+        if (context.using_keyswitching())
         {
             /*
             [Relinearize]
@@ -235,7 +235,8 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
             expensive than rotating by just one step.
             */
             size_t row_size = batch_encoder.slot_count() / 2;
-            int random_rotation = static_cast<int>(rd() % row_size);
+            // row_size is always a power of 2
+            int random_rotation = static_cast<int>(rd() & (row_size - 1));
             time_start = chrono::high_resolution_clock::now();
             evaluator.rotate_rows_inplace(encrypted, random_rotation, gal_keys);
             time_end = chrono::high_resolution_clock::now();
@@ -305,7 +306,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
     cout << "Average multiply: " << avg_multiply << " microseconds" << endl;
     cout << "Average multiply plain: " << avg_multiply_plain << " microseconds" << endl;
     cout << "Average square: " << avg_square << " microseconds" << endl;
-    if (context->using_keyswitching())
+    if (context.using_keyswitching())
     {
         cout << "Average relinearize: " << avg_relinearize << " microseconds" << endl;
         cout << "Average rotate rows one step: " << avg_rotate_rows_one_step << " microseconds" << endl;
@@ -319,14 +320,14 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
     cout.flush();
 }
 
-void ckks_performance_test(shared_ptr<SEALContext> context)
+void ckks_performance_test(SEALContext context)
 {
     chrono::high_resolution_clock::time_point time_start, time_end;
 
     print_parameters(context);
     cout << endl;
 
-    auto &parms = context->first_context_data()->parms();
+    auto &parms = context.first_context_data()->parms();
     size_t poly_modulus_degree = parms.poly_modulus_degree();
 
     cout << "Generating secret/public keys: ";
@@ -339,7 +340,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
     RelinKeys relin_keys;
     GaloisKeys gal_keys;
     chrono::microseconds time_diff;
-    if (context->using_keyswitching())
+    if (context.using_keyswitching())
     {
         cout << "Generating relinearization keys: ";
         time_start = chrono::high_resolution_clock::now();
@@ -348,7 +349,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
         time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         cout << "Done [" << time_diff.count() << " microseconds]" << endl;
 
-        if (!context->first_context_data()->qualifiers().using_batching)
+        if (!context.first_context_data()->qualifiers().using_batching)
         {
             cout << "Given encryption parameters do not support batching." << endl;
             return;
@@ -485,7 +486,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
         time_end = chrono::high_resolution_clock::now();
         time_square_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
-        if (context->using_keyswitching())
+        if (context.using_keyswitching())
         {
             /*
             [Relinearize]
@@ -515,7 +516,8 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
             /*
             [Rotate Vector Random]
             */
-            int random_rotation = static_cast<int>(rd() % ckks_encoder.slot_count());
+            // ckks_encoder.slot_count() is always a power of 2.
+            int random_rotation = static_cast<int>(rd() & (ckks_encoder.slot_count() - 1));
             time_start = chrono::high_resolution_clock::now();
             evaluator.rotate_vector_inplace(encrypted, random_rotation, gal_keys);
             time_end = chrono::high_resolution_clock::now();
@@ -585,7 +587,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
     cout << "Average multiply: " << avg_multiply << " microseconds" << endl;
     cout << "Average multiply plain: " << avg_multiply_plain << " microseconds" << endl;
     cout << "Average square: " << avg_square << " microseconds" << endl;
-    if (context->using_keyswitching())
+    if (context.using_keyswitching())
     {
         cout << "Average relinearize: " << avg_relinearize << " microseconds" << endl;
         cout << "Average rescale: " << avg_rescale << " microseconds" << endl;
@@ -609,21 +611,21 @@ void example_bfv_performance_default()
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     parms.set_plain_modulus(786433);
-    bfv_performance_test(SEALContext::Create(parms));
+    bfv_performance_test(parms);
 
     cout << endl;
     poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     parms.set_plain_modulus(786433);
-    bfv_performance_test(SEALContext::Create(parms));
+    bfv_performance_test(parms);
 
     cout << endl;
     poly_modulus_degree = 16384;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     parms.set_plain_modulus(786433);
-    bfv_performance_test(SEALContext::Create(parms));
+    bfv_performance_test(parms);
 
     /*
     Comment out the following to run the biggest example.
@@ -633,7 +635,7 @@ void example_bfv_performance_default()
     // parms.set_poly_modulus_degree(poly_modulus_degree);
     // parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     // parms.set_plain_modulus(786433);
-    // bfv_performance_test(SEALContext::Create(parms));
+    // bfv_performance_test(parms);
 }
 
 void example_bfv_performance_custom()
@@ -668,7 +670,7 @@ void example_bfv_performance_custom()
     {
         parms.set_plain_modulus(786433);
     }
-    bfv_performance_test(SEALContext::Create(parms));
+    bfv_performance_test(parms);
 }
 
 void example_ckks_performance_default()
@@ -681,19 +683,19 @@ void example_ckks_performance_default()
     size_t poly_modulus_degree = 4096;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
-    ckks_performance_test(SEALContext::Create(parms));
+    ckks_performance_test(parms);
 
     cout << endl;
     poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
-    ckks_performance_test(SEALContext::Create(parms));
+    ckks_performance_test(parms);
 
     cout << endl;
     poly_modulus_degree = 16384;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
-    ckks_performance_test(SEALContext::Create(parms));
+    ckks_performance_test(parms);
 
     /*
     Comment out the following to run the biggest example.
@@ -702,7 +704,7 @@ void example_ckks_performance_default()
     // poly_modulus_degree = 32768;
     // parms.set_poly_modulus_degree(poly_modulus_degree);
     // parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
-    // ckks_performance_test(SEALContext::Create(parms));
+    // ckks_performance_test(parms);
 }
 
 void example_ckks_performance_custom()
@@ -729,7 +731,7 @@ void example_ckks_performance_custom()
     EncryptionParameters parms(scheme_type::CKKS);
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
-    ckks_performance_test(SEALContext::Create(parms));
+    ckks_performance_test(parms);
 }
 
 /*

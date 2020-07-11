@@ -445,8 +445,7 @@ namespace seal
         }
 
         /**
-        Enables access to private members of seal::EncryptionParameters for .NET
-        wrapper.
+        Enables access to private members of seal::EncryptionParameters for SEAL_C.
         */
         struct EncryptionParametersPrivateHelper;
 
@@ -525,7 +524,7 @@ namespace std
     template <>
     struct hash<seal::EncryptionParameters>
     {
-        std::size_t operator()(const seal::EncryptionParameters parms) const
+        std::size_t operator()(const seal::EncryptionParameters &parms) const
         {
             hash<seal::parms_id_type> parms_id_hash;
             return parms_id_hash(parms.parms_id_);

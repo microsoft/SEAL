@@ -13,9 +13,9 @@
 #include "seal/c/defines.h"
 #include <stdint.h>
 
-SEAL_C_FUNC KeyGenerator_Create1(void *sealContext, void **key_generator);
+SEAL_C_FUNC KeyGenerator_Create1(void *context, void **key_generator);
 
-SEAL_C_FUNC KeyGenerator_Create2(void *sealContext, void *secret_key, void **key_generator);
+SEAL_C_FUNC KeyGenerator_Create2(void *context, void *secret_key, void **key_generator);
 
 SEAL_C_FUNC KeyGenerator_Destroy(void *thisptr);
 

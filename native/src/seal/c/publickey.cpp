@@ -138,17 +138,17 @@ SEAL_C_FUNC PublicKey_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_
 
 SEAL_C_FUNC PublicKey_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     PublicKey *pkey = FromVoid<PublicKey>(thisptr);
     IfNullRet(pkey, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(inptr, E_POINTER);
     IfNullRet(in_bytes, E_POINTER);
 
     try
     {
         *in_bytes = util::safe_cast<int64_t>(
-            pkey->unsafe_load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
+            pkey->unsafe_load(*ctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -167,17 +167,17 @@ SEAL_C_FUNC PublicKey_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, u
 
 SEAL_C_FUNC PublicKey_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     PublicKey *pkey = FromVoid<PublicKey>(thisptr);
     IfNullRet(pkey, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(inptr, E_POINTER);
     IfNullRet(in_bytes, E_POINTER);
 
     try
     {
         *in_bytes = util::safe_cast<int64_t>(
-            pkey->load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
+            pkey->load(*ctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)

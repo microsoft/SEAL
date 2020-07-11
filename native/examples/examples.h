@@ -53,14 +53,9 @@ inline void print_example_banner(std::string title)
 /*
 Helper function: Prints the parameters in a SEALContext.
 */
-inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
+inline void print_parameters(const seal::SEALContext &context)
 {
-    // Verify parameters
-    if (!context)
-    {
-        throw std::invalid_argument("context is not set");
-    }
-    auto &context_data = *context->key_context_data();
+    auto &context_data = *context.key_context_data();
 
     /*
     Which scheme are we using?

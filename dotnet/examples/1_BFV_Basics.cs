@@ -438,6 +438,7 @@ namespace SEALNetExamples
             using SEALContext new_context = new SEALContext(parms);
             Utilities.PrintParameters(context);
             Console.WriteLine("Parameter validation (failed): {0}", new_context.ParameterErrorMessage());
+            Console.WriteLine();
 
             /*
             This information is helpful to fix invalid encryption parameters.

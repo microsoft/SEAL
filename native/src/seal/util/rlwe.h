@@ -55,7 +55,7 @@ namespace seal
         @param[out] destination The output ciphertext - an encryption of zero.
         */
         void encrypt_zero_asymmetric(
-            const PublicKey &public_key, std::shared_ptr<SEALContext> context, parms_id_type parms_id, bool is_ntt_form,
+            const PublicKey &public_key, const SEALContext &context, parms_id_type parms_id, bool is_ntt_form,
             Ciphertext &destination);
 
         /**
@@ -70,7 +70,7 @@ namespace seal
         replaced with the random seed used to sample this component.
         */
         void encrypt_zero_symmetric(
-            const SecretKey &secret_key, std::shared_ptr<SEALContext> context, parms_id_type parms_id, bool is_ntt_form,
+            const SecretKey &secret_key, const SEALContext &context, parms_id_type parms_id, bool is_ntt_form,
             bool save_seed, Ciphertext &destination);
     } // namespace util
 } // namespace seal

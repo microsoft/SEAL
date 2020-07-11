@@ -13,7 +13,7 @@
 #include "seal/c/defines.h"
 #include <stdint.h>
 
-SEAL_C_FUNC Evaluator_Create(void *sealContext, void **evaluator);
+SEAL_C_FUNC Evaluator_Create(void *context, void **evaluator);
 
 SEAL_C_FUNC Evaluator_Destroy(void *thisptr);
 
@@ -23,18 +23,24 @@ SEAL_C_FUNC Evaluator_Add(void *thisptr, void *encrypted1, void *encrypted2, voi
 
 SEAL_C_FUNC Evaluator_AddMany(void *thisptr, uint64_t count, void **encrypteds, void *destination);
 
-SEAL_C_FUNC Evaluator_AddPlain(void *thisptr, void *encrypted, void *plain, void *destination);
+SEAL_C_FUNC Evaluator_AddPlain1(void *thisptr, void *encrypted, void *plain, void *destination);
+
+SEAL_C_FUNC Evaluator_AddPlain2(void *thisptr, void *plain1, void *plain2, void *destination);
 
 SEAL_C_FUNC Evaluator_Sub(void *thisptr, void *encrypted1, void *encrypted2, void *destination);
 
-SEAL_C_FUNC Evaluator_SubPlain(void *thisptr, void *encrypted, void *plain, void *destination);
+SEAL_C_FUNC Evaluator_SubPlain1(void *thisptr, void *encrypted, void *plain, void *destination);
+
+SEAL_C_FUNC Evaluator_SubPlain2(void *thisptr, void *plain1, void *plain2, void *destination);
 
 SEAL_C_FUNC Evaluator_Multiply(void *thisptr, void *encrypted1, void *encrypted2, void *destination, void *pool);
 
 SEAL_C_FUNC Evaluator_MultiplyMany(
     void *thisptr, uint64_t count, void **encrypteds, void *relin_keys, void *destination, void *pool);
 
-SEAL_C_FUNC Evaluator_MultiplyPlain(void *thisptr, void *encrypted, void *plain, void *destination, void *pool);
+SEAL_C_FUNC Evaluator_MultiplyPlain1(void *thisptr, void *encrypted, void *plain, void *destination, void *pool);
+
+SEAL_C_FUNC Evaluator_MultiplyPlain2(void *thisptr, void *plain1, void *plain2, void *destination);
 
 SEAL_C_FUNC Evaluator_Square(void *thisptr, void *encrypted, void *destination, void *pool);
 

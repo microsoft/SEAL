@@ -17,7 +17,6 @@
 #include <functional>
 #include <iostream>
 #include <iterator>
-#include <memory>
 #include <stdexcept>
 #include <string>
 
@@ -74,15 +73,14 @@ namespace seal
 
         @param[in] context The SEALContext
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if pool is uninitialized
         */
-        explicit Ciphertext(std::shared_ptr<SEALContext> context, MemoryPoolHandle pool = MemoryManager::GetPool())
+        explicit Ciphertext(const SEALContext &context, MemoryPoolHandle pool = MemoryManager::GetPool())
             : data_(std::move(pool))
         {
             // Allocate memory but don't resize
-            reserve(std::move(context), 2);
+            reserve(context, 2);
         }
 
         /**
@@ -94,19 +92,17 @@ namespace seal
         @param[in] parms_id The parms_id corresponding to the encryption
         parameters to be used
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         @throws std::invalid_argument if pool is uninitialized
         */
         explicit Ciphertext(
-            std::shared_ptr<SEALContext> context, parms_id_type parms_id,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            const SEALContext &context, parms_id_type parms_id, MemoryPoolHandle pool = MemoryManager::GetPool())
             : data_(std::move(pool))
         {
             // Allocate memory but don't resize
-            reserve(std::move(context), parms_id, 2);
+            reserve(context, parms_id, 2);
         }
 
         /**
@@ -119,20 +115,19 @@ namespace seal
         parameters to be used
         @param[in] size_capacity The capacity
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         @throws std::invalid_argument if size_capacity is less than 2 or too large
         @throws std::invalid_argument if pool is uninitialized
         */
         explicit Ciphertext(
-            std::shared_ptr<SEALContext> context, parms_id_type parms_id, std::size_t size_capacity,
+            const SEALContext &context, parms_id_type parms_id, std::size_t size_capacity,
             MemoryPoolHandle pool = MemoryManager::GetPool())
             : data_(std::move(pool))
         {
             // Allocate memory but don't resize
-            reserve(std::move(context), parms_id, size_capacity);
+            reserve(context, parms_id, size_capacity);
         }
 
         /**
@@ -171,13 +166,12 @@ namespace seal
         @param[in] parms_id The parms_id corresponding to the encryption
         parameters to be used
         @param[in] size_capacity The capacity
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         @throws std::invalid_argument if size_capacity is less than 2 or too large
         */
-        void reserve(std::shared_ptr<SEALContext> context, parms_id_type parms_id, std::size_t size_capacity);
+        void reserve(const SEALContext &context, parms_id_type parms_id, std::size_t size_capacity);
 
         /**
         Allocates enough memory to accommodate the backing array of a ciphertext
@@ -187,20 +181,13 @@ namespace seal
 
         @param[in] context The SEALContext
         @param[in] size_capacity The capacity
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if size_capacity is less than 2 or too large
         */
-        inline void reserve(std::shared_ptr<SEALContext> context, std::size_t size_capacity)
+        inline void reserve(const SEALContext &context, std::size_t size_capacity)
         {
-            // Verify parameters
-            if (!context)
-            {
-                throw std::invalid_argument("invalid context");
-            }
-
-            auto parms_id = context->first_parms_id();
-            reserve(std::move(context), parms_id, size_capacity);
+            auto parms_id = context.first_parms_id();
+            reserve(context, parms_id, size_capacity);
         }
 
         /**
@@ -233,13 +220,12 @@ namespace seal
         @param[in] parms_id The parms_id corresponding to the encryption
         parameters to be used
         @param[in] size The new size
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         @throws std::invalid_argument if size is less than 2 or too large
         */
-        void resize(std::shared_ptr<SEALContext> context, parms_id_type parms_id, std::size_t size);
+        void resize(const SEALContext &context, parms_id_type parms_id, std::size_t size);
 
         /**
         Resizes the ciphertext to given size, reallocating if the capacity
@@ -254,20 +240,13 @@ namespace seal
 
         @param[in] context The SEALContext
         @param[in] size The new size
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if size is less than 2 or too large
         */
-        inline void resize(std::shared_ptr<SEALContext> context, std::size_t size)
+        inline void resize(const SEALContext &context, std::size_t size)
         {
-            // Verify parameters
-            if (!context)
-            {
-                throw std::invalid_argument("invalid context");
-            }
-
-            auto parms_id = context->first_parms_id();
-            resize(std::move(context), parms_id, size);
+            auto parms_id = context.first_parms_id();
+            resize(context, parms_id, size);
         }
 
         /**
@@ -512,16 +491,15 @@ namespace seal
 
         @param[in] context The SEALContext
         @param[in] stream The stream to load the ciphertext from
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, std::istream &stream)
+        inline std::streamoff unsafe_load(const SEALContext &context, std::istream &stream)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Ciphertext::load_members, this, std::move(context), _1), stream);
+            return Serialization::Load(std::bind(&Ciphertext::load_members, this, context, _1), stream);
         }
 
         /**
@@ -530,17 +508,16 @@ namespace seal
 
         @param[in] context The SEALContext
         @param[in] stream The stream to load the ciphertext from
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(std::shared_ptr<SEALContext> context, std::istream &stream)
+        inline std::streamoff load(const SEALContext &context, std::istream &stream)
         {
             Ciphertext new_data(pool());
             auto in_size = new_data.unsafe_load(context, stream);
-            if (!is_valid_for(new_data, std::move(context)))
+            if (!is_valid_for(new_data, context))
             {
                 throw std::logic_error("ciphertext data is invalid");
             }
@@ -579,18 +556,17 @@ namespace seal
         @param[in] context The SEALContext
         @param[in] in The memory location to load the ciphertext from
         @param[in] size The number of bytes available in the given memory location
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff unsafe_load(const SEALContext &context, const SEAL_BYTE *in, std::size_t size)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Ciphertext::load_members, this, std::move(context), _1), in, size);
+            return Serialization::Load(std::bind(&Ciphertext::load_members, this, context, _1), in, size);
         }
 
         /**
@@ -601,19 +577,18 @@ namespace seal
         @param[in] context The SEALContext
         @param[in] in The memory location to load the ciphertext from
         @param[in] size The number of bytes available in the given memory location
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff load(const SEALContext &context, const SEAL_BYTE *in, std::size_t size)
         {
             Ciphertext new_data(pool());
             auto in_size = new_data.unsafe_load(context, in, size);
-            if (!is_valid_for(new_data, std::move(context)))
+            if (!is_valid_for(new_data, context))
             {
                 throw std::logic_error("ciphertext data is invalid");
             }
@@ -685,7 +660,7 @@ namespace seal
         }
 
         /**
-        Enables access to private members of seal::Ciphertext for .NET wrapper.
+        Enables access to private members of seal::Ciphertext for SEAL_C.
         */
         struct CiphertextPrivateHelper;
 
@@ -695,11 +670,11 @@ namespace seal
 
         void resize_internal(std::size_t size, std::size_t poly_modulus_degree, std::size_t coeff_modulus_size);
 
-        void expand_seed(std::shared_ptr<SEALContext> context, const random_seed_type &seed);
+        void expand_seed(const SEALContext &context, const random_seed_type &seed);
 
         void save_members(std::ostream &stream) const;
 
-        void load_members(std::shared_ptr<SEALContext> context, std::istream &stream);
+        void load_members(const SEALContext &context, std::istream &stream);
 
         inline bool has_seed_marker() const noexcept
         {

@@ -77,6 +77,23 @@ namespace sealtest
             ASSERT_EQ(0xFFFFFFFFFFFFFFFFULL, result);
             ASSERT_TRUE(add_uint64(0xF00F00F00F00F00FULL, 0x0FF0FF0FF0FF0FF0ULL, 1, &result));
             ASSERT_EQ(0x0ULL, result);
+
+            ASSERT_FALSE(add_uint64(0ULL, 0ULL, &result));
+            ASSERT_EQ(0ULL, result);
+            ASSERT_FALSE(add_uint64(1ULL, 1ULL, &result));
+            ASSERT_EQ(2ULL, result);
+            ASSERT_FALSE(add_uint64(1ULL, 0ULL, &result));
+            ASSERT_EQ(1ULL, result);
+            ASSERT_FALSE(add_uint64(0ULL, 1ULL, &result));
+            ASSERT_EQ(1ULL, result);
+            ASSERT_TRUE(add_uint64(0xFFFFFFFFFFFFFFFFULL, 1ULL, &result));
+            ASSERT_EQ(0ULL, result);
+            ASSERT_TRUE(add_uint64(1ULL, 0xFFFFFFFFFFFFFFFFULL, &result));
+            ASSERT_EQ(0ULL, result);
+            ASSERT_TRUE(add_uint64(2ULL, 0xFFFFFFFFFFFFFFFEULL, 0, &result));
+            ASSERT_EQ(0ULL, result);
+            ASSERT_FALSE(add_uint64(0xF00F00F00F00F00FULL, 0x0FF0FF0FF0FF0FF0ULL, 0, &result));
+            ASSERT_EQ(0xFFFFFFFFFFFFFFFFULL, result);
         }
 
 #if SEAL_COMPILER == SEAL_COMPILER_MSVC
@@ -1700,75 +1717,6 @@ namespace sealtest
             ASSERT_EQ(17027763760347278414ULL, quotient[0]);
             ASSERT_EQ(13243816258047883211ULL, quotient[1]);
             ASSERT_EQ(0ULL, quotient[2]);
-        }
-
-        TEST(UIntArith, ExponentiateUInt)
-        {
-            MemoryPool &pool = *global_variables::global_memory_pool;
-            auto input(allocate_zero_uint(2, pool));
-            auto result(allocate_zero_uint(8, pool));
-
-            result[0] = 1, result[1] = 2, result[2] = 3, result[3] = 4;
-            result[4] = 5, result[5] = 6, result[6] = 7, result[7] = 8;
-
-            uint64_t exponent[2]{ 0, 0 };
-
-            input[0] = 0xFFF;
-            input[1] = 0;
-            exponentiate_uint(input.get(), 2, exponent, 1, 1, result.get(), pool);
-            ASSERT_EQ(1ULL, result[0]);
-            ASSERT_EQ(2ULL, result[1]);
-
-            exponentiate_uint(input.get(), 2, exponent, 1, 2, result.get(), pool);
-            ASSERT_EQ(1ULL, result[0]);
-            ASSERT_EQ(0ULL, result[1]);
-
-            exponentiate_uint(input.get(), 1, exponent, 1, 4, result.get(), pool);
-            ASSERT_EQ(1ULL, result[0]);
-            ASSERT_EQ(0ULL, result[1]);
-            ASSERT_EQ(0ULL, result[2]);
-            ASSERT_EQ(0ULL, result[3]);
-
-            input[0] = 123;
-            exponent[0] = 5;
-            exponentiate_uint(input.get(), 1, exponent, 2, 2, result.get(), pool);
-            ASSERT_EQ(28153056843ULL, result[0]);
-            ASSERT_EQ(0ULL, result[1]);
-
-            input[0] = 1;
-            exponent[0] = 1;
-            exponent[1] = 1;
-            exponentiate_uint(input.get(), 1, exponent, 2, 2, result.get(), pool);
-            ASSERT_EQ(1ULL, result[0]);
-            ASSERT_EQ(0ULL, result[1]);
-
-            input[0] = 0;
-            input[1] = 1;
-            exponent[0] = 7;
-            exponent[1] = 0;
-            exponentiate_uint(input.get(), 2, exponent, 2, 8, result.get(), pool);
-            ASSERT_EQ(0ULL, result[0]);
-            ASSERT_EQ(0ULL, result[1]);
-            ASSERT_EQ(0ULL, result[2]);
-            ASSERT_EQ(0ULL, result[3]);
-            ASSERT_EQ(0ULL, result[4]);
-            ASSERT_EQ(0ULL, result[5]);
-            ASSERT_EQ(0ULL, result[6]);
-            ASSERT_EQ(1ULL, result[7]);
-
-            input[0] = 121212;
-            input[1] = 343434;
-            exponent[0] = 3;
-            exponent[1] = 0;
-            exponentiate_uint(input.get(), 2, exponent, 2, 8, result.get(), pool);
-            ASSERT_EQ(1780889000200128ULL, result[0]);
-            ASSERT_EQ(15137556501701088ULL, result[1]);
-            ASSERT_EQ(42889743421486416ULL, result[2]);
-            ASSERT_EQ(40506979898070504ULL, result[3]);
-            ASSERT_EQ(0ULL, result[4]);
-            ASSERT_EQ(0ULL, result[5]);
-            ASSERT_EQ(0ULL, result[6]);
-            ASSERT_EQ(0ULL, result[7]);
         }
 
         TEST(UIntArith, ExponentiateUInt64)

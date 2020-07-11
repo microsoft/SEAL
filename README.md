@@ -4,7 +4,7 @@ Microsoft SEAL is an easy-to-use open-source ([MIT licensed](LICENSE)) homomorph
 Microsoft SEAL is written in modern standard C++ and is easy to compile and run in many different environments.
 For more information about the Microsoft SEAL project, see [sealcrypto.org](https://www.microsoft.com/en-us/research/project/microsoft-seal).
 
-This document pertains to Microsoft SEAL version 3.5.
+This document pertains to Microsoft SEAL version 3.6.
 Users of previous versions of the library should look at the [list of changes](CHANGES.md).
 
 ## Contents
@@ -57,7 +57,8 @@ Users of previous versions of the library should look at the [list of changes](C
   - [Getting Started](#getting-started)
   - [Contributing](#contributing)
   - [Citing Microsoft SEAL](#citing-microsoft-seal)
-    <!-- - [Version 3.5](#version-35)
+    <!-- - [Version 3.6](#version-36)
+    - [Version 3.5](#version-35)
     - [Version 3.4](#version-34)
     - [Version 3.3](#version-33)
     - [Version 3.2](#version-32)
@@ -251,7 +252,7 @@ make
 
 #### [Optional] Shared Library
 
-By default Microsoft SEAL builds only a static library that is `libseal-3.5.a` on Unix-like platforms.
+By default Microsoft SEAL builds only a static library that is `libseal-3.6.a` on Unix-like platforms.
 You can enable building a shared library, `libseal.so*` in Linux or `libseal*.dylib` in macOS, in CMake configuration options as follows:
 
 ```shell
@@ -308,7 +309,7 @@ It is very easy to link your own applications and libraries with Microsoft SEAL 
 Simply add the following to your `CMakeLists.txt`:
 
 ```shell
-find_package(SEAL 3.5 REQUIRED)
+find_package(SEAL 3.6 REQUIRED)
 target_link_libraries(<your target> SEAL::seal)
 ```
 
@@ -483,6 +484,19 @@ For contributing to Microsoft SEAL, please see [CONTRIBUTING.md](CONTRIBUTING.md
 ## Citing Microsoft SEAL
 
 To cite Microsoft SEAL in academic papers, please use the following BibTeX entries.
+
+### Version 3.6
+
+```tex
+    @misc{sealcrypto,
+        title = {{M}icrosoft {SEAL} (release 3.6)},
+        howpublished = {\url{https://github.com/Microsoft/SEAL}},
+        month = sep,
+        year = 2020,
+        note = {Microsoft Research, Redmond, WA.},
+        key = {SEAL}
+    }
+```
 
 ### Version 3.5
 

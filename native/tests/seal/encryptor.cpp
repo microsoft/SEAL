@@ -27,7 +27,7 @@ namespace sealtest
         {
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
             IntegerEncoder encoder(context);
@@ -40,47 +40,47 @@ namespace sealtest
             encryptor.encrypt(encoder.encode(0x12345678), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x12345678ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(0), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(1), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(1ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(2), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(2ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFD)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFDULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFE)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFEULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFF)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFFULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(314159265), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
         }
         {
             parms.set_poly_modulus_degree(128);
             parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40 }));
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
             IntegerEncoder encoder(context);
@@ -93,48 +93,48 @@ namespace sealtest
             encryptor.encrypt(encoder.encode(0x12345678), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x12345678ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(0), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(1), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(1ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(2), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(2ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFD)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFDULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFE)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFEULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFF)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFFULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(314159265), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
         }
         {
             parms.set_poly_modulus_degree(256);
             parms.set_coeff_modulus(CoeffModulus::Create(256, { 40, 40, 40 }));
 
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
             IntegerEncoder encoder(context);
@@ -147,48 +147,48 @@ namespace sealtest
             encryptor.encrypt(encoder.encode(0x12345678), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x12345678ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(0), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(1), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(1ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(2), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(2ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFD)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFDULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFE)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFEULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFF)), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(0x7FFFFFFFFFFFFFFFULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt(encoder.encode(314159265), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
         }
         {
             parms.set_poly_modulus_degree(256);
             parms.set_coeff_modulus(CoeffModulus::Create(256, { 40, 40, 40 }));
 
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
             IntegerEncoder encoder(context);
@@ -203,13 +203,13 @@ namespace sealtest
             encryptor.encrypt_symmetric(encoder.encode(314159265), encrypted);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             encryptor.encrypt_symmetric(encoder.encode(314159265)).save(stream);
             encrypted.load(context, stream);
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
         }
     }
 
@@ -220,7 +220,7 @@ namespace sealtest
         parms.set_plain_modulus(plain_modulus);
         parms.set_poly_modulus_degree(64);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40, 40, 40 }));
-        auto context = SEALContext::Create(parms, true, sec_level_type::none);
+        SEALContext context(parms, true, sec_level_type::none);
         KeyGenerator keygen(context);
 
         Encryptor encryptor(context, keygen.public_key(), keygen.secret_key());
@@ -228,7 +228,7 @@ namespace sealtest
 
         Ciphertext ct;
         Plaintext pt;
-        parms_id_type next_parms = context->first_context_data()->next_context_data()->parms_id();
+        parms_id_type next_parms = context.first_context_data()->next_context_data()->parms_id();
         {
             encryptor.encrypt_zero(ct);
             ASSERT_FALSE(ct.is_ntt_form());
@@ -288,7 +288,7 @@ namespace sealtest
         parms.set_poly_modulus_degree(64);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40, 40, 40 }));
 
-        auto context = SEALContext::Create(parms, true, sec_level_type::none);
+        SEALContext context(parms, true, sec_level_type::none);
         KeyGenerator keygen(context);
 
         Encryptor encryptor(context, keygen.public_key(), keygen.secret_key());
@@ -297,14 +297,14 @@ namespace sealtest
 
         Ciphertext ct;
         Plaintext pt;
-        std::vector<std::complex<double>> res;
-        parms_id_type next_parms = context->first_context_data()->next_context_data()->parms_id();
+        vector<complex<double>> res;
+        parms_id_type next_parms = context.first_context_data()->next_context_data()->parms_id();
         {
             encryptor.encrypt_zero(ct);
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
-            ct.scale() = std::pow(2.0, 20);
+            ct.scale() = pow(2.0, 20);
             decryptor.decrypt(ct, pt);
             encoder.decode(pt, res);
             for (auto val : res)
@@ -317,7 +317,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
-            ct.scale() = std::pow(2.0, 20);
+            ct.scale() = pow(2.0, 20);
             ASSERT_EQ(ct.parms_id(), next_parms);
             decryptor.decrypt(ct, pt);
             ASSERT_EQ(pt.parms_id(), next_parms);
@@ -333,7 +333,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
-            ct.scale() = std::pow(2.0, 20);
+            ct.scale() = pow(2.0, 20);
             decryptor.decrypt(ct, pt);
             encoder.decode(pt, res);
             for (auto val : res)
@@ -346,7 +346,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
-            ct.scale() = std::pow(2.0, 20);
+            ct.scale() = pow(2.0, 20);
             ASSERT_EQ(ct.parms_id(), next_parms);
             decryptor.decrypt(ct, pt);
             ASSERT_EQ(pt.parms_id(), next_parms);
@@ -364,7 +364,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
-            ct.scale() = std::pow(2.0, 20);
+            ct.scale() = pow(2.0, 20);
             decryptor.decrypt(ct, pt);
             encoder.decode(pt, res);
             for (auto val : res)
@@ -378,7 +378,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
-            ct.scale() = std::pow(2.0, 20);
+            ct.scale() = pow(2.0, 20);
             ASSERT_EQ(ct.parms_id(), next_parms);
             decryptor.decrypt(ct, pt);
             ASSERT_EQ(pt.parms_id(), next_parms);
@@ -400,7 +400,7 @@ namespace sealtest
             parms.set_poly_modulus_degree(2 * slot_size);
             parms.set_coeff_modulus(CoeffModulus::Create(2 * slot_size, { 40, 40, 40, 40 }));
 
-            auto context = SEALContext::Create(parms, true, sec_level_type::none);
+            SEALContext context(parms, true, sec_level_type::none);
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
@@ -411,15 +411,15 @@ namespace sealtest
             Plaintext plain;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input(slot_size, 1.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input(slot_size, 1.0);
+            vector<complex<double>> output(slot_size);
             const double delta = static_cast<double>(1 << 16);
 
-            encoder.encode(input, context->first_parms_id(), delta, plain);
+            encoder.encode(input, context.first_parms_id(), delta, plain);
             encryptor.encrypt(plain, encrypted);
 
             // check correctness of encryption
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             decryptor.decrypt(encrypted, plainRes);
             encoder.decode(plainRes, output);
@@ -436,7 +436,7 @@ namespace sealtest
             parms.set_poly_modulus_degree(2 * slot_size);
             parms.set_coeff_modulus(CoeffModulus::Create(2 * slot_size, { 40, 40, 40, 40 }));
 
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
@@ -447,15 +447,15 @@ namespace sealtest
             Plaintext plain;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input(slot_size, 0.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input(slot_size, 0.0);
+            vector<complex<double>> output(slot_size);
             const double delta = static_cast<double>(1 << 16);
 
-            encoder.encode(input, context->first_parms_id(), delta, plain);
+            encoder.encode(input, context.first_parms_id(), delta, plain);
             encryptor.encrypt(plain, encrypted);
 
             // check correctness of encryption
-            ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
             decryptor.decrypt(encrypted, plainRes);
             encoder.decode(plainRes, output);
@@ -472,7 +472,7 @@ namespace sealtest
             parms.set_poly_modulus_degree(2 * slot_size);
             parms.set_coeff_modulus(CoeffModulus::Create(2 * slot_size, { 60, 60, 60 }));
 
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
@@ -483,8 +483,8 @@ namespace sealtest
             Plaintext plain;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input(slot_size);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input(slot_size);
+            vector<complex<double>> output(slot_size);
 
             srand(static_cast<unsigned>(time(NULL)));
             int input_bound = 1 << 30;
@@ -497,11 +497,11 @@ namespace sealtest
                     input[i] = pow(-1.0, rand() % 2) * static_cast<double>(rand() % input_bound);
                 }
 
-                encoder.encode(input, context->first_parms_id(), delta, plain);
+                encoder.encode(input, context.first_parms_id(), delta, plain);
                 encryptor.encrypt(plain, encrypted);
 
                 // check correctness of encryption
-                ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+                ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
                 decryptor.decrypt(encrypted, plainRes);
                 encoder.decode(plainRes, output);
@@ -519,7 +519,7 @@ namespace sealtest
             parms.set_poly_modulus_degree(128);
             parms.set_coeff_modulus(CoeffModulus::Create(128, { 60, 60, 60 }));
 
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
@@ -530,8 +530,8 @@ namespace sealtest
             Plaintext plain;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input(slot_size);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input(slot_size);
+            vector<complex<double>> output(slot_size);
 
             srand(static_cast<unsigned>(time(NULL)));
             int input_bound = 1 << 30;
@@ -544,11 +544,11 @@ namespace sealtest
                     input[i] = pow(-1.0, rand() % 2) * static_cast<double>(rand() % input_bound);
                 }
 
-                encoder.encode(input, context->first_parms_id(), delta, plain);
+                encoder.encode(input, context.first_parms_id(), delta, plain);
                 encryptor.encrypt(plain, encrypted);
 
                 // check correctness of encryption
-                ASSERT_TRUE(encrypted.parms_id() == context->first_parms_id());
+                ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
                 decryptor.decrypt(encrypted, plainRes);
                 encoder.decode(plain, output);
@@ -566,7 +566,7 @@ namespace sealtest
             parms.set_poly_modulus_degree(2 * slot_size);
             parms.set_coeff_modulus(CoeffModulus::Create(2 * slot_size, { 40, 40, 40, 40 }));
 
-            auto context = SEALContext::Create(parms, true, sec_level_type::none);
+            SEALContext context(parms, true, sec_level_type::none);
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
@@ -577,11 +577,11 @@ namespace sealtest
             Plaintext plain;
             Plaintext plainRes;
 
-            std::vector<std::complex<double>> input(slot_size, 1.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input(slot_size, 1.0);
+            vector<complex<double>> output(slot_size);
             const double delta = static_cast<double>(1 << 16);
 
-            auto first_context_data = context->first_context_data();
+            auto first_context_data = context.first_context_data();
             ASSERT_NE(nullptr, first_context_data.get());
             auto second_context_data = first_context_data->next_context_data();
             ASSERT_NE(nullptr, second_context_data.get());
@@ -608,7 +608,7 @@ namespace sealtest
             parms.set_poly_modulus_degree(2 * slot_size);
             parms.set_coeff_modulus(CoeffModulus::Create(2 * slot_size, { 40, 40, 40, 40 }));
 
-            auto context = SEALContext::Create(parms, true, sec_level_type::none);
+            SEALContext context(parms, true, sec_level_type::none);
             KeyGenerator keygen(context);
 
             CKKSEncoder encoder(context);
@@ -620,11 +620,11 @@ namespace sealtest
             Plaintext plainRes;
             stringstream stream;
 
-            std::vector<std::complex<double>> input(slot_size, 1.0);
-            std::vector<std::complex<double>> output(slot_size);
+            vector<complex<double>> input(slot_size, 1.0);
+            vector<complex<double>> output(slot_size);
             const double delta = static_cast<double>(1 << 16);
 
-            auto first_context_data = context->first_context_data();
+            auto first_context_data = context.first_context_data();
             ASSERT_NE(nullptr, first_context_data.get());
             auto second_context_data = first_context_data->next_context_data();
             ASSERT_NE(nullptr, second_context_data.get());

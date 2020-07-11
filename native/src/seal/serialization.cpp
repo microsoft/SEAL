@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/context.h"
 #include "seal/intarray.h"
 #include "seal/memorymanager.h"
 #include "seal/serialization.h"
@@ -25,11 +24,11 @@ namespace seal
 
     // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to ensure
     // symbol is created.
-    constexpr std::uint16_t Serialization::seal_magic;
+    constexpr uint16_t Serialization::seal_magic;
 
     // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to ensure
     // symbol is created.
-    constexpr std::uint8_t Serialization::seal_header_size;
+    constexpr uint8_t Serialization::seal_header_size;
 
     namespace
     {

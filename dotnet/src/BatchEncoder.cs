@@ -55,8 +55,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="context">The SEALContext</param>
         /// @param[in] context
         /// <exception cref="ArgumentNullException">if context is null.</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
-        /// parameters are not valid for batching</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid for batching</exception>
         /// <exception cref="ArgumentException">if scheme is not SchemeType.BFV</exception>
         public BatchEncoder(SEALContext context)
         {
@@ -127,32 +126,6 @@ namespace Microsoft.Research.SEAL
 
             long[] valarray = values.ToArray();
             NativeMethods.BatchEncoder_Encode(NativePtr, (ulong)valarray.LongLength, valarray, destination.NativePtr);
-        }
-
-        /// <summary>
-        /// Creates a plaintext from a given matrix. This function "batches" a given matrix
-        /// of integers modulo the plaintext modulus in-place into a plaintext ready to be
-        /// encrypted. The matrix is given as a plaintext element whose first N/2 coefficients
-        /// represent the first row of the matrix, and the second N/2 coefficients represent the
-        /// second row, where N denotes the degree of the polynomial modulus. The input plaintext
-        /// must have degress less than the polynomial modulus, and coefficients less than the
-        /// plaintext modulus, i.e. it must be a valid plaintext for the encryption parameters.
-        /// Dynamic memory allocations in the process are allocated from the memory pool pointed
-        /// to by the given MemoryPoolHandle.
-        /// </summary>
-        /// <param name="plain">The matrix of integers modulo plaintext modulus to batch</param>
-        /// <param name="pool"></param>
-        /// <exception cref="ArgumentNullException">if plain is null.</exception>
-        /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
-        /// <exception cref="ArgumentException">if plain is in NTT form</exception>
-        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public void Encode(Plaintext plain, MemoryPoolHandle pool = null)
-        {
-            if (null == plain)
-                throw new ArgumentNullException(nameof(plain));
-
-            IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-            NativeMethods.BatchEncoder_Encode(NativePtr, plain.NativePtr, poolPtr);
         }
 
         /// <summary>
@@ -227,30 +200,6 @@ namespace Microsoft.Research.SEAL
             {
                 destination.Add(destArray[i]);
             }
-        }
-
-        /// <summary>
-        /// Inverse of encode. This function "unbatches" a given plaintext in-place into
-        /// a matrix of integers modulo the plaintext modulus. The input plaintext must have
-        /// degress less than the polynomial modulus, and coefficients less than the plaintext
-        /// modulus, i.e. it must be a valid plaintext for the encryption parameters. Dynamic
-        /// memory allocations in the process are allocated from the memory pool pointed to by
-        /// the given MemoryPoolHandle.
-        /// </summary>
-        /// <param name="plain">The plaintext polynomial to unbatch</param>
-        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentNullException">if plain is null</exception>
-        /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
-        /// <exception cref="ArgumentException">if plain is in NTT form</exception>
-        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public void Decode(Plaintext plain, MemoryPoolHandle pool = null)
-        {
-            if (null == plain)
-                throw new ArgumentNullException(nameof(plain));
-
-            IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-
-            NativeMethods.BatchEncoder_Decode(NativePtr, plain.NativePtr, poolPtr);
         }
 
         /// <summary>

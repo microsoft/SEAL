@@ -138,17 +138,17 @@ SEAL_C_FUNC SecretKey_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_
 
 SEAL_C_FUNC SecretKey_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     SecretKey *skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(inptr, E_POINTER);
     IfNullRet(in_bytes, E_POINTER);
 
     try
     {
         *in_bytes = util::safe_cast<int64_t>(
-            skey->unsafe_load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
+            skey->unsafe_load(*ctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -167,17 +167,17 @@ SEAL_C_FUNC SecretKey_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, u
 
 SEAL_C_FUNC SecretKey_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     SecretKey *skey = FromVoid<SecretKey>(thisptr);
     IfNullRet(skey, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(inptr, E_POINTER);
     IfNullRet(in_bytes, E_POINTER);
 
     try
     {
         *in_bytes = util::safe_cast<int64_t>(
-            skey->load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
+            skey->load(*ctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)

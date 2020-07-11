@@ -18,20 +18,6 @@ using namespace seal;
 using namespace seal::util;
 using namespace seal::c;
 
-namespace seal
-{
-    namespace c
-    {
-        /**
-        The purpose of this map is to keep SEALContext shared pointers alive
-        while they are being used as regular pointers in the managed world.
-        */
-        unordered_map<SEALContext *, shared_ptr<SEALContext>> pointer_store_;
-
-        ReaderWriterLocker pointer_store_locker_;
-    } // namespace c
-} // namespace seal
-
 SEAL_C_FUNC SEALContext_Create(void *encryptionParams, bool expand_mod_chain, int sec_level, void **context)
 {
     EncryptionParameters *encParams = FromVoid<EncryptionParameters>(encryptionParams);
@@ -39,12 +25,8 @@ SEAL_C_FUNC SEALContext_Create(void *encryptionParams, bool expand_mod_chain, in
     IfNullRet(context, E_POINTER);
 
     sec_level_type security_level = static_cast<sec_level_type>(sec_level);
-    auto result = SEALContext::Create(*encParams, expand_mod_chain, security_level);
 
-    WriterLock lock(pointer_store_locker_.acquire_write());
-    pointer_store_[result.get()] = result;
-
-    *context = result.get();
+    *context = new SEALContext(*encParams, expand_mod_chain, security_level);
     return S_OK;
 }
 
@@ -53,8 +35,7 @@ SEAL_C_FUNC SEALContext_Destroy(void *thisptr)
     SEALContext *context = FromVoid<SEALContext>(thisptr);
     IfNullRet(context, E_POINTER);
 
-    WriterLock lock(pointer_store_locker_.acquire_write());
-    pointer_store_.erase(context);
+    delete context;
     return S_OK;
 }
 

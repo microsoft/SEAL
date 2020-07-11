@@ -13,7 +13,6 @@
 #include "seal/serializable.h"
 #include "seal/util/defines.h"
 #include "seal/util/ntt.h"
-#include <memory>
 #include <vector>
 
 namespace seal
@@ -54,11 +53,10 @@ namespace seal
 
         @param[in] context The SEALContext
         @param[in] public_key The public key
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if public_key is not valid
         */
-        Encryptor(std::shared_ptr<SEALContext> context, const PublicKey &public_key);
+        Encryptor(const SEALContext &context, const PublicKey &public_key);
 
         /**
         Creates an Encryptor instance initialized with the specified SEALContext
@@ -66,11 +64,10 @@ namespace seal
 
         @param[in] context The SEALContext
         @param[in] secret_key The secret key
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if secret_key is not valid
         */
-        Encryptor(std::shared_ptr<SEALContext> context, const SecretKey &secret_key);
+        Encryptor(const SEALContext &context, const SecretKey &secret_key);
 
         /**
         Creates an Encryptor instance initialized with the specified SEALContext,
@@ -79,11 +76,10 @@ namespace seal
         @param[in] context The SEALContext
         @param[in] public_key The public key
         @param[in] secret_key The secret key
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if public_key or secret_key is not valid
         */
-        Encryptor(std::shared_ptr<SEALContext> context, const PublicKey &public_key, const SecretKey &secret_key);
+        Encryptor(const SEALContext &context, const PublicKey &public_key, const SecretKey &secret_key);
 
         /**
         Give a new instance of public key.
@@ -158,7 +154,7 @@ namespace seal
         */
         inline void encrypt_zero(Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
-            encrypt_zero(context_->first_parms_id(), destination, pool);
+            encrypt_zero(context_.first_parms_id(), destination, pool);
         }
 
         /**
@@ -228,7 +224,7 @@ namespace seal
         inline void encrypt_zero_symmetric(
             Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
-            encrypt_zero_symmetric(context_->first_parms_id(), destination, pool);
+            encrypt_zero_symmetric(context_.first_parms_id(), destination, pool);
         }
 
         /**
@@ -334,11 +330,11 @@ namespace seal
         SEAL_NODISCARD inline Serializable<Ciphertext> encrypt_zero_symmetric(
             MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
-            return encrypt_zero_symmetric(context_->first_parms_id(), pool);
+            return encrypt_zero_symmetric(context_.first_parms_id(), pool);
         }
 
         /**
-        Enables access to private members of seal::Encryptor for .NET wrapper.
+        Enables access to private members of seal::Encryptor for SEAL_C.
         */
         struct EncryptorPrivateHelper;
 
@@ -361,7 +357,7 @@ namespace seal
             const Plaintext &plain, bool is_asymmetric, bool save_seed, Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
-        std::shared_ptr<SEALContext> context_{ nullptr };
+        SEALContext context_;
 
         PublicKey public_key_;
 

@@ -11,7 +11,7 @@ cmake_minimum_required(VERSION 3.12)
 #   4. SEAL C++ tests                             #
 ###################################################
 
-project(SEAL VERSION 3.5.4 LANGUAGES CXX C)
+project(SEAL VERSION 3.6.0 LANGUAGES CXX C)
 
 # Check operating system: for Windows, use Visual Studio solution/project files.
 if(MSVC)
@@ -114,8 +114,8 @@ set(CMAKE_LIBRARY_RUNTIME_DIRECTORY ${SEAL_SOURCE_DIR}/bin)
 set(SEAL_TARGETS_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALTargets.cmake)
 set(SEAL_CONFIG_IN_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake.in)
 set(SEAL_CONFIG_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake)
-set(SEAL_PKGCONFIG_IN_FILENAME ${SEAL_SOURCE_DIR}/seal.pc.in)
-set(SEAL_PKGCONFIG_FILENAME ${SEAL_SOURCE_DIR}/seal-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR}.pc)
+set(SEAL_PKGCONFIG_IN_FILENAME ${SEAL_SOURCE_DIR}/pkgconfig/seal.pc.in)
+set(SEAL_PKGCONFIG_FILENAME ${SEAL_SOURCE_DIR}/pkgconfig/seal-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR}.pc)
 set(SEAL_CONFIG_VERSION_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfigVersion.cmake)
 set(SEAL_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
 set(SEAL_PKGCONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/pkgconfig)

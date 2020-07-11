@@ -30,16 +30,16 @@ struct seal::Encryptor::EncryptorPrivateHelper
     static void encrypt_zero_symmetric_internal(
         Encryptor *encryptor, bool save_seed, Ciphertext &destination, MemoryPoolHandle pool)
     {
-        encryptor->encrypt_zero_internal(encryptor->context_->first_parms_id(), false, save_seed, destination, pool);
+        encryptor->encrypt_zero_internal(encryptor->context_.first_parms_id(), false, save_seed, destination, pool);
     }
 };
 
 SEAL_C_FUNC Encryptor_Create(void *context, void *public_key, void *secret_key, void **encryptor)
 {
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     PublicKey *pkey = FromVoid<PublicKey>(public_key);
     SecretKey *skey = FromVoid<SecretKey>(secret_key);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(encryptor, E_POINTER);
     if (nullptr == pkey && nullptr == skey)
     {
@@ -51,7 +51,7 @@ SEAL_C_FUNC Encryptor_Create(void *context, void *public_key, void *secret_key, 
         Encryptor *enc;
         if (nullptr != pkey)
         {
-            enc = new Encryptor(sharedctx, *pkey);
+            enc = new Encryptor(*ctx, *pkey);
             if (nullptr != skey)
             {
                 enc->set_secret_key(*skey);
@@ -59,7 +59,7 @@ SEAL_C_FUNC Encryptor_Create(void *context, void *public_key, void *secret_key, 
         }
         else
         {
-            enc = new Encryptor(sharedctx, *skey);
+            enc = new Encryptor(*ctx, *skey);
         }
         *encryptor = enc;
         return S_OK;

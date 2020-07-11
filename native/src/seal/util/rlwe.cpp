@@ -109,27 +109,26 @@ namespace seal
             // Set up source of randomness that produces 32 bit random things.
             RandomToStandardAdapter engine(rng);
 
-            // We sample numbers up to 2^63-1 to use barrett_reduce_63
-            constexpr uint64_t max_random = static_cast<uint64_t>(0x7FFFFFFFFFFFFFFFULL);
+            constexpr uint64_t max_random = static_cast<uint64_t>(0xFFFFFFFFFFFFFFFFULL);
             for (size_t j = 0; j < coeff_modulus_size; j++)
             {
                 auto &modulus = coeff_modulus[j];
-                uint64_t max_multiple = max_random - barrett_reduce_63(max_random, modulus) - 1;
+                uint64_t max_multiple = max_random - barrett_reduce_64(max_random, modulus) - 1;
                 for (size_t i = 0; i < coeff_count; i++)
                 {
                     // This ensures uniform distribution.
                     uint64_t rand;
                     do
                     {
-                        rand = (static_cast<uint64_t>(engine()) << 31) | (static_cast<uint64_t>(engine() >> 1));
+                        rand = (static_cast<uint64_t>(engine()) << 32) | static_cast<uint64_t>(engine());
                     } while (rand >= max_multiple);
-                    destination[i + j * coeff_count] = barrett_reduce_63(rand, modulus);
+                    destination[i + j * coeff_count] = barrett_reduce_64(rand, modulus);
                 }
             }
         }
 
         void encrypt_zero_asymmetric(
-            const PublicKey &public_key, shared_ptr<SEALContext> context, parms_id_type parms_id, bool is_ntt_form,
+            const PublicKey &public_key, const SEALContext &context, parms_id_type parms_id, bool is_ntt_form,
             Ciphertext &destination)
         {
 #ifdef SEAL_DEBUG
@@ -141,7 +140,7 @@ namespace seal
             // We use a fresh memory pool with `clear_on_destruction' enabled.
             MemoryPoolHandle pool = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
 
-            auto &context_data = *context->get_context_data(parms_id);
+            auto &context_data = *context.get_context_data(parms_id);
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
             size_t coeff_modulus_size = coeff_modulus.size();
@@ -174,7 +173,7 @@ namespace seal
                         u.get() + i * coeff_count, public_key.data().data(j) + i * coeff_count, coeff_count,
                         coeff_modulus[i], destination.data(j) + i * coeff_count);
 
-                    // addition with e_0, e_1 is in non-NTT form.
+                    // Addition with e_0, e_1 is in non-NTT form.
                     if (!is_ntt_form)
                     {
                         inverse_ntt_negacyclic_harvey(destination.data(j) + i * coeff_count, ntt_tables[i]);
@@ -189,7 +188,7 @@ namespace seal
                 sample_poly_normal(rng, parms, u.get());
                 for (size_t i = 0; i < coeff_modulus_size; i++)
                 {
-                    // addition with e_0, e_1 is in NTT form.
+                    // Addition with e_0, e_1 is in NTT form.
                     if (is_ntt_form)
                     {
                         ntt_negacyclic_harvey(u.get() + i * coeff_count, ntt_tables[i]);
@@ -202,7 +201,7 @@ namespace seal
         }
 
         void encrypt_zero_symmetric(
-            const SecretKey &secret_key, shared_ptr<SEALContext> context, parms_id_type parms_id, bool is_ntt_form,
+            const SecretKey &secret_key, const SEALContext &context, parms_id_type parms_id, bool is_ntt_form,
             bool save_seed, Ciphertext &destination)
         {
 #ifdef SEAL_DEBUG
@@ -214,7 +213,7 @@ namespace seal
             // We use a fresh memory pool with `clear_on_destruction' enabled.
             MemoryPoolHandle pool = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
 
-            auto &context_data = *context->get_context_data(parms_id);
+            auto &context_data = *context.get_context_data(parms_id);
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
             size_t coeff_modulus_size = coeff_modulus.size();
@@ -233,9 +232,16 @@ namespace seal
             destination.is_ntt_form() = is_ntt_form;
             destination.scale() = 1.0;
 
-            auto rng_error = parms.random_generator()->create();
-            shared_ptr<UniformRandomGenerator> rng_ciphertext;
-            rng_ciphertext = BlakePRNGFactory().create();
+            // Create an instance of a random number generator. We use this for sampling a seed for a second BlakePRNG
+            // used for sampling u (the seed can be public information. This RNG is also used for sampling the error.
+            auto bootstrap_rng = parms.random_generator()->create();
+
+            // Sample a seed for generating uniform randomness for the ciphertext; this seed is public information
+            random_seed_type public_rng_seed;
+            bootstrap_rng->generate(sizeof(random_seed_type), reinterpret_cast<SEAL_BYTE *>(public_rng_seed.data()));
+
+            // Create a BlakePRNG for sampling u
+            auto ciphertext_rng = BlakePRNGFactory(public_rng_seed).create();
 
             // Generate ciphertext: (c[0], c[1]) = ([-(as+e)]_q, a)
             uint64_t *c0 = destination.data();
@@ -244,13 +250,13 @@ namespace seal
             // Sample a uniformly at random
             if (is_ntt_form || !save_seed)
             {
-                // sample the NTT form directly
-                sample_poly_uniform(rng_ciphertext, parms, c1);
+                // Sample the NTT form directly
+                sample_poly_uniform(ciphertext_rng, parms, c1);
             }
             else if (save_seed)
             {
-                // sample non-NTT form and store the seed
-                sample_poly_uniform(rng_ciphertext, parms, c1);
+                // Sample non-NTT form and store the seed
+                sample_poly_uniform(ciphertext_rng, parms, c1);
                 for (size_t i = 0; i < coeff_modulus_size; i++)
                 {
                     // Transform the c1 into NTT representation.
@@ -260,9 +266,9 @@ namespace seal
 
             // Sample e <-- chi
             auto noise(allocate_poly(coeff_count, coeff_modulus_size, pool));
-            sample_poly_normal(rng_error, parms, noise.get());
+            sample_poly_normal(bootstrap_rng, parms, noise.get());
 
-            // calculate -(a*s + e) (mod q) and store in c[0]
+            // Calculate -(a*s + e) (mod q) and store in c[0]
             for (size_t i = 0; i < coeff_modulus_size; i++)
             {
                 dyadic_product_coeffmod(
@@ -294,10 +300,9 @@ namespace seal
 
             if (save_seed)
             {
-                random_seed_type seed = rng_ciphertext->seed();
                 // Write random seed to destination.data(1).
                 c1[0] = static_cast<uint64_t>(0xFFFFFFFFFFFFFFFFULL);
-                copy_n(seed.cbegin(), seed.size(), c1 + 1);
+                copy_n(public_rng_seed.cbegin(), public_rng_seed.size(), c1 + 1);
             }
         }
     } // namespace util

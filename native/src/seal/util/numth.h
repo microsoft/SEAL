@@ -30,8 +30,8 @@ namespace seal
             // Transform to non-adjacent form (NAF)
             for (int i = 0; value; i++)
             {
-                int zi = (value % 2) ? 2 - (value % 4) : 0;
-                value = (value - zi) / 2;
+                int zi = (value & int(0x1)) ? 2 - (value & int(0x3)) : 0;
+                value = (value - zi) >> 1;
                 if (zi)
                 {
                     res.push_back((sign ? -zi : zi) * (1 << i));

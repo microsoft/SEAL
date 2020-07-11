@@ -400,7 +400,7 @@ namespace seal
             }
 
             /**
-            Return the non-RNS form of upppoer_half_increment which is q mod t.
+            Return the non-RNS form of upper_half_increment which is q mod t.
             */
             SEAL_NODISCARD inline auto coeff_modulus_mod_plain_modulus() const noexcept -> std::uint64_t
             {
@@ -463,7 +463,7 @@ namespace seal
 
             int total_coeff_modulus_bit_count_ = 0;
 
-            util::Pointer<std::uint64_t> coeff_div_plain_modulus_;
+            util::Pointer<util::MultiplyUIntModOperand> coeff_div_plain_modulus_;
 
             std::uint64_t plain_upper_half_threshold_ = 0;
 
@@ -482,8 +482,6 @@ namespace seal
             std::size_t chain_index_ = 0;
         };
 
-        SEALContext() = delete;
-
         /**
         Creates an instance of SEALContext and performs several pre-computations
         on the given EncryptionParameters.
@@ -494,13 +492,39 @@ namespace seal
         @param[in] sec_level Determines whether a specific security level should be
         enforced according to HomomorphicEncryption.org security standard
         */
-        SEAL_NODISCARD static auto Create(
+        SEALContext(
             const EncryptionParameters &parms, bool expand_mod_chain = true,
             sec_level_type sec_level = sec_level_type::tc128)
-        {
-            return std::shared_ptr<SEALContext>(
-                new SEALContext(parms, expand_mod_chain, sec_level, MemoryManager::GetPool()));
-        }
+            : SEALContext(parms, expand_mod_chain, sec_level, MemoryManager::GetPool())
+        {}
+
+        /**
+        Constructs a new SEALContext by copying a given one.
+
+        @param[in] copy The SEALContext to copy from
+        */
+        SEALContext(const SEALContext &copy) = default;
+
+        /**
+        Creates a new SEALContext by moving a given one.
+
+        @param[in] source The SEALContext to move from
+        */
+        SEALContext(SEALContext &&source) = default;
+
+        /**
+        Copies a given SEALContext to the current one.
+
+        @param[in] assign The SEALContext to copy from
+        */
+        SEALContext &operator=(const SEALContext &assign) = default;
+
+        /**
+        Moves a given SEALContext to the current one.
+
+        @param[in] assign The SEALContext to move from
+        */
+        SEALContext &operator=(SEALContext &&assign) = default;
 
         /**
         Returns the ContextData corresponding to encryption parameters with a given
@@ -611,14 +635,6 @@ namespace seal
         }
 
     private:
-        SEALContext(const SEALContext &copy) = delete;
-
-        SEALContext(SEALContext &&source) = delete;
-
-        SEALContext &operator=(const SEALContext &assign) = delete;
-
-        SEALContext &operator=(SEALContext &&assign) = delete;
-
         /**
         Creates an instance of SEALContext, and performs several pre-computations
         on the given EncryptionParameters.

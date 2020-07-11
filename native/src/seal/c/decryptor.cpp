@@ -15,15 +15,15 @@ using namespace seal::c;
 
 SEAL_C_FUNC Decryptor_Create(void *context, void *secret_key, void **decryptor)
 {
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     SecretKey *secretKey = FromVoid<SecretKey>(secret_key);
     IfNullRet(secretKey, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(decryptor, E_POINTER);
 
     try
     {
-        Decryptor *decr = new Decryptor(sharedctx, *secretKey);
+        Decryptor *decr = new Decryptor(*ctx, *secretKey);
         *decryptor = decr;
         return S_OK;
     }

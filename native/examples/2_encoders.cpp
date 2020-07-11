@@ -81,7 +81,7 @@ void example_integer_encoder()
     will be incorrect.
     */
     parms.set_plain_modulus(512);
-    auto context = SEALContext::Create(parms);
+    SEALContext context(parms);
     print_parameters(context);
     cout << endl;
 
@@ -182,7 +182,7 @@ void example_batch_encoder()
     */
     parms.set_plain_modulus(PlainModulus::Batching(poly_modulus_degree, 20));
 
-    auto context = SEALContext::Create(parms);
+    SEALContext context(parms);
     print_parameters(context);
     cout << endl;
 
@@ -190,7 +190,7 @@ void example_batch_encoder()
     We can verify that batching is indeed enabled by looking at the encryption
     parameter qualifiers created by SEALContext.
     */
-    auto qualifiers = context->first_context_data()->qualifiers();
+    auto qualifiers = context.first_context_data()->qualifiers();
     cout << "Batching enabled: " << boolalpha << qualifiers.using_batching << endl;
 
     KeyGenerator keygen(context);
@@ -276,7 +276,7 @@ void example_batch_encoder()
     vector<uint64_t> pod_matrix2;
     for (size_t i = 0; i < slot_count; i++)
     {
-        pod_matrix2.push_back((i % 2) + 1);
+        pod_matrix2.push_back((i & size_t(0x1)) + 1);
     }
     Plaintext plain_matrix2;
     batch_encoder.encode(pod_matrix2, plain_matrix2);
@@ -349,7 +349,7 @@ void example_ckks_encoder()
     /*
     We create the SEALContext as usual and print the parameters.
     */
-    auto context = SEALContext::Create(parms);
+    SEALContext context(parms);
     print_parameters(context);
     cout << endl;
 

@@ -8,6 +8,7 @@
 #include "seal/util/defines.h"
 #include "seal/util/iterator.h"
 #include "seal/util/pointer.h"
+#include "seal/util/uintarithsmallmod.h"
 #include "seal/util/uintcore.h"
 #include <stdexcept>
 
@@ -24,15 +25,11 @@ namespace seal
                 : pool_(copy.pool_), root_(copy.root_), coeff_count_power_(copy.coeff_count_power_),
                   coeff_count_(copy.coeff_count_), modulus_(copy.modulus_), inv_degree_modulo_(copy.inv_degree_modulo_)
             {
-                root_powers_ = allocate_uint(coeff_count_, pool_);
-                inv_root_powers_ = allocate_uint(coeff_count_, pool_);
-                scaled_root_powers_ = allocate_uint(coeff_count_, pool_);
-                scaled_inv_root_powers_ = allocate_uint(coeff_count_, pool_);
+                root_powers_ = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
+                inv_root_powers_ = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
 
-                set_uint(copy.root_powers_.get(), coeff_count_, root_powers_.get());
-                set_uint(copy.inv_root_powers_.get(), coeff_count_, inv_root_powers_.get());
-                set_uint(copy.scaled_root_powers_.get(), coeff_count_, scaled_root_powers_.get());
-                set_uint(copy.scaled_inv_root_powers_.get(), coeff_count_, scaled_inv_root_powers_.get());
+                std::copy_n(copy.root_powers_.get(), coeff_count_, root_powers_.get());
+                std::copy_n(copy.inv_root_powers_.get(), coeff_count_, inv_root_powers_.get());
             }
 
             NTTTables(int coeff_count_power, const Modulus &modulus, MemoryPoolHandle pool = MemoryManager::GetPool());
@@ -42,7 +39,7 @@ namespace seal
                 return root_;
             }
 
-            SEAL_NODISCARD inline auto get_from_root_powers(std::size_t index) const -> std::uint64_t
+            SEAL_NODISCARD inline MultiplyUIntModOperand get_from_root_powers(std::size_t index) const
             {
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
@@ -53,18 +50,7 @@ namespace seal
                 return root_powers_[index];
             }
 
-            SEAL_NODISCARD inline auto get_from_scaled_root_powers(std::size_t index) const -> std::uint64_t
-            {
-#ifdef SEAL_DEBUG
-                if (index >= coeff_count_)
-                {
-                    throw std::out_of_range("index");
-                }
-#endif
-                return scaled_root_powers_[index];
-            }
-
-            SEAL_NODISCARD inline auto get_from_inv_root_powers(std::size_t index) const -> std::uint64_t
+            SEAL_NODISCARD inline MultiplyUIntModOperand get_from_inv_root_powers(std::size_t index) const
             {
 #ifdef SEAL_DEBUG
                 if (index >= coeff_count_)
@@ -75,20 +61,9 @@ namespace seal
                 return inv_root_powers_[index];
             }
 
-            SEAL_NODISCARD inline auto get_from_scaled_inv_root_powers(std::size_t index) const -> std::uint64_t
+            SEAL_NODISCARD inline const MultiplyUIntModOperand &inv_degree_modulo() const
             {
-#ifdef SEAL_DEBUG
-                if (index >= coeff_count_)
-                {
-                    throw std::out_of_range("index");
-                }
-#endif
-                return scaled_inv_root_powers_[index];
-            }
-
-            SEAL_NODISCARD inline auto get_inv_degree_modulo() const -> const std::uint64_t *
-            {
-                return &inv_degree_modulo_;
+                return inv_degree_modulo_;
             }
 
             SEAL_NODISCARD inline const Modulus &modulus() const
@@ -115,21 +90,11 @@ namespace seal
 
             // Computed bit-scrambled vector of first 1 << coeff_count_power powers
             // of a primitive root.
-            void ntt_powers_of_primitive_root(std::uint64_t root, std::uint64_t *destination) const;
-
-            // Scales the elements of a vector returned by powers_of_primitive_root(...)
-            // by word_size/modulus and rounds down.
-            void ntt_scale_powers_of_primitive_root(const std::uint64_t *input, std::uint64_t *destination) const;
+            void ntt_powers_of_primitive_root(std::uint64_t root, MultiplyUIntModOperand *destination) const;
 
             MemoryPoolHandle pool_;
 
             std::uint64_t root_ = 0;
-
-            // Size coeff_count_
-            Pointer<std::uint64_t> root_powers_;
-
-            // Size coeff_count_
-            Pointer<std::uint64_t> scaled_root_powers_;
 
             int coeff_count_power_ = 0;
 
@@ -137,13 +102,13 @@ namespace seal
 
             Modulus modulus_;
 
-            // Size coeff_count_
-            Pointer<std::uint64_t> inv_root_powers_;
+            MultiplyUIntModOperand inv_degree_modulo_;
 
             // Size coeff_count_
-            Pointer<std::uint64_t> scaled_inv_root_powers_;
+            Pointer<MultiplyUIntModOperand> root_powers_;
 
-            std::uint64_t inv_degree_modulo_ = 0;
+            // Size coeff_count_
+            Pointer<MultiplyUIntModOperand> inv_root_powers_;
         };
 
         /**

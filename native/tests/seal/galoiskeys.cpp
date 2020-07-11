@@ -24,7 +24,7 @@ namespace sealtest
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(65537);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60 }));
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
             GaloisKeys keys;
@@ -60,7 +60,7 @@ namespace sealtest
             parms.set_plain_modulus(65537);
             parms.set_coeff_modulus(CoeffModulus::Create(256, { 60, 50 }));
 
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
             GaloisKeys keys;
@@ -95,12 +95,12 @@ namespace sealtest
     {
         // Returns true if a, b contains the same error.
         auto compare_kswitchkeys = [](const KSwitchKeys &a, const KSwitchKeys &b, const SecretKey &sk,
-                                      shared_ptr<SEALContext> context) {
+                                      const SEALContext &context) {
             auto compare_error = [](const Ciphertext &a_ct, const Ciphertext &b_ct, const SecretKey &sk1,
-                                    shared_ptr<SEALContext> ctx) {
-                auto get_error = [](const Ciphertext &encrypted, const SecretKey &sk2, shared_ptr<SEALContext> ctx2) {
+                                    const SEALContext &ctx) {
+                auto get_error = [](const Ciphertext &encrypted, const SecretKey &sk2, const SEALContext &ctx2) {
                     auto pool = MemoryManager::GetPool();
-                    auto &ctx2_data = *ctx2->get_context_data(encrypted.parms_id());
+                    auto &ctx2_data = *ctx2.get_context_data(encrypted.parms_id());
                     auto &parms = ctx2_data.parms();
                     auto &coeff_modulus = parms.coeff_modulus();
                     size_t coeff_count = parms.poly_modulus_degree();
@@ -168,7 +168,7 @@ namespace sealtest
             }
             auto rng = make_shared<BlakePRNGFactory>(BlakePRNGFactory(seed));
             parms.set_random_generator(rng);
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
             SecretKey secret_key = keygen.secret_key();
 
@@ -190,7 +190,7 @@ namespace sealtest
             }
             auto rng = make_shared<BlakePRNGFactory>(BlakePRNGFactory(seed));
             parms.set_random_generator(rng);
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
             SecretKey secret_key = keygen.secret_key();
 

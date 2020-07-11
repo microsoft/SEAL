@@ -20,14 +20,10 @@ using namespace seal::util;
 
 namespace seal
 {
-    KeyGenerator::KeyGenerator(shared_ptr<SEALContext> context) : context_(move(context))
+    KeyGenerator::KeyGenerator(const SEALContext &context) : context_(context)
     {
         // Verify parameters
-        if (!context_)
-        {
-            throw invalid_argument("invalid context");
-        }
-        if (!context_->parameters_set())
+        if (!context_.parameters_set())
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
@@ -39,14 +35,10 @@ namespace seal
         generate_sk();
     }
 
-    KeyGenerator::KeyGenerator(shared_ptr<SEALContext> context, const SecretKey &secret_key) : context_(move(context))
+    KeyGenerator::KeyGenerator(const SEALContext &context, const SecretKey &secret_key) : context_(context)
     {
         // Verify parameters
-        if (!context_)
-        {
-            throw invalid_argument("invalid context");
-        }
-        if (!context_->parameters_set())
+        if (!context_.parameters_set())
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
@@ -66,7 +58,7 @@ namespace seal
     void KeyGenerator::generate_sk(bool is_initialized)
     {
         // Extract encryption parameters.
-        auto &context_data = *context_->key_context_data();
+        auto &context_data = *context_.key_context_data();
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
@@ -79,11 +71,9 @@ namespace seal
             sk_generated_ = false;
             secret_key_.data().resize(mul_safe(coeff_count, coeff_modulus_size));
 
-            shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
-
             // Generate secret key
             RNSIter secret_key(secret_key_.data().data(), coeff_count);
-            sample_poly_ternary(random, parms, secret_key);
+            sample_poly_ternary(parms.random_generator()->create(), parms, secret_key);
 
             // Transform the secret s into NTT representation.
             auto ntt_tables = context_data.small_ntt_tables();
@@ -110,7 +100,7 @@ namespace seal
         }
 
         // Extract encryption parameters.
-        auto &context_data = *context_->key_context_data();
+        auto &context_data = *context_.key_context_data();
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
@@ -126,7 +116,6 @@ namespace seal
         // PublicKey data allocated from pool given by MemoryManager::GetPool.
         PublicKey public_key;
 
-        shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
         encrypt_zero_symmetric(secret_key_, context_, context_data.parms_id(), true, false, public_key.data());
 
         // Set the parms_id for public key
@@ -148,7 +137,7 @@ namespace seal
         }
 
         // Extract encryption parameters.
-        auto &context_data = *context_->key_context_data();
+        auto &context_data = *context_.key_context_data();
         auto &parms = context_data.parms();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_size = parms.coeff_modulus().size();
@@ -158,8 +147,6 @@ namespace seal
         {
             throw logic_error("invalid parameters");
         }
-
-        shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
 
         // Make sure we have enough secret keys computed
         compute_secret_key_array(context_data, count + 1);
@@ -186,7 +173,7 @@ namespace seal
         }
 
         // Extract encryption parameters.
-        auto &context_data = *context_->key_context_data();
+        auto &context_data = *context_.key_context_data();
         if (!context_data.qualifiers().using_batching)
         {
             throw logic_error("encryption parameters do not support batching");
@@ -232,7 +219,6 @@ namespace seal
             // Initialize Galois key
             // This is the location in the galois_keys vector
             size_t index = GaloisKeys::get_index(galois_elt);
-            shared_ptr<UniformRandomGenerator> random(parms.random_generator()->create());
 
             // Create Galois keys.
             generate_one_kswitch_key(rotated_secret_key, galois_keys.data()[index], save_seed);
@@ -322,17 +308,16 @@ namespace seal
         secret_key_array_.acquire(secret_key_array);
     }
 
-    void KeyGenerator::generate_one_kswitch_key(
-        ConstRNSIter new_key, std::vector<PublicKey> &destination, bool save_seed)
+    void KeyGenerator::generate_one_kswitch_key(ConstRNSIter new_key, vector<PublicKey> &destination, bool save_seed)
     {
-        if (!context_->using_keyswitching())
+        if (!context_.using_keyswitching())
         {
             throw logic_error("keyswitching is not supported by the context");
         }
 
-        size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
-        size_t decomp_mod_count = context_->first_context_data()->parms().coeff_modulus().size();
-        auto &key_context_data = *context_->key_context_data();
+        size_t coeff_count = context_.key_context_data()->parms().poly_modulus_degree();
+        size_t decomp_mod_count = context_.first_context_data()->parms().coeff_modulus().size();
+        auto &key_context_data = *context_.key_context_data();
         auto &key_parms = key_context_data.parms();
         auto &key_modulus = key_parms.coeff_modulus();
 
@@ -349,7 +334,7 @@ namespace seal
             SEAL_ALLOCATE_GET_COEFF_ITER(temp, coeff_count, pool_);
             encrypt_zero_symmetric(
                 secret_key_, context_, key_context_data.parms_id(), true, save_seed, get<2>(I).data());
-            uint64_t factor = barrett_reduce_63(key_modulus.back().value(), get<1>(I));
+            uint64_t factor = barrett_reduce_64(key_modulus.back().value(), get<1>(I));
             multiply_poly_scalar_coeffmod(get<0>(I), coeff_count, factor, get<1>(I), temp);
 
             // We use the SeqIter at get<3>(I) to find the i-th RNS factor of the first destination polynomial.
@@ -361,8 +346,8 @@ namespace seal
     void KeyGenerator::generate_kswitch_keys(
         ConstPolyIter new_keys, size_t num_keys, KSwitchKeys &destination, bool save_seed)
     {
-        size_t coeff_count = context_->key_context_data()->parms().poly_modulus_degree();
-        auto &key_context_data = *context_->key_context_data();
+        size_t coeff_count = context_.key_context_data()->parms().poly_modulus_degree();
+        auto &key_context_data = *context_.key_context_data();
         auto &key_parms = key_context_data.parms();
         size_t coeff_modulus_size = key_parms.coeff_modulus().size();
 

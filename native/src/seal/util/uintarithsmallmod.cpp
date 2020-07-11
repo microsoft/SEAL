@@ -74,7 +74,7 @@ namespace seal
             }
             else if (uint64_count == 1)
             {
-                *numerator = *numerator % modulus.value();
+                *numerator = barrett_reduce_64(*numerator, modulus);
                 *quotient = *numerator / modulus.value();
                 return;
             }

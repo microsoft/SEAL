@@ -1,8 +1,48 @@
 # List of Changes
 
+## Version 3.6.0
+
+### API Changes
+
+- Added const overloads of `IntArray::begin` and `IntArray::end`.
+- Added `std::hash` implementation for `EncryptionParameters` (in addition to `parms_id_type`) so it is possible to create e.g. `std::unordered_map` of `EncryptionParameters`.
+- Added overloads to `Evaluator::add_plain*`, `Evaluator::sub_plain*`, and `Evaluator::multiply_plain*` for plaintext-plaintext computations.
+Most users should probably avoid this functionality; usually it's much more efficient to perform plaintext computations on raw data before encoding. 
+However, since CKKS encoding can be slow, there are a situations where it can be advantageous to instead operate on `Plaintext` objects.
+- Removed `BatchEncoder` API for encoding and decoding `Plaintext` objects inplace.
+This is because a `Plaintext` object with slot-data written into the coefficients is (confusingly) not valid to be used for encryption or unencrypted arithmetic.
+- Added API to `UniformRandomGeneratorFactory` to find whether the factory uses a default seed (absolutely only for debugging purposes!), and to retrieve that seed.
+
+### Other
+
+- Moved all files related to pkg-config to `pkgconfig/` subdirectory.
+
+### Bug Fixes
+
+- Fixed a bug where setting a PRNG factory to use a constant seed did actually not result in deterministic ciphertexts or public keys.
+The problem was that the specified PRNG factory was not used to create a PRNG, but instead a fresh (secure) PRNG was always created instead.
+- Fixed a bug where the `parms_id` of a `Plaintext` was not cleared correctly before resizing in `Decryptor::bfv_decrypt`.
+As a result, a plaintext in NTT form could not be used as the destination for decrypting a BFV ciphertext.
+
+## Version 3.5.5
+
+### New Features
+
+- Added a struct `seal::util::MultiplyUIntModOperand` in [native/src/seal/util/uintarithsmallmod.h](native/src/seal/util/uintarithsmallmod.h).
+This struct handles precomputation data for Barrett style modular multiplication.
+- Added new overloads for modular arithmetic in [native/src/seal/util/uintarithsmallmod.h](native/src/seal/util/uintarithsmallmod.h) where one operand is replaced by a `MultiplyUIntModOperand` instance for improved performance when the same operand is used repeatedly.
+- Changed the name of `seal::util::barrett_reduce_63` to `seal::util::barrett_reduce_64`; the name was misleading and only referred to the size of the modulus.
+- Added `seal::util::StrideIter` in [native/src/seal/util/iterator.h](native/src/seal/util/iterator.h).
+- Added macros `SEAL_ALLOCATE_GET_PTR_ITER` and `SEAL_ALLOCATE_GET_STRIDE_ITER` in [native/src/seal/util/defines.h](native/src/seal/util/defines.h).
+
+### Other
+
+- Significant performance improvements from merging pull request [(PR 185)](https://github.com/microsoft/SEAL/pull/185) and implementing other improvements of the same style (see above).
+- Removed a lot of old and unused code.
+
 ## Version 3.5.4
 
-### Bug fixes
+### Bug Fixes
 
 - `std::void_t` was introduced only in C++17; switched to using a custom implementation [(Issue 180)](https://github.com/microsoft/SEAL/issues/180).
 - Fixed two independent bugs in `native/src/CMakeConfig.cmd`: The first prevented SEAL to be built in a directory with spaces in the path due to missing quotation marks. Another issue caused MSVC to fail when building SEAL for multiple architectures.
@@ -18,14 +58,14 @@ Instead, the outer lambda function parameter should be wrapped inside another ca
 
 ## Version 3.5.3
 
-### Bug fixes
+### Bug Fixes
 
 - Fixed a bug in `seal::util::IterTuple<...>` where a part of the `value_type` was constructed incorrectly.
 - Fixed a bug in `Evaluator::mod_switch_drop_to_next` that caused non-inplace modulus switching to fail [(Issue 179)](https://github.com/microsoft/SEAL/issues/179). Thanks s0l0ist!
 
 ## Version 3.5.2
 
-### Bug fixes
+### Bug Fixes
 
 - Merged pull request [PR 178](https://github.com/microsoft/SEAL/pull/178) to fix a lambda capture issue when building on GCC 7.5.
 - Fixed issue where SEAL.vcxproj could not be compiled with MSBuild outside the solution [(Issue 171)](https://github.com/microsoft/SEAL/issues/171).
@@ -33,7 +73,7 @@ Instead, the outer lambda function parameter should be wrapped inside another ca
 - Fixed issue in NuSpec file that made local NuGet package generation fail.
 - Fixed issue in NuSpec where XML documentation was not included into the package.
 
-### New features
+### New Features
 
 - Huge improvements to SEAL iterators, including `seal::util::iter` and `seal::util::reverse_iter` functions that can create any type of iterator from appropriate parameters.
 - Added `seal::util::SeqIter<T>` iterator for iterating a sequence of numbers for convenient iteration indexing.

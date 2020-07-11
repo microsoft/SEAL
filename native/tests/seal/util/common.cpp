@@ -17,14 +17,10 @@ namespace sealtest
         {
             ASSERT_EQ(4, bits_per_nibble);
             ASSERT_EQ(8, bits_per_byte);
-            ASSERT_EQ(4, bytes_per_uint32);
             ASSERT_EQ(8, bytes_per_uint64);
-            ASSERT_EQ(32, bits_per_uint32);
             ASSERT_EQ(64, bits_per_uint64);
             ASSERT_EQ(2, nibbles_per_byte);
-            ASSERT_EQ(2, uint32_per_uint64);
             ASSERT_EQ(16, nibbles_per_uint64);
-            ASSERT_EQ(static_cast<uint64_t>(INT64_MAX) + 1, uint64_high_bit);
         }
 
         TEST(Common, UnsignedComparisons)
@@ -132,29 +128,6 @@ namespace sealtest
             ASSERT_EQ(3, divide_round_up(9, 4));
             ASSERT_EQ(3, divide_round_up(12, 4));
             ASSERT_EQ(4, divide_round_up(13, 4));
-        }
-
-        TEST(Common, GetUInt64Byte)
-        {
-            uint64_t number[2];
-            number[0] = 0x3456789ABCDEF121;
-            number[1] = 0x23456789ABCDEF12;
-            ASSERT_TRUE(SEAL_BYTE(0x21) == *get_uint64_byte(number, 0));
-            ASSERT_TRUE(SEAL_BYTE(0xF1) == *get_uint64_byte(number, 1));
-            ASSERT_TRUE(SEAL_BYTE(0xDE) == *get_uint64_byte(number, 2));
-            ASSERT_TRUE(SEAL_BYTE(0xBC) == *get_uint64_byte(number, 3));
-            ASSERT_TRUE(SEAL_BYTE(0x9A) == *get_uint64_byte(number, 4));
-            ASSERT_TRUE(SEAL_BYTE(0x78) == *get_uint64_byte(number, 5));
-            ASSERT_TRUE(SEAL_BYTE(0x56) == *get_uint64_byte(number, 6));
-            ASSERT_TRUE(SEAL_BYTE(0x34) == *get_uint64_byte(number, 7));
-            ASSERT_TRUE(SEAL_BYTE(0x12) == *get_uint64_byte(number, 8));
-            ASSERT_TRUE(SEAL_BYTE(0xEF) == *get_uint64_byte(number, 9));
-            ASSERT_TRUE(SEAL_BYTE(0xCD) == *get_uint64_byte(number, 10));
-            ASSERT_TRUE(SEAL_BYTE(0xAB) == *get_uint64_byte(number, 11));
-            ASSERT_TRUE(SEAL_BYTE(0x89) == *get_uint64_byte(number, 12));
-            ASSERT_TRUE(SEAL_BYTE(0x67) == *get_uint64_byte(number, 13));
-            ASSERT_TRUE(SEAL_BYTE(0x45) == *get_uint64_byte(number, 14));
-            ASSERT_TRUE(SEAL_BYTE(0x23) == *get_uint64_byte(number, 15));
         }
 
         template <typename T>

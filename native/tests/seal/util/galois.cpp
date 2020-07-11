@@ -81,8 +81,8 @@ namespace sealtest
             EncryptionParameters parms(scheme_type::CKKS);
             parms.set_poly_modulus_degree(8);
             parms.set_coeff_modulus({ 17 });
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
-            auto context_data = context->key_context_data();
+            SEALContext context(parms, false, sec_level_type::none);
+            auto context_data = context.key_context_data();
             auto galois_tool = context_data->galois_tool();
             uint64_t in[8]{ 0, 1, 2, 3, 4, 5, 6, 7 };
             uint64_t out[8];
@@ -99,8 +99,8 @@ namespace sealtest
             EncryptionParameters parms(scheme_type::CKKS);
             parms.set_poly_modulus_degree(8);
             parms.set_coeff_modulus({ 17 });
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
-            auto context_data = context->key_context_data();
+            SEALContext context(parms, false, sec_level_type::none);
+            auto context_data = context.key_context_data();
             auto galois_tool = context_data->galois_tool();
             uint64_t in[8]{ 0, 1, 2, 3, 4, 5, 6, 7 };
             uint64_t out[8];

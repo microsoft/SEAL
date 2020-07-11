@@ -9,22 +9,23 @@
 // SEAL
 #include "seal/intencoder.h"
 
+using namespace std;
 using namespace seal;
 using namespace seal::c;
 
 SEAL_C_FUNC IntegerEncoder_Create(void *context, void **encoder)
 {
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     IfNullRet(encoder, E_POINTER);
 
     try
     {
-        IntegerEncoder *intEncoder = new IntegerEncoder(sharedctx);
+        IntegerEncoder *intEncoder = new IntegerEncoder(*ctx);
         *encoder = intEncoder;
         return S_OK;
     }
-    catch (const std::invalid_argument &)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -109,7 +110,7 @@ SEAL_C_FUNC IntegerEncoder_DecodeUInt32(void *thisptr, void *plainptr, uint32_t 
         *result = intenc->decode_uint32(*plain);
         return S_OK;
     }
-    catch (const std::invalid_argument &)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -128,7 +129,7 @@ SEAL_C_FUNC IntegerEncoder_DecodeUInt64(void *thisptr, void *plainptr, uint64_t 
         *result = intenc->decode_uint64(*plain);
         return S_OK;
     }
-    catch (const std::invalid_argument &)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -147,7 +148,7 @@ SEAL_C_FUNC IntegerEncoder_DecodeInt32(void *thisptr, void *plainptr, int32_t *r
         *result = intenc->decode_int32(*plain);
         return S_OK;
     }
-    catch (const std::invalid_argument &)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -166,7 +167,7 @@ SEAL_C_FUNC IntegerEncoder_DecodeInt64(void *thisptr, void *plainptr, int64_t *r
         *result = intenc->decode_int64(*plain);
         return S_OK;
     }
-    catch (std::invalid_argument &)
+    catch (invalid_argument &)
     {
         return E_INVALIDARG;
     }
@@ -187,7 +188,7 @@ SEAL_C_FUNC IntegerEncoder_DecodeBigUInt(void *thisptr, void *plainptr, void **b
         *biguint = resultPtr;
         return S_OK;
     }
-    catch (const std::invalid_argument &)
+    catch (const invalid_argument &)
     {
         return E_INVALIDARG;
     }

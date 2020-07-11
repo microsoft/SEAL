@@ -170,24 +170,16 @@ namespace seal
 #endif
 
 #ifndef SEAL_MULTIPLY_UINT64
-#define SEAL_MULTIPLY_UINT64(operand1, operand2, result128)     \
-    {                                                           \
-        multiply_uint64_generic(operand1, operand2, result128); \
-    }
+#define SEAL_MULTIPLY_UINT64(operand1, operand2, result128) multiply_uint64_generic(operand1, operand2, result128);
 #endif
 
 #ifndef SEAL_DIVIDE_UINT128_UINT64
-#define SEAL_DIVIDE_UINT128_UINT64(numerator, denominator, result)             \
-    {                                                                          \
-        divide_uint128_uint64_inplace_generic(numerator, denominator, result); \
-    }
+#define SEAL_DIVIDE_UINT128_UINT64(numerator, denominator, result) \
+    divide_uint128_uint64_inplace_generic(numerator, denominator, result);
 #endif
 
 #ifndef SEAL_MULTIPLY_UINT64_HW64
-#define SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64)     \
-    {                                                           \
-        multiply_uint64_hw64_generic(operand1, operand2, hw64); \
-    }
+#define SEAL_MULTIPLY_UINT64_HW64(operand1, operand2, hw64) multiply_uint64_hw64_generic(operand1, operand2, hw64);
 #endif
 
 #ifndef SEAL_MSB_INDEX_UINT64
@@ -195,19 +187,37 @@ namespace seal
 #endif
 
 // Check whether an object is of expected type; this requires the type_traits header to be included
-#define SEAL_ASSERT_TYPE(obj, expected, message)      \
-    static_assert(                                    \
-        std::is_same<decltype(obj), expected>::value, \
-        "In " __FILE__ ":" SEAL_STRINGIZE(__LINE__) " expected " SEAL_STRINGIZE(expected) " (message: " message ")");
+#define SEAL_ASSERT_TYPE(obj, expected, message)                                                                    \
+    do                                                                                                              \
+    {                                                                                                               \
+        static_assert(                                                                                              \
+            std::is_same<decltype(obj), expected>::value,                                                           \
+            "In " __FILE__ ":" SEAL_STRINGIZE(__LINE__) " expected " SEAL_STRINGIZE(expected) " (message: " message \
+                                                                                              ")");                 \
+    } while (false)
 
-// This macro can be used to allocate temporary buffer and create a PolyIter object pointing to it. This is convenient
+// This macro can be used to allocate a temporary buffer and create a PtrIter<T *> object pointing to it. This is
+// convenient when the Pointer holding the buffer is not explicitly needed and the memory is only accessed through the
+// iterator.
+#define SEAL_ALLOCATE_GET_PTR_ITER(name, type, size, pool)                               \
+    auto SEAL_JOIN(_seal_temp_alloc_, __LINE__)(seal::util::allocate<type>(size, pool)); \
+    seal::util::PtrIter<type *> name(SEAL_JOIN(_seal_temp_alloc_, __LINE__).get());
+
+// This macro can be used to allocate a temporary buffer and create a StrideIter<T *> object pointing to it. This is
+// convenient when the Pointer holding the buffer is not explicitly needed and the memory is only accessed through the
+// iterator.
+#define SEAL_ALLOCATE_GET_STRIDE_ITER(name, type, size, stride, pool)                                                  \
+    auto SEAL_JOIN(_seal_temp_alloc_, __LINE__)(seal::util::allocate<type>(seal::util::mul_safe(size, stride), pool)); \
+    seal::util::StrideIter<type *> name(SEAL_JOIN(_seal_temp_alloc_, __LINE__).get(), stride);
+
+// This macro can be used to allocate a temporary buffer and create a PolyIter object pointing to it. This is convenient
 // when the Pointer holding the buffer is not explicitly needed and the memory is only accessed through the iterator.
 #define SEAL_ALLOCATE_GET_POLY_ITER(name, poly_count, poly_modulus_degree, coeff_modulus_size, pool) \
     auto SEAL_JOIN(_seal_temp_alloc_, __LINE__)(                                                     \
         seal::util::allocate_poly_array(poly_count, poly_modulus_degree, coeff_modulus_size, pool)); \
     seal::util::PolyIter name(SEAL_JOIN(_seal_temp_alloc_, __LINE__).get(), poly_modulus_degree, coeff_modulus_size);
 
-// This macro can be used to allocate temporary buffer (set to zero) and create a PolyIter object pointing to it. This
+// This macro can be used to allocate a temporary buffer (set to zero) and create a PolyIter object pointing to it. This
 // is convenient when the Pointer holding the buffer is not explicitly needed and the memory is only accessed through
 // the iterator.
 #define SEAL_ALLOCATE_ZERO_GET_POLY_ITER(name, poly_count, poly_modulus_degree, coeff_modulus_size, pool) \
@@ -215,14 +225,14 @@ namespace seal
         seal::util::allocate_zero_poly_array(poly_count, poly_modulus_degree, coeff_modulus_size, pool)); \
     seal::util::PolyIter name(SEAL_JOIN(_seal_temp_alloc_, __LINE__).get(), poly_modulus_degree, coeff_modulus_size);
 
-// This macro can be used to allocate temporary buffer and create a RNSIter object pointing to it. This is convenient
+// This macro can be used to allocate a temporary buffer and create a RNSIter object pointing to it. This is convenient
 // when the Pointer holding the buffer is not explicitly needed and the memory is only accessed through the iterator.
 #define SEAL_ALLOCATE_GET_RNS_ITER(name, poly_modulus_degree, coeff_modulus_size, pool) \
     auto SEAL_JOIN(_seal_temp_alloc_, __LINE__)(                                        \
         seal::util::allocate_poly(poly_modulus_degree, coeff_modulus_size, pool));      \
     seal::util::RNSIter name(SEAL_JOIN(_seal_temp_alloc_, __LINE__).get(), poly_modulus_degree);
 
-// This macro can be used to allocate temporary buffer (set to zero) and create a RNSIter object pointing to it. This
+// This macro can be used to allocate a temporary buffer (set to zero) and create a RNSIter object pointing to it. This
 // is convenient when the Pointer holding the buffer is not explicitly needed and the memory is only accessed through
 // the iterator.
 #define SEAL_ALLOCATE_ZERO_GET_RNS_ITER(name, poly_modulus_degree, coeff_modulus_size, pool) \
@@ -230,15 +240,16 @@ namespace seal
         seal::util::allocate_zero_poly(poly_modulus_degree, coeff_modulus_size, pool));      \
     seal::util::RNSIter name(SEAL_JOIN(_seal_temp_alloc_, __LINE__).get(), poly_modulus_degree);
 
-// This macro can be used to allocate temporary buffer and create a CoeffIter object pointing to it. This is convenient
-// when the Pointer holding the buffer is not explicitly needed and the memory is only accessed through the iterator.
+// This macro can be used to allocate a temporary buffer and create a CoeffIter object pointing to it. This is
+// convenient when the Pointer holding the buffer is not explicitly needed and the memory is only accessed through the
+// iterator.
 #define SEAL_ALLOCATE_GET_COEFF_ITER(name, poly_modulus_degree, pool)                                  \
     auto SEAL_JOIN(_seal_temp_alloc_, __LINE__)(seal::util::allocate_uint(poly_modulus_degree, pool)); \
     seal::util::CoeffIter name(SEAL_JOIN(_seal_temp_alloc_, __LINE__).get());
 
-// This macro can be used to allocate temporary buffer (set to zero) and create a CoeffIter object pointing to it. This
-// is convenient when the Pointer holding the buffer is not explicitly needed and the memory is only accessed through
-// the iterator.
+// This macro can be used to allocate a temporary buffer (set to zero) and create a CoeffIter object pointing to it.
+// This is convenient when the Pointer holding the buffer is not explicitly needed and the memory is only accessed
+// through the iterator.
 #define SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(name, poly_modulus_degree, pool)                                  \
     auto SEAL_JOIN(_seal_temp_alloc_, __LINE__)(seal::util::allocate_zero_uint(poly_modulus_degree, pool)); \
     seal::util::CoeffIter name(SEAL_JOIN(_seal_temp_alloc_, __LINE__).get());
