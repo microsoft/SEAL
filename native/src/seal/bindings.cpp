@@ -141,6 +141,12 @@ y_combinator<std::decay_t<F>> make_y_combinator(F&& f) {
     return {std::forward<F>(f)};
 }
 
+template <typename T>
+void string_to_number(std::string &str, T &numb) {
+    std::istringstream is(str);
+    is >> numb;
+}
+
 /*
  * Dummy main so the linker will not perform DCE
  */
@@ -1081,19 +1087,13 @@ EMSCRIPTEN_BINDINGS(SEAL) {
         .constructor<std::shared_ptr<SEALContext>> ()
         .function("encode", optional_override([](BatchEncoder &self,
             const val &v, Plaintext &destination,
-                const bool &sign) {
-            if (sign) {
-                // Get the size of the TypedArray input
-                const size_t length = v["length"].as<unsigned>();
+                const std::string &type) {
 
-                // Reserve the known max BatchEncoder slot count
-                const size_t MAX_SLOT_COUNT = self.BatchEncoder::slot_count();
+            const std::size_t length = v["length"].as<std::size_t>();
 
+            if (type == "INT32") {
                 // Create a temporary vector to store the TypedArray values
                 std::vector<std::int32_t> temp;
-                temp.reserve(MAX_SLOT_COUNT);
-
-                // Resize to the number of elements in the TypedArray
                 temp.resize(length);
 
                 // Construct a memory view on the temp vector
@@ -1107,18 +1107,9 @@ EMSCRIPTEN_BINDINGS(SEAL) {
 
                 // Encode the vector to the plainText
                 self.BatchEncoder::encode(values, destination);
-            } else {
-                // Get the size of the TypedArray input
-                const size_t length = v["length"].as<unsigned>();
-
-                // Reserve the known max BatchEncoder slot count
-                const size_t MAX_SLOT_COUNT = self.BatchEncoder::slot_count();
-
+            } else if (type == "UINT32") {
                 // Create a temporary vector to store the TypedArray values
                 std::vector<std::uint32_t> temp;
-                temp.reserve(MAX_SLOT_COUNT);
-
-                // Resize to the number of elements in the TypedArray
                 temp.resize(length);
 
                 // Construct a memory view on the temp vector
@@ -1132,15 +1123,89 @@ EMSCRIPTEN_BINDINGS(SEAL) {
 
                 // Encode the vector to the plainText
                 self.BatchEncoder::encode(values, destination);
+            } else if (type == "INT64") {
+                std::vector<std::int64_t> values;
+                values.reserve(length);
+                // Right now, embind doesn't support BigInt from JS => WASM
+                // The work arround is to perform string conversion.
+                for (std::size_t i = 0; i < length; ++i) {
+                    std::string string_value = v[i].as<std::string>();
+                    std::int64_t num_value;
+                    string_to_number(string_value, num_value);
+                    values.push_back(num_value);
+                }
+                self.BatchEncoder::encode(values, destination);
+            } else if (type == "UINT64") {
+                std::vector<std::uint64_t> values;
+                values.reserve(length);
+                // Right now, embind doesn't support BigInt from JS => WASM
+                // The work arround is to perform string conversion.
+                for (std::size_t i = 0; i < length; ++i) {
+                    std::string string_value = v[i].as<std::string>();
+                    std::uint64_t num_value;
+                    string_to_number(string_value, num_value);
+                    values.push_back(num_value);
+                }
+                self.BatchEncoder::encode(values, destination);
+            }
+        }))
+        .function("decodeBigInt", optional_override([](BatchEncoder &self,
+            const Plaintext &plain, const bool &sign,
+                MemoryPoolHandle pool = MemoryManager::GetPool()) {
+
+            if (sign) {
+                // Reserve the known max encoder slot count
+                const size_t MAX_SLOT_COUNT = self.BatchEncoder::slot_count();
+
+                // Create a new vector to store the decoded result
+                std::vector<std::int64_t> destination;
+                destination.reserve(MAX_SLOT_COUNT);
+
+                // Decode the plainText
+                self.BatchEncoder::decode(plain, destination, pool);
+
+                std::vector<std::string> result_strings;
+                result_strings.reserve(MAX_SLOT_COUNT);
+
+                for (auto number: destination) {
+                    result_strings.push_back(std::to_string(number));
+                }
+                // Create a new array of strings which will be converted
+                // to BigInts on the JS side.
+                emscripten::val result = emscripten::val::array(
+                  result_strings.begin(), result_strings.end());
+                return result;
+            } else {
+                // Reserve the known max encoder slot count
+                const size_t MAX_SLOT_COUNT = self.BatchEncoder::slot_count();
+
+                // Create a new vector to store the decoded result
+                std::vector<std::uint64_t> destination;
+                destination.reserve(MAX_SLOT_COUNT);
+
+                // Decode the plainText
+                self.BatchEncoder::decode(plain, destination, pool);
+
+                std::vector<std::string> result_strings;
+                result_strings.reserve(MAX_SLOT_COUNT);
+
+                for (auto number: destination) {
+                    result_strings.push_back(std::to_string(number));
+                }
+                // Create a new array of strings which will be converted
+                // to BigInts on the JS side.
+                emscripten::val result = emscripten::val::array(
+                  result_strings.begin(), result_strings.end());
+                return result;
             }
         }))
         .function("decodeInt32", optional_override([](BatchEncoder &self,
             const Plaintext &plain, MemoryPoolHandle pool = MemoryManager::GetPool()) {
+                // Reserve the known max encoder slot count
+                const size_t MAX_SLOT_COUNT = self.BatchEncoder::slot_count();
+
                 // Create a new vector to store the decoded result
                 std::vector<std::int64_t> destination;
-
-                // Reserve the known max CKKS encoder slot count
-                const size_t MAX_SLOT_COUNT = self.BatchEncoder::slot_count();
                 destination.reserve(MAX_SLOT_COUNT);
 
                 // Decode the plainText
@@ -1157,11 +1222,11 @@ EMSCRIPTEN_BINDINGS(SEAL) {
             }))
         .function("decodeUInt32", optional_override([](BatchEncoder &self,
             const Plaintext &plain, MemoryPoolHandle pool = MemoryManager::GetPool()) {
+                // Reserve the known max encoder slot count
+                const size_t MAX_SLOT_COUNT = self.BatchEncoder::slot_count();
+                
                 // Create a new vector to store the decoded result
                 std::vector<std::uint64_t> destination;
-
-                // Reserve the known max CKKS encoder slot count
-                const size_t MAX_SLOT_COUNT = self.BatchEncoder::slot_count();
                 destination.reserve(MAX_SLOT_COUNT);
 
                 // Decode the plainText
