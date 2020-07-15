@@ -1,6 +1,20 @@
 # List of Changes
 
+## Version 3.5.6
+
+### Bug fixes
+
+- Fixed a bug where setting a PRNG factory to use a constant seed did actually not result in determistic ciphertexts of public keys. The problem was that the specified PRNG factory was not used to create a PRNG, but instead a fresh (secure) PRNG was always created and used.
+
+### Other
+
+- Merged pull request [(Issue 190)](https://github.com/microsoft/SEAL/pull/190) to replace global statics with function-local statics to avoid creating these objects unless they are actually used.
+
 ## Version 3.5.5
+
+### Hotfix - 7/6/2020
+
+- Fixed [(Issue 188)](https://github.com/microsoft/SEAL/issues/188).
 
 ### New features
 
