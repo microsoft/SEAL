@@ -17,16 +17,24 @@ This is because a `Plaintext` object with slot-data written into the coefficient
 
 - Moved all files related to pkg-config to `pkgconfig/` subdirectory.
 
-### Bug Fixes
+## Version 3.5.6
 
-- Fixed a bug where setting a PRNG factory to use a constant seed did actually not result in deterministic ciphertexts or public keys.
-The problem was that the specified PRNG factory was not used to create a PRNG, but instead a fresh (secure) PRNG was always created instead.
-- Fixed a bug where the `parms_id` of a `Plaintext` was not cleared correctly before resizing in `Decryptor::bfv_decrypt`.
-As a result, a plaintext in NTT form could not be used as the destination for decrypting a BFV ciphertext.
+### Bug fixes
+
+- Fixed a bug where setting a PRNG factory to use a constant seed did actually not result in determistic ciphertexts of public keys. The problem was that the specified PRNG factory was not used to create a PRNG, but instead a fresh (secure) PRNG was always created and used.
+- Fixed a bug where the `parms_id` of a `Plaintext` was not cleared correctly before resizing in `Decryptor::bfv_decrypt`. As a result, a plaintext in NTT form could not be used as the destination for decrypting a BFV ciphertext.
+
+### Other
+
+- Merged pull request [(Issue 190)](https://github.com/microsoft/SEAL/pull/190) to replace global statics with function-local statics to avoid creating these objects unless they are actually used.
 
 ## Version 3.5.5
 
-### New Features
+### Hotfix - 7/6/2020
+
+- Fixed [(Issue 188)](https://github.com/microsoft/SEAL/issues/188).
+
+### New features
 
 - Added a struct `seal::util::MultiplyUIntModOperand` in [native/src/seal/util/uintarithsmallmod.h](native/src/seal/util/uintarithsmallmod.h).
 This struct handles precomputation data for Barrett style modular multiplication.
