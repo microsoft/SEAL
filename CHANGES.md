@@ -4,8 +4,8 @@
 
 ### Bug fixes
 
-- Fixed a bug where setting a PRNG factory to use a constant seed did actually not result in determistic ciphertexts of public keys.
-The problem was that the specified PRNG factory was not used to create a PRNG, but instead a fresh (secure) PRNG was always created and used.
+- Fixed a bug where setting a PRNG factory to use a constant seed did not result in deterministic ciphertexts or public keys.
+The problem was that the specified PRNG factory was not used to sample the uniform part of the RLWE sample(s), but instead a fresh (secure) PRNG was always created and used.
 - Fixed a bug where the `parms_id` of a `Plaintext` was not cleared correctly before resizing in `Decryptor::bfv_decrypt`.
 As a result, a plaintext in NTT form could not be used as the destination for decrypting a BFV ciphertext.
 
