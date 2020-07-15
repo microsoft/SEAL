@@ -91,9 +91,9 @@ namespace sealtest
 
         factory = make_shared<BlakePRNGFactory>(random_seed_type{});
         ASSERT_FALSE(factory->use_random_seed());
-        ASSERT_EQ(random_seed_type{} , factory->default_seed());
+        ASSERT_EQ(random_seed_type{}, factory->default_seed());
 
-        factory = make_shared<BlakePRNGFactory>(random_seed_type{1, 2, 3, 4, 5, 6, 7, 8});
+        factory = make_shared<BlakePRNGFactory>(random_seed_type{ 1, 2, 3, 4, 5, 6, 7, 8 });
         ASSERT_FALSE(factory->use_random_seed());
         ASSERT_EQ(random_seed_type({ 1, 2, 3, 4, 5, 6, 7, 8 }), factory->default_seed());
 

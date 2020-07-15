@@ -7,7 +7,7 @@
 - Added const overloads of `IntArray::begin` and `IntArray::end`.
 - Added `std::hash` implementation for `EncryptionParameters` (in addition to `parms_id_type`) so it is possible to create e.g. `std::unordered_map` of `EncryptionParameters`.
 - Added overloads to `Evaluator::add_plain*`, `Evaluator::sub_plain*`, and `Evaluator::multiply_plain*` for plaintext-plaintext computations.
-Most users should probably avoid this functionality; usually it's much more efficient to perform plaintext computations on raw data before encoding. 
+Most users should probably avoid this functionality; usually it's much more efficient to perform plaintext computations on raw data before encoding.
 However, since CKKS encoding can be slow, there are a situations where it can be advantageous to instead operate on `Plaintext` objects.
 - Removed `BatchEncoder` API for encoding and decoding `Plaintext` objects inplace.
 This is because a `Plaintext` object with slot-data written into the coefficients is (confusingly) not valid to be used for encryption or unencrypted arithmetic.

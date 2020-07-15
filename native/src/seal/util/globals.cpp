@@ -19,7 +19,7 @@ namespace seal
 #else
 #pragma message("WARNING: Thread-local memory pools disabled to support /clr")
 #endif
-            const std::map<std::size_t, std::vector<Modulus>>& GetDefaultCoeffModulus128()
+            const std::map<std::size_t, std::vector<Modulus>> &GetDefaultCoeffModulus128()
             {
                 static const map<size_t, vector<Modulus>> default_coeff_modulus_128{
                     /*
@@ -74,7 +74,7 @@ namespace seal
                 return default_coeff_modulus_128;
             }
 
-            const map<size_t, vector<Modulus>>& GetDefaultCoeffModulus192()
+            const map<size_t, vector<Modulus>> &GetDefaultCoeffModulus192()
             {
                 static const map<size_t, vector<Modulus>> default_coeff_modulus_192{
                     /*
@@ -128,7 +128,7 @@ namespace seal
                 return default_coeff_modulus_192;
             }
 
-            const map<size_t, vector<Modulus>>& GetDefaultCoeffModulus256()
+            const map<size_t, vector<Modulus>> &GetDefaultCoeffModulus256()
             {
                 static const map<size_t, vector<Modulus>> default_coeff_modulus_256{
                     /*
