@@ -4,8 +4,10 @@
 
 ### Bug fixes
 
-- Fixed a bug where setting a PRNG factory to use a constant seed did actually not result in determistic ciphertexts of public keys. The problem was that the specified PRNG factory was not used to create a PRNG, but instead a fresh (secure) PRNG was always created and used.
-- Fixed a bug where the `parms_id` of a `Plaintext` was not cleared correctly before resizing in `Decryptor::bfv_decrypt`. As a result, a plaintext in NTT form could not be used as the destination for decrypting a BFV ciphertext.
+- Fixed a bug where setting a PRNG factory to use a constant seed did actually not result in determistic ciphertexts of public keys.
+The problem was that the specified PRNG factory was not used to create a PRNG, but instead a fresh (secure) PRNG was always created and used.
+- Fixed a bug where the `parms_id` of a `Plaintext` was not cleared correctly before resizing in `Decryptor::bfv_decrypt`.
+As a result, a plaintext in NTT form could not be used as the destination for decrypting a BFV ciphertext.
 
 ### Other
 
@@ -21,7 +23,7 @@
 
 - Added a struct `seal::util::MultiplyUIntModOperand` in [native/src/seal/util/uintarithsmallmod.h](native/src/seal/util/uintarithsmallmod.h).
 This struct handles precomputation data for Barrett style modular multiplication.
-- Added new overloads for modular arithmetic in [native/src/seal/util/uintarithsmallmod.h](native/src/seal/util/uintarithsmallmod.h) where one operand is replaced by a `MultiplyUIntModOperand` instance for improved performance when the same operand is used repeatedly. 
+- Added new overloads for modular arithmetic in [native/src/seal/util/uintarithsmallmod.h](native/src/seal/util/uintarithsmallmod.h) where one operand is replaced by a `MultiplyUIntModOperand` instance for improved performance when the same operand is used repeatedly.
 - Changed the name of `seal::util::barrett_reduce_63` to `seal::util::barrett_reduce_64`; the name was misleading and only referred to the size of the modulus.
 - Added `seal::util::StrideIter` in [native/src/seal/util/iterator.h](native/src/seal/util/iterator.h).
 - Added macros `SEAL_ALLOCATE_GET_PTR_ITER` and `SEAL_ALLOCATE_GET_STRIDE_ITER` in [native/src/seal/util/defines.h](native/src/seal/util/defines.h).
