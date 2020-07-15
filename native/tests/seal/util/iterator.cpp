@@ -273,7 +273,7 @@ namespace sealtest
             ASSERT_EQ(4, *s[2]);
 
             // Increment/Decrement
-            StrideIter u = s++;
+            StrideIter<uint64_t *> u = s++;
             ASSERT_EQ(0, **u);
             ASSERT_EQ(2, **s);
             u = s--;
