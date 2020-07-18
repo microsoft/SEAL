@@ -48,7 +48,7 @@ For .NET Framework wrapper support (C++/CLI) we need to
             level is at least 128 bits according to http://HomomorphicEncryption.org. This makes
             it easy for non-expert users to select secure parameters.
             */
-            extern const std::map<std::size_t, std::vector<Modulus>> default_coeff_modulus_128;
+            const std::map<std::size_t, std::vector<Modulus>> &GetDefaultCoeffModulus128();
 
             /**
             This data structure is a key-value storage that maps degrees of the polynomial modulus
@@ -57,7 +57,7 @@ For .NET Framework wrapper support (C++/CLI) we need to
             level is at least 192 bits according to http://HomomorphicEncryption.org. This makes
             it easy for non-expert users to select secure parameters.
             */
-            extern const std::map<std::size_t, std::vector<Modulus>> default_coeff_modulus_192;
+            const std::map<std::size_t, std::vector<Modulus>> &GetDefaultCoeffModulus192();
 
             /**
             This data structure is a key-value storage that maps degrees of the polynomial modulus
@@ -66,7 +66,7 @@ For .NET Framework wrapper support (C++/CLI) we need to
             level is at least 256 bits according to http://HomomorphicEncryption.org. This makes
             it easy for non-expert users to select secure parameters.
             */
-            extern const std::map<std::size_t, std::vector<Modulus>> default_coeff_modulus_256;
+            const std::map<std::size_t, std::vector<Modulus>> &GetDefaultCoeffModulus256();
         } // namespace global_variables
     }     // namespace util
 } // namespace seal

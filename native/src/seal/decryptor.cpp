@@ -134,6 +134,7 @@ namespace seal
         dot_product_ct_sk_array(encrypted, tmp_dest_modq, pool_);
 
         // Allocate a full size destination to write to
+        destination.parms_id() = parms_id_zero;
         destination.resize(coeff_count);
 
         // Divide scaling variant using BEHZ FullRNS techniques
@@ -144,7 +145,6 @@ namespace seal
 
         // Resize destination to appropriate size
         destination.resize(max(plain_coeff_count, size_t(1)));
-        destination.parms_id() = parms_id_zero;
     }
 
     void Decryptor::ckks_decrypt(const Ciphertext &encrypted, Plaintext &destination, MemoryPoolHandle pool)
