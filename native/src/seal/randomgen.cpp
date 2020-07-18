@@ -9,9 +9,19 @@
 #if SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
 #include <Windows.h>
 #include <bcrypt.h>
+#include <wincrypt.h>
 #endif
 
 using namespace std;
+
+#if SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
+namespace
+{
+    NTSTATUS bcrypt_error = 0;
+    DWORD last_crypt_error = 0;
+    HCRYPTPROV hCryptProvider = NULL;
+}
+#endif
 
 namespace seal
 {
@@ -22,11 +32,32 @@ namespace seal
         random_device rd("/dev/urandom");
         result = (static_cast<uint64_t>(rd()) << 32) + static_cast<uint64_t>(rd());
 #elif SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
-        if (!BCRYPT_SUCCESS(BCryptGenRandom(
-                NULL, reinterpret_cast<unsigned char *>(&result), sizeof(result), BCRYPT_USE_SYSTEM_PREFERRED_RNG)))
+        NTSTATUS status = BCryptGenRandom(
+            NULL, reinterpret_cast<unsigned char *>(&result), sizeof(result), BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+
+        if (BCRYPT_SUCCESS(status))
         {
-            throw runtime_error("BCryptGenRandom failed");
+            return result;
         }
+
+        bcrypt_error = status;
+
+        if (NULL == hCryptProvider)
+        {
+            if (!CryptAcquireContext(
+                    &hCryptProvider, /* szContainer */ nullptr, MS_DEF_PROV, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
+            {
+                last_crypt_error = GetLastError();
+                throw runtime_error("CryptAcquireContext failed");
+            }
+        }
+
+        if (!CryptGenRandom(hCryptProvider, sizeof(uint64_t), reinterpret_cast<BYTE *>(&result)))
+        {
+            last_crypt_error = GetLastError();
+            throw runtime_error("CryptGenRandom failed");
+        }
+
 #elif SEAL_SYSTEM == SEAL_SYSTEM_OTHER
 #warning "SECURITY WARNING: System detection failed; falling back to a potentially insecure randomness source!"
         random_device rd;
