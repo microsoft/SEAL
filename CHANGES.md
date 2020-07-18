@@ -1,12 +1,29 @@
 # List of Changes
 
+## Version 3.5.6
+
+### Bug fixes
+
+- Fixed a bug where setting a PRNG factory to use a constant seed did not result in deterministic ciphertexts or public keys.
+The problem was that the specified PRNG factory was not used to sample the uniform part of the RLWE sample(s), but instead a fresh (secure) PRNG was always created and used.
+- Fixed a bug where the `parms_id` of a `Plaintext` was not cleared correctly before resizing in `Decryptor::bfv_decrypt`.
+As a result, a plaintext in NTT form could not be used as the destination for decrypting a BFV ciphertext.
+
+### Other
+
+- Merged pull request [(Issue 190)](https://github.com/microsoft/SEAL/pull/190) to replace global statics with function-local statics to avoid creating these objects unless they are actually used.
+
 ## Version 3.5.5
+
+### Hotfix - 7/6/2020
+
+- Fixed [(Issue 188)](https://github.com/microsoft/SEAL/issues/188).
 
 ### New features
 
 - Added a struct `seal::util::MultiplyUIntModOperand` in [native/src/seal/util/uintarithsmallmod.h](native/src/seal/util/uintarithsmallmod.h).
 This struct handles precomputation data for Barrett style modular multiplication.
-- Added new overloads for modular arithmetic in [native/src/seal/util/uintarithsmallmod.h](native/src/seal/util/uintarithsmallmod.h) where one operand is replaced by a `MultiplyUIntModOperand` instance for improved performance when the same operand is used repeatedly. 
+- Added new overloads for modular arithmetic in [native/src/seal/util/uintarithsmallmod.h](native/src/seal/util/uintarithsmallmod.h) where one operand is replaced by a `MultiplyUIntModOperand` instance for improved performance when the same operand is used repeatedly.
 - Changed the name of `seal::util::barrett_reduce_63` to `seal::util::barrett_reduce_64`; the name was misleading and only referred to the size of the modulus.
 - Added `seal::util::StrideIter` in [native/src/seal/util/iterator.h](native/src/seal/util/iterator.h).
 - Added macros `SEAL_ALLOCATE_GET_PTR_ITER` and `SEAL_ALLOCATE_GET_STRIDE_ITER` in [native/src/seal/util/defines.h](native/src/seal/util/defines.h).

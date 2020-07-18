@@ -188,11 +188,11 @@ namespace seal
             multiply_uint64_hw64(input[0], const_ratio[0], &carry);
 
             multiply_uint64(input[0], const_ratio[1], tmp2);
-            tmp3 = tmp2[1] + add_uint64(tmp2[0], carry, 0, &tmp1);
+            tmp3 = tmp2[1] + add_uint64(tmp2[0], carry, &tmp1);
 
             // Round 2
             multiply_uint64(input[1], const_ratio[0], tmp2);
-            carry = tmp2[1] + add_uint64(tmp1, tmp2[0], 0, &tmp1);
+            carry = tmp2[1] + add_uint64(tmp1, tmp2[0], &tmp1);
 
             // This is all we care about
             tmp1 = input[1] * const_ratio[1] + tmp3 + carry;

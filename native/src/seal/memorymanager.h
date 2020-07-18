@@ -499,7 +499,7 @@ namespace seal
             default:
 #ifdef SEAL_DEBUG
             {
-                auto pool = mm_prof_->get_pool(prof_opt);
+                auto pool = GetMMProf()->get_pool(prof_opt);
                 if (!pool)
                 {
                     throw std::logic_error("cannot return uninitialized pool");
@@ -507,7 +507,7 @@ namespace seal
                 return pool;
             }
 #endif
-                return mm_prof_->get_pool(prof_opt);
+                return GetMMProf()->get_pool(prof_opt);
             }
         }
 
@@ -523,8 +523,8 @@ namespace seal
             {
                 throw std::invalid_argument("mm_prof cannot be null");
             }
-            auto ret_mm_prof = std::move(mm_prof_);
-            mm_prof_.reset(mm_prof);
+            auto ret_mm_prof = std::move(GetMMProf());
+            GetMMProf().reset(mm_prof);
             return ret_mm_prof;
         }
 
@@ -535,11 +535,15 @@ namespace seal
             {
                 throw std::invalid_argument("mm_prof cannot be null");
             }
-            std::swap(mm_prof_, mm_prof);
+            std::swap(GetMMProf(), mm_prof);
             return std::move(mm_prof);
         }
 
-        static std::unique_ptr<MMProf> mm_prof_;
+        SEAL_NODISCARD static inline std::unique_ptr<MMProf> &GetMMProf()
+        {
+            static std::unique_ptr<MMProf> mm_prof{ new MMProfGlobal };
+            return mm_prof;
+        }
 #ifndef _M_CEE
         static std::mutex switch_mutex_;
 #endif
