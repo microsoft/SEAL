@@ -9,18 +9,16 @@
 #if SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
 #include <Windows.h>
 #include <bcrypt.h>
-#include <wincrypt.h>
 #endif
 
 using namespace std;
 
 #if SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
-namespace
-{
-    NTSTATUS bcrypt_error = 0;
-    DWORD last_crypt_error = 0;
-    HCRYPTPROV hCryptProvider = NULL;
-}
+
+constexpr auto RTL_GENRANDOM = "SystemFunction036";
+NTSTATUS last_bcrypt_error = 0;
+DWORD last_genrandom_error = 0;
+
 #endif
 
 namespace seal
@@ -40,22 +38,21 @@ namespace seal
             return result;
         }
 
-        bcrypt_error = status;
+        last_bcrypt_error = status;
 
-        if (NULL == hCryptProvider)
+        HMODULE hAdvApi = LoadLibraryA("ADVAPI32.DLL");
+        if (hAdvApi)
         {
-            if (!CryptAcquireContext(
-                    &hCryptProvider, /* szContainer */ nullptr, MS_DEF_PROV, PROV_RSA_FULL, CRYPT_VERIFYCONTEXT))
+            BOOLEAN(APIENTRY * RtlGenRandom)
+            (void *, ULONG) = (BOOLEAN(APIENTRY *)(void *, ULONG))GetProcAddress(hAdvApi, RTL_GENRANDOM);
+
+            if (!RtlGenRandom || !RtlGenRandom(&result, sizeof(uint64_t)))
             {
-                last_crypt_error = GetLastError();
-                throw runtime_error("CryptAcquireContext failed");
+                last_genrandom_error = GetLastError();
+                throw runtime_error("Failed to call RtlGenRandom");
             }
-        }
 
-        if (!CryptGenRandom(hCryptProvider, sizeof(uint64_t), reinterpret_cast<BYTE *>(&result)))
-        {
-            last_crypt_error = GetLastError();
-            throw runtime_error("CryptGenRandom failed");
+            FreeLibrary(hAdvApi);
         }
 
 #elif SEAL_SYSTEM == SEAL_SYSTEM_OTHER
