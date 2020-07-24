@@ -16,6 +16,8 @@ using namespace std;
 #if SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
 
 constexpr auto RTL_GENRANDOM = "SystemFunction036";
+
+// Preserve error codes to diagnose in case of failure
 NTSTATUS last_bcrypt_error = 0;
 DWORD last_genrandom_error = 0;
 
@@ -30,15 +32,18 @@ namespace seal
         random_device rd("/dev/urandom");
         result = (static_cast<uint64_t>(rd()) << 32) + static_cast<uint64_t>(rd());
 #elif SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
-        NTSTATUS status = BCryptGenRandom(
-            NULL, reinterpret_cast<unsigned char *>(&result), sizeof(result), BCRYPT_USE_SYSTEM_PREFERRED_RNG);
-
-        if (BCRYPT_SUCCESS(status))
+        if (BCRYPT_SUCCESS(last_bcrypt_error))
         {
-            return result;
-        }
+            NTSTATUS status = BCryptGenRandom(
+                NULL, reinterpret_cast<unsigned char *>(&result), sizeof(result), BCRYPT_USE_SYSTEM_PREFERRED_RNG);
 
-        last_bcrypt_error = status;
+            if (BCRYPT_SUCCESS(status))
+            {
+                return result;
+            }
+
+            last_bcrypt_error = status;
+        }
 
         HMODULE hAdvApi = LoadLibraryA("ADVAPI32.DLL");
         if (hAdvApi)
