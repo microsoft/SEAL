@@ -982,6 +982,9 @@ EMSCRIPTEN_BINDINGS(SEAL) {
         .function("isNttForm", select_overload<bool() const>(&Plaintext::is_ntt_form))
         .function("parmsId", select_overload<parms_id_type &()>(&Plaintext::parms_id))
         .function("scale", select_overload<double &()>(&Plaintext::scale))
+        .function("setScale", optional_override([](Plaintext &self, const val &v) {
+            return self.scale() = v.as<double>();
+        }))
         .function("pool", optional_override([](Plaintext &self) {
             return self.pool();
         }));
@@ -1072,6 +1075,9 @@ EMSCRIPTEN_BINDINGS(SEAL) {
         .function("isNttForm", select_overload<bool() const>(&Ciphertext::is_ntt_form))
         .function("parmsId", select_overload<parms_id_type &()>(&Ciphertext::parms_id))
         .function("scale", select_overload<double &()>(&Ciphertext::scale))
+        .function("setScale", optional_override([](Ciphertext &self, const val &v) {
+            return self.scale() = v.as<double>();
+        }))
         .function("pool", optional_override([](Ciphertext &self) {
             return self.pool();
         }));
