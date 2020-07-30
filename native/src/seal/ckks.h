@@ -495,7 +495,7 @@ namespace seal
             // Verify that the values are not too large to fit in coeff_modulus
             // Note that we have an extra + 1 for the sign bit
             // Don't compute logarithmis of numbers less than 1
-            int max_coeff_bit_count = static_cast<int>(std::log2(std::max(max_coeff, 1.0))) + 2;
+            int max_coeff_bit_count = static_cast<int>(std::ceil(std::log2(std::max(max_coeff, 1.0)))) + 1;
             if (max_coeff_bit_count >= context_data.total_coeff_modulus_bit_count())
             {
                 throw std::invalid_argument("encoded values are too large");
