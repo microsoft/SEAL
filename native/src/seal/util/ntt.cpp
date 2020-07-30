@@ -39,6 +39,8 @@ namespace seal
             root_powers_ = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
             inv_root_powers_ = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
             modulus_ = modulus;
+            integer_modular_arith_ = ModArithLazy(modulus_);
+            ntt_handler_ = NTTHandler(integer_modular_arith_);
 
             // We defer parameter checking to try_minimal_primitive_root(...)
             if (!try_minimal_primitive_root(2 * coeff_count_, modulus_, root_))
@@ -197,7 +199,7 @@ namespace seal
 
         For details, see Michael Naehrig and Patrick Longa.
         */
-        void ntt_negacyclic_harvey_lazy(CoeffIter operand, const NTTTables &tables)
+/*        void ntt_negacyclic_harvey_lazy(CoeffIter operand, const NTTTables &tables)
         {
 #ifdef SEAL_DEBUG
             if (!operand)
@@ -383,6 +385,17 @@ namespace seal
                 *X++ = multiply_uint_mod_lazy(tx, inv_N, modulus);
                 *Y++ = multiply_uint_mod_lazy(ty, inv_N_W, modulus);
             }
+        }
+*/
+        void ntt_negacyclic_harvey_lazy(CoeffIter operand, const NTTTables &tables)
+        {
+            tables.ntt_handler().transform_to_rev(operand.ptr(), tables.coeff_count_power(), tables.get_from_root_powers());
+        }
+
+        void inverse_ntt_negacyclic_harvey_lazy(CoeffIter operand, const NTTTables &tables)
+        {
+            MultiplyUIntModOperand inv_degree_modulo = tables.inv_degree_modulo();
+            tables.ntt_handler().transform_from_rev(operand.ptr(), tables.coeff_count_power(), tables.get_from_inv_root_powers(), &inv_degree_modulo);
         }
     } // namespace util
 } // namespace seal

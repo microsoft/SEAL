@@ -6,6 +6,7 @@
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"
 #include "seal/util/defines.h"
+#include "seal/util/fft.h"
 #include "seal/util/iterator.h"
 #include "seal/util/pointer.h"
 #include "seal/util/uintarithsmallmod.h"
@@ -16,8 +17,55 @@ namespace seal
 {
     namespace util
     {
+        using NTTHandler = DWTHandler<std::uint64_t, MultiplyUIntModOperand, MultiplyUIntModOperand>;
+
+        template <>
+        class Arithmetic<std::uint64_t, MultiplyUIntModOperand, MultiplyUIntModOperand>
+        {
+        public:
+            Arithmetic() {}
+
+            Arithmetic(const Modulus &modulus): modulus_(modulus), two_times_modulus_(modulus.value() << 1) {}
+
+            inline std::uint64_t add(const std::uint64_t &a, const std::uint64_t &b) const
+            {
+                return a + b;
+            }
+
+            std::uint64_t sub(const std::uint64_t &a, const std::uint64_t &b) const
+            {
+                return a + two_times_modulus_ - b;
+            }
+
+            std::uint64_t mul_root(const std::uint64_t &a, const MultiplyUIntModOperand &r) const
+            {
+                return multiply_uint_mod_lazy(a, r, modulus_);
+            }
+
+            std::uint64_t mul_scalar(const std::uint64_t &a, const MultiplyUIntModOperand &s) const
+            {
+                return multiply_uint_mod_lazy(a, s, modulus_);
+            }
+
+            MultiplyUIntModOperand mul_root_scalar(const MultiplyUIntModOperand &r, const MultiplyUIntModOperand &s) const
+            {
+                MultiplyUIntModOperand result;
+                result.set(multiply_uint_mod(r.operand, s, modulus_), modulus_);
+                return result;
+            }
+
+            inline std::uint64_t guard(const std::uint64_t &a) const
+            {
+                return a - (two_times_modulus_ & static_cast<uint64_t>(-static_cast<int64_t>(a >= two_times_modulus_)));
+            }
+        private:
+            Modulus modulus_;
+            std::uint64_t two_times_modulus_;
+        };
+
         class NTTTables
         {
+            using ModArithLazy = Arithmetic<std::uint64_t, MultiplyUIntModOperand, MultiplyUIntModOperand>;
         public:
             NTTTables(NTTTables &&source) = default;
 
@@ -37,6 +85,16 @@ namespace seal
             SEAL_NODISCARD inline std::uint64_t get_root() const
             {
                 return root_;
+            }
+
+            SEAL_NODISCARD inline const MultiplyUIntModOperand *get_from_root_powers() const
+            {
+                return root_powers_.get();
+            }
+
+            SEAL_NODISCARD inline const MultiplyUIntModOperand *get_from_inv_root_powers() const
+            {
+                return inv_root_powers_.get();
             }
 
             SEAL_NODISCARD inline MultiplyUIntModOperand get_from_root_powers(std::size_t index) const
@@ -81,6 +139,11 @@ namespace seal
                 return coeff_count_;
             }
 
+            const NTTHandler &ntt_handler() const
+            {
+                return ntt_handler_;
+            }
+
         private:
             NTTTables &operator=(const NTTTables &assign) = delete;
 
@@ -109,6 +172,10 @@ namespace seal
 
             // Size coeff_count_
             Pointer<MultiplyUIntModOperand> inv_root_powers_;
+
+            ModArithLazy integer_modular_arith_;
+
+            NTTHandler ntt_handler_;
         };
 
         /**
@@ -302,5 +369,8 @@ namespace seal
             SEAL_ITERATE(
                 operand, size, [&](auto I) { inverse_ntt_negacyclic_harvey(I, operand.coeff_modulus_size(), tables); });
         }
+
+        void ntt_negacyclic_harvey_new(CoeffIter operand, const NTTTables &tables);
+        void inverse_ntt_negacyclic_harvey_new(CoeffIter operand, const NTTTables &tables);
     } // namespace util
 } // namespace seal
