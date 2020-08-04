@@ -32,32 +32,39 @@ namespace seal
         random_device rd("/dev/urandom");
         result = (static_cast<uint64_t>(rd()) << 32) + static_cast<uint64_t>(rd());
 #elif SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
-        if (BCRYPT_SUCCESS(last_bcrypt_error))
+        NTSTATUS status = BCryptGenRandom(
+            NULL, reinterpret_cast<unsigned char *>(&result), sizeof(result), BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+
+        if (BCRYPT_SUCCESS(status))
         {
-            NTSTATUS status = BCryptGenRandom(
-                NULL, reinterpret_cast<unsigned char *>(&result), sizeof(result), BCRYPT_USE_SYSTEM_PREFERRED_RNG);
-
-            if (BCRYPT_SUCCESS(status))
-            {
-                return result;
-            }
-
-            last_bcrypt_error = status;
+            return result;
         }
 
+        last_bcrypt_error = status;
+
         HMODULE hAdvApi = LoadLibraryA("ADVAPI32.DLL");
-        if (hAdvApi)
+        if (!hAdvApi)
         {
-            BOOLEAN(APIENTRY * RtlGenRandom)
-            (void *, ULONG) = (BOOLEAN(APIENTRY *)(void *, ULONG))GetProcAddress(hAdvApi, RTL_GENRANDOM);
+            last_genrandom_error = GetLastError();
+            throw runtime_error("Failed to load ADVAPI32.dll");
+        }
 
-            if (!RtlGenRandom || !RtlGenRandom(&result, sizeof(uint64_t)))
-            {
-                last_genrandom_error = GetLastError();
-                throw runtime_error("Failed to call RtlGenRandom");
-            }
+        BOOLEAN(APIENTRY * RtlGenRandom)
+        (void *, ULONG) = (BOOLEAN(APIENTRY *)(void *, ULONG))GetProcAddress(hAdvApi, RTL_GENRANDOM);
 
-            FreeLibrary(hAdvApi);
+        BOOLEAN genrand_result = FALSE;
+        if (RtlGenRandom)
+        {
+            genrand_result = RtlGenRandom(&result, sizeof(uint64_t));
+        }
+
+        DWORD dwError = GetLastError();
+        FreeLibrary(hAdvApi);
+
+        if (!genrand_result)
+        {
+            last_genrandom_error = dwError;
+            throw runtime_error("Failed to call RtlGenRandom");
         }
 
 #elif SEAL_SYSTEM == SEAL_SYSTEM_OTHER
