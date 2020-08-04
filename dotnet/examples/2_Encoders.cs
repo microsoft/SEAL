@@ -131,7 +131,6 @@ namespace SEALNetExamples
             /*
             As a simple example, we compute (-encrypted1 + encrypted2) * encrypted2.
             */
-            encryptor.Encrypt(plain2, encrypted2);
             using Ciphertext encryptedResult = new Ciphertext();
             Utilities.PrintLine();
             Console.WriteLine("Compute encrypted_result = (-encrypted1 + encrypted2) * encrypted2.");
