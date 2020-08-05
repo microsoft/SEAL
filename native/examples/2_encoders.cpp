@@ -124,7 +124,6 @@ void example_integer_encoder()
     /*
     As a simple example, we compute (-encrypted1 + encrypted2) * encrypted2.
     */
-    encryptor.encrypt(plain2, encrypted2);
     Ciphertext encrypted_result;
     print_line(__LINE__);
     cout << "Compute encrypted_result = (-encrypted1 + encrypted2) * encrypted2." << endl;
