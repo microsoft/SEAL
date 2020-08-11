@@ -198,7 +198,7 @@ namespace seal
         inline std::streamoff save(
             SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
-            return sk_.save(out, size, compr_mode);
+            return sk_.save(out, size, compr_mode, /* clear_on_destruction */ true);
         }
 
         /**
@@ -222,7 +222,7 @@ namespace seal
         {
             // We use a fresh memory pool with `clear_on_destruction' enabled.
             Plaintext new_sk(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
-            auto in_size = new_sk.unsafe_load(std::move(context), in, size);
+            auto in_size = new_sk.unsafe_load(std::move(context), in, size, /* clear_on_destruction */ true);
             std::swap(sk_, new_sk);
             return in_size;
         }
