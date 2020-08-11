@@ -21,7 +21,8 @@ namespace seal
         class SafeByteBuffer final : public std::streambuf
         {
         public:
-            SafeByteBuffer(std::streamsize size = 1) : size_(size)
+            SafeByteBuffer(std::streamsize size = 1, bool clear_on_destruction = false)
+                : size_(size), clear_on_destruction_(clear_on_destruction)
             {
                 if (!fits_in<std::size_t>(add_safe(size_, std::streamsize(1))))
                 {
@@ -237,9 +238,11 @@ namespace seal
                 return count;
             }
 
-            IntArray<char> buf_{ MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true) };
+            IntArray<char> buf_{ MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, clear_on_destruction_) };
 
             std::streamsize size_;
+
+            bool clear_on_destruction_;
 
             static constexpr double expansion_factor_ = 1.3;
 
