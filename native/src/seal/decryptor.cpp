@@ -91,7 +91,7 @@ namespace seal
             throw invalid_argument("encrypted is empty");
         }
 
-        auto &context_data = *context_->first_context_data();
+        auto &context_data = *context_.first_context_data();
         auto &parms = context_data.parms();
 
         switch (parms.scheme())
@@ -315,7 +315,7 @@ namespace seal
             throw invalid_argument("encrypted is empty");
         }
 
-        if (context_->key_context_data()->parms().scheme() != scheme_type::BFV)
+        if (context_.key_context_data()->parms().scheme() != scheme_type::BFV)
         {
             throw logic_error("unsupported scheme");
         }
