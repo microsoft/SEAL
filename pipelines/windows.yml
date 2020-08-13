@@ -35,7 +35,7 @@ steps:
   displayName: 'Get .NET Core 3.1 SDK'
   inputs:
     packageType: 'sdk'
-    version: '3.1.x'
+    version: '3.1.6'
 
 - ${{ if eq(parameters.configuration, 'Release') }}:
   - task: PowerShell@2
