@@ -39,8 +39,8 @@ namespace seal
             root_powers_ = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
             inv_root_powers_ = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
             modulus_ = modulus;
-            integer_modular_arith_ = ModArithLazy(modulus_);
-            ntt_handler_ = NTTHandler(integer_modular_arith_);
+            mod_arith_lazy_ = ModArithLazy(modulus_);
+            ntt_handler_ = NTTHandler(mod_arith_lazy_);
 
             // We defer parameter checking to try_minimal_primitive_root(...)
             if (!try_minimal_primitive_root(2 * coeff_count_, modulus_, root_))

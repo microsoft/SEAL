@@ -155,7 +155,7 @@ namespace seal
             Accesses to values is not coalesced without loop unrolling.
 
             @param[values] inputs in bit-reversed order, outputs in normal order
-            @param[roots] powers of a root in normal order
+            @param[roots] powers of a root in scrambled order
             @param[scalar] an optional scalar that is multiplied to all output values
             */
             void transform_from_rev(ValueType *values, int log_n, const RootType *roots, const ScalarType *scalar = nullptr) const

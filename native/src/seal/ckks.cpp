@@ -61,16 +61,27 @@ namespace seal
             for (size_t i = 0; i < coeff_count; i++)
             {
                 roots_[i] = complex_roots_->get_root(static_cast<size_t>(reverse_bits(i, logn)));
-                inv_roots_[i] = conj(roots_[i]);
+                inv_roots_[i] = conj(complex_roots_->get_root(i));
+            }
+            complex<double> *temp_ptr = inv_roots_.get() + 1;
+            for (size_t j = coeff_count >> 1; j > 0; j >>= 1)
+            {
+                for (size_t i = 0; i < j; i++)
+                {
+                    *temp_ptr++ = conj(roots_[j + i]);
+                }
             }
         }
         else if (m == 4)
         {
-            roots_[0] = { 0, 1 };
-            roots_[1] = { 0, -1 };
-            inv_roots_[0] = conj(roots_[0]);
-            inv_roots_[1] = conj(roots_[1]);
+            roots_[0] = { 1, 0 };
+            roots_[1] = { 0, 1 };
+            inv_roots_[0] = { 1, 0 };
+            inv_roots_[1] = { 0, -1 };
         }
+
+        complex_arith_ = ComplexArith();
+        fft_handler_ = FFTHandler(complex_arith_);
     }
 
     void CKKSEncoder::encode_internal(

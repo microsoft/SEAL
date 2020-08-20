@@ -32,22 +32,22 @@ namespace seal
                 return a + b;
             }
 
-            std::uint64_t sub(const std::uint64_t &a, const std::uint64_t &b) const
+            inline std::uint64_t sub(const std::uint64_t &a, const std::uint64_t &b) const
             {
                 return a + two_times_modulus_ - b;
             }
 
-            std::uint64_t mul_root(const std::uint64_t &a, const MultiplyUIntModOperand &r) const
+            inline std::uint64_t mul_root(const std::uint64_t &a, const MultiplyUIntModOperand &r) const
             {
                 return multiply_uint_mod_lazy(a, r, modulus_);
             }
 
-            std::uint64_t mul_scalar(const std::uint64_t &a, const MultiplyUIntModOperand &s) const
+            inline std::uint64_t mul_scalar(const std::uint64_t &a, const MultiplyUIntModOperand &s) const
             {
                 return multiply_uint_mod_lazy(a, s, modulus_);
             }
 
-            MultiplyUIntModOperand mul_root_scalar(const MultiplyUIntModOperand &r, const MultiplyUIntModOperand &s) const
+            inline MultiplyUIntModOperand mul_root_scalar(const MultiplyUIntModOperand &r, const MultiplyUIntModOperand &s) const
             {
                 MultiplyUIntModOperand result;
                 result.set(multiply_uint_mod(r.operand, s, modulus_), modulus_);
@@ -173,7 +173,7 @@ namespace seal
             // Size coeff_count_
             Pointer<MultiplyUIntModOperand> inv_root_powers_;
 
-            ModArithLazy integer_modular_arith_;
+            ModArithLazy mod_arith_lazy_;
 
             NTTHandler ntt_handler_;
         };
