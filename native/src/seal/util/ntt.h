@@ -6,7 +6,7 @@
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"
 #include "seal/util/defines.h"
-#include "seal/util/fft.h"
+#include "seal/util/dwthandler.h"
 #include "seal/util/iterator.h"
 #include "seal/util/pointer.h"
 #include "seal/util/uintarithsmallmod.h"
