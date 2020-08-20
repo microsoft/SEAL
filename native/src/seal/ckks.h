@@ -495,9 +495,9 @@ namespace seal
             for (std::size_t i = 0; i < values_size; i++)
             {
                 conj_values[matrix_reps_index_map_[i]] = values[i];
+                // TODO: if values are real, the following values should be set to zero, and multiply results by 2.
                 conj_values[matrix_reps_index_map_[i + slots_]] = std::conj(values[i]);
             }
-
             double fix = scale / static_cast<double>(n);
             fft_handler_.transform_from_rev(conj_values.get(), util::get_power_of_two(n), inv_roots_.get(), &fix);
 
