@@ -17,8 +17,6 @@ namespace seal
 {
     namespace util
     {
-        using NTTHandler = DWTHandler<std::uint64_t, MultiplyUIntModOperand, MultiplyUIntModOperand>;
-
         template <>
         class Arithmetic<std::uint64_t, MultiplyUIntModOperand, MultiplyUIntModOperand>
         {
@@ -56,16 +54,18 @@ namespace seal
 
             inline std::uint64_t guard(const std::uint64_t &a) const
             {
-                return a - (two_times_modulus_ & static_cast<uint64_t>(-static_cast<int64_t>(a >= two_times_modulus_)));
+                return a - (two_times_modulus_ & static_cast<std::uint64_t>(-static_cast<std::int64_t>(a >= two_times_modulus_)));
             }
         private:
             Modulus modulus_;
+
             std::uint64_t two_times_modulus_;
         };
 
         class NTTTables
         {
-            using ModArithLazy = Arithmetic<std::uint64_t, MultiplyUIntModOperand, MultiplyUIntModOperand>;
+            using ModArithLazy = Arithmetic<uint64_t, MultiplyUIntModOperand, MultiplyUIntModOperand>;
+            using NTTHandler = DWTHandler<std::uint64_t, MultiplyUIntModOperand, MultiplyUIntModOperand>;
         public:
             NTTTables(NTTTables &&source) = default;
 
@@ -151,11 +151,6 @@ namespace seal
 
             void initialize(int coeff_count_power, const Modulus &modulus);
 
-            // Generate 1~(n-1)-th powers of root_ and store them in root_powers_ in bit-reversed order.
-            void gen_root_powers();
-            // Generate 1~(n-1)-th powers of inv_root_ and store them in inv_root_powers_ in scrambled order.
-            void gen_inv_root_powers();
-
             MemoryPoolHandle pool_;
 
             std::uint64_t root_ = 0;
@@ -168,6 +163,7 @@ namespace seal
 
             Modulus modulus_;
 
+            // Inverse of coeff_count_ modulo modulus_.
             MultiplyUIntModOperand inv_degree_modulo_;
 
             // Holds 1~(n-1)-th powers of root_ in bit-reversed order, the 0-th power is left unset.

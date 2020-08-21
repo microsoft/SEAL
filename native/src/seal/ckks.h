@@ -80,8 +80,6 @@ namespace seal
         };
     } // namespace util
 
-    using FFTHandler = util::DWTHandler<std::complex<double>, std::complex<double>, double>;
-
     /**
     Provides functionality for encoding vectors of complex or real numbers into
     plaintext polynomials to be encrypted and computed on using the CKKS scheme.
@@ -107,7 +105,7 @@ namespace seal
     class CKKSEncoder
     {
         using ComplexArith = util::Arithmetic<std::complex<double>, std::complex<double>, double>;
-
+        using FFTHandler = util::DWTHandler<std::complex<double>, std::complex<double>, double>;
     public:
         /**
         Creates a CKKSEncoder instance initialized with the specified SEALContext.
