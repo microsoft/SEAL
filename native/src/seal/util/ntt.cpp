@@ -34,45 +34,24 @@ namespace seal
 #endif
             coeff_count_power_ = coeff_count_power;
             coeff_count_ = size_t(1) << coeff_count_power_;
-
-            // Allocate memory for the tables
-            root_powers_ = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
-            inv_root_powers_ = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
             modulus_ = modulus;
-            mod_arith_lazy_ = ModArithLazy(modulus_);
-            ntt_handler_ = NTTHandler(mod_arith_lazy_);
-
             // We defer parameter checking to try_minimal_primitive_root(...)
             if (!try_minimal_primitive_root(2 * coeff_count_, modulus_, root_))
             {
                 throw invalid_argument("invalid modulus");
             }
-
-            uint64_t inverse_root;
-            if (!try_invert_uint_mod(root_, modulus_, inverse_root))
+            if (!try_invert_uint_mod(root_, modulus_, inv_root_))
             {
                 throw invalid_argument("invalid modulus");
             }
+            mod_arith_lazy_ = ModArithLazy(modulus_);
+            ntt_handler_ = NTTHandler(mod_arith_lazy_);
 
-            // Populate the tables storing (scaled version of) powers of root
-            // mod q in bit-scrambled order.
-            ntt_powers_of_primitive_root(root_, root_powers_.get());
-
-            // Populate the tables storing (scaled version of) powers of
-            // (root)^{-1} mod q in bit-scrambled order.
-            ntt_powers_of_primitive_root(inverse_root, inv_root_powers_.get());
-
-            // Reordering inv_root_powers_ so that the access pattern in inverse NTT is sequential.
-            auto temp = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
-            MultiplyUIntModOperand *temp_ptr = temp.get() + 1;
-            for (size_t m = (coeff_count_ >> 1); m > 0; m >>= 1)
-            {
-                for (size_t i = 0; i < m; i++)
-                {
-                    *temp_ptr++ = inv_root_powers_[m + i];
-                }
-            }
-            copy_n(temp.get() + 1, coeff_count_ - 1, inv_root_powers_.get() + 1);
+            // Populate tables with powers of root in specific orders.
+            root_powers_ = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
+            gen_root_powers();
+            inv_root_powers_ = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
+            gen_inv_root_powers();
 
             // Last compute n^(-1) modulo q.
             uint64_t degree_uint = static_cast<uint64_t>(coeff_count_);
@@ -85,15 +64,28 @@ namespace seal
             return;
         }
 
-        void NTTTables::ntt_powers_of_primitive_root(uint64_t root, MultiplyUIntModOperand *destination) const
+        void NTTTables::gen_root_powers()
         {
-            MultiplyUIntModOperand *destination_start = destination;
-            destination_start->set(1, modulus_);
+            MultiplyUIntModOperand root;
+            root.set(root_, modulus_);
+            uint64_t power = 1;
+            for (size_t i = 0; i < coeff_count_; i++)
+            {
+                root_powers_[reverse_bits(i, coeff_count_power_)].set(power, modulus_);
+                power = multiply_uint_mod(power, root, modulus_);
+            }
+        }
+
+        void NTTTables::gen_inv_root_powers()
+        {
+            MultiplyUIntModOperand root;
+            root.set(inv_root_, modulus_);
+            uint64_t power = 1;
+            inv_root_powers_[0].set(1, modulus_);
             for (size_t i = 1; i < coeff_count_; i++)
             {
-                MultiplyUIntModOperand *next_destination = destination_start + reverse_bits(i, coeff_count_power_);
-                next_destination->set(multiply_uint_mod(destination->operand, root, modulus_), modulus_);
-                destination = next_destination;
+                power = multiply_uint_mod(power, root, modulus_);
+                inv_root_powers_[reverse_bits(i - 1, coeff_count_power_) + 1].set(power, modulus_);
             }
         }
 

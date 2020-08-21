@@ -66,11 +66,14 @@ namespace seal
         @par Algorithms implemented in this class are based on algorithms 1 and 2 in the paper by Patrick Longa and
         Michael Naehrig (https://eprint.iacr.org/2016/504.pdf) with three modifications. First, we generalize in this
         class the algorithms to DWT over arbitrary rings. Second, the powers of \psi^{-1} used by the IDWT are stored
-        in normal order (in contrast to bit-reversed order in paper) to create coalesced memory accesses. Third, the
+        in a scrambled order (in contrast to bit-reversed order in paper) to create coalesced memory accesses. Third, the
         multiplication with 1/n in the IDWT is merged to the last iteration, saving n/2 multiplications. Last, we unroll
         the loops to create coalesced memory accesses to input and output vectors. In earlier versions of SEAL, the
         mutiplication with 1/n is done by merging a multiplication of 1/2 in all interations, which is slower than the
         current method on CPUs but more efficient on some hardware architectures.
+
+        @par The order in which the powers of \psi^{-1} used by the IDWT are stored is unnatural but efficient:
+        the i-th slot stores the (reverse_bits(i - 1, log_n) + 1)-th power of \psi^{-1}.
         */
         template <typename ValueType, typename RootType, typename ScalarType>
         class DWTHandler

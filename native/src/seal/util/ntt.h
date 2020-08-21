@@ -151,13 +151,16 @@ namespace seal
 
             void initialize(int coeff_count_power, const Modulus &modulus);
 
-            // Computed bit-scrambled vector of first 1 << coeff_count_power powers
-            // of a primitive root.
-            void ntt_powers_of_primitive_root(std::uint64_t root, MultiplyUIntModOperand *destination) const;
+            // Generate 0~(n-1)-th powers of root_ and store them in root_powers_ in bit-reversed order.
+            void gen_root_powers();
+            // Generate 0~(n-1)-th powers of inv_root_ and store them in inv_root_powers_ in scrambled order.
+            void gen_inv_root_powers();
 
             MemoryPoolHandle pool_;
 
             std::uint64_t root_ = 0;
+
+            std::uint64_t inv_root_ = 0;
 
             int coeff_count_power_ = 0;
 
@@ -167,10 +170,10 @@ namespace seal
 
             MultiplyUIntModOperand inv_degree_modulo_;
 
-            // Size coeff_count_
+            // Holds 0~(n-1)-th powers of root_ in bit-reversed order.
             Pointer<MultiplyUIntModOperand> root_powers_;
 
-            // Size coeff_count_
+            // Holds 0~(n-1)-th powers of inv_root_ in scrambled order.
             Pointer<MultiplyUIntModOperand> inv_root_powers_;
 
             ModArithLazy mod_arith_lazy_;
