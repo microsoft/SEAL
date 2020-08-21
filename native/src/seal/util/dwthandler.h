@@ -43,9 +43,6 @@ namespace seal
         polynomial multiplications and BatchEncoder. It is also specialized with double-precision complex arithmetic for
         DWT over the complex field, which is used in CKKSEncoder.
 
-        TODO: Loops of size 4 and more should be unrolled.
-        TODO: Loops of size 2 and 1 can be combined.
-
         @par The discrete weighted transform (DWT) is a variantion on the discrete Fourier transform (DFT) over
         arbitrary rings involving weighing the input before transforming it by multiplying element-wise by a weight
         vector, then weighing the output by another vector. The DWT can be used to perform negacyclic convolution on
@@ -113,19 +110,54 @@ namespace seal
                 for (; m < (n >> 1); m <<= 1)
                 {
                     std::size_t offset = 0;
-                    for (std::size_t i = 0; i < m; i++)
+                    if (gap < 4)
                     {
-                        r = *++roots;
-                        x = values + offset;
-                        y = x + gap;
-                        for (std::size_t j = 0; j < gap; j++)
+                        for (std::size_t i = 0; i < m; i++)
                         {
-                            u = arithmetic_.guard(*x);
-                            v = arithmetic_.mul_root(*y, r);
-                            *x++ = arithmetic_.add(u, v);
-                            *y++ = arithmetic_.sub(u, v);
+                            r = *++roots;
+                            x = values + offset;
+                            y = x + gap;
+                            for (std::size_t j = 0; j < gap; j++)
+                            {
+                                u = arithmetic_.guard(*x);
+                                v = arithmetic_.mul_root(*y, r);
+                                *x++ = arithmetic_.add(u, v);
+                                *y++ = arithmetic_.sub(u, v);
+                            }
+                            offset += gap << 1;
                         }
-                        offset += gap << 1;
+                    }
+                    else
+                    {
+                        for (std::size_t i = 0; i < m; i++)
+                        {
+                            r = *++roots;
+                            x = values + offset;
+                            y = x + gap;
+                            for (std::size_t j = 0; j < gap; j += 4)
+                            {
+                                u = arithmetic_.guard(*x);
+                                v = arithmetic_.mul_root(*y, r);
+                                *x++ = arithmetic_.add(u, v);
+                                *y++ = arithmetic_.sub(u, v);
+
+                                u = arithmetic_.guard(*x);
+                                v = arithmetic_.mul_root(*y, r);
+                                *x++ = arithmetic_.add(u, v);
+                                *y++ = arithmetic_.sub(u, v);
+
+                                u = arithmetic_.guard(*x);
+                                v = arithmetic_.mul_root(*y, r);
+                                *x++ = arithmetic_.add(u, v);
+                                *y++ = arithmetic_.sub(u, v);
+
+                                u = arithmetic_.guard(*x);
+                                v = arithmetic_.mul_root(*y, r);
+                                *x++ = arithmetic_.add(u, v);
+                                *y++ = arithmetic_.sub(u, v);
+                            }
+                            offset += gap << 1;
+                        }
                     }
                     gap >>= 1;
                 }
@@ -186,19 +218,54 @@ namespace seal
                 for (; m > 1; m >>= 1)
                 {
                     std::size_t offset = 0;
-                    for (std::size_t i = 0; i < m; i++)
+                    if (gap < 4)
                     {
-                        r = *++roots;
-                        x = values + offset;
-                        y = x + gap;
-                        for (std::size_t j = 0; j < gap; j++)
+                        for (std::size_t i = 0; i < m; i++)
                         {
-                            u = *x;
-                            v = *y;
-                            *x++ = arithmetic_.guard(arithmetic_.add(u, v));
-                            *y++ = arithmetic_.mul_root(arithmetic_.sub(u, v), r);
+                            r = *++roots;
+                            x = values + offset;
+                            y = x + gap;
+                            for (std::size_t j = 0; j < gap; j++)
+                            {
+                                u = *x;
+                                v = *y;
+                                *x++ = arithmetic_.guard(arithmetic_.add(u, v));
+                                *y++ = arithmetic_.mul_root(arithmetic_.sub(u, v), r);
+                            }
+                            offset += gap << 1;
                         }
-                        offset += gap << 1;
+                    }
+                    else
+                    {
+                        for (std::size_t i = 0; i < m; i++)
+                        {
+                            r = *++roots;
+                            x = values + offset;
+                            y = x + gap;
+                            for (std::size_t j = 0; j < gap; j += 4)
+                            {
+                                u = *x;
+                                v = *y;
+                                *x++ = arithmetic_.guard(arithmetic_.add(u, v));
+                                *y++ = arithmetic_.mul_root(arithmetic_.sub(u, v), r);
+
+                                u = *x;
+                                v = *y;
+                                *x++ = arithmetic_.guard(arithmetic_.add(u, v));
+                                *y++ = arithmetic_.mul_root(arithmetic_.sub(u, v), r);
+
+                                u = *x;
+                                v = *y;
+                                *x++ = arithmetic_.guard(arithmetic_.add(u, v));
+                                *y++ = arithmetic_.mul_root(arithmetic_.sub(u, v), r);
+
+                                u = *x;
+                                v = *y;
+                                *x++ = arithmetic_.guard(arithmetic_.add(u, v));
+                                *y++ = arithmetic_.mul_root(arithmetic_.sub(u, v), r);
+                            }
+                            offset += gap << 1;
+                        }
                     }
                     gap <<= 1;
                 }
@@ -209,12 +276,40 @@ namespace seal
                     RootType scaled_r = arithmetic_.mul_root_scalar(r, *scalar);
                     x = values;
                     y = x + gap;
-                    for (std::size_t j = 0; j < gap; j++)
+                    if (gap < 4)
                     {
-                        u = arithmetic_.guard(*x);
-                        v = *y;
-                        *x++ = arithmetic_.mul_scalar(arithmetic_.guard(arithmetic_.add(u, v)), *scalar);
-                        *y++ = arithmetic_.mul_root(arithmetic_.sub(u, v), scaled_r);
+                        for (std::size_t j = 0; j < gap; j += 4)
+                        {
+                            u = arithmetic_.guard(*x);
+                            v = *y;
+                            *x++ = arithmetic_.mul_scalar(arithmetic_.guard(arithmetic_.add(u, v)), *scalar);
+                            *y++ = arithmetic_.mul_root(arithmetic_.sub(u, v), scaled_r);
+                        }
+                    }
+                    else
+                    {
+                        for (std::size_t j = 0; j < gap; j += 4)
+                        {
+                            u = arithmetic_.guard(*x);
+                            v = *y;
+                            *x++ = arithmetic_.mul_scalar(arithmetic_.guard(arithmetic_.add(u, v)), *scalar);
+                            *y++ = arithmetic_.mul_root(arithmetic_.sub(u, v), scaled_r);
+
+                            u = arithmetic_.guard(*x);
+                            v = *y;
+                            *x++ = arithmetic_.mul_scalar(arithmetic_.guard(arithmetic_.add(u, v)), *scalar);
+                            *y++ = arithmetic_.mul_root(arithmetic_.sub(u, v), scaled_r);
+
+                            u = arithmetic_.guard(*x);
+                            v = *y;
+                            *x++ = arithmetic_.mul_scalar(arithmetic_.guard(arithmetic_.add(u, v)), *scalar);
+                            *y++ = arithmetic_.mul_root(arithmetic_.sub(u, v), scaled_r);
+
+                            u = arithmetic_.guard(*x);
+                            v = *y;
+                            *x++ = arithmetic_.mul_scalar(arithmetic_.guard(arithmetic_.add(u, v)), *scalar);
+                            *y++ = arithmetic_.mul_root(arithmetic_.sub(u, v), scaled_r);
+                        }
                     }
                 }
                 else
@@ -222,12 +317,40 @@ namespace seal
                     r = *++roots;
                     x = values;
                     y = x + gap;
-                    for (std::size_t j = 0; j < gap; j++)
+                    if (gap < 4)
                     {
-                        u = *x;
-                        v = *y;
-                        *x++ = arithmetic_.guard(arithmetic_.add(u, v));
-                        *y++ = arithmetic_.mul_root(arithmetic_.sub(u, v), r);
+                        for (std::size_t j = 0; j < gap; j += 4)
+                        {
+                            u = *x;
+                            v = *y;
+                            *x++ = arithmetic_.guard(arithmetic_.add(u, v));
+                            *y++ = arithmetic_.mul_root(arithmetic_.sub(u, v), r);
+                        }
+                    }
+                    else
+                    {
+                        for (std::size_t j = 0; j < gap; j += 4)
+                        {
+                            u = *x;
+                            v = *y;
+                            *x++ = arithmetic_.guard(arithmetic_.add(u, v));
+                            *y++ = arithmetic_.mul_root(arithmetic_.sub(u, v), r);
+
+                            u = *x;
+                            v = *y;
+                            *x++ = arithmetic_.guard(arithmetic_.add(u, v));
+                            *y++ = arithmetic_.mul_root(arithmetic_.sub(u, v), r);
+
+                            u = *x;
+                            v = *y;
+                            *x++ = arithmetic_.guard(arithmetic_.add(u, v));
+                            *y++ = arithmetic_.mul_root(arithmetic_.sub(u, v), r);
+
+                            u = *x;
+                            v = *y;
+                            *x++ = arithmetic_.guard(arithmetic_.add(u, v));
+                            *y++ = arithmetic_.mul_root(arithmetic_.sub(u, v), r);
+                        }
                     }
                 }
             }
