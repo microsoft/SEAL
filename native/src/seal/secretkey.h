@@ -230,7 +230,8 @@ namespace seal
 
             // We use a fresh memory pool with `clear_on_destruction' enabled.
             Plaintext new_sk(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
-            auto in_size = Serialization::Load(std::bind(&Plaintext::load_members, &new_sk, std::move(context), _1), in, size);
+            auto in_size =
+                Serialization::Load(std::bind(&Plaintext::load_members, &new_sk, std::move(context), _1), in, size);
             std::swap(sk_, new_sk);
             return in_size;
         }

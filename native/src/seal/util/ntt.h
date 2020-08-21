@@ -21,9 +21,11 @@ namespace seal
         class Arithmetic<std::uint64_t, MultiplyUIntModOperand, MultiplyUIntModOperand>
         {
         public:
-            Arithmetic() {}
+            Arithmetic()
+            {}
 
-            Arithmetic(const Modulus &modulus): modulus_(modulus), two_times_modulus_(modulus.value() << 1) {}
+            Arithmetic(const Modulus &modulus) : modulus_(modulus), two_times_modulus_(modulus.value() << 1)
+            {}
 
             inline std::uint64_t add(const std::uint64_t &a, const std::uint64_t &b) const
             {
@@ -45,7 +47,8 @@ namespace seal
                 return multiply_uint_mod_lazy(a, s, modulus_);
             }
 
-            inline MultiplyUIntModOperand mul_root_scalar(const MultiplyUIntModOperand &r, const MultiplyUIntModOperand &s) const
+            inline MultiplyUIntModOperand mul_root_scalar(
+                const MultiplyUIntModOperand &r, const MultiplyUIntModOperand &s) const
             {
                 MultiplyUIntModOperand result;
                 result.set(multiply_uint_mod(r.operand, s, modulus_), modulus_);
@@ -54,8 +57,10 @@ namespace seal
 
             inline std::uint64_t guard(const std::uint64_t &a) const
             {
-                return a - (two_times_modulus_ & static_cast<std::uint64_t>(-static_cast<std::int64_t>(a >= two_times_modulus_)));
+                return a - (two_times_modulus_ &
+                            static_cast<std::uint64_t>(-static_cast<std::int64_t>(a >= two_times_modulus_)));
             }
+
         private:
             Modulus modulus_;
 
@@ -66,6 +71,7 @@ namespace seal
         {
             using ModArithLazy = Arithmetic<uint64_t, MultiplyUIntModOperand, MultiplyUIntModOperand>;
             using NTTHandler = DWTHandler<std::uint64_t, MultiplyUIntModOperand, MultiplyUIntModOperand>;
+
         public:
             NTTTables(NTTTables &&source) = default;
 

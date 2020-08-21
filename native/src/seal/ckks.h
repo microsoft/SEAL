@@ -46,7 +46,8 @@ namespace seal
         class Arithmetic<std::complex<double>, std::complex<double>, double>
         {
         public:
-            Arithmetic() {}
+            Arithmetic()
+            {}
 
             inline std::complex<double> add(const std::complex<double> &a, const std::complex<double> &b) const
             {
@@ -106,6 +107,7 @@ namespace seal
     {
         using ComplexArith = util::Arithmetic<std::complex<double>, std::complex<double>, double>;
         using FFTHandler = util::DWTHandler<std::complex<double>, std::complex<double>, double>;
+
     public:
         /**
         Creates a CKKSEncoder instance initialized with the specified SEALContext.

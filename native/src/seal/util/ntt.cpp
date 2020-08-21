@@ -171,13 +171,15 @@ namespace seal
 
         void ntt_negacyclic_harvey_lazy(CoeffIter operand, const NTTTables &tables)
         {
-            tables.ntt_handler().transform_to_rev(operand.ptr(), tables.coeff_count_power(), tables.get_from_root_powers());
+            tables.ntt_handler().transform_to_rev(
+                operand.ptr(), tables.coeff_count_power(), tables.get_from_root_powers());
         }
 
         void inverse_ntt_negacyclic_harvey_lazy(CoeffIter operand, const NTTTables &tables)
         {
             MultiplyUIntModOperand inv_degree_modulo = tables.inv_degree_modulo();
-            tables.ntt_handler().transform_from_rev(operand.ptr(), tables.coeff_count_power(), tables.get_from_inv_root_powers(), &inv_degree_modulo);
+            tables.ntt_handler().transform_from_rev(
+                operand.ptr(), tables.coeff_count_power(), tables.get_from_inv_root_powers(), &inv_degree_modulo);
         }
     } // namespace util
 } // namespace seal
