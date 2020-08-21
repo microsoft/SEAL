@@ -119,6 +119,9 @@
     <ClInclude Include="seal\util\defines.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
+    <ClInclude Include="seal\util\dwthandler.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
     <ClInclude Include="seal\util\gcc.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
