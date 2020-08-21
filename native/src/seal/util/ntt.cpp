@@ -44,8 +44,6 @@ namespace seal
             {
                 throw invalid_argument("invalid modulus");
             }
-            mod_arith_lazy_ = ModArithLazy(modulus_);
-            ntt_handler_ = NTTHandler(mod_arith_lazy_);
 
             // Populate tables with powers of root in specific orders.
             root_powers_ = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
@@ -53,7 +51,7 @@ namespace seal
             inv_root_powers_ = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
             gen_inv_root_powers();
 
-            // Last compute n^(-1) modulo q.
+            // Compute n^(-1) modulo q.
             uint64_t degree_uint = static_cast<uint64_t>(coeff_count_);
             if (!try_invert_uint_mod(degree_uint, modulus_, inv_degree_modulo_.operand))
             {
@@ -61,15 +59,16 @@ namespace seal
             }
             inv_degree_modulo_.set_quotient(modulus_);
 
-            return;
+            mod_arith_lazy_ = ModArithLazy(modulus_);
+            ntt_handler_ = NTTHandler(mod_arith_lazy_);
         }
 
         void NTTTables::gen_root_powers()
         {
             MultiplyUIntModOperand root;
             root.set(root_, modulus_);
-            uint64_t power = 1;
-            for (size_t i = 0; i < coeff_count_; i++)
+            uint64_t power = root_;
+            for (size_t i = 1; i < coeff_count_; i++)
             {
                 root_powers_[reverse_bits(i, coeff_count_power_)].set(power, modulus_);
                 power = multiply_uint_mod(power, root, modulus_);
@@ -80,12 +79,11 @@ namespace seal
         {
             MultiplyUIntModOperand root;
             root.set(inv_root_, modulus_);
-            uint64_t power = 1;
-            inv_root_powers_[0].set(1, modulus_);
+            uint64_t power = inv_root_;
             for (size_t i = 1; i < coeff_count_; i++)
             {
-                power = multiply_uint_mod(power, root, modulus_);
                 inv_root_powers_[reverse_bits(i - 1, coeff_count_power_) + 1].set(power, modulus_);
+                power = multiply_uint_mod(power, root, modulus_);
             }
         }
 

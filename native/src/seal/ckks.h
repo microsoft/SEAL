@@ -499,7 +499,7 @@ namespace seal
                 conj_values[matrix_reps_index_map_[i + slots_]] = std::conj(values[i]);
             }
             double fix = scale / static_cast<double>(n);
-            fft_handler_.transform_from_rev(conj_values.get(), util::get_power_of_two(n), inv_roots_.get(), &fix);
+            fft_handler_.transform_from_rev(conj_values.get(), util::get_power_of_two(n), inv_root_powers_.get(), &fix);
 
             double max_coeff = 0;
             for (std::size_t i = 0; i < n; i++)
@@ -732,7 +732,7 @@ namespace seal
                 // res[i] = res_accum * inv_scale;
             }
 
-            fft_handler_.transform_to_rev(res.get(), logn, roots_.get());
+            fft_handler_.transform_to_rev(res.get(), logn, root_powers_.get());
 
             for (std::size_t i = 0; i < slots_; i++)
             {
@@ -761,9 +761,11 @@ namespace seal
 
         std::shared_ptr<util::ComplexRoots> complex_roots_;
 
-        util::Pointer<std::complex<double>> roots_;
+        // Holds 1~(n-1)-th powers of root in bit-reversed order, the 0-th power is left unset.
+        util::Pointer<std::complex<double>> root_powers_;
 
-        util::Pointer<std::complex<double>> inv_roots_;
+        // Holds 1~(n-1)-th powers of inverse root in scrambled order, the 0-th power is left unset.
+        util::Pointer<std::complex<double>> inv_root_powers_;
 
         util::Pointer<std::size_t> matrix_reps_index_map_;
 

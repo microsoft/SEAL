@@ -151,9 +151,9 @@ namespace seal
 
             void initialize(int coeff_count_power, const Modulus &modulus);
 
-            // Generate 0~(n-1)-th powers of root_ and store them in root_powers_ in bit-reversed order.
+            // Generate 1~(n-1)-th powers of root_ and store them in root_powers_ in bit-reversed order.
             void gen_root_powers();
-            // Generate 0~(n-1)-th powers of inv_root_ and store them in inv_root_powers_ in scrambled order.
+            // Generate 1~(n-1)-th powers of inv_root_ and store them in inv_root_powers_ in scrambled order.
             void gen_inv_root_powers();
 
             MemoryPoolHandle pool_;
@@ -170,10 +170,10 @@ namespace seal
 
             MultiplyUIntModOperand inv_degree_modulo_;
 
-            // Holds 0~(n-1)-th powers of root_ in bit-reversed order.
+            // Holds 1~(n-1)-th powers of root_ in bit-reversed order, the 0-th power is left unset.
             Pointer<MultiplyUIntModOperand> root_powers_;
 
-            // Holds 0~(n-1)-th powers of inv_root_ in scrambled order.
+            // Holds 1~(n-1)-th powers of inv_root_ in scrambled order, the 0-th power is left unset.
             Pointer<MultiplyUIntModOperand> inv_root_powers_;
 
             ModArithLazy mod_arith_lazy_;
