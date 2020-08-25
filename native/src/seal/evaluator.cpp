@@ -2372,7 +2372,7 @@ namespace seal
             // Add (p-1)/2 to change from flooring to rounding.
             uint64_t qk = key_modulus[key_modulus_size - 1].value();
             uint64_t qk_half = qk >> 1;
-            SEAL_ITERATE(t_last, coeff_count, [&](auto J) {
+            SEAL_ITERATE(t_last, coeff_count, [&](auto &J) {
                 J = barrett_reduce_64(J + qk_half, key_modulus[key_modulus_size - 1]);
             });
 
@@ -2393,7 +2393,7 @@ namespace seal
 
                 // Lazy substraction, results in [0, 2*qi), since fix is in [0, qi].
                 uint64_t fix = qi - barrett_reduce_64(qk_half, get<1>(J));
-                SEAL_ITERATE(t_ntt, coeff_count, [fix](auto K) { K += fix; });
+                SEAL_ITERATE(t_ntt, coeff_count, [fix](auto &K) { K += fix; });
 
                 uint64_t qi_lazy = qi << 1; // some multiples of qi
                 if (scheme == scheme_type::CKKS)
@@ -2402,7 +2402,7 @@ namespace seal
                     ntt_negacyclic_harvey_lazy(t_ntt, get<2>(J));
 #if SEAL_USER_MOD_BIT_COUNT_MAX > 60
                     // Reduce from [0, 4qi) to [0, 2qi)
-                    SEAL_ITERATE(t_ntt, coeff_count, [&](auto K) {
+                    SEAL_ITERATE(t_ntt, coeff_count, [&](auto &K) {
                         K -= (qi_lazy & static_cast<uint64_t>(-static_cast<int64_t>(K >= qi_lazy)));
                     });
 #else

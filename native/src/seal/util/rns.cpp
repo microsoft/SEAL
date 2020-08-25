@@ -81,14 +81,14 @@ namespace seal
         bool RNSBase::contains(const Modulus &value) const noexcept
         {
             bool result = false;
-            SEAL_ITERATE(iter(base_), size_, [&](auto I) { result = result || (I == value); });
+            SEAL_ITERATE(iter(base_), size_, [&](auto &I) { result = result || (I == value); });
             return result;
         }
 
         bool RNSBase::is_subbase_of(const RNSBase &superbase) const noexcept
         {
             bool result = true;
-            SEAL_ITERATE(iter(base_), size_, [&](auto I) { result = result && superbase.contains(I); });
+            SEAL_ITERATE(iter(base_), size_, [&](auto &I) { result = result && superbase.contains(I); });
             return result;
         }
 
