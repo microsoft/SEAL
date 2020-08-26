@@ -131,7 +131,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Inverse of encode. This function "unbatches" a given plaintext into a matrix
         /// of integers modulo the plaintext modulus, and stores the result in the destination
-        /// parameter. The input plaintext must have degress less than the polynomial modulus,
+        /// parameter. The input plaintext must have degrees less than the polynomial modulus,
         /// and coefficients less than the plaintext modulus, i.e. it must be a valid plaintext
         /// for the encryption parameters. Dynamic memory allocations in the process are
         /// allocated from the memory pool pointed to by the given MemoryPoolHandle.
@@ -168,7 +168,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Inverse of encode. This function "unbatches" a given plaintext into a matrix
         /// of integers modulo the plaintext modulus, and stores the result in the destination
-        /// parameter. The input plaintext must have degress less than the polynomial modulus,
+        /// parameter. The input plaintext must have degrees less than the polynomial modulus,
         /// and coefficients less than the plaintext modulus, i.e. it must be a valid plaintext
         /// for the encryption parameters. Dynamic memory allocations in the process are
         /// allocated from the memory pool pointed to by the given MemoryPoolHandle.

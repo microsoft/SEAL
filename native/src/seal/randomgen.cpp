@@ -6,14 +6,14 @@
 #include <algorithm>
 #include <iostream>
 #include <random>
-#if SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
+#if (SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS)
 #include <Windows.h>
 #include <bcrypt.h>
 #endif
 
 using namespace std;
 
-#if SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
+#if (SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS)
 
 constexpr auto RTL_GENRANDOM = "SystemFunction036";
 

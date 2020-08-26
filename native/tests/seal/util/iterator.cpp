@@ -7,7 +7,6 @@
 #include <algorithm>
 #include <array>
 #include <cstdint>
-#include <stdexcept>
 #include <type_traits>
 #include <vector>
 #include "gtest/gtest.h"

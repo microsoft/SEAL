@@ -7,13 +7,11 @@
 #include "seal/galoiskeys.h"
 #include "seal/memorymanager.h"
 #include "seal/publickey.h"
-#include "seal/randomgen.h"
 #include "seal/relinkeys.h"
 #include "seal/secretkey.h"
 #include "seal/serializable.h"
 #include "seal/util/defines.h"
 #include "seal/util/iterator.h"
-#include "seal/util/ntt.h"
 #include <random>
 
 namespace seal

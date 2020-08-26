@@ -3,7 +3,6 @@
 
 #include "seal/util/uintarithmod.h"
 #include "seal/util/uintcore.h"
-#include <algorithm>
 #include <cstdint>
 #include "gtest/gtest.h"
 

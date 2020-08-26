@@ -11,7 +11,6 @@
 #include "seal/util/uintarith.h"
 #include "seal/util/uintarithmod.h"
 #include "seal/util/uintcore.h"
-#include "seal/util/ztools.h"
 #include <cstdint>
 #include <iostream>
 #include <string>
@@ -1590,7 +1589,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&BigUInt::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode);
+                std::bind(&BigUInt::save_members, this, _1), save_size(compr_mode_type::NONE), stream, compr_mode);
         }
 
         /**
@@ -1627,7 +1626,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&BigUInt::save_members, this, _1), save_size(compr_mode_type::none), out, size, compr_mode);
+                std::bind(&BigUInt::save_members, this, _1), save_size(compr_mode_type::NONE), out, size, compr_mode);
         }
 
         /**

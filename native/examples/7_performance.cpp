@@ -258,10 +258,10 @@ void bfv_performance_test(SEALContext context)
         /*
         [Serialize Ciphertext]
         */
-        size_t buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::none));
+        size_t buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::NONE));
         vector<SEAL_BYTE> buf(buf_size);
         time_start = chrono::high_resolution_clock::now();
-        encrypted.save(buf.data(), buf_size, compr_mode_type::none);
+        encrypted.save(buf.data(), buf_size, compr_mode_type::NONE);
         time_end = chrono::high_resolution_clock::now();
         time_serialize_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 #ifdef SEAL_USE_ZLIB
@@ -558,10 +558,10 @@ void ckks_performance_test(SEALContext context)
         /*
         [Serialize Ciphertext]
         */
-        size_t buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::none));
+        size_t buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::NONE));
         vector<SEAL_BYTE> buf(buf_size);
         time_start = chrono::high_resolution_clock::now();
-        encrypted.save(buf.data(), buf_size, compr_mode_type::none);
+        encrypted.save(buf.data(), buf_size, compr_mode_type::NONE);
         time_end = chrono::high_resolution_clock::now();
         time_serialize_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 #ifdef SEAL_USE_ZLIB

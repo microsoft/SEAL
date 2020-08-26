@@ -72,7 +72,16 @@ if not exist %ZLIBCONFIGDIR% (
 )
 cd %ZLIBCONFIGDIR%
 "%CMAKEPATH%" ..\..\.. -G %CMAKEGEN% -A %PROJECTPLATFORM% -DZLIB_PLATFORM=%PROJECTPLATFORM%
+"%CMAKEPATH%" --build . --config "%PROJECTCONFIGURATION%"
 
+rem Download and build Zstandard
+set ZSTDCONFIGDIR="..\..\thirdparty\zstd\.config\%VSVERSION%\%PROJECTPLATFORM%"
+cd "%~dp0"
+if not exist %ZSTDCONFIGDIR% (
+	mkdir %ZSTDCONFIGDIR%
+)
+cd %ZSTDCONFIGDIR%
+"%CMAKEPATH%" ..\..\.. -G %CMAKEGEN% -A %PROJECTPLATFORM% -DZSTD_PLATFORM=%PROJECTPLATFORM%
 "%CMAKEPATH%" --build . --config "%PROJECTCONFIGURATION%"
 
 rem Configure Microsoft SEAL

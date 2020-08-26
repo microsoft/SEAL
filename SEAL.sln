@@ -94,6 +94,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{
 		pipelines\windows.yml = pipelines\windows.yml
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "zstd", "zstd", "{0FC3AB9D-3FE4-4BCB-9470-EA174B1ECDFF}"
+	ProjectSection(SolutionItems) = preProject
+		thirdparty\zstd\CMakeLists.txt = thirdparty\zstd\CMakeLists.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -177,6 +182,7 @@ Global
 		{0DD76E94-59E1-49D4-9ED7-8C696B89F26E} = {6B00D0DE-8A17-44B8-BF47-F372E9189434}
 		{256C7291-7A4D-466A-BF88-535B541D2CAC} = {C73A600E-7F50-467C-9228-58AC2C1A7DDA}
 		{03B08661-29E2-4806-9F10-F1B7013D717D} = {C73A600E-7F50-467C-9228-58AC2C1A7DDA}
+		{0FC3AB9D-3FE4-4BCB-9470-EA174B1ECDFF} = {6B00D0DE-8A17-44B8-BF47-F372E9189434}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {15A17F22-F747-4B82-BF5F-E0224AF4B3ED}

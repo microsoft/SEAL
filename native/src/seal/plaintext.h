@@ -11,10 +11,8 @@
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
 #include "seal/util/polycore.h"
-#include "seal/util/ztools.h"
 #include <algorithm>
 #include <functional>
-#include <iostream>
 #include <stdexcept>
 #include <string>
 #ifdef SEAL_USE_MSGSL
@@ -546,7 +544,7 @@ namespace seal
                 util::add_safe(
                     sizeof(parms_id_),
                     sizeof(std::uint64_t), // coeff_count_
-                    sizeof(scale_), util::safe_cast<std::size_t>(data_.save_size(compr_mode_type::none))),
+                    sizeof(scale_), util::safe_cast<std::size_t>(data_.save_size(compr_mode_type::NONE))),
                 compr_mode);
 
             return util::safe_cast<std::streamoff>(util::add_safe(sizeof(Serialization::SEALHeader), members_size));
@@ -568,7 +566,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&Plaintext::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode);
+                std::bind(&Plaintext::save_members, this, _1), save_size(compr_mode_type::NONE), stream, compr_mode);
         }
 
         /**
@@ -631,7 +629,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&Plaintext::save_members, this, _1), save_size(compr_mode_type::none), out, size, compr_mode);
+                std::bind(&Plaintext::save_members, this, _1), save_size(compr_mode_type::NONE), out, size, compr_mode);
         }
 
         /**

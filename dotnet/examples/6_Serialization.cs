@@ -89,7 +89,7 @@ namespace SEALNetExamples
                 providing EncryptionParameters.Save with the desired compression mode as
                 in the following examples:
 
-                    long size = parms.Save(sharedStream, ComprModeType.None);
+                    long size = parms.Save(sharedStream, ComprModeType.NONE);
                     long size = parms.Save(sharedStream, ComprModeType.ZLIB);
                     long size = parms.Save(sharedStream, ComprModeType.ZSTD);
 
@@ -106,7 +106,7 @@ namespace SEALNetExamples
 
                 In more detail, the output of EncryptionParameters.SaveSize is as follows:
 
-                    - Exact buffer size required for ComprModeType.None;
+                    - Exact buffer size required for ComprModeType.NONE;
                     - Upper bound on the size required for ComprModeType.ZLIB or
                       ComprModeType.ZSTD.
 
@@ -117,8 +117,8 @@ namespace SEALNetExamples
                 compressed data.
                 */
                 Utilities.PrintLine();
-                Console.Write("EncryptionParameters: data size upper bound (ComprModeType.None): ");
-                Console.WriteLine(parms.SaveSize(ComprModeType.None));
+                Console.Write("EncryptionParameters: data size upper bound (ComprModeType.NONE): ");
+                Console.WriteLine(parms.SaveSize(ComprModeType.NONE));
                 Console.Write("             ");
                 Console.Write("EncryptionParameters: data size upper bound (compression): ");
                 Console.WriteLine(parms.SaveSize(/* Serialization.ComprModeDefault */));
@@ -287,7 +287,7 @@ namespace SEALNetExamples
 
                 Finally, we would like to point out that none of these methods provide any
                 space savings unless Microsoft SEAL is compiled with ZLIB support, or when
-                serialized with ComprModeType.None.
+                serialized with ComprModeType.NONE.
                 */
             }
 

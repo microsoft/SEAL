@@ -6,8 +6,6 @@
 #include "seal/serialization.h"
 #include "seal/util/defines.h"
 #include "seal/util/streambuf.h"
-#include <cstdint>
-#include <functional>
 #include <ios>
 #include <iostream>
 

@@ -102,9 +102,10 @@ void example_ckks_basics()
     input.reserve(slot_count);
     double curr_point = 0;
     double step_size = 1.0 / (static_cast<double>(slot_count) - 1);
-    for (size_t i = 0; i < slot_count; i++, curr_point += step_size)
+    for (size_t i = 0; i < slot_count; i++)
     {
         input.push_back(curr_point);
+        curr_point += step_size;
     }
     cout << "Input vector: " << endl;
     print_vector(input, 3, 7);

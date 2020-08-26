@@ -4,9 +4,7 @@
 #include "seal/batchencoder.h"
 #include "seal/valcheck.h"
 #include "seal/util/common.h"
-#include "seal/util/polycore.h"
 #include <algorithm>
-#include <cstdlib>
 #include <limits>
 #include <random>
 #include <stdexcept>

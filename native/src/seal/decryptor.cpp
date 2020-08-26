@@ -8,8 +8,6 @@
 #include "seal/util/polycore.h"
 #include "seal/util/scalingvariant.h"
 #include "seal/util/uintarith.h"
-#include "seal/util/uintarithmod.h"
-#include "seal/util/uintarithsmallmod.h"
 #include "seal/util/uintcore.h"
 #include <algorithm>
 #include <stdexcept>

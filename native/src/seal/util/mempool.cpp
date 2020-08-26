@@ -4,9 +4,7 @@
 #include "seal/util/common.h"
 #include "seal/util/mempool.h"
 #include "seal/util/uintarith.h"
-#include <algorithm>
 #include <cmath>
-#include <cstring>
 #include <numeric>
 #include <stdexcept>
 

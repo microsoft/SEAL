@@ -7,11 +7,8 @@
 #include "seal/util/common.h"
 #include "seal/util/streambuf.h"
 #include "seal/util/ztools.h"
-#include <algorithm>
 #include <stdexcept>
-#include <type_traits>
 #include <typeinfo>
-#include <utility>
 
 using namespace std;
 using namespace seal::util;
@@ -102,7 +99,7 @@ namespace seal
         case compr_mode_type::ZLIB:
             return ztools::zlib_deflate_size_bound(in_size);
 #endif
-        case compr_mode_type::none:
+        case compr_mode_type::NONE:
             // No compression
             return in_size;
 
@@ -254,7 +251,7 @@ namespace seal
 
             switch (compr_mode)
             {
-            case compr_mode_type::none:
+            case compr_mode_type::NONE:
                 // We set the compression mode and size here, and save the header
                 header.compr_mode = compr_mode;
                 header.size = safe_cast<uint64_t>(raw_size);
@@ -371,7 +368,7 @@ namespace seal
 
             switch (header.compr_mode)
             {
-            case compr_mode_type::none:
+            case compr_mode_type::NONE:
                 // Read rest of the data
                 load_members(stream);
                 if (header.size != safe_cast<uint64_t>(stream.tellg() - stream_start_pos))

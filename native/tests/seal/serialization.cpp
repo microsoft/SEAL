@@ -142,8 +142,8 @@ namespace sealtest
         stringstream stream;
 
         auto out_size = Serialization::Save(
-            bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::none), stream,
-            compr_mode_type::none);
+            bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::NONE), stream,
+            compr_mode_type::NONE);
         auto in_size = Serialization::Load(bind(&test_struct::load_members, &st2, _1), stream);
         ASSERT_EQ(out_size, in_size);
         ASSERT_EQ(st.a, st2.a);

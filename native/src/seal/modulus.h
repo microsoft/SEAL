@@ -3,7 +3,6 @@
 
 #pragma once
 
-#include "seal/memorymanager.h"
 #include "seal/serialization.h"
 #include "seal/util/defines.h"
 #include "seal/util/hestdparms.h"
@@ -13,7 +12,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
-#include <numeric>
 #include <vector>
 
 namespace seal
@@ -297,7 +295,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&Modulus::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode);
+                std::bind(&Modulus::save_members, this, _1), save_size(compr_mode_type::NONE), stream, compr_mode);
         }
 
         /**
@@ -333,7 +331,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&Modulus::save_members, this, _1), save_size(compr_mode_type::none), out, size, compr_mode);
+                std::bind(&Modulus::save_members, this, _1), save_size(compr_mode_type::NONE), out, size, compr_mode);
         }
 
         /**

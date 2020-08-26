@@ -85,7 +85,7 @@ void example_serialization()
         providing EncryptionParameters::save with the desired compression mode as
         in the following examples:
 
-            auto size = parms.save(shared_stream, compr_mode_type::none);
+            auto size = parms.save(shared_stream, compr_mode_type::NONE);
             auto size = parms.save(shared_stream, compr_mode_type::ZLIB);
             auto size = parms.save(shared_stream, compr_mode_type::ZSTD);
 
@@ -102,7 +102,7 @@ void example_serialization()
 
         In more detail, the output of EncryptionParameters::save_size is as follows:
 
-            - Exact buffer size required for compr_mode_type::none;
+            - Exact buffer size required for compr_mode_type::NONE;
             - Upper bound on the size required for compr_mode_type::ZLIB or
               compr_mode_type::ZSTD.
 
@@ -113,8 +113,8 @@ void example_serialization()
         compressed data.
         */
         print_line(__LINE__);
-        cout << "EncryptionParameters: data size upper bound (compr_mode_type::none): "
-             << parms.save_size(compr_mode_type::none) << endl;
+        cout << "EncryptionParameters: data size upper bound (compr_mode_type::NONE): "
+             << parms.save_size(compr_mode_type::NONE) << endl;
         cout << "             "
              << "EncryptionParameters: data size upper bound (compression): "
              << parms.save_size(/* Serialization::compr_mode_default */) << endl;
@@ -287,7 +287,7 @@ void example_serialization()
 
         Finally, we would like to point out that none of these methods provide any
         space savings unless Microsoft SEAL is compiled with compression support, or
-        when serialized with compr_mode_type::none.
+        when serialized with compr_mode_type::NONE.
         */
     }
 

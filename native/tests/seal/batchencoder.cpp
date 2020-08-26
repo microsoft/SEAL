@@ -5,7 +5,6 @@
 #include "seal/context.h"
 #include "seal/keygenerator.h"
 #include "seal/modulus.h"
-#include <ctime>
 #include <vector>
 #include "gtest/gtest.h"
 

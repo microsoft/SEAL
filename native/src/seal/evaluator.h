@@ -6,17 +6,13 @@
 #include "seal/ciphertext.h"
 #include "seal/context.h"
 #include "seal/galoiskeys.h"
-#include "seal/kswitchkeys.h"
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"
 #include "seal/plaintext.h"
 #include "seal/relinkeys.h"
 #include "seal/secretkey.h"
 #include "seal/valcheck.h"
-#include "seal/util/common.h"
 #include "seal/util/iterator.h"
-#include "seal/util/pointer.h"
-#include "seal/util/uintarithsmallmod.h"
 #include <map>
 #include <stdexcept>
 #include <vector>

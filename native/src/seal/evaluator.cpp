@@ -12,7 +12,6 @@
 #include <algorithm>
 #include <cmath>
 #include <functional>
-#include <limits>
 
 using namespace std;
 using namespace seal::util;

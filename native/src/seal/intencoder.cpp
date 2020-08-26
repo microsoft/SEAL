@@ -3,11 +3,6 @@
 
 #include "seal/intencoder.h"
 #include "seal/util/common.h"
-#include "seal/util/defines.h"
-#include "seal/util/pointer.h"
-#include "seal/util/uintarithsmallmod.h"
-#include <algorithm>
-#include <cmath>
 #include <stdexcept>
 
 using namespace std;

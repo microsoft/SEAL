@@ -133,7 +133,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&Plaintext::save_members, &sk_, _1), sk_.save_size(compr_mode_type::none), stream, compr_mode,
+                std::bind(&Plaintext::save_members, &sk_, _1), sk_.save_size(compr_mode_type::NONE), stream, compr_mode,
                 /* clear_on_destruction */ true);
         }
 
@@ -204,7 +204,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&Plaintext::save_members, &sk_, _1), sk_.save_size(compr_mode_type::none), out, size,
+                std::bind(&Plaintext::save_members, &sk_, _1), sk_.save_size(compr_mode_type::NONE), out, size,
                 compr_mode, /* clear_on_destruction */ true);
         }
 

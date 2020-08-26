@@ -7,7 +7,6 @@
 #include "seal/evaluator.h"
 #include "seal/keygenerator.h"
 #include "seal/valcheck.h"
-#include "seal/util/polycore.h"
 #include "gtest/gtest.h"
 
 using namespace seal;

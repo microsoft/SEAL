@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 #include "seal/kswitchkeys.h"
-#include "seal/util/defines.h"
 #include <stdexcept>
 
 using namespace std;
@@ -67,7 +66,7 @@ namespace seal
                 for (size_t j = 0; j < keys_dim2; j++)
                 {
                     // Save the key
-                    keys_[index][j].save(stream, compr_mode_type::none);
+                    keys_[index][j].save(stream, compr_mode_type::NONE);
                 }
             }
         }

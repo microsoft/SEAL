@@ -5,7 +5,6 @@
 #include "seal/util/common.h"
 #include "seal/util/numth.h"
 #include "seal/util/uintarith.h"
-#include "seal/util/uintarithsmallmod.h"
 #include <numeric>
 #include <stdexcept>
 #include <unordered_map>

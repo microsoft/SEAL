@@ -3,7 +3,6 @@
 
 #include "seal/modulus.h"
 #include "seal/util/globals.h"
-#include <cstdint>
 
 using namespace std;
 

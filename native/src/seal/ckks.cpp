@@ -2,8 +2,6 @@
 // Licensed under the MIT license.
 
 #include "seal/ckks.h"
-#include <cinttypes>
-#include <limits>
 #include <random>
 #include <stdexcept>
 

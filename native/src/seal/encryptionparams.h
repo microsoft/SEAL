@@ -344,7 +344,7 @@ namespace seal
             std::size_t coeff_modulus_total_size =
                 coeff_modulus_.empty()
                     ? std::size_t(0)
-                    : util::safe_cast<std::size_t>(coeff_modulus_[0].save_size(compr_mode_type::none));
+                    : util::safe_cast<std::size_t>(coeff_modulus_[0].save_size(compr_mode_type::NONE));
             coeff_modulus_total_size = util::mul_safe(coeff_modulus_total_size, coeff_modulus_.size());
 
             std::size_t members_size = Serialization::ComprSizeEstimate(
@@ -353,7 +353,7 @@ namespace seal
                     sizeof(std::uint64_t), // poly_modulus_degree_
                     sizeof(std::uint64_t), // coeff_modulus_size
                     coeff_modulus_total_size,
-                    util::safe_cast<std::size_t>(plain_modulus_.save_size(compr_mode_type::none))),
+                    util::safe_cast<std::size_t>(plain_modulus_.save_size(compr_mode_type::NONE))),
                 compr_mode);
 
             return util::safe_cast<std::streamoff>(util::add_safe(sizeof(Serialization::SEALHeader), members_size));
@@ -376,7 +376,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&EncryptionParameters::save_members, this, _1), save_size(compr_mode_type::none), stream,
+                std::bind(&EncryptionParameters::save_members, this, _1), save_size(compr_mode_type::NONE), stream,
                 compr_mode);
         }
 
@@ -417,7 +417,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&EncryptionParameters::save_members, this, _1), save_size(compr_mode_type::none), out, size,
+                std::bind(&EncryptionParameters::save_members, this, _1), save_size(compr_mode_type::NONE), out, size,
                 compr_mode);
         }
 

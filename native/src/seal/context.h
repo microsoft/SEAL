@@ -8,10 +8,8 @@
 #include "seal/modulus.h"
 #include "seal/util/galois.h"
 #include "seal/util/ntt.h"
-#include "seal/util/numth.h"
 #include "seal/util/pointer.h"
 #include "seal/util/rns.h"
-#include <functional>
 #include <memory>
 #include <unordered_map>
 

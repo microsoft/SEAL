@@ -8,7 +8,6 @@
 #include "seal/serialization.h"
 #include "seal/util/pointer.h"
 #include "seal/util/ztools.h"
-#include <cmath>
 #include <cstddef>
 #include <cstring>
 #include <limits>

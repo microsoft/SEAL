@@ -8,7 +8,6 @@
 #include "seal/publickey.h"
 #include "seal/valcheck.h"
 #include <iostream>
-#include <limits>
 #include <vector>
 
 namespace seal
@@ -167,7 +166,7 @@ namespace seal
                 for (auto &key_dim2 : key_dim1)
                 {
                     total_key_size = util::add_safe(
-                        total_key_size, util::safe_cast<std::size_t>(key_dim2.save_size(compr_mode_type::none)));
+                        total_key_size, util::safe_cast<std::size_t>(key_dim2.save_size(compr_mode_type::NONE)));
                 }
             }
 
@@ -198,7 +197,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&KSwitchKeys::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode);
+                std::bind(&KSwitchKeys::save_members, this, _1), save_size(compr_mode_type::NONE), stream, compr_mode);
         }
 
         /**
@@ -262,7 +261,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&KSwitchKeys::save_members, this, _1), save_size(compr_mode_type::none), out, size,
+                std::bind(&KSwitchKeys::save_members, this, _1), save_size(compr_mode_type::NONE), out, size,
                 compr_mode);
         }
 

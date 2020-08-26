@@ -5,7 +5,6 @@
 
 #include "seal/biguint.h"
 #include "seal/context.h"
-#include "seal/memorymanager.h"
 #include "seal/modulus.h"
 #include "seal/plaintext.h"
 #include <cstdint>
