@@ -566,5 +566,7 @@ namespace seal
         {
             return value == T{ 0 };
         }
+
+        void memzero(void *const data, const size_t size);
     } // namespace util
 } // namespace seal

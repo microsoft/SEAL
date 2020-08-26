@@ -498,6 +498,17 @@ cmake_dependent_option(SEAL_USE__ADDCARRY_U64 ${SEAL_USE__ADDCARRY_U64_OPTION_ST
 set(SEAL_USE__SUBBORROW_U64_OPTION_STR "Use _subborrow_u64")
 cmake_dependent_option(SEAL_USE__SUBBORROW_U64 ${SEAL_USE__SUBBORROW_U64_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
 
+set(SEAL_USE_MEMSET_S_OPTION_STR "Use memset_s")
+cmake_dependent_option(SEAL_USE_MEMSET_S ${SEAL_USE_MEMSET_S_OPTION_STR} ON "SEAL_USE_MEMSET_S" OFF)
+
+set(SEAL_USE_EXPLICIT_BZERO_OPTION_STR "Use explicit_bzero")
+cmake_dependent_option(SEAL_USE_EXPLICIT_BZERO ${SEAL_USE_EXPLICIT_BZERO_OPTION_STR} ON "SEAL_USE_EXPLICIT_BZERO" OFF)
+
+set(SEAL_USE_EXPLICIT_MEMSET_OPTION_STR "Use explicit_memset")
+cmake_dependent_option(SEAL_USE_EXPLICIT_MEMSET ${SEAL_USE_EXPLICIT_MEMSET_OPTION_STR} ON "SEAL_USE_EXPLICIT_MEMSET" OFF)
+
+set(SEAL_USE_)
+
 if(SEAL_USE_INTRIN)
     cmake_push_check_state(RESET)
     set(CMAKE_REQUIRED_QUIET TRUE)
@@ -605,6 +616,37 @@ if(SEAL_USE_INTRIN)
 
     cmake_pop_check_state()
 endif()
+
+# Check for memset_s
+check_cxx_source_runs("
+    #define __STDC_WANT_LIB_EXT1__ 1
+    #include <string.h>
+    int main(void)
+    {
+        char str[] = "ghghghghghghghghghghgh";
+        int r = memset_s(str, sizeof(str), 'a', 5);
+        return r;
+    }"
+    USE_MEMSET_S)
+if(NOT USE_MEMSET_S EQUAL 1)
+    set(SEAL_USE_MEMSET_S OFF CACHE BOOL ${SEAL_USE_MEMSET_S_OPTION_STR} FORCE)
+endif()
+unset(USE_MEMSET_S CACHE)
+
+# Check for explicit_bzero
+include (CheckSymbolExists)
+check_symbol_exists(explicit_bzero "string.h" USE_EXPLICIT_BZERO)
+if(NOT USE_EXPLICIT_BZERO EQUAL 1)
+    set(SEAL_USE_EXPLICIT_BZERO OFF CACHE BOOL ${SEAL_USE_EXPLICIT_BZERO_OPTION_STR} FORCE)
+endif()
+unset(USE_EXPLICIT_BZERO)
+
+# Check for explicit_memset
+check_symbol_exists(explicit_memset "string.h" USE_EXPLICIT_MEMSET)
+if(NOT USE_EXPLICIT_MEMSET EQUAL 1)
+    set(SEAL_USE_EXPLICIT_MEMSET OFF CACHE BOOL ${SEAL_USE_EXPLICIT_MEMSET_OPTION_STR} FORCE)
+endif()
+unset(USE_EXPLICIT_MEMSET)
 
 # Create an object library to compile sources only once
 add_library(seal_obj OBJECT)
