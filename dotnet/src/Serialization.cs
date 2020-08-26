@@ -21,8 +21,11 @@ namespace Microsoft.Research.SEAL
         /// <summary>No compression is used.</summary>
         None = 0,
 
-        /// <summary>Use Deflate compression.</summary>
-        Deflate = 1,
+        /// <summary>Use ZLIB compression.</summary>
+        ZLIB = 1,
+
+        /// <summary>Use Zstandard compression.</summary>
+        ZSTD = 2
     }
 
     /// <summary>Class to provide functionality for serialization.</summary>

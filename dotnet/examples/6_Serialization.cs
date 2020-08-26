@@ -23,11 +23,12 @@ namespace SEALNetExamples
             Utilities.PrintExampleBanner("Example: Serialization");
 
             /*
-            We require ZLIB support for this example to be available.
+            We require ZLIB or Zstandard support for this example to be available.
             */
-            if (!Serialization.IsSupportedComprMode(ComprModeType.Deflate))
+            if (!Serialization.IsSupportedComprMode(ComprModeType.ZLIB) &&
+                !Serialization.IsSupportedComprMode(ComprModeType.ZSTD))
             {
-                Console.WriteLine("ZLIB support is not enabled; this example is not available.");
+                Console.WriteLine("Neither ZLIB nor Zstandard support is enabled; this example is not available.");
                 Console.WriteLine();
                 return;
             }
@@ -84,16 +85,16 @@ namespace SEALNetExamples
                 */
 
                 /*
-                It is possible to enable or disable ZLIB ("deflate") compression for
-                serialization by providing EncryptionParameters.Save with the desired
-                compression mode as in the following examples:
+                It is possible to enable or disable compression for serialization by
+                providing EncryptionParameters.Save with the desired compression mode as
+                in the following examples:
 
                     long size = parms.Save(sharedStream, ComprModeType.None);
-                    long size = parms.Save(sharedStream, ComprModeType.Deflate);
+                    long size = parms.Save(sharedStream, ComprModeType.ZLIB);
+                    long size = parms.Save(sharedStream, ComprModeType.ZSTD);
 
-                If Microsoft SEAL is compiled with ZLIB support, the default is to use
-                ComprModeType.Deflate, so to instead disable compression one would use
-                the first version of the two.
+                If Microsoft SEAL is compiled with Zstandard or ZLIB support, the default is
+                to use one of them. If available, Zstandard is preferred over ZLIB.
                 */
 
                 /*
@@ -101,13 +102,13 @@ namespace SEALNetExamples
                 to know ahead of time an upper bound on the serialized data size to
                 allocate enough memory. This information is returned by the
                 EncryptionParameters.SaveSize function. This function accepts the
-                desired compression mode, with ComprModeType.Deflate being the default
-                when Microsoft SEAL is compiled with ZLIB support.
+                desired compression mode, or uses the default option otherwise.
 
                 In more detail, the output of EncryptionParameters.SaveSize is as follows:
 
                     - Exact buffer size required for ComprModeType.None;
-                    - Upper bound on the size required for ComprModeType.Deflate.
+                    - Upper bound on the size required for ComprModeType.ZLIB or
+                      ComprModeType.ZSTD.
 
                 As we can see from the print-out, the sizes returned by these functions
                 are significantly larger than the compressed size written into the shared
@@ -119,8 +120,8 @@ namespace SEALNetExamples
                 Console.Write("EncryptionParameters: data size upper bound (ComprModeType.None): ");
                 Console.WriteLine(parms.SaveSize(ComprModeType.None));
                 Console.Write("             ");
-                Console.Write("EncryptionParameters: data size upper bound (ComprModeType.Deflate): ");
-                Console.WriteLine(parms.SaveSize(ComprModeType.Deflate));
+                Console.Write("EncryptionParameters: data size upper bound (compression): ");
+                Console.WriteLine(parms.SaveSize(/* Serialization.ComprModeDefault */));
 
                 /*
                 As an example, we now serialize the encryption parameters to a fixed

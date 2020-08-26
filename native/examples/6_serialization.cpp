@@ -19,10 +19,10 @@ void example_serialization()
     print_example_banner("Example: Serialization");
 
     /*
-    We require ZLIB support for this example to be available.
+    We require ZLIB or Zstandard support for this example to be available.
     */
-#ifndef SEAL_USE_ZLIB
-    cout << "ZLIB support is not enabled; this example is not available." << endl;
+#if(!defined(SEAL_USE_ZSTD) && !defined(SEAL_USE_ZLIB))
+    cout << "Neither ZLIB nor Zstandard support is enabled; this example is not available." << endl;
     cout << endl;
     return;
 #else
@@ -81,29 +81,30 @@ void example_serialization()
         */
 
         /*
-        It is possible to enable or disable ZLIB ("deflate") compression for
-        serialization by providing EncryptionParameters::save with the desired
-        compression mode as in the following examples:
+        It is possible to enable or disable compression for serialization by
+        providing EncryptionParameters::save with the desired compression mode as
+        in the following examples:
 
             auto size = parms.save(shared_stream, compr_mode_type::none);
-            auto size = parms.save(shared_stream, compr_mode_type::deflate);
+            auto size = parms.save(shared_stream, compr_mode_type::ZLIB);
+            auto size = parms.save(shared_stream, compr_mode_type::ZSTD);
 
-        If Microsoft SEAL is compiled with ZLIB support, the default is to use
-        compr_mode_type::deflate, so to instead disable compression one would use
-        the first version of the two.
+        If Microsoft SEAL is compiled with Zstandard or ZLIB support, the default is
+        to use one of them. If available, Zstandard is preferred over ZLIB.
         */
 
         /*
         It is also possible to serialize data directly to a buffer. For this, one
         needs to know an upper bound for the required buffer size, which can be
         obtained using the EncryptionParameters::save_size function. This function
-        also accepts the desired compression mode, with compr_mode_type::deflate
-        being the default when Microsoft SEAL is compiled with ZLIB support.
+        also accepts the desired compression mode, or uses the default option
+        otherwise. 
 
         In more detail, the output of EncryptionParameters::save_size is as follows:
 
             - Exact buffer size required for compr_mode_type::none;
-            - Upper bound on the size required for compr_mode_type::deflate.
+            - Upper bound on the size required for compr_mode_type::ZLIB or
+              compr_mode_type::ZSTD.
 
         As we can see from the print-out, the sizes returned by these functions
         are significantly larger than the compressed size written into the shared
@@ -115,8 +116,8 @@ void example_serialization()
         cout << "EncryptionParameters: data size upper bound (compr_mode_type::none): "
              << parms.save_size(compr_mode_type::none) << endl;
         cout << "             "
-             << "EncryptionParameters: data size upper bound (compr_mode_type::deflate): "
-             << parms.save_size(compr_mode_type::deflate) << endl;
+             << "EncryptionParameters: data size upper bound (compression): "
+             << parms.save_size(/* Serialization::compr_mode_default */) << endl;
 
         /*
         As an example, we now serialize the encryption parameters to a fixed size
@@ -285,8 +286,8 @@ void example_serialization()
         exactly how many bytes to read. We will see this working next.
 
         Finally, we would like to point out that none of these methods provide any
-        space savings unless Microsoft SEAL is compiled with ZLIB support, or when
-        serialized with compr_mode_type::none.
+        space savings unless Microsoft SEAL is compiled with compression support, or
+        when serialized with compr_mode_type::none.
         */
     }
 

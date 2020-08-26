@@ -24,8 +24,12 @@ namespace seal
         // No compression is used.
         none = 0,
 #ifdef SEAL_USE_ZLIB
-        // Use Deflate compression
-        deflate = 1,
+        // Use ZLIB compression
+        ZLIB = 1,
+#endif
+#ifdef SEAL_USE_ZSTD
+        // Use Zstandard compression
+        ZSTD = 2,
 #endif
     };
 
@@ -38,10 +42,12 @@ namespace seal
     {
     public:
         /**
-        The compression mode used by default.
+        The compression mode used by default; prefer Zstandard
         */
-#ifdef SEAL_USE_ZLIB
-        static constexpr compr_mode_type compr_mode_default = compr_mode_type::deflate;
+#ifdef SEAL_USE_ZSTD
+        static constexpr compr_mode_type compr_mode_default = compr_mode_type::zstd;
+#elif SEAL_USE_ZLIB
+        static constexpr compr_mode_type compr_mode_default = compr_mode_type::zlib;
 #else
         static constexpr compr_mode_type compr_mode_default = compr_mode_type::none;
 #endif
@@ -95,7 +101,11 @@ namespace seal
             case static_cast<std::uint8_t>(compr_mode_type::none):
                 /* fall through */
 #ifdef SEAL_USE_ZLIB
-            case static_cast<std::uint8_t>(compr_mode_type::deflate):
+            case static_cast<std::uint8_t>(compr_mode_type::zlib):
+                /* fall through */
+#endif
+#ifdef SEAL_USE_ZSTD
+            case static_cast<std::uint8_t>(compr_mode_type::zstd):
 #endif
                 return true;
             }

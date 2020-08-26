@@ -34,3 +34,4 @@
 // Third-party dependencies
 #cmakedefine SEAL_USE_MSGSL
 #cmakedefine SEAL_USE_ZLIB
+#cmakedefine SEAL_USE_ZSTD

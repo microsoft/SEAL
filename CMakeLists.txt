@@ -307,10 +307,6 @@ endif()
 set(SEAL_USE_ZLIB_OPTION_STR "Use ZLIB for compressed serialization")
 option(SEAL_USE_ZLIB ${SEAL_USE_ZLIB_OPTION_STR} ON)
 
-# [option] SEAL_USE_ZSTD
-set(SEAL_USE_ZSTD_OPTION_STR "Use ZSTD for compressed serialization")
-option(SEAL_USE_ZSTD ${SEAL_USE_ZSTD_OPTION_STR} ON)
-
 # ZLIB has no VERSION given to project(), needs to suppress CMP0048 warning
 if(SEAL_USE_ZLIB AND NOT MSVC)
     set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS TRUE CACHE INTERNAL "Suppress CMP0048 warning" FORCE)
@@ -380,12 +376,12 @@ if(SEAL_USE_ZLIB AND NOT MSVC)
 endif()
 
 # [option] SEAL_USE_ZSTD
-set(SEAL_USE_ZSTD_OPTION_STR "Use ZSTD for compressed serialization")
+set(SEAL_USE_ZSTD_OPTION_STR "Use Zstandard for compressed serialization")
 option(SEAL_USE_ZSTD ${SEAL_USE_ZSTD_OPTION_STR} ON)
 
 # Download and configure
 if(SEAL_USE_ZSTD AND NOT MSVC)
-    message(STATUS "Setting up ZSTD ...")
+    message(STATUS "Setting up Zstandard ...")
     if(NOT CMAKE_TOOLCHAIN_FILE)
         execute_process(
             COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
@@ -408,17 +404,17 @@ if(SEAL_USE_ZSTD AND NOT MSVC)
     if(result)
         message(WARNING "Failed to download ZSTD (${result}); disabling `SEAL_USE_ZSTD`")
     endif()
-    mark_as_advanced(AMD64)
-    mark_as_advanced(ASM686)
-    mark_as_advanced(EXECUTABLE_OUTPUT_PATH)
-    mark_as_advanced(CMAKE_INSTALL_PREFIX)
-    mark_as_advanced(INSTALL_BIN_DIR)
-    mark_as_advanced(INSTALL_INC_DIR)
-    mark_as_advanced(INSTALL_LIB_DIR)
-    mark_as_advanced(INSTALL_MAN_DIR)
-    mark_as_advanced(INSTALL_PKGCONFIG_DIR)
-    mark_as_advanced(LIBRARY_OUTPUT_PATH)
-    mark_as_advanced(CMAKE_BACKWARDS_COMPATIBILITY)
+    #mark_as_advanced(AMD64)
+    #mark_as_advanced(ASM686)
+    #mark_as_advanced(EXECUTABLE_OUTPUT_PATH)
+    #mark_as_advanced(CMAKE_INSTALL_PREFIX)
+    #mark_as_advanced(INSTALL_BIN_DIR)
+    #mark_as_advanced(INSTALL_INC_DIR)
+    #mark_as_advanced(INSTALL_LIB_DIR)
+    #mark_as_advanced(INSTALL_MAN_DIR)
+    #mark_as_advanced(INSTALL_PKGCONFIG_DIR)
+    #mark_as_advanced(LIBRARY_OUTPUT_PATH)
+    #mark_as_advanced(CMAKE_BACKWARDS_COMPATIBILITY)
 endif()
 
 # Build
@@ -437,11 +433,10 @@ if(SEAL_USE_ZSTD AND NOT MSVC)
     add_subdirectory(
         ${SEAL_THIRDPARTY_DIR}/zstd/src/build/cmake
         EXCLUDE_FROM_ALL)
+
     # Set the ZSTD include directory to be relative to this CMakeLists.txt's binary directory
     # for out-of-source builds.
-    #set(SEAL_ZSTD_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zstd/src/lib)
-    #set_target_properties(libzstd_static PROPERTIES
-        #INTERFACE_INCLUDE_DIRECTORIES ${SEAL_ZSTD_INCLUDE_DIR})
+    set(ZSTD_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zstd/src/lib)
 endif()
 
 # Google Test
@@ -695,6 +690,7 @@ endif()
 
 if(SEAL_USE_ZSTD AND NOT MSVC)
     target_link_libraries(seal_obj PRIVATE libzstd_static)
+    target_include_directories(seal_obj PRIVATE $<BUILD_INTERFACE:${ZSTD_INCLUDE_DIR}>)
 endif()
 
 # Always build the static library
@@ -734,17 +730,18 @@ if(BUILD_SHARED_LIBS)
     if(SEAL_USE_ZSTD AND NOT MSVC)
         # In the shared build we link libzstd_static into the shared library
         target_link_libraries(seal_shared PRIVATE libzstd_static)
+        target_include_directories(seal_shared PRIVATE $<BUILD_INTERFACE:${ZSTD_INCLUDE_DIR}>)
     endif()
 
     seal_install_target(seal_shared SEALTargets)
 endif()
 
-# In UNIX-like platforms combine manually seal and zlibstatic into a single archive; not pretty, but works
+# In UNIX-like platforms combine manually seal and zlibstatic into a single archive
 if(SEAL_USE_ZLIB AND NOT MSVC)
     seal_combine_archives(seal zlibstatic)
 endif()
 
-# In UNIX-like platforms combine manually seal and libzstd_static into a single archive; not pretty, but works
+# In UNIX-like platforms combine manually seal and libzstd_static into a single archive
 if(SEAL_USE_ZSTD AND NOT MSVC)
     seal_combine_archives(seal libzstd_static)
 endif()
