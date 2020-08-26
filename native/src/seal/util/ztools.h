@@ -71,8 +71,7 @@ namespace seal
             SEAL_NODISCARD SizeT zstd_deflate_size_bound(SizeT in_size)
             {
                 return util::add_safe<SizeT>(
-                    in_size,
-                    in_size >> 8,
+                    in_size, in_size >> 8,
                     (in_size < (SizeT(128) << 10)) ? (((SizeT(128) << 10) - in_size) >> 11) : SizeT(0));
             }
         } // namespace ztools

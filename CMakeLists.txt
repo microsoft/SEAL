@@ -300,7 +300,7 @@ if(SEAL_USE_MSGSL AND NOT MSVC)
     add_subdirectory(
         ${SEAL_THIRDPARTY_DIR}/msgsl/src
         EXCLUDE_FROM_ALL)
-    set(MSGSL_INCLUDE_DIR ${SEAL_THIRDPARTY_DIR}/msgsl/src/include)
+    set(SEAL_MSGSL_INCLUDE_DIR ${SEAL_THIRDPARTY_DIR}/msgsl/src/include)
 endif()
 
 # [option] SEAL_USE_ZLIB
@@ -366,13 +366,12 @@ if(SEAL_USE_ZLIB AND NOT MSVC)
     add_subdirectory(
         ${SEAL_THIRDPARTY_DIR}/zlib/src
         EXCLUDE_FROM_ALL)
-    # Set the ZLIB include directory to be relative to this CMakeLists.txt's binary directory
-    # for out-of-source builds.
-    set(SEAL_ZLIB_INCLUDE_DIRS
-        ${SEAL_THIRDPARTY_DIR}/zlib/src
-        ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zlib/src)
+
+    # Set the ZLIB include directory
+    set(SEAL_ZLIB_INCLUDE_DIR ${SEAL_THIRDPARTY_DIR}/zlib/src)
+        #${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/zlib/src)
     set_target_properties(zlibstatic PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${SEAL_ZLIB_INCLUDE_DIRS}")
+        INTERFACE_INCLUDE_DIRECTORIES "${SEAL_ZLIB_INCLUDE_DIR}")
 endif()
 
 # [option] SEAL_USE_ZSTD
@@ -404,17 +403,6 @@ if(SEAL_USE_ZSTD AND NOT MSVC)
     if(result)
         message(WARNING "Failed to download ZSTD (${result}); disabling `SEAL_USE_ZSTD`")
     endif()
-    #mark_as_advanced(AMD64)
-    #mark_as_advanced(ASM686)
-    #mark_as_advanced(EXECUTABLE_OUTPUT_PATH)
-    #mark_as_advanced(CMAKE_INSTALL_PREFIX)
-    #mark_as_advanced(INSTALL_BIN_DIR)
-    #mark_as_advanced(INSTALL_INC_DIR)
-    #mark_as_advanced(INSTALL_LIB_DIR)
-    #mark_as_advanced(INSTALL_MAN_DIR)
-    #mark_as_advanced(INSTALL_PKGCONFIG_DIR)
-    #mark_as_advanced(LIBRARY_OUTPUT_PATH)
-    #mark_as_advanced(CMAKE_BACKWARDS_COMPATIBILITY)
 endif()
 
 # Build
@@ -434,9 +422,8 @@ if(SEAL_USE_ZSTD AND NOT MSVC)
         ${SEAL_THIRDPARTY_DIR}/zstd/src/build/cmake
         EXCLUDE_FROM_ALL)
 
-    # Set the ZSTD include directory to be relative to this CMakeLists.txt's binary directory
-    # for out-of-source builds.
-    set(ZSTD_INCLUDE_DIR ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zstd/src/lib)
+    # Set the ZSTD include directory
+    set(SEAL_ZSTD_INCLUDE_DIR ${SEAL_THIRDPARTY_DIR}/zstd/src/lib)
 endif()
 
 # Google Test
@@ -690,7 +677,7 @@ endif()
 
 if(SEAL_USE_ZSTD AND NOT MSVC)
     target_link_libraries(seal_obj PRIVATE libzstd_static)
-    target_include_directories(seal_obj PRIVATE $<BUILD_INTERFACE:${ZSTD_INCLUDE_DIR}>)
+    target_include_directories(seal_obj PRIVATE $<BUILD_INTERFACE:${SEAL_ZSTD_INCLUDE_DIR}>)
 endif()
 
 # Always build the static library
@@ -704,7 +691,7 @@ seal_install_target(seal SEALTargets)
 
 # Conditionally add MSGSL include directory to build interface
 if(SEAL_USE_MSGSL AND NOT MSVC)
-    target_include_directories(seal PUBLIC $<BUILD_INTERFACE:${MSGSL_INCLUDE_DIR}>)
+    target_include_directories(seal PUBLIC $<BUILD_INTERFACE:${SEAL_MSGSL_INCLUDE_DIR}>)
 endif()
 
 # Conditionally build the shared library
@@ -716,22 +703,6 @@ if(BUILD_SHARED_LIBS)
     seal_set_language(seal_shared)
     seal_set_include_directories(seal_shared)
     seal_link_threads(seal_shared)
-
-    # Conditionally add MSGSL include directory to build interface
-    if(SEAL_USE_MSGSL AND NOT MSVC)
-        target_include_directories(seal_shared PUBLIC $<BUILD_INTERFACE:${MSGSL_INCLUDE_DIR}>)
-    endif()
-
-    if(SEAL_USE_ZLIB AND NOT MSVC)
-        # In the shared build we link zlibstatic into the shared library
-        target_link_libraries(seal_shared PRIVATE zlibstatic)
-    endif()
-
-    if(SEAL_USE_ZSTD AND NOT MSVC)
-        # In the shared build we link libzstd_static into the shared library
-        target_link_libraries(seal_shared PRIVATE libzstd_static)
-        target_include_directories(seal_shared PRIVATE $<BUILD_INTERFACE:${ZSTD_INCLUDE_DIR}>)
-    endif()
 
     seal_install_target(seal_shared SEALTargets)
 endif()
@@ -823,7 +794,7 @@ export(
 if(SEAL_USE_MSGSL AND NOT MSVC)
     install(
         DIRECTORY
-            ${MSGSL_INCLUDE_DIR}/gsl
+            ${SEAL_MSGSL_INCLUDE_DIR}/gsl
         DESTINATION
             ${SEAL_INCLUDES_INSTALL_DIR}
     )

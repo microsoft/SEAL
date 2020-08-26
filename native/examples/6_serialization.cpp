@@ -21,7 +21,7 @@ void example_serialization()
     /*
     We require ZLIB or Zstandard support for this example to be available.
     */
-#if(!defined(SEAL_USE_ZSTD) && !defined(SEAL_USE_ZLIB))
+#if (!defined(SEAL_USE_ZSTD) && !defined(SEAL_USE_ZLIB))
     cout << "Neither ZLIB nor Zstandard support is enabled; this example is not available." << endl;
     cout << endl;
     return;
@@ -98,7 +98,7 @@ void example_serialization()
         needs to know an upper bound for the required buffer size, which can be
         obtained using the EncryptionParameters::save_size function. This function
         also accepts the desired compression mode, or uses the default option
-        otherwise. 
+        otherwise.
 
         In more detail, the output of EncryptionParameters::save_size is as follows:
 

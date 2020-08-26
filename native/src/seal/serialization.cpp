@@ -393,8 +393,8 @@ namespace seal
 
                 // Throw an exception on non-zero return value
                 if (ztools::zlib_inflate_stream(
-                    stream, safe_cast<streamoff>(compr_size), temp_stream,
-                    MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, clear_on_destruction)))
+                        stream, safe_cast<streamoff>(compr_size), temp_stream,
+                        MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, clear_on_destruction)))
                 {
                     throw logic_error("stream inflate failed");
                 }
@@ -416,8 +416,8 @@ namespace seal
 
                 // Throw an exception on non-zero return value
                 if (ztools::zstd_inflate_stream(
-                    stream, safe_cast<streamoff>(compr_size), temp_stream,
-                    MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, clear_on_destruction)))
+                        stream, safe_cast<streamoff>(compr_size), temp_stream,
+                        MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, clear_on_destruction)))
                 {
                     throw logic_error("stream inflate failed");
                 }

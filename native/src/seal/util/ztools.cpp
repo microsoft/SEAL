@@ -52,9 +52,9 @@ namespace seal
                     unordered_map<void *, Pointer<SEAL_BYTE>> ptr_storage_;
                 };
             } // namespace
-        }
-    }
-}
+        }     // namespace ztools
+    }         // namespace util
+} // namespace seal
 
 #endif
 
@@ -114,7 +114,7 @@ namespace seal
                 {
                     reinterpret_cast<PointerStorage *>(ptr_storage)->free(addr);
                 }
-            }
+            } // namespace
 
             int zlib_deflate_array_inplace(IntArray<SEAL_BYTE> &in, MemoryPoolHandle pool)
             {
@@ -416,9 +416,9 @@ namespace seal
 
                 out_stream.exceptions(old_except_mask);
             }
-        }
-    }
-}
+        } // namespace ztools
+    }     // namespace util
+} // namespace seal
 
 #endif
 
@@ -431,8 +431,8 @@ namespace seal
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wsign-conversion"
 #endif
-#include "zstd.h"
 #include "common/zstd_internal.h"
+#include "zstd.h"
 #if (SEAL_COMPILER == SEAL_COMPILER_GCC)
 #pragma GCC diagnostic pop
 #elif (SEAL_COMPILER == SEAL_COMPILER_CLANG)
@@ -456,7 +456,7 @@ namespace seal
                 constexpr size_t zstd_process_bytes_in_max =
                     zstd_process_bytes_out_max - (zstd_process_bytes_out_max >> 8) - 64;
 
-                // Custom implementation for Zstandard 
+                // Custom implementation for Zstandard
                 void *zstd_alloc_impl(void *ptr_storage, size_t size)
                 {
                     try
@@ -499,13 +499,13 @@ namespace seal
                     throw invalid_argument("pool is uninitialized");
                 }
 
-                //int result;
-                //int level = Z_DEFAULT_COMPRESSION;
+                // int result;
+                // int level = Z_DEFAULT_COMPRESSION;
 
                 size_t pending = 0;
 
-                //z_stream zstream;
-                //zstream.data_type = Z_BINARY;
+                // z_stream zstream;
+                // zstream.data_type = Z_BINARY;
 
                 PointerStorage ptr_storage(pool);
 
@@ -514,20 +514,20 @@ namespace seal
                 mem.customFree = zstd_free_impl;
                 mem.opaque = &ptr_storage;
 
-                //zstream.zalloc = alloc_impl;
-                //zstream.zfree = free_impl;
-                //zstream.opaque = reinterpret_cast<voidpf>(&ptr_storage);
+                // zstream.zalloc = alloc_impl;
+                // zstream.zfree = free_impl;
+                // zstream.opaque = reinterpret_cast<voidpf>(&ptr_storage);
 
-                //result = deflateInit(&zstream, level);
+                // result = deflateInit(&zstream, level);
                 ZSTD_CCtx *cctx = ZSTD_createCCtx_advanced(mem);
 
-                //ZSTD_CCtx_setParameter(cctx, ZSTD_c_compressionLevel, 1);
-                //ZSTD_CCtx_setParameter(cctx, ZSTD_c_checksumFlag, 1);
+                // ZSTD_CCtx_setParameter(cctx, ZSTD_c_compressionLevel, 1);
+                // ZSTD_CCtx_setParameter(cctx, ZSTD_c_checksumFlag, 1);
 
-                //if (result != Z_OK)
+                // if (result != Z_OK)
                 //{
-                    //deflateEnd(&zstream);
-                    //return result;
+                // deflateEnd(&zstream);
+                // return result;
                 //}
 
                 // How much data was finally produced
@@ -550,15 +550,15 @@ namespace seal
                 bool out_is_in = false;
 
                 // Set the input and output pointers for the initial block
-                //zstream.next_in = reinterpret_cast<unsigned char *>(const_cast<SEAL_BYTE *>(in.cbegin()));
-                //zstream.next_out = reinterpret_cast<unsigned char *>(out_head);
+                // zstream.next_in = reinterpret_cast<unsigned char *>(const_cast<SEAL_BYTE *>(in.cbegin()));
+                // zstream.next_out = reinterpret_cast<unsigned char *>(out_head);
 
                 do
                 {
                     // The number of bytes we can read at a time is capped by zstd_process_bytes_in_max
                     size_t process_bytes_in = min<size_t>(in_size, zstd_process_bytes_in_max);
                     ZSTD_inBuffer input = { in.cbegin() + bytes_read_from_in, process_bytes_in, 0 };
-                    //input.size = process_bytes_in;
+                    // input.size = process_bytes_in;
 
                     // Number of bytes left after this round; if we are at the end set flush accordingly
                     in_size -= process_bytes_in;
@@ -614,16 +614,16 @@ namespace seal
                         }
 
                         // Set the stream output
-                        //zstream.next_out = reinterpret_cast<unsigned char *>(out_head);
-                        //output.dst = out_head;
+                        // zstream.next_out = reinterpret_cast<unsigned char *>(out_head);
+                        // output.dst = out_head;
 
                         // Cap the out size to process_bytes_out_max
                         size_t process_bytes_out = min<size_t>(out_size, zstd_process_bytes_out_max);
-                        //zstream.avail_out = static_cast<uInt>(process_bytes_out);
+                        // zstream.avail_out = static_cast<uInt>(process_bytes_out);
 
                         ZSTD_outBuffer output = { out_head, process_bytes_out, 0 };
 
-                        //result = deflate(&zstream, flush);
+                        // result = deflate(&zstream, flush);
 
                         pending = ZSTD_compressStream2(cctx, &output, &input, flush);
 
@@ -694,22 +694,22 @@ namespace seal
                 mem.customFree = zstd_free_impl;
                 mem.opaque = &ptr_storage;
 
-                //z_stream zstream;
-                //zstream.data_type = Z_BINARY;
+                // z_stream zstream;
+                // zstream.data_type = Z_BINARY;
                 ZSTD_DCtx *dctx = ZSTD_createDCtx_advanced(mem);
 
-                //zstream.zalloc = alloc_impl;
-                //zstream.zfree = free_impl;
-                //zstream.opaque = reinterpret_cast<voidpf>(&ptr_storage);
+                // zstream.zalloc = alloc_impl;
+                // zstream.zfree = free_impl;
+                // zstream.opaque = reinterpret_cast<voidpf>(&ptr_storage);
 
-                //zstream.avail_in = 0;
-                //zstream.next_in = Z_NULL;
-                //result = inflateInit(&zstream);
-                //if (result != Z_OK)
+                // zstream.avail_in = 0;
+                // zstream.next_in = Z_NULL;
+                // result = inflateInit(&zstream);
+                // if (result != Z_OK)
                 //{
-                    //in_stream.exceptions(in_stream_except_mask);
-                    //out_stream.exceptions(out_stream_except_mask);
-                    //return result;
+                // in_stream.exceptions(in_stream_except_mask);
+                // out_stream.exceptions(out_stream_except_mask);
+                // return result;
                 //}
 
                 while (true)
@@ -718,7 +718,7 @@ namespace seal
                             reinterpret_cast<char *>(in.get()),
                             min(static_cast<streamoff>(buffer_size), in_stream_end_pos - in_stream.tellg())))
                     {
-                        //inflateEnd(&zstream);
+                        // inflateEnd(&zstream);
                         in_stream.exceptions(in_stream_except_mask);
                         out_stream.exceptions(out_stream_except_mask);
 
@@ -737,33 +737,34 @@ namespace seal
                         ZSTD_outBuffer output = { out.get(), buffer_size, 0 };
                         pending = ZSTD_decompressStream(dctx, &output, &input);
 
-                        //zstream.avail_out = buffer_size;
-                        //zstream.next_out = out.get();
-                        //result = inflate(&zstream, Z_NO_FLUSH);
+                        // zstream.avail_out = buffer_size;
+                        // zstream.next_out = out.get();
+                        // result = inflate(&zstream, Z_NO_FLUSH);
 
-                        //switch (result)
+                        // switch (result)
                         //{
-                        //case Z_NEED_DICT:
-                            //result = Z_DATA_ERROR;
-                            //[> fall through <]
+                        // case Z_NEED_DICT:
+                        // result = Z_DATA_ERROR;
+                        //[> fall through <]
 
-                        //case Z_DATA_ERROR:
-                            //[> fall through <]
+                        // case Z_DATA_ERROR:
+                        //[> fall through <]
 
-                        //case Z_MEM_ERROR:
-                            //inflateEnd(&zstream);
-                            //in_stream.exceptions(in_stream_except_mask);
-                            //out_stream.exceptions(out_stream_except_mask);
-                            //return result;
+                        // case Z_MEM_ERROR:
+                        // inflateEnd(&zstream);
+                        // in_stream.exceptions(in_stream_except_mask);
+                        // out_stream.exceptions(out_stream_except_mask);
+                        // return result;
                         //}
 
-                        //in_stream.exceptions(in_stream_except_mask);
-                        //out_stream.exceptions(out_stream_except_mask);
-                        //return result;
+                        // in_stream.exceptions(in_stream_except_mask);
+                        // out_stream.exceptions(out_stream_except_mask);
+                        // return result;
 
-                        if (!out_stream.write(reinterpret_cast<const char *>(out.get()), static_cast<streamsize>(output.pos)))
+                        if (!out_stream.write(
+                                reinterpret_cast<const char *>(out.get()), static_cast<streamsize>(output.pos)))
                         {
-                            //inflateEnd(&zstream);
+                            // inflateEnd(&zstream);
                             in_stream.exceptions(in_stream_except_mask);
                             out_stream.exceptions(out_stream_except_mask);
                             return -1;
@@ -773,12 +774,12 @@ namespace seal
                 //} while (result != Z_STREAM_END);
 
                 ZSTD_freeDCtx(dctx);
-                //inflateEnd(&zstream);
+                // inflateEnd(&zstream);
 
                 in_stream.exceptions(in_stream_except_mask);
                 out_stream.exceptions(out_stream_except_mask);
                 return 0;
-                //return result == Z_STREAM_END ? Z_OK : Z_DATA_ERROR;
+                // return result == Z_STREAM_END ? Z_OK : Z_DATA_ERROR;
             }
 
             void zstd_write_header_deflate_buffer(
