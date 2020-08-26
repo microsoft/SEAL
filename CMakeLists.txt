@@ -367,11 +367,13 @@ if(SEAL_USE_ZLIB AND NOT MSVC)
         ${SEAL_THIRDPARTY_DIR}/zlib/src
         EXCLUDE_FROM_ALL)
 
-    # Set the ZLIB include directory
-    set(SEAL_ZLIB_INCLUDE_DIR ${SEAL_THIRDPARTY_DIR}/zlib/src)
-        #${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/zlib/src)
+    # Set the ZLIB include directories; we have to include also ZLIB binary directory because
+    # ZLIB creates a file zconf.h into it, which must be visible to the compiler.
+    set(SEAL_ZLIB_INCLUDE_DIRS
+        ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zlib/src
+        ${SEAL_THIRDPARTY_DIR}/zlib/src)
     set_target_properties(zlibstatic PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${SEAL_ZLIB_INCLUDE_DIR}")
+        INTERFACE_INCLUDE_DIRECTORIES "${SEAL_ZLIB_INCLUDE_DIRS}")
 endif()
 
 # [option] SEAL_USE_ZSTD
