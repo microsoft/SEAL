@@ -29,11 +29,11 @@ namespace seal
             @throws std::logic_error if compression failed
             */
             void zlib_write_header_deflate_buffer(
-                IntArray<SEAL_BYTE> &in, void *header_ptr, std::ostream &out_stream, MemoryPoolHandle pool);
+                IntArray<seal_byte> &in, void *header_ptr, std::ostream &out_stream, MemoryPoolHandle pool);
 
-            int zlib_deflate_array(const IntArray<SEAL_BYTE> &in, IntArray<SEAL_BYTE> &out, MemoryPoolHandle pool);
+            int zlib_deflate_array(const IntArray<seal_byte> &in, IntArray<seal_byte> &out, MemoryPoolHandle pool);
 
-            int zlib_deflate_array_inplace(IntArray<SEAL_BYTE> &in, MemoryPoolHandle pool);
+            int zlib_deflate_array_inplace(IntArray<seal_byte> &in, MemoryPoolHandle pool);
 
             int zlib_inflate_stream(
                 std::istream &in_stream, std::streamoff in_size, std::ostream &out_stream, MemoryPoolHandle pool);
@@ -52,11 +52,11 @@ namespace seal
             @throws std::logic_error if compression failed
             */
             void zstd_write_header_deflate_buffer(
-                IntArray<SEAL_BYTE> &in, void *header_ptr, std::ostream &out_stream, MemoryPoolHandle pool);
+                IntArray<seal_byte> &in, void *header_ptr, std::ostream &out_stream, MemoryPoolHandle pool);
 
-            int zstd_deflate_array(const IntArray<SEAL_BYTE> &in, IntArray<SEAL_BYTE> &out, MemoryPoolHandle pool);
+            int zstd_deflate_array(const IntArray<seal_byte> &in, IntArray<seal_byte> &out, MemoryPoolHandle pool);
 
-            int zstd_deflate_array_inplace(IntArray<SEAL_BYTE> &in, MemoryPoolHandle pool);
+            int zstd_deflate_array_inplace(IntArray<seal_byte> &in, MemoryPoolHandle pool);
 
             int zstd_inflate_stream(
                 std::istream &in_stream, std::streamoff in_size, std::ostream &out_stream, MemoryPoolHandle pool);

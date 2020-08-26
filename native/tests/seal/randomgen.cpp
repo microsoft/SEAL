@@ -108,7 +108,7 @@ namespace sealtest
         iota(value_list.begin(), value_list.end(), 0);
 
         array<uint8_t, 4096> compare_list;
-        sgen->generate(4096, reinterpret_cast<SEAL_BYTE *>(compare_list.data()));
+        sgen->generate(4096, reinterpret_cast<seal_byte *>(compare_list.data()));
 
         ASSERT_TRUE(equal(value_list.cbegin(), value_list.cend(), compare_list.cbegin()));
     }
@@ -129,15 +129,15 @@ namespace sealtest
         auto generator1(UniformRandomGeneratorFactory::DefaultFactory()->create({}));
 
         array<uint32_t, 20> values1;
-        generator1->generate(sizeof(values1), reinterpret_cast<SEAL_BYTE *>(values1.data()));
+        generator1->generate(sizeof(values1), reinterpret_cast<seal_byte *>(values1.data()));
 
         auto generator2(UniformRandomGeneratorFactory::DefaultFactory()->create({ 1 }));
         array<uint32_t, 20> values2;
-        generator2->generate(sizeof(values2), reinterpret_cast<SEAL_BYTE *>(values2.data()));
+        generator2->generate(sizeof(values2), reinterpret_cast<seal_byte *>(values2.data()));
 
         auto generator3(UniformRandomGeneratorFactory::DefaultFactory()->create({ 1 }));
         array<uint32_t, 20> values3;
-        generator3->generate(sizeof(values3), reinterpret_cast<SEAL_BYTE *>(values3.data()));
+        generator3->generate(sizeof(values3), reinterpret_cast<seal_byte *>(values3.data()));
 
         for (size_t i = 0; i < values1.size(); i++)
         {
@@ -157,16 +157,16 @@ namespace sealtest
     {
         auto generator1(UniformRandomGeneratorFactory::DefaultFactory()->create());
         array<uint32_t, 20> values1;
-        generator1->generate(sizeof(values1), reinterpret_cast<SEAL_BYTE *>(values1.data()));
+        generator1->generate(sizeof(values1), reinterpret_cast<seal_byte *>(values1.data()));
 
         auto generator2(UniformRandomGeneratorFactory::DefaultFactory()->create());
         array<uint32_t, 20> values2;
-        generator2->generate(sizeof(values2), reinterpret_cast<SEAL_BYTE *>(values2.data()));
+        generator2->generate(sizeof(values2), reinterpret_cast<seal_byte *>(values2.data()));
 
         auto seed3 = generator2->seed();
         auto generator3(UniformRandomGeneratorFactory::DefaultFactory()->create(seed3));
         array<uint32_t, 20> values3;
-        generator3->generate(sizeof(values3), reinterpret_cast<SEAL_BYTE *>(values3.data()));
+        generator3->generate(sizeof(values3), reinterpret_cast<seal_byte *>(values3.data()));
 
         for (size_t i = 0; i < values1.size(); i++)
         {
@@ -196,7 +196,7 @@ namespace sealtest
             auto th_func = [&, generator, i]() {
                 generator->generate(
                     sizeof(uint64_t) * numbers_per_thread,
-                    reinterpret_cast<SEAL_BYTE *>(results.data() + numbers_per_thread * i));
+                    reinterpret_cast<seal_byte *>(results.data() + numbers_per_thread * i));
             };
             th_vec.emplace_back(th_func);
         }
@@ -211,7 +211,7 @@ namespace sealtest
         for (size_t i = 0; i < thread_count * numbers_per_thread; i++)
         {
             uint64_t value = 0;
-            generator2->generate(sizeof(value), reinterpret_cast<SEAL_BYTE *>(&value));
+            generator2->generate(sizeof(value), reinterpret_cast<seal_byte *>(&value));
             ASSERT_TRUE(find(results.begin(), results.end(), value) != results.end());
         }
     }

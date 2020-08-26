@@ -149,7 +149,7 @@ namespace seal
         size_t members_size = Serialization::ComprSizeEstimate(
             add_safe(
                 sizeof(parms_id_),
-                sizeof(SEAL_BYTE), // is_ntt_form_
+                sizeof(seal_byte), // is_ntt_form_
                 sizeof(uint64_t),  // size_
                 sizeof(uint64_t),  // poly_modulus_degree_
                 sizeof(uint64_t),  // coeff_modulus_size_
@@ -168,8 +168,8 @@ namespace seal
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
             stream.write(reinterpret_cast<const char *>(&parms_id_), sizeof(parms_id_type));
-            SEAL_BYTE is_ntt_form_byte = static_cast<SEAL_BYTE>(is_ntt_form_);
-            stream.write(reinterpret_cast<const char *>(&is_ntt_form_byte), sizeof(SEAL_BYTE));
+            seal_byte is_ntt_form_byte = static_cast<seal_byte>(is_ntt_form_);
+            stream.write(reinterpret_cast<const char *>(&is_ntt_form_byte), sizeof(seal_byte));
             uint64_t size64 = safe_cast<uint64_t>(size_);
             stream.write(reinterpret_cast<const char *>(&size64), sizeof(uint64_t));
             uint64_t poly_modulus_degree64 = safe_cast<uint64_t>(poly_modulus_degree_);
@@ -235,8 +235,8 @@ namespace seal
 
             parms_id_type parms_id{};
             stream.read(reinterpret_cast<char *>(&parms_id), sizeof(parms_id_type));
-            SEAL_BYTE is_ntt_form_byte;
-            stream.read(reinterpret_cast<char *>(&is_ntt_form_byte), sizeof(SEAL_BYTE));
+            seal_byte is_ntt_form_byte;
+            stream.read(reinterpret_cast<char *>(&is_ntt_form_byte), sizeof(seal_byte));
             uint64_t size64 = 0;
             stream.read(reinterpret_cast<char *>(&size64), sizeof(uint64_t));
             uint64_t poly_modulus_degree64 = 0;
@@ -248,7 +248,7 @@ namespace seal
 
             // Set values already at this point for the metadata validity check
             new_data.parms_id_ = parms_id;
-            new_data.is_ntt_form_ = (is_ntt_form_byte == SEAL_BYTE(0)) ? false : true;
+            new_data.is_ntt_form_ = (is_ntt_form_byte == seal_byte(0)) ? false : true;
             new_data.size_ = safe_cast<size_t>(size64);
             new_data.poly_modulus_degree_ = safe_cast<size_t>(poly_modulus_degree64);
             new_data.coeff_modulus_size_ = safe_cast<size_t>(coeff_modulus_size64);

@@ -491,7 +491,7 @@ SEAL_C_FUNC Plaintext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_
     try
     {
         *out_bytes = util::safe_cast<int64_t>(plain->save(
-            reinterpret_cast<SEAL_BYTE *>(outptr), util::safe_cast<size_t>(size),
+            reinterpret_cast<seal_byte *>(outptr), util::safe_cast<size_t>(size),
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
@@ -521,7 +521,7 @@ SEAL_C_FUNC Plaintext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, u
     try
     {
         *in_bytes = util::safe_cast<int64_t>(
-            plain->unsafe_load(*ctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
+            plain->unsafe_load(*ctx, reinterpret_cast<seal_byte *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -550,7 +550,7 @@ SEAL_C_FUNC Plaintext_Load(void *thisptr, void *context, uint8_t *inptr, uint64_
     try
     {
         *in_bytes = util::safe_cast<int64_t>(
-            plain->load(*ctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
+            plain->load(*ctx, reinterpret_cast<seal_byte *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)

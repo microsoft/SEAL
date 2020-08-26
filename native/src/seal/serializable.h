@@ -138,7 +138,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            seal_byte *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             return obj_.save(out, size, compr_mode);
         }

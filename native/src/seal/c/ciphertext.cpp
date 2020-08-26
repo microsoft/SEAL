@@ -487,7 +487,7 @@ SEAL_C_FUNC Ciphertext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8
     try
     {
         *out_bytes = util::safe_cast<int64_t>(cipher->save(
-            reinterpret_cast<SEAL_BYTE *>(outptr), util::safe_cast<size_t>(size),
+            reinterpret_cast<seal_byte *>(outptr), util::safe_cast<size_t>(size),
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
@@ -517,7 +517,7 @@ SEAL_C_FUNC Ciphertext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, 
     try
     {
         *in_bytes = util::safe_cast<int64_t>(
-            cipher->unsafe_load(*ctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
+            cipher->unsafe_load(*ctx, reinterpret_cast<seal_byte *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -546,7 +546,7 @@ SEAL_C_FUNC Ciphertext_Load(void *thisptr, void *context, uint8_t *inptr, uint64
     try
     {
         *in_bytes = util::safe_cast<int64_t>(
-            cipher->load(*ctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
+            cipher->load(*ctx, reinterpret_cast<seal_byte *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)

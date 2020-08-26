@@ -32,7 +32,7 @@ namespace seal
 
     /**
     A resizable container for storing an array of arithmetic data types or
-    SEAL_BYTE types (e.g., std::byte). The allocations are done from a memory
+    seal_byte types (e.g., std::byte). The allocations are done from a memory
     pool. The IntArray class is mainly intended for internal use and provides
     the underlying data structure for Plaintext and Ciphertext classes.
 
@@ -50,7 +50,7 @@ namespace seal
     template <
         typename T_,
         typename = std::enable_if_t<
-            std::is_arithmetic<T_>::value || std::is_same<typename std::decay<T_>::type, SEAL_BYTE>::value>>
+            std::is_arithmetic<T_>::value || std::is_same<typename std::decay<T_>::type, seal_byte>::value>>
     class IntArray
     {
         friend class Ciphertext;
@@ -572,7 +572,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            seal_byte *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
@@ -597,7 +597,7 @@ namespace seal
         or if the loaded size exceeds in_size_bound
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(const SEAL_BYTE *in, std::size_t size, std::size_t in_size_bound = 0)
+        inline std::streamoff load(const seal_byte *in, std::size_t size, std::size_t in_size_bound = 0)
         {
             using namespace std::placeholders;
             return Serialization::Load(std::bind(&IntArray<T_>::load_members, this, _1, in_size_bound), in, size);

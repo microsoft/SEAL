@@ -200,7 +200,7 @@ namespace seal
         contain a SEALHeader
         @throws std::runtime_error if I/O operations failed
         */
-        static std::streamoff SaveHeader(const SEALHeader &header, SEAL_BYTE *out, std::size_t size);
+        static std::streamoff SaveHeader(const SEALHeader &header, seal_byte *out, std::size_t size);
 
         /**
         Loads a SEALHeader from a given memory location.
@@ -214,7 +214,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff LoadHeader(
-            const SEAL_BYTE *in, std::size_t size, SEALHeader &header, bool try_upgrade_if_invalid = true);
+            const seal_byte *in, std::size_t size, SEALHeader &header, bool try_upgrade_if_invalid = true);
 
         /**
         Evaluates save_members and compresses the output according to the given
@@ -286,7 +286,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Save(
-            std::function<void(std::ostream &stream)> save_members, std::streamoff raw_size, SEAL_BYTE *out,
+            std::function<void(std::ostream &stream)> save_members, std::streamoff raw_size, seal_byte *out,
             std::size_t size, compr_mode_type compr_mode, bool clear_on_destruction = false);
 
         /**
@@ -307,7 +307,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Load(
-            std::function<void(std::istream &stream)> load_members, const SEAL_BYTE *in, std::size_t size,
+            std::function<void(std::istream &stream)> load_members, const seal_byte *in, std::size_t size,
             bool clear_on_destruction = false);
 
     private:

@@ -179,7 +179,7 @@ namespace seal
         return static_cast<streamoff>(sizeof(SEALHeader));
     }
 
-    streamoff Serialization::SaveHeader(const SEALHeader &header, SEAL_BYTE *out, size_t size)
+    streamoff Serialization::SaveHeader(const SEALHeader &header, seal_byte *out, size_t size)
     {
         if (!out)
         {
@@ -199,7 +199,7 @@ namespace seal
     }
 
     streamoff Serialization::LoadHeader(
-        const SEAL_BYTE *in, size_t size, SEALHeader &header, bool try_upgrade_if_invalid)
+        const seal_byte *in, size_t size, SEALHeader &header, bool try_upgrade_if_invalid)
     {
         if (!in)
         {
@@ -275,8 +275,8 @@ namespace seal
                 auto safe_pool(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
 
                 // Create temporary aliasing IntArray to wrap safe_buffer
-                IntArray<SEAL_BYTE> safe_buffer_array(
-                    Pointer<SEAL_BYTE>::Aliasing(safe_buffer.data()), safe_buffer.size(),
+                IntArray<seal_byte> safe_buffer_array(
+                    Pointer<seal_byte>::Aliasing(safe_buffer.data()), safe_buffer.size(),
                     static_cast<size_t>(temp_stream.tellp()), false, safe_pool);
 
                 // After compression, write_header_deflate_buffer will write the final size to the given header and
@@ -301,8 +301,8 @@ namespace seal
                 auto safe_pool(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, clear_on_destruction));
 
                 // Create temporary aliasing IntArray to wrap safe_buffer
-                IntArray<SEAL_BYTE> safe_buffer_array(
-                    Pointer<SEAL_BYTE>::Aliasing(safe_buffer.data()), safe_buffer.size(),
+                IntArray<seal_byte> safe_buffer_array(
+                    Pointer<seal_byte>::Aliasing(safe_buffer.data()), safe_buffer.size(),
                     static_cast<size_t>(temp_stream.tellp()), false, safe_pool);
 
                 // After compression, write_header_deflate_buffer will write the final size to the given header and
@@ -444,7 +444,7 @@ namespace seal
     }
 
     streamoff Serialization::Save(
-        function<void(ostream &stream)> save_members, streamoff raw_size, SEAL_BYTE *out, size_t size,
+        function<void(ostream &stream)> save_members, streamoff raw_size, seal_byte *out, size_t size,
         compr_mode_type compr_mode, bool clear_on_destruction)
     {
         if (!out)
@@ -465,7 +465,7 @@ namespace seal
     }
 
     streamoff Serialization::Load(
-        function<void(istream &stream)> load_members, const SEAL_BYTE *in, size_t size, bool clear_on_destruction)
+        function<void(istream &stream)> load_members, const seal_byte *in, size_t size, bool clear_on_destruction)
     {
         if (!in)
         {

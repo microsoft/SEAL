@@ -117,14 +117,17 @@ static_assert(sizeof(unsigned long long) == 8, "Require sizeof(unsigned long lon
 #include <cstddef>
 namespace seal
 {
-    using SEAL_BYTE = std::byte;
+    using seal_byte = std::byte;
+    using SEAL_BYTE = seal_byte;
 }
 #else
 namespace seal
 {
-    enum class SEAL_BYTE : unsigned char
+    enum class seal_byte : unsigned char
     {
     };
+
+    using SEAL_BYTE = seal_byte;
 }
 #endif
 

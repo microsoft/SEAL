@@ -123,8 +123,8 @@ void example_serialization()
         As an example, we now serialize the encryption parameters to a fixed size
         buffer.
         */
-        vector<SEAL_BYTE> byte_buffer(static_cast<size_t>(parms.save_size()));
-        parms.save(reinterpret_cast<SEAL_BYTE *>(byte_buffer.data()), byte_buffer.size());
+        vector<seal_byte> byte_buffer(static_cast<size_t>(parms.save_size()));
+        parms.save(reinterpret_cast<seal_byte *>(byte_buffer.data()), byte_buffer.size());
 
         /*
         To illustrate deserialization, we load back the encryption parameters
@@ -135,7 +135,7 @@ void example_serialization()
         of the buffer is only used for a sanity check.
         */
         EncryptionParameters parms2;
-        parms2.load(reinterpret_cast<const SEAL_BYTE *>(byte_buffer.data()), byte_buffer.size());
+        parms2.load(reinterpret_cast<const seal_byte *>(byte_buffer.data()), byte_buffer.size());
 
         /*
         We can check that the saved and loaded encryption parameters indeed match.

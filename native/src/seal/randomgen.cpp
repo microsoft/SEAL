@@ -75,7 +75,7 @@ namespace seal
         return result;
     }
 
-    void UniformRandomGenerator::generate(size_t byte_count, SEAL_BYTE *destination)
+    void UniformRandomGenerator::generate(size_t byte_count, seal_byte *destination)
     {
         lock_guard<mutex> lock(mutex_);
         while (byte_count)
@@ -104,7 +104,7 @@ namespace seal
     {
         // Fill the randomness buffer
         if (blake2xb(
-                buffer_begin_, buffer_size_, reinterpret_cast<const SEAL_BYTE *>(&counter_), sizeof(counter_),
+                buffer_begin_, buffer_size_, reinterpret_cast<const seal_byte *>(&counter_), sizeof(counter_),
                 seed_.cbegin(), seed_.size() * sizeof(decltype(seed_)::T)) != 0)
         {
             throw runtime_error("blake2xb failed");

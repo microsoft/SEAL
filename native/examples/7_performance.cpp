@@ -259,7 +259,7 @@ void bfv_performance_test(SEALContext context)
         [Serialize Ciphertext]
         */
         size_t buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::NONE));
-        vector<SEAL_BYTE> buf(buf_size);
+        vector<seal_byte> buf(buf_size);
         time_start = chrono::high_resolution_clock::now();
         encrypted.save(buf.data(), buf_size, compr_mode_type::NONE);
         time_end = chrono::high_resolution_clock::now();
@@ -559,7 +559,7 @@ void ckks_performance_test(SEALContext context)
         [Serialize Ciphertext]
         */
         size_t buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::NONE));
-        vector<SEAL_BYTE> buf(buf_size);
+        vector<seal_byte> buf(buf_size);
         time_start = chrono::high_resolution_clock::now();
         encrypted.save(buf.data(), buf_size, compr_mode_type::NONE);
         time_end = chrono::high_resolution_clock::now();

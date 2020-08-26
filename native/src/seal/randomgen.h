@@ -62,7 +62,7 @@ namespace seal
         /**
         Fills a given buffer with a given number of bytes of randomness.
         */
-        void generate(std::size_t byte_count, SEAL_BYTE *destination);
+        void generate(std::size_t byte_count, seal_byte *destination);
 
         /**
         Generates a new unsigned 32-bit random number.
@@ -70,7 +70,7 @@ namespace seal
         SEAL_NODISCARD inline std::uint32_t generate()
         {
             std::uint32_t result;
-            generate(sizeof(result), reinterpret_cast<SEAL_BYTE *>(&result));
+            generate(sizeof(result), reinterpret_cast<seal_byte *>(&result));
             return result;
         }
 
@@ -98,7 +98,7 @@ namespace seal
         const std::size_t buffer_size_ = 4096;
 
     private:
-        IntArray<SEAL_BYTE> buffer_;
+        IntArray<seal_byte> buffer_;
 
         std::mutex mutex_;
 

@@ -96,7 +96,7 @@ namespace sealtest
             header.compr_mode = Serialization::compr_mode_default;
             header.size = 256;
 
-            vector<SEAL_BYTE> buffer(16);
+            vector<seal_byte> buffer(16);
             Serialization::SaveHeader(header, buffer.data(), buffer.size());
             ASSERT_TRUE(Serialization::IsValidHeader(header));
             Serialization::LoadHeader(buffer.data(), buffer.size(), loaded_header);
@@ -119,7 +119,7 @@ namespace sealtest
         {
             Serialization::SEALHeader header;
             Serialization::LoadHeader(
-                reinterpret_cast<const SEAL_BYTE *>(&header_3_4), sizeof(legacy_headers::SEALHeader_3_4), header);
+                reinterpret_cast<const seal_byte *>(&header_3_4), sizeof(legacy_headers::SEALHeader_3_4), header);
             ASSERT_TRUE(Serialization::IsValidHeader(header));
             ASSERT_EQ(header_3_4.compr_mode, header.compr_mode);
             ASSERT_EQ(header_3_4.size, header.size);
@@ -127,7 +127,7 @@ namespace sealtest
         {
             Serialization::SEALHeader header;
             Serialization::LoadHeader(
-                reinterpret_cast<const SEAL_BYTE *>(&header_3_4), sizeof(legacy_headers::SEALHeader_3_4), header,
+                reinterpret_cast<const seal_byte *>(&header_3_4), sizeof(legacy_headers::SEALHeader_3_4), header,
                 false);
 
             // No upgrade requested
@@ -183,7 +183,7 @@ namespace sealtest
         using namespace placeholders;
 
         constexpr size_t arr_size = 1024;
-        SEAL_BYTE buffer[arr_size]{};
+        seal_byte buffer[arr_size]{};
 
         stringstream ss;
         auto test_out_size = Serialization::Save(
@@ -195,7 +195,7 @@ namespace sealtest
         ASSERT_EQ(test_out_size, out_size);
         for (size_t i = static_cast<size_t>(out_size); i < arr_size; i++)
         {
-            ASSERT_TRUE(SEAL_BYTE(0) == buffer[i]);
+            ASSERT_TRUE(seal_byte(0) == buffer[i]);
         }
 
         auto in_size = Serialization::Load(bind(&test_struct::load_members, &st2, _1), buffer, arr_size);
@@ -219,7 +219,7 @@ namespace sealtest
             ASSERT_EQ(test_out_size, out_size);
             for (size_t i = static_cast<size_t>(out_size); i < arr_size; i++)
             {
-                ASSERT_EQ(SEAL_BYTE(0), buffer[i]);
+                ASSERT_EQ(seal_byte(0), buffer[i]);
             }
 
             in_size = Serialization::Load(bind(&test_struct::load_members, &st3, _1), buffer, arr_size);
@@ -245,7 +245,7 @@ namespace sealtest
             ASSERT_EQ(test_out_size, out_size);
             for (size_t i = static_cast<size_t>(out_size); i < arr_size; i++)
             {
-                ASSERT_EQ(SEAL_BYTE(0), buffer[i]);
+                ASSERT_EQ(seal_byte(0), buffer[i]);
             }
 
             in_size = Serialization::Load(bind(&test_struct::load_members, &st3, _1), buffer, arr_size);

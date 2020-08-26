@@ -40,7 +40,7 @@ namespace seal
             allocation new_alloc;
             try
             {
-                new_alloc.data_ptr = new SEAL_BYTE[mul_safe(MemoryPool::first_alloc_count, item_byte_count_)];
+                new_alloc.data_ptr = new seal_byte[mul_safe(MemoryPool::first_alloc_count, item_byte_count_)];
             }
             catch (const bad_alloc &)
             {
@@ -80,10 +80,10 @@ namespace seal
                 for (auto &alloc : allocs_)
                 {
                     size_t curr_alloc_byte_count = mul_safe(item_byte_count_, alloc.size);
-                    volatile SEAL_BYTE *data_ptr = reinterpret_cast<SEAL_BYTE *>(alloc.data_ptr);
+                    volatile seal_byte *data_ptr = reinterpret_cast<seal_byte *>(alloc.data_ptr);
                     while (curr_alloc_byte_count--)
                     {
-                        *data_ptr++ = static_cast<SEAL_BYTE>(0);
+                        *data_ptr++ = static_cast<seal_byte>(0);
                     }
 
                     // Delete this allocation
@@ -141,7 +141,7 @@ namespace seal
 
                     try
                     {
-                        new_alloc.data_ptr = new SEAL_BYTE[new_alloc_byte_count];
+                        new_alloc.data_ptr = new seal_byte[new_alloc_byte_count];
                     }
                     catch (const bad_alloc &)
                     {
@@ -182,7 +182,7 @@ namespace seal
             allocation new_alloc;
             try
             {
-                new_alloc.data_ptr = new SEAL_BYTE[mul_safe(MemoryPool::first_alloc_count, item_byte_count_)];
+                new_alloc.data_ptr = new seal_byte[mul_safe(MemoryPool::first_alloc_count, item_byte_count_)];
             }
             catch (const bad_alloc &)
             {
@@ -216,10 +216,10 @@ namespace seal
                 for (auto &alloc : allocs_)
                 {
                     size_t curr_alloc_byte_count = mul_safe(item_byte_count_, alloc.size);
-                    volatile SEAL_BYTE *data_ptr = reinterpret_cast<SEAL_BYTE *>(alloc.data_ptr);
+                    volatile seal_byte *data_ptr = reinterpret_cast<seal_byte *>(alloc.data_ptr);
                     while (curr_alloc_byte_count--)
                     {
-                        *data_ptr++ = static_cast<SEAL_BYTE>(0);
+                        *data_ptr++ = static_cast<seal_byte>(0);
                     }
 
                     // Delete this allocation
@@ -272,7 +272,7 @@ namespace seal
 
                     try
                     {
-                        new_alloc.data_ptr = new SEAL_BYTE[new_alloc_byte_count];
+                        new_alloc.data_ptr = new seal_byte[new_alloc_byte_count];
                     }
                     catch (const bad_alloc &)
                     {
@@ -325,7 +325,7 @@ namespace seal
             pools_.clear();
         }
 
-        Pointer<SEAL_BYTE> MemoryPoolMT::get_for_byte_count(size_t byte_count)
+        Pointer<seal_byte> MemoryPoolMT::get_for_byte_count(size_t byte_count)
         {
             if (byte_count > max_single_alloc_byte_count)
             {
@@ -333,7 +333,7 @@ namespace seal
             }
             else if (byte_count == 0)
             {
-                return Pointer<SEAL_BYTE>();
+                return Pointer<seal_byte>();
             }
 
             // Attempt to find size.
@@ -355,7 +355,7 @@ namespace seal
                 }
                 else
                 {
-                    return Pointer<SEAL_BYTE>(mid_head);
+                    return Pointer<seal_byte>(mid_head);
                 }
             }
             reader_lock.unlock();
@@ -379,7 +379,7 @@ namespace seal
                 }
                 else
                 {
-                    return Pointer<SEAL_BYTE>(mid_head);
+                    return Pointer<seal_byte>(mid_head);
                 }
             }
 
@@ -400,7 +400,7 @@ namespace seal
                 pools_.emplace_back(new_head);
             }
 
-            return Pointer<SEAL_BYTE>(new_head);
+            return Pointer<seal_byte>(new_head);
         }
 
         size_t MemoryPoolMT::alloc_byte_count() const
@@ -421,7 +421,7 @@ namespace seal
             pools_.clear();
         }
 
-        Pointer<SEAL_BYTE> MemoryPoolST::get_for_byte_count(size_t byte_count)
+        Pointer<seal_byte> MemoryPoolST::get_for_byte_count(size_t byte_count)
         {
             if (byte_count > MemoryPool::max_single_alloc_byte_count)
             {
@@ -429,7 +429,7 @@ namespace seal
             }
             else if (byte_count == 0)
             {
-                return Pointer<SEAL_BYTE>();
+                return Pointer<seal_byte>();
             }
 
             // Attempt to find size.
@@ -450,7 +450,7 @@ namespace seal
                 }
                 else
                 {
-                    return Pointer<SEAL_BYTE>(mid_head);
+                    return Pointer<seal_byte>(mid_head);
                 }
             }
 
@@ -471,7 +471,7 @@ namespace seal
                 pools_.emplace_back(new_head);
             }
 
-            return Pointer<SEAL_BYTE>(new_head);
+            return Pointer<seal_byte>(new_head);
         }
 
         size_t MemoryPoolST::alloc_byte_count() const

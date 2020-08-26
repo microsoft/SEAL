@@ -337,13 +337,13 @@ namespace seal
         @param[in] index The index of the byte to read
         @throws std::out_of_range if index is not within [0, byte_count())
         */
-        SEAL_NODISCARD inline const SEAL_BYTE &operator[](std::size_t index) const
+        SEAL_NODISCARD inline const seal_byte &operator[](std::size_t index) const
         {
             if (index >= byte_count())
             {
                 throw std::out_of_range("index must be within [0, byte count)");
             }
-            return reinterpret_cast<const SEAL_BYTE *>(value_.get())[index];
+            return reinterpret_cast<const seal_byte *>(value_.get())[index];
         }
 
         /**
@@ -358,13 +358,13 @@ namespace seal
         @param[in] index The index of the byte to read
         @throws std::out_of_range if index is not within [0, byte_count())
         */
-        SEAL_NODISCARD inline SEAL_BYTE &operator[](std::size_t index)
+        SEAL_NODISCARD inline seal_byte &operator[](std::size_t index)
         {
             if (index >= byte_count())
             {
                 throw std::out_of_range("index must be within [0, byte count)");
             }
-            return reinterpret_cast<SEAL_BYTE *>(value_.get())[index];
+            return reinterpret_cast<seal_byte *>(value_.get())[index];
         }
 
         /**
@@ -1622,7 +1622,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            seal_byte *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
@@ -1641,7 +1641,7 @@ namespace seal
         or if the loaded BigUInt is too large for an aliased BigUInt
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff load(const seal_byte *in, std::size_t size)
         {
             using namespace std::placeholders;
             return Serialization::Load(std::bind(&BigUInt::load_members, this, _1), in, size);

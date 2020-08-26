@@ -238,7 +238,7 @@ namespace seal
 
             // Sample a seed for generating uniform randomness for the ciphertext; this seed is public information
             random_seed_type public_rng_seed;
-            bootstrap_rng->generate(sizeof(random_seed_type), reinterpret_cast<SEAL_BYTE *>(public_rng_seed.data()));
+            bootstrap_rng->generate(sizeof(random_seed_type), reinterpret_cast<seal_byte *>(public_rng_seed.data()));
 
             // Create a BlakePRNG for sampling u
             auto ciphertext_rng = BlakePRNGFactory(public_rng_seed).create();

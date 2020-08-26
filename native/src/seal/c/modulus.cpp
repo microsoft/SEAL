@@ -199,7 +199,7 @@ SEAL_C_FUNC Modulus_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t 
     try
     {
         *out_bytes = util::safe_cast<int64_t>(sm->save(
-            reinterpret_cast<SEAL_BYTE *>(outptr), util::safe_cast<size_t>(size),
+            reinterpret_cast<seal_byte *>(outptr), util::safe_cast<size_t>(size),
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
@@ -227,7 +227,7 @@ SEAL_C_FUNC Modulus_Load(void *thisptr, uint8_t *inptr, uint64_t size, int64_t *
     try
     {
         *in_bytes =
-            util::safe_cast<int64_t>(sm->load(reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
+            util::safe_cast<int64_t>(sm->load(reinterpret_cast<seal_byte *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)

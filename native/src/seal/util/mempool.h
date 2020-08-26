@@ -26,7 +26,7 @@ namespace seal
         class ConstPointer;
 
         template <>
-        class ConstPointer<SEAL_BYTE>;
+        class ConstPointer<seal_byte>;
 
         template <typename T = void, typename = std::enable_if_t<std::is_standard_layout<T>::value>>
         class Pointer;
@@ -34,15 +34,15 @@ namespace seal
         class MemoryPoolItem
         {
         public:
-            MemoryPoolItem(SEAL_BYTE *data) noexcept : data_(data)
+            MemoryPoolItem(seal_byte *data) noexcept : data_(data)
             {}
 
-            SEAL_NODISCARD inline SEAL_BYTE *data() noexcept
+            SEAL_NODISCARD inline seal_byte *data() noexcept
             {
                 return data_;
             }
 
-            SEAL_NODISCARD inline const SEAL_BYTE *data() const noexcept
+            SEAL_NODISCARD inline const seal_byte *data() const noexcept
             {
                 return data_;
             }
@@ -62,7 +62,7 @@ namespace seal
 
             MemoryPoolItem &operator=(const MemoryPoolItem &assign) = delete;
 
-            SEAL_BYTE *data_ = nullptr;
+            seal_byte *data_ = nullptr;
 
             MemoryPoolItem *next_ = nullptr;
         };
@@ -79,13 +79,13 @@ namespace seal
                 std::size_t size;
 
                 // Pointer to start of the allocation
-                SEAL_BYTE *data_ptr;
+                seal_byte *data_ptr;
 
                 // How much free space is left (number of items that still fit)
                 std::size_t free;
 
                 // Pointer to current head of allocation
-                SEAL_BYTE *head_ptr;
+                seal_byte *head_ptr;
             };
 
             // The overriding functions are noexcept(false)
@@ -218,7 +218,7 @@ namespace seal
 
             virtual ~MemoryPool() = default;
 
-            virtual Pointer<SEAL_BYTE> get_for_byte_count(std::size_t byte_count) = 0;
+            virtual Pointer<seal_byte> get_for_byte_count(std::size_t byte_count) = 0;
 
             virtual std::size_t pool_count() const = 0;
 
@@ -232,7 +232,7 @@ namespace seal
 
             ~MemoryPoolMT() noexcept override;
 
-            SEAL_NODISCARD Pointer<SEAL_BYTE> get_for_byte_count(std::size_t byte_count) override;
+            SEAL_NODISCARD Pointer<seal_byte> get_for_byte_count(std::size_t byte_count) override;
 
             SEAL_NODISCARD inline std::size_t pool_count() const override
             {
@@ -261,7 +261,7 @@ namespace seal
 
             ~MemoryPoolST() noexcept override;
 
-            SEAL_NODISCARD Pointer<SEAL_BYTE> get_for_byte_count(std::size_t byte_count) override;
+            SEAL_NODISCARD Pointer<seal_byte> get_for_byte_count(std::size_t byte_count) override;
 
             SEAL_NODISCARD inline std::size_t pool_count() const override
             {

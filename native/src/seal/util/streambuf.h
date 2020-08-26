@@ -39,14 +39,14 @@ namespace seal
 
             SafeByteBuffer &operator=(const SafeByteBuffer &assign) = delete;
 
-            SEAL_NODISCARD const SEAL_BYTE *data() const noexcept
+            SEAL_NODISCARD const seal_byte *data() const noexcept
             {
-                return reinterpret_cast<const SEAL_BYTE *>(buf_.cbegin());
+                return reinterpret_cast<const seal_byte *>(buf_.cbegin());
             }
 
-            SEAL_NODISCARD SEAL_BYTE *data() noexcept
+            SEAL_NODISCARD seal_byte *data() noexcept
             {
-                return reinterpret_cast<SEAL_BYTE *>(buf_.begin());
+                return reinterpret_cast<seal_byte *>(buf_.begin());
             }
 
             SEAL_NODISCARD std::size_t size() noexcept

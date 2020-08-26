@@ -34,7 +34,7 @@ namespace seal
 
                     void *allocate(size_t size)
                     {
-                        auto ptr = util::allocate<SEAL_BYTE>(size, pool_);
+                        auto ptr = util::allocate<seal_byte>(size, pool_);
                         void *addr = reinterpret_cast<void *>(ptr.get());
                         ptr_storage_[addr] = move(ptr);
                         return addr;
@@ -48,7 +48,7 @@ namespace seal
                 private:
                     MemoryPoolHandle pool_;
 
-                    unordered_map<void *, Pointer<SEAL_BYTE>> ptr_storage_;
+                    unordered_map<void *, Pointer<seal_byte>> ptr_storage_;
                 };
             } // namespace
         }     // namespace ztools
@@ -115,7 +115,7 @@ namespace seal
                 }
             } // namespace
 
-            int zlib_deflate_array_inplace(IntArray<SEAL_BYTE> &in, MemoryPoolHandle pool)
+            int zlib_deflate_array_inplace(IntArray<seal_byte> &in, MemoryPoolHandle pool)
             {
                 if (!pool)
                 {
@@ -151,10 +151,10 @@ namespace seal
                 size_t bytes_read_from_in = 0;
 
                 // Allocate a temporary buffer for output
-                auto temp_out = IntArray<SEAL_BYTE>(buffer_size, pool);
+                auto temp_out = IntArray<seal_byte>(buffer_size, pool);
 
                 // Where we are writing output now; start writing to the temporary buffer
-                SEAL_BYTE *out_head = temp_out.begin();
+                seal_byte *out_head = temp_out.begin();
 
                 // How much of input do we have left to process
                 size_t in_size = in.size();
@@ -166,7 +166,7 @@ namespace seal
                 bool out_is_in = false;
 
                 // Set the input and output pointers for the initial block
-                zstream.next_in = reinterpret_cast<unsigned char *>(const_cast<SEAL_BYTE *>(in.cbegin()));
+                zstream.next_in = reinterpret_cast<unsigned char *>(const_cast<seal_byte *>(in.cbegin()));
                 zstream.next_out = reinterpret_cast<unsigned char *>(out_head);
 
                 do
@@ -247,7 +247,7 @@ namespace seal
 #endif
                         // True number of bytes written
                         process_bytes_out =
-                            static_cast<size_t>(reinterpret_cast<SEAL_BYTE *>(zstream.next_out) - out_head);
+                            static_cast<size_t>(reinterpret_cast<seal_byte *>(zstream.next_out) - out_head);
                         out_size -= process_bytes_out;
                         out_head += process_bytes_out;
 
@@ -383,7 +383,7 @@ namespace seal
             }
 
             void zlib_write_header_deflate_buffer(
-                IntArray<SEAL_BYTE> &in, void *header_ptr, ostream &out_stream, MemoryPoolHandle pool)
+                IntArray<seal_byte> &in, void *header_ptr, ostream &out_stream, MemoryPoolHandle pool)
             {
                 Serialization::SEALHeader &header = *reinterpret_cast<Serialization::SEALHeader *>(header_ptr);
 
@@ -491,7 +491,7 @@ namespace seal
                 }
             } // namespace
 
-            int zstd_deflate_array_inplace(IntArray<SEAL_BYTE> &in, MemoryPoolHandle pool)
+            int zstd_deflate_array_inplace(IntArray<seal_byte> &in, MemoryPoolHandle pool)
             {
                 if (!pool)
                 {
@@ -534,10 +534,10 @@ namespace seal
                 size_t bytes_read_from_in = 0;
 
                 // Allocate a temporary buffer for output
-                auto temp_out = IntArray<SEAL_BYTE>(buffer_size, pool);
+                auto temp_out = IntArray<seal_byte>(buffer_size, pool);
 
                 // Where we are writing output now; start writing to the temporary buffer
-                SEAL_BYTE *out_head = temp_out.begin();
+                seal_byte *out_head = temp_out.begin();
 
                 // How much of input do we have left to process
                 size_t in_size = in.size();
@@ -549,7 +549,7 @@ namespace seal
                 bool out_is_in = false;
 
                 // Set the input and output pointers for the initial block
-                // zstream.next_in = reinterpret_cast<unsigned char *>(const_cast<SEAL_BYTE *>(in.cbegin()));
+                // zstream.next_in = reinterpret_cast<unsigned char *>(const_cast<seal_byte *>(in.cbegin()));
                 // zstream.next_out = reinterpret_cast<unsigned char *>(out_head);
 
                 do
@@ -782,7 +782,7 @@ namespace seal
             }
 
             void zstd_write_header_deflate_buffer(
-                IntArray<SEAL_BYTE> &in, void *header_ptr, ostream &out_stream, MemoryPoolHandle pool)
+                IntArray<seal_byte> &in, void *header_ptr, ostream &out_stream, MemoryPoolHandle pool)
             {
                 Serialization::SEALHeader &header = *reinterpret_cast<Serialization::SEALHeader *>(header_ptr);
 

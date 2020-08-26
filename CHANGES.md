@@ -21,6 +21,7 @@ This is because a `Plaintext` object with slot-data written into the coefficient
 ### Other
 
 - Moved all files related to pkg-config to `pkgconfig/` subdirectory.
+- Added a new typedef `seal::seal_byte` for the unnecessarily capitalized `seal::SEAL_BYTE`.
 
 ## Version 3.5.6
 
