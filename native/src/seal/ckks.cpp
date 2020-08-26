@@ -51,26 +51,27 @@ namespace seal
             pos &= (m - 1);
         }
 
-        // we need 0~(n-1)-th powers of the primitive 2n-th root, m = 2n
-        roots_ = allocate<complex<double>>(coeff_count, pool_);
-        inv_roots_ = allocate<complex<double>>(coeff_count, pool_);
-        // 0~(n-1)-th powers of the primitive 2n-th root have 4-fold symmetry
+        // We need 1~(n-1)-th powers of the primitive 2n-th root, m = 2n
+        root_powers_ = allocate<complex<double>>(coeff_count, pool_);
+        inv_root_powers_ = allocate<complex<double>>(coeff_count, pool_);
+        // Powers of the primitive 2n-th root have 4-fold symmetry
         if (m >= 8)
         {
             complex_roots_ = make_shared<util::ComplexRoots>(util::ComplexRoots(static_cast<size_t>(m), pool_));
-            for (size_t i = 0; i < coeff_count; i++)
+            for (size_t i = 1; i < coeff_count; i++)
             {
-                roots_[i] = complex_roots_->get_root(static_cast<size_t>(reverse_bits(i, logn)));
-                inv_roots_[i] = conj(roots_[i]);
+                root_powers_[i] = complex_roots_->get_root(reverse_bits(i, logn));
+                inv_root_powers_[i] = conj(complex_roots_->get_root(reverse_bits(i - 1, logn) + 1));
             }
         }
         else if (m == 4)
         {
-            roots_[0] = { 0, 1 };
-            roots_[1] = { 0, -1 };
-            inv_roots_[0] = conj(roots_[0]);
-            inv_roots_[1] = conj(roots_[1]);
+            root_powers_[1] = { 0, 1 };
+            inv_root_powers_[1] = { 0, -1 };
         }
+
+        complex_arith_ = ComplexArith();
+        fft_handler_ = FFTHandler(complex_arith_);
     }
 
     void CKKSEncoder::encode_internal(

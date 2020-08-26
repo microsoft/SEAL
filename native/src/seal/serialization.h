@@ -45,9 +45,9 @@ namespace seal
         The compression mode used by default; prefer Zstandard
         */
 #ifdef SEAL_USE_ZSTD
-        static constexpr compr_mode_type compr_mode_default = compr_mode_type::zstd;
+        static constexpr compr_mode_type compr_mode_default = compr_mode_type::ZSTD;
 #elif SEAL_USE_ZLIB
-        static constexpr compr_mode_type compr_mode_default = compr_mode_type::zlib;
+        static constexpr compr_mode_type compr_mode_default = compr_mode_type::ZLIB;
 #else
         static constexpr compr_mode_type compr_mode_default = compr_mode_type::none;
 #endif
@@ -101,11 +101,11 @@ namespace seal
             case static_cast<std::uint8_t>(compr_mode_type::none):
                 /* fall through */
 #ifdef SEAL_USE_ZLIB
-            case static_cast<std::uint8_t>(compr_mode_type::zlib):
+            case static_cast<std::uint8_t>(compr_mode_type::ZLIB):
                 /* fall through */
 #endif
 #ifdef SEAL_USE_ZSTD
-            case static_cast<std::uint8_t>(compr_mode_type::zstd):
+            case static_cast<std::uint8_t>(compr_mode_type::ZSTD):
 #endif
                 return true;
             }
@@ -240,7 +240,7 @@ namespace seal
         */
         static std::streamoff Save(
             std::function<void(std::ostream &stream)> save_members, std::streamoff raw_size, std::ostream &stream,
-            compr_mode_type compr_mode);
+            compr_mode_type compr_mode, bool clear_on_destruction = false);
 
         /**
         Deserializes data from stream that was serialized by Save. Once stream has
@@ -257,7 +257,9 @@ namespace seal
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        static std::streamoff Load(std::function<void(std::istream &stream)> load_members, std::istream &stream);
+        static std::streamoff Load(
+            std::function<void(std::istream &stream)> load_members, std::istream &stream,
+            bool clear_on_destruction = false);
 
         /**
         Evaluates save_members and compresses the output according to the given
@@ -285,7 +287,7 @@ namespace seal
         */
         static std::streamoff Save(
             std::function<void(std::ostream &stream)> save_members, std::streamoff raw_size, SEAL_BYTE *out,
-            std::size_t size, compr_mode_type compr_mode);
+            std::size_t size, compr_mode_type compr_mode, bool clear_on_destruction = false);
 
         /**
         Deserializes data from a memory location that was serialized by Save.
@@ -305,7 +307,8 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Load(
-            std::function<void(std::istream &stream)> load_members, const SEAL_BYTE *in, std::size_t size);
+            std::function<void(std::istream &stream)> load_members, const SEAL_BYTE *in, std::size_t size,
+            bool clear_on_destruction = false);
 
     private:
         Serialization() = delete;

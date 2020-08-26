@@ -85,6 +85,12 @@ namespace seal
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
 
+        // Additionally check that ciphertext doesn't have trivial size
+        if (encrypted.size() < SEAL_CIPHERTEXT_SIZE_MIN)
+        {
+            throw invalid_argument("encrypted is empty");
+        }
+
         auto &context_data = *context_.first_context_data();
         auto &parms = context_data.parms();
 
@@ -301,6 +307,12 @@ namespace seal
         if (!is_valid_for(encrypted, context_))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
+        }
+
+        // Additionally check that ciphertext doesn't have trivial size
+        if (encrypted.size() < SEAL_CIPHERTEXT_SIZE_MIN)
+        {
+            throw invalid_argument("encrypted is empty");
         }
 
         if (context_.key_context_data()->parms().scheme() != scheme_type::BFV)

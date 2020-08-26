@@ -34,45 +34,38 @@ namespace seal
 #endif
             coeff_count_power_ = coeff_count_power;
             coeff_count_ = size_t(1) << coeff_count_power_;
-
-            // Allocate memory for the tables
-            root_powers_ = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
-            inv_root_powers_ = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
             modulus_ = modulus;
-
             // We defer parameter checking to try_minimal_primitive_root(...)
             if (!try_minimal_primitive_root(2 * coeff_count_, modulus_, root_))
             {
                 throw invalid_argument("invalid modulus");
             }
-
-            uint64_t inverse_root;
-            if (!try_invert_uint_mod(root_, modulus_, inverse_root))
+            if (!try_invert_uint_mod(root_, modulus_, inv_root_))
             {
                 throw invalid_argument("invalid modulus");
             }
 
-            // Populate the tables storing (scaled version of) powers of root
-            // mod q in bit-scrambled order.
-            ntt_powers_of_primitive_root(root_, root_powers_.get());
-
-            // Populate the tables storing (scaled version of) powers of
-            // (root)^{-1} mod q in bit-scrambled order.
-            ntt_powers_of_primitive_root(inverse_root, inv_root_powers_.get());
-
-            // Reordering inv_root_powers_ so that the access pattern in inverse NTT is sequential.
-            auto temp = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
-            MultiplyUIntModOperand *temp_ptr = temp.get() + 1;
-            for (size_t m = (coeff_count_ >> 1); m > 0; m >>= 1)
+            // Populate tables with powers of root in specific orders.
+            root_powers_ = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
+            MultiplyUIntModOperand root;
+            root.set(root_, modulus_);
+            uint64_t power = root_;
+            for (size_t i = 1; i < coeff_count_; i++)
             {
-                for (size_t i = 0; i < m; i++)
-                {
-                    *temp_ptr++ = inv_root_powers_[m + i];
-                }
+                root_powers_[reverse_bits(i, coeff_count_power_)].set(power, modulus_);
+                power = multiply_uint_mod(power, root, modulus_);
             }
-            copy_n(temp.get() + 1, coeff_count_ - 1, inv_root_powers_.get() + 1);
 
-            // Last compute n^(-1) modulo q.
+            inv_root_powers_ = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
+            root.set(inv_root_, modulus_);
+            power = inv_root_;
+            for (size_t i = 1; i < coeff_count_; i++)
+            {
+                inv_root_powers_[reverse_bits(i - 1, coeff_count_power_) + 1].set(power, modulus_);
+                power = multiply_uint_mod(power, root, modulus_);
+            }
+
+            // Compute n^(-1) modulo q.
             uint64_t degree_uint = static_cast<uint64_t>(coeff_count_);
             if (!try_invert_uint_mod(degree_uint, modulus_, inv_degree_modulo_.operand))
             {
@@ -80,19 +73,8 @@ namespace seal
             }
             inv_degree_modulo_.set_quotient(modulus_);
 
-            return;
-        }
-
-        void NTTTables::ntt_powers_of_primitive_root(uint64_t root, MultiplyUIntModOperand *destination) const
-        {
-            MultiplyUIntModOperand *destination_start = destination;
-            destination_start->set(1, modulus_);
-            for (size_t i = 1; i < coeff_count_; i++)
-            {
-                MultiplyUIntModOperand *next_destination = destination_start + reverse_bits(i, coeff_count_power_);
-                next_destination->set(multiply_uint_mod(destination->operand, root, modulus_), modulus_);
-                destination = next_destination;
-            }
+            mod_arith_lazy_ = ModArithLazy(modulus_);
+            ntt_handler_ = NTTHandler(mod_arith_lazy_);
         }
 
         class NTTTablesCreateIter
@@ -187,202 +169,17 @@ namespace seal
             tables = allocate(iter, modulus.size(), pool);
         }
 
-        /**
-        This function computes in-place the negacyclic NTT. The input is
-        a polynomial a of degree n in R_q, where n is assumed to be a power of
-        2 and q is a prime such that q = 1 (mod 2n).
-
-        The output is a vector A such that the following hold:
-        A[j] =  a(psi**(2*bit_reverse(j) + 1)), 0 <= j < n.
-
-        For details, see Michael Naehrig and Patrick Longa.
-        */
         void ntt_negacyclic_harvey_lazy(CoeffIter operand, const NTTTables &tables)
         {
-#ifdef SEAL_DEBUG
-            if (!operand)
-            {
-                throw invalid_argument("operand");
-            }
-#endif
-            Modulus modulus = tables.modulus();
-            uint64_t two_times_modulus = modulus.value() << 1;
-
-            // Return the NTT in scrambled order
-            size_t n = size_t(1) << tables.coeff_count_power();
-            size_t t = n >> 1;
-            for (size_t m = 1; m < n; m <<= 1)
-            {
-                size_t j1 = 0;
-                if (t >= 4)
-                {
-                    for (size_t i = 0; i < m; i++)
-                    {
-                        size_t j2 = j1 + t;
-                        const MultiplyUIntModOperand W = tables.get_from_root_powers(m + i);
-
-                        uint64_t *X = operand + j1;
-                        uint64_t *Y = X + t;
-                        uint64_t tx;
-                        uint64_t Q;
-                        for (size_t j = j1; j < j2; j += 4)
-                        {
-                            tx = *X - (two_times_modulus &
-                                       static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
-                            Q = multiply_uint_mod_lazy(*Y, W, modulus);
-                            *X++ = tx + Q;
-                            *Y++ = tx + two_times_modulus - Q;
-
-                            tx = *X - (two_times_modulus &
-                                       static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
-                            Q = multiply_uint_mod_lazy(*Y, W, modulus);
-                            *X++ = tx + Q;
-                            *Y++ = tx + two_times_modulus - Q;
-
-                            tx = *X - (two_times_modulus &
-                                       static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
-                            Q = multiply_uint_mod_lazy(*Y, W, modulus);
-                            *X++ = tx + Q;
-                            *Y++ = tx + two_times_modulus - Q;
-
-                            tx = *X - (two_times_modulus &
-                                       static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
-                            Q = multiply_uint_mod_lazy(*Y, W, modulus);
-                            *X++ = tx + Q;
-                            *Y++ = tx + two_times_modulus - Q;
-                        }
-                        j1 += (t << 1);
-                    }
-                }
-                else
-                {
-                    for (size_t i = 0; i < m; i++)
-                    {
-                        size_t j2 = j1 + t;
-                        const MultiplyUIntModOperand W = tables.get_from_root_powers(m + i);
-
-                        uint64_t *X = operand + j1;
-                        uint64_t *Y = X + t;
-                        uint64_t tx;
-                        uint64_t Q;
-                        for (size_t j = j1; j < j2; j++)
-                        {
-                            // The Harvey butterfly: assume X, Y in [0, 2p), and return X', Y' in [0, 4p).
-                            // X', Y' = X + WY, X - WY (mod p).
-                            tx = *X - (two_times_modulus &
-                                       static_cast<uint64_t>(-static_cast<int64_t>(*X >= two_times_modulus)));
-                            Q = multiply_uint_mod_lazy(*Y, W, modulus);
-                            *X++ = tx + Q;
-                            *Y++ = tx + two_times_modulus - Q;
-                        }
-                        j1 += (t << 1);
-                    }
-                }
-                t >>= 1;
-            }
+            tables.ntt_handler().transform_to_rev(
+                operand.ptr(), tables.coeff_count_power(), tables.get_from_root_powers());
         }
 
-        // Inverse negacyclic NTT using Harvey's butterfly. (See Patrick Longa and Michael Naehrig).
         void inverse_ntt_negacyclic_harvey_lazy(CoeffIter operand, const NTTTables &tables)
         {
-#ifdef SEAL_DEBUG
-            if (!operand)
-            {
-                throw invalid_argument("operand");
-            }
-#endif
-            Modulus modulus = tables.modulus();
-            uint64_t two_times_modulus = modulus.value() << 1;
-
-            // return the bit-reversed order of NTT.
-            size_t n = size_t(1) << tables.coeff_count_power();
-            size_t t = 1;
-            size_t root_index = 1;
-            for (size_t m = (n >> 1); m > 1; m >>= 1)
-            {
-                size_t j1 = 0;
-                if (t >= 4)
-                {
-                    for (size_t i = 0; i < m; i++, root_index++)
-                    {
-                        size_t j2 = j1 + t;
-                        const MultiplyUIntModOperand W = tables.get_from_inv_root_powers(root_index);
-
-                        uint64_t *X = operand + j1;
-                        uint64_t *Y = X + t;
-                        uint64_t tx;
-                        uint64_t ty;
-                        for (size_t j = j1; j < j2; j += 4)
-                        {
-                            tx = *X + *Y;
-                            ty = *X + two_times_modulus - *Y;
-                            *X++ = tx - (two_times_modulus &
-                                         static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
-                            *Y++ = multiply_uint_mod_lazy(ty, W, modulus);
-
-                            tx = *X + *Y;
-                            ty = *X + two_times_modulus - *Y;
-                            *X++ = tx - (two_times_modulus &
-                                         static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
-                            *Y++ = multiply_uint_mod_lazy(ty, W, modulus);
-
-                            tx = *X + *Y;
-                            ty = *X + two_times_modulus - *Y;
-                            *X++ = tx - (two_times_modulus &
-                                         static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
-                            *Y++ = multiply_uint_mod_lazy(ty, W, modulus);
-
-                            tx = *X + *Y;
-                            ty = *X + two_times_modulus - *Y;
-                            *X++ = tx - (two_times_modulus &
-                                         static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
-                            *Y++ = multiply_uint_mod_lazy(ty, W, modulus);
-                        }
-                        j1 += (t << 1);
-                    }
-                }
-                else
-                {
-                    for (size_t i = 0; i < m; i++, root_index++)
-                    {
-                        size_t j2 = j1 + t;
-                        const MultiplyUIntModOperand W = tables.get_from_inv_root_powers(root_index);
-
-                        uint64_t *X = operand + j1;
-                        uint64_t *Y = X + t;
-                        uint64_t tx;
-                        uint64_t ty;
-                        for (size_t j = j1; j < j2; j++)
-                        {
-                            tx = *X + *Y;
-                            ty = *X + two_times_modulus - *Y;
-                            *X++ = tx - (two_times_modulus &
-                                         static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus)));
-                            *Y++ = multiply_uint_mod_lazy(ty, W, modulus);
-                        }
-                        j1 += (t << 1);
-                    }
-                }
-                t <<= 1;
-            }
-
-            MultiplyUIntModOperand inv_N = tables.inv_degree_modulo();
-            MultiplyUIntModOperand W = tables.get_from_inv_root_powers(root_index);
-            MultiplyUIntModOperand inv_N_W;
-            inv_N_W.set(multiply_uint_mod(inv_N.operand, W, modulus), modulus);
-
-            uint64_t *X = operand;
-            uint64_t *Y = X + (n >> 1);
-            uint64_t tx;
-            uint64_t ty;
-            for (size_t j = (n >> 1); j < n; j++)
-            {
-                tx = *X + *Y;
-                tx -= two_times_modulus & static_cast<uint64_t>(-static_cast<int64_t>(tx >= two_times_modulus));
-                ty = *X + two_times_modulus - *Y;
-                *X++ = multiply_uint_mod_lazy(tx, inv_N, modulus);
-                *Y++ = multiply_uint_mod_lazy(ty, inv_N_W, modulus);
-            }
+            MultiplyUIntModOperand inv_degree_modulo = tables.inv_degree_modulo();
+            tables.ntt_handler().transform_from_rev(
+                operand.ptr(), tables.coeff_count_power(), tables.get_from_inv_root_powers(), &inv_degree_modulo);
         }
     } // namespace util
 } // namespace seal

@@ -6,6 +6,7 @@
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"
 #include "seal/util/defines.h"
+#include "seal/util/dwthandler.h"
 #include "seal/util/iterator.h"
 #include "seal/util/pointer.h"
 #include "seal/util/uintarithsmallmod.h"
@@ -16,8 +17,61 @@ namespace seal
 {
     namespace util
     {
+        template <>
+        class Arithmetic<std::uint64_t, MultiplyUIntModOperand, MultiplyUIntModOperand>
+        {
+        public:
+            Arithmetic()
+            {}
+
+            Arithmetic(const Modulus &modulus) : modulus_(modulus), two_times_modulus_(modulus.value() << 1)
+            {}
+
+            inline std::uint64_t add(const std::uint64_t &a, const std::uint64_t &b) const
+            {
+                return a + b;
+            }
+
+            inline std::uint64_t sub(const std::uint64_t &a, const std::uint64_t &b) const
+            {
+                return a + two_times_modulus_ - b;
+            }
+
+            inline std::uint64_t mul_root(const std::uint64_t &a, const MultiplyUIntModOperand &r) const
+            {
+                return multiply_uint_mod_lazy(a, r, modulus_);
+            }
+
+            inline std::uint64_t mul_scalar(const std::uint64_t &a, const MultiplyUIntModOperand &s) const
+            {
+                return multiply_uint_mod_lazy(a, s, modulus_);
+            }
+
+            inline MultiplyUIntModOperand mul_root_scalar(
+                const MultiplyUIntModOperand &r, const MultiplyUIntModOperand &s) const
+            {
+                MultiplyUIntModOperand result;
+                result.set(multiply_uint_mod(r.operand, s, modulus_), modulus_);
+                return result;
+            }
+
+            inline std::uint64_t guard(const std::uint64_t &a) const
+            {
+                return a - (two_times_modulus_ &
+                            static_cast<std::uint64_t>(-static_cast<std::int64_t>(a >= two_times_modulus_)));
+            }
+
+        private:
+            Modulus modulus_;
+
+            std::uint64_t two_times_modulus_;
+        };
+
         class NTTTables
         {
+            using ModArithLazy = Arithmetic<uint64_t, MultiplyUIntModOperand, MultiplyUIntModOperand>;
+            using NTTHandler = DWTHandler<std::uint64_t, MultiplyUIntModOperand, MultiplyUIntModOperand>;
+
         public:
             NTTTables(NTTTables &&source) = default;
 
@@ -37,6 +91,16 @@ namespace seal
             SEAL_NODISCARD inline std::uint64_t get_root() const
             {
                 return root_;
+            }
+
+            SEAL_NODISCARD inline const MultiplyUIntModOperand *get_from_root_powers() const
+            {
+                return root_powers_.get();
+            }
+
+            SEAL_NODISCARD inline const MultiplyUIntModOperand *get_from_inv_root_powers() const
+            {
+                return inv_root_powers_.get();
             }
 
             SEAL_NODISCARD inline MultiplyUIntModOperand get_from_root_powers(std::size_t index) const
@@ -81,6 +145,11 @@ namespace seal
                 return coeff_count_;
             }
 
+            const NTTHandler &ntt_handler() const
+            {
+                return ntt_handler_;
+            }
+
         private:
             NTTTables &operator=(const NTTTables &assign) = delete;
 
@@ -88,13 +157,11 @@ namespace seal
 
             void initialize(int coeff_count_power, const Modulus &modulus);
 
-            // Computed bit-scrambled vector of first 1 << coeff_count_power powers
-            // of a primitive root.
-            void ntt_powers_of_primitive_root(std::uint64_t root, MultiplyUIntModOperand *destination) const;
-
             MemoryPoolHandle pool_;
 
             std::uint64_t root_ = 0;
+
+            std::uint64_t inv_root_ = 0;
 
             int coeff_count_power_ = 0;
 
@@ -102,13 +169,18 @@ namespace seal
 
             Modulus modulus_;
 
+            // Inverse of coeff_count_ modulo modulus_.
             MultiplyUIntModOperand inv_degree_modulo_;
 
-            // Size coeff_count_
+            // Holds 1~(n-1)-th powers of root_ in bit-reversed order, the 0-th power is left unset.
             Pointer<MultiplyUIntModOperand> root_powers_;
 
-            // Size coeff_count_
+            // Holds 1~(n-1)-th powers of inv_root_ in scrambled order, the 0-th power is left unset.
             Pointer<MultiplyUIntModOperand> inv_root_powers_;
+
+            ModArithLazy mod_arith_lazy_;
+
+            NTTHandler ntt_handler_;
         };
 
         /**
@@ -302,5 +374,8 @@ namespace seal
             SEAL_ITERATE(
                 operand, size, [&](auto I) { inverse_ntt_negacyclic_harvey(I, operand.coeff_modulus_size(), tables); });
         }
+
+        void ntt_negacyclic_harvey_new(CoeffIter operand, const NTTTables &tables);
+        void inverse_ntt_negacyclic_harvey_new(CoeffIter operand, const NTTTables &tables);
     } // namespace util
 } // namespace seal

@@ -8,6 +8,7 @@
 #include "seal/util/common.h"
 #include "seal/util/croots.h"
 #include "seal/util/defines.h"
+#include "seal/util/dwthandler.h"
 #include "seal/util/uintarithsmallmod.h"
 #include "seal/util/uintcore.h"
 #include <cmath>
@@ -39,6 +40,47 @@ namespace seal
         return in;
     }
 
+    namespace util
+    {
+        template <>
+        class Arithmetic<std::complex<double>, std::complex<double>, double>
+        {
+        public:
+            Arithmetic()
+            {}
+
+            inline std::complex<double> add(const std::complex<double> &a, const std::complex<double> &b) const
+            {
+                return a + b;
+            }
+
+            inline std::complex<double> sub(const std::complex<double> &a, const std::complex<double> &b) const
+            {
+                return a - b;
+            }
+
+            inline std::complex<double> mul_root(const std::complex<double> &a, const std::complex<double> &r) const
+            {
+                return a * r;
+            }
+
+            inline std::complex<double> mul_scalar(const std::complex<double> &a, const double &s) const
+            {
+                return a * s;
+            }
+
+            inline std::complex<double> mul_root_scalar(const std::complex<double> &r, const double &s) const
+            {
+                return r * s;
+            }
+
+            inline std::complex<double> guard(const std::complex<double> &a) const
+            {
+                return a;
+            }
+        };
+    } // namespace util
+
     /**
     Provides functionality for encoding vectors of complex or real numbers into
     plaintext polynomials to be encrypted and computed on using the CKKS scheme.
@@ -63,6 +105,9 @@ namespace seal
     */
     class CKKSEncoder
     {
+        using ComplexArith = util::Arithmetic<std::complex<double>, std::complex<double>, double>;
+        using FFTHandler = util::DWTHandler<std::complex<double>, std::complex<double>, double>;
+
     public:
         /**
         Creates a CKKSEncoder instance initialized with the specified SEALContext.
@@ -450,52 +495,21 @@ namespace seal
             for (std::size_t i = 0; i < values_size; i++)
             {
                 conj_values[matrix_reps_index_map_[i]] = values[i];
+                // TODO: if values are real, the following values should be set to zero, and multiply results by 2.
                 conj_values[matrix_reps_index_map_[i + slots_]] = std::conj(values[i]);
             }
+            double fix = scale / static_cast<double>(n);
+            fft_handler_.transform_from_rev(conj_values.get(), util::get_power_of_two(n), inv_root_powers_.get(), &fix);
 
-            int logn = util::get_power_of_two(n);
-            std::size_t tt = 1;
-            for (int i = 0; i < logn; i++)
-            {
-                std::size_t mm = std::size_t(1) << (logn - i);
-                std::size_t k_start = 0;
-                std::size_t h = mm / 2;
-
-                for (std::size_t j = 0; j < h; j++)
-                {
-                    std::size_t k_end = k_start + tt;
-                    auto s = inv_roots_[h + j];
-
-                    for (std::size_t k = k_start; k < k_end; k++)
-                    {
-                        auto u = conj_values[k];
-                        auto v = conj_values[k + tt];
-                        conj_values[k] = u + v;
-                        conj_values[k + tt] = (u - v) * s;
-                    }
-
-                    k_start += 2 * tt;
-                }
-                tt *= 2;
-            }
-
-            double n_inv = double(1.0) / static_cast<double>(n);
-
-            // Put the scale in at this point
-            n_inv *= scale;
-
-            int max_coeff_bit_count = 1;
+            double max_coeff = 0;
             for (std::size_t i = 0; i < n; i++)
             {
-                // Multiply by scale and n_inv (see above)
-                conj_values[i] *= n_inv;
-
-                // Verify that the values are not too large to fit in coeff_modulus
-                // Note that we have an extra + 1 for the sign bit
-                // Don't compute logarithmis of numbers less than 1
-                double d = std::max(std::fabs(conj_values[i].real()), 1.0);
-                max_coeff_bit_count = std::max(max_coeff_bit_count, static_cast<int>(std::log2(d)) + 2);
+                max_coeff = std::max(max_coeff, std::fabs(conj_values[i].real()));
             }
+            // Verify that the values are not too large to fit in coeff_modulus
+            // Note that we have an extra + 1 for the sign bit
+            // Don't compute logarithmis of numbers less than 1
+            int max_coeff_bit_count = static_cast<int>(std::ceil(std::log2(std::max(max_coeff, 1.0)))) + 1;
             if (max_coeff_bit_count >= context_data.total_coeff_modulus_bit_count())
             {
                 throw std::invalid_argument("encoded values are too large");
@@ -718,28 +732,7 @@ namespace seal
                 // res[i] = res_accum * inv_scale;
             }
 
-            // Butterfly to obtain final result
-            std::size_t tt = coeff_count;
-            for (int i = 0; i < logn; i++)
-            {
-                std::size_t mm = std::size_t(1) << i;
-                tt >>= 1;
-
-                for (std::size_t j = 0; j < mm; j++)
-                {
-                    std::size_t j1 = 2 * j * tt;
-                    std::size_t j2 = j1 + tt - 1;
-                    auto s = roots_[mm + j];
-
-                    for (std::size_t k = j1; k < j2 + 1; k++)
-                    {
-                        auto u = res[k];
-                        auto v = res[k + tt] * s;
-                        res[k] = u + v;
-                        res[k + tt] = u - v;
-                    }
-                }
-            }
+            fft_handler_.transform_to_rev(res.get(), logn, root_powers_.get());
 
             for (std::size_t i = 0; i < slots_; i++)
             {
@@ -768,10 +761,16 @@ namespace seal
 
         std::shared_ptr<util::ComplexRoots> complex_roots_;
 
-        util::Pointer<std::complex<double>> roots_;
+        // Holds 1~(n-1)-th powers of root in bit-reversed order, the 0-th power is left unset.
+        util::Pointer<std::complex<double>> root_powers_;
 
-        util::Pointer<std::complex<double>> inv_roots_;
+        // Holds 1~(n-1)-th powers of inverse root in scrambled order, the 0-th power is left unset.
+        util::Pointer<std::complex<double>> inv_root_powers_;
 
         util::Pointer<std::size_t> matrix_reps_index_map_;
+
+        ComplexArith complex_arith_;
+
+        FFTHandler fft_handler_;
     };
 } // namespace seal

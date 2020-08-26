@@ -40,6 +40,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/config.h
         ${CMAKE_CURRENT_LIST_DIR}/croots.h
         ${CMAKE_CURRENT_LIST_DIR}/defines.h
+        ${CMAKE_CURRENT_LIST_DIR}/dwthandler.h
         ${CMAKE_CURRENT_LIST_DIR}/galois.h
         ${CMAKE_CURRENT_LIST_DIR}/gcc.h
         ${CMAKE_CURRENT_LIST_DIR}/globals.h
