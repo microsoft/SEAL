@@ -70,8 +70,6 @@ namespace seal
         {
             namespace
             {
-                constexpr double zlib_buffer_expansion_factor = 1.3;
-
                 // The output size in a single deflate round cannot exceed 4 GB so we need to invert the deflateBound
                 // inequality to find an upper bound for the input size.
                 constexpr size_t zlib_process_bytes_out_max = static_cast<size_t>(numeric_limits<uInt>::max());
@@ -235,7 +233,7 @@ namespace seal
                         zstream.next_out = reinterpret_cast<unsigned char *>(out_head);
 
                         // Cap the out size to process_bytes_out_max
-                        size_t process_bytes_out = min<size_t>(out_size, process_bytes_out_max);
+                        size_t process_bytes_out = min<size_t>(out_size, zlib_process_bytes_out_max);
                         zstream.avail_out = static_cast<uInt>(process_bytes_out);
 
                         result = deflate(&zstream, flush);
@@ -397,7 +395,7 @@ namespace seal
                 }
 
                 // Populate the header
-                header.compr_mode = compr_mode_type::zlib;
+                header.compr_mode = compr_mode_type::ZLIB;
                 header.size = static_cast<uint64_t>(add_safe(sizeof(Serialization::SEALHeader), in.size()));
 
                 auto old_except_mask = out_stream.exceptions();
@@ -426,8 +424,20 @@ namespace seal
 
 #ifdef SEAL_USE_ZSTD
 
+#if (SEAL_COMPILER == SEAL_COMPILER_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+#elif (SEAL_COMPILER == SEAL_COMPILER_CLANG)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wsign-conversion"
+#endif
 #include "zstd.h"
 #include "common/zstd_internal.h"
+#if (SEAL_COMPILER == SEAL_COMPILER_GCC)
+#pragma GCC diagnostic pop
+#elif (SEAL_COMPILER == SEAL_COMPILER_CLANG)
+#pragma clang diagnostic pop
+#endif
 
 namespace seal
 {
@@ -661,7 +671,7 @@ namespace seal
                 return 0;
             }
 
-            int inflate_stream(istream &in_stream, streamoff in_size, ostream &out_stream, MemoryPoolHandle pool)
+            int zstd_inflate_stream(istream &in_stream, streamoff in_size, ostream &out_stream, MemoryPoolHandle pool)
             {
                 // Clear the exception masks; this function returns an error code
                 // on failure rather than throws an IO exception.
@@ -783,7 +793,7 @@ namespace seal
                 }
 
                 // Populate the header
-                header.compr_mode = compr_mode_type::zstd;
+                header.compr_mode = compr_mode_type::ZSTD;
                 header.size = static_cast<uint64_t>(add_safe(sizeof(Serialization::SEALHeader), in.size()));
 
                 auto old_except_mask = out_stream.exceptions();

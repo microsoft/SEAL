@@ -18,13 +18,15 @@ Users of previous versions of the library should look at the [list of changes](C
   - [Building Microsoft SEAL](#building-microsoft-seal)
     - [Optional Dependencies](#optional-dependencies)
       <!-- - [Microsoft GSL](#microsoft-gsl)
-      - [ZLIB](#zlib) -->
+      - [ZLIB](#zlib)
+      - [Zstandard](#zstandard) -->
     - [Windows](#windows)
       <!-- - [Platform](#platform)
       - [Building Microsoft SEAL](#building-microsoft-seal-1)
       - [[Optional] Debug and Release builds](#optional-debug-and-release-builds)
       - [[Optional] Microsoft GSL](#optional-microsoft-gsl)
       - [[Optional] ZLIB](#optional-zlib)
+      - [[Optional] Zstandard](#optional-zstandard)
       - [Building Examples](#building-examples)
       - [Building Unit Tests](#building-unit-tests) -->
     - [Linux, macOS, and FreeBSD](#linux-macos-and-freebsd)
@@ -32,6 +34,7 @@ Users of previous versions of the library should look at the [list of changes](C
       - [[Optional] Debug and Release Modes](#optional-debug-and-release-modes)
       - [[Optional] Microsoft GSL](#optional-microsoft-gsl-1)
       - [[Optional] ZLIB](#optional-zlib-1)
+      - [[Optional] Zstandard](#optional-zstandard-1)
       - [[Optional] Shared Library](#optional-shared-library)
       - [Building Examples](#building-examples-1)
       - [Building Unit Tests](#building-unit-tests-1)
@@ -145,6 +148,13 @@ However, it is always possible to explicitly pass `compr_mode_type::none` to ser
 In most common applications of Microsoft SEAL the size of a `SecretKey` would not be deliberately revealed to untrusted parties.
 If this is a concern, one can always save the `SecretKey` in an uncompressed form by passing `compr_mode_type::none` to `SecretKey::save`.
 
+#### Zstandard
+
+ZLIB compression can be extremely slow.
+In Microsoft SEAL >= 3.6.0 [Zstandard](https://github.com/facebook/zstd) is supported and preferred as an alternative.
+It is easy to compile Microsoft SEAL to support one or both of the compression libraries.
+This will ensure that any received ciphertext can be decompressed and used.
+
 ### Windows
 
 Microsoft SEAL comes with a Microsoft Visual Studio 2019 solution file `SEAL.sln` that can be used to conveniently build the library, examples, and unit tests.
@@ -177,6 +187,12 @@ You can disable the dependency on Microsoft GSL by commenting out `#cmakedefine 
 By default ZLIB is downloaded and compiled as part of Microsoft SEAL library.
 ZLIB's static archive is included in Microsoft SEAL's static or shared target object.
 You can disable the dependency on ZLIB by commenting out `#cmakedefine SEAL_USE_ZLIB` in [native\src\seal\util\config.h.in](native\src\seal\util\config.h.in).
+
+#### [Optional] Zstandard
+
+By default Zstandard is downloaded and compiled as part of Microsoft SEAL library.
+Zstandard's static archive is included in Microsoft SEAL's static or shared target object.
+You can disable the dependency on Zstandard by commenting out `#cmakedefine SEAL_USE_ZSTD` in [native\src\seal\util\config.h.in](native\src\seal\util\config.h.in).
 
 #### Building Examples
 
@@ -247,6 +263,17 @@ You can disable the dependency on ZLIB in CMake configuration options as follows
 
 ```shell
 cmake . -DSEAL_USE_ZLIB=OFF
+make
+```
+
+#### [Optional] Zstandard
+
+By default Zstandard is downloaded and compiled as part of Microsoft SEAL library.
+Zstandard's static archive is included in Microsoft SEAL's static or shared target object.
+You can disable the dependency on Zstandard in CMake configuration options as follows:
+
+```shell
+cmake . -DSEAL_USE_ZSTD=OFF
 make
 ```
 

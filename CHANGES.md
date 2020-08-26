@@ -2,6 +2,11 @@
 
 ## Version 3.6.0
 
+### New features
+
+- Added support for [Zstandard](https://github.com/facebook/zstd) compression as a much more efficient alternative to ZLIB.
+The performance improvement should be expected to be around 20-30x.
+
 ### API Changes
 
 - Added const overloads of `IntArray::begin` and `IntArray::end`.

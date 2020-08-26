@@ -83,7 +83,10 @@ void bfv_performance_test(SEALContext context)
     chrono::microseconds time_rotate_columns_sum(0);
     chrono::microseconds time_serialize_sum(0);
 #ifdef SEAL_USE_ZLIB
-    chrono::microseconds time_serialize_compr_sum(0);
+    chrono::microseconds time_serialize_zlib_sum(0);
+#endif
+#ifdef SEAL_USE_ZSTD
+    chrono::microseconds time_serialize_zstd_sum(0);
 #endif
     /*
     How many times to run the test?
@@ -263,14 +266,25 @@ void bfv_performance_test(SEALContext context)
         time_serialize_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 #ifdef SEAL_USE_ZLIB
         /*
-        [Serialize Ciphertext]
+        [Serialize Ciphertext (ZLIB)]
         */
-        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::deflate));
+        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::ZLIB));
         buf.resize(buf_size);
         time_start = chrono::high_resolution_clock::now();
-        encrypted.save(buf.data(), buf_size, compr_mode_type::deflate);
+        encrypted.save(buf.data(), buf_size, compr_mode_type::ZLIB);
         time_end = chrono::high_resolution_clock::now();
-        time_serialize_compr_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
+        time_serialize_zlib_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
+#endif
+#ifdef SEAL_USE_ZSTD
+        /*
+        [Serialize Ciphertext (Zstandard)]
+        */
+        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::ZSTD));
+        buf.resize(buf_size);
+        time_start = chrono::high_resolution_clock::now();
+        encrypted.save(buf.data(), buf_size, compr_mode_type::ZSTD);
+        time_end = chrono::high_resolution_clock::now();
+        time_serialize_zstd_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 #endif
         /*
         Print a dot to indicate progress.
@@ -296,7 +310,10 @@ void bfv_performance_test(SEALContext context)
     auto avg_rotate_columns = time_rotate_columns_sum.count() / count;
     auto avg_serialize = time_serialize_sum.count() / count;
 #ifdef SEAL_USE_ZLIB
-    auto avg_serialize_compr = time_serialize_compr_sum.count() / count;
+    auto avg_serialize_zlib = time_serialize_zlib_sum.count() / count;
+#endif
+#ifdef SEAL_USE_ZSTD
+    auto avg_serialize_zstd = time_serialize_zstd_sum.count() / count;
 #endif
     cout << "Average batch: " << avg_batch << " microseconds" << endl;
     cout << "Average unbatch: " << avg_unbatch << " microseconds" << endl;
@@ -315,7 +332,10 @@ void bfv_performance_test(SEALContext context)
     }
     cout << "Average serialize ciphertext: " << avg_serialize << " microseconds" << endl;
 #ifdef SEAL_USE_ZLIB
-    cout << "Average compressed serialize ciphertext: " << avg_serialize_compr << " microseconds" << endl;
+    cout << "Average compressed (ZLIB) serialize ciphertext: " << avg_serialize_zlib << " microseconds" << endl;
+#endif
+#ifdef SEAL_USE_ZSTD
+    cout << "Average compressed (Zstandard) serialize ciphertext: " << avg_serialize_zstd << " microseconds" << endl;
 #endif
     cout.flush();
 }
@@ -383,7 +403,10 @@ void ckks_performance_test(SEALContext context)
     chrono::microseconds time_conjugate_sum(0);
     chrono::microseconds time_serialize_sum(0);
 #ifdef SEAL_USE_ZLIB
-    chrono::microseconds time_serialize_compr_sum(0);
+    chrono::microseconds time_serialize_zlib_sum(0);
+#endif
+#ifdef SEAL_USE_ZSTD
+    chrono::microseconds time_serialize_zstd_sum(0);
 #endif
     /*
     How many times to run the test?
@@ -543,14 +566,25 @@ void ckks_performance_test(SEALContext context)
         time_serialize_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 #ifdef SEAL_USE_ZLIB
         /*
-        [Serialize Ciphertext]
+        [Serialize Ciphertext (ZLIB)]
         */
-        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::deflate));
+        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::ZLIB));
         buf.resize(buf_size);
         time_start = chrono::high_resolution_clock::now();
-        encrypted.save(buf.data(), buf_size, compr_mode_type::deflate);
+        encrypted.save(buf.data(), buf_size, compr_mode_type::ZLIB);
         time_end = chrono::high_resolution_clock::now();
-        time_serialize_compr_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
+        time_serialize_zlib_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
+#endif
+#ifdef SEAL_USE_ZSTD
+        /*
+        [Serialize Ciphertext (Zstandard)]
+        */
+        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::ZSTD));
+        buf.resize(buf_size);
+        time_start = chrono::high_resolution_clock::now();
+        encrypted.save(buf.data(), buf_size, compr_mode_type::ZSTD);
+        time_end = chrono::high_resolution_clock::now();
+        time_serialize_zstd_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 #endif
         /*
         Print a dot to indicate progress.
@@ -577,7 +611,10 @@ void ckks_performance_test(SEALContext context)
     auto avg_conjugate = time_conjugate_sum.count() / count;
     auto avg_serialize = time_serialize_sum.count() / count;
 #ifdef SEAL_USE_ZLIB
-    auto avg_serialize_compr = time_serialize_compr_sum.count() / count;
+    auto avg_serialize_zlib = time_serialize_zlib_sum.count() / count;
+#endif
+#ifdef SEAL_USE_ZSTD
+    auto avg_serialize_zstd = time_serialize_zstd_sum.count() / count;
 #endif
     cout << "Average encode: " << avg_encode << " microseconds" << endl;
     cout << "Average decode: " << avg_decode << " microseconds" << endl;
@@ -597,7 +634,10 @@ void ckks_performance_test(SEALContext context)
     }
     cout << "Average serialize ciphertext: " << avg_serialize << " microseconds" << endl;
 #ifdef SEAL_USE_ZLIB
-    cout << "Average compressed serialize ciphertext: " << avg_serialize_compr << " microseconds" << endl;
+    cout << "Average compressed (ZLIB) serialize ciphertext: " << avg_serialize_zlib << " microseconds" << endl;
+#endif
+#ifdef SEAL_USE_ZSTD
+    cout << "Average compressed (Zstandard) serialize ciphertext: " << avg_serialize_zstd << " microseconds" << endl;
 #endif
     cout.flush();
 }
