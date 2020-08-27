@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <cstring>
 #include <limits>
+#include <sstream>
 #include <unordered_map>
 
 using namespace std;
@@ -73,12 +74,12 @@ namespace seal
                 // inequality to find an upper bound for the input size.
                 constexpr size_t zlib_process_bytes_out_max = static_cast<size_t>(numeric_limits<uInt>::max());
 
-                // If input size is at most process_bytes_in_max, we can complete the deflate algorithm in a single call
-                // to deflate (deflateBound(process_bytes_in_max) is at most 4 GB).
+                // If input size is at most zlib_process_bytes_in_max, we can complete the deflate algorithm in a single
+                // call to deflate (deflateBound(zlib_process_bytes_in_max) is at most 4 GB).
                 constexpr size_t zlib_process_bytes_in_max =
                     zlib_process_bytes_out_max - (zlib_process_bytes_out_max >> 10) - 17;
 
-                // Custom implementation for zlib zalloc
+                // Custom allocator for ZLIB
                 void *zlib_alloc_impl(voidpf ptr_storage, uInt items, uInt size)
                 {
                     try
@@ -108,7 +109,7 @@ namespace seal
                     }
                 }
 
-                // Custom implementation for zlib zfree
+                // Custom free implementation for ZLIB
                 void zlib_free_impl(voidpf ptr_storage, void *addr)
                 {
                     reinterpret_cast<PointerStorage *>(ptr_storage)->free(addr);
@@ -231,7 +232,7 @@ namespace seal
                         // Set the stream output
                         zstream.next_out = reinterpret_cast<unsigned char *>(out_head);
 
-                        // Cap the out size to process_bytes_out_max
+                        // Cap the out size to zlib_process_bytes_out_max
                         size_t process_bytes_out = min<size_t>(out_size, zlib_process_bytes_out_max);
                         zstream.avail_out = static_cast<uInt>(process_bytes_out);
 
@@ -390,7 +391,10 @@ namespace seal
                 auto ret = zlib_deflate_array_inplace(in, move(pool));
                 if (Z_OK != ret)
                 {
-                    throw logic_error("zlib compression failed");
+                    stringstream ss;
+                    ss << "ZLIB compression failed with error code ";
+                    ss << ret;
+                    throw logic_error(ss.str());
                 }
 
                 // Populate the header
@@ -447,15 +451,17 @@ namespace seal
             namespace
             {
                 // We cap the output size in a single compression round to 4 GB so we need to invert the deflateBound
-                // inequality to find an upper bound for the input size.
+                // inequality to find an upper bound for the input size. Unlike for ZLIB, for Zstandard this is not
+                // a required bound. However, it can help keep the memory footprint smaller when very large objects are
+                // compressed.
                 constexpr size_t zstd_process_bytes_out_max = static_cast<size_t>(numeric_limits<uint32_t>::max());
 
-                // If input size is at most process_bytes_in_max, we can complete the deflate algorithm in a single call
-                // to deflate (deflateBound(process_bytes_in_max) is at most 4 GB).
+                // If input size is at most zstd_process_bytes_in_max, we can complete the deflate algorithm in a single
+                // call to deflate (deflateBound(zstd_process_bytes_in_max) is at most 4 GB).
                 constexpr size_t zstd_process_bytes_in_max =
                     zstd_process_bytes_out_max - (zstd_process_bytes_out_max >> 8) - 64;
 
-                // Custom implementation for Zstandard
+                // Custom allocator for Zstandard
                 void *zstd_alloc_impl(void *ptr_storage, size_t size)
                 {
                     try
@@ -484,50 +490,34 @@ namespace seal
                     }
                 }
 
-                // Custom implementation for zlib zfree
+                // Custom free implementation for Zstandard
                 void zstd_free_impl(void *ptr_storage, void *addr)
                 {
                     reinterpret_cast<PointerStorage *>(ptr_storage)->free(addr);
                 }
             } // namespace
 
-            int zstd_deflate_array_inplace(IntArray<seal_byte> &in, MemoryPoolHandle pool)
+            unsigned zstd_deflate_array_inplace(IntArray<seal_byte> &in, MemoryPoolHandle pool)
             {
                 if (!pool)
                 {
                     throw invalid_argument("pool is uninitialized");
                 }
 
-                // int result;
-                // int level = Z_DEFAULT_COMPRESSION;
-
-                size_t pending = 0;
-
-                // z_stream zstream;
-                // zstream.data_type = Z_BINARY;
-
                 PointerStorage ptr_storage(pool);
 
+                // Set up the custom allocator
                 ZSTD_customMem mem;
                 mem.customAlloc = zstd_alloc_impl;
                 mem.customFree = zstd_free_impl;
                 mem.opaque = &ptr_storage;
 
-                // zstream.zalloc = alloc_impl;
-                // zstream.zfree = free_impl;
-                // zstream.opaque = reinterpret_cast<voidpf>(&ptr_storage);
-
-                // result = deflateInit(&zstream, level);
                 ZSTD_CCtx *cctx = ZSTD_createCCtx_advanced(mem);
-
-                // ZSTD_CCtx_setParameter(cctx, ZSTD_c_compressionLevel, 1);
-                // ZSTD_CCtx_setParameter(cctx, ZSTD_c_checksumFlag, 1);
-
-                // if (result != Z_OK)
-                //{
-                // deflateEnd(&zstream);
-                // return result;
-                //}
+                if (!cctx)
+                {
+                    // Failed to set up the context; there is something wrong with the allocator
+                    return ZSTD_error_GENERIC;
+                }
 
                 // How much data was finally produced
                 size_t bytes_written_to_in = 0;
@@ -548,16 +538,15 @@ namespace seal
                 // Are we overwriting in at this time?
                 bool out_is_in = false;
 
-                // Set the input and output pointers for the initial block
-                // zstream.next_in = reinterpret_cast<unsigned char *>(const_cast<seal_byte *>(in.cbegin()));
-                // zstream.next_out = reinterpret_cast<unsigned char *>(out_head);
+                // Holds the return value of the stream compression call. This is either the amount of data that remains
+                // to be flushed from internal buffers, or an error code.
+                size_t pending = 0;
 
                 do
                 {
                     // The number of bytes we can read at a time is capped by zstd_process_bytes_in_max
                     size_t process_bytes_in = min<size_t>(in_size, zstd_process_bytes_in_max);
                     ZSTD_inBuffer input = { in.cbegin() + bytes_read_from_in, process_bytes_in, 0 };
-                    // input.size = process_bytes_in;
 
                     // Number of bytes left after this round; if we are at the end set flush accordingly
                     in_size -= process_bytes_in;
@@ -612,19 +601,19 @@ namespace seal
                             }
                         }
 
-                        // Set the stream output
-                        // zstream.next_out = reinterpret_cast<unsigned char *>(out_head);
-                        // output.dst = out_head;
-
-                        // Cap the out size to process_bytes_out_max
+                        // Cap the out size to zstd_process_bytes_out_max
                         size_t process_bytes_out = min<size_t>(out_size, zstd_process_bytes_out_max);
-                        // zstream.avail_out = static_cast<uInt>(process_bytes_out);
 
                         ZSTD_outBuffer output = { out_head, process_bytes_out, 0 };
 
-                        // result = deflate(&zstream, flush);
-
+                        // Call the stream compression; the return value indicates remaining data in internal buffers,
+                        // or an error code, which we need to check.
                         pending = ZSTD_compressStream2(cctx, &output, &input, flush);
+                        if (ZSTD_isError(pending))
+                        {
+                            // Something went wrong; return the error code
+                            return static_cast<unsigned>(pending);
+                        }
 
                         // True number of bytes written
                         process_bytes_out = output.pos;
@@ -640,7 +629,6 @@ namespace seal
                         // Continue while not all input has been read, or while there is data pending in the internal
                         // buffers
                     } while (pending || (input.pos != input.size));
-                    //} while (((flush == ZSTD_e_end) && pending) || (input.pos != input.size));
 
                     // Number of bytes read
                     bytes_read_from_in += process_bytes_in;
@@ -667,10 +655,11 @@ namespace seal
 
                 ZSTD_freeCCtx(cctx);
 
-                return 0;
+                return ZSTD_error_no_error;
             }
 
-            int zstd_inflate_stream(istream &in_stream, streamoff in_size, ostream &out_stream, MemoryPoolHandle pool)
+            unsigned zstd_inflate_stream(
+                istream &in_stream, streamoff in_size, ostream &out_stream, MemoryPoolHandle pool)
             {
                 // Clear the exception masks; this function returns an error code
                 // on failure rather than throws an IO exception.
@@ -685,31 +674,24 @@ namespace seal
                 auto in(allocate<unsigned char>(buffer_size, pool));
                 auto out(allocate<unsigned char>(buffer_size, pool));
 
-                size_t pending = 0;
-
                 PointerStorage ptr_storage(pool);
                 ZSTD_customMem mem;
                 mem.customAlloc = zstd_alloc_impl;
                 mem.customFree = zstd_free_impl;
                 mem.opaque = &ptr_storage;
 
-                // z_stream zstream;
-                // zstream.data_type = Z_BINARY;
                 ZSTD_DCtx *dctx = ZSTD_createDCtx_advanced(mem);
+                if (!dctx)
+                {
+                    // Failed to set up the context; there is something wrong with the allocator
+                    in_stream.exceptions(in_stream_except_mask);
+                    out_stream.exceptions(out_stream_except_mask);
+                    return ZSTD_error_GENERIC;
+                }
 
-                // zstream.zalloc = alloc_impl;
-                // zstream.zfree = free_impl;
-                // zstream.opaque = reinterpret_cast<voidpf>(&ptr_storage);
-
-                // zstream.avail_in = 0;
-                // zstream.next_in = Z_NULL;
-                // result = inflateInit(&zstream);
-                // if (result != Z_OK)
-                //{
-                // in_stream.exceptions(in_stream_except_mask);
-                // out_stream.exceptions(out_stream_except_mask);
-                // return result;
-                //}
+                // Holds the return value of the decompression call. This is either the amount of data that remains to
+                // be flushed from internal buffers, or an error code.
+                size_t pending = 0;
 
                 while (true)
                 {
@@ -717,12 +699,10 @@ namespace seal
                             reinterpret_cast<char *>(in.get()),
                             min(static_cast<streamoff>(buffer_size), in_stream_end_pos - in_stream.tellg())))
                     {
-                        // inflateEnd(&zstream);
+                        // Failed to read from stream
                         in_stream.exceptions(in_stream_except_mask);
                         out_stream.exceptions(out_stream_except_mask);
-
-                        // Failed to read from stream
-                        return -1;
+                        return ZSTD_error_GENERIC;
                     }
 
                     ZSTD_inBuffer input = { in.get(), static_cast<size_t>(in_stream.gcount()), 0 };
@@ -736,49 +716,28 @@ namespace seal
                         ZSTD_outBuffer output = { out.get(), buffer_size, 0 };
                         pending = ZSTD_decompressStream(dctx, &output, &input);
 
-                        // zstream.avail_out = buffer_size;
-                        // zstream.next_out = out.get();
-                        // result = inflate(&zstream, Z_NO_FLUSH);
-
-                        // switch (result)
-                        //{
-                        // case Z_NEED_DICT:
-                        // result = Z_DATA_ERROR;
-                        //[> fall through <]
-
-                        // case Z_DATA_ERROR:
-                        //[> fall through <]
-
-                        // case Z_MEM_ERROR:
-                        // inflateEnd(&zstream);
-                        // in_stream.exceptions(in_stream_except_mask);
-                        // out_stream.exceptions(out_stream_except_mask);
-                        // return result;
-                        //}
-
-                        // in_stream.exceptions(in_stream_except_mask);
-                        // out_stream.exceptions(out_stream_except_mask);
-                        // return result;
+                        if (ZSTD_isError(pending))
+                        {
+                            in_stream.exceptions(in_stream_except_mask);
+                            out_stream.exceptions(out_stream_except_mask);
+                            return static_cast<unsigned>(pending);
+                        }
 
                         if (!out_stream.write(
                                 reinterpret_cast<const char *>(out.get()), static_cast<streamsize>(output.pos)))
                         {
-                            // inflateEnd(&zstream);
                             in_stream.exceptions(in_stream_except_mask);
                             out_stream.exceptions(out_stream_except_mask);
-                            return -1;
+                            return ZSTD_error_GENERIC;
                         }
                     }
                 }
-                //} while (result != Z_STREAM_END);
 
                 ZSTD_freeDCtx(dctx);
-                // inflateEnd(&zstream);
 
                 in_stream.exceptions(in_stream_except_mask);
                 out_stream.exceptions(out_stream_except_mask);
-                return 0;
-                // return result == Z_STREAM_END ? Z_OK : Z_DATA_ERROR;
+                return ZSTD_error_no_error;
             }
 
             void zstd_write_header_deflate_buffer(
@@ -787,9 +746,13 @@ namespace seal
                 Serialization::SEALHeader &header = *reinterpret_cast<Serialization::SEALHeader *>(header_ptr);
 
                 auto ret = zstd_deflate_array_inplace(in, move(pool));
-                if (ret)
+                if (ZSTD_error_no_error != ret)
                 {
-                    throw logic_error("zstd compression failed");
+                    stringstream ss;
+                    ss << "Zstandard compression failed with error code ";
+                    ss << ret;
+                    ss << " (" << ZSTD_getErrorName(ret) << ")";
+                    throw logic_error(ss.str());
                 }
 
                 // Populate the header

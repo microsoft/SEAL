@@ -31,8 +31,6 @@ namespace seal
             void zlib_write_header_deflate_buffer(
                 IntArray<seal_byte> &in, void *header_ptr, std::ostream &out_stream, MemoryPoolHandle pool);
 
-            int zlib_deflate_array(const IntArray<seal_byte> &in, IntArray<seal_byte> &out, MemoryPoolHandle pool);
-
             int zlib_deflate_array_inplace(IntArray<seal_byte> &in, MemoryPoolHandle pool);
 
             int zlib_inflate_stream(
@@ -54,11 +52,9 @@ namespace seal
             void zstd_write_header_deflate_buffer(
                 IntArray<seal_byte> &in, void *header_ptr, std::ostream &out_stream, MemoryPoolHandle pool);
 
-            int zstd_deflate_array(const IntArray<seal_byte> &in, IntArray<seal_byte> &out, MemoryPoolHandle pool);
+            unsigned zstd_deflate_array_inplace(IntArray<seal_byte> &in, MemoryPoolHandle pool);
 
-            int zstd_deflate_array_inplace(IntArray<seal_byte> &in, MemoryPoolHandle pool);
-
-            int zstd_inflate_stream(
+            unsigned zstd_inflate_stream(
                 std::istream &in_stream, std::streamoff in_size, std::ostream &out_stream, MemoryPoolHandle pool);
 
             template <typename SizeT>

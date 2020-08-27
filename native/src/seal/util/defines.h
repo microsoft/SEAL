@@ -119,7 +119,7 @@ namespace seal
 {
     using seal_byte = std::byte;
     using SEAL_BYTE = seal_byte;
-}
+} // namespace seal
 #else
 namespace seal
 {
@@ -128,7 +128,7 @@ namespace seal
     };
 
     using SEAL_BYTE = seal_byte;
-}
+} // namespace seal
 #endif
 
 // Use `if constexpr' from C++17

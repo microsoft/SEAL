@@ -393,7 +393,7 @@ namespace seal
                         stream, safe_cast<streamoff>(compr_size), temp_stream,
                         MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, clear_on_destruction)))
                 {
-                    throw logic_error("stream inflate failed");
+                    throw logic_error("stream decompression failed");
                 }
                 load_members(temp_stream);
                 break;
@@ -416,7 +416,7 @@ namespace seal
                         stream, safe_cast<streamoff>(compr_size), temp_stream,
                         MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, clear_on_destruction)))
                 {
-                    throw logic_error("stream inflate failed");
+                    throw logic_error("stream decompression failed");
                 }
                 load_members(temp_stream);
                 break;
