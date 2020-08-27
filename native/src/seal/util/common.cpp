@@ -17,16 +17,20 @@ void seal::util::memzero(void *const data, const size_t size)
 {
 #if SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
     SecureZeroMemory(data, size);
+#error Horror 1
 #elif defined(SEAL_USE_MEMSET_S)
     if (size > 0U && memset_s(data, (rsize_t)size, 0, (rsize_t)size) != 0)
     {
         throw std::runtime_error("Error calling memset_s");
     }
+#error Horror 2
 #elif defined(SEAL_USE_EXPLICIT_BZERO)
     explicit_bzero(data, size);
 #elif defined(SEAL_USE_EXPLICIT_MEMSET)
+#error Horror 4
     explicit_memset(data, 0, size);
 #else
+#error Horror 5
     volatile SEAL_BYTE *data_ptr = reinterpret_cast<SEAL_BYTE *>(data);
     size_t i = 0;
     while (i < size)
