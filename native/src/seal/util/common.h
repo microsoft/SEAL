@@ -567,6 +567,6 @@ namespace seal
             return value == T{ 0 };
         }
 
-        void memzero(void *const data, const size_t size);
+        void seal_memzero(void *const data, const std::size_t size);
     } // namespace util
 } // namespace seal

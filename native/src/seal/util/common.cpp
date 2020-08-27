@@ -12,27 +12,33 @@
 #include <Windows.h>
 #endif
 
+using namespace std;
 
-void seal::util::memzero(void *const data, const size_t size)
+namespace seal
 {
+    namespace util
+    {
+        void seal_memzero(void *const data, const size_t size)
+        {
 #if SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
-    SecureZeroMemory(data, size);
+            SecureZeroMemory(data, size);
 #elif defined(SEAL_USE_MEMSET_S)
-    if (size > 0U && memset_s(data, (rsize_t)size, 0, (rsize_t)size) != 0)
-    {
-        throw std::runtime_error("Error calling memset_s");
-    }
+            if (size > 0U && memset_s(data, static_cast<rsize_t>(size), 0, static_cast<rsize_t>(size)) != 0)
+            {
+                throw runtime_error("error calling memset_s");
+            }
 #elif defined(SEAL_USE_EXPLICIT_BZERO)
-    explicit_bzero(data, size);
+            explicit_bzero(data, size);
 #elif defined(SEAL_USE_EXPLICIT_MEMSET)
-    explicit_memset(data, 0, size);
+            explicit_memset(data, 0, size);
 #else
-    volatile SEAL_BYTE *data_ptr = reinterpret_cast<SEAL_BYTE *>(data);
-    size_t i = 0;
-    while (i < size)
-    {
-        *data_ptr++ = static_cast<SEAL_BYTE>(0);
-    }
-
+            volatile SEAL_BYTE *data_ptr = reinterpret_cast<SEAL_BYTE *>(data);
+            size_t i = 0;
+            while (i < size)
+            {
+                *data_ptr++ = static_cast<SEAL_BYTE>(0);
+            }
 #endif
-}
+        }
+    } // namespace util
+} // namespace seal
