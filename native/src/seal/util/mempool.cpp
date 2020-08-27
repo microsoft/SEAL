@@ -80,11 +80,7 @@ namespace seal
                 for (auto &alloc : allocs_)
                 {
                     size_t curr_alloc_byte_count = mul_safe(item_byte_count_, alloc.size);
-                    volatile seal_byte *data_ptr = reinterpret_cast<seal_byte *>(alloc.data_ptr);
-                    while (curr_alloc_byte_count--)
-                    {
-                        *data_ptr++ = static_cast<seal_byte>(0);
-                    }
+                    seal::util::memzero(alloc.data_ptr, curr_alloc_byte_count);
 
                     // Delete this allocation
                     delete[] alloc.data_ptr;
