@@ -6,7 +6,6 @@
 #endif
 
 #include "seal/util/common.h"
-#include <cstddef>
 #include <string.h>
 
 #if SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
@@ -26,7 +25,7 @@ namespace seal
 #elif defined(SEAL_USE_MEMSET_S)
             if (size > 0U && memset_s(data, static_cast<rsize_t>(size), 0, static_cast<rsize_t>(size)) != 0)
             {
-                throw runtime_error("Error calling memset_s");
+                throw runtime_error("error calling memset_s");
             }
 #elif defined(SEAL_USE_EXPLICIT_BZERO)
             explicit_bzero(data, size);
