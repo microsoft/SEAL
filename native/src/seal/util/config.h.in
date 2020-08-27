@@ -31,6 +31,11 @@
 #cmakedefine SEAL_USE__ADDCARRY_U64
 #cmakedefine SEAL_USE__SUBBORROW_U64
 
+// Zero memory functions
+#cmakedefine SEAL_USE_EXPLICIT_BZERO
+#cmakedefine SEAL_USE_EXPLICIT_MEMSET
+#cmakedefine SEAL_USE_MEMSET_S
+
 // Third-party dependencies
 #cmakedefine SEAL_USE_MSGSL
 #cmakedefine SEAL_USE_ZLIB

@@ -97,6 +97,7 @@
     <ClCompile Include="seal\plaintext.cpp" />
     <ClCompile Include="seal\randomgen.cpp" />
     <ClCompile Include="seal\serialization.cpp" />
+    <ClCompile Include="seal\util\common.cpp" />
     <ClCompile Include="seal\util\rns.cpp" />
     <ClCompile Include="seal\util\ztools.cpp" />
     <ClCompile Include="seal\valcheck.cpp" />
