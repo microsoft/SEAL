@@ -230,7 +230,7 @@ namespace seal
         */
         static std::streamoff Save(
             std::function<void(std::ostream &stream)> save_members, std::streamoff raw_size, std::ostream &stream,
-            compr_mode_type compr_mode);
+            compr_mode_type compr_mode, bool clear_on_destruction = false);
 
         /**
         Deserializes data from stream that was serialized by Save. Once stream has
@@ -247,7 +247,9 @@ namespace seal
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        static std::streamoff Load(std::function<void(std::istream &stream)> load_members, std::istream &stream);
+        static std::streamoff Load(
+            std::function<void(std::istream &stream)> load_members, std::istream &stream,
+            bool clear_on_destruction = false);
 
         /**
         Evaluates save_members and compresses the output according to the given
@@ -275,7 +277,7 @@ namespace seal
         */
         static std::streamoff Save(
             std::function<void(std::ostream &stream)> save_members, std::streamoff raw_size, SEAL_BYTE *out,
-            std::size_t size, compr_mode_type compr_mode);
+            std::size_t size, compr_mode_type compr_mode, bool clear_on_destruction = false);
 
         /**
         Deserializes data from a memory location that was serialized by Save.
@@ -295,7 +297,8 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Load(
-            std::function<void(std::istream &stream)> load_members, const SEAL_BYTE *in, std::size_t size);
+            std::function<void(std::istream &stream)> load_members, const SEAL_BYTE *in, std::size_t size,
+            bool clear_on_destruction = false);
 
     private:
         Serialization() = delete;

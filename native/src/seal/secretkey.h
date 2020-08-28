@@ -132,7 +132,10 @@ namespace seal
         inline std::streamoff save(
             std::ostream &stream, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
-            return sk_.save(stream, compr_mode);
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&Plaintext::save_members, &sk_, _1), sk_.save_size(compr_mode_type::none), stream, compr_mode,
+                /* clear_on_destruction */ true);
         }
 
         /**
@@ -151,9 +154,13 @@ namespace seal
         */
         inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, std::istream &stream)
         {
+            using namespace std::placeholders;
+
             // We use a fresh memory pool with `clear_on_destruction' enabled.
             Plaintext new_sk(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
-            auto in_size = new_sk.unsafe_load(std::move(context), stream);
+            auto in_size = Serialization::Load(
+                std::bind(&Plaintext::load_members, &new_sk, std::move(context), _1), stream,
+                /* clear_on_destruction */ true);
             std::swap(sk_, new_sk);
             return in_size;
         }
@@ -198,7 +205,10 @@ namespace seal
         inline std::streamoff save(
             SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
-            return sk_.save(out, size, compr_mode);
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&Plaintext::save_members, &sk_, _1), sk_.save_size(compr_mode_type::none), out, size,
+                compr_mode, /* clear_on_destruction */ true);
         }
 
         /**
@@ -220,9 +230,11 @@ namespace seal
         */
         inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
         {
+            using namespace std::placeholders;
+
             // We use a fresh memory pool with `clear_on_destruction' enabled.
             Plaintext new_sk(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
-            auto in_size = new_sk.unsafe_load(std::move(context), in, size);
+            auto in_size = Serialization::Load(std::bind(&Plaintext::load_members, &new_sk, std::move(context), _1), in, size);
             std::swap(sk_, new_sk);
             return in_size;
         }
