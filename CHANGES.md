@@ -2,6 +2,10 @@
 
 ## Version 3.5.7
 
+### Hotfix - 8/28/2020
+
+- Merged [(PR 209)](https://github.com/microsoft/SEAL/pull/209). Thanks [s0l0ist](https://github.com/s0l0ist)!
+
 ### Bug fixes
 
 - Fixed an omission in input validation in decryption: the size of the ciphertext was not checked to be non-zero.
