@@ -1026,7 +1026,7 @@ namespace seal
             template <typename SizeT>
             inline self_type &operator+=(SizeT n) noexcept
             {
-                ptr_it_ += n * static_cast<difference_type>(step_size_);
+                ptr_it_ += static_cast<difference_type>(n) * static_cast<difference_type>(step_size_);
                 return *this;
             }
 

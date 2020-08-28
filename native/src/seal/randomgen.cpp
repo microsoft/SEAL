@@ -13,6 +13,16 @@
 
 using namespace std;
 
+#if SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
+
+constexpr auto RTL_GENRANDOM = "SystemFunction036";
+
+// Preserve error codes to diagnose in case of failure
+NTSTATUS last_bcrypt_error = 0;
+DWORD last_genrandom_error = 0;
+
+#endif
+
 namespace seal
 {
     uint64_t random_uint64()
@@ -22,11 +32,41 @@ namespace seal
         random_device rd("/dev/urandom");
         result = (static_cast<uint64_t>(rd()) << 32) + static_cast<uint64_t>(rd());
 #elif SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
-        if (!BCRYPT_SUCCESS(BCryptGenRandom(
-                NULL, reinterpret_cast<unsigned char *>(&result), sizeof(result), BCRYPT_USE_SYSTEM_PREFERRED_RNG)))
+        NTSTATUS status = BCryptGenRandom(
+            NULL, reinterpret_cast<unsigned char *>(&result), sizeof(result), BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+
+        if (BCRYPT_SUCCESS(status))
         {
-            throw runtime_error("BCryptGenRandom failed");
+            return result;
         }
+
+        last_bcrypt_error = status;
+
+        HMODULE hAdvApi = LoadLibraryA("ADVAPI32.DLL");
+        if (!hAdvApi)
+        {
+            last_genrandom_error = GetLastError();
+            throw runtime_error("Failed to load ADVAPI32.dll");
+        }
+
+        BOOLEAN(APIENTRY * RtlGenRandom)
+        (void *, ULONG) = (BOOLEAN(APIENTRY *)(void *, ULONG))GetProcAddress(hAdvApi, RTL_GENRANDOM);
+
+        BOOLEAN genrand_result = FALSE;
+        if (RtlGenRandom)
+        {
+            genrand_result = RtlGenRandom(&result, sizeof(uint64_t));
+        }
+
+        DWORD dwError = GetLastError();
+        FreeLibrary(hAdvApi);
+
+        if (!genrand_result)
+        {
+            last_genrandom_error = dwError;
+            throw runtime_error("Failed to call RtlGenRandom");
+        }
+
 #elif SEAL_SYSTEM == SEAL_SYSTEM_OTHER
 #warning "SECURITY WARNING: System detection failed; falling back to a potentially insecure randomness source!"
         random_device rd;

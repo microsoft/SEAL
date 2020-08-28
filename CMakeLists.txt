@@ -11,7 +11,7 @@ cmake_minimum_required(VERSION 3.12)
 #   4. SEAL C++ tests                             #
 ###################################################
 
-project(SEAL VERSION 3.5.6 LANGUAGES CXX C)
+project(SEAL VERSION 3.5.7 LANGUAGES CXX C)
 
 # Check operating system: for Windows, use Visual Studio solution/project files.
 if(MSVC)
@@ -498,6 +498,10 @@ cmake_dependent_option(SEAL_USE__ADDCARRY_U64 ${SEAL_USE__ADDCARRY_U64_OPTION_ST
 set(SEAL_USE__SUBBORROW_U64_OPTION_STR "Use _subborrow_u64")
 cmake_dependent_option(SEAL_USE__SUBBORROW_U64 ${SEAL_USE__SUBBORROW_U64_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
 
+set(SEAL_USE_MEMSET_S_OPTION_STR "Use memset_s")
+set(SEAL_USE_EXPLICIT_BZERO_OPTION_STR "Use explicit_bzero")
+set(SEAL_USE_EXPLICIT_MEMSET_OPTION_STR "Use explicit_memset")
+
 if(SEAL_USE_INTRIN)
     cmake_push_check_state(RESET)
     set(CMAKE_REQUIRED_QUIET TRUE)
@@ -605,6 +609,37 @@ if(SEAL_USE_INTRIN)
 
     cmake_pop_check_state()
 endif()
+
+# Check for memset_s
+check_cxx_source_runs("
+    #define __STDC_WANT_LIB_EXT1__ 1
+    #include <string.h>
+    int main(void)
+    {
+        char str[] = \"ghghghghghghghghghghgh\";
+        int r = memset_s(str, sizeof(str), 'a', 5);
+        return r;
+    }"
+    USE_MEMSET_S)
+if(USE_MEMSET_S)
+    set(SEAL_USE_MEMSET_S ON CACHE BOOL ${SEAL_USE_MEMSET_S_OPTION_STR} FORCE)
+endif()
+unset(USE_MEMSET_S CACHE)
+
+# Check for explicit_bzero
+include (CheckSymbolExists)
+check_symbol_exists(explicit_bzero "string.h" USE_EXPLICIT_BZERO)
+if(USE_EXPLICIT_BZERO)
+    set(SEAL_USE_EXPLICIT_BZERO ON CACHE BOOL ${SEAL_USE_EXPLICIT_BZERO_OPTION_STR} FORCE)
+endif()
+unset(USE_EXPLICIT_BZERO)
+
+# Check for explicit_memset
+check_symbol_exists(explicit_memset "string.h" USE_EXPLICIT_MEMSET)
+if(USE_EXPLICIT_MEMSET)
+    set(SEAL_USE_EXPLICIT_MEMSET ON CACHE BOOL ${SEAL_USE_EXPLICIT_MEMSET_OPTION_STR} FORCE)
+endif()
+unset(USE_EXPLICIT_MEMSET)
 
 # Create an object library to compile sources only once
 add_library(seal_obj OBJECT)

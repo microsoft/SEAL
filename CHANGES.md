@@ -1,5 +1,17 @@
 # List of Changes
 
+## Version 3.5.7
+
+### Bug fixes
+
+- Fixed an omission in input validation in decryption: the size of the ciphertext was not checked to be non-zero.
+
+### Other
+
+- In Windows switch to using `RtlGenRandom` if the BCrypt API fails.
+- Improved performance in serialization: data clearing memory pools were always used before, but now are only used for the secret key.
+- Use native APIs for memory clearing, when available, instead of for-loop.
+
 ## Version 3.5.6
 
 ### Bug fixes
