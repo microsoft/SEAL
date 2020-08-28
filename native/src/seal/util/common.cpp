@@ -18,7 +18,7 @@ namespace seal
 {
     namespace util
     {
-        void seal_memzero(void *const data, const size_t size)
+        void seal_memzero(void *const data, size_t size)
         {
 #if SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
             SecureZeroMemory(data, size);
@@ -33,8 +33,7 @@ namespace seal
             explicit_memset(data, 0, size);
 #else
             volatile SEAL_BYTE *data_ptr = reinterpret_cast<SEAL_BYTE *>(data);
-            size_t i = 0;
-            while (i < size)
+            while (size--)
             {
                 *data_ptr++ = static_cast<SEAL_BYTE>(0);
             }

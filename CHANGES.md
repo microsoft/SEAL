@@ -23,6 +23,28 @@ This is because a `Plaintext` object with slot-data written into the coefficient
 - Moved all files related to pkg-config to `pkgconfig/` subdirectory.
 - Added a new typedef `seal::seal_byte` for the unnecessarily capitalized `seal::SEAL_BYTE`.
 
+## Version 3.5.8
+
+### Other
+
+- The bug fixed in [(PR 209)](https://github.com/microsoft/SEAL/pull/209) also affects Android. Changed version to 3.5.8 where this is fixed.
+
+## Version 3.5.7
+
+### Hotfix - 8/28/2020
+
+- Merged [(PR 209)](https://github.com/microsoft/SEAL/pull/209). Thanks [s0l0ist](https://github.com/s0l0ist)!
+
+### Bug fixes
+
+- Fixed an omission in input validation in decryption: the size of the ciphertext was not checked to be non-zero.
+
+### Other
+
+- In Windows switch to using `RtlGenRandom` if the BCrypt API fails.
+- Improved performance in serialization: data clearing memory pools were always used before, but now are only used for the secret key.
+- Use native APIs for memory clearing, when available, instead of for-loop.
+
 ## Version 3.5.6
 
 ### Bug fixes
