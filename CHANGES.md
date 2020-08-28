@@ -1,5 +1,11 @@
 # List of Changes
 
+## Version 3.5.8
+
+### Other
+
+- The bug fixed in [(PR 209)](https://github.com/microsoft/SEAL/pull/209) also affects Android. Changed version to 3.5.8 where this is fixed.
+
 ## Version 3.5.7
 
 ### Hotfix - 8/28/2020
