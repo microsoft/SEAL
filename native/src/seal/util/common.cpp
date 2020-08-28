@@ -33,8 +33,8 @@ namespace seal
             explicit_memset(data, 0, size);
 #else
             volatile SEAL_BYTE *data_ptr = reinterpret_cast<SEAL_BYTE *>(data);
-            size_t i = 0;
-            while (i < size)
+            size_t i = size;
+            while (i--)
             {
                 *data_ptr++ = static_cast<SEAL_BYTE>(0);
             }
