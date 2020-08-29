@@ -133,6 +133,7 @@ include(CheckIncludeFiles)
 include(CheckCXXSourceCompiles)
 include(CheckCXXSourceRuns)
 include(CheckTypeSize)
+include (CheckSymbolExists)
 
 ################################################
 # Cleaning up artifacts from previous versions #
@@ -551,9 +552,18 @@ cmake_dependent_option(SEAL_USE__ADDCARRY_U64 ${SEAL_USE__ADDCARRY_U64_OPTION_ST
 set(SEAL_USE__SUBBORROW_U64_OPTION_STR "Use _subborrow_u64")
 cmake_dependent_option(SEAL_USE__SUBBORROW_U64 ${SEAL_USE__SUBBORROW_U64_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
 
+# Options for memory clearing
 set(SEAL_USE_MEMSET_S_OPTION_STR "Use memset_s")
+option(SEAL_USE_MEMSET_S ${SEAL_USE_MEMSET_S_OPTION_STR} ON)
+mark_as_advanced(FORCE SEAL_USE_MEMSET_S)
+
 set(SEAL_USE_EXPLICIT_BZERO_OPTION_STR "Use explicit_bzero")
+option(SEAL_USE_EXPLICIT_BZERO ${SEAL_USE_EXPLICIT_BZERO_OPTION_STR} ON)
+mark_as_advanced(FORCE SEAL_USE_EXPLICIT_BZERO)
+
 set(SEAL_USE_EXPLICIT_MEMSET_OPTION_STR "Use explicit_memset")
+option(SEAL_USE_EXPLICIT_MEMSET ${SEAL_USE_EXPLICIT_MEMSET_OPTION_STR} ON)
+mark_as_advanced(FORCE SEAL_USE_EXPLICIT_MEMSET)
 
 if(SEAL_USE_INTRIN)
     cmake_push_check_state(RESET)
@@ -664,35 +674,40 @@ if(SEAL_USE_INTRIN)
 endif()
 
 # Check for memset_s
-check_cxx_source_runs("
-    #define __STDC_WANT_LIB_EXT1__ 1
-    #include <string.h>
-    int main(void)
-    {
-        char str[] = \"ghghghghghghghghghghgh\";
-        int r = memset_s(str, sizeof(str), 'a', 5);
-        return r;
-    }"
-    USE_MEMSET_S)
-if(USE_MEMSET_S)
-    set(SEAL_USE_MEMSET_S ON CACHE BOOL ${SEAL_USE_MEMSET_S_OPTION_STR} FORCE)
+if(SEAL_USE_MEMSET_S)
+    check_cxx_source_runs("
+        #define __STDC_WANT_LIB_EXT1__ 1
+        #include <string.h>
+        int main(void)
+        {
+            char str[] = \"ghghghghghghghghghghgh\";
+            int r = memset_s(str, sizeof(str), 'a', 5);
+            return r;
+        }"
+        USE_MEMSET_S)
+    if(NOT USE_MEMSET_S)
+        set(SEAL_USE_MEMSET_S OFF CACHE BOOL ${SEAL_USE_MEMSET_S_OPTION_STR} FORCE)
+    endif()
+    unset(USE_MEMSET_S CACHE)
 endif()
-unset(USE_MEMSET_S CACHE)
 
 # Check for explicit_bzero
-include (CheckSymbolExists)
-check_symbol_exists(explicit_bzero "string.h" USE_EXPLICIT_BZERO)
-if(USE_EXPLICIT_BZERO)
-    set(SEAL_USE_EXPLICIT_BZERO ON CACHE BOOL ${SEAL_USE_EXPLICIT_BZERO_OPTION_STR} FORCE)
+if(SEAL_USE_EXPLICIT_BZERO)
+    check_symbol_exists(explicit_bzero "string.h" USE_EXPLICIT_BZERO)
+    if(NOT USE_EXPLICIT_BZERO)
+        set(SEAL_USE_EXPLICIT_BZERO OFF CACHE BOOL ${SEAL_USE_EXPLICIT_BZERO_OPTION_STR} FORCE)
+    endif()
+    unset(USE_EXPLICIT_BZERO)
 endif()
-unset(USE_EXPLICIT_BZERO)
 
 # Check for explicit_memset
-check_symbol_exists(explicit_memset "string.h" USE_EXPLICIT_MEMSET)
-if(USE_EXPLICIT_MEMSET)
-    set(SEAL_USE_EXPLICIT_MEMSET ON CACHE BOOL ${SEAL_USE_EXPLICIT_MEMSET_OPTION_STR} FORCE)
+if(SEAL_USE_EXPLICIT_MEMSET)
+    check_symbol_exists(explicit_memset "string.h" USE_EXPLICIT_MEMSET)
+    if(NOT USE_EXPLICIT_MEMSET)
+        set(SEAL_USE_EXPLICIT_MEMSET OFF CACHE BOOL ${SEAL_USE_EXPLICIT_MEMSET_OPTION_STR} FORCE)
+    endif()
+    unset(USE_EXPLICIT_MEMSET)
 endif()
-unset(USE_EXPLICIT_MEMSET)
 
 # Create an object library to compile sources only once
 add_library(seal_obj OBJECT)
