@@ -165,7 +165,7 @@ namespace sealtest
             ASSERT_EQ(Modulus(13), base6[5]);
             ASSERT_EQ(Modulus(17), base6[6]);
 
-            ASSERT_THROW(auto base7 = base4.extend(RNSBase({ 7, 11, 15 }, pool)), logic_error);
+            ASSERT_THROW(auto base7 = base4.extend(RNSBase({ 7, 10, 11 }, pool)), invalid_argument);
         }
 
         TEST(RNSBaseTest, Drop)

@@ -130,7 +130,7 @@ namespace seal
             // The bases must be coprime
             for (size_t i = 0; i < other.size_; i++)
             {
-                for (size_t j = 0; j < i; j++)
+                for (size_t j = 0; j < size_; j++)
                 {
                     if (!are_coprime(other[i].value(), base_[j].value()))
                     {
