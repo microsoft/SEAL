@@ -92,7 +92,7 @@ namespace seal
             return result;
         }
 
-        RNSBase RNSBase::extend(Modulus value) const
+        RNSBase RNSBase::extend(const Modulus &value) const
         {
             if (value.is_zero())
             {
@@ -176,7 +176,7 @@ namespace seal
             return newbase;
         }
 
-        RNSBase RNSBase::drop(Modulus value) const
+        RNSBase RNSBase::drop(const Modulus &value) const
         {
             if (size_ == 1)
             {
