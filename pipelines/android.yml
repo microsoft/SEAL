@@ -14,7 +14,7 @@ steps:
       $ToolsDirectory = Join-Path -Path $Env:BUILD_SOURCESDIRECTORY -ChildPath tools
       $NinjaZipFile = Join-Path $ToolsDirectory -ChildPath ninja.zip
       $NinjaExeFile = Join-Path $ToolsDirectory -ChildPath ninja.exe
-      
+
       Invoke-WebRequest -Uri "https://github.com/ninja-build/ninja/releases/download/v1.10.0/ninja-win.zip" -OutFile $NinjaZipFile
       Expand-Archive -Path $NinjaZipFile -DestinationPath $ToolsDirectory
       Copy-Item -Path $NinjaExeFile -Destination "c:\Program Files\CMake\bin"

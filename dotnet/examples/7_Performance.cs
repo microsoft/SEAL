@@ -20,7 +20,7 @@ namespace SEALNetExamples
 
             bool hasZLIB = Serialization.IsSupportedComprMode(ComprModeType.ZLIB);
             bool hasZSTD = Serialization.IsSupportedComprMode(ComprModeType.ZSTD);
-            
+
             using EncryptionParameters parms = context.FirstContextData.Parms;
             using Modulus plainModulus = parms.PlainModulus;
             ulong polyModulusDegree = parms.PolyModulusDegree;
