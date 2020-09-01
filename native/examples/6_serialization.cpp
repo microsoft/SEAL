@@ -56,7 +56,7 @@ void example_serialization()
     accordingly.
     */
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         size_t poly_modulus_degree = 8192;
         parms.set_poly_modulus_degree(poly_modulus_degree);
         parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 50, 20, 50 }));
@@ -85,9 +85,9 @@ void example_serialization()
         providing EncryptionParameters::save with the desired compression mode as
         in the following examples:
 
-            auto size = parms.save(shared_stream, compr_mode_type::NONE);
-            auto size = parms.save(shared_stream, compr_mode_type::ZLIB);
-            auto size = parms.save(shared_stream, compr_mode_type::ZSTD);
+            auto size = parms.save(shared_stream, compr_mode_type::none);
+            auto size = parms.save(shared_stream, compr_mode_type::zlib);
+            auto size = parms.save(shared_stream, compr_mode_type::zstd);
 
         If Microsoft SEAL is compiled with Zstandard or ZLIB support, the default is
         to use one of them. If available, Zstandard is preferred over ZLIB.
@@ -102,9 +102,9 @@ void example_serialization()
 
         In more detail, the output of EncryptionParameters::save_size is as follows:
 
-            - Exact buffer size required for compr_mode_type::NONE;
-            - Upper bound on the size required for compr_mode_type::ZLIB or
-              compr_mode_type::ZSTD.
+            - Exact buffer size required for compr_mode_type::none;
+            - Upper bound on the size required for compr_mode_type::zlib or
+              compr_mode_type::zstd.
 
         As we can see from the print-out, the sizes returned by these functions
         are significantly larger than the compressed size written into the shared
@@ -113,8 +113,8 @@ void example_serialization()
         compressed data.
         */
         print_line(__LINE__);
-        cout << "EncryptionParameters: data size upper bound (compr_mode_type::NONE): "
-             << parms.save_size(compr_mode_type::NONE) << endl;
+        cout << "EncryptionParameters: data size upper bound (compr_mode_type::none): "
+             << parms.save_size(compr_mode_type::none) << endl;
         cout << "             "
              << "EncryptionParameters: data size upper bound (compression): "
              << parms.save_size(/* Serialization::compr_mode_default */) << endl;
@@ -287,7 +287,7 @@ void example_serialization()
 
         Finally, we would like to point out that none of these methods provide any
         space savings unless Microsoft SEAL is compiled with compression support, or
-        when serialized with compr_mode_type::NONE.
+        when serialized with compr_mode_type::none.
         */
     }
 

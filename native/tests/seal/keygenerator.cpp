@@ -17,7 +17,7 @@ namespace sealtest
 {
     TEST(KeyGeneratorTest, BFVKeyGeneration)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         {
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(65537);
@@ -158,7 +158,7 @@ namespace sealtest
 
     TEST(KeyGeneratorTest, CKKSKeyGeneration)
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         {
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60 }));
@@ -296,7 +296,7 @@ namespace sealtest
 
     TEST(KeyGeneratorTest, Constructors)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(65537);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 60, 50, 40 }));

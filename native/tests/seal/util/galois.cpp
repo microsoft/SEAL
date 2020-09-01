@@ -78,7 +78,7 @@ namespace sealtest
 
         TEST(GaloisToolTest, ApplyGalois)
         {
-            EncryptionParameters parms(scheme_type::CKKS);
+            EncryptionParameters parms(scheme_type::ckks);
             parms.set_poly_modulus_degree(8);
             parms.set_coeff_modulus({ 17 });
             SEALContext context(parms, false, sec_level_type::none);
@@ -96,7 +96,7 @@ namespace sealtest
 
         TEST(GaloisToolTest, ApplyGaloisNTT)
         {
-            EncryptionParameters parms(scheme_type::CKKS);
+            EncryptionParameters parms(scheme_type::ckks);
             parms.set_poly_modulus_degree(8);
             parms.set_coeff_modulus({ 17 });
             SEALContext context(parms, false, sec_level_type::none);

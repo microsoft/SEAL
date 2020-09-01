@@ -87,7 +87,7 @@ namespace sealtest
         Plaintext plain2;
 
         {
-            EncryptionParameters parms(scheme_type::CKKS);
+            EncryptionParameters parms(scheme_type::ckks);
             parms.set_poly_modulus_degree(4);
             parms.set_coeff_modulus(CoeffModulus::Create(4, { 20 }));
 
@@ -124,7 +124,7 @@ namespace sealtest
             ASSERT_TRUE(plain2.parms_id() == plain.parms_id());
         }
         {
-            EncryptionParameters parms(scheme_type::BFV);
+            EncryptionParameters parms(scheme_type::bfv);
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 30 }));
             parms.set_plain_modulus(65537);
@@ -146,7 +146,7 @@ namespace sealtest
             ASSERT_TRUE(plain2.is_ntt_form());
         }
         {
-            EncryptionParameters parms(scheme_type::CKKS);
+            EncryptionParameters parms(scheme_type::ckks);
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 30 }));
 

@@ -94,11 +94,11 @@ namespace seal
 
         switch (parms.scheme())
         {
-        case scheme_type::BFV:
+        case scheme_type::bfv:
             bfv_decrypt(encrypted, destination, pool_);
             return;
 
-        case scheme_type::CKKS:
+        case scheme_type::ckks:
             ckks_decrypt(encrypted, destination, pool_);
             return;
 
@@ -313,7 +313,7 @@ namespace seal
             throw invalid_argument("encrypted is empty");
         }
 
-        if (context_.key_context_data()->parms().scheme() != scheme_type::BFV)
+        if (context_.key_context_data()->parms().scheme() != scheme_type::bfv)
         {
             throw logic_error("unsupported scheme");
         }

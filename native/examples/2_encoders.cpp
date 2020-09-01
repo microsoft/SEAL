@@ -69,7 +69,7 @@ void example_integer_encoder()
     However, advanced users will probably prefer more efficient approaches,
     such as the BatchEncoder or the CKKSEncoder.
     */
-    EncryptionParameters parms(scheme_type::BFV);
+    EncryptionParameters parms(scheme_type::bfv);
     size_t poly_modulus_degree = 4096;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
@@ -168,7 +168,7 @@ void example_batch_encoder()
     with BFV, and when used properly will result in implementations outperforming
     anything done with the IntegerEncoder.
     */
-    EncryptionParameters parms(scheme_type::BFV);
+    EncryptionParameters parms(scheme_type::bfv);
     size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
@@ -339,7 +339,7 @@ void example_ckks_encoder()
             `ckks_basics.cpp'. In this example we use CoeffModulus::Create to
             generate 5 40-bit prime numbers.
     */
-    EncryptionParameters parms(scheme_type::CKKS);
+    EncryptionParameters parms(scheme_type::ckks);
 
     size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);

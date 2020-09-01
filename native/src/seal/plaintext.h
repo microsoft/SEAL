@@ -37,8 +37,8 @@ namespace seal
     the desired capacity to the constructor as an extra argument, or by calling
     the reserve function at any time.
 
-    When the scheme is scheme_type::BFV each coefficient of a plaintext is a 64-bit
-    word, but when the scheme is scheme_type::CKKS the plaintext is by default
+    When the scheme is scheme_type::bfv each coefficient of a plaintext is a 64-bit
+    word, but when the scheme is scheme_type::ckks the plaintext is by default
     stored in an NTT transformed form with respect to each of the primes in the
     coefficient modulus. Thus, the size of the allocation that is needed is the
     size of the coefficient modulus (number of primes) times the degree of the
@@ -544,7 +544,7 @@ namespace seal
                 util::add_safe(
                     sizeof(parms_id_),
                     sizeof(std::uint64_t), // coeff_count_
-                    sizeof(scale_), util::safe_cast<std::size_t>(data_.save_size(compr_mode_type::NONE))),
+                    sizeof(scale_), util::safe_cast<std::size_t>(data_.save_size(compr_mode_type::none))),
                 compr_mode);
 
             return util::safe_cast<std::streamoff>(util::add_safe(sizeof(Serialization::SEALHeader), members_size));
@@ -566,7 +566,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&Plaintext::save_members, this, _1), save_size(compr_mode_type::NONE), stream, compr_mode);
+                std::bind(&Plaintext::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode);
         }
 
         /**
@@ -629,7 +629,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&Plaintext::save_members, this, _1), save_size(compr_mode_type::NONE), out, size, compr_mode);
+                std::bind(&Plaintext::save_members, this, _1), save_size(compr_mode_type::none), out, size, compr_mode);
         }
 
         /**

@@ -39,9 +39,9 @@ namespace seal
 
 
     @par NTT form
-    When using the BFV scheme (scheme_type::BFV), all plaintext and ciphertexts
+    When using the BFV scheme (scheme_type::bfv), all plaintext and ciphertexts
     should remain by default in the usual coefficient representation, i.e. not in
-    NTT form. When using the CKKS scheme (scheme_type::CKKS), all plaintexts and
+    NTT form. When using the CKKS scheme (scheme_type::ckks), all plaintexts and
     ciphertexts should remain by default in NTT form. We call these scheme-specific
     NTT states the "default NTT form". Decryption requires the input ciphertexts
     to be in the default NTT form, and will throw an exception if this is not the

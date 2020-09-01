@@ -398,7 +398,7 @@ namespace seal
                 }
 
                 // Populate the header
-                header.compr_mode = compr_mode_type::ZLIB;
+                header.compr_mode = compr_mode_type::zlib;
                 header.size = static_cast<uint64_t>(add_safe(sizeof(Serialization::SEALHeader), in.size()));
 
                 auto old_except_mask = out_stream.exceptions();
@@ -756,7 +756,7 @@ namespace seal
                 }
 
                 // Populate the header
-                header.compr_mode = compr_mode_type::ZSTD;
+                header.compr_mode = compr_mode_type::zstd;
                 header.size = static_cast<uint64_t>(add_safe(sizeof(Serialization::SEALHeader), in.size()));
 
                 auto old_except_mask = out_stream.exceptions();

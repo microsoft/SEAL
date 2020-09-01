@@ -15,7 +15,7 @@ namespace sealtest
     TEST(ContextTest, ContextConstructor)
     {
         // Nothing set
-        auto scheme = scheme_type::BFV;
+        auto scheme = scheme_type::bfv;
         EncryptionParameters parms(scheme);
         {
             SEALContext context(parms, false, sec_level_type::none);
@@ -313,7 +313,7 @@ namespace sealtest
     TEST(ContextTest, ModulusChainExpansion)
     {
         {
-            EncryptionParameters parms(scheme_type::BFV);
+            EncryptionParameters parms(scheme_type::bfv);
             parms.set_poly_modulus_degree(4);
             parms.set_coeff_modulus({ 41, 137, 193, 65537 });
             parms.set_plain_modulus(73);
@@ -345,7 +345,7 @@ namespace sealtest
             ASSERT_TRUE(!!context.first_context_data()->prev_context_data());
         }
         {
-            EncryptionParameters parms(scheme_type::CKKS);
+            EncryptionParameters parms(scheme_type::ckks);
             parms.set_poly_modulus_degree(4);
             parms.set_coeff_modulus({ 41, 137, 193, 65537 });
             SEALContext context(parms, true, sec_level_type::none);
@@ -384,7 +384,7 @@ namespace sealtest
 
     TEST(EncryptionParameterQualifiersTest, ParameterError)
     {
-        auto scheme = scheme_type::BFV;
+        auto scheme = scheme_type::bfv;
         EncryptionParameters parms(scheme);
         SEALContext context(parms, false, sec_level_type::none);
         auto qualifiers = context.first_context_data()->qualifiers();

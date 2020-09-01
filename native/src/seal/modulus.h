@@ -295,7 +295,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&Modulus::save_members, this, _1), save_size(compr_mode_type::NONE), stream, compr_mode);
+                std::bind(&Modulus::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode);
         }
 
         /**
@@ -331,7 +331,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&Modulus::save_members, this, _1), save_size(compr_mode_type::NONE), out, size, compr_mode);
+                std::bind(&Modulus::save_members, this, _1), save_size(compr_mode_type::none), out, size, compr_mode);
         }
 
         /**
@@ -433,13 +433,13 @@ namespace seal
             switch (sec_level)
             {
             case sec_level_type::tc128:
-                return util::SEAL_HE_STD_PARMS_128_TC(poly_modulus_degree);
+                return util::seal_he_std_parms_128_tc(poly_modulus_degree);
 
             case sec_level_type::tc192:
-                return util::SEAL_HE_STD_PARMS_192_TC(poly_modulus_degree);
+                return util::seal_he_std_parms_192_tc(poly_modulus_degree);
 
             case sec_level_type::tc256:
-                return util::SEAL_HE_STD_PARMS_256_TC(poly_modulus_degree);
+                return util::seal_he_std_parms_256_tc(poly_modulus_degree);
 
             case sec_level_type::none:
                 return std::numeric_limits<int>::max();

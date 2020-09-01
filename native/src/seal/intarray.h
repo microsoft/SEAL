@@ -534,7 +534,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&IntArray<T_>::save_members, this, _1), save_size(compr_mode_type::NONE), stream, compr_mode);
+                std::bind(&IntArray<T_>::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode);
         }
 
         /**
@@ -576,7 +576,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&IntArray<T_>::save_members, this, _1), save_size(compr_mode_type::NONE), out, size,
+                std::bind(&IntArray<T_>::save_members, this, _1), save_size(compr_mode_type::none), out, size,
                 compr_mode);
         }
 

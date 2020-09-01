@@ -128,7 +128,7 @@ namespace seal
     {
         // We need to consider two cases: seeded and unseeded; these have very
         // different size characteristics and we need the exact size when
-        // compr_mode is compr_mode_type::NONE.
+        // compr_mode is compr_mode_type::none.
         size_t data_size;
         if (has_seed_marker())
         {
@@ -138,12 +138,12 @@ namespace seal
                 data_.pool());
 
             data_size = add_safe(
-                safe_cast<size_t>(alias_data.save_size(compr_mode_type::NONE)), // data_(0)
+                safe_cast<size_t>(alias_data.save_size(compr_mode_type::none)), // data_(0)
                 sizeof(random_seed_type));                                      // seed
         }
         else
         {
-            data_size = safe_cast<size_t>(data_.save_size(compr_mode_type::NONE)); // data_
+            data_size = safe_cast<size_t>(data_.save_size(compr_mode_type::none)); // data_
         }
 
         size_t members_size = Serialization::ComprSizeEstimate(
@@ -193,7 +193,7 @@ namespace seal
                 alias_data.capacity_ = half_size;
                 auto alias_ptr = util::Pointer<ct_coeff_type>::Aliasing(const_cast<ct_coeff_type *>(data_.cbegin()));
                 swap(alias_data.data_, alias_ptr);
-                alias_data.save(stream, compr_mode_type::NONE);
+                alias_data.save(stream, compr_mode_type::none);
 
                 // Save the seed
                 stream.write(reinterpret_cast<char *>(&seed), sizeof(random_seed_type));
@@ -201,7 +201,7 @@ namespace seal
             else
             {
                 // Save the IntArray
-                data_.save(stream, compr_mode_type::NONE);
+                data_.save(stream, compr_mode_type::none);
             }
         }
         catch (const ios_base::failure &)

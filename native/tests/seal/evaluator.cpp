@@ -23,7 +23,7 @@ namespace sealtest
 {
     TEST(EvaluatorTest, BFVEncryptNegateDecrypt)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
@@ -77,7 +77,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, BFVEncryptAddDecrypt)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
@@ -156,7 +156,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, CKKSEncryptAddDecrypt)
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         {
             // Adding two zero vectors
             size_t slot_size = 32;
@@ -312,7 +312,7 @@ namespace sealtest
     }
     TEST(EvaluatorTest, CKKSEncryptAddPlainDecrypt)
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         {
             // Adding two zero vectors
             size_t slot_size = 32;
@@ -558,7 +558,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, CKKSEncryptSubPlainDecrypt)
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         {
             // Subtracting two zero vectors
             size_t slot_size = 32;
@@ -739,7 +739,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, BFVEncryptSubDecrypt)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
@@ -799,7 +799,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, BFVEncryptAddPlainDecrypt)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
@@ -871,7 +871,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, BFVEncryptSubPlainDecrypt)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
@@ -943,7 +943,7 @@ namespace sealtest
     TEST(EvaluatorTest, BFVEncryptMultiplyPlainDecrypt)
     {
         {
-            EncryptionParameters parms(scheme_type::BFV);
+            EncryptionParameters parms(scheme_type::bfv);
             Modulus plain_modulus(1 << 6);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
@@ -1037,7 +1037,7 @@ namespace sealtest
             ASSERT_EQ(static_cast<uint64_t>(325), encoder.decode_uint64(plain));
         }
         {
-            EncryptionParameters parms(scheme_type::BFV);
+            EncryptionParameters parms(scheme_type::bfv);
             Modulus plain_modulus((1ULL << 20) - 1);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
@@ -1095,7 +1095,7 @@ namespace sealtest
             ASSERT_EQ(static_cast<uint64_t>(325), encoder.decode_uint64(plain));
         }
         {
-            EncryptionParameters parms(scheme_type::BFV);
+            EncryptionParameters parms(scheme_type::bfv);
             Modulus plain_modulus((1ULL << 40) - 1);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
@@ -1153,7 +1153,7 @@ namespace sealtest
             ASSERT_EQ(static_cast<uint64_t>(325), encoder.decode_uint64(plain));
         }
         {
-            EncryptionParameters parms(scheme_type::BFV);
+            EncryptionParameters parms(scheme_type::bfv);
             Modulus plain_modulus(PlainModulus::Batching(64, 20));
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
@@ -1188,7 +1188,7 @@ namespace sealtest
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
         }
         {
-            EncryptionParameters parms(scheme_type::BFV);
+            EncryptionParameters parms(scheme_type::bfv);
             Modulus plain_modulus(PlainModulus::Batching(64, 40));
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
@@ -1251,7 +1251,7 @@ namespace sealtest
     TEST(EvaluatorTest, BFVEncryptMultiplyDecrypt)
     {
         {
-            EncryptionParameters parms(scheme_type::BFV);
+            EncryptionParameters parms(scheme_type::bfv);
             Modulus plain_modulus(1 << 6);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
@@ -1317,7 +1317,7 @@ namespace sealtest
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
         }
         {
-            EncryptionParameters parms(scheme_type::BFV);
+            EncryptionParameters parms(scheme_type::bfv);
             Modulus plain_modulus((1ULL << 60) - 1);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
@@ -1383,7 +1383,7 @@ namespace sealtest
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
         }
         {
-            EncryptionParameters parms(scheme_type::BFV);
+            EncryptionParameters parms(scheme_type::bfv);
             Modulus plain_modulus(1 << 6);
             parms.set_poly_modulus_degree(128);
             parms.set_plain_modulus(plain_modulus);
@@ -1449,7 +1449,7 @@ namespace sealtest
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
         }
         {
-            EncryptionParameters parms(scheme_type::BFV);
+            EncryptionParameters parms(scheme_type::bfv);
             Modulus plain_modulus(1 << 8);
             parms.set_poly_modulus_degree(128);
             parms.set_plain_modulus(plain_modulus);
@@ -1477,7 +1477,7 @@ namespace sealtest
 #include "seal/randomgen.h"
     TEST(EvaluatorTest, BFVRelinearize)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
@@ -1549,7 +1549,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, CKKSEncryptNaiveMultiplyDecrypt)
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         {
             // Multiplying two zero vectors
             size_t slot_size = 32;
@@ -1703,7 +1703,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, CKKSEncryptMultiplyByNumberDecrypt)
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         {
             // Multiplying two random vectors by an integer
             size_t slot_size = 32;
@@ -1928,7 +1928,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, CKKSEncryptMultiplyRelinDecrypt)
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         {
             // Multiplying two random vectors 50 times
             size_t slot_size = 32;
@@ -2119,7 +2119,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, CKKSEncryptSquareRelinDecrypt)
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         {
             // Squaring two random vectors 100 times
             size_t slot_size = 32;
@@ -2289,7 +2289,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, CKKSEncryptMultiplyRelinRescaleDecrypt)
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         {
             // Multiplying two random vectors 100 times
             size_t slot_size = 64;
@@ -2547,7 +2547,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, CKKSEncryptSquareRelinRescaleDecrypt)
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         {
             // Squaring two random vectors 100 times
             size_t slot_size = 64;
@@ -2667,7 +2667,7 @@ namespace sealtest
     }
     TEST(EvaluatorTest, CKKSEncryptModSwitchDecrypt)
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         {
             // Modulus switching without rescaling for random vectors
             size_t slot_size = 64;
@@ -2884,7 +2884,7 @@ namespace sealtest
     }
     TEST(EvaluatorTest, CKKSEncryptMultiplyRelinRescaleModSwitchAddDecrypt)
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         {
             // Multiplication and addition without rescaling for random vectors
             size_t slot_size = 64;
@@ -3048,7 +3048,7 @@ namespace sealtest
     }
     TEST(EvaluatorTest, CKKSEncryptRotateDecrypt)
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         {
             // Maximal number of slots
             size_t slot_size = 4;
@@ -3196,7 +3196,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, CKKSEncryptRescaleRotateDecrypt)
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         {
             // Maximal number of slots
             size_t slot_size = 4;
@@ -3352,7 +3352,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, BFVEncryptSquareDecrypt)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         Modulus plain_modulus(1 << 8);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
@@ -3414,7 +3414,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, BFVEncryptMultiplyManyDecrypt)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
@@ -3501,7 +3501,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, BFVEncryptExponentiateDecrypt)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
@@ -3545,7 +3545,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, BFVEncryptAddManyDecrypt)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
@@ -3629,7 +3629,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, TransformPlainToNTT)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
@@ -3701,7 +3701,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, TransformEncryptedToFromNTT)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
@@ -3743,7 +3743,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, BFVEncryptMultiplyPlainNTTDecrypt)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         Modulus plain_modulus(1 << 6);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
@@ -3812,7 +3812,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, BFVEncryptApplyGaloisDecrypt)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         Modulus plain_modulus(257);
         parms.set_poly_modulus_degree(8);
         parms.set_plain_modulus(plain_modulus);
@@ -3890,7 +3890,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, BFVEncryptRotateMatrixDecrypt)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         Modulus plain_modulus(257);
         parms.set_poly_modulus_degree(8);
         parms.set_plain_modulus(plain_modulus);
@@ -3942,7 +3942,7 @@ namespace sealtest
         Modulus plain_modulus(1 << 6);
 
         // The parameters and the context of the higher level
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 30, 30, 30, 30 }));
@@ -4025,7 +4025,7 @@ namespace sealtest
         Modulus plain_modulus(1 << 6);
 
         // The parameters and the context of the higher level
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 30, 30, 30, 30 }));

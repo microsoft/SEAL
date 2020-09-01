@@ -21,7 +21,7 @@ void example_ckks_basics()
 
     We start by setting up the CKKS scheme.
     */
-    EncryptionParameters parms(scheme_type::CKKS);
+    EncryptionParameters parms(scheme_type::ckks);
 
     /*
     We saw in `2_encoders.cpp' that multiplication in CKKS causes scales

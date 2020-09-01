@@ -21,7 +21,7 @@ namespace sealtest
 {
     TEST(EncryptorTest, BFVEncryptDecrypt)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         Modulus plain_modulus(1 << 6);
         parms.set_plain_modulus(plain_modulus);
         {
@@ -215,7 +215,7 @@ namespace sealtest
 
     TEST(EncryptorTest, BFVEncryptZeroDecrypt)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         Modulus plain_modulus(1 << 6);
         parms.set_plain_modulus(plain_modulus);
         parms.set_poly_modulus_degree(64);
@@ -284,7 +284,7 @@ namespace sealtest
 
     TEST(EncryptorTest, CKKSEncryptZeroDecrypt)
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         parms.set_poly_modulus_degree(64);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40, 40, 40 }));
 
@@ -393,7 +393,7 @@ namespace sealtest
 
     TEST(EncryptorTest, CKKSEncryptDecrypt)
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         {
             // input consists of ones
             size_t slot_size = 32;

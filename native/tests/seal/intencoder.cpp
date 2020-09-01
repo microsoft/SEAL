@@ -15,7 +15,7 @@ namespace sealtest
     TEST(Encoder, IntEncodeDecodeBigUInt)
     {
         Modulus modulus(0xFFFFFFFFFFFFFFF);
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         parms.set_plain_modulus(modulus);
         SEALContext context(parms);
         IntegerEncoder encoder(context);
@@ -93,7 +93,7 @@ namespace sealtest
     TEST(Encoder, IntEncodeDecodeUInt64)
     {
         Modulus modulus(0xFFFFFFFFFFFFFFF);
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         parms.set_plain_modulus(modulus);
         SEALContext context(parms);
         IntegerEncoder encoder(context);
@@ -162,7 +162,7 @@ namespace sealtest
     TEST(Encoder, IntEncodeDecodeUInt32)
     {
         Modulus modulus(0xFFFFFFFFFFFFFFF);
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         parms.set_plain_modulus(modulus);
         SEALContext context(parms);
         IntegerEncoder encoder(context);
@@ -231,7 +231,7 @@ namespace sealtest
     TEST(Encoder, IntEncodeDecodeInt64)
     {
         Modulus modulus(0x7FFFFFFFFFFFF);
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         parms.set_plain_modulus(modulus);
         SEALContext context(parms);
         IntegerEncoder encoder(context);
@@ -337,7 +337,7 @@ namespace sealtest
     TEST(Encoder, IntEncodeDecodeInt32)
     {
         Modulus modulus(0x7FFFFFFFFFFFFF);
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         parms.set_plain_modulus(modulus);
         SEALContext context(parms);
         IntegerEncoder encoder(context);

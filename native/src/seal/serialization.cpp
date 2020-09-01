@@ -92,14 +92,14 @@ namespace seal
         switch (compr_mode)
         {
 #ifdef SEAL_USE_ZSTD
-        case compr_mode_type::ZSTD:
+        case compr_mode_type::zstd:
             return ztools::zstd_deflate_size_bound(in_size);
 #endif
 #ifdef SEAL_USE_ZLIB
-        case compr_mode_type::ZLIB:
+        case compr_mode_type::zlib:
             return ztools::zlib_deflate_size_bound(in_size);
 #endif
-        case compr_mode_type::NONE:
+        case compr_mode_type::none:
             // No compression
             return in_size;
 
@@ -251,7 +251,7 @@ namespace seal
 
             switch (compr_mode)
             {
-            case compr_mode_type::NONE:
+            case compr_mode_type::none:
                 // We set the compression mode and size here, and save the header
                 header.compr_mode = compr_mode;
                 header.size = safe_cast<uint64_t>(raw_size);
@@ -261,7 +261,7 @@ namespace seal
                 save_members(stream);
                 break;
 #ifdef SEAL_USE_ZLIB
-            case compr_mode_type::ZLIB:
+            case compr_mode_type::zlib:
             {
                 // First save_members to a temporary byte stream; set the size of the temporary stream to be right from
                 // the start to avoid extra reallocs.
@@ -287,7 +287,7 @@ namespace seal
             }
 #endif
 #ifdef SEAL_USE_ZSTD
-            case compr_mode_type::ZSTD:
+            case compr_mode_type::zstd:
             {
                 // First save_members to a temporary byte stream; set the size of the temporary stream to be right from
                 // the start to avoid extra reallocs.
@@ -368,7 +368,7 @@ namespace seal
 
             switch (header.compr_mode)
             {
-            case compr_mode_type::NONE:
+            case compr_mode_type::none:
                 // Read rest of the data
                 load_members(stream);
                 if (header.size != safe_cast<uint64_t>(stream.tellg() - stream_start_pos))
@@ -377,7 +377,7 @@ namespace seal
                 }
                 break;
 #ifdef SEAL_USE_ZLIB
-            case compr_mode_type::ZLIB:
+            case compr_mode_type::zlib:
             {
                 auto compr_size = header.size - safe_cast<uint64_t>(stream.tellg() - stream_start_pos);
 
@@ -400,7 +400,7 @@ namespace seal
             }
 #endif
 #ifdef SEAL_USE_ZSTD
-            case compr_mode_type::ZSTD:
+            case compr_mode_type::zstd:
             {
                 auto compr_size = header.size - safe_cast<uint64_t>(stream.tellg() - stream_start_pos);
 

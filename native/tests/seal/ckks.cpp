@@ -17,7 +17,7 @@ namespace sealtest
 {
     TEST(CKKSEncoderTest, CKKSEncoderEncodeVectorDecodeTest)
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         {
             size_t slots = 32;
             parms.set_poly_modulus_degree(slots << 1);
@@ -248,7 +248,7 @@ namespace sealtest
 
     TEST(CKKSEncoderTest, CKKSEncoderEncodeSingleDecodeTest)
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         {
             size_t slots = 16;
             parms.set_poly_modulus_degree(64);

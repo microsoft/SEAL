@@ -42,7 +42,7 @@ void example_levels()
     node can be identified by the parms_id of its specific encryption parameters
     (poly_modulus_degree remains the same but coeff_modulus varies).
     */
-    EncryptionParameters parms(scheme_type::BFV);
+    EncryptionParameters parms(scheme_type::bfv);
 
     size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);

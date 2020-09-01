@@ -23,7 +23,7 @@ namespace seal
         }
 
         auto &context_data = *context_.first_context_data();
-        if (context_data.parms().scheme() != scheme_type::BFV)
+        if (context_data.parms().scheme() != scheme_type::bfv)
         {
             throw invalid_argument("unsupported scheme");
         }

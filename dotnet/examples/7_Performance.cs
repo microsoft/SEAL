@@ -2,10 +2,11 @@
 // Licensed under the MIT license.
 
 using System;
-using Microsoft.Research.SEAL;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using Microsoft.Research.SEAL;
 
 namespace SEALNetExamples
 {
@@ -17,6 +18,9 @@ namespace SEALNetExamples
             Utilities.PrintParameters(context);
             Console.WriteLine();
 
+            bool hasZLIB = Serialization.IsSupportedComprMode(ComprModeType.ZLIB);
+            bool hasZSTD = Serialization.IsSupportedComprMode(ComprModeType.ZSTD);
+            
             using EncryptionParameters parms = context.FirstContextData.Parms;
             using Modulus plainModulus = parms.PlainModulus;
             ulong polyModulusDegree = parms.PolyModulusDegree;
@@ -100,6 +104,9 @@ namespace SEALNetExamples
             Stopwatch timeRotateRowsOneStepSum = new Stopwatch();
             Stopwatch timeRotateRowsRandomSum = new Stopwatch();
             Stopwatch timeRotateColumnsSum = new Stopwatch();
+            Stopwatch timeSerializeSum = new Stopwatch();
+            Stopwatch timeSerializeZLIBSum = new Stopwatch();
+            Stopwatch timeSerializeZSTDSum = new Stopwatch();
 
             /*
             How many times to run the test?
@@ -256,6 +263,33 @@ namespace SEALNetExamples
                     timeRotateColumnsSum.Stop();
                 }
 
+                /*
+                [Serialize Ciphertext]
+                */
+                MemoryStream stream = new MemoryStream();
+                timeSerializeSum.Start();
+                encrypted.Save(stream, ComprModeType.None);
+                timeSerializeSum.Stop();
+
+                if (hasZLIB)
+                {
+                    /*
+                    [Serialize Ciphertext (ZLIB)]
+                    */
+                    timeSerializeZLIBSum.Start();
+                    encrypted.Save(stream, ComprModeType.ZLIB);
+                    timeSerializeZLIBSum.Stop();
+                }
+
+                if (hasZSTD)
+                {
+                    /*
+                    [Serialize Ciphertext (Zstandard)]
+                    */
+                    timeSerializeZSTDSum.Start();
+                    encrypted.Save(stream, ComprModeType.ZSTD);
+                    timeSerializeZSTDSum.Stop();
+                }
 
                 /*
                 Print a dot to indicate progress.
@@ -280,6 +314,9 @@ namespace SEALNetExamples
             int avgRotateRowsOneStep = (int)(timeRotateRowsOneStepSum.Elapsed.TotalMilliseconds * 1000 / (2 * count));
             int avgRotateRowsRandom = (int)(timeRotateRowsRandomSum.Elapsed.TotalMilliseconds * 1000 / count);
             int avgRotateColumns = (int)(timeRotateColumnsSum.Elapsed.TotalMilliseconds * 1000 / count);
+            int avgSerializeSum = (int)(timeSerializeSum.Elapsed.TotalMilliseconds * 1000 / count);
+            int avgSerializeZLIBSum = (int)(timeSerializeZLIBSum.Elapsed.TotalMilliseconds * 1000 / count);
+            int avgSerializeZSTDSum = (int)(timeSerializeZSTDSum.Elapsed.TotalMilliseconds * 1000 / count);
 
             Console.WriteLine($"Average batch: {avgBatch} microseconds");
             Console.WriteLine($"Average unbatch: {avgUnbatch} microseconds");
@@ -296,6 +333,18 @@ namespace SEALNetExamples
                 Console.WriteLine($"Average rotate rows random: {avgRotateRowsRandom} microseconds");
                 Console.WriteLine($"Average rotate columns: {avgRotateColumns} microseconds");
             }
+            Console.WriteLine($"Average serialize ciphertext: {avgSerializeSum} microseconds");
+            if (hasZLIB)
+            {
+                Console.WriteLine(
+                    $"Average compressed (ZLIB) serialize ciphertext: {avgSerializeZLIBSum} microseconds");
+            }
+            if (hasZSTD)
+            {
+                Console.WriteLine(
+                    $"Average compressed (Zstandard) serialize ciphertext: {avgSerializeZSTDSum} microseconds");
+            }
+
             Console.Out.Flush();
         }
 
@@ -304,6 +353,9 @@ namespace SEALNetExamples
             Stopwatch timer;
             Utilities.PrintParameters(context);
             Console.WriteLine();
+
+            bool hasZLIB = Serialization.IsSupportedComprMode(ComprModeType.ZLIB);
+            bool hasZSTD = Serialization.IsSupportedComprMode(ComprModeType.ZSTD);
 
             using EncryptionParameters parms = context.FirstContextData.Parms;
             ulong polyModulusDegree = parms.PolyModulusDegree;
@@ -384,6 +436,9 @@ namespace SEALNetExamples
             Stopwatch timeRotateOneStepSum = new Stopwatch();
             Stopwatch timeRotateRandomSum = new Stopwatch();
             Stopwatch timeConjugateSum = new Stopwatch();
+            Stopwatch timeSerializeSum = new Stopwatch();
+            Stopwatch timeSerializeZLIBSum = new Stopwatch();
+            Stopwatch timeSerializeZSTDSum = new Stopwatch();
 
             Random rnd = new Random();
 
@@ -520,6 +575,34 @@ namespace SEALNetExamples
                 }
 
                 /*
+                [Serialize Ciphertext]
+                */
+                MemoryStream stream = new MemoryStream();
+                timeSerializeSum.Start();
+                encrypted.Save(stream, ComprModeType.None);
+                timeSerializeSum.Stop();
+
+                if (hasZLIB)
+                {
+                    /*
+                    [Serialize Ciphertext (ZLIB)]
+                    */
+                    timeSerializeZLIBSum.Start();
+                    encrypted.Save(stream, ComprModeType.ZLIB);
+                    timeSerializeZLIBSum.Stop();
+                }
+
+                if (hasZSTD)
+                {
+                    /*
+                    [Serialize Ciphertext (Zstandard)]
+                    */
+                    timeSerializeZSTDSum.Start();
+                    encrypted.Save(stream, ComprModeType.ZSTD);
+                    timeSerializeZSTDSum.Stop();
+                }
+
+                /*
                 Print a dot to indicate progress.
                 */
                 Console.Write(".");
@@ -543,6 +626,9 @@ namespace SEALNetExamples
             int avgRotateOneStep = (int)(timeRotateOneStepSum.Elapsed.TotalMilliseconds * 1000 / (2 * count));
             int avgRotateRandom = (int)(timeRotateRandomSum.Elapsed.TotalMilliseconds * 1000 / count);
             int avgConjugate = (int)(timeConjugateSum.Elapsed.TotalMilliseconds * 1000 / count);
+            int avgSerializeSum = (int)(timeSerializeSum.Elapsed.TotalMilliseconds * 1000 / count);
+            int avgSerializeZLIBSum = (int)(timeSerializeZLIBSum.Elapsed.TotalMilliseconds * 1000 / count);
+            int avgSerializeZSTDSum = (int)(timeSerializeZSTDSum.Elapsed.TotalMilliseconds * 1000 / count);
 
             Console.WriteLine($"Average encode: {avgEncode} microseconds");
             Console.WriteLine($"Average decode: {avgDecode} microseconds");
@@ -560,6 +646,18 @@ namespace SEALNetExamples
                 Console.WriteLine($"Average rotate vector random: {avgRotateRandom} microseconds");
                 Console.WriteLine($"Average complex conjugate: {avgConjugate} microseconds");
             }
+            Console.WriteLine($"Average serialize ciphertext: {avgSerializeSum} microseconds");
+            if (hasZLIB)
+            {
+                Console.WriteLine(
+                    $"Average compressed (ZLIB) serialize ciphertext: {avgSerializeZLIBSum} microseconds");
+            }
+            if (hasZSTD)
+            {
+                Console.WriteLine(
+                    $"Average compressed (Zstandard) serialize ciphertext: {avgSerializeZSTDSum} microseconds");
+            }
+
             Console.Out.Flush();
         }
 

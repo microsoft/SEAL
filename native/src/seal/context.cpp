@@ -250,7 +250,7 @@ namespace seal
             return context_data;
         }
 
-        if (parms.scheme() == scheme_type::BFV)
+        if (parms.scheme() == scheme_type::bfv)
         {
             // Plain modulus must be at least 2 and at most 60 bits
             if (plain_modulus.value() >> SEAL_PLAIN_MOD_BIT_COUNT_MAX ||
@@ -345,7 +345,7 @@ namespace seal
                     context_data.plain_upper_half_increment_.get());
             }
         }
-        else if (parms.scheme() == scheme_type::CKKS)
+        else if (parms.scheme() == scheme_type::ckks)
         {
             // Check that plain_modulus is set to zero
             if (!plain_modulus.is_zero())

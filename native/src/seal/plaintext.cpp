@@ -213,7 +213,7 @@ namespace seal
             uint64_t coeff_count64 = static_cast<uint64_t>(coeff_count_);
             stream.write(reinterpret_cast<const char *>(&coeff_count64), sizeof(uint64_t));
             stream.write(reinterpret_cast<const char *>(&scale_), sizeof(double));
-            data_.save(stream, compr_mode_type::NONE);
+            data_.save(stream, compr_mode_type::none);
         }
         catch (const ios_base::failure &)
         {

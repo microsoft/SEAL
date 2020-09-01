@@ -16,7 +16,7 @@ namespace sealtest
 {
     TEST(BatchEncoderTest, BatchUnbatchUIntVector)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         parms.set_poly_modulus_degree(64);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 60 }));
         parms.set_plain_modulus(257);
@@ -69,7 +69,7 @@ namespace sealtest
 
     TEST(BatchEncoderTest, BatchUnbatchIntVector)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         parms.set_poly_modulus_degree(64);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 60 }));
         parms.set_plain_modulus(257);

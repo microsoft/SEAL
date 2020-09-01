@@ -17,7 +17,7 @@ namespace sealtest
 {
     TEST(CiphertextTest, CiphertextBasics)
     {
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
 
         parms.set_poly_modulus_degree(2);
         parms.set_coeff_modulus(CoeffModulus::Create(2, { 30 }));
@@ -93,7 +93,7 @@ namespace sealtest
     TEST(CiphertextTest, SaveLoadCiphertext)
     {
         stringstream stream;
-        EncryptionParameters parms(scheme_type::BFV);
+        EncryptionParameters parms(scheme_type::bfv);
         parms.set_poly_modulus_degree(2);
         parms.set_coeff_modulus(CoeffModulus::Create(2, { 30 }));
         parms.set_plain_modulus(2);

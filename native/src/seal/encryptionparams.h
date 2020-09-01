@@ -27,10 +27,10 @@ namespace seal
         none = 0x0,
 
         // Brakerski/Fan-Vercauteren scheme
-        BFV = 0x1,
+        bfv = 0x1,
 
         // Cheon-Kim-Kim-Song scheme
-        CKKS = 0x2
+        ckks = 0x2
     };
 
     /**
@@ -221,7 +221,7 @@ namespace seal
         inline void set_plain_modulus(const Modulus &plain_modulus)
         {
             // Check that scheme is BFV
-            if (scheme_ != scheme_type::BFV && !plain_modulus.is_zero())
+            if (scheme_ != scheme_type::bfv && !plain_modulus.is_zero())
             {
                 throw std::logic_error("plain_modulus is not supported for this scheme");
             }
@@ -344,7 +344,7 @@ namespace seal
             std::size_t coeff_modulus_total_size =
                 coeff_modulus_.empty()
                     ? std::size_t(0)
-                    : util::safe_cast<std::size_t>(coeff_modulus_[0].save_size(compr_mode_type::NONE));
+                    : util::safe_cast<std::size_t>(coeff_modulus_[0].save_size(compr_mode_type::none));
             coeff_modulus_total_size = util::mul_safe(coeff_modulus_total_size, coeff_modulus_.size());
 
             std::size_t members_size = Serialization::ComprSizeEstimate(
@@ -353,7 +353,7 @@ namespace seal
                     sizeof(std::uint64_t), // poly_modulus_degree_
                     sizeof(std::uint64_t), // coeff_modulus_size
                     coeff_modulus_total_size,
-                    util::safe_cast<std::size_t>(plain_modulus_.save_size(compr_mode_type::NONE))),
+                    util::safe_cast<std::size_t>(plain_modulus_.save_size(compr_mode_type::none))),
                 compr_mode);
 
             return util::safe_cast<std::streamoff>(util::add_safe(sizeof(Serialization::SEALHeader), members_size));
@@ -376,7 +376,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&EncryptionParameters::save_members, this, _1), save_size(compr_mode_type::NONE), stream,
+                std::bind(&EncryptionParameters::save_members, this, _1), save_size(compr_mode_type::none), stream,
                 compr_mode);
         }
 
@@ -417,7 +417,7 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&EncryptionParameters::save_members, this, _1), save_size(compr_mode_type::NONE), out, size,
+                std::bind(&EncryptionParameters::save_members, this, _1), save_size(compr_mode_type::none), out, size,
                 compr_mode);
         }
 
@@ -462,10 +462,10 @@ namespace seal
             case static_cast<std::uint8_t>(scheme_type::none):
                 /* fall through */
 
-            case static_cast<std::uint8_t>(scheme_type::BFV):
+            case static_cast<std::uint8_t>(scheme_type::bfv):
                 /* fall through */
 
-            case static_cast<std::uint8_t>(scheme_type::CKKS):
+            case static_cast<std::uint8_t>(scheme_type::ckks):
                 return true;
             }
             return false;

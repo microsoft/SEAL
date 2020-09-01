@@ -20,7 +20,7 @@ namespace sealtest
     {
         stringstream stream;
         {
-            EncryptionParameters parms(scheme_type::BFV);
+            EncryptionParameters parms(scheme_type::bfv);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(65537);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60 }));
@@ -55,7 +55,7 @@ namespace sealtest
             ASSERT_EQ(64ULL, keys.data().size());
         }
         {
-            EncryptionParameters parms(scheme_type::BFV);
+            EncryptionParameters parms(scheme_type::bfv);
             parms.set_poly_modulus_degree(256);
             parms.set_plain_modulus(65537);
             parms.set_coeff_modulus(CoeffModulus::Create(256, { 60, 50 }));
@@ -157,7 +157,7 @@ namespace sealtest
 
         stringstream stream;
         {
-            EncryptionParameters parms(scheme_type::BFV);
+            EncryptionParameters parms(scheme_type::bfv);
             parms.set_poly_modulus_degree(8);
             parms.set_plain_modulus(65537);
             parms.set_coeff_modulus(CoeffModulus::Create(8, { 60, 60 }));
@@ -179,7 +179,7 @@ namespace sealtest
             compare_kswitchkeys(keys, test_keys, secret_key, context);
         }
         {
-            EncryptionParameters parms(scheme_type::BFV);
+            EncryptionParameters parms(scheme_type::bfv);
             parms.set_poly_modulus_degree(256);
             parms.set_plain_modulus(65537);
             parms.set_coeff_modulus(CoeffModulus::Create(256, { 60, 50 }));

@@ -40,7 +40,7 @@ void example_bfv_basics()
     be large enough to support the desired computation; otherwise the result is
     impossible to make sense of even with the secret key.
     */
-    EncryptionParameters parms(scheme_type::BFV);
+    EncryptionParameters parms(scheme_type::bfv);
 
     /*
     The first parameter we set is the degree of the `polynomial modulus'. This

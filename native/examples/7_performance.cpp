@@ -258,20 +258,20 @@ void bfv_performance_test(SEALContext context)
         /*
         [Serialize Ciphertext]
         */
-        size_t buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::NONE));
+        size_t buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::none));
         vector<seal_byte> buf(buf_size);
         time_start = chrono::high_resolution_clock::now();
-        encrypted.save(buf.data(), buf_size, compr_mode_type::NONE);
+        encrypted.save(buf.data(), buf_size, compr_mode_type::none);
         time_end = chrono::high_resolution_clock::now();
         time_serialize_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 #ifdef SEAL_USE_ZLIB
         /*
         [Serialize Ciphertext (ZLIB)]
         */
-        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::ZLIB));
+        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::zlib));
         buf.resize(buf_size);
         time_start = chrono::high_resolution_clock::now();
-        encrypted.save(buf.data(), buf_size, compr_mode_type::ZLIB);
+        encrypted.save(buf.data(), buf_size, compr_mode_type::zlib);
         time_end = chrono::high_resolution_clock::now();
         time_serialize_zlib_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 #endif
@@ -279,10 +279,10 @@ void bfv_performance_test(SEALContext context)
         /*
         [Serialize Ciphertext (Zstandard)]
         */
-        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::ZSTD));
+        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::zstd));
         buf.resize(buf_size);
         time_start = chrono::high_resolution_clock::now();
-        encrypted.save(buf.data(), buf_size, compr_mode_type::ZSTD);
+        encrypted.save(buf.data(), buf_size, compr_mode_type::zstd);
         time_end = chrono::high_resolution_clock::now();
         time_serialize_zstd_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 #endif
@@ -558,20 +558,20 @@ void ckks_performance_test(SEALContext context)
         /*
         [Serialize Ciphertext]
         */
-        size_t buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::NONE));
+        size_t buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::none));
         vector<seal_byte> buf(buf_size);
         time_start = chrono::high_resolution_clock::now();
-        encrypted.save(buf.data(), buf_size, compr_mode_type::NONE);
+        encrypted.save(buf.data(), buf_size, compr_mode_type::none);
         time_end = chrono::high_resolution_clock::now();
         time_serialize_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 #ifdef SEAL_USE_ZLIB
         /*
         [Serialize Ciphertext (ZLIB)]
         */
-        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::ZLIB));
+        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::zlib));
         buf.resize(buf_size);
         time_start = chrono::high_resolution_clock::now();
-        encrypted.save(buf.data(), buf_size, compr_mode_type::ZLIB);
+        encrypted.save(buf.data(), buf_size, compr_mode_type::zlib);
         time_end = chrono::high_resolution_clock::now();
         time_serialize_zlib_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 #endif
@@ -579,10 +579,10 @@ void ckks_performance_test(SEALContext context)
         /*
         [Serialize Ciphertext (Zstandard)]
         */
-        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::ZSTD));
+        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::zstd));
         buf.resize(buf_size);
         time_start = chrono::high_resolution_clock::now();
-        encrypted.save(buf.data(), buf_size, compr_mode_type::ZSTD);
+        encrypted.save(buf.data(), buf_size, compr_mode_type::zstd);
         time_end = chrono::high_resolution_clock::now();
         time_serialize_zstd_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 #endif
@@ -646,7 +646,7 @@ void example_bfv_performance_default()
 {
     print_example_banner("BFV Performance Test with Degrees: 4096, 8192, and 16384");
 
-    EncryptionParameters parms(scheme_type::BFV);
+    EncryptionParameters parms(scheme_type::bfv);
     size_t poly_modulus_degree = 4096;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
@@ -699,7 +699,7 @@ void example_bfv_performance_custom()
     string banner = "BFV Performance Test with Degree: ";
     print_example_banner(banner + to_string(poly_modulus_degree));
 
-    EncryptionParameters parms(scheme_type::BFV);
+    EncryptionParameters parms(scheme_type::bfv);
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     if (poly_modulus_degree == 1024)
@@ -719,7 +719,7 @@ void example_ckks_performance_default()
 
     // It is not recommended to use BFVDefault primes in CKKS. However, for performance
     // test, BFVDefault primes are good enough.
-    EncryptionParameters parms(scheme_type::CKKS);
+    EncryptionParameters parms(scheme_type::ckks);
     size_t poly_modulus_degree = 4096;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
@@ -768,7 +768,7 @@ void example_ckks_performance_custom()
     string banner = "CKKS Performance Test with Degree: ";
     print_example_banner(banner + to_string(poly_modulus_degree));
 
-    EncryptionParameters parms(scheme_type::CKKS);
+    EncryptionParameters parms(scheme_type::ckks);
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     ckks_performance_test(parms);

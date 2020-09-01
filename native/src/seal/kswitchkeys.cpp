@@ -66,7 +66,7 @@ namespace seal
                 for (size_t j = 0; j < keys_dim2; j++)
                 {
                     // Save the key
-                    keys_[index][j].save(stream, compr_mode_type::NONE);
+                    keys_[index][j].save(stream, compr_mode_type::none);
                 }
             }
         }

@@ -107,11 +107,11 @@ namespace seal
         size_t coeff_count = parms.poly_modulus_degree();
         bool is_ntt_form = false;
 
-        if (parms.scheme() == scheme_type::CKKS)
+        if (parms.scheme() == scheme_type::ckks)
         {
             is_ntt_form = true;
         }
-        else if (parms.scheme() != scheme_type::BFV)
+        else if (parms.scheme() != scheme_type::bfv)
         {
             throw invalid_argument("unsupported scheme");
         }
@@ -192,7 +192,7 @@ namespace seal
         }
 
         auto scheme = context_.key_context_data()->parms().scheme();
-        if (scheme == scheme_type::BFV)
+        if (scheme == scheme_type::bfv)
         {
             if (plain.is_ntt_form())
             {
@@ -205,7 +205,7 @@ namespace seal
             // Result gets added into the c_0 term of ciphertext (c_0,c_1).
             multiply_add_plain_with_scaling_variant(plain, *context_.first_context_data(), *iter(destination));
         }
-        else if (scheme == scheme_type::CKKS)
+        else if (scheme == scheme_type::ckks)
         {
             if (!plain.is_ntt_form())
             {

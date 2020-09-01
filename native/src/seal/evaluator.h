@@ -58,8 +58,8 @@ namespace seal
     sense.
 
     @par NTT form
-    When using the BFV scheme (scheme_type::BFV), all plaintexts and ciphertexts should remain by default in the usual
-    coefficient representation, i.e., not in NTT form. When using the CKKS scheme (scheme_type::CKKS), all plaintexts
+    When using the BFV scheme (scheme_type::bfv), all plaintexts and ciphertexts should remain by default in the usual
+    coefficient representation, i.e., not in NTT form. When using the CKKS scheme (scheme_type::ckks), all plaintexts
     and ciphertexts should remain by default in NTT form. We call these scheme-specific NTT states the "default NTT
     form". Some functions, such as add, work even if the inputs are not in the default state, but others, such as
     multiply, will throw an exception. The output of all evaluation functions will be in the same state as the input(s),
@@ -578,7 +578,7 @@ namespace seal
         @param[in] relin_keys The relinearization keys
         @param[out] destination The ciphertext to overwrite with the multiplication result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if scheme is not scheme_type::BFV
+        @throws std::logic_error if scheme is not scheme_type::bfv
         @throws std::invalid_argument if encrypteds is empty
         @throws std::invalid_argument if ciphertexts or relin_keys are not valid for the encryption parameters
         @throws std::invalid_argument if encrypteds are not in the default NTT form
@@ -602,7 +602,7 @@ namespace seal
         @param[in] exponent The power to raise the ciphertext to
         @param[in] relin_keys The relinearization keys
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if scheme is not scheme_type::BFV
+        @throws std::logic_error if scheme is not scheme_type::bfv
         @throws std::invalid_argument if encrypted or relin_keys is not valid for the encryption parameters
         @throws std::invalid_argument if encrypted is not in the default NTT form
         @throws std::invalid_argument if the output scale is too large for the encryption parameters
@@ -628,7 +628,7 @@ namespace seal
         @param[in] relin_keys The relinearization keys
         @param[out] destination The ciphertext to overwrite with the power
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if scheme is not scheme_type::BFV
+        @throws std::logic_error if scheme is not scheme_type::bfv
         @throws std::invalid_argument if encrypted or relin_keys is not valid for the encryption parameters
         @throws std::invalid_argument if encrypted is not in the default NTT form
         @throws std::invalid_argument if the output scale is too large for the encryption parameters
@@ -1024,7 +1024,7 @@ namespace seal
         @param[in] steps The number of steps to rotate (negative left, positive right)
         @param[in] galois_keys The Galois keys
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if scheme is not scheme_type::BFV
+        @throws std::logic_error if scheme is not scheme_type::bfv
         @throws std::logic_error if the encryption parameters do not support batching
         @throws std::invalid_argument if encrypted or galois_keys is not valid for
         the encryption parameters
@@ -1042,7 +1042,7 @@ namespace seal
             Ciphertext &encrypted, int steps, const GaloisKeys &galois_keys,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            if (context_.key_context_data()->parms().scheme() != scheme_type::BFV)
+            if (context_.key_context_data()->parms().scheme() != scheme_type::bfv)
             {
                 throw std::logic_error("unsupported scheme");
             }
@@ -1061,7 +1061,7 @@ namespace seal
         @param[in] galois_keys The Galois keys
         @param[out] destination The ciphertext to overwrite with the rotated result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if scheme is not scheme_type::BFV
+        @throws std::logic_error if scheme is not scheme_type::bfv
         @throws std::logic_error if the encryption parameters do not support batching
         @throws std::invalid_argument if encrypted or galois_keys is not valid for
         the encryption parameters
@@ -1093,7 +1093,7 @@ namespace seal
         @param[in] galois_keys The Galois keys
         @param[out] destination The ciphertext to overwrite with the rotated result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if scheme is not scheme_type::BFV
+        @throws std::logic_error if scheme is not scheme_type::bfv
         @throws std::logic_error if the encryption parameters do not support batching
         @throws std::invalid_argument if encrypted or galois_keys is not valid for
         the encryption parameters
@@ -1109,7 +1109,7 @@ namespace seal
         inline void rotate_columns_inplace(
             Ciphertext &encrypted, const GaloisKeys &galois_keys, MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            if (context_.key_context_data()->parms().scheme() != scheme_type::BFV)
+            if (context_.key_context_data()->parms().scheme() != scheme_type::bfv)
             {
                 throw std::logic_error("unsupported scheme");
             }
@@ -1127,7 +1127,7 @@ namespace seal
         @param[in] galois_keys The Galois keys
         @param[out] destination The ciphertext to overwrite with the rotated result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if scheme is not scheme_type::BFV
+        @throws std::logic_error if scheme is not scheme_type::bfv
         @throws std::logic_error if the encryption parameters do not support batching
         @throws std::invalid_argument if encrypted or galois_keys is not valid for
         the encryption parameters
@@ -1159,7 +1159,7 @@ namespace seal
         @param[in] steps The number of steps to rotate (negative left, positive right)
         @param[in] galois_keys The Galois keys
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if scheme is not scheme_type::CKKS
+        @throws std::logic_error if scheme is not scheme_type::ckks
         @throws std::invalid_argument if encrypted or galois_keys is not valid for
         the encryption parameters
         @throws std::invalid_argument if galois_keys do not correspond to the top
@@ -1176,7 +1176,7 @@ namespace seal
             Ciphertext &encrypted, int steps, const GaloisKeys &galois_keys,
             MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            if (context_.key_context_data()->parms().scheme() != scheme_type::CKKS)
+            if (context_.key_context_data()->parms().scheme() != scheme_type::ckks)
             {
                 throw std::logic_error("unsupported scheme");
             }
@@ -1195,7 +1195,7 @@ namespace seal
         @param[in] galois_keys The Galois keys
         @param[out] destination The ciphertext to overwrite with the rotated result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if scheme is not scheme_type::CKKS
+        @throws std::logic_error if scheme is not scheme_type::ckks
         @throws std::invalid_argument if encrypted or galois_keys is not valid for
         the encryption parameters
         @throws std::invalid_argument if galois_keys do not correspond to the top
@@ -1225,7 +1225,7 @@ namespace seal
         @param[in] galois_keys The Galois keys
         @param[out] destination The ciphertext to overwrite with the rotated result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if scheme is not scheme_type::CKKS
+        @throws std::logic_error if scheme is not scheme_type::ckks
         @throws std::invalid_argument if encrypted or galois_keys is not valid for
         the encryption parameters
         @throws std::invalid_argument if galois_keys do not correspond to the top
@@ -1240,7 +1240,7 @@ namespace seal
         inline void complex_conjugate_inplace(
             Ciphertext &encrypted, const GaloisKeys &galois_keys, MemoryPoolHandle pool = MemoryManager::GetPool())
         {
-            if (context_.key_context_data()->parms().scheme() != scheme_type::CKKS)
+            if (context_.key_context_data()->parms().scheme() != scheme_type::ckks)
             {
                 throw std::logic_error("unsupported scheme");
             }
@@ -1256,7 +1256,7 @@ namespace seal
         @param[in] galois_keys The Galois keys
         @param[out] destination The ciphertext to overwrite with the rotated result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if scheme is not scheme_type::CKKS
+        @throws std::logic_error if scheme is not scheme_type::ckks
         @throws std::invalid_argument if encrypted or galois_keys is not valid for
         the encryption parameters
         @throws std::invalid_argument if galois_keys do not correspond to the top

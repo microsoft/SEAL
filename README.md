@@ -142,11 +142,11 @@ The BFV scheme benefits typically less from this technique, because the prime nu
 The compression is not only applied to `Ciphertext` objects, but to every serializable Microsoft SEAL object.
 
 If ZLIB is available, it will be automatically used for serialization (see `Serialization::compr_mode_default` in `native/src/seal/serialization.h`.
-However, it is always possible to explicitly pass `compr_mode_type::NONE` to serialization methods to disable compression.
+However, it is always possible to explicitly pass `compr_mode_type::none` to serialization methods to disable compression.
 
 **WARNING:** The compression rate for a `SecretKey` can (in theory at least) reveal information about the key.
 In most common applications of Microsoft SEAL the size of a `SecretKey` would not be deliberately revealed to untrusted parties.
-If this is a concern, one can always save the `SecretKey` in an uncompressed form by passing `compr_mode_type::NONE` to `SecretKey::save`.
+If this is a concern, one can always save the `SecretKey` in an uncompressed form by passing `compr_mode_type::none` to `SecretKey::save`.
 
 #### Zstandard
 

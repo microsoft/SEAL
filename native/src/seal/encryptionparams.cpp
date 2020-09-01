@@ -29,11 +29,11 @@ namespace seal
             stream.write(reinterpret_cast<const char *>(&coeff_modulus_size64), sizeof(uint64_t));
             for (const auto &mod : coeff_modulus_)
             {
-                mod.save(stream, compr_mode_type::NONE);
+                mod.save(stream, compr_mode_type::none);
             }
 
             // Only BFV uses plain_modulus but save it in any case for simplicity
-            plain_modulus_.save(stream, compr_mode_type::NONE);
+            plain_modulus_.save(stream, compr_mode_type::none);
         }
         catch (const ios_base::failure &)
         {

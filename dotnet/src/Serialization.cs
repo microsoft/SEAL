@@ -19,7 +19,7 @@ namespace Microsoft.Research.SEAL
     public enum ComprModeType : byte
     {
         /// <summary>No compression is used.</summary>
-        NONE = 0,
+        None = 0,
 
         /// <summary>Use ZLIB compression.</summary>
         ZLIB = 1,

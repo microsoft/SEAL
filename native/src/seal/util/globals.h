@@ -33,7 +33,7 @@ For .NET Framework wrapper support (C++/CLI) we need to
             /**
             Default value for the standard deviation of the noise (error) distribution.
             */
-            constexpr double noise_standard_deviation = SEAL_HE_STD_PARMS_ERROR_STD_DEV;
+            constexpr double noise_standard_deviation = seal_he_std_parms_error_std_dev;
 
             constexpr double noise_distribution_width_multiplier = 6;
 

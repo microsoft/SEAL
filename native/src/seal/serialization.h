@@ -22,14 +22,14 @@ namespace seal
     enum class compr_mode_type : std::uint8_t
     {
         // No compression is used.
-        NONE = 0,
+        none = 0,
 #ifdef SEAL_USE_ZLIB
         // Use ZLIB compression
-        ZLIB = 1,
+        zlib = 1,
 #endif
 #ifdef SEAL_USE_ZSTD
         // Use Zstandard compression
-        ZSTD = 2,
+        zstd = 2,
 #endif
     };
 
@@ -45,11 +45,11 @@ namespace seal
         The compression mode used by default; prefer Zstandard
         */
 #if defined(SEAL_USE_ZSTD)
-        static constexpr compr_mode_type compr_mode_default = compr_mode_type::ZSTD;
+        static constexpr compr_mode_type compr_mode_default = compr_mode_type::zstd;
 #elif defined(SEAL_USE_ZLIB)
-        static constexpr compr_mode_type compr_mode_default = compr_mode_type::ZLIB;
+        static constexpr compr_mode_type compr_mode_default = compr_mode_type::zlib;
 #else
-        static constexpr compr_mode_type compr_mode_default = compr_mode_type::NONE;
+        static constexpr compr_mode_type compr_mode_default = compr_mode_type::none;
 #endif
         /**
         The magic value indicating a Microsoft SEAL header.
@@ -82,7 +82,7 @@ namespace seal
 
             std::uint8_t version_minor = static_cast<std::uint8_t>(SEAL_VERSION_MINOR);
 
-            compr_mode_type compr_mode = compr_mode_type::NONE;
+            compr_mode_type compr_mode = compr_mode_type::none;
 
             std::uint16_t reserved = 0;
 
@@ -98,14 +98,14 @@ namespace seal
         {
             switch (compr_mode)
             {
-            case static_cast<std::uint8_t>(compr_mode_type::NONE):
+            case static_cast<std::uint8_t>(compr_mode_type::none):
                 /* fall through */
 #ifdef SEAL_USE_ZLIB
-            case static_cast<std::uint8_t>(compr_mode_type::ZLIB):
+            case static_cast<std::uint8_t>(compr_mode_type::zlib):
                 /* fall through */
 #endif
 #ifdef SEAL_USE_ZSTD
-            case static_cast<std::uint8_t>(compr_mode_type::ZSTD):
+            case static_cast<std::uint8_t>(compr_mode_type::zstd):
 #endif
                 return true;
             }
@@ -125,7 +125,7 @@ namespace seal
         /**
         Returns an upper bound on the output size of data compressed according to
         a given compression mode with given input size. If compr_mode is
-        compr_mode_type::NONE, the return value is exactly in_size.
+        compr_mode_type::none, the return value is exactly in_size.
 
         @param[in] in_size The input size to a compression algorithm
         @param[in] in_size The compression mode
@@ -325,7 +325,7 @@ namespace seal
 
             std::uint8_t zero_byte = 0x00;
 
-            compr_mode_type compr_mode = compr_mode_type::NONE;
+            compr_mode_type compr_mode = compr_mode_type::none;
 
             std::uint32_t size = 0;
 
