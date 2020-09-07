@@ -20,6 +20,8 @@ Simply follow the instructions provided by the bot. You will only need to do thi
 
 Microsoft SEAL uses a customized `.clang-format` configuration for C++ code styling.
 A script `tools/scripts/clang-format-all.sh` is provided to easily format all C++ sources and headers in the `native` directory.
+To ensure the code is properly formatted before making a pull request, we highly recommend using [pre-commit](https://pre-commit.com/).
+Note that the repository includes a `.pre-commit-config.yaml` that describes the appropriate formatting checks.
 
 Documentation are mostly written in GitHub-flavored Markdown.
 A line break is required after each full sentence.

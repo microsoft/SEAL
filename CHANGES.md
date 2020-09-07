@@ -22,6 +22,7 @@ This is because a `Plaintext` object with slot-data written into the coefficient
 
 - Moved all files related to pkg-config to `pkgconfig/` subdirectory.
 - Added a new typedef `seal::seal_byte` for the unnecessarily capitalized `seal::SEAL_BYTE`.
+- Added `.pre-commit-config.yaml` (check out [pre-commit](https://pre-commit.com) if you are not familiar with this tool).
 
 ## Version 3.5.8
 
