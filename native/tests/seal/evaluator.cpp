@@ -3636,7 +3636,6 @@ namespace sealtest
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
 
         SEALContext context(parms, true, sec_level_type::none);
-        KeyGenerator keygen(context);
 
         Evaluator evaluator(context);
         Plaintext plain("0");
