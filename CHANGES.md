@@ -24,6 +24,13 @@ This is because a `Plaintext` object with slot-data written into the coefficient
 - Added a new typedef `seal::seal_byte` for the unnecessarily capitalized `seal::SEAL_BYTE`.
 - Added `.pre-commit-config.yaml` (check out [pre-commit](https://pre-commit.com) if you are not familiar with this tool).
 
+## Version 3.5.9
+
+### Bug fixes
+
+- Fixed [(Issue 216)](https://github.com/microsoft/SEAL/issues/216).
+- Fixed [(Issue 210)](https://github.com/microsoft/SEAL/issues/210).
+
 ## Version 3.5.8
 
 ### Other

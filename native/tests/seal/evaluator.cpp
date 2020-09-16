@@ -3634,7 +3634,6 @@ namespace sealtest
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
-
         SEALContext context(parms, true, sec_level_type::none);
 
         Evaluator evaluator(context);
