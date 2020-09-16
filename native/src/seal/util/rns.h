@@ -66,13 +66,13 @@ namespace seal
                 return (size_ > subbase.size_) && !is_subbase_of(subbase);
             }
 
-            SEAL_NODISCARD RNSBase extend(Modulus value) const;
+            SEAL_NODISCARD RNSBase extend(const Modulus &value) const;
 
             SEAL_NODISCARD RNSBase extend(const RNSBase &other) const;
 
             SEAL_NODISCARD RNSBase drop() const;
 
-            SEAL_NODISCARD RNSBase drop(Modulus value) const;
+            SEAL_NODISCARD RNSBase drop(const Modulus &value) const;
 
             void decompose(std::uint64_t *value, MemoryPoolHandle pool) const;
 
