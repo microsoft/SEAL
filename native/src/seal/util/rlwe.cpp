@@ -25,33 +25,15 @@ namespace seal
             size_t coeff_modulus_size = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
             RandomToStandardAdapter engine(rng);
-            uniform_int_distribution<int> dist(-1, 1);
+            uniform_int_distribution<uint64_t> dist(0, 2);
 
-            for (size_t i = 0; i < coeff_count; i++)
-            {
-                int rand_index = dist(engine);
-                if (rand_index == 1)
-                {
-                    for (size_t j = 0; j < coeff_modulus_size; j++)
-                    {
-                        destination[i + j * coeff_count] = 1;
-                    }
-                }
-                else if (rand_index == -1)
-                {
-                    for (size_t j = 0; j < coeff_modulus_size; j++)
-                    {
-                        destination[i + j * coeff_count] = coeff_modulus[j].value() - 1;
-                    }
-                }
-                else
-                {
-                    for (size_t j = 0; j < coeff_modulus_size; j++)
-                    {
-                        destination[i + j * coeff_count] = 0;
-                    }
-                }
-            }
+            SEAL_ITERATE(iter(destination), coeff_count, [&](auto &I) {
+                uint64_t rand = dist(engine);
+                uint64_t flag = -static_cast<uint64_t>(rand == 0);
+                SEAL_ITERATE(
+                    iter(StrideIter<uint64_t *>(&I, coeff_count), iter(coeff_modulus)), coeff_modulus_size,
+                    [&](auto J) { *get<0>(J) = rand + (flag & get<1>(J).value()) - 1; });
+            });
         }
 
         void sample_poly_normal(
