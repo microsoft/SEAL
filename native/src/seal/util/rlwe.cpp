@@ -52,32 +52,14 @@ namespace seal
             RandomToStandardAdapter engine(rng);
             ClippedNormalDistribution dist(
                 0, global_variables::noise_standard_deviation, global_variables::noise_max_deviation);
-            for (size_t i = 0; i < coeff_count; i++)
-            {
+
+            SEAL_ITERATE(iter(destination), coeff_count, [&](auto &I) {
                 int64_t noise = static_cast<int64_t>(dist(engine));
-                if (noise > 0)
-                {
-                    for (size_t j = 0; j < coeff_modulus_size; j++)
-                    {
-                        destination[i + j * coeff_count] = static_cast<uint64_t>(noise);
-                    }
-                }
-                else if (noise < 0)
-                {
-                    noise = -noise;
-                    for (size_t j = 0; j < coeff_modulus_size; j++)
-                    {
-                        destination[i + j * coeff_count] = coeff_modulus[j].value() - static_cast<uint64_t>(noise);
-                    }
-                }
-                else
-                {
-                    for (size_t j = 0; j < coeff_modulus_size; j++)
-                    {
-                        destination[i + j * coeff_count] = 0;
-                    }
-                }
-            }
+                uint64_t flag = -static_cast<uint64_t>(noise < 0);
+                SEAL_ITERATE(
+                    iter(StrideIter<uint64_t *>(&I, coeff_count), iter(coeff_modulus)), coeff_modulus_size,
+                    [&](auto J) { *get<0>(J) = static_cast<uint64_t>(noise) + (flag & get<1>(J).value()); });
+            });
         }
 
         void sample_poly_uniform(
