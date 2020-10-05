@@ -160,11 +160,6 @@ namespace SEALNetTest
             Assert.AreEqual(3ul, plaindest[1]);
             Assert.AreEqual(3ul, plaindest[2]);
             Assert.AreEqual(2ul, plaindest[3]);
-
-            // Addition of plaintexts
-            plaindest.Set("1x^3 + 2x^2");
-            evaluator.AddPlainInplace(plaindest, plain);
-            Assert.AreEqual("1x^3 + 3x^2 + 1x^1 + 1", plaindest.ToString());
         }
 
         [TestMethod]
@@ -293,12 +288,6 @@ namespace SEALNetTest
             Assert.AreEqual(4ul, plaindest[1]);
             Assert.AreEqual(9ul, plaindest[2]);
             Assert.AreEqual(0x3Aul, plaindest[3]); // -6
-
-            // Subtraction of plaintexts
-            plaindest.Set("6x^3 + 1x^2 + 7x^1 + 2");
-            plain.Set("1x^3 + 2x^2 + 1");
-            evaluator.SubPlainInplace(plaindest, plain);
-            Assert.AreEqual("5x^3 + 3Fx^2 + 7x^1 + 1", plaindest.ToString());
         }
 
         [TestMethod]
@@ -1221,7 +1210,6 @@ namespace SEALNetTest
             Utilities.AssertThrows<ArgumentException>(() => evaluator.AddPlain(encrypted1, plain1, encrypted2));
 
             Utilities.AssertThrows<ArgumentNullException>(() => evaluator.AddPlainInplace(encrypted1, null));
-            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.AddPlainInplace(plain1, null));
 
             Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ApplyGalois(encrypted1, 1, galoisKeys, null));
             Utilities.AssertThrows<ArgumentNullException>(() => evaluator.ApplyGalois(encrypted1, 1, null, encrypted2));
@@ -1372,8 +1360,6 @@ namespace SEALNetTest
             Utilities.AssertThrows<ArgumentException>(() => evaluator.SubPlain(encrypted1, plain1, encrypted2));
 
             Utilities.AssertThrows<ArgumentNullException>(() => evaluator.SubPlainInplace(encrypted1, null));
-            Utilities.AssertThrows<ArgumentNullException>(() => evaluator.SubPlainInplace(plain1, null));
-            Utilities.AssertThrows<ArgumentException>(() => evaluator.SubPlainInplace(encrypted1, plain1));
 
             Utilities.AssertThrows<ArgumentNullException>(() => evaluator.TransformFromNTT(encrypted1, null));
             Utilities.AssertThrows<ArgumentNullException>(() => evaluator.TransformFromNTT(null, encrypted2));
