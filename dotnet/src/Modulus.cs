@@ -222,8 +222,7 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Loads a Modulus from an input stream overwriting the current
-        /// Modulus.
+        /// Loads a Modulus from an input stream overwriting the current Modulus.
         /// </summary>
         /// <param name="stream">The stream to load the Modulus from</param>
         /// <exception cref="ArgumentNullException">if stream is null</exception>
@@ -242,6 +241,17 @@ namespace Microsoft.Research.SEAL
                     NativeMethods.Modulus_Load(NativePtr, outptr, size,
                     out outBytes),
                 stream);
+        }
+
+        /// <summary>
+        /// Reduces a given unsigned integer modulo this modulus.
+        /// </summary>
+        /// <param name="value">The unsigned integer to reduce</param>
+        /// <exception cref="InvalidOperationException"></exception>
+        public ulong Reduce(ulong value)
+        {
+            NativeMethods.Modulus_Reduce(NativePtr, value, out ulong result);
+            return result;
         }
 
         /// <summary>

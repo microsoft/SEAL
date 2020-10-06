@@ -287,6 +287,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Modulus_Load(IntPtr thisptr, byte[] inptr, ulong size, out long inBytes);
 
+        [DllImport(sealc, PreserveSig = false)]
+        internal static extern void Modulus_Reduce(IntPtr thisptr, ulong value, out ulong result);
+
         #endregion
 
         #region EncryptionParameters methods

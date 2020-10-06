@@ -150,6 +150,26 @@ namespace sealtest
         ASSERT_EQ(mod2.is_prime(), mod.is_prime());
     }
 
+    TEST(ModulusTest, Reduce)
+    {
+        Modulus mod;
+        uint64_t res = 0;
+        ASSERT_THROW(res = mod.reduce(10), logic_error);
+
+        mod = 2;
+        ASSERT_EQ(0, mod.reduce(0));
+        ASSERT_EQ(1, mod.reduce(1));
+        ASSERT_EQ(0, mod.reduce(2));
+        ASSERT_EQ(0, mod.reduce(0xF0F0F0));
+
+        mod = 10;
+        ASSERT_EQ(0, mod.reduce(0));
+        ASSERT_EQ(1, mod.reduce(1));
+        ASSERT_EQ(8, mod.reduce(8));
+        ASSERT_EQ(7, mod.reduce(1234567));
+        ASSERT_EQ(0, mod.reduce(12345670));
+    }
+
     TEST(CoeffModTest, CustomExceptionTest)
     {
         // Too small poly_modulus_degree

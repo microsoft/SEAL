@@ -9,6 +9,7 @@ The performance improvement should be expected to be around 20-30x.
 
 ### API Changes
 
+- Added public API for modular reduction to the `Modulus` class.
 - Added `encrypt` and `encrypt_zero` overloads to `Encryptor` that output asymmetrically encrypted `Serializable<Ciphertext>` objects.
 Previously these existed only for symmetric-key encryption mode.
 - Added const overloads of `IntArray::begin` and `IntArray::end`.
