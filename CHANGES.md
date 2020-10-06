@@ -9,6 +9,8 @@ The performance improvement should be expected to be around 20-30x.
 
 ### API Changes
 
+- Added `encrypt` and `encrypt_zero` overloads to `Encryptor` that output asymmetrically encrypted `Serializable<Ciphertext>` objects.
+Previously these existed only for symmetric-key encryption mode.
 - Added const overloads of `IntArray::begin` and `IntArray::end`.
 - Added `std::hash` implementation for `EncryptionParameters` (in addition to `parms_id_type`) so it is possible to create e.g. `std::unordered_map` of `EncryptionParameters`.
 - Removed `BatchEncoder` API for encoding and decoding `Plaintext` objects inplace.

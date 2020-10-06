@@ -109,8 +109,9 @@ void example_serialization()
         As we can see from the print-out, the sizes returned by these functions
         are significantly larger than the compressed size written into the shared
         stream in the beginning. This is normal: compression yielded a significant
-        improvement in the data size, yet it is hard to estimate the size of the
-        compressed data.
+        improvement in the data size. It is impossible to know ahead of time the
+        exact size of the compressed data. If no compression is used, then the size
+        is exactly determined by the encryption parameters.
         */
         print_line(__LINE__);
         cout << "EncryptionParameters: data size upper bound (compr_mode_type::none): "
@@ -184,11 +185,11 @@ void example_serialization()
         of RelinKeys and GaloisKeys, the functions KeyGenerator::relin_keys_local
         and KeyGenerator::galois_keys_local can be used to create the RelinKeys
         and GaloisKeys objects directly. The difference is that the Serializable<T>
-        objects contain a partly seeded version of the RelinKeys (or GaloisKeys)
-        that will result in a significantly smaller size when serialized. Using
-        this method has no impact on security. Such seeded RelinKeys (GaloisKeys)
-        must be expanded before being used in computations; this is automatically
-        done by deserialization.
+        objects wrap a partly seeded version of the RelinKeys (or GaloisKeys) that
+        will result in a significantly smaller size when serialized. Using this
+        method has no impact on security. Such seeded RelinKeys (GaloisKeys) must
+        be expanded before being used in computations; this is automatically done
+        by deserialization.
         */
         Serializable<RelinKeys> rlk = keygen.relin_keys();
 
@@ -225,53 +226,45 @@ void example_serialization()
         encoder.encode(4.5, scale, plain2);
 
         Encryptor encryptor(context, pk);
-        Ciphertext encrypted1, encrypted2;
-        encryptor.encrypt(plain1, encrypted1);
-        encryptor.encrypt(plain2, encrypted2);
 
         /*
-        Now, we could serialize both encrypted1 and encrypted2 to data_stream
-        using Ciphertext::save. However, for this example, we demonstrate another
-        size-saving trick that can come in handy.
+        Here we demonstrate another overload of the Encryptor::encrypt function
+        that outputs a Serializable<Ciphertext> instead of a regular ciphertext,
+        because the client has no use for the ciphertext object anyway. We can
+        call the save function immediately without creating an unnecessary named
+        object.
+        */
+        auto size_encrypted1 = encryptor.encrypt(plain1).save(data_stream);
 
-        As you noticed, we set up the Encryptor using the public key. Clearly this
-        indicates that the CKKS scheme is a public-key encryption scheme. However,
-        both BFV and CKKS can operate also in a symmetric-key mode. This can be
-        beneficial when the public-key functionality is not exactly needed, like
-        in simple outsourced computation scenarios. The benefit is that in these
-        cases it is possible to produce ciphertexts that are partly seeded, hence
-        significantly smaller. Such ciphertexts must be expanded before being used
-        in computations; this is automatically done by deserialization.
+        /*
+        For this example, we demonstrate another size-saving trick. Earlier we
+        set up the Encryptor using the public key. Clearly this indicates that
+        the CKKS scheme is a public-key encryption scheme. However, both BFV and
+        CKKS can operate also in symmetric-key mode, which can be beneficial when
+        the public-key functionality is not needed, like in simple outsourced
+        computation scenarios. In symmetric-key mode it is possible to produce
+        ciphertexts that are partly seeded, hence significantly smaller in size.
+        Such seeded ciphertexts cannot be used directly, and must first be expanded
+        to full size. They are always wrapped in Serializable<Ciphertext> objects
+        and can only be serialized. Deserialization automatically expands them into
+        regular ciphertexts that can be used in computations.
 
         To use symmetric-key encryption, we need to set up the Encryptor with the
-        secret key instead.
+        secret key instead, and use it to produce a seeded ciphertext wrapped in
+        a Serializable<Ciphertext> object. Again, we immediately call the save
+        function to avoid creating an unnecessary named object.
         */
         Encryptor sym_encryptor(context, sk);
-        Serializable<Ciphertext> sym_encrypted1 = sym_encryptor.encrypt_symmetric(plain1);
-        Serializable<Ciphertext> sym_encrypted2 = sym_encryptor.encrypt_symmetric(plain2);
+        auto size_sym_encrypted2 = sym_encryptor.encrypt_symmetric(plain2).save(data_stream);
 
         /*
         Before continuing, we demonstrate the significant space saving from this
         method.
         */
-        auto size_sym_encrypted1 = sym_encrypted1.save(data_stream);
-        auto size_encrypted1 = encrypted1.save(data_stream);
-
-        /*
-        Now compare the serialized sizes of encrypted1 and sym_encrypted1.
-        */
         print_line(__LINE__);
-        cout << "Serializable<Ciphertext> (symmetric-key): wrote " << size_sym_encrypted1 << " bytes" << endl;
+        cout << "Serializable<Ciphertext> (public-key): wrote " << size_encrypted1 << " bytes" << endl;
         cout << "             "
-             << "Ciphertext (public-key): wrote " << size_encrypted1 << " bytes" << endl;
-
-        /*
-        Seek back in data_stream to where sym_encrypted1 data ended, i.e.,
-        size_encrypted1 bytes backwards from current position and write
-        sym_encrypted2 right after sym_encrypted1.
-        */
-        data_stream.seekp(-size_encrypted1, data_stream.cur);
-        sym_encrypted2.save(data_stream);
+             << "Serializable<Ciphertext> (seeded symmetric-key): wrote " << size_sym_encrypted2 << " bytes" << endl;
 
         /*
         We have seen how using KeyGenerator::relin_keys (KeyGenerator::galois_keys)
