@@ -113,8 +113,9 @@ namespace SEALNetExamples
                 As we can see from the print-out, the sizes returned by these functions
                 are significantly larger than the compressed size written into the shared
                 stream in the beginning. This is normal: compression yielded a significant
-                improvement in the data size, yet it is hard to estimate the size of the
-                compressed data.
+                improvement in the data size. It is impossible to know ahead of time the
+                exact size of the compressed data. If no compression is used, then the size
+                is exactly determined by the encryption parameters.
                 */
                 Utilities.PrintLine();
                 Console.Write("EncryptionParameters: data size upper bound (ComprModeType.None): ");
@@ -180,11 +181,11 @@ namespace SEALNetExamples
                 of RelinKeys and GaloisKeys, the functions KeyGenerator.RelinKeysLocal
                 and KeyGenerator.GaloisKeysLocal can be used to create the RelinKeys
                 and GaloisKeys objects directly. The difference is that the Serializable<T>
-                objects contain a partly seeded version of the RelinKeys (or GaloisKeys)
-                that will result in a significantly smaller size when serialized. Using
-                this method has no impact on security. Such seeded RelinKeys (GaloisKeys)
-                must be expanded before being used in computations; this is automatically
-                done by deserialization.
+                objects wrap a partly seeded version of the RelinKeys (or GaloisKeys) that
+                will result in a significantly smaller size when serialized. Using this
+                method has no impact on security. Such seeded RelinKeys (GaloisKeys) must
+                be expanded before being used in computations; this is automatically done
+                by deserialization.
                 */
                 using Serializable<RelinKeys> rlk = keygen.RelinKeys();
 
@@ -222,55 +223,50 @@ namespace SEALNetExamples
                 encoder.Encode(4.5, scale, plain2);
 
                 using Encryptor encryptor = new Encryptor(context, pk);
-                using Ciphertext encrypted1 = new Ciphertext(),
-                                encrypted2 = new Ciphertext();
-                encryptor.Encrypt(plain1, encrypted1);
-                encryptor.Encrypt(plain2, encrypted2);
 
                 /*
-                Now, we could serialize both encrypted1 and encrypted2 to dataStream
-                using Ciphertext.Save. However, for this example, we demonstrate another
-                size-saving trick that can come in handy.
+                Here we demonstrate another overload of the Encryptor::encrypt function
+                that outputs a Serializable<Ciphertext> instead of a regular ciphertext,
+                because the client has no use for the ciphertext object anyway. We can
+                call the Save function immediately without creating an unnecessary named
+                object.
+                */
+                long sizeEncrypted1 = encryptor.Encrypt(plain1).Save(dataStream);
 
-                As you noticed, we set up the Encryptor using the public key. Clearly this
-                indicates that the CKKS scheme is a public-key encryption scheme. However,
-                both BFV and CKKS can operate also in a symmetric-key mode. This can be
-                beneficial when the public-key functionality is not exactly needed, like
-                in simple outsourced computation scenarios. The benefit is that in these
-                cases it is possible to produce ciphertexts that are partly seeded, hence
-                significantly smaller. Such ciphertexts must be expanded before being used
-                in computations; this is automatically done by deserialization.
+                /*
+                For this example, we demonstrate another size-saving trick. Earlier we
+                set up the Encryptor using the public key. Clearly this indicates that
+                the CKKS scheme is a public-key encryption scheme. However, both BFV and
+                CKKS can operate also in symmetric-key mode, which can be beneficial when
+                the public-key functionality is not needed, like in simple outsourced
+                computation scenarios. In symmetric-key mode it is possible to produce
+                ciphertexts that are partly seeded, hence significantly smaller in size.
+                Such seeded ciphertexts cannot be used directly, and must first be expanded
+                to full size. They are always wrapped in Serializable<Ciphertext> objects
+                and can only be serialized. Deserialization automatically expands them into
+                regular ciphertexts that can be used in computations.
 
                 To use symmetric-key encryption, we need to set up the Encryptor with the
-                secret key instead.
+                secret key instead, and use it to produce a seeded ciphertext wrapped in
+                a Serializable<Ciphertext> object. Again, we immediately call the Save
+                function to avoid creating an unnecessary named object.
                 */
                 using Encryptor symEncryptor = new Encryptor(context, sk);
-                using Serializable<Ciphertext> symEncrypted1 = symEncryptor.EncryptSymmetric(plain1);
-                using Serializable<Ciphertext> symEncrypted2 = symEncryptor.EncryptSymmetric(plain2);
+                long sizeSymEncrypted2 = symEncryptor.EncryptSymmetric(plain2).Save(dataStream);
 
                 /*
                 Before continuing, we demonstrate the significant space saving from this
                 method.
                 */
-                long sizeSymEncrypted1 = symEncrypted1.Save(dataStream);
-                long sizeEncrypted1 = encrypted1.Save(dataStream);
-
-                /*
-                Now compare the serialized sizes of encrypted1 and symEncrypted1.
-                */
                 Utilities.PrintLine();
-                Console.Write("Serializable<Ciphertext> (symmetric-key): ");
-                Console.WriteLine($"wrote {sizeSymEncrypted1} bytes");
+                Console.WriteLine($"Serializable<Ciphertext> (public-key): wrote {sizeEncrypted1} bytes");
                 Console.Write("             ");
-                Console.WriteLine($"Ciphertext (public-key): wrote {sizeEncrypted1} bytes");
+                Console.Write($"Serializable<Ciphertext> (seeded symmetric-key): ");
+                Console.WriteLine($"wrote {sizeSymEncrypted2} bytes");
 
                 /*
-                Seek back in dataStream to where symEncrypted1 data ended, i.e.,
-                sizeEncrypted1 bytes backwards from current position and write
-                symEncrypted2 right after symEncrypted1.
+                Seek to the beginning of dataStream.
                 */
-                dataStream.Seek(-sizeEncrypted1, SeekOrigin.Current);
-                symEncrypted2.Save(dataStream);
                 dataStream.Seek(0, SeekOrigin.Begin);
 
                 /*

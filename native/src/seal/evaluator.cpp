@@ -1388,61 +1388,6 @@ namespace seal
 #endif
     }
 
-    void Evaluator::add_plain_inplace(Plaintext &plain1, const Plaintext &plain2)
-    {
-        // Verify parameters.
-        if (!is_metadata_valid_for(plain1, context_) || !is_buffer_valid(plain1))
-        {
-            throw invalid_argument("plain1 is not valid for encryption parameters");
-        }
-        if (!is_metadata_valid_for(plain2, context_) || !is_buffer_valid(plain2))
-        {
-            throw invalid_argument("plain2 is not valid for encryption parameters");
-        }
-
-        bool ntt_form = plain1.is_ntt_form();
-        if (ntt_form != plain2.is_ntt_form())
-        {
-            throw invalid_argument("NTT form mismatch");
-        }
-        if (ntt_form && (plain1.parms_id() != plain2.parms_id()))
-        {
-            throw invalid_argument("plain1 and plain2 parameter mismatch");
-        }
-        if (!are_same_scale(plain1, plain2))
-        {
-            throw invalid_argument("scale mismatch");
-        }
-
-        if (ntt_form)
-        {
-            // Extract encryption parameters.
-            auto &parms = context_.get_context_data(plain1.parms_id())->parms();
-            auto &coeff_modulus = parms.coeff_modulus();
-            size_t coeff_count = parms.poly_modulus_degree();
-            size_t coeff_modulus_size = coeff_modulus.size();
-
-            RNSIter plain1_iter(plain1.data(), coeff_count);
-            ConstRNSIter plain2_iter(plain2.data(), coeff_count);
-
-            // Add the RNS polynomials coefficient-wise
-            add_poly_coeffmod(plain1_iter, plain2_iter, coeff_modulus_size, coeff_modulus, plain1_iter);
-        }
-        else
-        {
-            // Extract encryption parameters.
-            auto &parms = context_.first_context_data()->parms();
-            auto &plain_modulus = parms.plain_modulus();
-
-            // Resize plain1 to the larger of the input sizes; pad with zeros if size is extended
-            size_t coeff_count_max = max(plain1.coeff_count(), plain2.coeff_count());
-            plain1.resize(coeff_count_max);
-
-            // Add the polynomials modulo plain_modulus
-            add_poly_coeffmod(plain1.data(), plain2.data(), plain2.coeff_count(), plain_modulus, plain1.data());
-        }
-    }
-
     void Evaluator::sub_plain_inplace(Ciphertext &encrypted, const Plaintext &plain)
     {
         // Verify parameters.
@@ -1515,61 +1460,6 @@ namespace seal
             throw logic_error("result ciphertext is transparent");
         }
 #endif
-    }
-
-    void Evaluator::sub_plain_inplace(Plaintext &plain1, const Plaintext &plain2)
-    {
-        // Verify parameters.
-        if (!is_metadata_valid_for(plain1, context_) || !is_buffer_valid(plain1))
-        {
-            throw invalid_argument("plain1 is not valid for encryption parameters");
-        }
-        if (!is_metadata_valid_for(plain2, context_) || !is_buffer_valid(plain2))
-        {
-            throw invalid_argument("plain2 is not valid for encryption parameters");
-        }
-
-        bool ntt_form = plain1.is_ntt_form();
-        if (ntt_form != plain2.is_ntt_form())
-        {
-            throw invalid_argument("NTT form mismatch");
-        }
-        if (ntt_form && (plain1.parms_id() != plain2.parms_id()))
-        {
-            throw invalid_argument("plain1 and plain2 parameter mismatch");
-        }
-        if (!are_same_scale(plain1, plain2))
-        {
-            throw invalid_argument("scale mismatch");
-        }
-
-        if (ntt_form)
-        {
-            // Extract encryption parameters.
-            auto &parms = context_.get_context_data(plain1.parms_id())->parms();
-            auto &coeff_modulus = parms.coeff_modulus();
-            size_t coeff_count = parms.poly_modulus_degree();
-            size_t coeff_modulus_size = coeff_modulus.size();
-
-            RNSIter plain1_iter(plain1.data(), coeff_count);
-            ConstRNSIter plain2_iter(plain2.data(), coeff_count);
-
-            // Subtract the RNS polynomials coefficient-wise
-            sub_poly_coeffmod(plain1_iter, plain2_iter, coeff_modulus_size, coeff_modulus, plain1_iter);
-        }
-        else
-        {
-            // Extract encryption parameters.
-            auto &parms = context_.first_context_data()->parms();
-            auto &plain_modulus = parms.plain_modulus();
-
-            // Resize plain1 to the larger of the input sizes; pad with zeros if size is extended
-            size_t coeff_count_max = max(plain1.coeff_count(), plain2.coeff_count());
-            plain1.resize(coeff_count_max);
-
-            // Subtract the polynomials modulo plain_modulus
-            sub_poly_coeffmod(plain1.data(), plain2.data(), plain2.coeff_count(), plain_modulus, plain1.data());
-        }
     }
 
     void Evaluator::multiply_plain_inplace(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool)
@@ -1777,53 +1667,6 @@ namespace seal
 
         // Set the scale
         encrypted_ntt.scale() = new_scale;
-    }
-
-    void Evaluator::multiply_plain_inplace(Plaintext &plain1, const Plaintext &plain2)
-    {
-        // Verify parameters.
-        if (!is_metadata_valid_for(plain1, context_) || !is_buffer_valid(plain1))
-        {
-            throw invalid_argument("plain1 is not valid for encryption parameters");
-        }
-        if (!is_metadata_valid_for(plain2, context_) || !is_buffer_valid(plain2))
-        {
-            throw invalid_argument("plain2 is not valid for encryption parameters");
-        }
-        if (!plain1.is_ntt_form())
-        {
-            throw invalid_argument("plain1 is not in NTT form");
-        }
-        if (!plain2.is_ntt_form())
-        {
-            throw invalid_argument("plain2 is not in NTT form");
-        }
-        if (plain1.parms_id() != plain2.parms_id())
-        {
-            throw invalid_argument("plain1 and plain2 parameter mismatch");
-        }
-
-        // Extract encryption parameters.
-        auto &context_data = *context_.get_context_data(plain1.parms_id());
-        auto &parms = context_data.parms();
-        auto &coeff_modulus = parms.coeff_modulus();
-        size_t coeff_count = parms.poly_modulus_degree();
-        size_t coeff_modulus_size = coeff_modulus.size();
-
-        double new_scale = plain1.scale() * plain2.scale();
-        if (!is_scale_within_bounds(new_scale, context_data))
-        {
-            throw invalid_argument("scale out of bounds");
-        }
-
-        RNSIter plain1_iter(plain1.data(), coeff_count);
-        ConstRNSIter plain2_iter(plain2.data(), coeff_count);
-
-        // Multiply the polynomials coefficient-wise modulo coeff_modulus
-        dyadic_product_coeffmod(plain1_iter, plain2_iter, coeff_modulus_size, coeff_modulus, plain1_iter);
-
-        // Set the scale
-        plain1.scale() = new_scale;
     }
 
     void Evaluator::transform_to_ntt_inplace(Plaintext &plain, parms_id_type parms_id, MemoryPoolHandle pool)

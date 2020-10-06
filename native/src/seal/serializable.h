@@ -22,12 +22,6 @@ namespace seal
     sense when, e.g., the ciphertexts need to be communicated from a client to
     a server for encrypted computation.
 
-    Serializable objects are created only by the following functions:
-        - Encryptor::encrypt_symmetric
-        - Encryptor::encrypt_zero_symmetric
-        - KeyGenerator::relin_keys
-        - KeyGenerator::galois_keys
-
     Serializable objects also expose the save_size function that behaves just
     as the save_size functions of other objects in Microsoft SEAL: it returns
     an upper bound on the size of a buffer needed to hold the serialized data.

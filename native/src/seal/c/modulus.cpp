@@ -244,6 +244,23 @@ SEAL_C_FUNC Modulus_Load(void *thisptr, uint8_t *inptr, uint64_t size, int64_t *
     }
 }
 
+SEAL_C_FUNC Modulus_Reduce(void *thisptr, uint64_t value, uint64_t *result)
+{
+    Modulus *sm = FromVoid<Modulus>(thisptr);
+    IfNullRet(sm, E_POINTER);
+    IfNullRet(result, E_POINTER);
+
+    try
+    {
+        *result = sm->reduce(value);
+        return S_OK;
+    }
+    catch (const logic_error &)
+    {
+        return COR_E_INVALIDOPERATION;
+    }
+}
+
 SEAL_C_FUNC CoeffModulus_MaxBitCount(uint64_t poly_modulus_degree, int sec_level, int *bit_count)
 {
     IfNullRet(bit_count, E_POINTER);

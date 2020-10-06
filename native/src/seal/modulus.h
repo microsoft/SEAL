@@ -279,9 +279,8 @@ namespace seal
         }
 
         /**
-        Saves the Modulus to an output stream. The full state of the modulus is
-        serialized. The output is in binary format and not human-readable. The output
-        stream must have the "binary" flag set.
+        Saves the Modulus to an output stream. The output is in binary format
+        and not human-readable. The output stream must have the "binary" flag set.
 
         @param[out] stream The stream to save the Modulus to
         @param[in] compr_mode The desired compression mode
@@ -299,8 +298,7 @@ namespace seal
         }
 
         /**
-        Loads a Modulus from an input stream overwriting the current
-        Modulus.
+        Loads a Modulus from an input stream overwriting the current Modulus.
 
         @param[in] stream The stream to load the Modulus from
         @throws std::logic_error if the data cannot be loaded by this version of
@@ -314,8 +312,8 @@ namespace seal
         }
 
         /**
-        Saves the Modulus to a given memory location. The full state of the
-        modulus is serialized. The output is in binary format and not human-readable.
+        Saves the Modulus to a given memory location. The output is in binary
+        format and not human-readable.
 
         @param[out] out The memory location to write the Modulus to
         @param[in] size The number of bytes available in the given memory location
@@ -351,6 +349,14 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Load(std::bind(&Modulus::load_members, this, _1), in, size);
         }
+
+        /**
+        Reduces a given unsigned integer modulo this modulus.
+
+        @param[in] value The unsigned integer to reduce
+        @throws std::logic_error if the Modulus is zero
+        */
+        SEAL_NODISCARD std::uint64_t reduce(std::uint64_t value) const;
 
     private:
         void set_value(std::uint64_t value);

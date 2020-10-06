@@ -287,6 +287,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Modulus_Load(IntPtr thisptr, byte[] inptr, ulong size, out long inBytes);
 
+        [DllImport(sealc, PreserveSig = false)]
+        internal static extern void Modulus_Reduce(IntPtr thisptr, ulong value, out ulong result);
+
         #endregion
 
         #region EncryptionParameters methods
@@ -479,7 +482,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void Evaluator_AddMany(IntPtr thisptr, ulong count, IntPtr[] encrypteds, IntPtr destination);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void Evaluator_AddPlain1(IntPtr thisptr, IntPtr encrypted, IntPtr plain, IntPtr destination);
+        internal static extern void Evaluator_AddPlain(IntPtr thisptr, IntPtr encrypted, IntPtr plain, IntPtr destination);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Evaluator_AddPlain2(IntPtr thisptr, IntPtr plain1, IntPtr plain2, IntPtr destination);
@@ -488,7 +491,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void Evaluator_Sub(IntPtr thisptr, IntPtr encrypted1, IntPtr encrypted2, IntPtr destination);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void Evaluator_SubPlain1(IntPtr thisptr, IntPtr encrypted, IntPtr plain, IntPtr destination);
+        internal static extern void Evaluator_SubPlain(IntPtr thisptr, IntPtr encrypted, IntPtr plain, IntPtr destination);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Evaluator_SubPlain2(IntPtr thisptr, IntPtr plain1, IntPtr plain2, IntPtr destination);
@@ -499,11 +502,8 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Evaluator_MultiplyMany(IntPtr thisptr, ulong count, IntPtr[] encrypteds, IntPtr relinKeys, IntPtr destination, IntPtr pool);
 
-        [DllImport(sealc, EntryPoint = "Evaluator_MultiplyPlain1", PreserveSig = false)]
+        [DllImport(sealc, PreserveSig = false)]
         internal static extern void Evaluator_MultiplyPlain(IntPtr thisptr, IntPtr encrypted, IntPtr plain, IntPtr destination, IntPtr pool);
-
-        [DllImport(sealc, EntryPoint = "Evaluator_MultiplyPlain2", PreserveSig = false)]
-        internal static extern void Evaluator_MultiplyPlain(IntPtr thisptr, IntPtr plain1, IntPtr plain2, IntPtr destination);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Evaluator_Square(IntPtr thisptr, IntPtr encrypted, IntPtr destination, IntPtr pool);

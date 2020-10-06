@@ -678,34 +678,6 @@ namespace seal
         }
 
         /**
-        Adds two plaintexts. Note that in many cases it can be much more efficient to perform any computations on raw
-        unencrypted data before encoding it, rather than using this function to compute on the plaintext objects.
-
-        @param[in] plain1 The first plaintext to add
-        @param[in] plain2 The second plaintext to add
-        @throws std::invalid_argument if plain1 or plain2 is not valid for the encryption parameters
-        @throws std::invalid_argument if plain1 and plain2 are in different NTT forms
-        @throws std::invalid_argument if plain1 and plain2 are at different level or scale
-        */
-        void add_plain_inplace(Plaintext &plain1, const Plaintext &plain2);
-
-        /**
-        Adds two plaintexts. This function adds two plaintexts and stores the result in the destination parameter.
-
-        @param[in] plain1 The first plaintext to add
-        @param[in] plain2 The second plaintext to add
-        @param[out] destination The plaintext to overwrite with the addition result
-        @throws std::invalid_argument if plain1 or plain2 is not valid for the encryption parameters
-        @throws std::invalid_argument if plain1 and plain2 are in different NTT forms
-        @throws std::invalid_argument if plain1 and plain2 are at different level or scale
-        */
-        inline void add_plain(const Plaintext &plain1, const Plaintext &plain2, Plaintext &destination)
-        {
-            destination = plain1;
-            add_plain_inplace(destination, plain2);
-        }
-
-        /**
         Subtracts a plaintext from a ciphertext.
 
         @param[in] encrypted The ciphertext to subtract from
@@ -733,36 +705,6 @@ namespace seal
         {
             destination = encrypted;
             sub_plain_inplace(destination, plain);
-        }
-
-        /**
-        Subtracts two plaintexts. Note that in many cases it can be much more efficient to perform any computations on
-        raw unencrypted data before encoding it, rather than using this function to compute on the plaintext objects.
-
-        @param[in] plain1 The plaintext to subtract from
-        @param[in] plain2 The plaintext to subtract
-        @throws std::invalid_argument if plain1 or plain2 is not valid for the encryption parameters
-        @throws std::invalid_argument if plain1 and plain2 are in different NTT forms
-        @throws std::invalid_argument if plain1 and plain2 are at different level or scale
-        */
-        void sub_plain_inplace(Plaintext &plain1, const Plaintext &plain2);
-
-        /**
-        Subtracts two plaintexts. This function subtracts two plaintexts and stores the result in the destination
-        parameter. Note that in many cases it can be much more efficient to perform any computations on raw unencrypted
-        data before encoding it, rather than using this function to compute on the plaintext objects.
-
-        @param[in] plain1 The plaintext to subtract from
-        @param[in] plain2 The plaintext to subtract
-        @param[out] destination The plaintext to overwrite with the subtraction result
-        @throws std::invalid_argument if plain1 or plain2 is not valid for the encryption parameters
-        @throws std::invalid_argument if plain1 and plain2 are in different NTT forms
-        @throws std::invalid_argument if plain1 and plain2 are at different level or scale
-        */
-        inline void sub_plain(const Plaintext &plain1, const Plaintext &plain2, Plaintext &destination)
-        {
-            destination = plain1;
-            sub_plain_inplace(destination, plain2);
         }
 
         /**
@@ -802,40 +744,6 @@ namespace seal
         {
             destination = encrypted;
             multiply_plain_inplace(destination, plain, std::move(pool));
-        }
-
-        /**
-        Multiplies two plaintexts. This function requires both plain1 and plain2 to be in NTT form. Note that in many
-        cases it can be much more efficient to perform any computations on raw unencrypted data before encoding it,
-        rather than using this function to compute on the plaintext objects.
-
-        @param[in] plain1 The first plaintext to multiply
-        @param[in] plain2 The second plaintext to multiply
-        @throws std::invalid_argument if plain1 or plain2 is not valid for the encryption parameters
-        @throws std::invalid_argument if plain1 or plain2 is not in NTT form
-        @throws std::invalid_argument if plain1 and plain2 are at different level
-        @throws std::invalid_argument if the output scale is too large for the encryption parameters
-        */
-        void multiply_plain_inplace(Plaintext &plain1, const Plaintext &plain2);
-
-        /**
-        Multiplies two plaintexts. This function multiplies two plaintexts and stores the result in the destination
-        parameter. This function requires both plain1 and plain2 to be in NTT form. Note that in many cases it can be
-        much more efficient to perform any computations on raw unencrypted data before encoding it, rather than using
-        this function to compute on the plaintext objects.
-
-        @param[in] plain1 The first plaintext to multiply
-        @param[in] plain2 The second plaintext to multiply
-        @param[out] destination The plaintext to overwrite with the multiplication result
-        @throws std::invalid_argument if plain1 or plain2 is not valid for the encryption parameters
-        @throws std::invalid_argument if plain1 or plain2 is not in NTT form
-        @throws std::invalid_argument if plain1 and plain2 are at different level
-        @throws std::invalid_argument if the output scale is too large for the encryption parameters
-        */
-        inline void multiply_plain(const Plaintext &plain1, const Plaintext &plain2, Plaintext &destination)
-        {
-            destination = plain1;
-            multiply_plain_inplace(destination, plain2);
         }
 
         /**

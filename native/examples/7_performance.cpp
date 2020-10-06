@@ -101,7 +101,7 @@ void bfv_performance_test(SEALContext context)
     random_device rd;
     for (size_t i = 0; i < slot_count; i++)
     {
-        pod_vector.push_back(rd() % plain_modulus.value());
+        pod_vector.push_back(plain_modulus.reduce(rd()));
     }
 
     cout << "Running tests ";

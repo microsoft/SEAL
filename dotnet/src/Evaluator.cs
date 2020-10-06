@@ -885,57 +885,8 @@ namespace Microsoft.Research.SEAL
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
 
-            NativeMethods.Evaluator_AddPlain1(
+            NativeMethods.Evaluator_AddPlain(
                 NativePtr, encrypted.NativePtr, plain.NativePtr, destination.NativePtr);
-        }
-
-        /// <summary>
-        /// Adds two plaintexts and stores the result in plain1.
-        /// </summary>
-        /// <remarks>
-        /// Adds two plaintexts and stores the result in plain1. Note that in many cases it can be much more efficient
-        /// to perform any computations on raw unencrypted data before encoding it, rather than using this function to
-        /// compute on the plaintext objects.
-        /// </remarks>
-        /// <param name="plain1">The first plaintext to add</param>
-        /// <param name="plain2">The second plaintext to add</param>
-        /// <exception cref="ArgumentNullException">if plain1 or plain2 is null</exception>
-        /// <exception cref="ArgumentException">if plain1 or plain2 is not valid for the encryption
-        /// parameters</exception>
-        /// <exception cref="ArgumentException">if plain1 or plain2 are in different NTT form</exception>
-        /// <exception cref="ArgumentException">if plain1 and plain2 are at different level or scale</exception>
-        public void AddPlainInplace(Plaintext plain1, Plaintext plain2)
-        {
-            AddPlain(plain1, plain2, destination: plain1);
-        }
-
-        /// <summary>
-        /// Adds two plaintexts.
-        /// </summary>
-        /// <remarks>
-        /// This function adds two plaintexts and stores the result in the destination parameter. Note that in many
-        /// cases it can be much more efficient to perform any computations on raw unencrypted data before encoding it,
-        /// rather than using this function to compute on the plaintext objects.
-        /// </remarks>
-        /// <param name="plain1">The first plaintext to add</param>
-        /// <param name="plain2">The second plaintext to add</param>
-        /// <param name="destination">The plaintext to overwrite with the addition result</param>
-        /// <exception cref="ArgumentNullException">if plain1, plain2, or destination is null</exception>
-        /// <exception cref="ArgumentException">if plain1 or plain2 is not valid for the encryption
-        /// parameters</exception>
-        /// <exception cref="ArgumentException">if plain1 or plain2 are in different NTT form</exception>
-        /// <exception cref="ArgumentException">if plain1 and plain2 are at different level or scale</exception>
-        public void AddPlain(Plaintext plain1, Plaintext plain2, Plaintext destination)
-        {
-            if (null == plain1)
-                throw new ArgumentNullException(nameof(plain1));
-            if (null == plain2)
-                throw new ArgumentNullException(nameof(plain2));
-            if (null == destination)
-                throw new ArgumentNullException(nameof(destination));
-
-            NativeMethods.Evaluator_AddPlain2(
-                NativePtr, plain1.NativePtr, plain2.NativePtr, destination.NativePtr);
         }
 
         /// <summary>
@@ -978,57 +929,8 @@ namespace Microsoft.Research.SEAL
             if (null == destination)
                 throw new ArgumentNullException(nameof(destination));
 
-            NativeMethods.Evaluator_SubPlain1(
+            NativeMethods.Evaluator_SubPlain(
                 NativePtr, encrypted.NativePtr, plain.NativePtr, destination.NativePtr);
-        }
-
-        /// <summary>
-        /// Subtracts two plaintexts and stores the result in plain1.
-        /// </summary>
-        /// <remarks>
-        /// Subtracts two plaintexts and stores the result in plain1. Note that in many cases it can be much more
-        /// efficient to perform any computations on raw unencrypted data before encoding it, rather than using this
-        /// function to compute on the plaintext objects.
-        /// </remarks>
-        /// <param name="plain1">The plaintext to subtract from</param>
-        /// <param name="plain2">The plaintext to subtract</param>
-        /// <exception cref="ArgumentNullException">if plain1 or plain2 is null</exception>
-        /// <exception cref="ArgumentException">if plain1 or plain2 is not valid for the encryption
-        /// parameters</exception>
-        /// <exception cref="ArgumentException">if plain1 or plain2 are in different NTT form</exception>
-        /// <exception cref="ArgumentException">if plain1 and plain2 are at different level or scale</exception>
-        public void SubPlainInplace(Plaintext plain1, Plaintext plain2)
-        {
-            SubPlain(plain1, plain2, destination: plain1);
-        }
-
-        /// <summary>
-        /// Subtracts two plaintexts.
-        /// </summary>
-        /// <remarks>
-        /// This function subtracts two plaintexts and stores the result in the destination parameter. Note that in
-        /// many cases it can be much more efficient to perform any computations on raw unencrypted data before encoding
-        /// it, rather than using this function to compute on the plaintext objects.
-        /// </remarks>
-        /// <param name="plain1">The plaintext to subtract from</param>
-        /// <param name="plain2">The plaintext to subtract</param>
-        /// <param name="destination">The plaintext to overwrite with the subtraction result</param>
-        /// <exception cref="ArgumentNullException">if plain1, plain2, or destination is null</exception>
-        /// <exception cref="ArgumentException">if plain1 or plain2 is not valid for the encryption
-        /// parameters</exception>
-        /// <exception cref="ArgumentException">if plain1 or plain2 are in different NTT form</exception>
-        /// <exception cref="ArgumentException">if plain1 and plain2 are at different level or scale</exception>
-        public void SubPlain(Plaintext plain1, Plaintext plain2, Plaintext destination)
-        {
-            if (null == plain1)
-                throw new ArgumentNullException(nameof(plain1));
-            if (null == plain2)
-                throw new ArgumentNullException(nameof(plain2));
-            if (null == destination)
-                throw new ArgumentNullException(nameof(destination));
-
-            NativeMethods.Evaluator_SubPlain2(
-                NativePtr, plain1.NativePtr, plain2.NativePtr, destination.NativePtr);
         }
 
         /// <summary>
@@ -1087,58 +989,6 @@ namespace Microsoft.Research.SEAL
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
             NativeMethods.Evaluator_MultiplyPlain(
                 NativePtr, encrypted.NativePtr, plain.NativePtr, destination.NativePtr, poolPtr);
-        }
-
-        /// <summary>
-        /// Multiplies two plaintexts and stores the result in plain1.
-        /// </summary>
-        /// <remarks>
-        /// Multiplies two plaintexts and stores the result in plain1. Note that in many cases it can be much more
-        /// efficient to perform any computations on raw unencrypted data before encoding it, rather than using this
-        /// function to compute on the plaintext objects.
-        /// </remarks>
-        /// <param name="plain1">The first plaintext to multiply</param>
-        /// <param name="plain2">The second plaintext to multiply</param>
-        /// <exception cref="ArgumentNullException">if plain1 or plain2 is null</exception>
-        /// <exception cref="ArgumentException">if plain1 or plain2 is not valid for the encryption
-        /// parameters</exception>
-        /// <exception cref="ArgumentException">if plain1 or plain2 is not in NTT form</exception>
-        /// <exception cref="ArgumentException">if plain1 and plain2 are at different level</exception>
-        /// <exception cref="ArgumentException">if the output scale is too large for the encryption
-        /// parameters</exception>
-        public void MultiplyPlainInplace(Plaintext plain1, Plaintext plain2)
-        {
-            MultiplyPlain(plain1, plain2, destination: plain1);
-        }
-
-        /// <summary>
-        /// Multiplies two plaintexts.
-        /// </summary>
-        /// <remarks>
-        /// This function multiplies two plaintexts and stores the result in the destination parameter. Note that in
-        /// many cases it can be much more efficient to perform any computations on raw unencrypted data before encoding
-        /// it, rather than using this function to compute on the plaintext objects.
-        /// </remarks>
-        /// <param name="plain1">The first plaintext to multiply</param>
-        /// <param name="plain2">The second plaintext to multiply</param>
-        /// <param name="destination">The plaintext to overwrite with the multiplication result</param>
-        /// <exception cref="ArgumentNullException">if plain1 or plain2 is null</exception>
-        /// <exception cref="ArgumentException">if plain1 or plain2 is not valid for the encryption
-        /// parameters</exception>
-        /// <exception cref="ArgumentException">if plain1 or plain2 is not in NTT form</exception>
-        /// <exception cref="ArgumentException">if plain1 and plain2 are at different level</exception>
-        /// <exception cref="ArgumentException">if the output scale is too large for the encryption
-        /// parameters</exception>
-        public void MultiplyPlain(Plaintext plain1, Plaintext plain2, Plaintext destination)
-        {
-            if (null == plain1)
-                throw new ArgumentNullException(nameof(plain1));
-            if (null == plain2)
-                throw new ArgumentNullException(nameof(plain2));
-            if (null == destination)
-                throw new ArgumentNullException(nameof(destination));
-
-            NativeMethods.Evaluator_MultiplyPlain(NativePtr, plain1.NativePtr, plain2.NativePtr, destination.NativePtr);
         }
 
         /// <summary>

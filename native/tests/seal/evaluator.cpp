@@ -349,15 +349,6 @@ namespace sealtest
                 auto tmp = abs(input[i].real() - output[i].real());
                 ASSERT_TRUE(tmp < 0.5);
             }
-
-            // Adding plaintexts
-            evaluator.add_plain(plain, plain, plainRes);
-            encoder.decode(plainRes, output);
-            for (size_t i = 0; i < slot_size; i++)
-            {
-                auto tmp = abs(input[i].real() - output[i].real());
-                ASSERT_TRUE(tmp < 0.5);
-            }
         }
         {
             // Adding two random vectors 50 times
@@ -413,15 +404,6 @@ namespace sealtest
                     auto tmp = abs(expected[i].real() - output[i].real());
                     ASSERT_TRUE(tmp < 0.5);
                 }
-
-                // Adding plaintexts
-                evaluator.add_plain(plain1, plain2, plainRes);
-                encoder.decode(plainRes, output);
-                for (size_t i = 0; i < slot_size; i++)
-                {
-                    auto tmp = abs(expected[i].real() - output[i].real());
-                    ASSERT_TRUE(tmp < 0.5);
-                }
             }
         }
         {
@@ -478,15 +460,6 @@ namespace sealtest
                     auto tmp = abs(expected[i].real() - output[i].real());
                     ASSERT_TRUE(tmp < 0.5);
                 }
-
-                // Adding plaintexts
-                evaluator.add_plain(plain1, plain2, plainRes);
-                encoder.decode(plainRes, output);
-                for (size_t i = 0; i < slot_size; i++)
-                {
-                    auto tmp = abs(expected[i].real() - output[i].real());
-                    ASSERT_TRUE(tmp < 0.5);
-                }
             }
         }
         {
@@ -537,15 +510,6 @@ namespace sealtest
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
-                encoder.decode(plainRes, output);
-                for (size_t i = 0; i < slot_size; i++)
-                {
-                    auto tmp = abs(expected[i].real() - output[i].real());
-                    ASSERT_TRUE(tmp < 0.5);
-                }
-
-                // Adding plaintexts
-                evaluator.add_plain(plain1, plain2, plainRes);
                 encoder.decode(plainRes, output);
                 for (size_t i = 0; i < slot_size; i++)
                 {
@@ -595,15 +559,6 @@ namespace sealtest
                 auto tmp = abs(input[i].real() - output[i].real());
                 ASSERT_TRUE(tmp < 0.5);
             }
-
-            // Subtracting plaintexts
-            evaluator.sub_plain(plain, plain, plainRes);
-            encoder.decode(plainRes, output);
-            for (size_t i = 0; i < slot_size; i++)
-            {
-                auto tmp = abs(input[i].real() - output[i].real());
-                ASSERT_TRUE(tmp < 0.5);
-            }
         }
         {
             // Subtracting two random vectors 100 times
@@ -653,15 +608,6 @@ namespace sealtest
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
-                encoder.decode(plainRes, output);
-                for (size_t i = 0; i < slot_size; i++)
-                {
-                    auto tmp = abs(expected[i].real() - output[i].real());
-                    ASSERT_TRUE(tmp < 0.5);
-                }
-
-                // Subtracting plaintexts
-                evaluator.sub_plain(plain1, plain2, plainRes);
                 encoder.decode(plainRes, output);
                 for (size_t i = 0; i < slot_size; i++)
                 {
@@ -718,15 +664,6 @@ namespace sealtest
                 ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
                 decryptor.decrypt(encrypted1, plainRes);
-                encoder.decode(plainRes, output);
-                for (size_t i = 0; i < slot_size; i++)
-                {
-                    auto tmp = abs(expected[i].real() - output[i].real());
-                    ASSERT_TRUE(tmp < 0.5);
-                }
-
-                // Subtracting plaintexts
-                evaluator.sub_plain(plain1, plain2, plainRes);
                 encoder.decode(plainRes, output);
                 for (size_t i = 0; i < slot_size; i++)
                 {
@@ -850,23 +787,6 @@ namespace sealtest
         decryptor.decrypt(encrypted1, plain);
         ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
-
-        // Adding plaintexts
-        plain = encoder.encode(0);
-        evaluator.add_plain_inplace(plain, encoder.encode(0));
-        ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
-
-        plain = encoder.encode(0);
-        evaluator.add_plain_inplace(plain, encoder.encode(5));
-        ASSERT_EQ(static_cast<uint64_t>(5), encoder.decode_uint64(plain));
-
-        plain = encoder.encode(5);
-        evaluator.add_plain_inplace(plain, encoder.encode(-3));
-        ASSERT_EQ(static_cast<uint64_t>(2), encoder.decode_uint64(plain));
-
-        plain = encoder.encode(0x54321);
-        evaluator.add_plain_inplace(plain, encoder.encode(0x12345678));
-        ASSERT_EQ(static_cast<uint64_t>(0x12399999), encoder.decode_uint64(plain));
     }
 
     TEST(EvaluatorTest, BFVEncryptSubPlainDecrypt)
@@ -921,23 +841,6 @@ namespace sealtest
         decryptor.decrypt(encrypted1, plain);
         ASSERT_TRUE(static_cast<int64_t>(-9) == encoder.decode_int64(plain));
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
-
-        // Subtracting plaintexts
-        plain = encoder.encode(0);
-        evaluator.sub_plain_inplace(plain, encoder.encode(0));
-        ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
-
-        plain = encoder.encode(0);
-        evaluator.sub_plain_inplace(plain, encoder.encode(5));
-        ASSERT_EQ(static_cast<int64_t>(-5), encoder.decode_int64(plain));
-
-        plain = encoder.encode(5);
-        evaluator.sub_plain_inplace(plain, encoder.encode(-3));
-        ASSERT_EQ(static_cast<uint64_t>(8), encoder.decode_uint64(plain));
-
-        plain = encoder.encode(0x12345678);
-        evaluator.sub_plain_inplace(plain, encoder.encode(0x54321));
-        ASSERT_EQ(static_cast<uint64_t>(0x122F1357), encoder.decode_uint64(plain));
     }
 
     TEST(EvaluatorTest, BFVEncryptMultiplyPlainDecrypt)
@@ -1007,34 +910,6 @@ namespace sealtest
             decryptor.decrypt(encrypted, plain);
             ASSERT_TRUE(static_cast<int64_t>(-14) == encoder.decode_int64(plain));
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
-
-            // Multiplying plaintexts
-            plain = encoder.encode(5);
-            ASSERT_THROW(evaluator.multiply_plain_inplace(plain, plain), invalid_argument);
-
-            evaluator.transform_to_ntt_inplace(plain, context.first_parms_id());
-            evaluator.multiply_plain_inplace(plain, plain);
-            encryptor.encrypt(Plaintext("1"), encrypted);
-            evaluator.transform_to_ntt_inplace(encrypted);
-            evaluator.multiply_plain_inplace(encrypted, plain);
-            evaluator.transform_from_ntt_inplace(encrypted);
-            decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(static_cast<uint64_t>(25), encoder.decode_uint64(plain));
-
-            plain = encoder.encode(13);
-            Plaintext plain2 = encoder.encode(25);
-            evaluator.transform_to_ntt_inplace(plain, context.first_parms_id());
-            ASSERT_THROW(evaluator.multiply_plain_inplace(plain, plain2), invalid_argument);
-            ASSERT_THROW(evaluator.multiply_plain_inplace(plain2, plain), invalid_argument);
-
-            evaluator.transform_to_ntt_inplace(plain2, context.first_parms_id());
-            evaluator.multiply_plain_inplace(plain, plain2);
-            encryptor.encrypt(Plaintext("1"), encrypted);
-            evaluator.transform_to_ntt_inplace(encrypted);
-            evaluator.multiply_plain_inplace(encrypted, plain);
-            evaluator.transform_from_ntt_inplace(encrypted);
-            decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(static_cast<uint64_t>(325), encoder.decode_uint64(plain));
         }
         {
             EncryptionParameters parms(scheme_type::bfv);
@@ -1065,34 +940,6 @@ namespace sealtest
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(static_cast<uint64_t>(0x5B05B058), encoder.decode_uint64(plain));
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
-
-            // Multiplying plaintexts
-            plain = encoder.encode(5);
-            ASSERT_THROW(evaluator.multiply_plain_inplace(plain, plain), invalid_argument);
-
-            evaluator.transform_to_ntt_inplace(plain, context.first_parms_id());
-            evaluator.multiply_plain_inplace(plain, plain);
-            encryptor.encrypt(Plaintext("1"), encrypted);
-            evaluator.transform_to_ntt_inplace(encrypted);
-            evaluator.multiply_plain_inplace(encrypted, plain);
-            evaluator.transform_from_ntt_inplace(encrypted);
-            decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(static_cast<uint64_t>(25), encoder.decode_uint64(plain));
-
-            plain = encoder.encode(13);
-            Plaintext plain2 = encoder.encode(25);
-            evaluator.transform_to_ntt_inplace(plain, context.first_parms_id());
-            ASSERT_THROW(evaluator.multiply_plain_inplace(plain, plain2), invalid_argument);
-            ASSERT_THROW(evaluator.multiply_plain_inplace(plain2, plain), invalid_argument);
-
-            evaluator.transform_to_ntt_inplace(plain2, context.first_parms_id());
-            evaluator.multiply_plain_inplace(plain, plain2);
-            encryptor.encrypt(Plaintext("1"), encrypted);
-            evaluator.transform_to_ntt_inplace(encrypted);
-            evaluator.multiply_plain_inplace(encrypted, plain);
-            evaluator.transform_from_ntt_inplace(encrypted);
-            decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(static_cast<uint64_t>(325), encoder.decode_uint64(plain));
         }
         {
             EncryptionParameters parms(scheme_type::bfv);
@@ -1123,34 +970,6 @@ namespace sealtest
             decryptor.decrypt(encrypted, plain);
             ASSERT_EQ(static_cast<uint64_t>(0x5B05B058), encoder.decode_uint64(plain));
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
-
-            // Multiplying plaintexts
-            plain = encoder.encode(5);
-            ASSERT_THROW(evaluator.multiply_plain_inplace(plain, plain), invalid_argument);
-
-            evaluator.transform_to_ntt_inplace(plain, context.first_parms_id());
-            evaluator.multiply_plain_inplace(plain, plain);
-            encryptor.encrypt(Plaintext("1"), encrypted);
-            evaluator.transform_to_ntt_inplace(encrypted);
-            evaluator.multiply_plain_inplace(encrypted, plain);
-            evaluator.transform_from_ntt_inplace(encrypted);
-            decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(static_cast<uint64_t>(25), encoder.decode_uint64(plain));
-
-            plain = encoder.encode(13);
-            Plaintext plain2 = encoder.encode(25);
-            evaluator.transform_to_ntt_inplace(plain, context.first_parms_id());
-            ASSERT_THROW(evaluator.multiply_plain_inplace(plain, plain2), invalid_argument);
-            ASSERT_THROW(evaluator.multiply_plain_inplace(plain2, plain), invalid_argument);
-
-            evaluator.transform_to_ntt_inplace(plain2, context.first_parms_id());
-            evaluator.multiply_plain_inplace(plain, plain2);
-            encryptor.encrypt(Plaintext("1"), encrypted);
-            evaluator.transform_to_ntt_inplace(encrypted);
-            evaluator.multiply_plain_inplace(encrypted, plain);
-            evaluator.transform_from_ntt_inplace(encrypted);
-            decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(static_cast<uint64_t>(325), encoder.decode_uint64(plain));
         }
         {
             EncryptionParameters parms(scheme_type::bfv);

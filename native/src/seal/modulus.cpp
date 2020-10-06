@@ -5,6 +5,7 @@
 #include "seal/util/common.h"
 #include "seal/util/numth.h"
 #include "seal/util/uintarith.h"
+#include "seal/util/uintarithsmallmod.h"
 #include <numeric>
 #include <stdexcept>
 #include <unordered_map>
@@ -101,6 +102,15 @@ namespace seal
             // Set the primality flag
             is_prime_ = util::is_prime(*this);
         }
+    }
+
+    uint64_t Modulus::reduce(uint64_t value) const
+    {
+        if (value_ == 0)
+        {
+            throw logic_error("cannot reduce modulo a zero modulus");
+        }
+        return barrett_reduce_64(value, *this);
     }
 
     vector<Modulus> CoeffModulus::BFVDefault(size_t poly_modulus_degree, sec_level_type sec_level)

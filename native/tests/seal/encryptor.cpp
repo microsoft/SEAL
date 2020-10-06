@@ -193,6 +193,33 @@ namespace sealtest
 
             IntegerEncoder encoder(context);
 
+            Encryptor encryptor(context, keygen.public_key());
+            Decryptor decryptor(context, keygen.secret_key());
+
+            Ciphertext encrypted;
+            Plaintext plain;
+            stringstream stream;
+
+            encryptor.encrypt(encoder.encode(314159265), encrypted);
+            decryptor.decrypt(encrypted, plain);
+            ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
+
+            encryptor.encrypt(encoder.encode(314159265)).save(stream);
+            encrypted.load(context, stream);
+            decryptor.decrypt(encrypted, plain);
+            ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
+            ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
+        }
+        {
+            parms.set_poly_modulus_degree(256);
+            parms.set_coeff_modulus(CoeffModulus::Create(256, { 40, 40, 40 }));
+
+            SEALContext context(parms, false, sec_level_type::none);
+            KeyGenerator keygen(context);
+
+            IntegerEncoder encoder(context);
+
             Encryptor encryptor(context, keygen.secret_key());
             Decryptor decryptor(context, keygen.secret_key());
 
@@ -238,6 +265,25 @@ namespace sealtest
             ASSERT_TRUE(pt.is_zero());
 
             encryptor.encrypt_zero(next_parms, ct);
+            ASSERT_FALSE(ct.is_ntt_form());
+            ASSERT_FALSE(ct.is_transparent());
+            ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.parms_id(), next_parms);
+            decryptor.decrypt(ct, pt);
+            ASSERT_TRUE(pt.is_zero());
+        }
+        {
+            stringstream stream;
+            encryptor.encrypt_zero().save(stream);
+            ct.load(context, stream);
+            ASSERT_FALSE(ct.is_ntt_form());
+            ASSERT_FALSE(ct.is_transparent());
+            ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            decryptor.decrypt(ct, pt);
+            ASSERT_TRUE(pt.is_zero());
+
+            encryptor.encrypt_zero(next_parms).save(stream);
+            ct.load(context, stream);
             ASSERT_FALSE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
@@ -314,6 +360,38 @@ namespace sealtest
             }
 
             encryptor.encrypt_zero(next_parms, ct);
+            ASSERT_FALSE(ct.is_transparent());
+            ASSERT_TRUE(ct.is_ntt_form());
+            ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ct.scale() = pow(2.0, 20);
+            ASSERT_EQ(ct.parms_id(), next_parms);
+            decryptor.decrypt(ct, pt);
+            ASSERT_EQ(pt.parms_id(), next_parms);
+            encoder.decode(pt, res);
+            for (auto val : res)
+            {
+                ASSERT_NEAR(val.real(), 0.0, 0.01);
+                ASSERT_NEAR(val.imag(), 0.0, 0.01);
+            }
+        }
+        {
+            stringstream stream;
+            encryptor.encrypt_zero().save(stream);
+            ct.load(context, stream);
+            ASSERT_FALSE(ct.is_transparent());
+            ASSERT_TRUE(ct.is_ntt_form());
+            ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ct.scale() = pow(2.0, 20);
+            decryptor.decrypt(ct, pt);
+            encoder.decode(pt, res);
+            for (auto val : res)
+            {
+                ASSERT_NEAR(val.real(), 0.0, 0.01);
+                ASSERT_NEAR(val.imag(), 0.0, 0.01);
+            }
+
+            encryptor.encrypt_zero(next_parms).save(stream);
+            ct.load(context, stream);
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
@@ -596,6 +674,20 @@ namespace sealtest
             decryptor.decrypt(encrypted, plainRes);
             encoder.decode(plainRes, output);
 
+            for (size_t i = 0; i < slot_size; i++)
+            {
+                auto tmp = abs(input[i].real() - output[i].real());
+                ASSERT_TRUE(tmp < 0.5);
+            }
+
+            stringstream stream;
+            encoder.encode(input, second_parms_id, delta, plain);
+            encryptor.encrypt(plain).save(stream);
+            encrypted.load(context, stream);
+            // Check correctness of encryption
+            ASSERT_TRUE(encrypted.parms_id() == second_parms_id);
+            decryptor.decrypt(encrypted, plainRes);
+            encoder.decode(plainRes, output);
             for (size_t i = 0; i < slot_size; i++)
             {
                 auto tmp = abs(input[i].real() - output[i].real());
