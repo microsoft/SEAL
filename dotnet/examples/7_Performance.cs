@@ -121,7 +121,7 @@ namespace SEALNetExamples
             Random rnd = new Random();
             for (ulong i = 0; i < batchEncoder.SlotCount; i++)
             {
-                podValues[i] = plainModulus.Reduce(rnd.Next());
+                podValues[i] = plainModulus.Reduce((ulong)rnd.Next());
             }
 
             Console.Write("Running tests ");
