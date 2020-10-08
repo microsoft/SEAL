@@ -13,12 +13,21 @@ using namespace emscripten;
 using namespace seal;
 
 /*
-  Transform a JS TypedArray into a Vector of the appropriate type
+  Helper to convert a string to a number type.
+*/
+template <typename T>
+void string_to_number(std::string &str, T &numb) {
+    std::istringstream is(str);
+    is >> numb;
+}
+
+/*
+  Transform a JS TypedArray into a Vector of the appropriate type (zero copy)
 */
 template<typename T>
     std::vector<T> vecFromJSArray(const val &v) {
         std::vector<T> rv;
-        const size_t l = v["length"].as<unsigned>();
+        const size_t l = v["length"].as<std::size_t>();
         rv.resize(l);
         val memoryView { typed_memory_view(l, rv.data()) };
         memoryView.call<void>("set", v);
@@ -26,7 +35,44 @@ template<typename T>
     };
 
 /*
-  Get the underlying bytes from a Vector to a JS TypedArray.
+  Transform a JS Array of strings into a Vector of the appropriate type (slow)
+*/
+template<typename T>
+    std::vector<T> vecFromJSArrayString(const val &v) {
+        const std::size_t length = v["length"].as<std::size_t>();
+        std::vector<T> values;
+        values.reserve(length);
+        // Right now, embind doesn't support BigInt from JS => WASM
+        // The work arround is to perform string conversion.
+        for (std::size_t i = 0; i < length; ++i) {
+            std::string string_value = v[i].as<std::string>();
+            T num_value;
+            string_to_number(string_value, num_value);
+            values.push_back(num_value);
+        }
+        return values;
+    };
+
+/*
+  Transform a JS Array of strings into a Vector of Modulus (slow)
+*/
+std::vector<Modulus> vecFromJSArrayStringModulus(const val &v) {
+    const std::size_t length = v["length"].as<std::size_t>();
+    std::vector<Modulus> values;
+    values.reserve(length);
+    // Right now, embind doesn't support BigInt from JS => WASM
+    // The work arround is to perform string conversion.
+    for (std::size_t i = 0; i < length; ++i) {
+        std::string string_value = v[i].as<std::string>();
+        uint64_t num_value;
+        string_to_number(string_value, num_value);
+        values.push_back(num_value);
+    }
+    return values;
+};
+
+/*
+  Converts a Vector to a JS TypedArray (zero copy)
 */
 template<typename T>
     emscripten::val jsArrayFromVec(const std::vector<T>  &vec) {
@@ -34,6 +80,42 @@ template<typename T>
         return val(typed_memory_view(l, vec.data()));
     };
 
+/*
+  Converts a Vector to a JS Array of strings (slow)
+*/
+template<typename T>
+    emscripten::val jsArrayStringFromVec(const std::vector<T> &vec) {
+        const size_t length = vec.size();
+
+        std::vector<std::string> result_strings;
+        result_strings.reserve(length);
+        const std::type_info& ti = typeid(T);
+
+        for (auto number: vec) {
+            result_strings.push_back(std::to_string(number));
+        }
+
+        emscripten::val result = emscripten::val::array(
+            result_strings.begin(), result_strings.end());
+        return result;
+    };
+/*
+  Converts a Vector holding Modulus to a JS Array of strings (slow)
+*/
+emscripten::val jsArrayStringFromVecModulus(const std::vector<Modulus> &vec) {
+    const size_t length = vec.size();
+
+    std::vector<std::string> result_strings;
+    result_strings.reserve(length);
+
+    for (auto number: vec) {
+        result_strings.push_back(std::to_string(number.value()));
+    }
+
+    emscripten::val result = emscripten::val::array(
+        result_strings.begin(), result_strings.end());
+    return result;
+};
 /*
   Copies a Vector of type T1 to type T2
 */
@@ -108,20 +190,6 @@ std::string get_exception(intptr_t ptr) {
     std::string error_string = exception->what();
     return error_string;
 }
-/*
- Fast binary GCD implementation using intrinsics
-*/
-std::uint64_t gcd(std::uint64_t u, std::uint64_t v)
-{
-   auto shift = __builtin_ctzll(u | v);
-    u >>= __builtin_ctzll(u);
-    do {
-        v >>= __builtin_ctzll(v);
-        if(u > v)
-            std::swap(u, v);
-    } while((v -= u));
-    return u << shift;
-}
 
 template <class F>
 struct y_combinator {
@@ -141,12 +209,6 @@ y_combinator<std::decay_t<F>> make_y_combinator(F&& f) {
     return {std::forward<F>(f)};
 }
 
-template <typename T>
-void string_to_number(std::string &str, T &numb) {
-    std::istringstream is(str);
-    is >> numb;
-}
-
 /*
  * Dummy main so the linker will not perform DCE
  */
@@ -160,23 +222,17 @@ EMSCRIPTEN_BINDINGS(SEAL) {
     emscripten::function("jsArrayUint8FromVec", select_overload<val(const std::vector<uint8_t> &)>(&jsArrayFromVec));
     emscripten::function("jsArrayInt32FromVec", select_overload<val(const std::vector<int32_t> &)>(&jsArrayFromVec));
     emscripten::function("jsArrayUint32FromVec", select_overload<val(const std::vector<uint32_t> &)>(&jsArrayFromVec));
-    emscripten::function("jsArrayDoubleFromVec", select_overload<val(const std::vector<double> &)>(&jsArrayFromVec));
+    emscripten::function("jsArrayFloat64FromVec", select_overload<val(const std::vector<double> &)>(&jsArrayFromVec));
+    emscripten::function("jsArrayStringFromVecInt64", select_overload<val(const std::vector<int64_t> &)>(&jsArrayStringFromVec));
+    emscripten::function("jsArrayStringFromVecUint64", select_overload<val(const std::vector<uint64_t> &)>(&jsArrayStringFromVec));
+    emscripten::function("jsArrayStringFromVecModulus", select_overload<val(const std::vector<Modulus> &)>(&jsArrayStringFromVecModulus));
     emscripten::function("vecFromArrayUint8", select_overload<std::vector<uint8_t>(const val &)>(&vecFromJSArray));
     emscripten::function("vecFromArrayInt32", select_overload<std::vector<int32_t>(const val &)>(&vecFromJSArray));
     emscripten::function("vecFromArrayUint32", select_overload<std::vector<uint32_t>(const val &)>(&vecFromJSArray));
-    emscripten::function("vecFromArrayDouble", select_overload<std::vector<double>(const val &)>(&vecFromJSArray));
-    emscripten::function("gcd", optional_override([](std::string a, std::string b) {
-            uint64_t aa;
-            uint64_t bb;
-            std::istringstream issa(a);
-            std::istringstream issb(b);
-            issa >> aa;
-            issb >> bb;
-            uint64_t result = gcd(aa, bb);
-            std::ostringstream str;
-            str << result;
-            return str.str();
-        }));
+    emscripten::function("vecFromArrayFloat64", select_overload<std::vector<double>(const val &)>(&vecFromJSArray));
+    emscripten::function("vecFromArrayBigInt64", select_overload<std::vector<int64_t>(const val &)>(&vecFromJSArrayString));
+    emscripten::function("vecFromArrayBigUint64", select_overload<std::vector<uint64_t>(const val &)>(&vecFromJSArrayString));
+    emscripten::function("vecFromArrayModulus", select_overload<std::vector<Modulus>(const val &)>(&vecFromJSArrayStringModulus));
 
     register_vector<Plaintext>("std::vector<Plaintext>");
     register_vector<Ciphertext>("std::vector<Ciphertext>");
@@ -185,18 +241,7 @@ EMSCRIPTEN_BINDINGS(SEAL) {
     register_vector<uint32_t>("std::vector<uint32_t>");
     register_vector<double>("std::vector<double>");
     register_vector<std::complex<double>> ("std::vector<std::complex<double>>");
-
-    class_<std::vector<Modulus>> ("std::vector<Modulus>")
-        .constructor<>()
-        .function("values", optional_override([](std::vector<Modulus> &self) {
-            std::ostringstream str;
-            std::string separator;
-            for (auto x: self) {
-                str << separator << x.value();
-                separator = ',';
-            }
-            return str.str();
-        }));
+    register_vector<Modulus>("std::vector<Modulus>");
 
     class_<util::HashFunction>("util::HashFunction")
         .class_property("hashBlockUint64Count", &util::HashFunction::hash_block_uint64_count)
@@ -210,13 +255,16 @@ EMSCRIPTEN_BINDINGS(SEAL) {
         .constructor<>()
         .constructor<parms_id_type &&>() // Move via constructor overload
         .function("values", optional_override([](parms_id_type &self) {
-            std::ostringstream str;
-            std::string separator;
-            for (auto x: self) {
-                str << separator << x;
-                separator = ',';
+            std::vector<std::string> result_strings;
+            result_strings.reserve(self.size());
+
+            for (auto number: self) {
+                result_strings.push_back(std::to_string(number));
             }
-            return str.str();
+
+            emscripten::val result = emscripten::val::array(
+                result_strings.begin(), result_strings.end());
+            return result;
         }));
 
     enum_<sec_level_type>("SecLevelType")
@@ -235,17 +283,16 @@ EMSCRIPTEN_BINDINGS(SEAL) {
     class_<CoeffModulus>("CoeffModulus")
         .class_function("MaxBitCount", &CoeffModulus::MaxBitCount)
         .class_function("BFVDefault", &CoeffModulus::BFVDefault)
-        .class_function("Create", &CoeffModulus::Create)
         .class_function("CreateFromArray", optional_override([](const std::size_t &poly_modulus_degree,
             const val &v) {
-            std::vector<int>bit_sizes;
-            const auto l = v["length"].as<unsigned>();
+            std::vector<int> bit_sizes;
+            const std::size_t l = v["length"].as<std::size_t>();
             bit_sizes.resize(l);
             val memoryView {
                 typed_memory_view(l, bit_sizes.data())
             };
             memoryView.call<void>("set", v);
-            std::vector<Modulus>coeffModulus = CoeffModulus::Create(poly_modulus_degree, bit_sizes);
+            std::vector<Modulus> coeffModulus = CoeffModulus::Create(poly_modulus_degree, bit_sizes);
             return coeffModulus;
         }));
     class_<PlainModulus>("PlainModulus")
@@ -1177,7 +1224,7 @@ EMSCRIPTEN_BINDINGS(SEAL) {
                     result_strings.push_back(std::to_string(number));
                 }
                 // Create a new array of strings which will be converted
-                // to BigInts on the JS side.
+                // to BigInt64Array on the JS side.
                 emscripten::val result = emscripten::val::array(
                   result_strings.begin(), result_strings.end());
                 return result;
@@ -1199,7 +1246,7 @@ EMSCRIPTEN_BINDINGS(SEAL) {
                     result_strings.push_back(std::to_string(number));
                 }
                 // Create a new array of strings which will be converted
-                // to BigInts on the JS side.
+                // to BigInt64Array on the JS side.
                 emscripten::val result = emscripten::val::array(
                   result_strings.begin(), result_strings.end());
                 return result;
