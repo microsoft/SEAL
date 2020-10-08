@@ -4,7 +4,6 @@
 #pragma once
 
 #include "seal/batchencoder.h"
-#include "seal/biguint.h"
 #include "seal/ciphertext.h"
 #include "seal/ckks.h"
 #include "seal/context.h"
@@ -13,7 +12,6 @@
 #include "seal/encryptor.h"
 #include "seal/evaluator.h"
 #include "seal/intarray.h"
-#include "seal/intencoder.h"
 #include "seal/keygenerator.h"
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"

@@ -17,6 +17,7 @@ Previously these existed only for symmetric-key encryption mode.
 - Removed `BatchEncoder` API for encoding and decoding `Plaintext` objects inplace.
 This is because a `Plaintext` object with slot-data written into the coefficients is (confusingly) not valid to be used for encryption or unencrypted arithmetic.
 - Added API to `UniformRandomGeneratorFactory` to find whether the factory uses a default seed (absolutely only for debugging purposes!), and to retrieve that seed.
+- Removed `IntegerEncoder` and `BigUInt` classes since they are not recommended and result in inefficient homomorphic evaluation.
 
 ### Other
 

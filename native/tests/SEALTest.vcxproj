@@ -55,12 +55,10 @@
   </PropertyGroup>
   <ItemGroup>
     <ClCompile Include="seal\batchencoder.cpp" />
-    <ClCompile Include="seal\biguint.cpp" />
     <ClCompile Include="seal\ciphertext.cpp" />
     <ClCompile Include="seal\ckks.cpp" />
     <ClCompile Include="seal\modulus.cpp" />
     <ClCompile Include="seal\context.cpp" />
-    <ClCompile Include="seal\intencoder.cpp" />
     <ClCompile Include="seal\encryptionparams.cpp" />
     <ClCompile Include="seal\encryptor.cpp" />
     <ClCompile Include="seal\evaluator.cpp" />

@@ -64,7 +64,6 @@ void bfv_performance_test(SEALContext context)
     Decryptor decryptor(context, secret_key);
     Evaluator evaluator(context);
     BatchEncoder batch_encoder(context);
-    IntegerEncoder encoder(context);
 
     /*
     These will hold the total times used by each operation.
@@ -113,7 +112,9 @@ void bfv_performance_test(SEALContext context)
         into the polynomial. Note how the plaintext we create is of the exactly
         right size so unnecessary reallocations are avoided.
         */
-        Plaintext plain(parms.poly_modulus_degree(), 0);
+        Plaintext plain(poly_modulus_degree, 0);
+        Plaintext plain1(poly_modulus_degree, 0);
+        Plaintext plain2(poly_modulus_degree, 0);
         time_start = chrono::high_resolution_clock::now();
         batch_encoder.encode(pod_vector, plain);
         time_end = chrono::high_resolution_clock::now();
@@ -149,7 +150,6 @@ void bfv_performance_test(SEALContext context)
         [Decryption]
         We decrypt what we just encrypted.
         */
-        Plaintext plain2(poly_modulus_degree, 0);
         time_start = chrono::high_resolution_clock::now();
         decryptor.decrypt(encrypted, plain2);
         time_end = chrono::high_resolution_clock::now();
@@ -164,9 +164,11 @@ void bfv_performance_test(SEALContext context)
         We create two ciphertexts and perform a few additions with them.
         */
         Ciphertext encrypted1(context);
-        encryptor.encrypt(encoder.encode(static_cast<uint64_t>(i)), encrypted1);
+        batch_encoder.encode(vector<uint64_t>(slot_count, i), plain1);
+        encryptor.encrypt(plain1, encrypted1);
         Ciphertext encrypted2(context);
-        encryptor.encrypt(encoder.encode(static_cast<uint64_t>(i + 1)), encrypted2);
+        batch_encoder.encode(vector<uint64_t>(slot_count, i + 1), plain1);
+        encryptor.encrypt(plain2, encrypted2);
         time_start = chrono::high_resolution_clock::now();
         evaluator.add_inplace(encrypted1, encrypted1);
         evaluator.add_inplace(encrypted2, encrypted2);
