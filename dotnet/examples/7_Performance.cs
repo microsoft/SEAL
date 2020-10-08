@@ -87,7 +87,6 @@ namespace SEALNetExamples
             using Decryptor decryptor = new Decryptor(context, secretKey);
             using Evaluator evaluator = new Evaluator(context);
             using BatchEncoder batchEncoder = new BatchEncoder(context);
-            using IntegerEncoder encoder = new IntegerEncoder(context);
 
             /*
             These will hold the total times used by each operation.
@@ -179,10 +178,21 @@ namespace SEALNetExamples
                 [Add]
                 We create two ciphertexts and perform a few additions with them.
                 */
+                using Plaintext plain1 = new Plaintext(parms.PolyModulusDegree, 0);
+                for (ulong j = 0; j < batchEncoder.SlotCount; j++)
+                {
+                    podValues[j] = j;
+                }
+                batchEncoder.Encode(podValues, plain1);
+                for (ulong j = 0; j < batchEncoder.SlotCount; j++)
+                {
+                    podValues[j] = j + 1;
+                }
+                batchEncoder.Encode(podValues, plain2);
                 using Ciphertext encrypted1 = new Ciphertext(context);
-                encryptor.Encrypt(encoder.Encode(i), encrypted1);
+                encryptor.Encrypt(plain1, encrypted1);
                 using Ciphertext encrypted2 = new Ciphertext(context);
-                encryptor.Encrypt(encoder.Encode(i + 1), encrypted2);
+                encryptor.Encrypt(plain2, encrypted2);
 
                 timeAddSum.Start();
                 evaluator.AddInplace(encrypted1, encrypted1);

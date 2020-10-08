@@ -30,135 +30,6 @@ namespace SEALNetExamples
         elements (encoding) that allow more computations without data type overflow, and
         can allow the full plaintext polynomial to be utilized.
         */
-        private static void ExampleIntegerEncoder()
-        {
-            Utilities.PrintExampleBanner("Example: Encoders / Integer Encoder");
-
-            /*
-            [IntegerEncoder] (For BFV scheme only)
-
-            The IntegerEncoder encodes integers to BFV plaintext polynomials as follows.
-            First, a binary expansion of the integer is computed. Next, a polynomial is
-            created with the bits as coefficients. For example, the integer
-
-                26 = 2^4 + 2^3 + 2^1
-
-            is encoded as the polynomial 1x^4 + 1x^3 + 1x^1. Conversely, plaintext
-            polynomials are decoded by evaluating them at x=2. For negative numbers the
-            IntegerEncoder simply stores all coefficients as either 0 or -1, where -1 is
-            represented by the unsigned integer PlainModulus - 1 in memory.
-
-            Since encrypted computations operate on the polynomials rather than on the
-            encoded integers themselves, the polynomial coefficients will grow in the
-            course of such computations. For example, computing the sum of the encrypted
-            encoded integer 26 with itself will result in an encrypted polynomial with
-            larger coefficients: 2x^4 + 2x^3 + 2x^1. Squaring the encrypted encoded
-            integer 26 results also in increased coefficients due to cross-terms, namely,
-
-                (1x^4 + 1x^3 + 1x^1)^2 = 1x^8 + 2x^7 + 1x^6 + 2x^5 + 2x^4 + 1x^2;
-
-            further computations will quickly increase the coefficients much more.
-            Decoding will still work correctly in this case (evaluating the polynomial
-            at x=2), but since the coefficients of plaintext polynomials are really
-            integers modulo plain_modulus, implicit reduction modulo plain_modulus may
-            yield unexpected results. For example, adding 1x^4 + 1x^3 + 1x^1 to itself
-            plain_modulus many times will result in the constant polynomial 0, which is
-            clearly not equal to 26 * plain_modulus. It can be difficult to predict when
-            such overflow will take place especially when computing several sequential
-            multiplications.
-
-            The IntegerEncoder is easy to understand and use for simple computations,
-            and can be a good tool to experiment with for users new to Microsoft SEAL.
-            However, advanced users will probably prefer more efficient approaches,
-            such as the BatchEncoder or the CKKSEncoder.
-            */
-            using EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
-            ulong polyModulusDegree = 4096;
-            parms.PolyModulusDegree = polyModulusDegree;
-            parms.CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree);
-
-            /*
-            There is no hidden logic behind our choice of the plain_modulus. The only
-            thing that matters is that the plaintext polynomial coefficients will not
-            exceed this value at any point during our computation; otherwise the result
-            will be incorrect.
-            */
-            parms.PlainModulus = new Modulus(512);
-            using SEALContext context = new SEALContext(parms);
-            Utilities.PrintParameters(context);
-            Console.WriteLine();
-
-            using KeyGenerator keygen = new KeyGenerator(context);
-            using PublicKey publicKey = keygen.PublicKey;
-            using SecretKey secretKey = keygen.SecretKey;
-            using Encryptor encryptor = new Encryptor(context, publicKey);
-            using Evaluator evaluator = new Evaluator(context);
-            using Decryptor decryptor = new Decryptor(context, secretKey);
-
-            /*
-            We create an IntegerEncoder.
-            */
-            using IntegerEncoder encoder = new IntegerEncoder(context);
-
-            /*
-            First, we encode two integers as plaintext polynomials. Note that encoding
-            is not encryption: at this point nothing is encrypted.
-            */
-            int value1 = 5;
-            using Plaintext plain1 = encoder.Encode(value1);
-            Utilities.PrintLine();
-            Console.WriteLine($"Encode {value1} as polynomial {plain1} (plain1),");
-
-            int value2 = -7;
-            using Plaintext plain2 = encoder.Encode(value2);
-            Console.WriteLine(new string(' ', 13)
-                + $"Encode {value2} as polynomial {plain2} (plain2),");
-
-            /*
-            Now we can encrypt the plaintext polynomials.
-            */
-            using Ciphertext encrypted1 = new Ciphertext();
-            using Ciphertext encrypted2 = new Ciphertext();
-            Utilities.PrintLine();
-            Console.WriteLine("Encrypt plain1 to encrypted1 and plain2 to encrypted2.");
-            encryptor.Encrypt(plain1, encrypted1);
-            encryptor.Encrypt(plain2, encrypted2);
-            Console.WriteLine("    + Noise budget in encrypted1: {0} bits",
-                decryptor.InvariantNoiseBudget(encrypted1));
-            Console.WriteLine("    + Noise budget in encrypted2: {0} bits",
-                decryptor.InvariantNoiseBudget(encrypted2));
-
-            /*
-            As a simple example, we compute (-encrypted1 + encrypted2) * encrypted2.
-            */
-            using Ciphertext encryptedResult = new Ciphertext();
-            Utilities.PrintLine();
-            Console.WriteLine("Compute encrypted_result = (-encrypted1 + encrypted2) * encrypted2.");
-            evaluator.Negate(encrypted1, encryptedResult);
-            evaluator.AddInplace(encryptedResult, encrypted2);
-            evaluator.MultiplyInplace(encryptedResult, encrypted2);
-            Console.WriteLine("    + Noise budget in encryptedResult: {0} bits",
-                decryptor.InvariantNoiseBudget(encryptedResult));
-
-            using Plaintext plainResult = new Plaintext();
-            Utilities.PrintLine();
-            Console.WriteLine("Decrypt encrypted_result to plain_result.");
-            decryptor.Decrypt(encryptedResult, plainResult);
-
-            /*
-            Print the result plaintext polynomial. The coefficients are not even close
-            to exceeding our plainModulus, 512.
-            */
-            Console.WriteLine($"    + Plaintext polynomial: {plainResult}");
-
-            /*
-            Decode to obtain an integer result.
-            */
-            Utilities.PrintLine();
-            Console.WriteLine("Decode plain_result.");
-            Console.WriteLine("    + Decoded integer: {0} ...... Correct.",
-                encoder.DecodeInt32(plainResult));
-        }
 
         private static void ExampleBatchEncoder()
         {
@@ -174,7 +45,7 @@ namespace SEALNetExamples
             several orders of magnitude in fully vectorizable computations. Thus, in all
             but the simplest computations, batching should be the preferred method to use
             with BFV, and when used properly will result in implementations outperforming
-            anything done with the IntegerEncoder.
+            anything done without batching.
             */
             using EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
             ulong polyModulusDegree = 8192;
@@ -379,7 +250,7 @@ namespace SEALNetExamples
 
             /*
             To create CKKS plaintexts we need a special encoder: there is no other way
-            to create them. The IntegerEncoder and BatchEncoder cannot be used with the
+            to create them. The BatchEncoder cannot be used with the
             CKKS scheme. The CKKSEncoder encodes vectors of real or complex numbers into
             Plaintext objects, which can subsequently be encrypted. At a high level this
             looks a lot like what BatchEncoder does for the BFV scheme, but the theory
@@ -478,7 +349,6 @@ namespace SEALNetExamples
             /*
             Run all encoder examples.
             */
-            ExampleIntegerEncoder();
             ExampleBatchEncoder();
             ExampleCKKSEncoder();
         }
