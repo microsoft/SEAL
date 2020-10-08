@@ -62,6 +62,50 @@ namespace seal
             });
         }
 
+        void sample_poly_cbd(
+            shared_ptr<UniformRandomGenerator> rng, const EncryptionParameters &parms, uint64_t *destination)
+        {
+            auto coeff_modulus = parms.coeff_modulus();
+            size_t coeff_modulus_size = coeff_modulus.size();
+            size_t coeff_count = parms.poly_modulus_degree();
+
+            if (are_close(global_variables::noise_max_deviation, 0.0))
+            {
+                set_zero_poly(coeff_count, coeff_modulus_size, destination);
+                return;
+            }
+
+            if (global_variables::noise_standard_deviation != 3.2)
+            {
+                throw logic_error(
+                    "center binomial distribution only supports standard deviation 3.2, use discrete Gaussian instead");
+            }
+
+            auto hw = [](uint8_t x) {
+                uint8_t t = x & 0x55;
+                t += (x >> 1) & 0x55; // counting every 2 bits
+                int8_t hw = t & 0x3;
+                hw += (t >> 2) & 0x3;
+                hw += (t >> 4) & 0x3;
+                hw += (t >> 6) & 0x3;
+                return hw;
+            };
+
+            auto cbd = [&](shared_ptr<UniformRandomGenerator> rng) {
+                uint8_t t[6];
+                rng->generate(6, reinterpret_cast<SEAL_BYTE *>(t));
+                return hw(t[0]) + hw(t[1]) + hw(t[2] & 0x1F) - hw(t[3]) - hw(t[4]) - hw(t[5] & 0x1F);
+            };
+
+            SEAL_ITERATE(iter(destination), coeff_count, [&](auto &I) {
+                int8_t noise = static_cast<int64_t>(cbd(rng));
+                uint64_t flag = static_cast<uint64_t>(-static_cast<int64_t>(noise < 0));
+                SEAL_ITERATE(
+                    iter(StrideIter<uint64_t *>(&I, coeff_count), iter(coeff_modulus)), coeff_modulus_size,
+                    [&](auto J) { *get<0>(J) = static_cast<uint64_t>(noise) + (flag & get<1>(J).value()); });
+            });
+        }
+
         void sample_poly_uniform(
             shared_ptr<UniformRandomGenerator> rng, const EncryptionParameters &parms, uint64_t *destination)
         {
@@ -149,7 +193,11 @@ namespace seal
             // c[j] = public_key[j] * u + e[j]
             for (size_t j = 0; j < encrypted_size; j++)
             {
+#ifdef SEAL_USE_DISCRETE_GAUSSIAN
                 sample_poly_normal(rng, parms, u.get());
+#else
+                sample_poly_cbd(rng, parms, u.get());
+#endif
                 for (size_t i = 0; i < coeff_modulus_size; i++)
                 {
                     // Addition with e_0, e_1 is in NTT form.
@@ -230,8 +278,11 @@ namespace seal
 
             // Sample e <-- chi
             auto noise(allocate_poly(coeff_count, coeff_modulus_size, pool));
+#ifdef SEAL_USE_DISCRETE_GAUSSIAN
             sample_poly_normal(bootstrap_rng, parms, noise.get());
-
+#else
+            sample_poly_cbd(bootstrap_rng, parms, noise.get());
+#endif
             // Calculate -(a*s + e) (mod q) and store in c[0]
             for (size_t i = 0; i < coeff_modulus_size; i++)
             {

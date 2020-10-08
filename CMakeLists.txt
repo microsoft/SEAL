@@ -487,6 +487,11 @@ set(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR "Throw an exception when a member o
 option(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT ${SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR} ON)
 mark_as_advanced(FORCE SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT)
 
+# Use a discrete Gaussian distribution for error
+set(SEAL_USE_DISCRETE_GAUSSIAN_STR "Use discrete Gaussian instead of centerd binomial for sampling errors")
+option(SEAL_USE_DISCRETE_GAUSSIAN ${SEAL_USE_DISCRETE_GAUSSIAN_STR} OFF)
+mark_as_advanced(FORCE SEAL_USE_DISCRETE_GAUSSIAN)
+
 # In some non-MSVC compilers std::for_each_n is not available even when compiling as C++17
 if(SEAL_USE_STD_FOR_EACH_N)
     cmake_push_check_state(RESET)
