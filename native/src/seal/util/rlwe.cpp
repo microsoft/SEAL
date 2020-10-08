@@ -29,7 +29,7 @@ namespace seal
 
             SEAL_ITERATE(iter(destination), coeff_count, [&](auto &I) {
                 uint64_t rand = dist(engine);
-                uint64_t flag = -static_cast<uint64_t>(rand == 0);
+                uint64_t flag = static_cast<uint64_t>(-static_cast<int64_t>(rand == 0));
                 SEAL_ITERATE(
                     iter(StrideIter<uint64_t *>(&I, coeff_count), iter(coeff_modulus)), coeff_modulus_size,
                     [&](auto J) { *get<0>(J) = rand + (flag & get<1>(J).value()) - 1; });
@@ -55,7 +55,7 @@ namespace seal
 
             SEAL_ITERATE(iter(destination), coeff_count, [&](auto &I) {
                 int64_t noise = static_cast<int64_t>(dist(engine));
-                uint64_t flag = -static_cast<uint64_t>(noise < 0);
+                uint64_t flag = static_cast<uint64_t>(-static_cast<int64_t>(noise < 0));
                 SEAL_ITERATE(
                     iter(StrideIter<uint64_t *>(&I, coeff_count), iter(coeff_modulus)), coeff_modulus_size,
                     [&](auto J) { *get<0>(J) = static_cast<uint64_t>(noise) + (flag & get<1>(J).value()); });

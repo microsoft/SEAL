@@ -24,6 +24,29 @@ This is because a `Plaintext` object with slot-data written into the coefficient
 - Moved all files related to pkg-config to `pkgconfig/` subdirectory.
 - Added a new typedef `seal::seal_byte` for the unnecessarily capitalized `seal::SEAL_BYTE`.
 - Added `.pre-commit-config.yaml` (check out [pre-commit](https://pre-commit.com) if you are not familiar with this tool).
+- Added `seal::util::DWTHandler` and `seal::util::Arithmetic` class templates that unify the implementation of FFT (used by `CKKSEncoder`) and NTT (used by polynomial arithmetic).
+- The performance of encoding and decoding in CKKS are improved.
+
+### File Changes
+
+Renamed files and directories:
+
+New files:
+
+- [native/src/seal/util/dwthandler.h](native/src/seal/util/dwthandler.h)
+
+Removed files:
+
+- `dotnet/src/BigUInt.cs`
+- `dotnet/src/IntegerEncoder.cs`
+- `dotnet/tests/BigUIntTests.cs`
+- `dotnet/tests/IntegerEncoderTests.cs`
+- `native/src/seal/biguint.h`
+- `native/src/seal/biguint.cpp`
+- `native/src/seal/intencoder.h`
+- `native/src/seal/intencoder.cpp`
+- `native/tests/seal/biguint.cpp`
+- `native/tests/seal/intencoder.cpp`
 
 ## Version 3.5.9
 
