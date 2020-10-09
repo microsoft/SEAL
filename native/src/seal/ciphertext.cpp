@@ -248,7 +248,7 @@ namespace seal
 
             // Set values already at this point for the metadata validity check
             new_data.parms_id_ = parms_id;
-            new_data.is_ntt_form_ = (is_ntt_form_byte == seal_byte(0)) ? false : true;
+            new_data.is_ntt_form_ = (is_ntt_form_byte == seal_byte{}) ? false : true;
             new_data.size_ = safe_cast<size_t>(size64);
             new_data.poly_modulus_degree_ = safe_cast<size_t>(poly_modulus_degree64);
             new_data.coeff_modulus_size_ = safe_cast<size_t>(coeff_modulus_size64);

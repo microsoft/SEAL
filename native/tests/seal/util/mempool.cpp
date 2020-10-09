@@ -557,7 +557,7 @@ namespace sealtest
         TEST(MemoryPoolTests, Allocate)
         {
             MemoryPool &pool = *global_variables::global_memory_pool;
-            vector<seal_byte> bytes{ seal_byte(0), seal_byte(1), seal_byte(2), seal_byte(3), seal_byte(4) };
+            vector<seal_byte> bytes{ seal_byte{ 0 }, seal_byte{ 1 }, seal_byte{ 2 }, seal_byte{ 3 }, seal_byte{ 4 } };
             auto ptr = allocate(bytes.begin(), bytes.size(), pool);
             ASSERT_TRUE(equal(bytes.begin(), bytes.end(), ptr.get()));
         }

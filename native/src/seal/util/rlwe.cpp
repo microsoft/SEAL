@@ -31,7 +31,7 @@ namespace seal
                 uint64_t rand = dist(engine);
                 uint64_t flag = static_cast<uint64_t>(-static_cast<int64_t>(rand == 0));
                 SEAL_ITERATE(
-                    iter(StrideIter<uint64_t *>(&I, coeff_count), iter(coeff_modulus)), coeff_modulus_size,
+                    iter(StrideIter<uint64_t *>(&I, coeff_count), coeff_modulus), coeff_modulus_size,
                     [&](auto J) { *get<0>(J) = rand + (flag & get<1>(J).value()) - 1; });
             });
         }
@@ -57,7 +57,7 @@ namespace seal
                 int64_t noise = static_cast<int64_t>(dist(engine));
                 uint64_t flag = static_cast<uint64_t>(-static_cast<int64_t>(noise < 0));
                 SEAL_ITERATE(
-                    iter(StrideIter<uint64_t *>(&I, coeff_count), iter(coeff_modulus)), coeff_modulus_size,
+                    iter(StrideIter<uint64_t *>(&I, coeff_count), coeff_modulus), coeff_modulus_size,
                     [&](auto J) { *get<0>(J) = static_cast<uint64_t>(noise) + (flag & get<1>(J).value()); });
             });
         }
@@ -93,7 +93,7 @@ namespace seal
 
             auto cbd = [&](shared_ptr<UniformRandomGenerator> rng) {
                 uint8_t t[6];
-                rng->generate(6, reinterpret_cast<SEAL_BYTE *>(t));
+                rng->generate(6, reinterpret_cast<seal_byte *>(t));
                 return hw(t[0]) + hw(t[1]) + hw(t[2] & 0x1F) - hw(t[3]) - hw(t[4]) - hw(t[5] & 0x1F);
             };
 
@@ -101,7 +101,7 @@ namespace seal
                 int8_t noise = static_cast<int64_t>(cbd(rng));
                 uint64_t flag = static_cast<uint64_t>(-static_cast<int64_t>(noise < 0));
                 SEAL_ITERATE(
-                    iter(StrideIter<uint64_t *>(&I, coeff_count), iter(coeff_modulus)), coeff_modulus_size,
+                    iter(StrideIter<uint64_t *>(&I, coeff_count), coeff_modulus), coeff_modulus_size,
                     [&](auto J) { *get<0>(J) = static_cast<uint64_t>(noise) + (flag & get<1>(J).value()); });
             });
         }

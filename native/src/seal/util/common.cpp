@@ -32,10 +32,10 @@ namespace seal
 #elif defined(SEAL_USE_EXPLICIT_MEMSET)
             explicit_memset(data, 0, size);
 #else
-            volatile SEAL_BYTE *data_ptr = reinterpret_cast<SEAL_BYTE *>(data);
+            volatile seal_byte *data_ptr = reinterpret_cast<seal_byte *>(data);
             while (size--)
             {
-                *data_ptr++ = static_cast<SEAL_BYTE>(0);
+                *data_ptr++ = seal_byte{};
             }
 #endif
         }
