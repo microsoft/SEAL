@@ -30,9 +30,8 @@ namespace seal
             }
             reader_lock.unlock();
 
-            WriterLock writer_lock(permutation_tables_locker_.acquire_write());
-            result = allocate<uint32_t>(coeff_count_, pool_);
-            auto result_ptr = result.get();
+            auto temp(allocate<uint32_t>(coeff_count_, pool_));
+            auto temp_ptr = temp.get();
 
             uint32_t coeff_count_minus_one = safe_cast<uint32_t>(coeff_count_) - 1;
             for (size_t i = coeff_count_; i < coeff_count_ << 1; i++)
@@ -40,10 +39,15 @@ namespace seal
                 uint32_t reversed = reverse_bits<uint32_t>(safe_cast<uint32_t>(i), coeff_count_power_ + 1);
                 uint64_t index_raw = (static_cast<uint64_t>(galois_elt) * static_cast<uint64_t>(reversed)) >> 1;
                 index_raw &= static_cast<uint64_t>(coeff_count_minus_one);
-                *result_ptr++ = reverse_bits<uint32_t>(static_cast<uint32_t>(index_raw), coeff_count_power_);
+                *temp_ptr++ = reverse_bits<uint32_t>(static_cast<uint32_t>(index_raw), coeff_count_power_);
             }
-            writer_lock.unlock();
-            return;
+
+            WriterLock writer_lock(permutation_tables_locker_.acquire_write());
+            if (result)
+            {
+                return;
+            }
+            result.acquire(move(temp));
         }
 
         uint32_t GaloisTool::get_elt_from_step(int step) const

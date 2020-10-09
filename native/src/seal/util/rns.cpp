@@ -92,7 +92,7 @@ namespace seal
             return result;
         }
 
-        RNSBase RNSBase::extend(Modulus value) const
+        RNSBase RNSBase::extend(const Modulus &value) const
         {
             if (value.is_zero())
             {
@@ -130,7 +130,7 @@ namespace seal
             // The bases must be coprime
             for (size_t i = 0; i < other.size_; i++)
             {
-                for (size_t j = 0; j < i; j++)
+                for (size_t j = 0; j < size_; j++)
                 {
                     if (!are_coprime(other[i].value(), base_[j].value()))
                     {
@@ -176,7 +176,7 @@ namespace seal
             return newbase;
         }
 
-        RNSBase RNSBase::drop(Modulus value) const
+        RNSBase RNSBase::drop(const Modulus &value) const
         {
             if (size_ == 1)
             {
