@@ -105,7 +105,7 @@ void bfv_performance_test(SEALContext context)
     }
 
     cout << "Running tests ";
-    for (long long i = 0; i < count; i++)
+    for (size_t i = 0; i < static_cast<size_t>(count); i++)
     {
         /*
         [Batching]
