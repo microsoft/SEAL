@@ -6,7 +6,6 @@
 #include "seal/context.h"
 #include "seal/decryptor.h"
 #include "seal/encryptor.h"
-#include "seal/intencoder.h"
 #include "seal/keygenerator.h"
 #include "seal/modulus.h"
 #include <cstddef>
@@ -32,51 +31,76 @@ namespace sealtest
             PublicKey pk;
             keygen.create_public_key(pk);
 
-            IntegerEncoder encoder(context);
-
             Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted;
             Plaintext plain;
-            encryptor.encrypt(encoder.encode(0x12345678), encrypted);
+            string hex_poly;
+
+            hex_poly =
+                "1x^28 + 1x^25 + 1x^21 + 1x^20 + 1x^18 + 1x^14 + 1x^12 + 1x^10 + 1x^9 + 1x^6 + 1x^5 + 1x^4 + 1x^3";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(0x12345678ULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(0), encrypted);
+            hex_poly = "0";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(0ULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(1), encrypted);
+            hex_poly = "1";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(1ULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(2), encrypted);
+            hex_poly = "1x^1";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(2ULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFD)), encrypted);
+            hex_poly =
+                "1x^62 + 1x^61 + 1x^60 + 1x^59 + 1x^58 + 1x^57 + 1x^56 + 1x^55 + 1x^54 + 1x^53 + 1x^52 + 1x^51 + 1x^50 "
+                "+ 1x^49 + 1x^48 + 1x^47 + 1x^46 + 1x^45 + 1x^44 + 1x^43 + 1x^42 + 1x^41 + 1x^40 + 1x^39 + 1x^38 + "
+                "1x^37 + 1x^36 + 1x^35 + 1x^34 + 1x^33 + 1x^32 + 1x^31 + 1x^30 + 1x^29 + 1x^28 + 1x^27 + 1x^26 + 1x^25 "
+                "+ 1x^24 + 1x^23 + 1x^22 + 1x^21 + 1x^20 + 1x^19 + 1x^18 + 1x^17 + 1x^16 + 1x^15 + 1x^14 + 1x^13 + "
+                "1x^12 + 1x^11 + 1x^10 + 1x^9 + 1x^8 + 1x^7 + 1x^6 + 1x^5 + 1x^4 + 1x^3 + 1x^2 + 1";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(0x7FFFFFFFFFFFFFFDULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFE)), encrypted);
+            hex_poly =
+                "1x^62 + 1x^61 + 1x^60 + 1x^59 + 1x^58 + 1x^57 + 1x^56 + 1x^55 + 1x^54 + 1x^53 + 1x^52 + 1x^51 + 1x^50 "
+                "+ 1x^49 + 1x^48 + 1x^47 + 1x^46 + 1x^45 + 1x^44 + 1x^43 + 1x^42 + 1x^41 + 1x^40 + 1x^39 + 1x^38 + "
+                "1x^37 + 1x^36 + 1x^35 + 1x^34 + 1x^33 + 1x^32 + 1x^31 + 1x^30 + 1x^29 + 1x^28 + 1x^27 + 1x^26 + 1x^25 "
+                "+ 1x^24 + 1x^23 + 1x^22 + 1x^21 + 1x^20 + 1x^19 + 1x^18 + 1x^17 + 1x^16 + 1x^15 + 1x^14 + 1x^13 + "
+                "1x^12 + 1x^11 + 1x^10 + 1x^9 + 1x^8 + 1x^7 + 1x^6 + 1x^5 + 1x^4 + 1x^3 + 1x^2 + 1x^1";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(0x7FFFFFFFFFFFFFFEULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFF)), encrypted);
+            hex_poly =
+                "1x^62 + 1x^61 + 1x^60 + 1x^59 + 1x^58 + 1x^57 + 1x^56 + 1x^55 + 1x^54 + 1x^53 + 1x^52 + 1x^51 + 1x^50 "
+                "+ 1x^49 + 1x^48 + 1x^47 + 1x^46 + 1x^45 + 1x^44 + 1x^43 + 1x^42 + 1x^41 + 1x^40 + 1x^39 + 1x^38 + "
+                "1x^37 + 1x^36 + 1x^35 + 1x^34 + 1x^33 + 1x^32 + 1x^31 + 1x^30 + 1x^29 + 1x^28 + 1x^27 + 1x^26 + 1x^25 "
+                "+ 1x^24 + 1x^23 + 1x^22 + 1x^21 + 1x^20 + 1x^19 + 1x^18 + 1x^17 + 1x^16 + 1x^15 + 1x^14 + 1x^13 + "
+                "1x^12 + 1x^11 + 1x^10 + 1x^9 + 1x^8 + 1x^7 + 1x^6 + 1x^5 + 1x^4 + 1x^3 + 1x^2 + 1x^1 + 1";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(0x7FFFFFFFFFFFFFFFULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(314159265), encrypted);
+            hex_poly =
+                "1x^28 + 1x^25 + 1x^23 + 1x^21 + 1x^20 + 1x^19 + 1x^16 + 1x^15 + 1x^13 + 1x^12 + 1x^7 + 1x^5 + 1";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
         }
         {
@@ -87,51 +111,76 @@ namespace sealtest
             PublicKey pk;
             keygen.create_public_key(pk);
 
-            IntegerEncoder encoder(context);
-
             Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted;
             Plaintext plain;
-            encryptor.encrypt(encoder.encode(0x12345678), encrypted);
+            string hex_poly;
+
+            hex_poly =
+                "1x^28 + 1x^25 + 1x^21 + 1x^20 + 1x^18 + 1x^14 + 1x^12 + 1x^10 + 1x^9 + 1x^6 + 1x^5 + 1x^4 + 1x^3";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(0x12345678ULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(0), encrypted);
+            hex_poly = "0";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(0ULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(1), encrypted);
+            hex_poly = "1";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(1ULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(2), encrypted);
+            hex_poly = "1x^1";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(2ULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFD)), encrypted);
+            hex_poly =
+                "1x^62 + 1x^61 + 1x^60 + 1x^59 + 1x^58 + 1x^57 + 1x^56 + 1x^55 + 1x^54 + 1x^53 + 1x^52 + 1x^51 + 1x^50 "
+                "+ 1x^49 + 1x^48 + 1x^47 + 1x^46 + 1x^45 + 1x^44 + 1x^43 + 1x^42 + 1x^41 + 1x^40 + 1x^39 + 1x^38 + "
+                "1x^37 + 1x^36 + 1x^35 + 1x^34 + 1x^33 + 1x^32 + 1x^31 + 1x^30 + 1x^29 + 1x^28 + 1x^27 + 1x^26 + 1x^25 "
+                "+ 1x^24 + 1x^23 + 1x^22 + 1x^21 + 1x^20 + 1x^19 + 1x^18 + 1x^17 + 1x^16 + 1x^15 + 1x^14 + 1x^13 + "
+                "1x^12 + 1x^11 + 1x^10 + 1x^9 + 1x^8 + 1x^7 + 1x^6 + 1x^5 + 1x^4 + 1x^3 + 1x^2 + 1";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(0x7FFFFFFFFFFFFFFDULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFE)), encrypted);
+            hex_poly =
+                "1x^62 + 1x^61 + 1x^60 + 1x^59 + 1x^58 + 1x^57 + 1x^56 + 1x^55 + 1x^54 + 1x^53 + 1x^52 + 1x^51 + 1x^50 "
+                "+ 1x^49 + 1x^48 + 1x^47 + 1x^46 + 1x^45 + 1x^44 + 1x^43 + 1x^42 + 1x^41 + 1x^40 + 1x^39 + 1x^38 + "
+                "1x^37 + 1x^36 + 1x^35 + 1x^34 + 1x^33 + 1x^32 + 1x^31 + 1x^30 + 1x^29 + 1x^28 + 1x^27 + 1x^26 + 1x^25 "
+                "+ 1x^24 + 1x^23 + 1x^22 + 1x^21 + 1x^20 + 1x^19 + 1x^18 + 1x^17 + 1x^16 + 1x^15 + 1x^14 + 1x^13 + "
+                "1x^12 + 1x^11 + 1x^10 + 1x^9 + 1x^8 + 1x^7 + 1x^6 + 1x^5 + 1x^4 + 1x^3 + 1x^2 + 1x^1";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(0x7FFFFFFFFFFFFFFEULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFF)), encrypted);
+            hex_poly =
+                "1x^62 + 1x^61 + 1x^60 + 1x^59 + 1x^58 + 1x^57 + 1x^56 + 1x^55 + 1x^54 + 1x^53 + 1x^52 + 1x^51 + 1x^50 "
+                "+ 1x^49 + 1x^48 + 1x^47 + 1x^46 + 1x^45 + 1x^44 + 1x^43 + 1x^42 + 1x^41 + 1x^40 + 1x^39 + 1x^38 + "
+                "1x^37 + 1x^36 + 1x^35 + 1x^34 + 1x^33 + 1x^32 + 1x^31 + 1x^30 + 1x^29 + 1x^28 + 1x^27 + 1x^26 + 1x^25 "
+                "+ 1x^24 + 1x^23 + 1x^22 + 1x^21 + 1x^20 + 1x^19 + 1x^18 + 1x^17 + 1x^16 + 1x^15 + 1x^14 + 1x^13 + "
+                "1x^12 + 1x^11 + 1x^10 + 1x^9 + 1x^8 + 1x^7 + 1x^6 + 1x^5 + 1x^4 + 1x^3 + 1x^2 + 1x^1 + 1";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(0x7FFFFFFFFFFFFFFFULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(314159265), encrypted);
+            hex_poly =
+                "1x^28 + 1x^25 + 1x^23 + 1x^21 + 1x^20 + 1x^19 + 1x^16 + 1x^15 + 1x^13 + 1x^12 + 1x^7 + 1x^5 + 1";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
         }
         {
@@ -143,51 +192,76 @@ namespace sealtest
             PublicKey pk;
             keygen.create_public_key(pk);
 
-            IntegerEncoder encoder(context);
-
             Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted;
             Plaintext plain;
-            encryptor.encrypt(encoder.encode(0x12345678), encrypted);
+            string hex_poly;
+
+            hex_poly =
+                "1x^28 + 1x^25 + 1x^21 + 1x^20 + 1x^18 + 1x^14 + 1x^12 + 1x^10 + 1x^9 + 1x^6 + 1x^5 + 1x^4 + 1x^3";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(0x12345678ULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(0), encrypted);
+            hex_poly = "0";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(0ULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(1), encrypted);
+            hex_poly = "1";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(1ULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(2), encrypted);
+            hex_poly = "1x^1";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(2ULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFD)), encrypted);
+            hex_poly =
+                "1x^62 + 1x^61 + 1x^60 + 1x^59 + 1x^58 + 1x^57 + 1x^56 + 1x^55 + 1x^54 + 1x^53 + 1x^52 + 1x^51 + 1x^50 "
+                "+ 1x^49 + 1x^48 + 1x^47 + 1x^46 + 1x^45 + 1x^44 + 1x^43 + 1x^42 + 1x^41 + 1x^40 + 1x^39 + 1x^38 + "
+                "1x^37 + 1x^36 + 1x^35 + 1x^34 + 1x^33 + 1x^32 + 1x^31 + 1x^30 + 1x^29 + 1x^28 + 1x^27 + 1x^26 + 1x^25 "
+                "+ 1x^24 + 1x^23 + 1x^22 + 1x^21 + 1x^20 + 1x^19 + 1x^18 + 1x^17 + 1x^16 + 1x^15 + 1x^14 + 1x^13 + "
+                "1x^12 + 1x^11 + 1x^10 + 1x^9 + 1x^8 + 1x^7 + 1x^6 + 1x^5 + 1x^4 + 1x^3 + 1x^2 + 1";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(0x7FFFFFFFFFFFFFFDULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFE)), encrypted);
+            hex_poly =
+                "1x^62 + 1x^61 + 1x^60 + 1x^59 + 1x^58 + 1x^57 + 1x^56 + 1x^55 + 1x^54 + 1x^53 + 1x^52 + 1x^51 + 1x^50 "
+                "+ 1x^49 + 1x^48 + 1x^47 + 1x^46 + 1x^45 + 1x^44 + 1x^43 + 1x^42 + 1x^41 + 1x^40 + 1x^39 + 1x^38 + "
+                "1x^37 + 1x^36 + 1x^35 + 1x^34 + 1x^33 + 1x^32 + 1x^31 + 1x^30 + 1x^29 + 1x^28 + 1x^27 + 1x^26 + 1x^25 "
+                "+ 1x^24 + 1x^23 + 1x^22 + 1x^21 + 1x^20 + 1x^19 + 1x^18 + 1x^17 + 1x^16 + 1x^15 + 1x^14 + 1x^13 + "
+                "1x^12 + 1x^11 + 1x^10 + 1x^9 + 1x^8 + 1x^7 + 1x^6 + 1x^5 + 1x^4 + 1x^3 + 1x^2 + 1x^1";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(0x7FFFFFFFFFFFFFFEULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(static_cast<uint64_t>(0x7FFFFFFFFFFFFFFF)), encrypted);
+            hex_poly =
+                "1x^62 + 1x^61 + 1x^60 + 1x^59 + 1x^58 + 1x^57 + 1x^56 + 1x^55 + 1x^54 + 1x^53 + 1x^52 + 1x^51 + 1x^50 "
+                "+ 1x^49 + 1x^48 + 1x^47 + 1x^46 + 1x^45 + 1x^44 + 1x^43 + 1x^42 + 1x^41 + 1x^40 + 1x^39 + 1x^38 + "
+                "1x^37 + 1x^36 + 1x^35 + 1x^34 + 1x^33 + 1x^32 + 1x^31 + 1x^30 + 1x^29 + 1x^28 + 1x^27 + 1x^26 + 1x^25 "
+                "+ 1x^24 + 1x^23 + 1x^22 + 1x^21 + 1x^20 + 1x^19 + 1x^18 + 1x^17 + 1x^16 + 1x^15 + 1x^14 + 1x^13 + "
+                "1x^12 + 1x^11 + 1x^10 + 1x^9 + 1x^8 + 1x^7 + 1x^6 + 1x^5 + 1x^4 + 1x^3 + 1x^2 + 1x^1 + 1";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(0x7FFFFFFFFFFFFFFFULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(314159265), encrypted);
+            hex_poly =
+                "1x^28 + 1x^25 + 1x^23 + 1x^21 + 1x^20 + 1x^19 + 1x^16 + 1x^15 + 1x^13 + 1x^12 + 1x^7 + 1x^5 + 1";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
         }
         {
@@ -199,24 +273,27 @@ namespace sealtest
             PublicKey pk;
             keygen.create_public_key(pk);
 
-            IntegerEncoder encoder(context);
-
             Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted;
             Plaintext plain;
+            string hex_poly;
             stringstream stream;
 
-            encryptor.encrypt(encoder.encode(314159265), encrypted);
+            hex_poly =
+                "1x^28 + 1x^25 + 1x^23 + 1x^21 + 1x^20 + 1x^19 + 1x^16 + 1x^15 + 1x^13 + 1x^12 + 1x^7 + 1x^5 + 1";
+            encryptor.encrypt(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(314159265)).save(stream);
+            hex_poly =
+                "1x^28 + 1x^25 + 1x^23 + 1x^21 + 1x^20 + 1x^19 + 1x^16 + 1x^15 + 1x^13 + 1x^12 + 1x^7 + 1x^5 + 1";
+            encryptor.encrypt(Plaintext(hex_poly)).save(stream);
             encrypted.load(context, stream);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
         }
         {
@@ -225,25 +302,28 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
-
-            IntegerEncoder encoder(context);
 
             Encryptor encryptor(context, keygen.secret_key());
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted;
             Plaintext plain;
+            string hex_poly;
             stringstream stream;
 
-            encryptor.encrypt_symmetric(encoder.encode(314159265), encrypted);
+            hex_poly =
+                "1x^28 + 1x^25 + 1x^23 + 1x^21 + 1x^20 + 1x^19 + 1x^16 + 1x^15 + 1x^13 + 1x^12 + 1x^7 + 1x^5 + 1";
+            encryptor.encrypt_symmetric(Plaintext(hex_poly), encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt_symmetric(encoder.encode(314159265)).save(stream);
+            hex_poly =
+                "1x^28 + 1x^25 + 1x^23 + 1x^21 + 1x^20 + 1x^19 + 1x^16 + 1x^15 + 1x^13 + 1x^12 + 1x^7 + 1x^5 + 1";
+            encryptor.encrypt_symmetric(Plaintext(hex_poly)).save(stream);
             encrypted.load(context, stream);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(314159265ULL, encoder.decode_uint64(plain));
+            ASSERT_EQ(hex_poly, plain.to_string());
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
         }
     }

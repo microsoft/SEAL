@@ -3,12 +3,9 @@
 
 target_sources(sealtest
     PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/batchencoder.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/biguint.cpp
         ${CMAKE_CURRENT_LIST_DIR}/ciphertext.cpp
         ${CMAKE_CURRENT_LIST_DIR}/ckks.cpp
         ${CMAKE_CURRENT_LIST_DIR}/context.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/intencoder.cpp
         ${CMAKE_CURRENT_LIST_DIR}/encryptionparams.cpp
         ${CMAKE_CURRENT_LIST_DIR}/encryptor.cpp
         ${CMAKE_CURRENT_LIST_DIR}/evaluator.cpp

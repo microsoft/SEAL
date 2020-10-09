@@ -7,7 +7,6 @@
 #include "seal/decryptor.h"
 #include "seal/encryptor.h"
 #include "seal/evaluator.h"
-#include "seal/intencoder.h"
 #include "seal/keygenerator.h"
 #include "seal/modulus.h"
 #include <cstddef>
@@ -34,47 +33,55 @@ namespace sealtest
         PublicKey pk;
         keygen.create_public_key(pk);
 
-        IntegerEncoder encoder(context);
         Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
         Ciphertext encrypted;
-        encryptor.encrypt(encoder.encode(0x12345678), encrypted);
-        evaluator.negate_inplace(encrypted);
         Plaintext plain;
-        decryptor.decrypt(encrypted, plain);
-        ASSERT_EQ(static_cast<int32_t>(-0x12345678), encoder.decode_int32(plain));
-        ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(0), encrypted);
+        plain = "1x^28 + 1x^25 + 1x^21 + 1x^20 + 1x^18 + 1x^14 + 1x^12 + 1x^10 + 1x^9 + 1x^6 + 1x^5 + 1x^4 + 1x^3";
+        encryptor.encrypt(plain, encrypted);
         evaluator.negate_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_EQ(static_cast<int32_t>(0), encoder.decode_int32(plain));
+        ASSERT_EQ(
+            plain.to_string(), "3Fx^28 + 3Fx^25 + 3Fx^21 + 3Fx^20 + 3Fx^18 + 3Fx^14 + 3Fx^12 + 3Fx^10 + 3Fx^9 + 3Fx^6 "
+                               "+ 3Fx^5 + 3Fx^4 + 3Fx^3");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(1), encrypted);
+        plain = "0";
+        encryptor.encrypt(plain, encrypted);
         evaluator.negate_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_EQ(static_cast<int32_t>(-1), encoder.decode_int32(plain));
+        ASSERT_EQ(plain.to_string(), "0");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(-1), encrypted);
+        plain = "1";
+        encryptor.encrypt(plain, encrypted);
         evaluator.negate_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_EQ(static_cast<int32_t>(1), encoder.decode_int32(plain));
+        ASSERT_EQ(plain.to_string(), "3F");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(2), encrypted);
+        plain = "3F";
+        encryptor.encrypt(plain, encrypted);
         evaluator.negate_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_EQ(static_cast<int32_t>(-2), encoder.decode_int32(plain));
+        ASSERT_EQ(plain.to_string(), "1");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(-5), encrypted);
+        plain = "1x^1";
+        encryptor.encrypt(plain, encrypted);
         evaluator.negate_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_EQ(static_cast<int32_t>(5), encoder.decode_int32(plain));
+        ASSERT_EQ(plain.to_string(), "3Fx^1");
+        ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
+
+        plain = "3Fx^2 + 3F";
+        encryptor.encrypt(plain, encrypted);
+        evaluator.negate_inplace(encrypted);
+        decryptor.decrypt(encrypted, plain);
+        ASSERT_EQ(plain.to_string(), "1x^2 + 1");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
     }
 
@@ -91,56 +98,68 @@ namespace sealtest
         PublicKey pk;
         keygen.create_public_key(pk);
 
-        IntegerEncoder encoder(context);
         Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
         Ciphertext encrypted1;
-        encryptor.encrypt(encoder.encode(0x12345678), encrypted1);
         Ciphertext encrypted2;
-        encryptor.encrypt(encoder.encode(0x54321), encrypted2);
+        Plaintext plain, plain1, plain2;
+
+        plain1 = "1x^28 + 1x^25 + 1x^21 + 1x^20 + 1x^18 + 1x^14 + 1x^12 + 1x^10 + 1x^9 + 1x^6 + 1x^5 + 1x^4 + 1x^3";
+        plain2 = "1x^18 + 1x^16 + 1x^14 + 1x^9 + 1x^8 + 1x^5 + 1";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
         evaluator.add_inplace(encrypted1, encrypted2);
-        Plaintext plain;
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(static_cast<uint64_t>(0x12399999), encoder.decode_uint64(plain));
+        ASSERT_EQ(
+            plain.to_string(), "1x^28 + 1x^25 + 1x^21 + 1x^20 + 2x^18 + 1x^16 + 2x^14 + 1x^12 + 1x^10 + 2x^9 + 1x^8 + "
+                               "1x^6 + 2x^5 + 1x^4 + 1x^3 + 1");
         ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(0), encrypted1);
-        encryptor.encrypt(encoder.encode(0), encrypted2);
+        plain1 = "0";
+        plain2 = "0";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
         evaluator.add_inplace(encrypted1, encrypted2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
+        ASSERT_EQ("0", plain.to_string());
         ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(0), encrypted1);
-        encryptor.encrypt(encoder.encode(5), encrypted2);
+        plain1 = "0";
+        plain2 = "1x^2 + 1";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
         evaluator.add_inplace(encrypted1, encrypted2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(static_cast<uint64_t>(5), encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "1x^2 + 1");
         ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(5), encrypted1);
-        encryptor.encrypt(encoder.encode(-3), encrypted2);
+        plain1 = "1x^2 + 1";
+        plain2 = "3Fx^1 + 3F";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
         evaluator.add_inplace(encrypted1, encrypted2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(static_cast<int32_t>(2), encoder.decode_int32(plain));
+        ASSERT_EQ(plain.to_string(), "1x^2 + 3Fx^1");
         ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(-7), encrypted1);
-        encryptor.encrypt(encoder.encode(2), encrypted2);
+        plain1 = "3Fx^2 + 3Fx^1 + 3F";
+        plain2 = "1x^1";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
         evaluator.add_inplace(encrypted1, encrypted2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(static_cast<int32_t>(-5), encoder.decode_int32(plain));
+        ASSERT_EQ(plain.to_string(), "3Fx^2 + 3F");
         ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        Plaintext plain1("2x^2 + 1x^1 + 3");
-        Plaintext plain2("3x^3 + 4x^2 + 5x^1 + 6");
+        plain1 = "2x^2 + 1x^1 + 3";
+        plain2 = "3x^3 + 4x^2 + 5x^1 + 6";
         encryptor.encrypt(plain1, encrypted1);
         encryptor.encrypt(plain2, encrypted2);
         evaluator.add_inplace(encrypted1, encrypted2);
@@ -714,51 +733,63 @@ namespace sealtest
         PublicKey pk;
         keygen.create_public_key(pk);
 
-        IntegerEncoder encoder(context);
         Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
         Ciphertext encrypted1;
-        encryptor.encrypt(encoder.encode(0x12345678), encrypted1);
         Ciphertext encrypted2;
-        encryptor.encrypt(encoder.encode(0x54321), encrypted2);
+        Plaintext plain, plain1, plain2;
+
+        plain1 = "1x^28 + 1x^25 + 1x^21 + 1x^20 + 1x^18 + 1x^14 + 1x^12 + 1x^10 + 1x^9 + 1x^6 + 1x^5 + 1x^4 + 1x^3";
+        plain2 = "1x^18 + 1x^16 + 1x^14 + 1x^9 + 1x^8 + 1x^5 + 1";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
         evaluator.sub_inplace(encrypted1, encrypted2);
-        Plaintext plain;
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(static_cast<int32_t>(0x122F1357), encoder.decode_int32(plain));
+        ASSERT_EQ(
+            plain.to_string(),
+            "1x^28 + 1x^25 + 1x^21 + 1x^20 + 3Fx^16 + 1x^12 + 1x^10 + 3Fx^8 + 1x^6 + 1x^4 + 1x^3 + 3F");
         ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(0), encrypted1);
-        encryptor.encrypt(encoder.encode(0), encrypted2);
+        plain1 = "0";
+        plain2 = "0";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
         evaluator.sub_inplace(encrypted1, encrypted2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(static_cast<int32_t>(0), encoder.decode_int32(plain));
+        ASSERT_EQ(plain.to_string(), "0");
         ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(0), encrypted1);
-        encryptor.encrypt(encoder.encode(5), encrypted2);
+        plain1 = "0";
+        plain2 = "1x^2 + 1";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
         evaluator.sub_inplace(encrypted1, encrypted2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(static_cast<int32_t>(-5), encoder.decode_int32(plain));
+        ASSERT_EQ(plain.to_string(), "3Fx^2 + 3F");
         ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(5), encrypted1);
-        encryptor.encrypt(encoder.encode(-3), encrypted2);
+        plain1 = "1x^2 + 1";
+        plain2 = "3Fx^1 + 3F";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
         evaluator.sub_inplace(encrypted1, encrypted2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(static_cast<int32_t>(8), encoder.decode_int32(plain));
+        ASSERT_EQ(plain.to_string(), "1x^2 + 1x^1 + 2");
         ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(-7), encrypted1);
-        encryptor.encrypt(encoder.encode(2), encrypted2);
+        plain1 = "3Fx^2 + 3Fx^1 + 3F";
+        plain2 = "1x^1";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
         evaluator.sub_inplace(encrypted1, encrypted2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(static_cast<int32_t>(-9), encoder.decode_int32(plain));
+        ASSERT_EQ(plain.to_string(), "3Fx^2 + 3Ex^1 + 3F");
         ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
     }
@@ -776,47 +807,54 @@ namespace sealtest
         PublicKey pk;
         keygen.create_public_key(pk);
 
-        IntegerEncoder encoder(context);
         Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
         Ciphertext encrypted1;
         Ciphertext encrypted2;
-        Plaintext plain;
-        encryptor.encrypt(encoder.encode(0x12345678), encrypted1);
-        plain = encoder.encode(0x54321);
-        evaluator.add_plain_inplace(encrypted1, plain);
+        Plaintext plain, plain1, plain2;
+
+        plain1 = "1x^28 + 1x^25 + 1x^21 + 1x^20 + 1x^18 + 1x^14 + 1x^12 + 1x^10 + 1x^9 + 1x^6 + 1x^5 + 1x^4 + 1x^3";
+        plain2 = "1x^18 + 1x^16 + 1x^14 + 1x^9 + 1x^8 + 1x^5 + 1";
+        encryptor.encrypt(plain1, encrypted1);
+        evaluator.add_plain_inplace(encrypted1, plain2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(static_cast<uint64_t>(0x12399999), encoder.decode_uint64(plain));
+        ASSERT_EQ(
+            plain.to_string(), "1x^28 + 1x^25 + 1x^21 + 1x^20 + 2x^18 + 1x^16 + 2x^14 + 1x^12 + 1x^10 + 2x^9 + 1x^8 + "
+                               "1x^6 + 2x^5 + 1x^4 + 1x^3 + 1");
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(0), encrypted1);
-        plain = encoder.encode(0);
-        evaluator.add_plain_inplace(encrypted1, plain);
+        plain1 = "0";
+        plain2 = "0";
+        encryptor.encrypt(plain1, encrypted1);
+        evaluator.add_plain_inplace(encrypted1, plain2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "0");
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(0), encrypted1);
-        plain = encoder.encode(5);
-        evaluator.add_plain_inplace(encrypted1, plain);
+        plain1 = "0";
+        plain2 = "1x^2 + 1";
+        encryptor.encrypt(plain1, encrypted1);
+        evaluator.add_plain_inplace(encrypted1, plain2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(static_cast<uint64_t>(5), encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "1x^2 + 1");
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(5), encrypted1);
-        plain = encoder.encode(-3);
-        evaluator.add_plain_inplace(encrypted1, plain);
+        plain1 = "1x^2 + 1";
+        plain2 = "3Fx^1 + 3F";
+        encryptor.encrypt(plain1, encrypted1);
+        evaluator.add_plain_inplace(encrypted1, plain2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(static_cast<uint64_t>(2), encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "1x^2 + 3Fx^1");
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(-7), encrypted1);
-        plain = encoder.encode(7);
-        evaluator.add_plain_inplace(encrypted1, plain);
+        plain1 = "3Fx^2 + 3Fx^1 + 3F";
+        plain2 = "1x^2 + 1x^1 + 1";
+        encryptor.encrypt(plain1, encrypted1);
+        evaluator.add_plain_inplace(encrypted1, plain2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "0");
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
     }
 
@@ -833,46 +871,53 @@ namespace sealtest
         PublicKey pk;
         keygen.create_public_key(pk);
 
-        IntegerEncoder encoder(context);
         Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
         Ciphertext encrypted1;
-        Plaintext plain;
-        encryptor.encrypt(encoder.encode(0x12345678), encrypted1);
-        plain = encoder.encode(0x54321);
-        evaluator.sub_plain_inplace(encrypted1, plain);
+        Plaintext plain, plain1, plain2;
+
+        plain1 = "1x^28 + 1x^25 + 1x^21 + 1x^20 + 1x^18 + 1x^14 + 1x^12 + 1x^10 + 1x^9 + 1x^6 + 1x^5 + 1x^4 + 1x^3";
+        plain2 = "1x^18 + 1x^16 + 1x^14 + 1x^9 + 1x^8 + 1x^5 + 1";
+        encryptor.encrypt(plain1, encrypted1);
+        evaluator.sub_plain_inplace(encrypted1, plain2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(static_cast<uint64_t>(0x122F1357), encoder.decode_uint64(plain));
+        ASSERT_EQ(
+            plain.to_string(),
+            "1x^28 + 1x^25 + 1x^21 + 1x^20 + 3Fx^16 + 1x^12 + 1x^10 + 3Fx^8 + 1x^6 + 1x^4 + 1x^3 + 3F");
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(0), encrypted1);
-        plain = encoder.encode(0);
-        evaluator.sub_plain_inplace(encrypted1, plain);
+        plain1 = "0";
+        plain2 = "0";
+        encryptor.encrypt(plain1, encrypted1);
+        evaluator.sub_plain_inplace(encrypted1, plain2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "0");
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(0), encrypted1);
-        plain = encoder.encode(5);
-        evaluator.sub_plain_inplace(encrypted1, plain);
+        plain1 = "0";
+        plain2 = "1x^2 + 1";
+        encryptor.encrypt(plain1, encrypted1);
+        evaluator.sub_plain_inplace(encrypted1, plain2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_TRUE(static_cast<int64_t>(-5) == encoder.decode_int64(plain));
+        ASSERT_EQ(plain.to_string(), "3Fx^2 + 3F");
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(5), encrypted1);
-        plain = encoder.encode(-3);
-        evaluator.sub_plain_inplace(encrypted1, plain);
+        plain1 = "1x^2 + 1";
+        plain2 = "3Fx^1 + 3F";
+        encryptor.encrypt(plain1, encrypted1);
+        evaluator.sub_plain_inplace(encrypted1, plain2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(static_cast<uint64_t>(8), encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "1x^2 + 1x^1 + 2");
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(-7), encrypted1);
-        plain = encoder.encode(2);
-        evaluator.sub_plain_inplace(encrypted1, plain);
+        plain1 = "3Fx^2 + 3Fx^1 + 3F";
+        plain2 = "1x^1";
+        encryptor.encrypt(plain1, encrypted1);
+        evaluator.sub_plain_inplace(encrypted1, plain2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_TRUE(static_cast<int64_t>(-9) == encoder.decode_int64(plain));
+        ASSERT_EQ(plain.to_string(), "3Fx^2 + 3Ex^1 + 3F");
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
     }
 
@@ -890,60 +935,71 @@ namespace sealtest
             PublicKey pk;
             keygen.create_public_key(pk);
 
-            IntegerEncoder encoder(context);
             Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted;
-            Plaintext plain;
-            encryptor.encrypt(encoder.encode(0x12345678), encrypted);
-            plain = encoder.encode(0x54321);
-            evaluator.multiply_plain_inplace(encrypted, plain);
+            Plaintext plain, plain1, plain2;
+
+            plain1 = "1x^28 + 1x^25 + 1x^21 + 1x^20 + 1x^18 + 1x^14 + 1x^12 + 1x^10 + 1x^9 + 1x^6 + 1x^5 + 1x^4 + 1x^3";
+            plain2 = "1x^18 + 1x^16 + 1x^14 + 1x^9 + 1x^8 + 1x^5 + 1";
+            encryptor.encrypt(plain1, encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain2);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(static_cast<uint64_t>(0x5FCBBBB88D78), encoder.decode_uint64(plain));
+            ASSERT_EQ(
+                plain.to_string(), "1x^46 + 1x^44 + 1x^43 + 1x^42 + 1x^41 + 2x^39 + 1x^38 + 2x^37 + 3x^36 + 1x^35 + "
+                                   "3x^34 + 2x^33 + 2x^32 + 4x^30 + 2x^29 + 5x^28 + 2x^27 + 4x^26 + 3x^25 + 2x^24 + "
+                                   "4x^23 + 3x^22 + 4x^21 + 4x^20 + 4x^19 + 4x^18 + 3x^17 + 2x^15 + 4x^14 + 2x^13 + "
+                                   "3x^12 + 2x^11 + 2x^10 + 2x^9 + 1x^8 + 1x^6 + 1x^5 + 1x^4 + 1x^3");
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(0), encrypted);
-            plain = encoder.encode(5);
-            evaluator.multiply_plain_inplace(encrypted, plain);
+            plain1 = "0";
+            plain2 = "1x^2 + 1";
+            encryptor.encrypt(plain1, encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain2);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
+            ASSERT_EQ(plain.to_string(), "0");
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(7), encrypted);
-            plain = encoder.encode(4);
-            evaluator.multiply_plain_inplace(encrypted, plain);
+            plain1 = "1x^2 + 1x^1 + 1";
+            plain2 = "1x^2";
+            encryptor.encrypt(plain1, encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain2);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(static_cast<uint64_t>(28), encoder.decode_uint64(plain));
+            ASSERT_EQ(plain.to_string(), "1x^4 + 1x^3 + 1x^2");
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(7), encrypted);
-            plain = encoder.encode(2);
-            evaluator.multiply_plain_inplace(encrypted, plain);
+            plain1 = "1x^2 + 1x^1 + 1";
+            plain2 = "1x^1";
+            encryptor.encrypt(plain1, encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain2);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(static_cast<uint64_t>(14), encoder.decode_uint64(plain));
+            ASSERT_EQ(plain.to_string(), "1x^3 + 1x^2 + 1x^1");
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(7), encrypted);
-            plain = encoder.encode(1);
-            evaluator.multiply_plain_inplace(encrypted, plain);
+            plain1 = "1x^2 + 1x^1 + 1";
+            plain2 = "1";
+            encryptor.encrypt(plain1, encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain2);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(static_cast<uint64_t>(7), encoder.decode_uint64(plain));
+            ASSERT_EQ(plain.to_string(), "1x^2 + 1x^1 + 1");
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(5), encrypted);
-            plain = encoder.encode(-3);
-            evaluator.multiply_plain_inplace(encrypted, plain);
+            plain1 = "1x^2 + 1";
+            plain2 = "3Fx^1 + 3F";
+            encryptor.encrypt(plain1, encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain2);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_TRUE(static_cast<int64_t>(-15) == encoder.decode_int64(plain));
+            ASSERT_EQ(plain.to_string(), "3Fx^3 + 3Fx^2 + 3Fx^1 + 3F");
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(-7), encrypted);
-            plain = encoder.encode(2);
-            evaluator.multiply_plain_inplace(encrypted, plain);
+            plain1 = "3Fx^2 + 3Fx^1 + 3F";
+            plain2 = "1x^1";
+            encryptor.encrypt(plain1, encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain2);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_TRUE(static_cast<int64_t>(-14) == encoder.decode_int64(plain));
+            ASSERT_EQ(plain.to_string(), "3Fx^3 + 3Fx^2 + 3Fx^1");
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
         }
         {
@@ -958,24 +1014,29 @@ namespace sealtest
             PublicKey pk;
             keygen.create_public_key(pk);
 
-            IntegerEncoder encoder(context);
             Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted;
-            Plaintext plain;
-            encryptor.encrypt(encoder.encode(0x12345678), encrypted);
-            plain = "1";
-            evaluator.multiply_plain_inplace(encrypted, plain);
+            Plaintext plain, plain1, plain2;
+
+            plain1 = "1x^28 + 1x^25 + 1x^21 + 1x^20 + 1x^18 + 1x^14 + 1x^12 + 1x^10 + 1x^9 + 1x^6 + 1x^5 + 1x^4 + 1x^3";
+            plain2 = "1";
+            encryptor.encrypt(plain1, encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain2);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(static_cast<uint64_t>(0x12345678), encoder.decode_uint64(plain));
+            ASSERT_EQ(
+                plain.to_string(),
+                "1x^28 + 1x^25 + 1x^21 + 1x^20 + 1x^18 + 1x^14 + 1x^12 + 1x^10 + 1x^9 + 1x^6 + 1x^5 + 1x^4 + 1x^3");
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            plain = "5";
-            evaluator.multiply_plain_inplace(encrypted, plain);
+            plain2 = "5";
+            evaluator.multiply_plain_inplace(encrypted, plain2);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(static_cast<uint64_t>(0x5B05B058), encoder.decode_uint64(plain));
+            ASSERT_EQ(
+                plain.to_string(),
+                "5x^28 + 5x^25 + 5x^21 + 5x^20 + 5x^18 + 5x^14 + 5x^12 + 5x^10 + 5x^9 + 5x^6 + 5x^5 + 5x^4 + 5x^3");
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
         }
         {
@@ -990,24 +1051,29 @@ namespace sealtest
             PublicKey pk;
             keygen.create_public_key(pk);
 
-            IntegerEncoder encoder(context);
             Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted;
-            Plaintext plain;
-            encryptor.encrypt(encoder.encode(0x12345678), encrypted);
-            plain = "1";
-            evaluator.multiply_plain_inplace(encrypted, plain);
+            Plaintext plain, plain1, plain2;
+
+            plain1 = "1x^28 + 1x^25 + 1x^21 + 1x^20 + 1x^18 + 1x^14 + 1x^12 + 1x^10 + 1x^9 + 1x^6 + 1x^5 + 1x^4 + 1x^3";
+            plain2 = "1";
+            encryptor.encrypt(plain1, encrypted);
+            evaluator.multiply_plain_inplace(encrypted, plain2);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(static_cast<uint64_t>(0x12345678), encoder.decode_uint64(plain));
+            ASSERT_EQ(
+                plain.to_string(),
+                "1x^28 + 1x^25 + 1x^21 + 1x^20 + 1x^18 + 1x^14 + 1x^12 + 1x^10 + 1x^9 + 1x^6 + 1x^5 + 1x^4 + 1x^3");
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-            plain = "5";
-            evaluator.multiply_plain_inplace(encrypted, plain);
+            plain2 = "5";
+            evaluator.multiply_plain_inplace(encrypted, plain2);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_EQ(static_cast<uint64_t>(0x5B05B058), encoder.decode_uint64(plain));
+            ASSERT_EQ(
+                plain.to_string(),
+                "5x^28 + 5x^25 + 5x^21 + 5x^20 + 5x^18 + 5x^14 + 5x^12 + 5x^10 + 5x^9 + 5x^6 + 5x^5 + 5x^4 + 5x^3");
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
         }
         {
@@ -1124,59 +1190,75 @@ namespace sealtest
             PublicKey pk;
             keygen.create_public_key(pk);
 
-            IntegerEncoder encoder(context);
             Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
-            Plaintext plain;
-            encryptor.encrypt(encoder.encode(0x12345678), encrypted1);
-            encryptor.encrypt(encoder.encode(0x54321), encrypted2);
+            Plaintext plain, plain1, plain2;
+
+            plain1 = "1x^28 + 1x^25 + 1x^21 + 1x^20 + 1x^18 + 1x^14 + 1x^12 + 1x^10 + 1x^9 + 1x^6 + 1x^5 + 1x^4 + 1x^3";
+            plain2 = "1x^18 + 1x^16 + 1x^14 + 1x^9 + 1x^8 + 1x^5 + 1";
+            encryptor.encrypt(plain1, encrypted1);
+            encryptor.encrypt(plain2, encrypted2);
             evaluator.multiply_inplace(encrypted1, encrypted2);
             decryptor.decrypt(encrypted1, plain);
-            ASSERT_EQ(static_cast<uint64_t>(0x5FCBBBB88D78), encoder.decode_uint64(plain));
+            ASSERT_EQ(
+                plain.to_string(), "1x^46 + 1x^44 + 1x^43 + 1x^42 + 1x^41 + 2x^39 + 1x^38 + 2x^37 + 3x^36 + 1x^35 + "
+                                   "3x^34 + 2x^33 + 2x^32 + 4x^30 + 2x^29 + 5x^28 + 2x^27 + 4x^26 + 3x^25 + 2x^24 + "
+                                   "4x^23 + 3x^22 + 4x^21 + 4x^20 + 4x^19 + 4x^18 + 3x^17 + 2x^15 + 4x^14 + 2x^13 + "
+                                   "3x^12 + 2x^11 + 2x^10 + 2x^9 + 1x^8 + 1x^6 + 1x^5 + 1x^4 + 1x^3");
             ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(0), encrypted1);
-            encryptor.encrypt(encoder.encode(0), encrypted2);
+            plain1 = "0";
+            plain2 = "0";
+            encryptor.encrypt(plain1, encrypted1);
+            encryptor.encrypt(plain2, encrypted2);
             evaluator.multiply_inplace(encrypted1, encrypted2);
             decryptor.decrypt(encrypted1, plain);
-            ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
+            ASSERT_EQ(plain.to_string(), "0");
             ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(0), encrypted1);
-            encryptor.encrypt(encoder.encode(5), encrypted2);
+            plain1 = "0";
+            plain2 = "1x^2 + 1";
+            encryptor.encrypt(plain1, encrypted1);
+            encryptor.encrypt(plain2, encrypted2);
             evaluator.multiply_inplace(encrypted1, encrypted2);
             decryptor.decrypt(encrypted1, plain);
-            ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
+            ASSERT_EQ(plain.to_string(), "0");
             ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(7), encrypted1);
-            encryptor.encrypt(encoder.encode(1), encrypted2);
+            plain1 = "1x^2 + 1x^1 + 1";
+            plain2 = "1";
+            encryptor.encrypt(plain1, encrypted1);
+            encryptor.encrypt(plain2, encrypted2);
             evaluator.multiply_inplace(encrypted1, encrypted2);
             decryptor.decrypt(encrypted1, plain);
-            ASSERT_EQ(static_cast<uint64_t>(7), encoder.decode_uint64(plain));
+            ASSERT_EQ(plain.to_string(), "1x^2 + 1x^1 + 1");
             ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(5), encrypted1);
-            encryptor.encrypt(encoder.encode(-3), encrypted2);
+            plain1 = "1x^2 + 1";
+            plain2 = "3Fx^1 + 3F";
+            encryptor.encrypt(plain1, encrypted1);
+            encryptor.encrypt(plain2, encrypted2);
             evaluator.multiply_inplace(encrypted1, encrypted2);
             decryptor.decrypt(encrypted1, plain);
-            ASSERT_TRUE(static_cast<int64_t>(-15) == encoder.decode_int64(plain));
+            ASSERT_EQ(plain.to_string(), "3Fx^3 + 3Fx^2 + 3Fx^1 + 3F");
             ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(0x10000), encrypted1);
-            encryptor.encrypt(encoder.encode(0x100), encrypted2);
+            plain1 = "1x^16";
+            plain2 = "1x^8";
+            encryptor.encrypt(plain1, encrypted1);
+            encryptor.encrypt(plain2, encrypted2);
             evaluator.multiply_inplace(encrypted1, encrypted2);
             decryptor.decrypt(encrypted1, plain);
-            ASSERT_EQ(static_cast<uint64_t>(0x1000000), encoder.decode_uint64(plain));
+            ASSERT_EQ(plain.to_string(), "1x^24");
             ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
         }
@@ -1192,59 +1274,76 @@ namespace sealtest
             PublicKey pk;
             keygen.create_public_key(pk);
 
-            IntegerEncoder encoder(context);
             Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
-            Plaintext plain;
-            encryptor.encrypt(encoder.encode(0x12345678), encrypted1);
-            encryptor.encrypt(encoder.encode(0x54321), encrypted2);
+            Plaintext plain, plain1, plain2;
+
+            plain1 = "1x^28 + 1x^25 + 1x^21 + 1x^20 + 1x^18 + 1x^14 + 1x^12 + 1x^10 + 1x^9 + 1x^6 + 1x^5 + 1x^4 + 1x^3";
+            plain2 = "1x^18 + 1x^16 + 1x^14 + 1x^9 + 1x^8 + 1x^5 + 1";
+            encryptor.encrypt(plain1, encrypted1);
+            encryptor.encrypt(plain2, encrypted2);
             evaluator.multiply_inplace(encrypted1, encrypted2);
             decryptor.decrypt(encrypted1, plain);
-            ASSERT_EQ(static_cast<uint64_t>(0x5FCBBBB88D78), encoder.decode_uint64(plain));
+            ASSERT_EQ(
+                plain.to_string(), "1x^46 + 1x^44 + 1x^43 + 1x^42 + 1x^41 + 2x^39 + 1x^38 + 2x^37 + 3x^36 + 1x^35 + "
+                                   "3x^34 + 2x^33 + 2x^32 + 4x^30 + 2x^29 + 5x^28 + 2x^27 + 4x^26 + 3x^25 + 2x^24 + "
+                                   "4x^23 + 3x^22 + 4x^21 + 4x^20 + 4x^19 + 4x^18 + 3x^17 + 2x^15 + 4x^14 + 2x^13 + "
+                                   "3x^12 + 2x^11 + 2x^10 + 2x^9 + 1x^8 + 1x^6 + 1x^5 + 1x^4 + 1x^3");
             ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(0), encrypted1);
-            encryptor.encrypt(encoder.encode(0), encrypted2);
+            plain1 = "0";
+            plain2 = "0";
+            encryptor.encrypt(plain1, encrypted1);
+            encryptor.encrypt(plain2, encrypted2);
             evaluator.multiply_inplace(encrypted1, encrypted2);
             decryptor.decrypt(encrypted1, plain);
-            ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
+            ASSERT_EQ(plain.to_string(), "0");
             ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(0), encrypted1);
-            encryptor.encrypt(encoder.encode(5), encrypted2);
+            plain1 = "0";
+            plain2 = "1x^2 + 1";
+            encryptor.encrypt(plain1, encrypted1);
+            encryptor.encrypt(plain2, encrypted2);
             evaluator.multiply_inplace(encrypted1, encrypted2);
             decryptor.decrypt(encrypted1, plain);
-            ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
+            ASSERT_EQ(plain.to_string(), "0");
             ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(7), encrypted1);
-            encryptor.encrypt(encoder.encode(1), encrypted2);
+            plain1 = "1x^2 + 1x^1 + 1";
+            plain2 = "1";
+            encryptor.encrypt(plain1, encrypted1);
+            encryptor.encrypt(plain2, encrypted2);
             evaluator.multiply_inplace(encrypted1, encrypted2);
             decryptor.decrypt(encrypted1, plain);
-            ASSERT_EQ(static_cast<uint64_t>(7), encoder.decode_uint64(plain));
+            ASSERT_EQ(plain.to_string(), "1x^2 + 1x^1 + 1");
             ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(5), encrypted1);
-            encryptor.encrypt(encoder.encode(-3), encrypted2);
+            plain1 = "1x^2 + 1";
+            plain2 = "FFFFFFFFFFFFFFEx^1 + FFFFFFFFFFFFFFE";
+            encryptor.encrypt(plain1, encrypted1);
+            encryptor.encrypt(plain2, encrypted2);
             evaluator.multiply_inplace(encrypted1, encrypted2);
             decryptor.decrypt(encrypted1, plain);
-            ASSERT_TRUE(static_cast<int64_t>(-15) == encoder.decode_int64(plain));
+            ASSERT_EQ(
+                plain.to_string(), "FFFFFFFFFFFFFFEx^3 + FFFFFFFFFFFFFFEx^2 + FFFFFFFFFFFFFFEx^1 + FFFFFFFFFFFFFFE");
             ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(0x10000), encrypted1);
-            encryptor.encrypt(encoder.encode(0x100), encrypted2);
+            plain1 = "1x^16";
+            plain2 = "1x^8";
+            encryptor.encrypt(plain1, encrypted1);
+            encryptor.encrypt(plain2, encrypted2);
             evaluator.multiply_inplace(encrypted1, encrypted2);
             decryptor.decrypt(encrypted1, plain);
-            ASSERT_EQ(static_cast<uint64_t>(0x1000000), encoder.decode_uint64(plain));
+            ASSERT_EQ(plain.to_string(), "1x^24");
             ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
         }
@@ -1260,59 +1359,75 @@ namespace sealtest
             PublicKey pk;
             keygen.create_public_key(pk);
 
-            IntegerEncoder encoder(context);
             Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
-            Plaintext plain;
-            encryptor.encrypt(encoder.encode(0x12345678), encrypted1);
-            encryptor.encrypt(encoder.encode(0x54321), encrypted2);
+            Plaintext plain, plain1, plain2;
+
+            plain1 = "1x^28 + 1x^25 + 1x^21 + 1x^20 + 1x^18 + 1x^14 + 1x^12 + 1x^10 + 1x^9 + 1x^6 + 1x^5 + 1x^4 + 1x^3";
+            plain2 = "1x^18 + 1x^16 + 1x^14 + 1x^9 + 1x^8 + 1x^5 + 1";
+            encryptor.encrypt(plain1, encrypted1);
+            encryptor.encrypt(plain2, encrypted2);
             evaluator.multiply_inplace(encrypted1, encrypted2);
             decryptor.decrypt(encrypted1, plain);
-            ASSERT_EQ(static_cast<uint64_t>(0x5FCBBBB88D78), encoder.decode_uint64(plain));
+            ASSERT_EQ(
+                plain.to_string(), "1x^46 + 1x^44 + 1x^43 + 1x^42 + 1x^41 + 2x^39 + 1x^38 + 2x^37 + 3x^36 + 1x^35 + "
+                                   "3x^34 + 2x^33 + 2x^32 + 4x^30 + 2x^29 + 5x^28 + 2x^27 + 4x^26 + 3x^25 + 2x^24 + "
+                                   "4x^23 + 3x^22 + 4x^21 + 4x^20 + 4x^19 + 4x^18 + 3x^17 + 2x^15 + 4x^14 + 2x^13 + "
+                                   "3x^12 + 2x^11 + 2x^10 + 2x^9 + 1x^8 + 1x^6 + 1x^5 + 1x^4 + 1x^3");
             ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(0), encrypted1);
-            encryptor.encrypt(encoder.encode(0), encrypted2);
+            plain1 = "0";
+            plain2 = "0";
+            encryptor.encrypt(plain1, encrypted1);
+            encryptor.encrypt(plain2, encrypted2);
             evaluator.multiply_inplace(encrypted1, encrypted2);
             decryptor.decrypt(encrypted1, plain);
-            ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
+            ASSERT_EQ(plain.to_string(), "0");
             ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(0), encrypted1);
-            encryptor.encrypt(encoder.encode(5), encrypted2);
+            plain1 = "0";
+            plain2 = "1x^2 + 1";
+            encryptor.encrypt(plain1, encrypted1);
+            encryptor.encrypt(plain2, encrypted2);
             evaluator.multiply_inplace(encrypted1, encrypted2);
             decryptor.decrypt(encrypted1, plain);
-            ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
+            ASSERT_EQ(plain.to_string(), "0");
             ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(7), encrypted1);
-            encryptor.encrypt(encoder.encode(1), encrypted2);
+            plain1 = "1x^2 + 1x^1 + 1";
+            plain2 = "1";
+            encryptor.encrypt(plain1, encrypted1);
+            encryptor.encrypt(plain2, encrypted2);
             evaluator.multiply_inplace(encrypted1, encrypted2);
             decryptor.decrypt(encrypted1, plain);
-            ASSERT_EQ(static_cast<uint64_t>(7), encoder.decode_uint64(plain));
+            ASSERT_EQ(plain.to_string(), "1x^2 + 1x^1 + 1");
             ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(5), encrypted1);
-            encryptor.encrypt(encoder.encode(-3), encrypted2);
+            plain1 = "1x^2 + 1";
+            plain2 = "3Fx^1 + 3F";
+            encryptor.encrypt(plain1, encrypted1);
+            encryptor.encrypt(plain2, encrypted2);
             evaluator.multiply_inplace(encrypted1, encrypted2);
             decryptor.decrypt(encrypted1, plain);
-            ASSERT_TRUE(static_cast<int64_t>(-15) == encoder.decode_int64(plain));
+            ASSERT_EQ(plain.to_string(), "3Fx^3 + 3Fx^2 + 3Fx^1 + 3F");
             ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-            encryptor.encrypt(encoder.encode(0x10000), encrypted1);
-            encryptor.encrypt(encoder.encode(0x100), encrypted2);
+            plain1 = "1x^16";
+            plain2 = "1x^8";
+            encryptor.encrypt(plain1, encrypted1);
+            encryptor.encrypt(plain2, encrypted2);
             evaluator.multiply_inplace(encrypted1, encrypted2);
             decryptor.decrypt(encrypted1, plain);
-            ASSERT_EQ(static_cast<uint64_t>(0x1000000), encoder.decode_uint64(plain));
+            ASSERT_EQ(plain.to_string(), "1x^24");
             ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
         }
@@ -1328,18 +1443,22 @@ namespace sealtest
             PublicKey pk;
             keygen.create_public_key(pk);
 
-            IntegerEncoder encoder(context);
             Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted1;
-            Plaintext plain;
-            encryptor.encrypt(encoder.encode(123), encrypted1);
+            Plaintext plain, plain1;
+
+            plain1 = "1x^6 + 1x^5 + 1x^4 + 1x^3 + 1x^1 + 1";
+            encryptor.encrypt(plain1, encrypted1);
             evaluator.multiply(encrypted1, encrypted1, encrypted1);
             evaluator.multiply(encrypted1, encrypted1, encrypted1);
             decryptor.decrypt(encrypted1, plain);
-            ASSERT_EQ(static_cast<uint64_t>(228886641), encoder.decode_uint64(plain));
+            ASSERT_EQ(
+                plain.to_string(), "1x^24 + 4x^23 + Ax^22 + 14x^21 + 1Fx^20 + 2Cx^19 + 3Cx^18 + 4Cx^17 + 5Fx^16 + "
+                                   "6Cx^15 + 70x^14 + 74x^13 + 71x^12 + 6Cx^11 + 64x^10 + 50x^9 + 40x^8 + 34x^7 + "
+                                   "26x^6 + 1Cx^5 + 11x^4 + 8x^3 + 6x^2 + 4x^1 + 1");
             ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
         }
     }
@@ -3307,54 +3426,66 @@ namespace sealtest
         PublicKey pk;
         keygen.create_public_key(pk);
 
-        IntegerEncoder encoder(context);
         Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
         Ciphertext encrypted;
         Plaintext plain;
-        encryptor.encrypt(encoder.encode(1), encrypted);
+
+        plain = "1";
+        encryptor.encrypt(plain, encrypted);
         evaluator.square_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_EQ(1ULL, encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "1");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(0), encrypted);
+        plain = "0";
+        encryptor.encrypt(plain, encrypted);
         evaluator.square_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_EQ(0ULL, encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "0");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(-5), encrypted);
+        plain = "FFx^2 + FF";
+        encryptor.encrypt(plain, encrypted);
         evaluator.square_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_EQ(25ULL, encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "1x^4 + 2x^2 + 1");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(-1), encrypted);
+        plain = "FF";
+        encryptor.encrypt(plain, encrypted);
         evaluator.square_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_EQ(1ULL, encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "1");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(123), encrypted);
+        plain = "1x^6 + 1x^5 + 1x^4 + 1x^3 + 1x^1 + 1";
+        encryptor.encrypt(plain, encrypted);
         evaluator.square_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_EQ(15129ULL, encoder.decode_uint64(plain));
+        ASSERT_EQ(
+            plain.to_string(),
+            "1x^12 + 2x^11 + 3x^10 + 4x^9 + 3x^8 + 4x^7 + 5x^6 + 4x^5 + 4x^4 + 2x^3 + 1x^2 + 2x^1 + 1");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(0x10000), encrypted);
+        plain = "1x^16";
+        encryptor.encrypt(plain, encrypted);
         evaluator.square_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_EQ(0x100000000ULL, encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "1x^32");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(123), encrypted);
+        plain = "1x^6 + 1x^5 + 1x^4 + 1x^3 + 1x^1 + 1";
+        encryptor.encrypt(plain, encrypted);
         evaluator.square_inplace(encrypted);
         evaluator.square_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_EQ(228886641ULL, encoder.decode_uint64(plain));
+        ASSERT_EQ(
+            plain.to_string(),
+            "1x^24 + 4x^23 + Ax^22 + 14x^21 + 1Fx^20 + 2Cx^19 + 3Cx^18 + 4Cx^17 + 5Fx^16 + 6Cx^15 + 70x^14 + 74x^13 + "
+            "71x^12 + 6Cx^11 + 64x^10 + 50x^9 + 40x^8 + 34x^7 + 26x^6 + 1Cx^5 + 11x^4 + 8x^3 + 6x^2 + 4x^1 + 1");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
     }
 
@@ -3373,74 +3504,90 @@ namespace sealtest
         RelinKeys rlk;
         keygen.create_relin_keys(rlk);
 
-        IntegerEncoder encoder(context);
         Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
         Ciphertext encrypted1, encrypted2, encrypted3, encrypted4, product;
-        Plaintext plain;
-        encryptor.encrypt(encoder.encode(5), encrypted1);
-        encryptor.encrypt(encoder.encode(6), encrypted2);
-        encryptor.encrypt(encoder.encode(7), encrypted3);
+        Plaintext plain, plain1, plain2, plain3, plain4;
+
+        plain1 = "1x^2 + 1";
+        plain2 = "1x^2 + 1x^1";
+        plain3 = "1x^2 + 1x^1 + 1";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
+        encryptor.encrypt(plain3, encrypted3);
         vector<Ciphertext> encrypteds{ encrypted1, encrypted2, encrypted3 };
         evaluator.multiply_many(encrypteds, rlk, product);
         ASSERT_EQ(3, encrypteds.size());
         decryptor.decrypt(product, plain);
-        ASSERT_EQ(static_cast<uint64_t>(210), encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "1x^6 + 2x^5 + 3x^4 + 3x^3 + 2x^2 + 1x^1");
         ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
         ASSERT_TRUE(encrypted2.parms_id() == product.parms_id());
         ASSERT_TRUE(encrypted3.parms_id() == product.parms_id());
         ASSERT_TRUE(product.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(-9), encrypted1);
-        encryptor.encrypt(encoder.encode(-17), encrypted2);
+        plain1 = "3Fx^3 + 3F";
+        plain2 = "3Fx^4 + 3F";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
         encrypteds = { encrypted1, encrypted2 };
         evaluator.multiply_many(encrypteds, rlk, product);
         ASSERT_EQ(2, encrypteds.size());
         decryptor.decrypt(product, plain);
-        ASSERT_EQ(static_cast<uint64_t>(153), encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "1x^7 + 1x^4 + 1x^3 + 1");
         ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
         ASSERT_TRUE(encrypted2.parms_id() == product.parms_id());
         ASSERT_TRUE(product.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(2), encrypted1);
-        encryptor.encrypt(encoder.encode(-31), encrypted2);
-        encryptor.encrypt(encoder.encode(7), encrypted3);
+        plain1 = "1x^1";
+        plain2 = "3Fx^4 + 3Fx^3 + 3Fx^2 + 3Fx^1 + 3F";
+        plain3 = "1x^2 + 1x^1 + 1";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
+        encryptor.encrypt(plain3, encrypted3);
         encrypteds = { encrypted1, encrypted2, encrypted3 };
         evaluator.multiply_many(encrypteds, rlk, product);
         ASSERT_EQ(3, encrypteds.size());
         decryptor.decrypt(product, plain);
-        ASSERT_TRUE(static_cast<int64_t>(-434) == encoder.decode_int64(plain));
+        ASSERT_EQ(plain.to_string(), "3Fx^7 + 3Ex^6 + 3Dx^5 + 3Dx^4 + 3Dx^3 + 3Ex^2 + 3Fx^1");
         ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
         ASSERT_TRUE(encrypted2.parms_id() == product.parms_id());
         ASSERT_TRUE(encrypted3.parms_id() == product.parms_id());
         ASSERT_TRUE(product.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(1), encrypted1);
-        encryptor.encrypt(encoder.encode(-1), encrypted2);
-        encryptor.encrypt(encoder.encode(1), encrypted3);
-        encryptor.encrypt(encoder.encode(-1), encrypted4);
+        plain1 = "1";
+        plain2 = "3F";
+        plain3 = "1";
+        plain4 = "3F";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
+        encryptor.encrypt(plain3, encrypted3);
+        encryptor.encrypt(plain4, encrypted4);
         encrypteds = { encrypted1, encrypted2, encrypted3, encrypted4 };
         evaluator.multiply_many(encrypteds, rlk, product);
         ASSERT_EQ(4, encrypteds.size());
         decryptor.decrypt(product, plain);
-        ASSERT_EQ(static_cast<uint64_t>(1), encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "1");
         ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
         ASSERT_TRUE(encrypted2.parms_id() == product.parms_id());
         ASSERT_TRUE(encrypted3.parms_id() == product.parms_id());
         ASSERT_TRUE(encrypted4.parms_id() == product.parms_id());
         ASSERT_TRUE(product.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(98765), encrypted1);
-        encryptor.encrypt(encoder.encode(0), encrypted2);
-        encryptor.encrypt(encoder.encode(12345), encrypted3);
-        encryptor.encrypt(encoder.encode(34567), encrypted4);
+        plain1 = "1x^16 + 1x^15 + 1x^8 + 1x^7 + 1x^6 + 1x^3 + 1x^2 + 1";
+        plain2 = "0";
+        plain3 = "1x^13 + 1x^12 + 1x^5 + 1x^4 + 1x^3 + 1";
+        plain4 = "1x^15 + 1x^10 + 1x^9 + 1x^8 + 1x^2 + 1x^1 + 1";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
+        encryptor.encrypt(plain3, encrypted3);
+        encryptor.encrypt(plain4, encrypted4);
         encrypteds = { encrypted1, encrypted2, encrypted3, encrypted4 };
         evaluator.multiply_many(encrypteds, rlk, product);
         ASSERT_EQ(4, encrypteds.size());
         decryptor.decrypt(product, plain);
-        ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "0");
         ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
         ASSERT_TRUE(encrypted2.parms_id() == product.parms_id());
         ASSERT_TRUE(encrypted3.parms_id() == product.parms_id());
@@ -3463,35 +3610,39 @@ namespace sealtest
         RelinKeys rlk;
         keygen.create_relin_keys(rlk);
 
-        IntegerEncoder encoder(context);
         Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
         Ciphertext encrypted;
         Plaintext plain;
-        encryptor.encrypt(encoder.encode(5), encrypted);
+
+        plain = "1x^2 + 1";
+        encryptor.encrypt(plain, encrypted);
         evaluator.exponentiate_inplace(encrypted, 1, rlk);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_EQ(static_cast<uint64_t>(5), encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "1x^2 + 1");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(7), encrypted);
+        plain = "1x^2 + 1x^1 + 1";
+        encryptor.encrypt(plain, encrypted);
         evaluator.exponentiate_inplace(encrypted, 2, rlk);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_EQ(static_cast<uint64_t>(49), encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "1x^4 + 2x^3 + 3x^2 + 2x^1 + 1");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(-7), encrypted);
+        plain = "3Fx^2 + 3Fx^1 + 3F";
+        encryptor.encrypt(plain, encrypted);
         evaluator.exponentiate_inplace(encrypted, 3, rlk);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_TRUE(static_cast<int64_t>(-343) == encoder.decode_int64(plain));
+        ASSERT_EQ(plain.to_string(), "3Fx^6 + 3Dx^5 + 3Ax^4 + 39x^3 + 3Ax^2 + 3Dx^1 + 3F");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(0x100), encrypted);
+        plain = "1x^8";
+        encryptor.encrypt(plain, encrypted);
         evaluator.exponentiate_inplace(encrypted, 4, rlk);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_EQ(static_cast<uint64_t>(0x100000000), encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "1x^32");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
     }
 
@@ -3508,72 +3659,90 @@ namespace sealtest
         PublicKey pk;
         keygen.create_public_key(pk);
 
-        IntegerEncoder encoder(context);
         Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
         Ciphertext encrypted1, encrypted2, encrypted3, encrypted4, sum;
-        Plaintext plain;
-        encryptor.encrypt(encoder.encode(5), encrypted1);
-        encryptor.encrypt(encoder.encode(6), encrypted2);
-        encryptor.encrypt(encoder.encode(7), encrypted3);
+        Plaintext plain, plain1, plain2, plain3, plain4;
+
+        plain1 = "1x^2 + 1";
+        plain2 = "1x^2 + 1x^1";
+        plain3 = "1x^2 + 1x^1 + 1";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
+        encryptor.encrypt(plain3, encrypted3);
         vector<Ciphertext> encrypteds = { encrypted1, encrypted2, encrypted3 };
         evaluator.add_many(encrypteds, sum);
         decryptor.decrypt(sum, plain);
-        ASSERT_EQ(static_cast<uint64_t>(18), encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "3x^2 + 2x^1 + 2");
         ASSERT_TRUE(encrypted1.parms_id() == sum.parms_id());
         ASSERT_TRUE(encrypted2.parms_id() == sum.parms_id());
         ASSERT_TRUE(encrypted3.parms_id() == sum.parms_id());
         ASSERT_TRUE(sum.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(-9), encrypted1);
-        encryptor.encrypt(encoder.encode(-17), encrypted2);
+        plain1 = "3Fx^3 + 3F";
+        plain2 = "3Fx^4 + 3F";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
         encrypteds = {
             encrypted1,
             encrypted2,
         };
         evaluator.add_many(encrypteds, sum);
         decryptor.decrypt(sum, plain);
-        ASSERT_TRUE(static_cast<int64_t>(-26) == encoder.decode_int64(plain));
+        ASSERT_EQ(plain.to_string(), "3Fx^4 + 3Fx^3 + 3E");
         ASSERT_TRUE(encrypted1.parms_id() == sum.parms_id());
         ASSERT_TRUE(encrypted2.parms_id() == sum.parms_id());
         ASSERT_TRUE(sum.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(2), encrypted1);
-        encryptor.encrypt(encoder.encode(-31), encrypted2);
-        encryptor.encrypt(encoder.encode(7), encrypted3);
+        plain1 = "1x^1";
+        plain2 = "3Fx^4 + 3Fx^3 + 3Fx^2 + 3Fx^1 + 3F";
+        plain3 = "1x^2 + 1x^1 + 1";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
+        encryptor.encrypt(plain3, encrypted3);
         encrypteds = { encrypted1, encrypted2, encrypted3 };
         evaluator.add_many(encrypteds, sum);
         decryptor.decrypt(sum, plain);
-        ASSERT_TRUE(static_cast<int64_t>(-22) == encoder.decode_int64(plain));
+        ASSERT_EQ(plain.to_string(), "3Fx^4 + 3Fx^3 + 1x^1");
         ASSERT_TRUE(encrypted1.parms_id() == sum.parms_id());
         ASSERT_TRUE(encrypted2.parms_id() == sum.parms_id());
         ASSERT_TRUE(encrypted3.parms_id() == sum.parms_id());
         ASSERT_TRUE(sum.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(1), encrypted1);
-        encryptor.encrypt(encoder.encode(-1), encrypted2);
-        encryptor.encrypt(encoder.encode(1), encrypted3);
-        encryptor.encrypt(encoder.encode(-1), encrypted4);
+        plain1 = "1";
+        plain2 = "3F";
+        plain3 = "1";
+        plain4 = "3F";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
+        encryptor.encrypt(plain3, encrypted3);
+        encryptor.encrypt(plain4, encrypted4);
         encrypteds = { encrypted1, encrypted2, encrypted3, encrypted4 };
         evaluator.add_many(encrypteds, sum);
         decryptor.decrypt(sum, plain);
-        ASSERT_EQ(static_cast<uint64_t>(0), encoder.decode_uint64(plain));
+        ASSERT_EQ(plain.to_string(), "0");
         ASSERT_TRUE(encrypted1.parms_id() == sum.parms_id());
         ASSERT_TRUE(encrypted2.parms_id() == sum.parms_id());
         ASSERT_TRUE(encrypted3.parms_id() == sum.parms_id());
         ASSERT_TRUE(encrypted4.parms_id() == sum.parms_id());
         ASSERT_TRUE(sum.parms_id() == context.first_parms_id());
 
-        encryptor.encrypt(encoder.encode(98765), encrypted1);
-        encryptor.encrypt(encoder.encode(0), encrypted2);
-        encryptor.encrypt(encoder.encode(12345), encrypted3);
-        encryptor.encrypt(encoder.encode(34567), encrypted4);
+        plain1 = "1x^16 + 1x^15 + 1x^8 + 1x^7 + 1x^6 + 1x^3 + 1x^2 + 1";
+        plain2 = "0";
+        plain3 = "1x^13 + 1x^12 + 1x^5 + 1x^4 + 1x^3 + 1";
+        plain4 = "1x^15 + 1x^10 + 1x^9 + 1x^8 + 1x^2 + 1x^1 + 1";
+        encryptor.encrypt(plain1, encrypted1);
+        encryptor.encrypt(plain2, encrypted2);
+        encryptor.encrypt(plain3, encrypted3);
+        encryptor.encrypt(plain4, encrypted4);
         encrypteds = { encrypted1, encrypted2, encrypted3, encrypted4 };
         evaluator.add_many(encrypteds, sum);
         decryptor.decrypt(sum, plain);
-        ASSERT_EQ(static_cast<uint64_t>(145677), encoder.decode_uint64(plain));
+        ASSERT_EQ(
+            plain.to_string(),
+            "1x^16 + 2x^15 + 1x^13 + 1x^12 + 1x^10 + 1x^9 + 2x^8 + 1x^7 + 1x^6 + 1x^5 + 1x^4 + 2x^3 + 2x^2 + 1x^1 + 3");
         ASSERT_TRUE(encrypted1.parms_id() == sum.parms_id());
         ASSERT_TRUE(encrypted2.parms_id() == sum.parms_id());
         ASSERT_TRUE(encrypted3.parms_id() == sum.parms_id());

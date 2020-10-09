@@ -9,24 +9,49 @@ The performance improvement should be expected to be around 20-30x.
 
 ### API Changes
 
-- All `Encryptor::encrypt` variants have now two overloads: one that takes a `Ciphertext` out-parameter, and one that returns a `Serializable<Ciphertext>`.
+- Removed `IntegerEncoder` and `BigUInt` classes.
+The `IntegerEncoder` did not have sane correctness properties making it almost impossible to use in any real application.
+The `BigUInt` class was used only by the `IntegerEncoder`.
 - Changed the names of the public key generation functions to clearly express that a new key is created each time, e.g., `KeyGenerator::create_public_key`.
 - Removed the `KeyGenerator::relin_keys_local` and `KeyGenerator::galois_keys_local` functions.
 These were poorly named and have been replaced with overloads of `KeyGenerator::create_relin_keys` and `KeyGenerator::create_galois_keys` that take an out-parameter of type `RelinKeys` or `GaloisKeys`.
 - Added public API for modular reduction to the `Modulus` class.
-- Added `encrypt` and `encrypt_zero` overloads to `Encryptor` that output asymmetrically encrypted `Serializable<Ciphertext>` objects.
-Previously these existed only for symmetric-key encryption mode.
+- All `Encryptor::encrypt` variants have now two overloads: one that takes a `Ciphertext` out-parameter, and one that returns a `Serializable<Ciphertext>`.
 - Added const overloads of `IntArray::begin` and `IntArray::end`.
 - Added `std::hash` implementation for `EncryptionParameters` (in addition to `parms_id_type`) so it is possible to create e.g. `std::unordered_map` of `EncryptionParameters`.
 - Removed `BatchEncoder` API for encoding and decoding `Plaintext` objects inplace.
 This is because a `Plaintext` object with slot-data written into the coefficients is (confusingly) not valid to be used for encryption or unencrypted arithmetic.
 - Added API to `UniformRandomGeneratorFactory` to find whether the factory uses a default seed (absolutely only for debugging purposes!), and to retrieve that seed.
+- Removed `IntegerEncoder` and `BigUInt` classes since they are not recommended and result in inefficient homomorphic evaluation.
 
 ### Other
 
 - Moved all files related to pkg-config to `pkgconfig/` subdirectory.
 - Added a new typedef `seal::seal_byte` for the unnecessarily capitalized `seal::SEAL_BYTE`.
 - Added `.pre-commit-config.yaml` (check out [pre-commit](https://pre-commit.com) if you are not familiar with this tool).
+- Added `seal::util::DWTHandler` and `seal::util::Arithmetic` class templates that unify the implementation of FFT (used by `CKKSEncoder`) and NTT (used by polynomial arithmetic).
+- The performance of encoding and decoding in CKKS are improved.
+
+### File Changes
+
+Renamed files and directories:
+
+New files:
+
+- [native/src/seal/util/dwthandler.h](native/src/seal/util/dwthandler.h)
+
+Removed files:
+
+- `dotnet/src/BigUInt.cs`
+- `dotnet/src/IntegerEncoder.cs`
+- `dotnet/tests/BigUIntTests.cs`
+- `dotnet/tests/IntegerEncoderTests.cs`
+- `native/src/seal/biguint.h`
+- `native/src/seal/biguint.cpp`
+- `native/src/seal/intencoder.h`
+- `native/src/seal/intencoder.cpp`
+- `native/tests/seal/biguint.cpp`
+- `native/tests/seal/intencoder.cpp`
 
 ## Version 3.5.9
 

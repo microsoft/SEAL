@@ -29,9 +29,6 @@
     <ClInclude Include="seal\batchencoder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\biguint.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="seal\ciphertext.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -57,9 +54,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="seal\intarray.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="seal\intencoder.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="seal\keygenerator.h">
@@ -208,9 +202,6 @@
     <ClCompile Include="seal\batchencoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\biguint.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="seal\ciphertext.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -230,9 +221,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\evaluator.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="seal\intencoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\keygenerator.cpp">

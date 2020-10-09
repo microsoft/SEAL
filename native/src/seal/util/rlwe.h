@@ -36,6 +36,16 @@ namespace seal
             std::shared_ptr<UniformRandomGenerator> rng, const EncryptionParameters &parms, std::uint64_t *destination);
 
         /**
+        Generate a polynomial from a centered binomial distribution and store in RNS representation.
+
+        @param[in] rng A uniform random generator.
+        @param[in] parms EncryptionParameters used to parametize an RNS polynomial.
+        @param[out] destination Allocated space to store a random polynomia.
+        */
+        void sample_poly_cbd(
+            std::shared_ptr<UniformRandomGenerator> rng, const EncryptionParameters &parms, std::uint64_t *destination);
+
+        /**
         Generate a polynomial uniformly from Rq and store in RNS representation.
 
         @param[in] rng A uniform random generator.

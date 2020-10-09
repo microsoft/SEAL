@@ -197,12 +197,10 @@
     <ClInclude Include="seal\c\modulus.h" />
     <ClInclude Include="seal\c\contextdata.h" />
     <ClInclude Include="seal\c\batchencoder.h" />
-    <ClInclude Include="seal\c\biguint.h" />
     <ClInclude Include="seal\c\ciphertext.h" />
     <ClInclude Include="seal\c\ckksencoder.h" />
     <ClInclude Include="seal\c\decryptor.h" />
     <ClInclude Include="seal\c\defines.h" />
-    <ClInclude Include="seal\c\intencoder.h" />
     <ClInclude Include="seal\c\encryptionparameterqualifiers.h" />
     <ClInclude Include="seal\c\encryptionparameters.h" />
     <ClInclude Include="seal\c\encryptor.h" />
@@ -232,8 +230,6 @@
     <ClCompile Include="seal\c\ckksencoder.cpp" />
     <ClCompile Include="seal\c\decryptor.cpp" />
     <ClCompile Include="seal\c\dllmain.cpp" />
-    <ClCompile Include="seal\c\biguint.cpp" />
-    <ClCompile Include="seal\c\intencoder.cpp" />
     <ClCompile Include="seal\c\encryptionparameterqualifiers.cpp" />
     <ClCompile Include="seal\c\encryptor.cpp" />
     <ClCompile Include="seal\c\evaluator.cpp" />

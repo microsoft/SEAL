@@ -20,7 +20,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="seal\batchencoder.h" />
-    <ClInclude Include="seal\biguint.h" />
     <ClInclude Include="seal\ciphertext.h" />
     <ClInclude Include="seal\ckks.h" />
     <ClInclude Include="seal\modulus.h" />
@@ -31,7 +30,6 @@
     <ClInclude Include="seal\evaluator.h" />
     <ClInclude Include="seal\galoiskeys.h" />
     <ClInclude Include="seal\intarray.h" />
-    <ClInclude Include="seal\intencoder.h" />
     <ClInclude Include="seal\keygenerator.h" />
     <ClInclude Include="seal\kswitchkeys.h" />
     <ClInclude Include="seal\memorymanager.h" />
@@ -81,7 +79,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="seal\batchencoder.cpp" />
-    <ClCompile Include="seal\biguint.cpp" />
     <ClCompile Include="seal\ciphertext.cpp" />
     <ClCompile Include="seal\ckks.cpp" />
     <ClCompile Include="seal\modulus.cpp" />
@@ -90,7 +87,6 @@
     <ClCompile Include="seal\encryptionparams.cpp" />
     <ClCompile Include="seal\encryptor.cpp" />
     <ClCompile Include="seal\evaluator.cpp" />
-    <ClCompile Include="seal\intencoder.cpp" />
     <ClCompile Include="seal\keygenerator.cpp" />
     <ClCompile Include="seal\kswitchkeys.cpp" />
     <ClCompile Include="seal\memorymanager.cpp" />
