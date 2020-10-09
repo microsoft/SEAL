@@ -58,7 +58,7 @@ namespace sealtest
         bool upper_half = false;
         bool even = false;
         bool odd = false;
-        for (int i = 0; i < 10; ++i)
+        for (int i = 0; i < 20; ++i)
         {
             uint32_t value = generator->generate();
             if (value < UINT32_MAX / 2)
