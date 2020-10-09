@@ -1,5 +1,12 @@
 # List of Changes
 
+## Version 3.5.9
+
+### Bug fixes
+
+- Fixed [(Issue 216)](https://github.com/microsoft/SEAL/issues/216).
+- Fixed [(Issue 210)](https://github.com/microsoft/SEAL/issues/210).
+
 ## Version 3.5.8
 
 ### Other
