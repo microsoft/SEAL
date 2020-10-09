@@ -81,10 +81,10 @@ namespace seal
                     "center binomial distribution only supports standard deviation 3.2, use discrete Gaussian instead");
             }
 
-            auto hw = [](uint8_t x) {
-                uint8_t t = x & 0x55;
+            auto hw = [](int8_t x) {
+                int32_t t = x & 0x55;
                 t += (x >> 1) & 0x55; // counting every 2 bits
-                int8_t hw = t & 0x3;
+                int32_t hw = t & 0x3;
                 hw += (t >> 2) & 0x3;
                 hw += (t >> 4) & 0x3;
                 hw += (t >> 6) & 0x3;
@@ -92,13 +92,15 @@ namespace seal
             };
 
             auto cbd = [&](shared_ptr<UniformRandomGenerator> rng) {
-                uint8_t t[6];
-                rng->generate(6, reinterpret_cast<seal_byte *>(t));
-                return hw(t[0]) + hw(t[1]) + hw(t[2] & 0x1F) - hw(t[3]) - hw(t[4]) - hw(t[5] & 0x1F);
+                int8_t x[6];
+                rng->generate(6, reinterpret_cast<seal_byte *>(x));
+                x[2] &= 0x1F;
+                x[5] &= 0x1F;
+                return hw(x[0]) + hw(x[1]) + hw(x[2]) - hw(x[3]) - hw(x[4]) - hw(x[5]);
             };
 
             SEAL_ITERATE(iter(destination), coeff_count, [&](auto &I) {
-                int8_t noise = static_cast<int64_t>(cbd(rng));
+                int32_t noise = cbd(rng);
                 uint64_t flag = static_cast<uint64_t>(-static_cast<int64_t>(noise < 0));
                 SEAL_ITERATE(
                     iter(StrideIter<uint64_t *>(&I, coeff_count), coeff_modulus), coeff_modulus_size,
