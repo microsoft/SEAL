@@ -1132,9 +1132,9 @@ EMSCRIPTEN_BINDINGS(SEAL) {
     class_<IntegerEncoder>("IntegerEncoder")
         .constructor<std::shared_ptr<SEALContext>> ()
         .function("encodeInt32", select_overload<void(std::int32_t, Plaintext &)>(&IntegerEncoder::encode))
-        .function("encodeUInt32", select_overload<void(std::uint32_t, Plaintext &)>(&IntegerEncoder::encode))
+        .function("encodeUint32", select_overload<void(std::uint32_t, Plaintext &)>(&IntegerEncoder::encode))
         .function("decodeInt32", select_overload<std::int32_t(const Plaintext &)>(&IntegerEncoder::decode_int32))
-        .function("decodeUInt32", select_overload<std::uint32_t(const Plaintext &)>(&IntegerEncoder::decode_uint32));
+        .function("decodeUint32", select_overload<std::uint32_t(const Plaintext &)>(&IntegerEncoder::decode_uint32));
 
     class_<BatchEncoder>("BatchEncoder")
         .constructor<std::shared_ptr<SEALContext>> ()
@@ -1273,7 +1273,7 @@ EMSCRIPTEN_BINDINGS(SEAL) {
                 // garbage collected and the memory view becomes corrupted.
                 return result;
             }))
-        .function("decodeUInt32", optional_override([](BatchEncoder &self,
+        .function("decodeUint32", optional_override([](BatchEncoder &self,
             const Plaintext &plain, MemoryPoolHandle pool = MemoryManager::GetPool()) {
                 // Reserve the known max encoder slot count
                 const size_t MAX_SLOT_COUNT = self.BatchEncoder::slot_count();
