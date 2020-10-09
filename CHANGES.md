@@ -9,20 +9,19 @@ The performance improvement should be expected to be around 20-30x.
 
 ### API Changes
 
-- Removed `IntegerEncoder` and `BigUInt` classes.
-The `IntegerEncoder` did not have sane correctness properties making it almost impossible to use in any real application.
-The `BigUInt` class was used only by the `IntegerEncoder`.
-- Changed the names of the public key generation functions to clearly express that a new key is created each time, e.g., `KeyGenerator::create_public_key`.
-- Removed the `KeyGenerator::relin_keys_local` and `KeyGenerator::galois_keys_local` functions.
-These were poorly named and have been replaced with overloads of `KeyGenerator::create_relin_keys` and `KeyGenerator::create_galois_keys` that take an out-parameter of type `RelinKeys` or `GaloisKeys`.
-- Added public API for modular reduction to the `Modulus` class.
-- All `Encryptor::encrypt` variants have now two overloads: one that takes a `Ciphertext` out-parameter, and one that returns a `Serializable<Ciphertext>`.
 - Added const overloads of `IntArray::begin` and `IntArray::end`.
 - Added `std::hash` implementation for `EncryptionParameters` (in addition to `parms_id_type`) so it is possible to create e.g. `std::unordered_map` of `EncryptionParameters`.
 - Removed `BatchEncoder` API for encoding and decoding `Plaintext` objects inplace.
-This is because a `Plaintext` object with slot-data written into the coefficients is (confusingly) not valid to be used for encryption or unencrypted arithmetic.
+This is because a `Plaintext` object with slot-data written into the coefficients is (confusingly) not valid to be used for encryption.
 - Added API to `UniformRandomGeneratorFactory` to find whether the factory uses a default seed (absolutely only for debugging purposes!), and to retrieve that seed.
-- Removed `IntegerEncoder` and `BigUInt` classes since they are not recommended and result in inefficient homomorphic evaluation.
+- Added public API for modular reduction to the `Modulus` class.
+- Removed `IntegerEncoder` and `BigUInt` classes.
+`IntegerEncoder` results in inefficient homomorphic evaluation and lacks sane correctness properties, so it was basically impossible to use in real applications.
+The `BigUInt` class was only used by the `IntegerEncoder`.
+- All `Encryptor::encrypt` variants have now two overloads: one that takes a `Ciphertext` out-parameter, and one that returns a `Serializable<Ciphertext>`.
+- Changed the names of the public key generation functions to clearly express that a new key is created each time, e.g., `KeyGenerator::create_public_key`.
+- Removed the `KeyGenerator::relin_keys_local` and `KeyGenerator::galois_keys_local` functions.
+These were poorly named and have been replaced with overloads of `KeyGenerator::create_relin_keys` and `KeyGenerator::create_galois_keys` that take an out-parameter of type `RelinKeys` or `GaloisKeys`.
 
 ### Other
 
