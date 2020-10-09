@@ -21,7 +21,7 @@ namespace SEALNetTest
             context_ = GlobalContext.BFVContext;
             keyGen_ = new KeyGenerator(context_);
             secretKey_ = keyGen_.SecretKey;
-            publicKey_ = keyGen_.PublicKey;
+            keyGen_.CreatePublicKey(out publicKey_);
         }
 
         [TestMethod]

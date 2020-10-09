@@ -18,15 +18,14 @@ namespace SEALNetTest
         {
             {
                 SEALContext context = GlobalContext.BFVContext;
-                KeyGenerator keyGen = new KeyGenerator(context);
-                PublicKey publicKey = keyGen.PublicKey;
-                SecretKey secretKey = keyGen.SecretKey;
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreatePublicKey(out PublicKey publicKey);
+                SecretKey secretKey = keygen.SecretKey;
                 Encryptor encryptor = new Encryptor(context, publicKey, secretKey);
 
                 Assert.IsNotNull(encryptor);
 
                 Plaintext plain = new Plaintext("1x^1 + 1");
-
                 Ciphertext cipher = new Ciphertext();
                 Assert.AreEqual(0ul, cipher.Size);
                 encryptor.Encrypt(plain, cipher);
@@ -36,8 +35,8 @@ namespace SEALNetTest
             using (MemoryStream stream = new MemoryStream())
             {
                 SEALContext context = GlobalContext.BFVContext;
-                KeyGenerator keyGen = new KeyGenerator(context);
-                PublicKey publicKey = keyGen.PublicKey;
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreatePublicKey(out PublicKey publicKey);
                 Encryptor encryptor = new Encryptor(context, publicKey);
 
                 Assert.IsNotNull(encryptor);
@@ -52,14 +51,13 @@ namespace SEALNetTest
             }
             {
                 SEALContext context = GlobalContext.BFVContext;
-                KeyGenerator keyGen = new KeyGenerator(context);
-                SecretKey secretKey = keyGen.SecretKey;
+                KeyGenerator keygen = new KeyGenerator(context);
+                SecretKey secretKey = keygen.SecretKey;
                 Encryptor encryptor = new Encryptor(context, secretKey);
 
                 Assert.IsNotNull(encryptor);
 
                 Plaintext plain = new Plaintext("1x^1 + 1");
-
                 Ciphertext cipher = new Ciphertext();
                 Assert.AreEqual(0ul, cipher.Size);
                 encryptor.EncryptSymmetric(plain, cipher);
@@ -69,8 +67,8 @@ namespace SEALNetTest
             using (MemoryStream stream = new MemoryStream())
             {
                 SEALContext context = GlobalContext.BFVContext;
-                KeyGenerator keyGen = new KeyGenerator(context);
-                SecretKey secretKey = keyGen.SecretKey;
+                KeyGenerator keygen = new KeyGenerator(context);
+                SecretKey secretKey = keygen.SecretKey;
                 Encryptor encryptor = new Encryptor(context, secretKey);
 
                 Assert.IsNotNull(encryptor);
@@ -90,11 +88,11 @@ namespace SEALNetTest
         {
             {
                 SEALContext context = GlobalContext.BFVContext;
-                KeyGenerator keyGen = new KeyGenerator(context);
-                PublicKey publicKey = keyGen.PublicKey;
-                SecretKey secretKey = keyGen.SecretKey;
-                Decryptor decryptor = new Decryptor(context, secretKey);
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreatePublicKey(out PublicKey publicKey);
+                SecretKey secretKey = keygen.SecretKey;
 
+                Decryptor decryptor = new Decryptor(context, secretKey);
                 Assert.IsNotNull(decryptor);
 
                 Ciphertext cipher = new Ciphertext();
@@ -195,9 +193,9 @@ namespace SEALNetTest
             }
             {
                 SEALContext context = GlobalContext.CKKSContext;
-                KeyGenerator keyGen = new KeyGenerator(context);
-                PublicKey publicKey = keyGen.PublicKey;
-                SecretKey secretKey = keyGen.SecretKey;
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreatePublicKey(out PublicKey publicKey);
+                SecretKey secretKey = keygen.SecretKey;
                 Decryptor decryptor = new Decryptor(context, secretKey);
                 CKKSEncoder encoder = new CKKSEncoder(context);
 
@@ -367,7 +365,7 @@ namespace SEALNetTest
         {
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
-            PublicKey pubKey = keygen.PublicKey;
+            keygen.CreatePublicKey(out PublicKey pubKey);
             PublicKey pubKey_invalid = new PublicKey();
             SecretKey secKey = keygen.SecretKey;
             SecretKey secKey_invalid = new SecretKey();

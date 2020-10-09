@@ -25,8 +25,8 @@ namespace sealtest
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
-            ASSERT_THROW(RelinKeys evk = keygen.relin_keys_local(), logic_error);
-            ASSERT_THROW(GaloisKeys galk = keygen.galois_keys_local(), logic_error);
+            ASSERT_THROW(auto evk = keygen.create_relin_keys(), logic_error);
+            ASSERT_THROW(auto galk = keygen.create_galois_keys(), logic_error);
         }
         {
             parms.set_poly_modulus_degree(64);
@@ -35,7 +35,8 @@ namespace sealtest
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
-            RelinKeys evk = keygen.relin_keys_local();
+            RelinKeys evk;
+            keygen.create_relin_keys(evk);
             ASSERT_TRUE(evk.parms_id() == context.key_parms_id());
             ASSERT_EQ(1ULL, evk.key(2).size());
             for (auto &a : evk.data())
@@ -47,7 +48,8 @@ namespace sealtest
             }
             ASSERT_TRUE(is_valid_for(evk, context));
 
-            GaloisKeys galks = keygen.galois_keys_local();
+            GaloisKeys galks;
+            keygen.create_galois_keys(galks);
             for (auto &a : galks.data())
             {
                 for (auto &b : a)
@@ -61,7 +63,7 @@ namespace sealtest
             ASSERT_EQ(1ULL, galks.key(3).size());
             ASSERT_EQ(10ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint32_t>{ 1, 3, 5, 7 });
+            keygen.create_galois_keys(vector<uint32_t>{ 1, 3, 5, 7 }, galks);
             ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(3));
@@ -75,7 +77,7 @@ namespace sealtest
             ASSERT_EQ(1ULL, galks.key(7).size());
             ASSERT_EQ(4ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint32_t>{ 1 });
+            keygen.create_galois_keys(vector<uint32_t>{ 1 }, galks);
             ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_FALSE(galks.has_key(3));
@@ -83,7 +85,7 @@ namespace sealtest
             ASSERT_EQ(1ULL, galks.key(1).size());
             ASSERT_EQ(1ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint32_t>{ 127 });
+            keygen.create_galois_keys(vector<uint32_t>{ 127 }, galks);
             ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(127));
@@ -98,7 +100,8 @@ namespace sealtest
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
-            RelinKeys evk = keygen.relin_keys_local();
+            RelinKeys evk;
+            keygen.create_relin_keys(evk);
             ASSERT_TRUE(evk.parms_id() == context.key_parms_id());
             ASSERT_EQ(2ULL, evk.key(2).size());
 
@@ -111,7 +114,8 @@ namespace sealtest
             }
             ASSERT_TRUE(is_valid_for(evk, context));
 
-            GaloisKeys galks = keygen.galois_keys_local();
+            GaloisKeys galks;
+            keygen.create_galois_keys(galks);
             for (auto &a : galks.data())
             {
                 for (auto &b : a)
@@ -125,7 +129,7 @@ namespace sealtest
             ASSERT_EQ(2ULL, galks.key(3).size());
             ASSERT_EQ(14ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint32_t>{ 1, 3, 5, 7 });
+            keygen.create_galois_keys(vector<uint32_t>{ 1, 3, 5, 7 }, galks);
             ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(3));
@@ -139,7 +143,7 @@ namespace sealtest
             ASSERT_EQ(2ULL, galks.key(7).size());
             ASSERT_EQ(4ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint32_t>{ 1 });
+            keygen.create_galois_keys(vector<uint32_t>{ 1 }, galks);
             ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_FALSE(galks.has_key(3));
@@ -147,7 +151,7 @@ namespace sealtest
             ASSERT_EQ(2ULL, galks.key(1).size());
             ASSERT_EQ(1ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint32_t>{ 511 });
+            keygen.create_galois_keys(vector<uint32_t>{ 511 }, galks);
             ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(511));
@@ -165,8 +169,8 @@ namespace sealtest
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
-            ASSERT_THROW(RelinKeys evk = keygen.relin_keys_local(), logic_error);
-            ASSERT_THROW(GaloisKeys galk = keygen.galois_keys_local(), logic_error);
+            ASSERT_THROW(auto evk = keygen.create_relin_keys(), logic_error);
+            ASSERT_THROW(auto galk = keygen.create_galois_keys(), logic_error);
         }
         {
             parms.set_poly_modulus_degree(64);
@@ -175,7 +179,8 @@ namespace sealtest
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
-            RelinKeys evk = keygen.relin_keys_local();
+            RelinKeys evk;
+            keygen.create_relin_keys(evk);
             ASSERT_TRUE(evk.parms_id() == context.key_parms_id());
             ASSERT_EQ(1ULL, evk.key(2).size());
             for (auto &a : evk.data())
@@ -187,7 +192,8 @@ namespace sealtest
             }
             ASSERT_TRUE(is_valid_for(evk, context));
 
-            GaloisKeys galks = keygen.galois_keys_local();
+            GaloisKeys galks;
+            keygen.create_galois_keys(galks);
             for (auto &a : galks.data())
             {
                 for (auto &b : a)
@@ -201,7 +207,7 @@ namespace sealtest
             ASSERT_EQ(1ULL, galks.key(3).size());
             ASSERT_EQ(10ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint32_t>{ 1, 3, 5, 7 });
+            keygen.create_galois_keys(vector<uint32_t>{ 1, 3, 5, 7 }, galks);
             ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(3));
@@ -215,7 +221,7 @@ namespace sealtest
             ASSERT_EQ(1ULL, galks.key(7).size());
             ASSERT_EQ(4ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint32_t>{ 1 });
+            keygen.create_galois_keys(vector<uint32_t>{ 1 }, galks);
             ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_FALSE(galks.has_key(3));
@@ -223,7 +229,7 @@ namespace sealtest
             ASSERT_EQ(1ULL, galks.key(1).size());
             ASSERT_EQ(1ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint32_t>{ 127 });
+            keygen.create_galois_keys(vector<uint32_t>{ 127 }, galks);
             ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(127));
@@ -237,7 +243,8 @@ namespace sealtest
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
-            RelinKeys evk = keygen.relin_keys_local();
+            RelinKeys evk;
+            keygen.create_relin_keys(evk);
             ASSERT_TRUE(evk.parms_id() == context.key_parms_id());
             ASSERT_EQ(2ULL, evk.key(2).size());
             for (auto &a : evk.data())
@@ -249,7 +256,8 @@ namespace sealtest
             }
             ASSERT_TRUE(is_valid_for(evk, context));
 
-            GaloisKeys galks = keygen.galois_keys_local();
+            GaloisKeys galks;
+            keygen.create_galois_keys(galks);
             for (auto &a : galks.data())
             {
                 for (auto &b : a)
@@ -263,7 +271,7 @@ namespace sealtest
             ASSERT_EQ(2ULL, galks.key(3).size());
             ASSERT_EQ(14ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint32_t>{ 1, 3, 5, 7 });
+            keygen.create_galois_keys(vector<uint32_t>{ 1, 3, 5, 7 }, galks);
             ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(3));
@@ -277,7 +285,7 @@ namespace sealtest
             ASSERT_EQ(2ULL, galks.key(7).size());
             ASSERT_EQ(4ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint32_t>{ 1 });
+            keygen.create_galois_keys(vector<uint32_t>{ 1 }, galks);
             ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_TRUE(galks.has_key(1));
             ASSERT_FALSE(galks.has_key(3));
@@ -285,7 +293,7 @@ namespace sealtest
             ASSERT_EQ(2ULL, galks.key(1).size());
             ASSERT_EQ(1ULL, galks.size());
 
-            galks = keygen.galois_keys_local(vector<uint32_t>{ 511 });
+            keygen.create_galois_keys(vector<uint32_t>{ 511 }, galks);
             ASSERT_TRUE(galks.parms_id() == context.key_parms_id());
             ASSERT_FALSE(galks.has_key(1));
             ASSERT_TRUE(galks.has_key(511));
@@ -304,10 +312,13 @@ namespace sealtest
         Evaluator evaluator(context);
 
         KeyGenerator keygen(context);
-        auto pk = keygen.public_key();
+        PublicKey pk;
+        keygen.create_public_key(pk);
         auto sk = keygen.secret_key();
-        RelinKeys rlk = keygen.relin_keys_local();
-        GaloisKeys galk = keygen.galois_keys_local();
+        RelinKeys rlk;
+        keygen.create_relin_keys(rlk);
+        GaloisKeys galk;
+        keygen.create_galois_keys(galk);
 
         ASSERT_TRUE(is_valid_for(rlk, context));
         ASSERT_TRUE(is_valid_for(galk, context));
@@ -324,11 +335,14 @@ namespace sealtest
 
         KeyGenerator keygen2(context, sk);
         auto sk2 = keygen.secret_key();
-        auto pk2 = keygen2.public_key();
+        PublicKey pk2;
+        keygen2.create_public_key(pk2);
         ASSERT_EQ(sk2.data(), sk.data());
 
-        RelinKeys rlk2 = keygen2.relin_keys_local();
-        GaloisKeys galk2 = keygen2.galois_keys_local();
+        RelinKeys rlk2;
+        keygen2.create_relin_keys(rlk2);
+        GaloisKeys galk2;
+        keygen2.create_galois_keys(galk2);
 
         ASSERT_TRUE(is_valid_for(rlk2, context));
         ASSERT_TRUE(is_valid_for(galk2, context));
@@ -343,7 +357,8 @@ namespace sealtest
         decryptor.decrypt(ct, ptres);
         ASSERT_EQ("1x^4 + 4x^2 + 4", ptres.to_string());
 
-        auto pk3 = keygen2.public_key();
+        PublicKey pk3;
+        keygen2.create_public_key(pk3);
 
         // There is a small random chance for this to fail
         for (size_t i = 0; i < pk3.data().int_array().size(); i++)

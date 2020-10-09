@@ -96,7 +96,9 @@ namespace SEALNetTest
             using (MemoryStream mem = new MemoryStream())
             {
                 KeyGenerator keygen = new KeyGenerator(context);
-                Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
+                keygen.CreatePublicKey(out PublicKey publicKey);
+                Encryptor encryptor = new Encryptor(context, publicKey);
+
                 Plaintext plain = new Plaintext("2x^3 + 4x^2 + 5x^1 + 6");
                 encryptor.Encrypt(plain, cipher);
                 cipher.Save(mem);

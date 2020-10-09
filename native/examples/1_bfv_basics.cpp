@@ -152,16 +152,23 @@ void example_bfv_basics()
 
     We are now ready to generate the secret and public keys. For this purpose
     we need an instance of the KeyGenerator class. Constructing a KeyGenerator
-    automatically generates the public and secret key, which can immediately be
-    read to local variables.
+    automatically generates a secret key. We can then create as many public
+    keys for it as we want using KeyGenerator::create_public_key.
+
+    Note that KeyGenerator::create_public_key has another overload that takes
+    no parameters and returns a Serializable<PublicKey> object. We will discuss
+    this in `6_serialization.cpp'.
     */
     KeyGenerator keygen(context);
-    PublicKey public_key = keygen.public_key();
     SecretKey secret_key = keygen.secret_key();
+    PublicKey public_key;
+    keygen.create_public_key(public_key);
 
     /*
     To be able to encrypt we need to construct an instance of Encryptor. Note
-    that the Encryptor only requires the public key, as expected.
+    that the Encryptor only requires the public key, as expected. It is also
+    possible to use Microsoft SEAL in secret-key mode by providing the Encryptor
+    the secret key instead. We will discuss this in `6_serialization.cpp'.
     */
     Encryptor encryptor(context, public_key);
 
@@ -208,7 +215,10 @@ void example_bfv_basics()
     cout << "Express x = " + to_string(x) + " as a plaintext polynomial 0x" + x_plain.to_string() + "." << endl;
 
     /*
-    We then encrypt the plaintext, producing a ciphertext.
+    We then encrypt the plaintext, producing a ciphertext. We note that the
+    Encryptor::encrypt function has another overload that takes as input only
+    a plaintext and returns a Serializable<Ciphertext> object. We will discuss
+    this in `6_serialization.cpp'.
     */
     print_line(__LINE__);
     Ciphertext x_encrypted;
@@ -339,14 +349,11 @@ void example_bfv_basics()
     Relinearization is used similarly in both the BFV and the CKKS schemes, but
     in this example we continue using BFV. We repeat our computation from before,
     but this time relinearize after every multiplication.
-
-    Here we use the function KeyGenerator::relin_keys_local(). In production
-    code it is much better to use KeyGenerator::relin_keys() instead. We will
-    explain and discuss these differences in `6_serialization.cpp'.
     */
     print_line(__LINE__);
-    cout << "Generate locally usable relinearization keys." << endl;
-    auto relin_keys = keygen.relin_keys_local();
+    cout << "Generate relinearization keys." << endl;
+    RelinKeys relin_keys;
+    keygen.create_relin_keys(relin_keys);
 
     /*
     We now repeat the computation relinearizing after each multiplication.

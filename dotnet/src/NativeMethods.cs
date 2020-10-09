@@ -862,19 +862,19 @@ namespace Microsoft.Research.SEAL
         internal static extern void KeyGenerator_Destroy(IntPtr thisptr);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void KeyGenerator_RelinKeys(IntPtr thisptr, bool save_seed, out IntPtr relin_keys);
-
-        [DllImport(sealc, EntryPoint = "KeyGenerator_GaloisKeysAll", PreserveSig = false)]
-        internal static extern void KeyGenerator_GaloisKeysAll(IntPtr thisptr, bool save_seed, out IntPtr galoisKeys);
-
-        [DllImport(sealc, EntryPoint = "KeyGenerator_GaloisKeysFromElts", PreserveSig = false)]
-        internal static extern void KeyGenerator_GaloisKeysFromElts(IntPtr thisptr, ulong count, uint[] galoisElts, bool save_seed, out IntPtr galoisKeys);
-
-        [DllImport(sealc, EntryPoint = "KeyGenerator_GaloisKeysFromSteps", PreserveSig = false)]
-        internal static extern void KeyGenerator_GaloisKeysFromSteps(IntPtr thisptr, ulong count, int[] steps, bool save_seed, out IntPtr galoisKeys);
+        internal static extern void KeyGenerator_CreateRelinKeys(IntPtr thisptr, bool save_seed, out IntPtr relin_keys);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void KeyGenerator_PublicKey(IntPtr thisptr, out IntPtr publicKey);
+        internal static extern void KeyGenerator_CreateGaloisKeysAll(IntPtr thisptr, bool save_seed, out IntPtr galoisKeys);
+
+        [DllImport(sealc, PreserveSig = false)]
+        internal static extern void KeyGenerator_CreateGaloisKeysFromElts(IntPtr thisptr, ulong count, uint[] galoisElts, bool save_seed, out IntPtr galoisKeys);
+
+        [DllImport(sealc, PreserveSig = false)]
+        internal static extern void KeyGenerator_CreateGaloisKeysFromSteps(IntPtr thisptr, ulong count, int[] steps, bool save_seed, out IntPtr galoisKeys);
+
+        [DllImport(sealc, PreserveSig = false)]
+        internal static extern void KeyGenerator_CreatePublicKey(IntPtr thisptr, bool save_seed, out IntPtr publicKey);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void KeyGenerator_SecretKey(IntPtr thisptr, out IntPtr secretKey);

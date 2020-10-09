@@ -28,11 +28,14 @@ namespace sealtest
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
+
         SEALContext context(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
 
         IntegerEncoder encoder(context);
-        Encryptor encryptor(context, keygen.public_key());
+        Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
@@ -82,11 +85,14 @@ namespace sealtest
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
+
         SEALContext context(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
 
         IntegerEncoder encoder(context);
-        Encryptor encryptor(context, keygen.public_key());
+        Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
@@ -162,11 +168,14 @@ namespace sealtest
             size_t slot_size = 32;
             parms.set_poly_modulus_degree(slot_size * 2);
             parms.set_coeff_modulus(CoeffModulus::Create(slot_size * 2, { 30, 30, 30, 30, 30 }));
+
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -201,9 +210,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -259,9 +270,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -321,9 +334,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -358,9 +373,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -414,9 +431,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -470,9 +489,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -531,9 +552,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -568,9 +591,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -624,9 +649,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -684,9 +711,11 @@ namespace sealtest
 
         SEALContext context(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
 
         IntegerEncoder encoder(context);
-        Encryptor encryptor(context, keygen.public_key());
+        Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
@@ -744,9 +773,11 @@ namespace sealtest
 
         SEALContext context(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
 
         IntegerEncoder encoder(context);
-        Encryptor encryptor(context, keygen.public_key());
+        Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
@@ -799,9 +830,11 @@ namespace sealtest
 
         SEALContext context(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
 
         IntegerEncoder encoder(context);
-        Encryptor encryptor(context, keygen.public_key());
+        Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
@@ -854,9 +887,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             IntegerEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
 
@@ -920,9 +955,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             IntegerEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
 
@@ -950,9 +987,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             IntegerEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
 
@@ -980,9 +1019,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             BatchEncoder batch_encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
 
@@ -1015,9 +1056,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             BatchEncoder batch_encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
 
@@ -1078,9 +1121,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             IntegerEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
 
@@ -1144,9 +1189,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             IntegerEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
 
@@ -1210,9 +1257,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             IntegerEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
 
@@ -1276,9 +1325,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             IntegerEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
 
@@ -1304,9 +1355,12 @@ namespace sealtest
 
         SEALContext context(parms, true, sec_level_type::none);
         KeyGenerator keygen(context);
-        RelinKeys rlk = keygen.relin_keys_local();
+        PublicKey pk;
+        keygen.create_public_key(pk);
+        RelinKeys rlk;
+        keygen.create_relin_keys(rlk);
 
-        Encryptor encryptor(context, keygen.public_key());
+        Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
@@ -1377,9 +1431,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -1414,9 +1470,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -1470,9 +1528,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -1531,9 +1591,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -1586,9 +1648,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -1641,9 +1705,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -1696,9 +1762,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -1756,12 +1824,15 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            RelinKeys rlk;
+            keygen.create_relin_keys(rlk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -1818,12 +1889,15 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            RelinKeys rlk;
+            keygen.create_relin_keys(rlk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -1880,12 +1954,15 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            RelinKeys rlk;
+            keygen.create_relin_keys(rlk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -1947,12 +2024,15 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            RelinKeys rlk;
+            keygen.create_relin_keys(rlk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted;
             Plaintext plain;
@@ -2002,12 +2082,15 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            RelinKeys rlk;
+            keygen.create_relin_keys(rlk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted;
             Plaintext plain;
@@ -2057,12 +2140,15 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            RelinKeys rlk;
+            keygen.create_relin_keys(rlk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted;
             Plaintext plain;
@@ -2118,12 +2204,15 @@ namespace sealtest
             SEALContext context(parms, true, sec_level_type::none);
             auto next_parms_id = context.first_context_data()->next_context_data()->parms_id();
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            RelinKeys rlk;
+            keygen.create_relin_keys(rlk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -2185,12 +2274,15 @@ namespace sealtest
             SEALContext context(parms, true, sec_level_type::none);
             auto next_parms_id = context.first_context_data()->next_context_data()->parms_id();
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            RelinKeys rlk;
+            keygen.create_relin_keys(rlk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -2251,12 +2343,15 @@ namespace sealtest
 
             SEALContext context(parms, true, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            RelinKeys rlk;
+            keygen.create_relin_keys(rlk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -2376,12 +2471,15 @@ namespace sealtest
             SEALContext context(parms, true, sec_level_type::none);
             auto next_parms_id = context.first_context_data()->next_context_data()->parms_id();
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            RelinKeys rlk;
+            keygen.create_relin_keys(rlk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted;
             Plaintext plain;
@@ -2434,12 +2532,15 @@ namespace sealtest
             SEALContext context(parms, true, sec_level_type::none);
             auto next_parms_id = context.first_context_data()->next_context_data()->parms_id();
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            RelinKeys rlk;
+            keygen.create_relin_keys(rlk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted;
             Plaintext plain;
@@ -2496,9 +2597,11 @@ namespace sealtest
             SEALContext context(parms, true, sec_level_type::none);
             auto next_parms_id = context.first_context_data()->next_context_data()->parms_id();
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -2567,9 +2670,11 @@ namespace sealtest
             SEALContext context(parms, true, sec_level_type::none);
             auto next_parms_id = context.first_context_data()->next_context_data()->parms_id();
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -2638,9 +2743,11 @@ namespace sealtest
             SEALContext context(parms, true, sec_level_type::none);
             auto next_parms_id = context.first_context_data()->next_context_data()->parms_id();
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
 
@@ -2713,12 +2820,15 @@ namespace sealtest
             SEALContext context(parms, true, sec_level_type::none);
             auto next_parms_id = context.first_context_data()->next_context_data()->parms_id();
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            RelinKeys rlk;
+            keygen.create_relin_keys(rlk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -2793,12 +2903,15 @@ namespace sealtest
             SEALContext context(parms, true, sec_level_type::none);
             auto next_parms_id = context.first_context_data()->next_context_data()->parms_id();
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            RelinKeys rlk;
+            keygen.create_relin_keys(rlk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
             Evaluator evaluator(context);
-            RelinKeys rlk = keygen.relin_keys_local();
 
             Ciphertext encrypted1;
             Ciphertext encrypted2;
@@ -2876,9 +2989,12 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
-            GaloisKeys glk = keygen.galois_keys_local();
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            GaloisKeys glk;
+            keygen.create_galois_keys(glk);
 
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
             CKKSEncoder encoder(context);
@@ -2947,9 +3063,12 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
-            GaloisKeys glk = keygen.galois_keys_local();
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            GaloisKeys glk;
+            keygen.create_galois_keys(glk);
 
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
             CKKSEncoder encoder(context);
@@ -3024,9 +3143,12 @@ namespace sealtest
 
             SEALContext context(parms, true, sec_level_type::none);
             KeyGenerator keygen(context);
-            GaloisKeys glk = keygen.galois_keys_local();
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            GaloisKeys glk;
+            keygen.create_galois_keys(glk);
 
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
             CKKSEncoder encoder(context);
@@ -3099,9 +3221,12 @@ namespace sealtest
 
             SEALContext context(parms, true, sec_level_type::none);
             KeyGenerator keygen(context);
-            GaloisKeys glk = keygen.galois_keys_local();
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            GaloisKeys glk;
+            keygen.create_galois_keys(glk);
 
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
             CKKSEncoder encoder(context);
@@ -3179,9 +3304,11 @@ namespace sealtest
 
         SEALContext context(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
 
         IntegerEncoder encoder(context);
-        Encryptor encryptor(context, keygen.public_key());
+        Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
@@ -3241,12 +3368,15 @@ namespace sealtest
 
         SEALContext context(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
+        RelinKeys rlk;
+        keygen.create_relin_keys(rlk);
 
         IntegerEncoder encoder(context);
-        Encryptor encryptor(context, keygen.public_key());
+        Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
-        RelinKeys rlk = keygen.relin_keys_local();
 
         Ciphertext encrypted1, encrypted2, encrypted3, encrypted4, product;
         Plaintext plain;
@@ -3328,12 +3458,15 @@ namespace sealtest
 
         SEALContext context(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
+        RelinKeys rlk;
+        keygen.create_relin_keys(rlk);
 
         IntegerEncoder encoder(context);
-        Encryptor encryptor(context, keygen.public_key());
+        Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
-        RelinKeys rlk = keygen.relin_keys_local();
 
         Ciphertext encrypted;
         Plaintext plain;
@@ -3372,9 +3505,11 @@ namespace sealtest
 
         SEALContext context(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
 
         IntegerEncoder encoder(context);
-        Encryptor encryptor(context, keygen.public_key());
+        Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
@@ -3526,8 +3661,10 @@ namespace sealtest
 
         SEALContext context(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
 
-        Encryptor encryptor(context, keygen.public_key());
+        Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
@@ -3568,8 +3705,10 @@ namespace sealtest
 
         SEALContext context(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
 
-        Encryptor encryptor(context, keygen.public_key());
+        Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
@@ -3637,9 +3776,12 @@ namespace sealtest
 
         SEALContext context(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
-        GaloisKeys glk = keygen.galois_keys_local(vector<uint32_t>{ 1, 3, 5, 15 });
+        PublicKey pk;
+        keygen.create_public_key(pk);
+        GaloisKeys glk;
+        keygen.create_galois_keys(vector<uint32_t>{ 1, 3, 5, 15 }, glk);
 
-        Encryptor encryptor(context, keygen.public_key());
+        Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
 
@@ -3715,9 +3857,12 @@ namespace sealtest
 
         SEALContext context(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
-        GaloisKeys glk = keygen.galois_keys_local();
+        PublicKey pk;
+        keygen.create_public_key(pk);
+        GaloisKeys glk;
+        keygen.create_galois_keys(glk);
 
-        Encryptor encryptor(context, keygen.public_key());
+        Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
         BatchEncoder batch_encoder(context);
@@ -3767,7 +3912,10 @@ namespace sealtest
         SEALContext context(parms, true, sec_level_type::none);
         KeyGenerator keygen(context);
         SecretKey secret_key = keygen.secret_key();
-        Encryptor encryptor(context, keygen.public_key());
+        PublicKey pk;
+        keygen.create_public_key(pk);
+
+        Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
         auto parms_id = context.first_parms_id();
@@ -3850,7 +3998,10 @@ namespace sealtest
         SEALContext context(parms, true, sec_level_type::none);
         KeyGenerator keygen(context);
         SecretKey secret_key = keygen.secret_key();
-        Encryptor encryptor(context, keygen.public_key());
+        PublicKey pk;
+        keygen.create_public_key(pk);
+
+        Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
         auto parms_id = context.first_parms_id();

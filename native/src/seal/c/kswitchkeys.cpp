@@ -35,16 +35,14 @@ namespace
     }
 } // namespace
 
-namespace seal
+// Enables access to private members of seal::PublicKey.
+using ph = struct PublicKey::PublicKeyPrivateHelper
 {
-    struct PublicKey::PublicKeyPrivateHelper
+    inline static PublicKey Create(MemoryPoolHandle pool)
     {
-        inline static PublicKey Create(MemoryPoolHandle pool)
-        {
-            return PublicKey(pool);
-        }
-    };
-} // namespace seal
+        return PublicKey(pool);
+    }
+};
 
 SEAL_C_FUNC KSwitchKeys_Create1(void **kswitch_keys)
 {
@@ -140,7 +138,7 @@ SEAL_C_FUNC KSwitchKeys_AddKeyList(void *thisptr, uint64_t count, void **key_lis
     for (uint64_t i = 0; i < count; i++)
     {
         PublicKey *pkey = key[i];
-        PublicKey new_pkey(PublicKey::PublicKeyPrivateHelper::Create(keys->pool()));
+        PublicKey new_pkey(ph::Create(keys->pool()));
         new_pkey = *pkey;
 
         keys->data().back().emplace_back(move(new_pkey));

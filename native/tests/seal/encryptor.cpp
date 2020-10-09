@@ -29,10 +29,12 @@ namespace sealtest
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             IntegerEncoder encoder(context);
 
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted;
@@ -82,10 +84,12 @@ namespace sealtest
             parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40 }));
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             IntegerEncoder encoder(context);
 
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted;
@@ -136,10 +140,12 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             IntegerEncoder encoder(context);
 
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted;
@@ -190,10 +196,12 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             IntegerEncoder encoder(context);
 
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted;
@@ -249,8 +257,10 @@ namespace sealtest
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40, 40, 40 }));
         SEALContext context(parms, true, sec_level_type::none);
         KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
 
-        Encryptor encryptor(context, keygen.public_key(), keygen.secret_key());
+        Encryptor encryptor(context, pk, keygen.secret_key());
         Decryptor decryptor(context, keygen.secret_key());
 
         Ciphertext ct;
@@ -336,8 +346,10 @@ namespace sealtest
 
         SEALContext context(parms, true, sec_level_type::none);
         KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
 
-        Encryptor encryptor(context, keygen.public_key(), keygen.secret_key());
+        Encryptor encryptor(context, pk, keygen.secret_key());
         Decryptor decryptor(context, keygen.secret_key());
         CKKSEncoder encoder(context);
 
@@ -480,9 +492,11 @@ namespace sealtest
 
             SEALContext context(parms, true, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted;
@@ -516,9 +530,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted;
@@ -552,9 +568,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted;
@@ -599,9 +617,11 @@ namespace sealtest
 
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted;
@@ -646,9 +666,11 @@ namespace sealtest
 
             SEALContext context(parms, true, sec_level_type::none);
             KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
             CKKSEncoder encoder(context);
-            Encryptor encryptor(context, keygen.public_key());
+            Encryptor encryptor(context, pk);
             Decryptor decryptor(context, keygen.secret_key());
 
             Ciphertext encrypted;

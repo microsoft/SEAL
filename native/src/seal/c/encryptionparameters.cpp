@@ -16,19 +16,14 @@ using namespace std;
 using namespace seal;
 using namespace seal::c;
 
-namespace seal
+// Enables access to private members of seal::EncryptionParameters.
+using ph = struct seal::EncryptionParameters::EncryptionParametersPrivateHelper
 {
-    /**
-    Enables access to private members of seal::EncryptionParameters.
-    */
-    struct EncryptionParameters::EncryptionParametersPrivateHelper
+    static auto parms_id(const EncryptionParameters &parms)
     {
-        static auto parms_id(const EncryptionParameters &parms)
-        {
-            return parms.parms_id();
-        }
-    };
-} // namespace seal
+        return parms.parms_id();
+    }
+};
 
 SEAL_C_FUNC EncParams_Create1(uint8_t scheme, void **enc_params)
 {
@@ -155,7 +150,7 @@ SEAL_C_FUNC EncParams_GetParmsId(void *thisptr, uint64_t *parms_id)
     IfNullRet(parms_id, E_POINTER);
 
     // We will assume the array is always size hash_block_uint64_count
-    auto parmsid = EncryptionParameters::EncryptionParametersPrivateHelper::parms_id(*params);
+    auto parmsid = ph::parms_id(*params);
     for (size_t i = 0; i < util::HashFunction::hash_block_uint64_count; i++)
     {
         parms_id[i] = parmsid[i];

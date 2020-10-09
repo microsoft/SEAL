@@ -164,24 +164,17 @@ void example_levels()
     We create some keys and check that indeed they appear at the highest level.
     */
     KeyGenerator keygen(context);
-    auto public_key = keygen.public_key();
     auto secret_key = keygen.secret_key();
-    auto relin_keys = keygen.relin_keys_local();
+    PublicKey public_key;
+    keygen.create_public_key(public_key);
+    RelinKeys relin_keys;
+    keygen.create_relin_keys(relin_keys);
 
-    /*
-    In this example we create a local version of the GaloisKeys object using
-    KeyGenerator::galois_keys_local(). In a production setting where the Galois
-    keys would need to be communicated to a server, it would be much better to
-    use KeyGenerator::galois_keys(), which outputs a Serializable<GaloisKeys>
-    object for compressed serialization.
-    */
-    auto galois_keys = keygen.galois_keys_local();
     print_line(__LINE__);
     cout << "Print the parameter IDs of generated elements." << endl;
     cout << "    + public_key:  " << public_key.parms_id() << endl;
     cout << "    + secret_key:  " << secret_key.parms_id() << endl;
     cout << "    + relin_keys:  " << relin_keys.parms_id() << endl;
-    cout << "    + galois_keys: " << galois_keys.parms_id() << endl;
 
     Encryptor encryptor(context, public_key);
     Evaluator evaluator(context);

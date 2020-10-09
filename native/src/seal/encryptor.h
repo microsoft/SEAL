@@ -138,49 +138,6 @@ namespace seal
         }
 
         /**
-        Encrypts a zero plaintext with the public key and stores the result in
-        destination.
-
-        The encryption parameters for the resulting ciphertext correspond to the
-        highest (data) level in the modulus switching chain. Dynamic memory
-        allocations in the process are allocated from the memory pool pointed to
-        by the given MemoryPoolHandle.
-
-        @param[out] destination The ciphertext to overwrite with the encrypted
-        plaintext
-        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if a public key is not set
-        @throws std::invalid_argument if pool is uninitialized
-        */
-        inline void encrypt_zero(Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
-        {
-            encrypt_zero(context_.first_parms_id(), destination, pool);
-        }
-
-        /**
-        Encrypts a zero plaintext with the public key and stores the result in
-        destination.
-
-        The encryption parameters for the resulting ciphertext correspond to the
-        given parms_id. Dynamic memory allocations in the process are allocated
-        from the memory pool pointed to by the given MemoryPoolHandle.
-
-        @param[in] parms_id The parms_id for the resulting ciphertext
-        @param[out] destination The ciphertext to overwrite with the encrypted
-        plaintext
-        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if a public key is not set
-        @throws std::invalid_argument if parms_id is not valid for the encryption
-        parameters
-        @throws std::invalid_argument if pool is uninitialized
-        */
-        inline void encrypt_zero(
-            parms_id_type parms_id, Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
-        {
-            encrypt_zero_internal(parms_id, true, false, destination, pool);
-        }
-
-        /**
         Encrypts a plaintext with the public key and returns the ciphertext as
         a serializable object.
 
@@ -207,6 +164,26 @@ namespace seal
         }
 
         /**
+        Encrypts a zero plaintext with the public key and stores the result in
+        destination.
+
+        The encryption parameters for the resulting ciphertext correspond to the
+        highest (data) level in the modulus switching chain. Dynamic memory
+        allocations in the process are allocated from the memory pool pointed to
+        by the given MemoryPoolHandle.
+
+        @param[out] destination The ciphertext to overwrite with the encrypted
+        plaintext
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::logic_error if a public key is not set
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        inline void encrypt_zero(Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        {
+            encrypt_zero(context_.first_parms_id(), destination, pool);
+        }
+
+        /**
         Encrypts a zero plaintext with the public key and returns the ciphertext
         as a serializable object.
 
@@ -227,6 +204,29 @@ namespace seal
             Ciphertext destination;
             encrypt_zero_internal(parms_id, true, true, destination, pool);
             return destination;
+        }
+
+        /**
+        Encrypts a zero plaintext with the public key and stores the result in
+        destination.
+
+        The encryption parameters for the resulting ciphertext correspond to the
+        given parms_id. Dynamic memory allocations in the process are allocated
+        from the memory pool pointed to by the given MemoryPoolHandle.
+
+        @param[in] parms_id The parms_id for the resulting ciphertext
+        @param[out] destination The ciphertext to overwrite with the encrypted
+        plaintext
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::logic_error if a public key is not set
+        @throws std::invalid_argument if parms_id is not valid for the encryption
+        parameters
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        inline void encrypt_zero(
+            parms_id_type parms_id, Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        {
+            encrypt_zero_internal(parms_id, true, false, destination, pool);
         }
 
         /**
@@ -275,24 +275,34 @@ namespace seal
         }
 
         /**
-        Encrypts a zero plaintext with the secret key and stores the result in
-        destination.
+        Encrypts a plaintext with the secret key and returns the ciphertext as
+        a serializable object.
 
-        The encryption parameters for the resulting ciphertext correspond to the
-        highest (data) level in the modulus switching chain. Dynamic memory
-        allocations in the process are allocated from the memory pool pointed to
-        by the given MemoryPoolHandle.
+        Half of the ciphertext data is pseudo-randomly generated from a seed to
+        reduce the object size. The resulting serializable object cannot be used
+        directly and is meant to be serialized for the size reduction to have an
+        impact.
 
-        @param[out] destination The ciphertext to overwrite with the encrypted
-        plaintext
+        The encryption parameters for the resulting ciphertext correspond to:
+        1) in BFV, the highest (data) level in the modulus switching chain,
+        2) in CKKS, the encryption parameters of the plaintext.
+        Dynamic memory allocations in the process are allocated from the memory
+        pool pointed to by the given MemoryPoolHandle.
+
+        @param[in] plain The plaintext to encrypt
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::logic_error if a secret key is not set
+        @throws std::invalid_argument if plain is not valid for the encryption
+        parameters
+        @throws std::invalid_argument if plain is not in default NTT form
         @throws std::invalid_argument if pool is uninitialized
         */
-        inline void encrypt_zero_symmetric(
-            Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        SEAL_NODISCARD inline Serializable<Ciphertext> encrypt_symmetric(
+            const Plaintext &plain, MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
-            encrypt_zero_symmetric(context_.first_parms_id(), destination, pool);
+            Ciphertext destination;
+            encrypt_internal(plain, false, true, destination, pool);
+            return destination;
         }
 
         /**
@@ -319,48 +329,17 @@ namespace seal
         }
 
         /**
-        Encrypts a plaintext with the secret key and returns the ciphertext as
-        a serializable object.
-
-        The encryption parameters for the resulting ciphertext correspond to:
-        1) in BFV, the highest (data) level in the modulus switching chain,
-        2) in CKKS, the encryption parameters of the plaintext.
-        Dynamic memory allocations in the process are allocated from the memory
-        pool pointed to by the given MemoryPoolHandle.
+        Encrypts a zero plaintext with the secret key and returns the ciphertext
+        as a serializable object.
 
         Half of the ciphertext data is pseudo-randomly generated from a seed to
         reduce the object size. The resulting serializable object cannot be used
         directly and is meant to be serialized for the size reduction to have an
         impact.
-
-        @param[in] plain The plaintext to encrypt
-        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if a secret key is not set
-        @throws std::invalid_argument if plain is not valid for the encryption
-        parameters
-        @throws std::invalid_argument if plain is not in default NTT form
-        @throws std::invalid_argument if pool is uninitialized
-        */
-        SEAL_NODISCARD inline Serializable<Ciphertext> encrypt_symmetric(
-            const Plaintext &plain, MemoryPoolHandle pool = MemoryManager::GetPool()) const
-        {
-            Ciphertext destination;
-            encrypt_internal(plain, false, true, destination, pool);
-            return destination;
-        }
-
-        /**
-        Encrypts a zero plaintext with the secret key and returns the ciphertext
-        as a serializable object.
 
         The encryption parameters for the resulting ciphertext correspond to the
         given parms_id. Dynamic memory allocations in the process are allocated
         from the memory pool pointed to by the given MemoryPoolHandle.
-
-        Half of the ciphertext data is pseudo-randomly generated from a seed to
-        reduce the object size. The resulting serializable object cannot be used
-        directly and is meant to be serialized for the size reduction to have an
-        impact.
 
         @param[in] parms_id The parms_id for the resulting ciphertext
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
@@ -378,18 +357,39 @@ namespace seal
         }
 
         /**
-        Encrypts a zero plaintext with the secret key and returns the ciphertext
-        as a serializable object.
+        Encrypts a zero plaintext with the secret key and stores the result in
+        destination.
 
         The encryption parameters for the resulting ciphertext correspond to the
         highest (data) level in the modulus switching chain. Dynamic memory
         allocations in the process are allocated from the memory pool pointed to
         by the given MemoryPoolHandle.
 
+        @param[out] destination The ciphertext to overwrite with the encrypted
+        plaintext
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::logic_error if a secret key is not set
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        inline void encrypt_zero_symmetric(
+            Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        {
+            encrypt_zero_symmetric(context_.first_parms_id(), destination, pool);
+        }
+
+        /**
+        Encrypts a zero plaintext with the secret key and returns the ciphertext
+        as a serializable object.
+
         Half of the ciphertext data is pseudo-randomly generated from a seed to
         reduce the object size. The resulting serializable object cannot be used
         directly and is meant to be serialized for the size reduction to have an
         impact.
+
+        The encryption parameters for the resulting ciphertext correspond to the
+        highest (data) level in the modulus switching chain. Dynamic memory
+        allocations in the process are allocated from the memory pool pointed to
+        by the given MemoryPoolHandle.
 
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::logic_error if a secret key is not set

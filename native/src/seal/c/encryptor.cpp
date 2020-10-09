@@ -13,7 +13,8 @@ using namespace std;
 using namespace seal;
 using namespace seal::c;
 
-struct seal::Encryptor::EncryptorPrivateHelper
+// Enables access to private members of seal::Encryptor.
+using ph = struct seal::Encryptor::EncryptorPrivateHelper
 {
     static void encrypt_symmetric_internal(
         Encryptor *encryptor, const Plaintext &plain, bool save_seed, Ciphertext &destination, MemoryPoolHandle pool)
@@ -194,7 +195,7 @@ SEAL_C_FUNC Encryptor_EncryptSymmetric(
 
     try
     {
-        Encryptor::EncryptorPrivateHelper::encrypt_symmetric_internal(encryptor, *plain, save_seed, *cipher, *pool);
+        ph::encrypt_symmetric_internal(encryptor, *plain, save_seed, *cipher, *pool);
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -222,7 +223,7 @@ SEAL_C_FUNC Encryptor_EncryptZeroSymmetric1(
 
     try
     {
-        Encryptor::EncryptorPrivateHelper::encrypt_zero_symmetric_internal(encryptor, parms, save_seed, *cipher, *pool);
+        ph::encrypt_zero_symmetric_internal(encryptor, parms, save_seed, *cipher, *pool);
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -245,7 +246,7 @@ SEAL_C_FUNC Encryptor_EncryptZeroSymmetric2(void *thisptr, bool save_seed, void 
 
     try
     {
-        Encryptor::EncryptorPrivateHelper::encrypt_zero_symmetric_internal(encryptor, save_seed, *cipher, *pool);
+        ph::encrypt_zero_symmetric_internal(encryptor, save_seed, *cipher, *pool);
         return S_OK;
     }
     catch (const invalid_argument &)

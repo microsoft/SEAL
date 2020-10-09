@@ -113,7 +113,9 @@ namespace sealtest
         parms.set_plain_modulus(0xF0F0);
         context = SEALContext(parms, false);
         KeyGenerator keygen(context);
-        Encryptor encryptor(context, keygen.public_key());
+        PublicKey pk;
+        keygen.create_public_key(pk);
+        Encryptor encryptor(context, pk);
         encryptor.encrypt(Plaintext("Ax^10 + 9x^9 + 8x^8 + 7x^7 + 6x^6 + 5x^5 + 4x^4 + 3x^3 + 2x^2 + 1"), ctxt);
         ctxt.save(stream);
         ctxt2.load(context, stream);

@@ -19,24 +19,19 @@ using namespace seal;
 using namespace seal::c;
 using namespace seal::util;
 
-namespace seal
+// Enables access to private members of seal::Plaintext.
+using ph = struct Plaintext::PlaintextPrivateHelper
 {
-    /**
-    Enables access to private members of seal::Plaintext.
-    */
-    struct Plaintext::PlaintextPrivateHelper
+    static void set_scale(seal::Plaintext *plain, double new_scale)
     {
-        static void set_scale(seal::Plaintext *plain, double new_scale)
-        {
-            plain->scale_ = new_scale;
-        }
+        plain->scale_ = new_scale;
+    }
 
-        static void swap_data(seal::Plaintext *plain, seal::IntArray<uint64_t> &new_data)
-        {
-            swap(plain->data_, new_data);
-        }
-    };
-} // namespace seal
+    static void swap_data(seal::Plaintext *plain, seal::IntArray<uint64_t> &new_data)
+    {
+        swap(plain->data_, new_data);
+    }
+};
 
 SEAL_C_FUNC Plaintext_Create1(void *memoryPoolHandle, void **plaintext)
 {
@@ -419,7 +414,7 @@ SEAL_C_FUNC Plaintext_SetScale(void *thisptr, double scale)
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
-    Plaintext::PlaintextPrivateHelper::set_scale(plain, scale);
+    ph::set_scale(plain, scale);
     return S_OK;
 }
 
@@ -445,7 +440,7 @@ SEAL_C_FUNC Plaintext_SwapData(void *thisptr, uint64_t count, uint64_t *new_data
     new_array.resize(count);
     copy_n(new_data, count, new_array.begin());
 
-    Plaintext::PlaintextPrivateHelper::swap_data(plain, new_array);
+    ph::swap_data(plain, new_array);
     return S_OK;
 }
 

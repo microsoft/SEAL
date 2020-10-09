@@ -27,7 +27,7 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
 
-            RelinKeys keys = keygen.RelinKeysLocal();
+            keygen.CreateRelinKeys(out RelinKeys keys);
 
             Assert.IsNotNull(keys);
             Assert.AreEqual(1ul, keys.Size);
@@ -50,7 +50,7 @@ namespace SEALNetTest
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
 
-            RelinKeys keys = keygen.RelinKeysLocal();
+            keygen.CreateRelinKeys(out RelinKeys keys);
 
             Assert.IsNotNull(keys);
             Assert.AreEqual(1ul, keys.Size);
@@ -118,12 +118,13 @@ namespace SEALNetTest
             RelinKeys relinKeys = new RelinKeys();
             using (MemoryStream stream = new MemoryStream())
             {
-                keygen.RelinKeys().Save(stream);
+                keygen.CreateRelinKeys().Save(stream);
                 stream.Seek(0, SeekOrigin.Begin);
                 relinKeys.Load(context, stream);
             }
 
-            Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
+            keygen.CreatePublicKey(out PublicKey publicKey);
+            Encryptor encryptor = new Encryptor(context, publicKey);
             Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
             Evaluator evaluator = new Evaluator(context);
 
@@ -163,7 +164,7 @@ namespace SEALNetTest
         {
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
-            RelinKeys relinKeys = keygen.RelinKeysLocal();
+            keygen.CreateRelinKeys(out RelinKeys relinKeys);
 
             Assert.IsTrue(relinKeys.HasKey(2));
             Assert.IsFalse(relinKeys.HasKey(3));

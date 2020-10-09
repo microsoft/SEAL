@@ -9,6 +9,10 @@ The performance improvement should be expected to be around 20-30x.
 
 ### API Changes
 
+- All `Encryptor::encrypt` variants have now two overloads: one that takes a `Ciphertext` out-parameter, and one that returns a `Serializable<Ciphertext>`.
+- Changed the names of the public key generation functions to clearly express that a new key is created each time, e.g., `KeyGenerator::create_public_key`.
+- Removed the `KeyGenerator::relin_keys_local` and `KeyGenerator::galois_keys_local` functions.
+These were poorly named and have been replaced with overloads of `KeyGenerator::create_relin_keys` and `KeyGenerator::create_galois_keys` that take an out-parameter of type `RelinKeys` or `GaloisKeys`.
 - Added public API for modular reduction to the `Modulus` class.
 - Added `encrypt` and `encrypt_zero` overloads to `Encryptor` that output asymmetrically encrypted `Serializable<Ciphertext>` objects.
 Previously these existed only for symmetric-key encryption mode.

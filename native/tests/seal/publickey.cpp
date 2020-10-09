@@ -24,7 +24,8 @@ namespace sealtest
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
-            PublicKey pk = keygen.public_key();
+            PublicKey pk;
+            keygen.create_public_key(pk);
             ASSERT_TRUE(pk.parms_id() == context.key_parms_id());
             pk.save(stream);
 
@@ -47,7 +48,8 @@ namespace sealtest
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
-            PublicKey pk = keygen.public_key();
+            PublicKey pk;
+            keygen.create_public_key(pk);
             ASSERT_TRUE(pk.parms_id() == context.key_parms_id());
             pk.save(stream);
 

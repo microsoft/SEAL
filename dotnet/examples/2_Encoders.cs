@@ -89,8 +89,8 @@ namespace SEALNetExamples
             Console.WriteLine();
 
             using KeyGenerator keygen = new KeyGenerator(context);
-            using PublicKey publicKey = keygen.PublicKey;
             using SecretKey secretKey = keygen.SecretKey;
+            keygen.CreatePublicKey(out PublicKey publicKey);
             using Encryptor encryptor = new Encryptor(context, publicKey);
             using Evaluator evaluator = new Evaluator(context);
             using Decryptor decryptor = new Decryptor(context, secretKey);
@@ -201,9 +201,9 @@ namespace SEALNetExamples
             Console.WriteLine($"Batching enabled: {qualifiers.UsingBatching}");
 
             using KeyGenerator keygen = new KeyGenerator(context);
-            using PublicKey publicKey = keygen.PublicKey;
             using SecretKey secretKey = keygen.SecretKey;
-            using RelinKeys relinKeys = keygen.RelinKeysLocal();
+            keygen.CreatePublicKey(out PublicKey publicKey);
+            keygen.CreateRelinKeys(out RelinKeys relinKeys);
             using Encryptor encryptor = new Encryptor(context, publicKey);
             using Evaluator evaluator = new Evaluator(context);
             using Decryptor decryptor = new Decryptor(context, secretKey);
@@ -366,9 +366,9 @@ namespace SEALNetExamples
             Keys are created the same way as for the BFV scheme.
             */
             using KeyGenerator keygen = new KeyGenerator(context);
-            using PublicKey publicKey = keygen.PublicKey;
             using SecretKey secretKey = keygen.SecretKey;
-            using RelinKeys relinKeys = keygen.RelinKeysLocal();
+            keygen.CreatePublicKey(out PublicKey publicKey);
+            keygen.CreateRelinKeys(out RelinKeys relinKeys);
 
             /*
             We also set up an Encryptor, Evaluator, and Decryptor as usual.

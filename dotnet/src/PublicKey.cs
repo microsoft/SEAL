@@ -19,7 +19,10 @@ namespace Microsoft.Research.SEAL
     /// storing the public key not being thread-safe.
     /// </para>
     /// </remarks>
-    public class PublicKey : NativeObject
+    public class PublicKey :
+        NativeObject,
+        ISerializableObject,
+        ISettable<PublicKey>
     {
         /// <summary>
         /// Creates an empty public key.

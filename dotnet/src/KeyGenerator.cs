@@ -76,20 +76,6 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Generates and returns a public key. Every time this function is called,
-        /// a new public key will be generated.
-        /// </summary>
-        public PublicKey PublicKey
-        {
-            get
-            {
-                NativeMethods.KeyGenerator_PublicKey(NativePtr, out IntPtr pubKeyPtr);
-                PublicKey pubKey = new PublicKey(pubKeyPtr);
-                return pubKey;
-            }
-        }
-
-        /// <summary>
         /// Returns a copy of the secret key.
         /// </summary>
         public SecretKey SecretKey
@@ -103,22 +89,60 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Generates and returns relinearization keys.
+        /// Generates a public key and stores the result in destination.
         /// </summary>
         /// <remarks>
-        /// Generates and returns relinearization keys. This function returns
-        /// relinearization keys in a fully expanded form and is meant to be used
-        /// primarily for demo, testing, and debugging purposes.
+        /// Generates a public key and stores the result in destination. Every time
+        /// this function is called, a new public key will be generated.
         /// </remarks>
+        /// <param name="destination">The public key to overwrite with the generated
+        /// public key</param>
+        public void CreatePublicKey(out PublicKey destination)
+        {
+            NativeMethods.KeyGenerator_CreatePublicKey(NativePtr, false, out IntPtr pubKeyPtr);
+            destination = new PublicKey(pubKeyPtr);
+        }
+
+        /// <summary>
+        /// Generates and returns a public key as a serializable object.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Generates and returns a public key as a serializable object. Every time
+        /// this function is called, a new public key will be generated.
+        /// </para>
+        /// <para>
+        /// Half of the key data is pseudo-randomly generated from a seed to reduce
+        /// the object size. The resulting serializable object cannot be used
+        /// directly and is meant to be serialized for the size reduction to have an
+        /// impact.
+        /// </para>
+        /// </remarks>
+        public Serializable<PublicKey> CreatePublicKey()
+        {
+            NativeMethods.KeyGenerator_CreatePublicKey(NativePtr, true, out IntPtr pubKeyPtr);
+            return new Serializable<PublicKey>(new PublicKey(pubKeyPtr));
+        }
+
+        /// <summary>
+        /// Generates relinearization keys and stores the result in destination.
+        /// </summary>
+        /// <remarks>
+        /// Generates relinearization keys and stores the result in destination.
+        /// Every time this function is called, new relinearization keys will be
+        /// generated.
+        /// </remarks>
+        /// <param name="destination">The relinearization keys to overwrite with
+        /// the generated relinearization keys</param>
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
-        public RelinKeys RelinKeysLocal()
+        public void CreateRelinKeys(out RelinKeys destination)
         {
             if (!UsingKeyswitching())
                 throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
-            NativeMethods.KeyGenerator_RelinKeys(NativePtr, false, out IntPtr relinKeysPtr);
-            return new RelinKeys(relinKeysPtr);
+            NativeMethods.KeyGenerator_CreateRelinKeys(NativePtr, false, out IntPtr relinKeysPtr);
+            destination = new RelinKeys(relinKeysPtr);
         }
 
         /// <summary>
@@ -127,6 +151,8 @@ namespace Microsoft.Research.SEAL
         /// <remarks>
         /// <para>
         /// Generates and returns relinearization keys as a serializable object.
+        /// Every time this function is called, new relinearization keys will be
+        /// generated.
         /// </para>
         /// <para>
         /// Half of the key data is pseudo-randomly generated from a seed to reduce
@@ -137,27 +163,28 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
-        public Serializable<RelinKeys> RelinKeys()
+        public Serializable<RelinKeys> CreateRelinKeys()
         {
             if (!UsingKeyswitching())
                 throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
-            NativeMethods.KeyGenerator_RelinKeys(NativePtr, true, out IntPtr relinKeysPtr);
-            RelinKeys relinKeys = new RelinKeys(relinKeysPtr);
-            return new Serializable<RelinKeys>(relinKeys);
+            NativeMethods.KeyGenerator_CreateRelinKeys(NativePtr, true, out IntPtr relinKeysPtr);
+            return new Serializable<RelinKeys>(new RelinKeys(relinKeysPtr));
         }
 
         /// <summary>
-        /// Generates and returns Galois keys.
+        /// Generates Galois keys and stores the result in destination.
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Generates and returns Galois keys. This function returns Galois keys in
-        /// a fully expanded form and is meant to be used primarily for demo, testing,
-        /// and debugging purposes. This function creates specific Galois keys that
-        /// can be used to apply specific Galois automorphisms on encrypted data. The
-        /// user needs to give as input a vector of Galois elements corresponding to
-        /// the keys that are to be created.
+        /// Generates Galois keys and stores the result in destination. Every time
+        /// this function is called, new Galois keys will be generated.
+        /// </para>
+        /// <para>
+        /// This function creates specific Galois keys that can be used to apply
+        /// specific Galois automorphisms on encrypted data. The user needs to give
+        /// as input a vector of Galois elements corresponding to the keys that are
+        /// to be created.
         /// </para>
         /// <para>
         /// The Galois elements are odd integers in the interval [1, M-1], where
@@ -170,12 +197,14 @@ namespace Microsoft.Research.SEAL
         /// </para>
         /// </remarks>
         /// <param name="galoisElts">The Galois elements for which to generate keys</param>
+        /// <param name="destination">The Galois keys to overwrite with the generated
+        /// Galois keys</param>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the Galois elements are not valid</exception>
-        public GaloisKeys GaloisKeysLocal(IEnumerable<uint> galoisElts)
+        public void CreateGaloisKeys(IEnumerable<uint> galoisElts, out GaloisKeys destination)
         {
             if (null == galoisElts)
                 throw new ArgumentNullException(nameof(galoisElts));
@@ -183,9 +212,9 @@ namespace Microsoft.Research.SEAL
                 throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
             uint[] galoisEltsArr = galoisElts.ToArray();
-            NativeMethods.KeyGenerator_GaloisKeysFromElts(NativePtr,
+            NativeMethods.KeyGenerator_CreateGaloisKeysFromElts(NativePtr,
                 (ulong)galoisEltsArr.Length, galoisEltsArr, false, out IntPtr galoisKeysPtr);
-            return new GaloisKeys(galoisKeysPtr);
+            destination = new GaloisKeys(galoisKeysPtr);
         }
 
         /// <summary>
@@ -193,10 +222,20 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Generates and returns Galois keys as a serializable object. This function
-        /// creates specific Galois keys that can be used to apply specific Galois
-        /// automorphisms on encrypted data. The user needs to give as input a vector
-        /// of Galois elements corresponding to the keys that are to be created.
+        /// Generates and returns Galois keys as a serializable object. Every time
+        /// this function is called, new Galois keys will be generated.
+        /// </para>
+        /// <para>
+        /// Half of the key data is pseudo-randomly generated from a seed to reduce
+        /// the object size. The resulting serializable object cannot be used
+        /// directly and is meant to be serialized for the size reduction to have an
+        /// impact.
+        /// </para>
+        /// <para>
+        /// This function creates specific Galois keys that can be used to apply
+        /// specific Galois automorphisms on encrypted data. The user needs to give
+        /// as input a vector of Galois elements corresponding to the keys that are
+        /// to be created.
         /// </para>
         /// <para>
         /// The Galois elements are odd integers in the interval [1, M-1], where
@@ -206,12 +245,6 @@ namespace Microsoft.Research.SEAL
         /// steps to the right. The Galois element M-1 corresponds to a column rotation
         /// (row swap). In the polynomial view (not batching), a Galois automorphism by
         /// a Galois element p changes Enc(plain(x)) to Enc(plain(x^p)).
-        /// </para>
-        /// <para>
-        /// Half of the key data is pseudo-randomly generated from a seed to reduce
-        /// the object size. The resulting serializable object cannot be used
-        /// directly and is meant to be serialized for the size reduction to have an
-        /// impact.
         /// </para>
         /// </remarks>
         /// <param name="galoisElts">The Galois elements for which to generate keys</param>
@@ -221,7 +254,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the Galois elements are not valid</exception>
-        public Serializable<GaloisKeys> GaloisKeys(IEnumerable<uint> galoisElts)
+        public Serializable<GaloisKeys> CreateGaloisKeys(IEnumerable<uint> galoisElts)
         {
             if (null == galoisElts)
                 throw new ArgumentNullException(nameof(galoisElts));
@@ -229,32 +262,37 @@ namespace Microsoft.Research.SEAL
                 throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
             uint[] galoisEltsArr = galoisElts.ToArray();
-            NativeMethods.KeyGenerator_GaloisKeysFromElts(NativePtr,
+            NativeMethods.KeyGenerator_CreateGaloisKeysFromElts(NativePtr,
                 (ulong)galoisEltsArr.Length, galoisEltsArr, true, out IntPtr galoisKeysPtr);
-            GaloisKeys galoisKeys = new GaloisKeys(galoisKeysPtr);
-            return new Serializable<GaloisKeys>(galoisKeys);
+            return new Serializable<GaloisKeys>(new GaloisKeys(galoisKeysPtr));
         }
 
         /// <summary>
-        /// Generates and returns Galois keys.
+        /// Generates Galois keys and stores the result in destination.
         /// </summary>
         /// <remarks>
-        /// Generates and returns Galois keys. This function returns Galois keys in
-        /// a fully expanded form and is meant to be used primarily for demo, testing,
-        /// and debugging purposes. The user needs to give as input a vector of desired
-        /// Galois rotation step counts, where negative step counts correspond to
-        /// rotations to the right and positive step counts correspond to rotations to
-        /// the left. A step count of zero can be used to indicate a column rotation
-        /// in the BFV scheme complex conjugation in the CKKS scheme.
+        /// <para>
+        /// Generates Galois keys and stores the result in destination. Every time
+        /// this function is called, new Galois keys will be generated.
+        /// </para>
+        /// <para>
+        /// The user needs to give as input a vector of desired Galois rotation step
+        /// counts, where negative step counts correspond to rotations to the right
+        /// and positive step counts correspond to rotations to the left. A step
+        /// count of zero can be used to indicate a column rotation in the BFV scheme
+        /// and complex conjugation in the CKKS scheme.
+        /// </para>
         /// </remarks>
         /// <param name="steps">The rotation step counts for which to generate keys</param>
+        /// <param name="destination">The Galois keys to overwrite with the generated
+        /// Galois keys</param>
         /// <exception cref="ArgumentNullException">if steps is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the step counts are not valid</exception>
-        public GaloisKeys GaloisKeysLocal(IEnumerable<int> steps)
+        public void CreateGaloisKeys(IEnumerable<int> steps, out GaloisKeys destination)
         {
             if (null == steps)
                 throw new ArgumentNullException(nameof(steps));
@@ -262,9 +300,9 @@ namespace Microsoft.Research.SEAL
                 throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
             int[] stepsArr = steps.ToArray();
-            NativeMethods.KeyGenerator_GaloisKeysFromSteps(NativePtr,
+            NativeMethods.KeyGenerator_CreateGaloisKeysFromSteps(NativePtr,
                 (ulong)stepsArr.Length, stepsArr, false, out IntPtr galoisKeysPtr);
-            return new GaloisKeys(galoisKeysPtr);
+            destination = new GaloisKeys(galoisKeysPtr);
         }
 
         /// <summary>
@@ -272,19 +310,21 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Generates and returns Galois keys as a serializable object. This function
-        /// creates specific Galois keys that can be used to apply specific Galois
-        /// automorphisms on encrypted data. The user needs to give as input a vector
-        /// of desired Galois rotation step counts, where negative step counts
-        /// correspond to rotations to the right and positive step counts correspond
-        /// to rotations to the left. A step count of zero can be used to indicate
-        /// a column rotation in the BFV scheme complex conjugation in the CKKS scheme.
+        /// Generates and returns Galois keys as a serializable object. Every time
+        /// this function is called, new Galois keys will be generated.
         /// </para>
         /// <para>
         /// Half of the key data is pseudo-randomly generated from a seed to reduce
         /// the object size. The resulting serializable object cannot be used
         /// directly and is meant to be serialized for the size reduction to have an
         /// impact.
+        /// </para>
+        /// <para>
+        /// The user needs to give as input a vector of desired Galois rotation step
+        /// counts, where negative step counts correspond to rotations to the right
+        /// and positive step counts correspond to rotations to the left. A step
+        /// count of zero can be used to indicate a column rotation in the BFV scheme
+        /// and complex conjugation in the CKKS scheme.
         /// </para>
         /// </remarks>
         /// <param name="steps">The rotation step counts for which to generate keys</param>
@@ -294,7 +334,7 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the step counts are not valid</exception>
-        public Serializable<GaloisKeys> GaloisKeys(IEnumerable<int> steps)
+        public Serializable<GaloisKeys> CreateGaloisKeys(IEnumerable<int> steps)
         {
             if (null == steps)
                 throw new ArgumentNullException(nameof(steps));
@@ -302,34 +342,39 @@ namespace Microsoft.Research.SEAL
                 throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
             int[] stepsArr = steps.ToArray();
-            NativeMethods.KeyGenerator_GaloisKeysFromSteps(NativePtr,
+            NativeMethods.KeyGenerator_CreateGaloisKeysFromSteps(NativePtr,
                 (ulong)stepsArr.Length, stepsArr, true, out IntPtr galoisKeysPtr);
-            GaloisKeys galoisKeys = new GaloisKeys(galoisKeysPtr);
-            return new Serializable<GaloisKeys>(galoisKeys);
+            return new Serializable<GaloisKeys>(new GaloisKeys(galoisKeysPtr));
         }
 
         /// <summary>
-        /// Generates and returns Galois keys.
+        /// Generates Galois keys and stores the result in destination.
         /// </summary>
         /// <remarks>
-        /// Generates and returns Galois keys. This function returns Galois keys in
-        /// a fully expanded form and is meant to be used primarily for demo, testing,
-        /// and debugging purposes. This function creates logarithmically many (in
-        /// degree of the polynomial modulus) Galois keys that is sufficient to apply
-        /// any Galois automorphism (e.g. rotations) on encrypted data. Most users
-        /// will want to use this overload of the function.
+        /// <para>
+        /// Generates Galois keys and stores the result in destination. Every time
+        /// this function is called, new Galois keys will be generated.
+        /// </para>
+        /// <para>
+        /// This function creates logarithmically many (in degree of the polynomial
+        /// modulus) Galois keys that is sufficient to apply any Galois automorphism
+        /// (e.g. rotations) on encrypted data. Most users will want to use this
+        /// overload of the function.
+        /// </para>
         /// </remarks>
+        /// <param name="destination">The Galois keys to overwrite with the generated
+        /// Galois keys</param>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
-        public GaloisKeys GaloisKeysLocal()
+        public void CreateGaloisKeys(out GaloisKeys destination)
         {
             if (!UsingKeyswitching())
                 throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
-            NativeMethods.KeyGenerator_GaloisKeysAll(NativePtr, false, out IntPtr galoisKeysPtr);
-            return new GaloisKeys(galoisKeysPtr);
+            NativeMethods.KeyGenerator_CreateGaloisKeysAll(NativePtr, false, out IntPtr galoisKeysPtr);
+            destination = new GaloisKeys(galoisKeysPtr);
         }
 
         /// <summary>
@@ -337,10 +382,8 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Generates and returns Galois keys as a serializable object. This function
-        /// creates logarithmically many (in degree of the polynomial modulus) Galois
-        /// keys that is sufficient to apply any Galois automorphism (e.g. rotations)
-        /// on encrypted data. Most users will want to use this overload of the function.
+        /// Generates and returns Galois keys as a serializable object. Every time
+        /// this function is called, new Galois keys will be generated.
         /// </para>
         /// <para>
         /// Half of the key data is pseudo-randomly generated from a seed to reduce
@@ -348,19 +391,24 @@ namespace Microsoft.Research.SEAL
         /// directly and is meant to be serialized for the size reduction to have an
         /// impact.
         /// </para>
+        /// <para>
+        /// This function creates logarithmically many (in degree of the polynomial
+        /// modulus) Galois keys that is sufficient to apply any Galois automorphism
+        /// (e.g. rotations) on encrypted data. Most users will want to use this
+        /// overload of the function.
+        /// </para>
         /// </remarks>
         /// <exception cref="InvalidOperationException">if the encryption parameters
         /// do not support batching and scheme is SchemeType.BFV</exception>
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
-        public Serializable<GaloisKeys> GaloisKeys()
+        public Serializable<GaloisKeys> CreateGaloisKeys()
         {
             if (!UsingKeyswitching())
                 throw new InvalidOperationException("Encryption parameters do not support keyswitching");
 
-            NativeMethods.KeyGenerator_GaloisKeysAll(NativePtr, true, out IntPtr galoisKeysPtr);
-            GaloisKeys galoisKeys = new GaloisKeys(galoisKeysPtr);
-            return new Serializable<GaloisKeys>(galoisKeys);
+            NativeMethods.KeyGenerator_CreateGaloisKeysAll(NativePtr, true, out IntPtr galoisKeysPtr);
+            return new Serializable<GaloisKeys>(new GaloisKeys(galoisKeysPtr));
         }
 
         /// <summary>

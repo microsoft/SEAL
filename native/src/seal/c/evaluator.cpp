@@ -20,7 +20,8 @@ using namespace seal;
 using namespace seal::c;
 using namespace seal::util;
 
-struct seal::Evaluator::EvaluatorPrivateHelper
+// Enables access to private members of seal::Evaluator.
+using ph = struct seal::Evaluator::EvaluatorPrivateHelper
 {
     static bool using_keyswitching(const Evaluator &ev)
     {
@@ -754,6 +755,6 @@ SEAL_C_FUNC Evaluator_ContextUsingKeyswitching(void *thisptr, bool *using_keyswi
     IfNullRet(eval, E_POINTER);
     IfNullRet(using_keyswitching, E_POINTER);
 
-    *using_keyswitching = Evaluator::EvaluatorPrivateHelper::using_keyswitching(*eval);
+    *using_keyswitching = ph::using_keyswitching(*eval);
     return S_OK;
 }

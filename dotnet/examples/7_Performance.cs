@@ -30,7 +30,7 @@ namespace SEALNetExamples
             Console.WriteLine("Done");
 
             using SecretKey secretKey = keygen.SecretKey;
-            using PublicKey publicKey = keygen.PublicKey;
+            keygen.CreatePublicKey(out PublicKey publicKey);
 
             Func<RelinKeys> GetRelinKeys = () => {
                 if (context.UsingKeyswitching)
@@ -40,10 +40,10 @@ namespace SEALNetExamples
                     */
                     Console.Write("Generating relinearization keys: ");
                     timer = Stopwatch.StartNew();
-                    RelinKeys result = keygen.RelinKeysLocal();
+                    keygen.CreateRelinKeys(out RelinKeys relinKeys);
                     int micros = (int)(timer.Elapsed.TotalMilliseconds * 1000);
                     Console.WriteLine($"Done [{micros} microseconds]");
-                    return result;
+                    return relinKeys;
                 }
                 else
                 {
@@ -69,10 +69,10 @@ namespace SEALNetExamples
                     */
                     Console.Write($"Generating Galois keys: ");
                     timer = Stopwatch.StartNew();
-                    GaloisKeys result = keygen.GaloisKeysLocal();
+                    keygen.CreateGaloisKeys(out GaloisKeys galoisKeys);
                     int micros = (int)(timer.Elapsed.TotalMilliseconds * 1000);
                     Console.WriteLine($"Done [{micros} microseconds]");
-                    return result;
+                    return galoisKeys;
                 }
                 else
                 {
@@ -365,7 +365,7 @@ namespace SEALNetExamples
             Console.WriteLine("Done");
 
             using SecretKey secretKey = keygen.SecretKey;
-            using PublicKey publicKey = keygen.PublicKey;
+            keygen.CreatePublicKey(out PublicKey publicKey);
 
             Func<RelinKeys> GetRelinKeys = () => {
                 if (context.UsingKeyswitching)
@@ -375,10 +375,10 @@ namespace SEALNetExamples
                     */
                     Console.Write("Generating relinearization keys: ");
                     timer = Stopwatch.StartNew();
-                    RelinKeys result = keygen.RelinKeysLocal();
+                    keygen.CreateRelinKeys(out RelinKeys relinKeys);
                     int micros = (int)(timer.Elapsed.TotalMilliseconds * 1000);
                     Console.WriteLine($"Done [{micros} microseconds]");
-                    return result;
+                    return relinKeys;
                 }
                 else
                 {
@@ -404,10 +404,10 @@ namespace SEALNetExamples
                     */
                     Console.Write($"Generating Galois keys: ");
                     timer = Stopwatch.StartNew();
-                    GaloisKeys result = keygen.GaloisKeysLocal();
+                    keygen.CreateGaloisKeys(out GaloisKeys galoisKeys);
                     int micros = (int)(timer.Elapsed.TotalMilliseconds * 1000);
                     Console.WriteLine($"Done [{micros} microseconds]");
-                    return result;
+                    return galoisKeys;
                 }
                 else
                 {

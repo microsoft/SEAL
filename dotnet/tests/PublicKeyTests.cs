@@ -25,8 +25,7 @@ namespace SEALNetTest
                 expandModChain: false,
                 secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
-
-            PublicKey pub = keygen.PublicKey;
+            keygen.CreatePublicKey(out PublicKey pub);
             PublicKey copy = new PublicKey(pub);
 
             Assert.IsNotNull(copy);
@@ -53,8 +52,7 @@ namespace SEALNetTest
                 expandModChain: false,
                 secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
-
-            PublicKey pub = keygen.PublicKey;
+            keygen.CreatePublicKey(out PublicKey pub);
 
             Assert.IsNotNull(pub);
             Assert.AreEqual(2ul, pub.Data.Size);

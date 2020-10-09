@@ -90,7 +90,7 @@ namespace seal
         sk_generated_ = true;
     }
 
-    PublicKey KeyGenerator::generate_pk() const
+    PublicKey KeyGenerator::generate_pk(bool save_seed) const
     {
         if (!sk_generated_)
         {
@@ -110,11 +110,8 @@ namespace seal
             throw logic_error("invalid parameters");
         }
 
-        // Initialize public key.
-        // PublicKey data allocated from pool given by MemoryManager::GetPool.
         PublicKey public_key;
-
-        encrypt_zero_symmetric(secret_key_, context_, context_data.parms_id(), true, false, public_key.data());
+        encrypt_zero_symmetric(secret_key_, context_, context_data.parms_id(), true, save_seed, public_key.data());
 
         // Set the parms_id for public key
         public_key.parms_id() = context_data.parms_id();
@@ -122,7 +119,7 @@ namespace seal
         return public_key;
     }
 
-    RelinKeys KeyGenerator::relin_keys(size_t count, bool save_seed)
+    RelinKeys KeyGenerator::create_relin_keys(size_t count, bool save_seed)
     {
         // Check to see if secret key and public key have been generated
         if (!sk_generated_)
@@ -162,7 +159,7 @@ namespace seal
         return relin_keys;
     }
 
-    GaloisKeys KeyGenerator::galois_keys(const vector<uint32_t> &galois_elts, bool save_seed)
+    GaloisKeys KeyGenerator::create_galois_keys(const vector<uint32_t> &galois_elts, bool save_seed)
     {
         // Check to see if secret key and public key have been generated
         if (!sk_generated_)

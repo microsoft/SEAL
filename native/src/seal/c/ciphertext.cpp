@@ -13,24 +13,19 @@ using namespace std;
 using namespace seal;
 using namespace seal::c;
 
-namespace seal
+// Enables access to private members of seal::Ciphertext.
+using ph = struct seal::Ciphertext::CiphertextPrivateHelper
 {
-    /**
-    Enables access to private members of seal::Ciphertext.
-    */
-    struct Ciphertext::CiphertextPrivateHelper
+    static void resize(Ciphertext *ciphertext, size_t size, size_t poly_modulus_degree, size_t coeff_modulus_size)
     {
-        static void resize(Ciphertext *ciphertext, size_t size, size_t poly_modulus_degree, size_t coeff_modulus_size)
-        {
-            ciphertext->resize_internal(size, poly_modulus_degree, coeff_modulus_size);
-        }
+        ciphertext->resize_internal(size, poly_modulus_degree, coeff_modulus_size);
+    }
 
-        static void set_ntt_form(Ciphertext *ciphertext, bool is_ntt_form)
-        {
-            ciphertext->is_ntt_form_ = is_ntt_form;
-        }
-    };
-} // namespace seal
+    static void set_ntt_form(Ciphertext *ciphertext, bool is_ntt_form)
+    {
+        ciphertext->is_ntt_form_ = is_ntt_form;
+    }
+};
 
 SEAL_C_FUNC Ciphertext_Create1(void *memoryPoolHandle, void **ciphertext)
 {
@@ -323,7 +318,7 @@ SEAL_C_FUNC Ciphertext_Resize4(void *thisptr, uint64_t size, uint64_t polyModulu
 
     try
     {
-        Ciphertext::CiphertextPrivateHelper::resize(cipher, size, polyModulusDegree, coeffModCount);
+        ph::resize(cipher, size, polyModulusDegree, coeffModCount);
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -403,7 +398,7 @@ SEAL_C_FUNC Ciphertext_SetIsNTTForm(void *thisptr, bool is_ntt_form)
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
     IfNullRet(cipher, E_POINTER);
 
-    Ciphertext::CiphertextPrivateHelper::set_ntt_form(cipher, is_ntt_form);
+    ph::set_ntt_form(cipher, is_ntt_form);
     return S_OK;
 }
 
