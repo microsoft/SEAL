@@ -194,7 +194,7 @@ namespace seal
         count of zero can be used to indicate a column rotation in the BFV scheme
         and complex conjugation in the CKKS scheme.
 
-        @param[in] galois_steps The rotation step counts for which to generate keys
+        @param[in] steps The rotation step counts for which to generate keys
         @param[out] destination The Galois keys to overwrite with the generated
         Galois keys
         @throws std::logic_error if the encryption parameters do not support
@@ -223,7 +223,7 @@ namespace seal
         count of zero can be used to indicate a column rotation in the BFV scheme
         and complex conjugation in the CKKS scheme.
 
-        @param[in] galois_steps The rotation step counts for which to generate keys
+        @param[in] steps The rotation step counts for which to generate keys
         @throws std::logic_error if the encryption parameters do not support
         batching and scheme is scheme_type::BFV
         @throws std::logic_error if the encryption parameters do not support
