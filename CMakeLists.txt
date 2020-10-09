@@ -26,8 +26,25 @@ endif()
 # Global configuration #
 ########################
 
-# [Option] CMAKE_BUILD_TYPE
-# Build in Release mode by default; otherwise use selected option
+# CMake modules
+include(CMakeDependentOption)
+include(CMakePushCheckState)
+include(CheckIncludeFiles)
+include(CheckCXXSourceCompiles)
+include(CheckCXXSourceRuns)
+include(CheckTypeSize)
+include (CheckSymbolExists)
+# Extra modules
+list(APPEND CMAKE_MODULE_PATH ${SEAL_SOURCE_DIR}/cmake)
+
+# Always build position-independent-code
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+# Make the install target depend on the all target (required by vcpkg)
+set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY OFF)
+
+# [option] CMAKE_BUILD_TYPE (default: "Release")
+# Build in one of the following modes: Release, Debug, MiniSizeRel, or RelWithDebInfo.
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY
@@ -35,67 +52,22 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Build type (CMAKE_BUILD_TYPE): ${CMAKE_BUILD_TYPE}")
 
-# [Flag] SEAL_DEBUG
-# In Debug mode, enable SEAL_DEBUG
+# In Debug mode, define SEAL_DEBUG
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(SEAL_DEBUG ON)
+    # In Debug mode, enable extra compiler flags.
+    include(EnableCXXCompilerFlags)
 else()
     set(SEAL_DEBUG OFF)
 endif()
 message(STATUS "Microsoft SEAL debug mode: ${SEAL_DEBUG}")
 
-# [Option] SEAL_USE_CXX17
-# Should we use C++14 or C++17?
+# [option] SEAL_USE_CXX17 (default: ON)
+# Use C++17, use C++14 otherwise.
 set(SEAL_USE_CXX17_OPTION_STR "Use C++17")
 option(SEAL_USE_CXX17 ${SEAL_USE_CXX17_OPTION_STR} ON)
-
-# Conditionally enable features from C++17
-set(SEAL_USE_STD_BYTE OFF)
-set(SEAL_USE_SHARED_MUTEX OFF)
-set(SEAL_USE_IF_CONSTEXPR OFF)
-set(SEAL_USE_MAYBE_UNUSED OFF)
-set(SEAL_USE_NODISCARD OFF)
-set(SEAL_USE_STD_FOR_EACH_N OFF)
-set(SEAL_LANG_FLAG "-std=c++14")
-if(SEAL_USE_CXX17)
-    set(SEAL_USE_STD_BYTE ON)
-    set(SEAL_USE_SHARED_MUTEX ON)
-    set(SEAL_USE_IF_CONSTEXPR ON)
-    set(SEAL_USE_MAYBE_UNUSED ON)
-    set(SEAL_USE_NODISCARD ON)
-    set(SEAL_USE_STD_FOR_EACH_N ON)
-    set(SEAL_LANG_FLAG "-std=c++17")
-endif()
-
-# [Option] CXX compiler flags
-# For easier adding of CXX compiler flags
-include(CheckCXXCompilerFlag)
-function(seal_enable_cxx_compiler_flag_if_supported flag)
-    string(FIND "${CMAKE_CXX_FLAGS}" "${flag}" flag_already_set)
-    if(flag_already_set EQUAL -1)
-        message(STATUS "Adding CXX compiler flag: ${flag} ...")
-        check_cxx_compiler_flag("${flag}" flag_supported)
-        if(flag_supported)
-            set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${flag}" PARENT_SCOPE)
-        endif()
-        unset(flag_supported CACHE)
-    endif()
-endfunction()
-
-# Always build position-independent-code
-set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-# Don't make the install target depend on the all target.
-set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY ON)
-
-# In Debug mode, enable extra compiler flags.
-if(NOT MSVC AND SEAL_DEBUG)
-  seal_enable_cxx_compiler_flag_if_supported("-Wall")
-  seal_enable_cxx_compiler_flag_if_supported("-Wextra")
-  seal_enable_cxx_compiler_flag_if_supported("-Wconversion")
-  seal_enable_cxx_compiler_flag_if_supported("-Wshadow")
-  seal_enable_cxx_compiler_flag_if_supported("-pedantic")
-endif()
+# Enable features from C++17 if available, disable features if set to OFF.
+include(EnableCXX17)
 
 # Path for outupt
 if(ANDROID_ABI)
@@ -124,32 +96,8 @@ set(SEAL_INCLUDES_BUILD_DIR ${SEAL_SOURCE_DIR}/native/src)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/bin)
 set(SEAL_THIRDPARTY_DIR ${SEAL_SOURCE_DIR}/thirdparty)
 
-# For extra modules we might have
-list(APPEND CMAKE_MODULE_PATH ${SEAL_SOURCE_DIR}/cmake)
-
-include(CMakePushCheckState)
-include(CMakeDependentOption)
-include(CheckIncludeFiles)
-include(CheckCXXSourceCompiles)
-include(CheckCXXSourceRuns)
-include(CheckTypeSize)
-include (CheckSymbolExists)
-
-################################################
-# Cleaning up artifacts from previous versions #
-################################################
-
-# Remove native/src/gsl directory which is no longer used in version >= 3.5.0
-if(NOT MSVC AND EXISTS ${SEAL_INCLUDES_BUILD_DIR}/gsl)
-    message(STATUS "Removing ${SEAL_INCLUDES_BUILD_DIR}/gsl; this is no longer used by Microsoft SEAL >= 3.5.0")
-    file(REMOVE_RECURSE ${SEAL_INCLUDES_BUILD_DIR}/gsl)
-endif()
-
-# Remove thirdparty/zlib/src/CMakeCache.txt: the location changed in SEAL >= 3.5.4
-if(NOT MSVC AND EXISTS ${SEAL_THIRDPARTY_DIR}/zlib/src/CMakeCache.txt)
-    message(STATUS "Removing old ${SEAL_THIRDPARTY_DIR}/zlib/src/CMakeCache.txt")
-    file(REMOVE ${SEAL_THIRDPARTY_DIR}/zlib/src/CMakeCache.txt)
-endif()
+# Cleaning up artifacts from previous versions
+include(CleanArtifacts)
 
 ##################################
 # Macros for configuring targets #
@@ -474,7 +422,8 @@ endif()
 # SEAL C++ library #
 ####################
 
-# Should we build also the shared library?
+# [option] BUILD_SHARED_LIBS (default: OFF)
+# Build a shared library if set to ON. Build a static library regardlessly.
 set(BUILD_SHARED_LIBS_STR "Build shared library")
 option(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_STR} OFF)
 if(MSVC AND BUILD_SHARED_LIBS)
@@ -482,82 +431,55 @@ if(MSVC AND BUILD_SHARED_LIBS)
     set(BUILD_SHARED_LIBS OFF CACHE BOOL ${BUILD_SHARED_LIBS_STR} FORCE)
 endif()
 
-# Throw on multiply_plain by a zero plaintext
+# [option] SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT (default: ON)
+# Throw an exception if the second polynomial of a ciphertext is zero.
 set(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR "Throw an exception when a member of Evaluator outputs a transparent ciphertext")
 option(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT ${SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR} ON)
 mark_as_advanced(FORCE SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT)
 
-# Use a discrete Gaussian distribution for error
-set(SEAL_USE_DISCRETE_GAUSSIAN_STR "Use discrete Gaussian instead of centerd binomial for sampling errors")
-option(SEAL_USE_DISCRETE_GAUSSIAN ${SEAL_USE_DISCRETE_GAUSSIAN_STR} OFF)
-mark_as_advanced(FORCE SEAL_USE_DISCRETE_GAUSSIAN)
+# [option] SEAL_USE_GAUSSIAN (default: OFF)
+# Use Gaussian distribution for error if set to ON, use centered binomial otherwise.
+set(SEAL_USE_GAUSSIAN_STR "Use Gaussian for error distribution instead of centerd binomial")
+option(SEAL_USE_GAUSSIAN ${SEAL_USE_GAUSSIAN_STR} OFF)
+mark_as_advanced(FORCE SEAL_USE_GAUSSIAN)
 
-# In some non-MSVC compilers std::for_each_n is not available even when compiling as C++17
-if(SEAL_USE_STD_FOR_EACH_N)
-    cmake_push_check_state(RESET)
-    set(CMAKE_REQUIRED_QUIET TRUE)
-
-    if(NOT MSVC)
-        set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -O0 ${SEAL_LANG_FLAG}")
-        check_cxx_source_compiles("
-            #include <algorithm>
-            int main() {
-                int a[1]{ 0 };
-                volatile auto fun = std::for_each_n(a, 1, [](auto b) {});
-                return 0;
-            }"
-            USE_STD_FOR_EACH_N
-        )
-        if(NOT USE_STD_FOR_EACH_N EQUAL 1)
-            set(SEAL_USE_STD_FOR_EACH_N OFF)
-        endif()
-        unset(USE_STD_FOR_EACH_N CACHE)
-    endif()
-
-    cmake_pop_check_state()
-endif()
-
-# Use intrinsics if available
+# [option] SEAL_USE_INTRIN (default: ON)
 set(SEAL_USE_INTRIN_OPTION_STR "Use intrinsics")
 option(SEAL_USE_INTRIN ${SEAL_USE_INTRIN_OPTION_STR} ON)
+# Look for header files, use intrinsics if available, set to OFF otherwise.
+include(CheckCXXIntrinsicsHeader)
 
-# Check for intrin.h or x64intrin.h
-if(SEAL_USE_INTRIN)
-    if(MSVC)
-        set(SEAL_INTRIN_HEADER "intrin.h")
-    else()
-        set(SEAL_INTRIN_HEADER "x86intrin.h")
-    endif()
-
-    check_include_file_cxx(${SEAL_INTRIN_HEADER} HAVE_INTRIN_HEADER)
-    if(NOT HAVE_INTRIN_HEADER)
-        set(SEAL_USE_INTRIN OFF CACHE BOOL ${SEAL_USE_INTRIN_OPTION_STR} FORCE)
-    endif()
-    unset(HAVE_INTRIN_HEADER CACHE)
-endif()
-
-# Specific intrinsics depending on SEAL_USE_INTRIN
+# [option] SEAL_USE_${A_SPECIFIC_INTRIN} (default: ON, advanced)
+# Not available if SEAL_USE_INTRIN is OFF.
 if(MSVC)
     set(SEAL_USE__UMUL128_OPTION_STR "Use _umul128")
     cmake_dependent_option(SEAL_USE__UMUL128 ${SEAL_USE__UMUL128_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
+    mark_as_advanced(FORCE SEAL_USE__UMUL128)
 
     set(SEAL_USE__BITSCANREVERSE64_OPTION_STR "Use _BitScanReverse64")
     cmake_dependent_option(SEAL_USE__BITSCANREVERSE64 ${SEAL_USE__BITSCANREVERSE64_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
+    mark_as_advanced(FORCE SEAL_USE__BITSCANREVERSE64)
 else()
     set(SEAL_USE___INT128_OPTION_STR "Use __int128")
     cmake_dependent_option(SEAL_USE___INT128 ${SEAL_USE___INT128_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
+    mark_as_advanced(FORCE SEAL_USE___INT128)
 
     set(SEAL_USE___BUILTIN_CLZLL_OPTION_STR "Use __builtin_clzll")
     cmake_dependent_option(SEAL_USE___BUILTIN_CLZLL ${SEAL_USE___BUILTIN_CLZLL_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
+    mark_as_advanced(FORCE SEAL_USE___BUILTIN_CLZLL)
 endif()
 
 set(SEAL_USE__ADDCARRY_U64_OPTION_STR "Use _addcarry_u64")
 cmake_dependent_option(SEAL_USE__ADDCARRY_U64 ${SEAL_USE__ADDCARRY_U64_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
+mark_as_advanced(FORCE SEAL_USE__ADDCARRY_U64)
 
 set(SEAL_USE__SUBBORROW_U64_OPTION_STR "Use _subborrow_u64")
 cmake_dependent_option(SEAL_USE__SUBBORROW_U64 ${SEAL_USE__SUBBORROW_U64_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
+mark_as_advanced(FORCE SEAL_USE__SUBBORROW_U64)
+# Use a specific intrinsic if available, set to OFF otherwise.
+include(CheckCXXIntrinsicsSpecific)
 
-# Options for memory clearing
+# [option] SEAL_USE_${A_SPECIFIC_MEMSET_METHOD} (default: ON, advanced)
 set(SEAL_USE_MEMSET_S_OPTION_STR "Use memset_s")
 option(SEAL_USE_MEMSET_S ${SEAL_USE_MEMSET_S_OPTION_STR} ON)
 mark_as_advanced(FORCE SEAL_USE_MEMSET_S)
@@ -569,150 +491,8 @@ mark_as_advanced(FORCE SEAL_USE_EXPLICIT_BZERO)
 set(SEAL_USE_EXPLICIT_MEMSET_OPTION_STR "Use explicit_memset")
 option(SEAL_USE_EXPLICIT_MEMSET ${SEAL_USE_EXPLICIT_MEMSET_OPTION_STR} ON)
 mark_as_advanced(FORCE SEAL_USE_EXPLICIT_MEMSET)
-
-if(SEAL_USE_INTRIN)
-    cmake_push_check_state(RESET)
-    set(CMAKE_REQUIRED_QUIET TRUE)
-    if(NOT MSVC)
-        set(CMAKE_REQUIRED_FLAGS "${CMAKE_REQUIRED_FLAGS} -O0 ${SEAL_LANG_FLAG}")
-    endif()
-
-    if(MSVC)
-        # Check for presence of _umul128
-        if(SEAL_USE__UMUL128)
-            check_cxx_source_runs("
-                #include <${SEAL_INTRIN_HEADER}>
-                int main() {
-                    unsigned long long a = 0, b = 0;
-                    unsigned long long c;
-                    volatile unsigned long long d;
-                    d = _umul128(a, b, &c);
-                    return 0;
-                }"
-                USE_UMUL128
-            )
-            if(NOT USE_UMUL128 EQUAL 1)
-                set(SEAL_USE__UMUL128 OFF CACHE BOOL ${SEAL_USE__UMUL128_OPTION_STR} FORCE)
-            endif()
-            unset(USE_UMUL128 CACHE)
-        endif()
-
-        # Check for _BitScanReverse64
-        if(SEAL_USE__BITSCANREVERSE64)
-            check_cxx_source_runs("
-                #include <${SEAL_INTRIN_HEADER}>
-                int main() {
-                    unsigned long a = 0, b = 0;
-                    volatile unsigned char res = _BitScanReverse64(&a, b);
-                    return 0;
-                }"
-                USE_BITSCANREVERSE64
-            )
-            if(NOT USE_BITSCANREVERSE64 EQUAL 1)
-                set(SEAL_USE__BITSCANREVERSE64 OFF CACHE BOOL ${SEAL_USE__BITSCANREVERSE64_OPTION_STR} FORCE)
-            endif()
-            unset(USE_BITSCANREVERSE64 CACHE)
-        endif()
-    else()
-        # Check for presence of __int128
-        if(SEAL_USE___INT128)
-            set(CMAKE_EXTRA_INCLUDE_FILES ${SEAL_INTRIN_HEADER})
-            check_type_size("__int128" INT128 LANGUAGE CXX)
-            if(NOT INT128 EQUAL 16)
-                set(SEAL_USE___INT128 OFF CACHE BOOL ${SEAL_USE___INT128_OPTION_STR} FORCE)
-            endif()
-            unset(HAVE_INT128 CACHE)
-            unset(INT128 CACHE)
-        endif()
-
-        # Check for __builtin_clzll
-        if(SEAL_USE___BUILTIN_CLZLL)
-            check_cxx_source_runs("
-                int main() {
-                    volatile auto res = __builtin_clzll(0);
-                    return 0;
-                }"
-                USE_BUILTIN_CLZLL
-            )
-            if(NOT USE_BUILTIN_CLZLL EQUAL 1)
-                set(SEAL_USE___BUILTIN_CLZLL OFF CACHE BOOL ${SEAL_USE___BUILTIN_CLZLL_OPTION_STR} FORCE)
-            endif()
-            unset(USE_BUILTIN_CLZLL CACHE)
-        endif()
-    endif()
-
-    # Check for _addcarry_u64
-    if(SEAL_USE__ADDCARRY_U64)
-        check_cxx_source_runs("
-            #include <${SEAL_INTRIN_HEADER}>
-            int main() {
-                unsigned long long a;
-                volatile auto res = _addcarry_u64(0,0,0,&a);
-                return 0;
-            }"
-            USE_ADDCARRY_U64
-        )
-        if(NOT USE_ADDCARRY_U64 EQUAL 1)
-            set(SEAL_USE__ADDCARRY_U64 OFF CACHE BOOL ${SEAL_USE__ADDCARRY_U64_OPTION_STR} FORCE)
-        endif()
-        unset(USE_ADDCARRY_U64 CACHE)
-    endif()
-
-    # Check for _subborrow_u64
-    if(SEAL_USE__SUBBORROW_U64)
-        check_cxx_source_runs("
-            #include <${SEAL_INTRIN_HEADER}>
-            int main() {
-                unsigned long long a;
-                volatile auto res = _subborrow_u64(0,0,0,&a);
-                return 0;
-            }"
-            USE_SUBBORROW_U64
-        )
-        if(NOT USE_SUBBORROW_U64 EQUAL 1)
-            set(SEAL_USE__SUBBORROW_U64 OFF CACHE BOOL ${SEAL_USE__SUBBORROW_U64_OPTION_STR} FORCE)
-        endif()
-        unset(USE_SUBBORROW_U64 CACHE)
-    endif()
-
-    cmake_pop_check_state()
-endif()
-
-# Check for memset_s
-if(SEAL_USE_MEMSET_S)
-    check_cxx_source_runs("
-        #define __STDC_WANT_LIB_EXT1__ 1
-        #include <string.h>
-        int main(void)
-        {
-            char str[] = \"ghghghghghghghghghghgh\";
-            int r = memset_s(str, sizeof(str), 'a', 5);
-            return r;
-        }"
-        USE_MEMSET_S)
-    if(NOT USE_MEMSET_S)
-        set(SEAL_USE_MEMSET_S OFF CACHE BOOL ${SEAL_USE_MEMSET_S_OPTION_STR} FORCE)
-    endif()
-    unset(USE_MEMSET_S CACHE)
-endif()
-
-# Check for explicit_bzero
-if(SEAL_USE_EXPLICIT_BZERO)
-    check_symbol_exists(explicit_bzero "string.h" USE_EXPLICIT_BZERO)
-    if(NOT USE_EXPLICIT_BZERO)
-        set(SEAL_USE_EXPLICIT_BZERO OFF CACHE BOOL ${SEAL_USE_EXPLICIT_BZERO_OPTION_STR} FORCE)
-    endif()
-    unset(USE_EXPLICIT_BZERO)
-endif()
-
-# Check for explicit_memset
-if(SEAL_USE_EXPLICIT_MEMSET)
-    check_symbol_exists(explicit_memset "string.h" USE_EXPLICIT_MEMSET)
-    if(NOT USE_EXPLICIT_MEMSET)
-        set(SEAL_USE_EXPLICIT_MEMSET OFF CACHE BOOL ${SEAL_USE_EXPLICIT_MEMSET_OPTION_STR} FORCE)
-    endif()
-    unset(USE_EXPLICIT_MEMSET)
-endif()
+# Use a specific memset method if available, set to OFF otherwise.
+include(CheckMemset)
 
 # Create an object library to compile sources only once
 add_library(seal_obj OBJECT)

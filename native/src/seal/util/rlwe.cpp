@@ -195,7 +195,7 @@ namespace seal
             // c[j] = public_key[j] * u + e[j]
             for (size_t j = 0; j < encrypted_size; j++)
             {
-#ifdef SEAL_USE_DISCRETE_GAUSSIAN
+#ifdef SEAL_USE_GAUSSIAN
                 sample_poly_normal(rng, parms, u.get());
 #else
                 sample_poly_cbd(rng, parms, u.get());
@@ -280,7 +280,7 @@ namespace seal
 
             // Sample e <-- chi
             auto noise(allocate_poly(coeff_count, coeff_modulus_size, pool));
-#ifdef SEAL_USE_DISCRETE_GAUSSIAN
+#ifdef SEAL_USE_GAUSSIAN
             sample_poly_normal(bootstrap_rng, parms, noise.get());
 #else
             sample_poly_cbd(bootstrap_rng, parms, noise.get());
