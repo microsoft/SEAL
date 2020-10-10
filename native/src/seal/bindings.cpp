@@ -239,6 +239,8 @@ EMSCRIPTEN_BINDINGS(SEAL) {
     register_vector<uint8_t>("std::vector<uint8_t>");
     register_vector<int32_t>("std::vector<int32_t>");
     register_vector<uint32_t>("std::vector<uint32_t>");
+    register_vector<int64_t>("std::vector<int64_t>");
+    register_vector<uint64_t>("std::vector<uint64_t>");
     register_vector<double>("std::vector<double>");
     register_vector<std::complex<double>> ("std::vector<std::complex<double>>");
     register_vector<Modulus>("std::vector<Modulus>");
