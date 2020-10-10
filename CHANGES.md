@@ -9,7 +9,6 @@ The performance improvement should be expected to be around 20-30x.
 
 ### API Changes
 
-- Added const overloads of `IntArray::begin` and `IntArray::end`.
 - Added `std::hash` implementation for `EncryptionParameters` (in addition to `parms_id_type`) so it is possible to create e.g. `std::unordered_map` of `EncryptionParameters`.
 - Removed `BatchEncoder` API for encoding and decoding `Plaintext` objects inplace.
 This is because a `Plaintext` object with slot-data written into the coefficients is (confusingly) not valid to be used for encryption.
@@ -22,6 +21,8 @@ The `BigUInt` class was only used by the `IntegerEncoder`.
 - Changed the names of the public key generation functions to clearly express that a new key is created each time, e.g., `KeyGenerator::create_public_key`.
 - Removed the `KeyGenerator::relin_keys_local` and `KeyGenerator::galois_keys_local` functions.
 These were poorly named and have been replaced with overloads of `KeyGenerator::create_relin_keys` and `KeyGenerator::create_galois_keys` that take an out-parameter of type `RelinKeys` or `GaloisKeys`.
+- Renamed `IntArray` to `DynArray` (dynamic array) and removed unnecessary limitations on the object type template parameter.
+- Added const overloads for `DynArray::begin` and `DynArray::end`.
 
 ### Other
 
@@ -34,6 +35,8 @@ These were poorly named and have been replaced with overloads of `KeyGenerator::
 ### File Changes
 
 Renamed files and directories:
+
+- `native/src/seal/intarray.h` to [native/src/seal/dynarray.h](native/src/seal/dynarray.h)
 
 New files:
 

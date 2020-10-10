@@ -53,7 +53,7 @@
     <ClInclude Include="seal\galoiskeys.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="seal\intarray.h">
+    <ClInclude Include="seal\dynarray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="seal\keygenerator.h">

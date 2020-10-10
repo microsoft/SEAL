@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/intarray.h"
+#include "seal/dynarray.h"
 #include "seal/memorymanager.h"
 #include <sstream>
 #include "gtest/gtest.h"
@@ -11,12 +11,12 @@ using namespace std;
 
 namespace sealtest
 {
-    TEST(IntArrayTest, IntArrayBasics)
+    TEST(DynArrayTest, DynArrayBasics)
     {
         {
             auto pool = MemoryPoolHandle::New();
             MemoryManager::SwitchProfile(new MMProfFixed(pool));
-            IntArray<int32_t> arr;
+            DynArray<int32_t> arr;
             ASSERT_TRUE(arr.begin() == nullptr);
             ASSERT_TRUE(arr.end() == nullptr);
             ASSERT_EQ(0ULL, arr.size());
@@ -82,7 +82,7 @@ namespace sealtest
         {
             auto pool = MemoryPoolHandle::New();
             MemoryManager::SwitchProfile(new MMProfFixed(pool));
-            IntArray<uint64_t> arr;
+            DynArray<uint64_t> arr;
             ASSERT_TRUE(arr.begin() == nullptr);
             ASSERT_TRUE(arr.end() == nullptr);
             ASSERT_EQ(0ULL, arr.size());
@@ -147,16 +147,16 @@ namespace sealtest
         }
     }
 
-    TEST(IntArrayTest, SaveLoadIntArray)
+    TEST(DynArrayTest, SaveLoadDynArray)
     {
-        IntArray<int32_t> arr(6, 4);
+        DynArray<int32_t> arr(6, 4);
         arr.at(0) = 0;
         arr.at(1) = 1;
         arr.at(2) = 2;
         arr.at(3) = 3;
         stringstream ss;
         arr.save(ss);
-        IntArray<int32_t> arr2;
+        DynArray<int32_t> arr2;
         arr2.load(ss);
 
         ASSERT_EQ(arr.size(), arr2.size());
@@ -178,10 +178,10 @@ namespace sealtest
         ASSERT_EQ(arr[1], arr2[1]);
     }
 
-    TEST(IntArrayTest, Assign)
+    TEST(DynArrayTest, Assign)
     {
-        IntArray<char> arr(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW));
-        IntArray<char> arr2(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW));
+        DynArray<char> arr(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW));
+        DynArray<char> arr2(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW));
         ASSERT_NE(&static_cast<util::MemoryPool &>(arr.pool()), &static_cast<util::MemoryPool &>(arr2.pool()));
 
         arr = arr2;

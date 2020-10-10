@@ -178,7 +178,7 @@ namespace seal
 
     bool is_buffer_valid(const Plaintext &in)
     {
-        if (in.coeff_count() != in.int_array().size())
+        if (in.coeff_count() != in.dyn_array().size())
         {
             return false;
         }
@@ -189,7 +189,7 @@ namespace seal
     bool is_buffer_valid(const Ciphertext &in)
     {
         // Check that the buffer size is correct
-        if (in.int_array().size() != mul_safe(in.size(), in.coeff_modulus_size(), in.poly_modulus_degree()))
+        if (in.dyn_array().size() != mul_safe(in.size(), in.coeff_modulus_size(), in.poly_modulus_degree()))
         {
             return false;
         }

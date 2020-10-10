@@ -31,40 +31,36 @@ namespace seal
     }     // namespace util
 
     /**
-    A resizable container for storing an array of arithmetic data types or
-    seal_byte types (e.g., std::byte). The allocations are done from a memory
-    pool. The IntArray class is mainly intended for internal use and provides
+    A dynamic array for storing objects allocated from a Microsoft SEAL memory
+    pool. The DynArray class is mainly intended for internal use and provides
     the underlying data structure for Plaintext and Ciphertext classes.
 
     @par Size and Capacity
-    IntArray allows the user to pre-allocate memory (capacity) for the array
+    DynArray allows the user to pre-allocate memory (capacity) for the array
     in cases where the array is known to be resized in the future and memory
-    moves are to be avoided at the time of resizing. The size of the IntArray
+    moves are to be avoided at the time of resizing. The size of the DynArray
     can never exceed its capacity. The capacity and size can be changed using
     the reserve and resize functions, respectively.
 
     @par Thread Safety
-    In general, reading from IntArray is thread-safe as long as no other thread
+    In general, reading from DynArray is thread-safe as long as no other thread
     is concurrently mutating it.
     */
-    template <
-        typename T_,
-        typename = std::enable_if_t<
-            std::is_arithmetic<T_>::value || std::is_same<typename std::decay<T_>::type, seal_byte>::value>>
-    class IntArray
+    template <typename T>
+    class DynArray
     {
         friend class Ciphertext;
 
     public:
-        using T = typename std::decay<T_>::type;
+        using type = T;
 
         /**
-        Creates a new IntArray. No memory is allocated by this constructor.
+        Creates a new DynArray. No memory is allocated by this constructor.
 
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized
         */
-        IntArray(MemoryPoolHandle pool = MemoryManager::GetPool()) : pool_(std::move(pool))
+        DynArray(MemoryPoolHandle pool = MemoryManager::GetPool()) : pool_(std::move(pool))
         {
             if (!pool_)
             {
@@ -73,13 +69,13 @@ namespace seal
         }
 
         /**
-        Creates a new IntArray with given size.
+        Creates a new DynArray with given size.
 
         @param[in] size The size of the array
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if pool is uninitialized
         */
-        explicit IntArray(std::size_t size, MemoryPoolHandle pool = MemoryManager::GetPool()) : pool_(std::move(pool))
+        explicit DynArray(std::size_t size, MemoryPoolHandle pool = MemoryManager::GetPool()) : pool_(std::move(pool))
         {
             if (!pool_)
             {
@@ -91,7 +87,7 @@ namespace seal
         }
 
         /**
-        Creates a new IntArray with given capacity and size.
+        Creates a new DynArray with given capacity and size.
 
         @param[in] capacity The capacity of the array
         @param[in] size The size of the array
@@ -99,7 +95,7 @@ namespace seal
         @throws std::invalid_argument if capacity is less than size
         @throws std::invalid_argument if pool is uninitialized
         */
-        explicit IntArray(std::size_t capacity, std::size_t size, MemoryPoolHandle pool = MemoryManager::GetPool())
+        explicit DynArray(std::size_t capacity, std::size_t size, MemoryPoolHandle pool = MemoryManager::GetPool())
             : pool_(std::move(pool))
         {
             if (!pool_)
@@ -117,9 +113,9 @@ namespace seal
         }
 
         /**
-        Creates a new IntArray with given size wrapping a given pointer. This
-        constructor allocates no memory. If the IntArray goes out of scope, the
-        Pointer object given here is destroyed. On resizing the IntArray to larger
+        Creates a new DynArray with given size wrapping a given pointer. This
+        constructor allocates no memory. If the DynArray goes out of scope, the
+        Pointer object given here is destroyed. On resizing the DynArray to larger
         size, the data will be copied over to a new allocation from the memory pool
         pointer to by the given MemoryPoolHandle and the Pointer object given here
         will subsequently be destroyed. Unlike the other constructors, this one
@@ -134,7 +130,7 @@ namespace seal
         @throws std::invalid_argument if capacity is less than size
         @throws std::invalid_argument if pool is uninitialized
         */
-        explicit IntArray(
+        explicit DynArray(
             util::Pointer<T> &&ptr, std::size_t capacity, std::size_t size, bool fill_zero,
             MemoryPoolHandle pool = MemoryManager::GetPool())
             : pool_(std::move(pool)), capacity_(capacity)
@@ -160,9 +156,9 @@ namespace seal
         }
 
         /**
-        Creates a new IntArray with given size wrapping a given pointer. This
-        constructor allocates no memory. If the IntArray goes out of scope, the
-        Pointer object given here is destroyed. On resizing the IntArray to larger
+        Creates a new DynArray with given size wrapping a given pointer. This
+        constructor allocates no memory. If the DynArray goes out of scope, the
+        Pointer object given here is destroyed. On resizing the DynArray to larger
         size, the data will be copied over to a new allocation from the memory pool
         pointer to by the given MemoryPoolHandle and the Pointer object given here
         will subsequently be destroyed. Unlike the other constructors, this one
@@ -175,17 +171,17 @@ namespace seal
         @throws std::invalid_argument if ptr is null and size is positive
         @throws std::invalid_argument if pool is uninitialized
         */
-        explicit IntArray(
+        explicit DynArray(
             util::Pointer<T> &&ptr, std::size_t size, bool fill_zero, MemoryPoolHandle pool = MemoryManager::GetPool())
-            : IntArray(std::move(ptr), size, size, fill_zero, std::move(pool))
+            : DynArray(std::move(ptr), size, size, fill_zero, std::move(pool))
         {}
 
         /**
-        Constructs a new IntArray by copying a given one.
+        Constructs a new DynArray by copying a given one.
 
-        @param[in] copy The IntArray to copy from
+        @param[in] copy The DynArray to copy from
         */
-        IntArray(const IntArray<T> &copy)
+        DynArray(const DynArray<T> &copy)
             : pool_(MemoryManager::GetPool()), capacity_(copy.size_), size_(copy.size_),
               data_(util::allocate<T>(copy.size_, pool_))
         {
@@ -194,19 +190,19 @@ namespace seal
         }
 
         /**
-        Constructs a new IntArray by moving a given one.
+        Constructs a new DynArray by moving a given one.
 
-        @param[in] source The IntArray to move from
+        @param[in] source The DynArray to move from
         */
-        IntArray(IntArray<T> &&source) noexcept
+        DynArray(DynArray<T> &&source) noexcept
             : pool_(std::move(source.pool_)), capacity_(source.capacity_), size_(source.size_),
               data_(std::move(source.data_))
         {}
 
         /**
-        Destroys the IntArray.
+        Destroys the DynArray.
         */
-        ~IntArray()
+        ~DynArray()
         {
             release();
         }
@@ -260,7 +256,7 @@ namespace seal
         }
 #ifdef SEAL_USE_MSGSL
         /**
-        Returns a span pointing to the beginning of the IntArray.
+        Returns a span pointing to the beginning of the DynArray.
         */
         SEAL_NODISCARD inline gsl::span<T> span()
         {
@@ -268,7 +264,7 @@ namespace seal
         }
 
         /**
-        Returns a span pointing to the beginning of the IntArray.
+        Returns a span pointing to the beginning of the DynArray.
         */
         SEAL_NODISCARD inline gsl::span<const T> span() const
         {
@@ -462,11 +458,11 @@ namespace seal
         }
 
         /**
-        Copies a given IntArray to the current one.
+        Copies a given DynArray to the current one.
 
-        @param[in] assign The IntArray to copy from
+        @param[in] assign The DynArray to copy from
         */
-        inline IntArray<T> &operator=(const IntArray<T> &assign)
+        inline DynArray<T> &operator=(const DynArray<T> &assign)
         {
             // Check for self-assignment
             if (this == &assign)
@@ -484,11 +480,11 @@ namespace seal
         }
 
         /**
-        Moves a given IntArray to the current one.
+        Moves a given DynArray to the current one.
 
-        @param[in] assign The IntArray to move from
+        @param[in] assign The DynArray to move from
         */
-        IntArray<T> &operator=(IntArray<T> &&assign) noexcept
+        DynArray<T> &operator=(DynArray<T> &&assign) noexcept
         {
             capacity_ = assign.capacity_;
             size_ = assign.size_;
@@ -499,7 +495,7 @@ namespace seal
         }
 
         /**
-        Returns an upper bound on the size of the IntArray, as if it was written
+        Returns an upper bound on the size of the DynArray, as if it was written
         to an output stream.
 
         @param[in] compr_mode The compression mode
@@ -519,10 +515,10 @@ namespace seal
         }
 
         /**
-        Saves the IntArray to an output stream. The output is in binary format
+        Saves the DynArray to an output stream. The output is in binary format
         and not human-readable. The output stream must have the "binary" flag set.
 
-        @param[out] stream The stream to save the IntArray to
+        @param[out] stream The stream to save the DynArray to
         @param[in] compr_mode The desired compression mode
         @throws std::invalid_argument if the compression mode is not supported
         @throws std::logic_error if the data to be saved is invalid, or if
@@ -534,17 +530,17 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&IntArray<T_>::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode);
+                std::bind(&DynArray<T>::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode);
         }
 
         /**
-        Loads a IntArray from an input stream overwriting the current IntArray.
-        This function takes optionally a bound on the size for the loaded IntArray
+        Loads a DynArray from an input stream overwriting the current DynArray.
+        This function takes optionally a bound on the size for the loaded DynArray
         and throws an exception if the size indicated by the loaded metadata exceeds
         the provided value. The check is omitted if in_size_bound is zero.
 
-        @param[in] stream The stream to load the IntArray from
-        @param[in] in_size_bound A bound on the size of the loaded IntArray
+        @param[in] stream The stream to load the DynArray from
+        @param[in] in_size_bound A bound on the size of the loaded DynArray
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, if decompression failed,
         or if the loaded size exceeds in_size_bound
@@ -555,11 +551,11 @@ namespace seal
         inline std::streamoff load(std::istream &stream, std::size_t in_size_bound = 0)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&IntArray<T_>::load_members, this, _1, in_size_bound), stream);
+            return Serialization::Load(std::bind(&DynArray<T>::load_members, this, _1, in_size_bound), stream);
         }
 
         /**
-        Saves the IntArray to a given memory location. The output is in binary
+        Saves the DynArray to a given memory location. The output is in binary
         format and not human-readable.
 
         @param[out] out The memory location to write the Modulus to
@@ -576,20 +572,20 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&IntArray<T_>::save_members, this, _1), save_size(compr_mode_type::none), out, size,
+                std::bind(&DynArray<T>::save_members, this, _1), save_size(compr_mode_type::none), out, size,
                 compr_mode);
         }
 
         /**
-        Loads a IntArray from a given memory location overwriting the current
-        IntArray. This function takes optionally a bound on the size for the loaded
-        IntArray and throws an exception if the size indicated by the loaded
+        Loads a DynArray from a given memory location overwriting the current
+        DynArray. This function takes optionally a bound on the size for the loaded
+        DynArray and throws an exception if the size indicated by the loaded
         metadata exceeds the provided value. The check is omitted if in_size_bound
         is zero.
 
         @param[in] in The memory location to load the Modulus from
         @param[in] size The number of bytes available in the given memory location
-        @param[in] in_size_bound A bound on the size of the loaded IntArray
+        @param[in] in_size_bound A bound on the size of the loaded DynArray
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if the data cannot be loaded by this version of
@@ -600,7 +596,7 @@ namespace seal
         inline std::streamoff load(const seal_byte *in, std::size_t size, std::size_t in_size_bound = 0)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&IntArray<T_>::load_members, this, _1, in_size_bound), in, size);
+            return Serialization::Load(std::bind(&DynArray<T>::load_members, this, _1, in_size_bound), in, size);
         }
 
     private:

@@ -46,10 +46,10 @@ namespace sealtest
                 {
                     ASSERT_EQ(keys.data()[j][i].data().size(), test_keys.data()[j][i].data().size());
                     ASSERT_EQ(
-                        keys.data()[j][i].data().int_array().size(), test_keys.data()[j][i].data().int_array().size());
+                        keys.data()[j][i].data().dyn_array().size(), test_keys.data()[j][i].data().dyn_array().size());
                     ASSERT_TRUE(is_equal_uint(
                         keys.data()[j][i].data().data(), test_keys.data()[j][i].data().data(),
-                        keys.data()[j][i].data().int_array().size()));
+                        keys.data()[j][i].data().dyn_array().size()));
                 }
             }
             ASSERT_EQ(64ULL, keys.data().size());
@@ -82,10 +82,10 @@ namespace sealtest
                 {
                     ASSERT_EQ(keys.data()[j][i].data().size(), test_keys.data()[j][i].data().size());
                     ASSERT_EQ(
-                        keys.data()[j][i].data().int_array().size(), test_keys.data()[j][i].data().int_array().size());
+                        keys.data()[j][i].data().dyn_array().size(), test_keys.data()[j][i].data().dyn_array().size());
                     ASSERT_TRUE(is_equal_uint(
                         keys.data()[j][i].data().data(), test_keys.data()[j][i].data().data(),
-                        keys.data()[j][i].data().int_array().size()));
+                        keys.data()[j][i].data().dyn_array().size()));
                 }
             }
             ASSERT_EQ(256ULL, keys.data().size());
@@ -107,7 +107,7 @@ namespace sealtest
                     size_t coeff_modulus_size = coeff_modulus.size();
                     size_t rns_poly_uint64_count = util::mul_safe(coeff_count, coeff_modulus_size);
 
-                    IntArray<Ciphertext::ct_coeff_type> error;
+                    DynArray<Ciphertext::ct_coeff_type> error;
                     error.resize(rns_poly_uint64_count);
                     auto destination = error.begin();
 

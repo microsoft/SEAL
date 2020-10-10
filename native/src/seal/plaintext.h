@@ -4,8 +4,8 @@
 #pragma once
 
 #include "seal/context.h"
+#include "seal/dynarray.h"
 #include "seal/encryptionparams.h"
-#include "seal/intarray.h"
 #include "seal/memorymanager.h"
 #include "seal/valcheck.h"
 #include "seal/util/common.h"
@@ -321,9 +321,9 @@ namespace seal
         }
 
         /**
-        Returns a reference to the backing IntArray object.
+        Returns a reference to the backing DynArray object.
         */
-        SEAL_NODISCARD inline const auto &int_array() const noexcept
+        SEAL_NODISCARD inline const auto &dyn_array() const noexcept
         {
             return data_;
         }
@@ -753,7 +753,7 @@ namespace seal
 
         double scale_ = 1.0;
 
-        IntArray<pt_coeff_type> data_;
+        DynArray<pt_coeff_type> data_;
 
         // SecretKey needs access to save_members/load_members
         friend class SecretKey;

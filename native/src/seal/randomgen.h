@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "seal/intarray.h"
+#include "seal/dynarray.h"
 #include "seal/memorymanager.h"
 #include "seal/util/defines.h"
 #include <algorithm>
@@ -42,7 +42,7 @@ namespace seal
         UniformRandomGenerator(random_seed_type seed)
             : seed_([&seed]() {
                   // Create a new seed allocation
-                  IntArray<std::uint64_t> new_seed(seed.size(), MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
+                  DynArray<std::uint64_t> new_seed(seed.size(), MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
 
                   // Assign the given seed and return
                   std::copy(seed.cbegin(), seed.cend(), new_seed.begin());
@@ -93,21 +93,21 @@ namespace seal
     protected:
         virtual void refill_buffer() = 0;
 
-        const IntArray<std::uint64_t> seed_;
+        const DynArray<std::uint64_t> seed_;
 
         const std::size_t buffer_size_ = 4096;
 
     private:
-        IntArray<seal_byte> buffer_;
+        DynArray<seal_byte> buffer_;
 
         std::mutex mutex_;
 
     protected:
-        decltype(buffer_)::T *const buffer_begin_;
+        decltype(buffer_)::type *const buffer_begin_;
 
-        decltype(buffer_)::T *const buffer_end_;
+        decltype(buffer_)::type *const buffer_end_;
 
-        decltype(buffer_)::T *buffer_head_;
+        decltype(buffer_)::type *buffer_head_;
     };
 
     /**

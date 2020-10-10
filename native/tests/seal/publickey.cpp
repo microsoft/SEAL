@@ -32,8 +32,8 @@ namespace sealtest
             PublicKey pk2;
             pk2.load(context, stream);
 
-            ASSERT_EQ(pk.data().int_array().size(), pk2.data().int_array().size());
-            for (size_t i = 0; i < pk.data().int_array().size(); i++)
+            ASSERT_EQ(pk.data().dyn_array().size(), pk2.data().dyn_array().size());
+            for (size_t i = 0; i < pk.data().dyn_array().size(); i++)
             {
                 ASSERT_EQ(pk.data().data()[i], pk2.data().data()[i]);
             }
@@ -56,8 +56,8 @@ namespace sealtest
             PublicKey pk2;
             pk2.load(context, stream);
 
-            ASSERT_EQ(pk.data().int_array().size(), pk2.data().int_array().size());
-            for (size_t i = 0; i < pk.data().int_array().size(); i++)
+            ASSERT_EQ(pk.data().dyn_array().size(), pk2.data().dyn_array().size());
+            for (size_t i = 0; i < pk.data().dyn_array().size(); i++)
             {
                 ASSERT_EQ(pk.data().data()[i], pk2.data().data()[i]);
             }

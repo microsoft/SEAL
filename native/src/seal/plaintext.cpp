@@ -275,8 +275,8 @@ namespace seal
             new_data.data_.reserve(new_data.coeff_count_);
 
             // Load the data. Note that we are supplying also the expected maximum
-            // size of the loaded IntArray. This is an important security measure to
-            // prevent a malformed IntArray from causing arbitrarily large memory
+            // size of the loaded DynArray. This is an important security measure to
+            // prevent a malformed DynArray from causing arbitrarily large memory
             // allocations.
             new_data.data_.load(stream, new_data.coeff_count_);
 

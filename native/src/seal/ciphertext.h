@@ -4,7 +4,7 @@
 #pragma once
 
 #include "seal/context.h"
-#include "seal/intarray.h"
+#include "seal/dynarray.h"
 #include "seal/memorymanager.h"
 #include "seal/randomgen.h"
 #include "seal/valcheck.h"
@@ -297,9 +297,9 @@ namespace seal
         Ciphertext &operator=(Ciphertext &&assign) = default;
 
         /**
-        Returns a reference to the backing IntArray object.
+        Returns a reference to the backing DynArray object.
         */
-        SEAL_NODISCARD inline const auto &int_array() const noexcept
+        SEAL_NODISCARD inline const auto &dyn_array() const noexcept
         {
             return data_;
         }
@@ -691,6 +691,6 @@ namespace seal
 
         double scale_ = 1.0;
 
-        IntArray<ct_coeff_type> data_;
+        DynArray<ct_coeff_type> data_;
     };
 } // namespace seal

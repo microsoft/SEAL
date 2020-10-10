@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "seal/intarray.h"
+#include "seal/dynarray.h"
 #include "seal/memorymanager.h"
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
@@ -238,7 +238,7 @@ namespace seal
                 return count;
             }
 
-            IntArray<char> buf_{ MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, clear_on_destruction_) };
+            DynArray<char> buf_{ MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, clear_on_destruction_) };
 
             std::streamsize size_;
 

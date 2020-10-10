@@ -132,8 +132,8 @@ namespace seal
         size_t data_size;
         if (has_seed_marker())
         {
-            // Create a temporary aliased IntArray of smaller size
-            IntArray<ct_coeff_type> alias_data(
+            // Create a temporary aliased DynArray of smaller size
+            DynArray<ct_coeff_type> alias_data(
                 Pointer<ct_coeff_type>::Aliasing(const_cast<ct_coeff_type *>(data_.cbegin())), data_.size() / 2, false,
                 data_.pool());
 
@@ -188,7 +188,7 @@ namespace seal
                 // Save_members must be a const method.
                 // Create an alias of data_, must be handled with care.
                 // Alternatively, create and serialize a half copy of data_.
-                IntArray<ct_coeff_type> alias_data(data_.pool_);
+                DynArray<ct_coeff_type> alias_data(data_.pool_);
                 alias_data.size_ = half_size;
                 alias_data.capacity_ = half_size;
                 auto alias_ptr = util::Pointer<ct_coeff_type>::Aliasing(const_cast<ct_coeff_type *>(data_.cbegin()));
@@ -200,7 +200,7 @@ namespace seal
             }
             else
             {
-                // Save the IntArray
+                // Save the DynArray
                 data_.save(stream, compr_mode_type::none);
             }
         }
@@ -276,8 +276,8 @@ namespace seal
             new_data.data_.reserve(total_uint64_count);
 
             // Load the data. Note that we are supplying also the expected maximum
-            // size of the loaded IntArray. This is an important security measure to
-            // prevent a malformed IntArray from causing arbitrarily large memory
+            // size of the loaded DynArray. This is an important security measure to
+            // prevent a malformed DynArray from causing arbitrarily large memory
             // allocations.
             new_data.data_.load(stream, total_uint64_count);
 

@@ -116,7 +116,7 @@ namespace seal
                 }
             } // namespace
 
-            int zlib_deflate_array_inplace(IntArray<seal_byte> &in, MemoryPoolHandle pool)
+            int zlib_deflate_array_inplace(DynArray<seal_byte> &in, MemoryPoolHandle pool)
             {
                 if (!pool)
                 {
@@ -152,7 +152,7 @@ namespace seal
                 size_t bytes_read_from_in = 0;
 
                 // Allocate a temporary buffer for output
-                auto temp_out = IntArray<seal_byte>(buffer_size, pool);
+                auto temp_out = DynArray<seal_byte>(buffer_size, pool);
 
                 // Where we are writing output now; start writing to the temporary buffer
                 seal_byte *out_head = temp_out.begin();
@@ -384,7 +384,7 @@ namespace seal
             }
 
             void zlib_write_header_deflate_buffer(
-                IntArray<seal_byte> &in, void *header_ptr, ostream &out_stream, MemoryPoolHandle pool)
+                DynArray<seal_byte> &in, void *header_ptr, ostream &out_stream, MemoryPoolHandle pool)
             {
                 Serialization::SEALHeader &header = *reinterpret_cast<Serialization::SEALHeader *>(header_ptr);
 
@@ -497,7 +497,7 @@ namespace seal
                 }
             } // namespace
 
-            unsigned zstd_deflate_array_inplace(IntArray<seal_byte> &in, MemoryPoolHandle pool)
+            unsigned zstd_deflate_array_inplace(DynArray<seal_byte> &in, MemoryPoolHandle pool)
             {
                 if (!pool)
                 {
@@ -524,7 +524,7 @@ namespace seal
                 size_t bytes_read_from_in = 0;
 
                 // Allocate a temporary buffer for output
-                auto temp_out = IntArray<seal_byte>(buffer_size, pool);
+                auto temp_out = DynArray<seal_byte>(buffer_size, pool);
 
                 // Where we are writing output now; start writing to the temporary buffer
                 seal_byte *out_head = temp_out.begin();
@@ -741,7 +741,7 @@ namespace seal
             }
 
             void zstd_write_header_deflate_buffer(
-                IntArray<seal_byte> &in, void *header_ptr, ostream &out_stream, MemoryPoolHandle pool)
+                DynArray<seal_byte> &in, void *header_ptr, ostream &out_stream, MemoryPoolHandle pool)
             {
                 Serialization::SEALHeader &header = *reinterpret_cast<Serialization::SEALHeader *>(header_ptr);
 

@@ -30,11 +30,11 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/modulus.h
         ${CMAKE_CURRENT_LIST_DIR}/context.h
         ${CMAKE_CURRENT_LIST_DIR}/decryptor.h
+        ${CMAKE_CURRENT_LIST_DIR}/dynarray.h
         ${CMAKE_CURRENT_LIST_DIR}/encryptionparams.h
         ${CMAKE_CURRENT_LIST_DIR}/encryptor.h
         ${CMAKE_CURRENT_LIST_DIR}/evaluator.h
         ${CMAKE_CURRENT_LIST_DIR}/galoiskeys.h
-        ${CMAKE_CURRENT_LIST_DIR}/intarray.h
         ${CMAKE_CURRENT_LIST_DIR}/keygenerator.h
         ${CMAKE_CURRENT_LIST_DIR}/kswitchkeys.h
         ${CMAKE_CURRENT_LIST_DIR}/memorymanager.h

@@ -105,7 +105,7 @@ namespace seal
         // Fill the randomness buffer
         if (blake2xb(
                 buffer_begin_, buffer_size_, reinterpret_cast<const seal_byte *>(&counter_), sizeof(counter_),
-                seed_.cbegin(), seed_.size() * sizeof(decltype(seed_)::T)) != 0)
+                seed_.cbegin(), seed_.size() * sizeof(decltype(seed_)::type)) != 0)
         {
             throw runtime_error("blake2xb failed");
         }

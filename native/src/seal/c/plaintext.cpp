@@ -27,7 +27,7 @@ using ph = struct Plaintext::PlaintextPrivateHelper
         plain->scale_ = new_scale;
     }
 
-    static void swap_data(seal::Plaintext *plain, seal::IntArray<uint64_t> &new_data)
+    static void swap_data(seal::Plaintext *plain, seal::DynArray<uint64_t> &new_data)
     {
         swap(plain->data_, new_data);
     }
@@ -436,7 +436,7 @@ SEAL_C_FUNC Plaintext_SwapData(void *thisptr, uint64_t count, uint64_t *new_data
     IfNullRet(plain, E_POINTER);
     IfNullRet(new_data, E_POINTER);
 
-    IntArray<uint64_t> new_array(plain->pool());
+    DynArray<uint64_t> new_array(plain->pool());
     new_array.resize(count);
     copy_n(new_data, count, new_array.begin());
 

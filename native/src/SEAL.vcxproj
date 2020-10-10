@@ -29,7 +29,7 @@
     <ClInclude Include="seal\encryptor.h" />
     <ClInclude Include="seal\evaluator.h" />
     <ClInclude Include="seal\galoiskeys.h" />
-    <ClInclude Include="seal\intarray.h" />
+    <ClInclude Include="seal\dynarray.h" />
     <ClInclude Include="seal\keygenerator.h" />
     <ClInclude Include="seal\kswitchkeys.h" />
     <ClInclude Include="seal\memorymanager.h" />

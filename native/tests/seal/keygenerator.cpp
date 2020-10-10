@@ -361,7 +361,7 @@ namespace sealtest
         keygen2.create_public_key(pk3);
 
         // There is a small random chance for this to fail
-        for (size_t i = 0; i < pk3.data().int_array().size(); i++)
+        for (size_t i = 0; i < pk3.data().dyn_array().size(); i++)
         {
             ASSERT_NE(pk3.data().data()[i], pk2.data().data()[i]);
         }

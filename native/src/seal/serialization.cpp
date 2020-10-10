@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/intarray.h"
+#include "seal/dynarray.h"
 #include "seal/memorymanager.h"
 #include "seal/serialization.h"
 #include "seal/util/common.h"
@@ -274,8 +274,8 @@ namespace seal
 
                 auto safe_pool(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
 
-                // Create temporary aliasing IntArray to wrap safe_buffer
-                IntArray<seal_byte> safe_buffer_array(
+                // Create temporary aliasing DynArray to wrap safe_buffer
+                DynArray<seal_byte> safe_buffer_array(
                     Pointer<seal_byte>::Aliasing(safe_buffer.data()), safe_buffer.size(),
                     static_cast<size_t>(temp_stream.tellp()), false, safe_pool);
 
@@ -300,8 +300,8 @@ namespace seal
 
                 auto safe_pool(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, clear_on_destruction));
 
-                // Create temporary aliasing IntArray to wrap safe_buffer
-                IntArray<seal_byte> safe_buffer_array(
+                // Create temporary aliasing DynArray to wrap safe_buffer
+                DynArray<seal_byte> safe_buffer_array(
                     Pointer<seal_byte>::Aliasing(safe_buffer.data()), safe_buffer.size(),
                     static_cast<size_t>(temp_stream.tellp()), false, safe_pool);
 

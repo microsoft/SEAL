@@ -3,7 +3,7 @@
 
 #pragma once
 
-#include "seal/intarray.h"
+#include "seal/dynarray.h"
 #include "seal/memorymanager.h"
 #include "seal/util/defines.h"
 #include <ios>
@@ -29,9 +29,9 @@ namespace seal
             @throws std::logic_error if compression failed
             */
             void zlib_write_header_deflate_buffer(
-                IntArray<seal_byte> &in, void *header_ptr, std::ostream &out_stream, MemoryPoolHandle pool);
+                DynArray<seal_byte> &in, void *header_ptr, std::ostream &out_stream, MemoryPoolHandle pool);
 
-            int zlib_deflate_array_inplace(IntArray<seal_byte> &in, MemoryPoolHandle pool);
+            int zlib_deflate_array_inplace(DynArray<seal_byte> &in, MemoryPoolHandle pool);
 
             int zlib_inflate_stream(
                 std::istream &in_stream, std::streamoff in_size, std::ostream &out_stream, MemoryPoolHandle pool);
@@ -50,9 +50,9 @@ namespace seal
             @throws std::logic_error if compression failed
             */
             void zstd_write_header_deflate_buffer(
-                IntArray<seal_byte> &in, void *header_ptr, std::ostream &out_stream, MemoryPoolHandle pool);
+                DynArray<seal_byte> &in, void *header_ptr, std::ostream &out_stream, MemoryPoolHandle pool);
 
-            unsigned zstd_deflate_array_inplace(IntArray<seal_byte> &in, MemoryPoolHandle pool);
+            unsigned zstd_deflate_array_inplace(DynArray<seal_byte> &in, MemoryPoolHandle pool);
 
             unsigned zstd_inflate_stream(
                 std::istream &in_stream, std::streamoff in_size, std::ostream &out_stream, MemoryPoolHandle pool);
