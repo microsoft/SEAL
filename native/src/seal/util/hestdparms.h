@@ -142,6 +142,6 @@ namespace seal
         }
 
         // Standard deviation for error distribution
-        constexpr double seal_he_std_parms_error_std_dev = 3.20;
+        constexpr double seal_he_std_parms_error_std_dev = 3.2;
     } // namespace util
 } // namespace seal
