@@ -75,7 +75,7 @@ namespace seal
                 return;
             }
 
-            if (global_variables::noise_standard_deviation != 3.2)
+            if (are_close(global_variables::noise_standard_deviation, 3.2))
             {
                 throw logic_error(
                     "center binomial distribution only supports standard deviation 3.2, use discrete Gaussian instead");
@@ -283,7 +283,7 @@ namespace seal
 #ifdef SEAL_USE_GAUSSIAN
             sample_poly_normal(bootstrap_rng, parms, noise.get());
 #else
-            sample_poly_cbd(bootstrap_rng, parms, noise.get());
+            sample_poly_cbd(bootstrap_rng, parms, noise.get(), pool);
 #endif
             // Calculate -(a*s + e) (mod q) and store in c[0]
             for (size_t i = 0; i < coeff_modulus_size; i++)
