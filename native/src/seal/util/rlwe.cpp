@@ -283,7 +283,7 @@ namespace seal
 #ifdef SEAL_USE_GAUSSIAN
             sample_poly_normal(bootstrap_rng, parms, noise.get());
 #else
-            sample_poly_cbd(bootstrap_rng, parms, noise.get(), pool);
+            sample_poly_cbd(bootstrap_rng, parms, noise.get());
 #endif
             // Calculate -(a*s + e) (mod q) and store in c[0]
             for (size_t i = 0; i < coeff_modulus_size; i++)
