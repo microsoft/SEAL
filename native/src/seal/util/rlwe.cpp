@@ -81,22 +81,12 @@ namespace seal
                     "center binomial distribution only supports standard deviation 3.2, use discrete Gaussian instead");
             }
 
-            auto hw = [](int8_t x) {
-                int32_t t = x & 0x55;
-                t += (x >> 1) & 0x55; // counting every 2 bits
-                int32_t hw = t & 0x3;
-                hw += (t >> 2) & 0x3;
-                hw += (t >> 4) & 0x3;
-                hw += (t >> 6) & 0x3;
-                return hw;
-            };
-
             auto cbd = [&](shared_ptr<UniformRandomGenerator> rng) {
-                int8_t x[6];
+                unsigned char x[6];
                 rng->generate(6, reinterpret_cast<seal_byte *>(x));
                 x[2] &= 0x1F;
                 x[5] &= 0x1F;
-                return hw(x[0]) + hw(x[1]) + hw(x[2]) - hw(x[3]) - hw(x[4]) - hw(x[5]);
+                return hamming_weight(x[0]) + hamming_weight(x[1]) + hamming_weight(x[2]) - hamming_weight(x[3]) - hamming_weight(x[4]) - hamming_weight(x[5]);
             };
 
             SEAL_ITERATE(iter(destination), coeff_count, [&](auto &I) {
