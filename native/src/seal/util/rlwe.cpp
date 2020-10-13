@@ -75,7 +75,7 @@ namespace seal
                 return;
             }
 
-            if (are_close(global_variables::noise_standard_deviation, 3.2))
+            if (!are_close(global_variables::noise_standard_deviation, 3.2))
             {
                 throw logic_error(
                     "center binomial distribution only supports standard deviation 3.2, use discrete Gaussian instead");
