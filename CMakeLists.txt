@@ -105,6 +105,13 @@ include(SEALMacros)
 # External dependencies #
 #########################
 
+# [option] SEAL_BUILD_DEPS (default: ON)
+# Download and build missing dependencies, throw error if disabled.
+set(SEAL_BUILD_DEPS_OPTION_STR "Automatically downloand and build missing dependencies")
+option(SEAL_BUILD_DEPS ${SEAL_BUILD_DEPS_OPTION_STR} ON)
+include(FetchContent)
+set(FETCHCONTENT_BASE_DIR ${SEAL_THIRDPARTY_DIR}/external CACHE STRING "" FORCE)
+
 function(seal_create_cache_entries dir_name)
     set(cce_file_name ${dir_name}/cache_init.txt)
     file(WRITE  "${cce_file_name}" "set(CMAKE_C_COMPILER \"${CMAKE_C_COMPILER}\" CACHE STRING \"\" FORCE)\n")
