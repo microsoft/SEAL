@@ -1,40 +1,18 @@
-# Google Test
-# This follows the example in
-# https://github.com/google/googletest/blob/release-1.10.0/googletest/README.md.
-
-# Download and configure
-if(SEAL_BUILD_TESTS AND NOT MSVC)
-    message(STATUS "Setting up Google Test ...")
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-        OUTPUT_QUIET
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/googletest)
-    if(result)
-        message(WARNING "Failed to download Google Test (${result}); disabling `SEAL_BUILD_TESTS`")
-    endif()
-    set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
-    mark_as_advanced(BUILD_GMOCK)
-    set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
-    mark_as_advanced(INSTALL_GTEST)
-endif()
-
-# Build
-if(SEAL_BUILD_TESTS AND NOT MSVC)
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-        OUTPUT_QUIET
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/googletest)
-    if(result)
-        message(WARNING "Failed to build Google Test (${result}); disabling `SEAL_BUILD_TESTS`")
-    endif()
-endif()
-
-# Set up the targets
-if(SEAL_BUILD_TESTS AND NOT MSVC)
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    add_subdirectory(
-        ${SEAL_THIRDPARTY_DIR}/googletest/src
-        ${SEAL_THIRDPARTY_DIR}/googletest/build
-        EXCLUDE_FROM_ALL)
-endif()
+FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG        703bd9caab50b139428cea1aaff9974ebee5742e # 1.10.0
+)
+FetchContent_GetProperties(googletest)
+FetchContent_Populate(googletest)
+set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
+set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+mark_as_advanced(BUILD_GMOCK)
+mark_as_advanced(INSTALL_GTEST)
+mark_as_advanced(FETCHCONTENT_SOURCE_DIR_GOOGLETEST)
+mark_as_advanced(FETCHCONTENT_UPDATES_DISCONNECTED_GOOGLETEST)
+add_subdirectory(
+    ${googletest_SOURCE_DIR}
+    ${googletest_BINARY_DIR}
+    EXCLUDE_FROM_ALL)

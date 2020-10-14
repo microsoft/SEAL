@@ -104,13 +104,20 @@ include(SEALMacros)
 #########################
 # External dependencies #
 #########################
+if(NOT MSVC) ## TODO: remove
 
 # [option] SEAL_BUILD_DEPS (default: ON)
 # Download and build missing dependencies, throw error if disabled.
-set(SEAL_BUILD_DEPS_OPTION_STR "Automatically downloand and build missing dependencies")
+set(SEAL_BUILD_DEPS_OPTION_STR "Automatically downloand and build unmet dependencies")
 option(SEAL_BUILD_DEPS ${SEAL_BUILD_DEPS_OPTION_STR} ON)
-include(FetchContent)
-set(FETCHCONTENT_BASE_DIR ${SEAL_THIRDPARTY_DIR}/external CACHE STRING "" FORCE)
+
+if(SEAL_BUILD_DEPS)
+    include(FetchContent)
+    set(FETCHCONTENT_BASE_DIR ${SEAL_THIRDPARTY_DIR}/external CACHE STRING "" FORCE)
+    mark_as_advanced(FETCHCONTENT_BASE_DIR)
+    mark_as_advanced(FETCHCONTENT_FULLY_DISCONNECTED)
+    mark_as_advanced(FETCHCONTENT_QUIET)
+endif()
 
 function(seal_create_cache_entries dir_name)
     set(cce_file_name ${dir_name}/cache_init.txt)
@@ -127,24 +134,77 @@ function(seal_create_cache_entries dir_name)
     file(APPEND "${cce_file_name}" "set(CMAKE_SYSTEM_VERSION ${CMAKE_SYSTEM_VERSION} CACHE STRING \"\" FORCE)\n")
 endfunction()
 
-# [option] SEAL_USE_MSGSL
+# [option] SEAL_USE_MSGSL (default: ON)
 set(SEAL_USE_MSGSL_OPTION_STR "Use Microsoft GSL")
 option(SEAL_USE_MSGSL ${SEAL_USE_MSGSL_OPTION_STR} ON)
-include(ExternalMSGSL)
+if(SEAL_USE_MSGSL)
+    find_package(Microsoft.GSL CONFIG)
+    if(Microsoft.GSL_FOUND)
+        set(GSL "Microsoft.GSL::GSL")
+    else()
+        if (SEAL_BUILD_DEPS)
+            message(STATUS "Download Microsoft.GSL ...")
+            include(ExternalMSGSL)
+            set(GSL "GSL")
+        else()
+            message(FATAL_ERROR "Failed to find Microsoft.GSL.")
+        endif()
+    endif()
+endif()
 
-# [option] SEAL_USE_ZLIB
+# [option] SEAL_USE_ZLIB (default: ON)
 set(SEAL_USE_ZLIB_OPTION_STR "Use ZLIB for compressed serialization")
 option(SEAL_USE_ZLIB ${SEAL_USE_ZLIB_OPTION_STR} ON)
-include(ExternalZLIB)
+if(SEAL_USE_ZLIB)
+    find_package(ZLIB 1.2.11)
+    if(ZLIB_FOUND)
+        set(ZLIB "ZLIB::ZLIB")
+    else()
+        if (SEAL_BUILD_DEPS)
+            message(STATUS "Download ZLIB ...")
+            include(ExternalZLIB)
+            set(ZLIB "zlibstatic")
+        else()
+            message(FATAL_ERROR "Failed to find ZLIB")
+        endif()
+    endif()
+endif()
 
-# [option] SEAL_USE_ZSTD
+# [option] SEAL_USE_ZSTD (default: ON)
 set(SEAL_USE_ZSTD_OPTION_STR "Use Zstandard for compressed serialization")
 option(SEAL_USE_ZSTD ${SEAL_USE_ZSTD_OPTION_STR} ON)
-include(ExternalZSTD)
+if(SEAL_USE_ZSTD)
+    find_package(zstd CONFIG)
+    if(zstd_FOUND)
+        set(ZSTD "libzstd")
+    else()
+        if (SEAL_BUILD_DEPS)
+            message(STATUS "Download ZSTD ...")
+            include(ExternalZSTD)
+            set(ZSTD "libzstd_static")
+        else()
+            message(FATAL_ERROR "Failed to find ZSTD")
+        endif()
+    endif()
+endif()
 
 # if SEAL_BUILD_TESTS is ON, use googletest
-include(ExternalGTest)
+if(SEAL_BUILD_TESTS)
+    find_package(GTest 1.10.0 CONFIG)
+    if(GTest_FOUND)
+        set(GTEST "GTest::gtest")
+    else()
+        if (SEAL_BUILD_DEPS)
+            message(STATUS "Download GTest ...")
+            include(ExternalGTest)
+            set(GTEST "gtest")
+        else()
+            message(FATAL_ERROR "Failed to find GTest")
+        endif()
+    endif()
+endif()
 
+endif()
 ####################
 # SEAL C++ library #
 ####################
@@ -264,15 +324,16 @@ seal_set_language(seal_obj)
 seal_set_include_directories(seal_obj)
 
 if(SEAL_USE_MSGSL AND NOT MSVC)
-    target_link_libraries(seal_obj PRIVATE GSL)
+    target_link_libraries(seal_obj PRIVATE ${GSL})
+    target_include_directories(seal PUBLIC $<BUILD_INTERFACE:${SEAL_MSGSL_INCLUDE_DIR}>)
 endif()
 
 if(SEAL_USE_ZLIB AND NOT MSVC)
-    target_link_libraries(seal_obj PRIVATE zlibstatic)
+    target_link_libraries(seal_obj PRIVATE ${ZLIB})
 endif()
 
 if(SEAL_USE_ZSTD AND NOT MSVC)
-    target_link_libraries(seal_obj PRIVATE libzstd_static)
+    target_link_libraries(seal_obj PRIVATE ${ZSTD})
     target_include_directories(seal_obj PRIVATE $<BUILD_INTERFACE:${SEAL_ZSTD_INCLUDE_DIR}>)
 endif()
 
@@ -285,11 +346,6 @@ seal_set_include_directories(seal)
 seal_link_threads(seal)
 seal_install_target(seal SEALTargets)
 
-# Conditionally add MSGSL include directory to build interface
-if(SEAL_USE_MSGSL AND NOT MSVC)
-    target_include_directories(seal PUBLIC $<BUILD_INTERFACE:${SEAL_MSGSL_INCLUDE_DIR}>)
-endif()
-
 # Conditionally build the shared library
 if(BUILD_SHARED_LIBS)
     add_library(seal_shared SHARED $<TARGET_OBJECTS:seal_obj>)
@@ -301,16 +357,6 @@ if(BUILD_SHARED_LIBS)
     seal_link_threads(seal_shared)
 
     seal_install_target(seal_shared SEALTargets)
-endif()
-
-# In UNIX-like platforms combine manually seal and zlibstatic into a single archive
-if(SEAL_USE_ZLIB AND NOT MSVC)
-    seal_combine_archives(seal zlibstatic)
-endif()
-
-# In UNIX-like platforms combine manually seal and libzstd_static into a single archive
-if(SEAL_USE_ZSTD AND NOT MSVC)
-    seal_combine_archives(seal libzstd_static)
 endif()
 
 #########################
@@ -385,16 +431,6 @@ export(
     EXPORT SEALTargets
     NAMESPACE SEAL::
     FILE ${SEAL_TARGETS_FILENAME})
-
-# In UNIX-like platforms install MSGSL header files
-if(SEAL_USE_MSGSL AND NOT MSVC)
-    install(
-        DIRECTORY
-            ${SEAL_MSGSL_INCLUDE_DIR}/gsl
-        DESTINATION
-            ${SEAL_INCLUDES_INSTALL_DIR}
-    )
-endif()
 
 #####################
 # SEAL C++ examples #

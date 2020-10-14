@@ -1,47 +1,28 @@
-# Download and configure
-if(SEAL_USE_ZSTD AND NOT MSVC)
-    message(STATUS "Setting up Zstandard ...")
-    if(NOT CMAKE_TOOLCHAIN_FILE)
-        execute_process(
-            COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-            OUTPUT_QUIET
-            RESULT_VARIABLE result
-            WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/zstd)
-    else()
-        seal_create_cache_entries(${SEAL_THIRDPARTY_DIR}/zstd)
-        if(EXISTS ${SEAL_THIRDPARTY_DIR}/zstd/build/CMakeCache.txt)
-            # Force regenerating make files. When cross compiling we might be
-            # compiling more than one platform at a time.
-            file(REMOVE ${SEAL_THIRDPARTY_DIR}/zstd/build/CMakeCache.txt)
-        endif()
-        execute_process(
-            COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . -Ccache_init.txt
-            OUTPUT_QUIET
-            RESULT_VARIABLE result
-            WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/zstd)
-    endif()
-    if(result)
-        message(WARNING "Failed to download ZSTD (${result}); disabling `SEAL_USE_ZSTD`")
-    endif()
-endif()
-
-# Build
-if(SEAL_USE_ZSTD AND NOT MSVC)
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-        OUTPUT_QUIET
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/zstd)
-    if(result)
-        message(WARNING "Failed to build ZSTD (${result}); disabling `SEAL_USE_ZSTD`")
-    endif()
-endif()
-
-# Set up the targets
-if(SEAL_USE_ZSTD AND NOT MSVC)
-    add_subdirectory(
-        ${SEAL_THIRDPARTY_DIR}/zstd/src/build/cmake
-        EXCLUDE_FROM_ALL)
-
-    # Set the ZSTD include directory
-    set(SEAL_ZSTD_INCLUDE_DIR ${SEAL_THIRDPARTY_DIR}/zstd/src/lib)
-endif()
+FetchContent_Declare(
+    zstd
+    GIT_REPOSITORY https://github.com/facebook/zstd.git
+    GIT_TAG        b706286adbba780006a47ef92df0ad7a785666b6 # 1.4.5
+)
+FetchContent_GetProperties(zstd)
+FetchContent_Populate(zstd)
+set(ZSTD_BUILD_PROGRAMS OFF CACHE BOOL "" FORCE)
+set(ZSTD_BUILD_SHARED ON CACHE BOOL "" FORCE)
+set(ZLIB_BUILD_STATIC ON CACHE BOOL "" FORCE)
+set(ZSTD_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(ZSTD_MULTITHREAD_SUPPORT OFF CACHE BOOL "" FORCE)
+mark_as_advanced(ZSTD_BUILD_CONTRIB)
+mark_as_advanced(ZSTD_BUILD_PROGRAMS)
+mark_as_advanced(ZSTD_BUILD_SHARED)
+mark_as_advanced(ZSTD_BUILD_STATIC)
+mark_as_advanced(ZSTD_BUILD_TESTS)
+mark_as_advanced(ZSTD_LEGACY_SUPPORT)
+mark_as_advanced(ZSTD_MULTITHREAD_SUPPORT)
+mark_as_advanced(ZSTD_PROGRAMS_LINK_SHARED)
+mark_as_advanced(FETCHCONTENT_SOURCE_DIR_ZSTD)
+mark_as_advanced(FETCHCONTENT_UPDATES_DISCONNECTED_ZSTD)
+add_subdirectory(
+    ${zstd_SOURCE_DIR}/build/cmake
+    EXCLUDE_FROM_ALL)
+set(SEAL_ZSTD_INCLUDE_DIRS
+    ${zstd_SOURCE_DIR}/lib
+    ${zstd_SOURCE_DIR}/lib/common)
