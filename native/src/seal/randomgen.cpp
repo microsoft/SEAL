@@ -3,6 +3,7 @@
 
 #include "seal/randomgen.h"
 #include "seal/util/blake2.h"
+#include "seal/util/fips202.h"
 #include <algorithm>
 #include <iostream>
 #include <random>
@@ -12,6 +13,7 @@
 #endif
 
 using namespace std;
+using namespace seal::util;
 
 #if (SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS)
 
@@ -55,7 +57,7 @@ namespace seal
         BOOLEAN genrand_result = FALSE;
         if (RtlGenRandom)
         {
-            genrand_result = RtlGenRandom(&result, sizeof(uint64_t));
+            genrand_result = RtlGenRandom(&result, bytes_per_uint64);
         }
 
         DWORD dwError = GetLastError();
@@ -66,13 +68,89 @@ namespace seal
             last_genrandom_error = dwError;
             throw runtime_error("Failed to call RtlGenRandom");
         }
-
 #elif SEAL_SYSTEM == SEAL_SYSTEM_OTHER
 #warning "SECURITY WARNING: System detection failed; falling back to a potentially insecure randomness source!"
         random_device rd;
         result = (static_cast<uint64_t>(rd()) << 32) + static_cast<uint64_t>(rd());
 #endif
         return result;
+    }
+
+    void UniformRandomGeneratorInfo::save_members(ostream &stream) const
+    {
+        // Throw exceptions on std::ios_base::badbit and std::ios_base::failbit
+        auto old_except_mask = stream.exceptions();
+        try
+        {
+            stream.exceptions(ios_base::badbit | ios_base::failbit);
+
+            stream.write(reinterpret_cast<const char *>(&type_), sizeof(prng_type));
+            stream.write(reinterpret_cast<const char *>(seed_.data()), prng_seed_byte_count);
+        }
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
+        {
+            stream.exceptions(old_except_mask);
+            throw;
+        }
+        stream.exceptions(old_except_mask);
+    }
+
+    void UniformRandomGeneratorInfo::load_members(istream &stream)
+    {
+        // Throw exceptions on std::ios_base::badbit and std::ios_base::failbit
+        auto old_except_mask = stream.exceptions();
+        try
+        {
+            stream.exceptions(ios_base::badbit | ios_base::failbit);
+
+            UniformRandomGeneratorInfo info;
+
+            // Read the PRNG type
+            stream.read(reinterpret_cast<char *>(&info.type_), sizeof(prng_type));
+            if (!info.has_valid_prng_type())
+            {
+                throw logic_error("prng_type is invalid");
+            }
+
+            // Read the seed data
+            stream.read(reinterpret_cast<char *>(info.seed_.data()), prng_seed_byte_count);
+
+            swap(*this, info);
+
+            stream.exceptions(old_except_mask);
+        }
+        catch (const ios_base::failure &)
+        {
+            stream.exceptions(old_except_mask);
+            throw runtime_error("I/O error");
+        }
+        catch (...)
+        {
+            stream.exceptions(old_except_mask);
+            throw;
+        }
+        stream.exceptions(old_except_mask);
+    }
+
+    shared_ptr<UniformRandomGenerator> UniformRandomGeneratorInfo::make_prng() const
+    {
+        switch (type_)
+        {
+        case prng_type::blake2xb:
+            return make_shared<Blake2xbPRNG>(seed_);
+
+        case prng_type::shake256:
+            return make_shared<Shake256PRNG>(seed_);
+
+        case prng_type::unknown:
+            return nullptr;
+        }
+        return nullptr;
     }
 
     void UniformRandomGenerator::generate(size_t byte_count, seal_byte *destination)
@@ -94,21 +172,34 @@ namespace seal
         }
     }
 
-    auto UniformRandomGeneratorFactory::DefaultFactory() -> const shared_ptr<UniformRandomGeneratorFactory>
+    auto UniformRandomGeneratorFactory::DefaultFactory() -> shared_ptr<UniformRandomGeneratorFactory>
     {
-        static const shared_ptr<UniformRandomGeneratorFactory> default_factory{ new SEAL_DEFAULT_RNG_FACTORY };
+        static shared_ptr<UniformRandomGeneratorFactory> default_factory{ new SEAL_DEFAULT_PRNG_FACTORY() };
         return default_factory;
     }
 
-    void BlakePRNG::refill_buffer()
+    void Blake2xbPRNG::refill_buffer()
     {
         // Fill the randomness buffer
         if (blake2xb(
-                buffer_begin_, buffer_size_, reinterpret_cast<const seal_byte *>(&counter_), sizeof(counter_),
-                seed_.cbegin(), seed_.size() * sizeof(decltype(seed_)::type)) != 0)
+                buffer_begin_, buffer_size_, &counter_, sizeof(counter_), seed_.cbegin(),
+                seed_.size() * sizeof(decltype(seed_)::type)) != 0)
         {
             throw runtime_error("blake2xb failed");
         }
+        counter_++;
+    }
+
+    void Shake256PRNG::refill_buffer()
+    {
+        // Fill the randomness buffer
+        array<uint64_t, prng_seed_uint64_count + 1> seed_ext;
+        copy_n(seed_.cbegin(), prng_seed_uint64_count, seed_ext.begin());
+        seed_ext[prng_seed_uint64_count] = counter_;
+        shake256(
+            reinterpret_cast<uint8_t *>(buffer_begin_), buffer_size_,
+            reinterpret_cast<const uint8_t *>(seed_ext.data()), seed_ext.size() * bytes_per_uint64);
+        seal_memzero(seed_ext.data(), seed_ext.size() * bytes_per_uint64);
         counter_++;
     }
 } // namespace seal

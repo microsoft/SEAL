@@ -668,7 +668,7 @@ namespace seal
 
         void resize_internal(std::size_t size, std::size_t poly_modulus_degree, std::size_t coeff_modulus_size);
 
-        void expand_seed(const SEALContext &context, const random_seed_type &seed);
+        void expand_seed(const SEALContext &context, const UniformRandomGeneratorInfo &prng_info);
 
         void save_members(std::ostream &stream) const;
 

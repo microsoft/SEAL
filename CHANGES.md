@@ -6,6 +6,8 @@
 
 - Added support for [Zstandard](https://github.com/facebook/zstd) compression as a much more efficient alternative to ZLIB.
 The performance improvement should be expected to be around 20-30x.
+- Added support for Shake256 extendable output function for pseudo-random number generation.
+The user can choose to set the default to Blake2xb (faster) or Shake256, when configuring the build system.
 
 ### API Changes
 
@@ -23,6 +25,9 @@ The `BigUInt` class was only used by the `IntegerEncoder`.
 These were poorly named and have been replaced with overloads of `KeyGenerator::create_relin_keys` and `KeyGenerator::create_galois_keys` that take an out-parameter of type `RelinKeys` or `GaloisKeys`.
 - Renamed `IntArray` to `DynArray` (dynamic array) and removed unnecessary limitations on the object type template parameter.
 - Added const overloads for `DynArray::begin` and `DynArray::end`.
+- Added a `Shake256PRNG` and `Shake256PRNGFactory` classes.
+Renamed `BlakePRNG` class to `Blake2xbPRNG`, and `BlakePRNGFactory` class to `Blake2xbPRNGFactory`.
+- Added a serializable `UniformRandomGeneratorInfo` class that represents the type of an extendable output function and a seed value.
 
 ### Other
 

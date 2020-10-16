@@ -432,16 +432,15 @@ if(MSVC AND BUILD_SHARED_LIBS)
 endif()
 
 # [option] SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT (default: ON)
-# Throw an exception if the second polynomial of a ciphertext is zero.
-set(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR "Throw an exception when a member of Evaluator outputs a transparent ciphertext")
+set(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR "Throw an exception when Evaluator outputs a transparent ciphertext")
 option(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT ${SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR} ON)
 mark_as_advanced(FORCE SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT)
 
-# [option] SEAL_USE_GAUSSIAN (default: OFF)
-# Use Gaussian distribution for error if set to ON, use centered binomial otherwise.
-set(SEAL_USE_GAUSSIAN_STR "Use Gaussian for error distribution instead of centerd binomial")
-option(SEAL_USE_GAUSSIAN ${SEAL_USE_GAUSSIAN_STR} OFF)
-mark_as_advanced(FORCE SEAL_USE_GAUSSIAN)
+# [option] SEAL_USE_GAUSSIAN_NOISE (default: OFF)
+# Use Gaussian distribution for noise sampling if set to ON, use centered binomial otherwise.
+set(SEAL_USE_GAUSSIAN_NOISE_STR "Use a rounded Gaussian distribution for noise sampling instead of a Centered Binomial Distribution")
+option(SEAL_USE_GAUSSIAN_NOISE ${SEAL_USE_GAUSSIAN_NOISE_STR} OFF)
+mark_as_advanced(FORCE SEAL_USE_GAUSSIAN_NOISE)
 
 # [option] SEAL_USE_INTRIN (default: ON)
 set(SEAL_USE_INTRIN_OPTION_STR "Use intrinsics")

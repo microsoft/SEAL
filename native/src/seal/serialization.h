@@ -89,6 +89,8 @@ namespace seal
             std::uint64_t size = 0;
         };
 
+        static_assert(sizeof(SEALHeader) == seal_header_size);
+
         /**
         Returns true if the given byte corresponds to a supported compression mode.
 
@@ -225,11 +227,13 @@ namespace seal
 
         For any given compression mode, raw_size must be the exact right size
         (in bytes) of what save_members writes to a stream in the uncompressed
-        mode. Otherwise the behavior of Save is unspecified.
+        mode plus the size of SEALHeader. Otherwise the behavior of Save is
+        unspecified.
 
         @param[in] save_members A function taking an std::ostream reference as an
         argument, possibly writing some number of bytes into it
         @param[in] raw_size The exact uncompressed output size of save_members
+        plus the size of SEALHeader
         @param[out] stream The stream to write to
         @param[in] compr_mode The desired compression mode
         @throws std::invalid_argument if save_members is invalid
@@ -271,11 +275,13 @@ namespace seal
 
         For any given compression mode, raw_size must be the exact right size
         (in bytes) of what save_members writes to a stream in the uncompressed
-        mode. Otherwise the behavior of Save is unspecified.
+        mode plus the size of SEALHeader. Otherwise the behavior of Save is
+        unspecified.
 
         @param[in] save_members A function that takes an std::ostream reference as
         an argument and writes some number of bytes into it
         @param[in] raw_size The exact uncompressed output size of save_members
+        plus the size of SEALHeader
         @param[out] out The memory location to write to
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode

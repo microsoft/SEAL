@@ -81,10 +81,6 @@ namespace SEALNetExamples
             can be convenient for local testing where no serialization is needed and the
             object needs to be used at the point of construction. Such an object can no
             longer be transformed back to a seeded state.
-
-            Due to the internal representation of Microsoft SEAL objects, the size saving
-            from using seeded objects only has an effect when a compressed serialization
-            method is used, as we will demonstrate in the example below.
             */
 
             /*
@@ -146,15 +142,27 @@ namespace SEALNetExamples
                     long size = parms.Save(sharedStream, ComprModeType.ZSTD);
 
                 If Microsoft SEAL is compiled with Zstandard or ZLIB support, the default
-                is to use one of them. If available, Zstandard is preferred over ZLIB.
+                is to use one of them. If available, Zstandard is preferred over ZLIB due
+                to its speed.
+
+                Compression can have a substantial impact on the serialized data size,
+                because ciphertext and key data consists of many uniformly random integers
+                modulo the CoeffModulus primes. Especially when using CKKS, the primes in
+                CoeffModulus can be relatively small compared to the 64-bit words used to
+                store the ciphertext and key data internally. Serialization writes full
+                64-bit words to the destination buffer or stream, possibly leaving in many
+                zero bytes corresponding to the high-order bytes of the 64-bit words. One
+                convenient way to get rid of these zeros is to apply a general-purpose
+                compression algorithm on the encrypted data. The compression rate can be
+                significant (up to 50-60%) when using CKKS with small primes.
                 */
 
                 /*
-                In many cases, when working with fixed size memory, it is necessary
-                to know ahead of time an upper bound on the serialized data size to
-                allocate enough memory. This information is returned by the
-                EncryptionParameters.SaveSize function. This function accepts the
-                desired compression mode, or uses the default option otherwise.
+                In many cases, when working with fixed size memory, it is necessary to know
+                ahead of time an upper bound on the serialized data size to allocate enough
+                memory. This information is returned by the EncryptionParameters.SaveSize
+                function. This function accepts the desired compression mode, or uses the
+                default option otherwise.
 
                 In more detail, the output of EncryptionParameters.SaveSize is as follows:
 
@@ -246,7 +254,9 @@ namespace SEALNetExamples
 
                 /*
                 We serialize both relinearization keys to demonstrate the concrete size
-                difference.
+                difference. If compressed serialization is used, the compression rate
+                will be the same in both cases. We omit specifying the compression mode
+                to use the default, as determined by the Microsoft SEAL build system.
                 */
                 long sizeRlk = rlk.Save(dataStream);
                 long sizeRlkBig = rlkBig.Save(dataStream);
@@ -318,10 +328,6 @@ namespace SEALNetExamples
                 serialize multiple Microsoft SEAL objects sequentially in a stream. Each
                 object writes its own size into the stream, so deserialization knows
                 exactly how many bytes to read. We will see this working below.
-
-                Finally, we would like to emphasize the point that none of these methods
-                provide any space savings when ComprModeType.None is used, e.g., when
-                Microsoft SEAL is not compiled with support for ZLIB or Zstandard.
                 */
             }
 

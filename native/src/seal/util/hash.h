@@ -29,9 +29,8 @@ namespace seal
 
             inline static void hash(const std::uint64_t *input, std::size_t uint64_count, hash_block_type &destination)
             {
-                if (blake2b(
-                        reinterpret_cast<seal_byte *>(&destination), hash_block_byte_count,
-                        reinterpret_cast<const seal_byte *>(input), uint64_count * bytes_per_uint64, nullptr, 0) != 0)
+                if (blake2b(&destination, hash_block_byte_count, input, uint64_count * bytes_per_uint64, nullptr, 0) !=
+                    0)
                 {
                     throw std::runtime_error("blake2b failed");
                 }

@@ -386,8 +386,7 @@ namespace seal
 
         @param[in] stream The stream to load the EncryptionParameters from
         @throws std::logic_error if the data cannot be loaded by this version of
-        Microsoft SEAL, if the loaded data is invalid, if decompression failed,
-        or if the loaded size exceeds in_size_bound
+        Microsoft SEAL, if the loaded data is invalid or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff load(std::istream &stream)
@@ -430,8 +429,7 @@ namespace seal
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if the data cannot be loaded by this version of
-        Microsoft SEAL, if the loaded data is invalid, if decompression failed,
-        or if the loaded size exceeds in_size_bound
+        Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff load(const seal_byte *in, std::size_t size)

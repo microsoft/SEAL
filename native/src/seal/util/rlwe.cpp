@@ -111,12 +111,12 @@ namespace seal
         void sample_poly_uniform(
             shared_ptr<UniformRandomGenerator> rng, const EncryptionParameters &parms, uint64_t *destination)
         {
-            // Extract encryption parameters.
+            // Extract encryption parameters
             auto coeff_modulus = parms.coeff_modulus();
             size_t coeff_modulus_size = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
 
-            // Set up source of randomness that produces 32 bit random things.
+            // Set up source of randomness that produces 32 bit random things
             RandomToStandardAdapter engine(rng);
 
             constexpr uint64_t max_random = static_cast<uint64_t>(0xFFFFFFFFFFFFFFFFULL);
@@ -126,7 +126,7 @@ namespace seal
                 uint64_t max_multiple = max_random - barrett_reduce_64(max_random, modulus) - 1;
                 for (size_t i = 0; i < coeff_count; i++)
                 {
-                    // This ensures uniform distribution.
+                    // This ensures uniform distribution
                     uint64_t rand;
                     do
                     {
@@ -147,7 +147,7 @@ namespace seal
                 throw invalid_argument("public key is not valid for the encryption parameters");
             }
 #endif
-            // We use a fresh memory pool with `clear_on_destruction' enabled.
+            // We use a fresh memory pool with `clear_on_destruction' enabled
             MemoryPoolHandle pool = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
 
             auto &context_data = *context.get_context_data(parms_id);
@@ -164,14 +164,14 @@ namespace seal
             destination.is_ntt_form() = is_ntt_form;
             destination.scale() = 1.0;
 
-            // c[j] = public_key[j] * u + e[j] where e[j] <-- chi, u <-- R_3.
+            // c[j] = public_key[j] * u + e[j] where e[j] <-- chi, u <-- R_3
 
-            // Create RNG, u and error share one RNG.
-            auto rng = parms.random_generator()->create();
+            // Create a PRNG; u and the noise/error share the same PRNG
+            auto prng = parms.random_generator()->create();
 
             // Generate u <-- R_3
             auto u(allocate_poly(coeff_count, coeff_modulus_size, pool));
-            sample_poly_ternary(rng, parms, u.get());
+            sample_poly_ternary(prng, parms, u.get());
 
             // c[j] = u * public_key[j]
             for (size_t i = 0; i < coeff_modulus_size; i++)
@@ -183,7 +183,7 @@ namespace seal
                         u.get() + i * coeff_count, public_key.data().data(j) + i * coeff_count, coeff_count,
                         coeff_modulus[i], destination.data(j) + i * coeff_count);
 
-                    // Addition with e_0, e_1 is in non-NTT form.
+                    // Addition with e_0, e_1 is in non-NTT form
                     if (!is_ntt_form)
                     {
                         inverse_ntt_negacyclic_harvey(destination.data(j) + i * coeff_count, ntt_tables[i]);
@@ -191,18 +191,14 @@ namespace seal
                 }
             }
 
-            // Generate e_j <-- chi.
+            // Generate e_j <-- chi
             // c[j] = public_key[j] * u + e[j]
             for (size_t j = 0; j < encrypted_size; j++)
             {
-#ifdef SEAL_USE_GAUSSIAN
-                sample_poly_normal(rng, parms, u.get());
-#else
-                sample_poly_cbd(rng, parms, u.get());
-#endif
+                SEAL_NOISE_SAMPLER(prng, parms, u.get());
                 for (size_t i = 0; i < coeff_modulus_size; i++)
                 {
-                    // Addition with e_0, e_1 is in NTT form.
+                    // Addition with e_0, e_1 is in NTT form
                     if (is_ntt_form)
                     {
                         ntt_negacyclic_harvey(u.get() + i * coeff_count, ntt_tables[i]);
@@ -235,9 +231,16 @@ namespace seal
             auto ntt_tables = context_data.small_ntt_tables();
             size_t encrypted_size = 2;
 
-            // If a polynomial is too small to store a seed, disable save_seed.
-            auto poly_uint64_count = mul_safe(coeff_count, coeff_modulus_size);
-            if (save_seed && static_cast<uint64_t>(poly_uint64_count) < (random_seed_type().size() + 1))
+            // If a polynomial is too small to store UniformRandomGeneratorInfo,
+            // it is best to just disable save_seed. Note that the size needed is
+            // the size of UniformRandomGeneratorInfo plus one (uint64_t) because
+            // of an indicator word that indicates a seeded ciphertext.
+            size_t poly_uint64_count = mul_safe(coeff_count, coeff_modulus_size);
+            size_t prng_info_byte_count =
+                static_cast<size_t>(UniformRandomGeneratorInfo::SaveSize(compr_mode_type::none));
+            size_t prng_info_uint64_count =
+                divide_round_up(prng_info_byte_count, static_cast<size_t>(bytes_per_uint64));
+            if (save_seed && poly_uint64_count < prng_info_uint64_count + 1)
             {
                 save_seed = false;
             }
@@ -246,16 +249,17 @@ namespace seal
             destination.is_ntt_form() = is_ntt_form;
             destination.scale() = 1.0;
 
-            // Create an instance of a random number generator. We use this for sampling a seed for a second BlakePRNG
-            // used for sampling u (the seed can be public information. This RNG is also used for sampling the error.
-            auto bootstrap_rng = parms.random_generator()->create();
+            // Create an instance of a random number generator. We use this for sampling
+            // a seed for a second PRNG used for sampling u (the seed can be public
+            // information. This PRNG is also used for sampling the noise/error below.
+            auto bootstrap_prng = parms.random_generator()->create();
 
-            // Sample a seed for generating uniform randomness for the ciphertext; this seed is public information
-            random_seed_type public_rng_seed;
-            bootstrap_rng->generate(sizeof(random_seed_type), reinterpret_cast<seal_byte *>(public_rng_seed.data()));
+            // Sample a public seed for generating uniform randomness
+            prng_seed_type public_prng_seed;
+            bootstrap_prng->generate(prng_seed_byte_count, reinterpret_cast<seal_byte *>(public_prng_seed.data()));
 
-            // Create a BlakePRNG for sampling u
-            auto ciphertext_rng = BlakePRNGFactory(public_rng_seed).create();
+            // Set up a new default PRNG for expanding u from the seed sampled above
+            auto ciphertext_prng = UniformRandomGeneratorFactory::DefaultFactory()->create(public_prng_seed);
 
             // Generate ciphertext: (c[0], c[1]) = ([-(as+e)]_q, a)
             uint64_t *c0 = destination.data();
@@ -265,26 +269,23 @@ namespace seal
             if (is_ntt_form || !save_seed)
             {
                 // Sample the NTT form directly
-                sample_poly_uniform(ciphertext_rng, parms, c1);
+                sample_poly_uniform(ciphertext_prng, parms, c1);
             }
             else if (save_seed)
             {
                 // Sample non-NTT form and store the seed
-                sample_poly_uniform(ciphertext_rng, parms, c1);
+                sample_poly_uniform(ciphertext_prng, parms, c1);
                 for (size_t i = 0; i < coeff_modulus_size; i++)
                 {
-                    // Transform the c1 into NTT representation.
+                    // Transform the c1 into NTT representation
                     ntt_negacyclic_harvey(c1 + i * coeff_count, ntt_tables[i]);
                 }
             }
 
             // Sample e <-- chi
             auto noise(allocate_poly(coeff_count, coeff_modulus_size, pool));
-#ifdef SEAL_USE_GAUSSIAN
-            sample_poly_normal(bootstrap_rng, parms, noise.get());
-#else
-            sample_poly_cbd(bootstrap_rng, parms, noise.get());
-#endif
+            SEAL_NOISE_SAMPLER(bootstrap_prng, parms, noise.get());
+
             // Calculate -(a*s + e) (mod q) and store in c[0]
             for (size_t i = 0; i < coeff_modulus_size; i++)
             {
@@ -293,7 +294,7 @@ namespace seal
                     c0 + i * coeff_count);
                 if (is_ntt_form)
                 {
-                    // Transform the noise e into NTT representation.
+                    // Transform the noise e into NTT representation
                     ntt_negacyclic_harvey(noise.get() + i * coeff_count, ntt_tables[i]);
                 }
                 else
@@ -310,16 +311,18 @@ namespace seal
             {
                 for (size_t i = 0; i < coeff_modulus_size; i++)
                 {
-                    // Transform the c1 into non-NTT representation.
+                    // Transform the c1 into non-NTT representation
                     inverse_ntt_negacyclic_harvey(c1 + i * coeff_count, ntt_tables[i]);
                 }
             }
 
             if (save_seed)
             {
-                // Write random seed to destination.data(1).
+                UniformRandomGeneratorInfo prng_info = ciphertext_prng->info();
+
+                // Write prng_info to destination.data(1) after an indicator word
                 c1[0] = static_cast<uint64_t>(0xFFFFFFFFFFFFFFFFULL);
-                copy_n(public_rng_seed.cbegin(), public_rng_seed.size(), c1 + 1);
+                prng_info.save(reinterpret_cast<seal_byte *>(c1 + 1), prng_info_byte_count, compr_mode_type::none);
             }
         }
     } // namespace util

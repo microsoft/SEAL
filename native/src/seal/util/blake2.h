@@ -15,8 +15,8 @@
 
 /*
 Minor modifications to the original file have been made and marked
-as `EDIT: ...`. The sole purpose of these edits is to silence misleading
-warnings in Visual Studio.
+as `Microsoft SEAL edit: ...`. The sole purpose of these edits is to silence
+misleading warnings in Visual Studio.
 */
 
 #ifndef BLAKE2_H
@@ -141,11 +141,9 @@ extern "C"
     } blake2xb_state;
 
     /* Padded structs result in a compile-time error */
-    /*
-    EDIT: explicit cast to int
-    */
     enum
     {
+        /* Microsoft SEAL edit: explicit cast to silence warnings. */
         BLAKE2_DUMMY_1 = 1 / (int)(sizeof(blake2s_param) == BLAKE2S_OUTBYTES),
         BLAKE2_DUMMY_2 = 1 / (int)(sizeof(blake2b_param) == BLAKE2B_OUTBYTES)
     };

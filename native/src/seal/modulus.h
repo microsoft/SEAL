@@ -169,7 +169,7 @@ namespace seal
         */
         SEAL_NODISCARD inline bool operator!=(const Modulus &compare) const noexcept
         {
-            return !(value_ == compare.value_);
+            return !operator==(compare);
         }
 
         /**
@@ -179,7 +179,7 @@ namespace seal
         */
         SEAL_NODISCARD inline bool operator!=(std::uint64_t compare) const noexcept
         {
-            return value_ != compare;
+            return !operator==(compare);
         }
 
         /**
