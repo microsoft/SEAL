@@ -50,6 +50,7 @@
     <ClInclude Include="seal\util\croots.h" />
     <ClInclude Include="seal\util\defines.h" />
     <ClInclude Include="seal\util\dwthandler.h" />
+    <ClInclude Include="seal\util\fips202.h" />
     <ClInclude Include="seal\util\galois.h" />
     <ClInclude Include="seal\util\gcc.h" />
     <ClInclude Include="seal\util\globals.h" />

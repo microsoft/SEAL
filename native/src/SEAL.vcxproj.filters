@@ -116,6 +116,9 @@
     <ClInclude Include="seal\util\dwthandler.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
+    <ClInclude Include="seal\util\fips202.h">
+      <Filter>Header Files\util</Filter>
+    </ClInclude>
     <ClInclude Include="seal\util\gcc.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>
@@ -257,6 +260,9 @@
       <Filter>Source Files\util</Filter>
     </ClCompile>
     <ClCompile Include="seal\util\croots.cpp">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="seal\util\fips202.c">
       <Filter>Source Files\util</Filter>
     </ClCompile>
     <ClCompile Include="seal\util\galois.cpp">
