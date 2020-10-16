@@ -365,6 +365,14 @@ namespace seal
 
         constexpr int nibbles_per_uint64 = bytes_per_uint64 * nibbles_per_byte;
 
+        SEAL_NODISCARD inline constexpr int hamming_weight(unsigned char value)
+        {
+            int t = static_cast<int>(value);
+            t -= (t >> 1) & 0x55;
+            t = (t & 0x33) + ((t >> 2) & 0x33);
+            return (t + (t >> 4)) & 0x0F;
+        }
+
         template <typename T, typename = std::enable_if_t<is_uint32_v<T> || is_uint64_v<T>>>
         SEAL_NODISCARD inline constexpr T reverse_bits(T operand) noexcept
         {

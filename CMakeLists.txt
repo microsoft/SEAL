@@ -99,84 +99,7 @@ set(SEAL_THIRDPARTY_DIR ${SEAL_SOURCE_DIR}/thirdparty)
 # Cleaning up artifacts from previous versions
 include(CleanArtifacts)
 
-##################################
-# Macros for configuring targets #
-##################################
-
-# Set the C++ language version
-macro(seal_set_language target)
-    if(SEAL_USE_CXX17)
-        target_compile_features(${target} PUBLIC cxx_std_17)
-    else()
-        target_compile_features(${target} PUBLIC cxx_std_14)
-    endif()
-endmacro()
-
-# Set the VERSION property
-macro(seal_set_version target)
-    set_target_properties(${target} PROPERTIES VERSION ${SEAL_VERSION})
-endmacro()
-
-# Set the library filename to reflect version
-macro(seal_set_version_filename target)
-    set_target_properties(${target} PROPERTIES
-        OUTPUT_NAME ${target}-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
-endmacro()
-
-# Set the SOVERSION property
-macro(seal_set_soversion target)
-    set_target_properties(${target} PROPERTIES
-        SOVERSION ${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
-endmacro()
-
-# Set include directories for build and install interfaces
-macro(seal_set_include_directories target)
-    target_include_directories(${target} PUBLIC
-        $<BUILD_INTERFACE:${SEAL_INCLUDES_BUILD_DIR}>
-        $<INSTALL_INTERFACE:${SEAL_INCLUDES_INSTALL_DIR}>)
-endmacro()
-
-# Link a thread library
-macro(seal_link_threads target)
-    # Require thread library
-    if(NOT TARGET Threads::Threads)
-        set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
-        set(THREADS_PREFER_PTHREAD_FLAG TRUE)
-        find_package(Threads REQUIRED)
-    endif()
-
-    # Link Threads
-    target_link_libraries(${target} PUBLIC Threads::Threads)
-endmacro()
-
-# Include target to given export
-macro(seal_install_target target export)
-    install(TARGETS ${target} EXPORT ${export}
-        ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
-endmacro()
-
-# Manually combine archives, using ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} to keep temporary files.
-macro(seal_combine_archives target dependency)
-    if(CMAKE_HOST_WIN32)
-        get_filename_component(CXX_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
-        set(AR_CMD_PATH "${CXX_DIR}/llvm-ar.exe")
-        file(TO_NATIVE_PATH "${AR_CMD_PATH}" AR_CMD_PATH)
-        set(DEL_CMD "del")
-        set(DEL_CMD_OPTS "")
-    else()
-        set(AR_CMD_PATH "ar")
-        set(DEL_CMD "rm")
-        set(DEL_CMD_OPTS "-rf")
-    endif()
-    add_custom_command(TARGET ${target} POST_BUILD
-        COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:${target}>
-        COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:${dependency}>
-        COMMAND "${AR_CMD_PATH}" rcs $<TARGET_FILE:${target}> *.o
-        COMMAND ${DEL_CMD} ${DEL_CMD_OPTS} *.o
-        WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-endmacro()
+include(SEALMacros)
 
 #########################
 # External dependencies #
@@ -200,223 +123,20 @@ endfunction()
 # [option] SEAL_USE_MSGSL
 set(SEAL_USE_MSGSL_OPTION_STR "Use Microsoft GSL")
 option(SEAL_USE_MSGSL ${SEAL_USE_MSGSL_OPTION_STR} ON)
-
-# Download and configure
-if(SEAL_USE_MSGSL AND NOT MSVC)
-    message(STATUS "Setting up MSGSL ...")
-    if(NOT CMAKE_TOOLCHAIN_FILE)
-        execute_process(
-            COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-            OUTPUT_QUIET
-            RESULT_VARIABLE result
-            WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/msgsl)
-    else()
-        seal_create_cache_entries(${SEAL_THIRDPARTY_DIR}/msgsl)
-        if(EXISTS ${SEAL_THIRDPARTY_DIR}/msgsl/CMakeCache.txt)
-            # Force regenerating make files. When cross compiling we might be
-            # compiling more than one platform at a time.
-            file(REMOVE ${SEAL_THIRDPARTY_DIR}/msgsl/CMakeCache.txt)
-        endif()
-        execute_process(
-            COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . -Ccache_init.txt
-            OUTPUT_QUIET
-            RESULT_VARIABLE result
-            WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/msgsl)
-    endif()
-    if(result)
-        message(WARNING "Failed to download MSGSL (${result}); disabling `SEAL_USE_MSGSL`")
-    endif()
-endif()
-
-# Build
-if(SEAL_USE_MSGSL AND NOT MSVC)
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} --build .
-        OUTPUT_QUIET
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/msgsl)
-    if(result)
-        message(WARNING "Failed to build MSGSL (${result}); disabling `SEAL_USE_MSGSL`")
-    endif()
-    set(GSL_CXX_STANDARD "14" CACHE STRING "" FORCE)
-    mark_as_advanced(GSL_CXX_STANDARD )
-    set(GSL_TEST OFF CACHE BOOL "" FORCE)
-    mark_as_advanced(GSL_TEST)
-endif()
-
-# Set up the targets
-if(SEAL_USE_MSGSL AND NOT MSVC)
-    add_subdirectory(
-        ${SEAL_THIRDPARTY_DIR}/msgsl/src
-        EXCLUDE_FROM_ALL)
-    set(SEAL_MSGSL_INCLUDE_DIR ${SEAL_THIRDPARTY_DIR}/msgsl/src/include)
-endif()
+include(ExternalMSGSL)
 
 # [option] SEAL_USE_ZLIB
 set(SEAL_USE_ZLIB_OPTION_STR "Use ZLIB for compressed serialization")
 option(SEAL_USE_ZLIB ${SEAL_USE_ZLIB_OPTION_STR} ON)
-
-# ZLIB has no VERSION given to project(), needs to suppress CMP0048 warning
-if(SEAL_USE_ZLIB AND NOT MSVC)
-    set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS TRUE CACHE INTERNAL "Suppress CMP0048 warning" FORCE)
-endif()
-
-# Download and configure
-if(SEAL_USE_ZLIB AND NOT MSVC)
-    message(STATUS "Setting up ZLIB ...")
-    if(NOT CMAKE_TOOLCHAIN_FILE)
-        execute_process(
-            COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-            OUTPUT_QUIET
-            RESULT_VARIABLE result
-            WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/zlib)
-    else()
-        seal_create_cache_entries(${SEAL_THIRDPARTY_DIR}/zlib)
-        if(EXISTS ${SEAL_THIRDPARTY_DIR}/zlib/build/CMakeCache.txt)
-            # Force regenerating make files. When cross compiling we might be
-            # compiling more than one platform at a time.
-            file(REMOVE ${SEAL_THIRDPARTY_DIR}/zlib/build/CMakeCache.txt)
-        endif()
-        execute_process(
-            COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . -Ccache_init.txt
-            OUTPUT_QUIET
-            RESULT_VARIABLE result
-            WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/zlib)
-    endif()
-    if(result)
-        message(WARNING "Failed to download ZLIB (${result}); disabling `SEAL_USE_ZLIB`")
-    endif()
-    mark_as_advanced(AMD64)
-    mark_as_advanced(ASM686)
-    mark_as_advanced(EXECUTABLE_OUTPUT_PATH)
-    mark_as_advanced(CMAKE_INSTALL_PREFIX)
-    mark_as_advanced(INSTALL_BIN_DIR)
-    mark_as_advanced(INSTALL_INC_DIR)
-    mark_as_advanced(INSTALL_LIB_DIR)
-    mark_as_advanced(INSTALL_MAN_DIR)
-    mark_as_advanced(INSTALL_PKGCONFIG_DIR)
-    mark_as_advanced(LIBRARY_OUTPUT_PATH)
-    mark_as_advanced(CMAKE_BACKWARDS_COMPATIBILITY)
-endif()
-
-# Build
-if(SEAL_USE_ZLIB AND NOT MSVC)
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-        OUTPUT_QUIET
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/zlib)
-    if(result)
-        message(WARNING "Failed to build ZLIB (${result}); disabling `SEAL_USE_ZLIB`")
-    endif()
-endif()
-
-# Set up the targets
-if(SEAL_USE_ZLIB AND NOT MSVC)
-    add_subdirectory(
-        ${SEAL_THIRDPARTY_DIR}/zlib/src
-        EXCLUDE_FROM_ALL)
-
-    # Set the ZLIB include directories; we have to include also ZLIB binary directory because
-    # ZLIB creates a file zconf.h into it, which must be visible to the compiler.
-    set(SEAL_ZLIB_INCLUDE_DIRS
-        ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zlib/src
-        ${SEAL_THIRDPARTY_DIR}/zlib/src)
-    set_target_properties(zlibstatic PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${SEAL_ZLIB_INCLUDE_DIRS}")
-endif()
+include(ExternalZLIB)
 
 # [option] SEAL_USE_ZSTD
 set(SEAL_USE_ZSTD_OPTION_STR "Use Zstandard for compressed serialization")
 option(SEAL_USE_ZSTD ${SEAL_USE_ZSTD_OPTION_STR} ON)
+include(ExternalZSTD)
 
-# Download and configure
-if(SEAL_USE_ZSTD AND NOT MSVC)
-    message(STATUS "Setting up Zstandard ...")
-    if(NOT CMAKE_TOOLCHAIN_FILE)
-        execute_process(
-            COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-            OUTPUT_QUIET
-            RESULT_VARIABLE result
-            WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/zstd)
-    else()
-        seal_create_cache_entries(${SEAL_THIRDPARTY_DIR}/zstd)
-        if(EXISTS ${SEAL_THIRDPARTY_DIR}/zstd/build/CMakeCache.txt)
-            # Force regenerating make files. When cross compiling we might be
-            # compiling more than one platform at a time.
-            file(REMOVE ${SEAL_THIRDPARTY_DIR}/zstd/build/CMakeCache.txt)
-        endif()
-        execute_process(
-            COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . -Ccache_init.txt
-            OUTPUT_QUIET
-            RESULT_VARIABLE result
-            WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/zstd)
-    endif()
-    if(result)
-        message(WARNING "Failed to download ZSTD (${result}); disabling `SEAL_USE_ZSTD`")
-    endif()
-endif()
-
-# Build
-if(SEAL_USE_ZSTD AND NOT MSVC)
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-        OUTPUT_QUIET
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/zstd)
-    if(result)
-        message(WARNING "Failed to build ZSTD (${result}); disabling `SEAL_USE_ZSTD`")
-    endif()
-endif()
-
-# Set up the targets
-if(SEAL_USE_ZSTD AND NOT MSVC)
-    add_subdirectory(
-        ${SEAL_THIRDPARTY_DIR}/zstd/src/build/cmake
-        EXCLUDE_FROM_ALL)
-
-    # Set the ZSTD include directory
-    set(SEAL_ZSTD_INCLUDE_DIR ${SEAL_THIRDPARTY_DIR}/zstd/src/lib)
-endif()
-
-# Google Test
-# This follows the example in
-# https://github.com/google/googletest/blob/release-1.10.0/googletest/README.md.
-
-# Download and configure
-if(SEAL_BUILD_TESTS AND NOT MSVC)
-    message(STATUS "Setting up Google Test ...")
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-        OUTPUT_QUIET
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/googletest)
-    if(result)
-        message(WARNING "Failed to download Google Test (${result}); disabling `SEAL_BUILD_TESTS`")
-    endif()
-    set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
-    mark_as_advanced(BUILD_GMOCK)
-    set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
-    mark_as_advanced(INSTALL_GTEST)
-endif()
-
-# Build
-if(SEAL_BUILD_TESTS AND NOT MSVC)
-    execute_process(COMMAND ${CMAKE_COMMAND} --build .
-        OUTPUT_QUIET
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/googletest)
-    if(result)
-        message(WARNING "Failed to build Google Test (${result}); disabling `SEAL_BUILD_TESTS`")
-    endif()
-endif()
-
-# Set up the targets
-if(SEAL_BUILD_TESTS AND NOT MSVC)
-    set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-    add_subdirectory(
-        ${SEAL_THIRDPARTY_DIR}/googletest/src
-        ${SEAL_THIRDPARTY_DIR}/googletest/build
-        EXCLUDE_FROM_ALL)
-endif()
+# if SEAL_BUILD_TESTS is ON, use googletest
+include(ExternalGTest)
 
 ####################
 # SEAL C++ library #
@@ -447,51 +167,83 @@ set(SEAL_USE_INTRIN_OPTION_STR "Use intrinsics")
 option(SEAL_USE_INTRIN ${SEAL_USE_INTRIN_OPTION_STR} ON)
 # Look for header files, use intrinsics if available, set to OFF otherwise.
 include(CheckCXXIntrinsicsHeader)
+if(NOT SEAL_INTRIN_HEADER_FOUND)
+    set(SEAL_USE_INTRIN OFF CACHE BOOL ${SEAL_USE_INTRIN_OPTION_STR} FORCE)
+endif()
 
 # [option] SEAL_USE_${A_SPECIFIC_INTRIN} (default: ON, advanced)
 # Not available if SEAL_USE_INTRIN is OFF.
+# Use a specific intrinsic if available, set to OFF otherwise.
+include(CheckCXXIntrinsicsSpecific)
+
 if(MSVC)
     set(SEAL_USE__UMUL128_OPTION_STR "Use _umul128")
     cmake_dependent_option(SEAL_USE__UMUL128 ${SEAL_USE__UMUL128_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
     mark_as_advanced(FORCE SEAL_USE__UMUL128)
+    if(NOT SEAL__UMUL128_FOUND)
+        set(SEAL_USE__UMUL128 OFF CACHE BOOL ${SEAL_USE__UMUL128_OPTION_STR} FORCE)
+    endif()
 
     set(SEAL_USE__BITSCANREVERSE64_OPTION_STR "Use _BitScanReverse64")
     cmake_dependent_option(SEAL_USE__BITSCANREVERSE64 ${SEAL_USE__BITSCANREVERSE64_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
     mark_as_advanced(FORCE SEAL_USE__BITSCANREVERSE64)
+    if(NOT SEAL__BITSCANREVERSE64_FOUND)
+        set(SEAL_USE__BITSCANREVERSE64 OFF CACHE BOOL ${SEAL_USE__BITSCANREVERSE64_OPTION_STR} FORCE)
+    endif()
 else()
     set(SEAL_USE___INT128_OPTION_STR "Use __int128")
     cmake_dependent_option(SEAL_USE___INT128 ${SEAL_USE___INT128_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
     mark_as_advanced(FORCE SEAL_USE___INT128)
+    if(NOT SEAL__INT128_FOUND)
+        set(SEAL_USE___INT128 OFF CACHE BOOL ${SEAL_USE___INT128_OPTION_STR} FORCE)
+    endif()
 
     set(SEAL_USE___BUILTIN_CLZLL_OPTION_STR "Use __builtin_clzll")
     cmake_dependent_option(SEAL_USE___BUILTIN_CLZLL ${SEAL_USE___BUILTIN_CLZLL_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
     mark_as_advanced(FORCE SEAL_USE___BUILTIN_CLZLL)
+    if(NOT SEAL__BUILTIN_CLZLL_FOUND)
+        set(SEAL_USE___BUILTIN_CLZLL OFF CACHE BOOL ${SEAL_USE___BUILTIN_CLZLL_OPTION_STR} FORCE)
+    endif()
 endif()
 
-set(SEAL_USE__ADDCARRY_U64_OPTION_STR "Use _addcarry_u64")
-cmake_dependent_option(SEAL_USE__ADDCARRY_U64 ${SEAL_USE__ADDCARRY_U64_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
-mark_as_advanced(FORCE SEAL_USE__ADDCARRY_U64)
+set(SEAL_USE_ADDCARRY_U64_OPTION_STR "Use _addcarry_u64")
+cmake_dependent_option(SEAL_USE_ADDCARRY_U64 ${SEAL_USE_ADDCARRY_U64_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
+mark_as_advanced(FORCE SEAL_USE_ADDCARRY_U64)
+if(NOT SEAL_ADDCARRY_U64_FOUND)
+    set(SEAL_USE_ADDCARRY_U64 OFF CACHE BOOL ${SEAL_USE_ADDCARRY_U64_OPTION_STR} FORCE)
+endif()
 
-set(SEAL_USE__SUBBORROW_U64_OPTION_STR "Use _subborrow_u64")
-cmake_dependent_option(SEAL_USE__SUBBORROW_U64 ${SEAL_USE__SUBBORROW_U64_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
-mark_as_advanced(FORCE SEAL_USE__SUBBORROW_U64)
-# Use a specific intrinsic if available, set to OFF otherwise.
-include(CheckCXXIntrinsicsSpecific)
+set(SEAL_USE_SUBBORROW_U64_OPTION_STR "Use _subborrow_u64")
+cmake_dependent_option(SEAL_USE_SUBBORROW_U64 ${SEAL_USE_SUBBORROW_U64_OPTION_STR} ON "SEAL_USE_INTRIN" OFF)
+mark_as_advanced(FORCE SEAL_USE_SUBBORROW_U64)
+if(NOT SEAL_SUBBORROW_U64_FOUND)
+    set(SEAL_USE_SUBBORROW_U64 OFF CACHE BOOL ${SEAL_USE_SUBBORROW_U64_OPTION_STR} FORCE)
+endif()
 
 # [option] SEAL_USE_${A_SPECIFIC_MEMSET_METHOD} (default: ON, advanced)
+# Use a specific memset method if available, set to OFF otherwise.
+include(CheckMemset)
+
 set(SEAL_USE_MEMSET_S_OPTION_STR "Use memset_s")
 option(SEAL_USE_MEMSET_S ${SEAL_USE_MEMSET_S_OPTION_STR} ON)
 mark_as_advanced(FORCE SEAL_USE_MEMSET_S)
+if(NOT SEAL_MEMSET_S_FOUND)
+    set(SEAL_USE_MEMSET_S OFF CACHE BOOL ${SEAL_USE_MEMSET_S_OPTION_STR} FORCE)
+endif()
 
 set(SEAL_USE_EXPLICIT_BZERO_OPTION_STR "Use explicit_bzero")
 option(SEAL_USE_EXPLICIT_BZERO ${SEAL_USE_EXPLICIT_BZERO_OPTION_STR} ON)
 mark_as_advanced(FORCE SEAL_USE_EXPLICIT_BZERO)
+if(NOT SEAL_EXPLICIT_BZERO_FOUND)
+    set(SEAL_USE_EXPLICIT_BZERO OFF CACHE BOOL ${SEAL_USE_EXPLICIT_BZERO_OPTION_STR} FORCE)
+endif()
 
 set(SEAL_USE_EXPLICIT_MEMSET_OPTION_STR "Use explicit_memset")
 option(SEAL_USE_EXPLICIT_MEMSET ${SEAL_USE_EXPLICIT_MEMSET_OPTION_STR} ON)
 mark_as_advanced(FORCE SEAL_USE_EXPLICIT_MEMSET)
-# Use a specific memset method if available, set to OFF otherwise.
-include(CheckMemset)
+if(NOT SEAL_EXPLICIT_MEMSET_FOUND)
+    set(SEAL_USE_EXPLICIT_MEMSET OFF CACHE BOOL ${SEAL_USE_EXPLICIT_MEMSET_OPTION_STR} FORCE)
+endif()
 
 # Create an object library to compile sources only once
 add_library(seal_obj OBJECT)
