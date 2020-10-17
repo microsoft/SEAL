@@ -151,6 +151,9 @@ namespace seal
                 legacy_headers::SEALHeader_3_4 header_3_4(header);
 
                 SEALHeader new_header;
+                new_header.version_major = 3;
+                new_header.version_minor = 4;
+
                 // Copy over the fields; of course the result may not be valid depending on whether the input was a
                 // valid version 3.4 header
                 new_header.compr_mode = header_3_4.compr_mode;

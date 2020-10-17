@@ -126,17 +126,13 @@ namespace seal
             throw logic_error("unsupported prng_type");
         }
 
-        if (version.major == 3 && version.minor >= 6)
-        {
-            sample_poly_uniform(prng, context_data_ptr->parms(), data(1));
-        }
-        else if (version.major == 3 && version.minor <= 5)
+        if (version.major == 3 && (version.minor == 4 || version.minor == 5))
         {
             sample_poly_uniform_seal_3_5(prng, context_data_ptr->parms(), data(1));
         }
         else
         {
-            throw logic_error("unsupported version");
+            sample_poly_uniform(prng, context_data_ptr->parms(), data(1));
         }
     }
 
@@ -320,7 +316,7 @@ namespace seal
                 }
                 else
                 {
-                    throw logic_error("unsupported version");
+                    throw logic_error("incompatible version");
                 }
 
                 // Set up a UniformRandomGenerator and expand

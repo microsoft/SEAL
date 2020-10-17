@@ -83,7 +83,6 @@
     <ClCompile Include="seal\batchencoder.cpp" />
     <ClCompile Include="seal\ciphertext.cpp" />
     <ClCompile Include="seal\ckks.cpp" />
-    <ClCompile Include="seal\modulus.cpp" />
     <ClCompile Include="seal\context.cpp" />
     <ClCompile Include="seal\decryptor.cpp" />
     <ClCompile Include="seal\encryptionparams.cpp" />
@@ -92,32 +91,34 @@
     <ClCompile Include="seal\keygenerator.cpp" />
     <ClCompile Include="seal\kswitchkeys.cpp" />
     <ClCompile Include="seal\memorymanager.cpp" />
+    <ClCompile Include="seal\modulus.cpp" />
     <ClCompile Include="seal\plaintext.cpp" />
     <ClCompile Include="seal\randomgen.cpp" />
     <ClCompile Include="seal\serialization.cpp" />
-    <ClCompile Include="seal\util\common.cpp" />
-    <ClCompile Include="seal\util\rns.cpp" />
-    <ClCompile Include="seal\util\ztools.cpp" />
-    <ClCompile Include="seal\valcheck.cpp" />
     <ClCompile Include="seal\util\blake2b.c" />
     <ClCompile Include="seal\util\blake2xb.c" />
     <ClCompile Include="seal\util\clipnormal.cpp" />
+    <ClCompile Include="seal\util\common.cpp" />
     <ClCompile Include="seal\util\croots.cpp" />
+    <ClCompile Include="seal\util\fips202.c" />
     <ClCompile Include="seal\util\galois.cpp" />
     <ClCompile Include="seal\util\globals.cpp" />
     <ClCompile Include="seal\util\hash.cpp" />
     <ClCompile Include="seal\util\iterator.cpp" />
     <ClCompile Include="seal\util\mempool.cpp" />
+    <ClCompile Include="seal\util\ntt.cpp" />
     <ClCompile Include="seal\util\numth.cpp" />
     <ClCompile Include="seal\util\polyarithsmallmod.cpp" />
     <ClCompile Include="seal\util\rlwe.cpp" />
+    <ClCompile Include="seal\util\rns.cpp" />
     <ClCompile Include="seal\util\scalingvariant.cpp" />
-    <ClCompile Include="seal\util\ntt.cpp" />
     <ClCompile Include="seal\util\streambuf.cpp" />
     <ClCompile Include="seal\util\uintarith.cpp" />
     <ClCompile Include="seal\util\uintarithmod.cpp" />
     <ClCompile Include="seal\util\uintarithsmallmod.cpp" />
     <ClCompile Include="seal\util\uintcore.cpp" />
+    <ClCompile Include="seal\util\ztools.cpp" />
+    <ClCompile Include="seal\valcheck.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="seal\CMakeLists.txt" />

@@ -9,7 +9,7 @@ The performance improvement should be expected to be around 20-30x.
 - Added support for Shake256 extendable output function for pseudo-random number generation.
 The user can choose to set the default to Blake2xb (faster) or Shake256, when configuring the build system.
 There is slight change in how seeded ciphertexts and public keys are serialized, partly due to this new flexibility.
-Microsoft SEAL 3.6 is backwards compatible when deserializing ciphertexts and public keys, but it does not support serializing in the old format.
+Microsoft SEAL 3.6 is backwards compatible with 3.4 and 3.5 when deserializing, but it does not support serializing in the old formats.
 
 ### API Changes
 

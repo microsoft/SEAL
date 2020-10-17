@@ -143,7 +143,25 @@ namespace seal
         */
         SEAL_NODISCARD static bool IsCompatibleVersion(const SEALHeader &header) noexcept
         {
-            return (header.version_major == SEAL_VERSION_MAJOR && header.version_minor == SEAL_VERSION_MINOR);
+            // Exact same version
+            if (header.version_major == SEAL_VERSION_MAJOR && header.version_minor == SEAL_VERSION_MINOR)
+            {
+                return true;
+            }
+
+            // Different major versions not supported
+            if (header.version_major != SEAL_VERSION_MAJOR)
+            {
+                return false;
+            }
+
+            // Support Microsoft SEAL 3.4 and 3.5
+            if (header.version_major == 3 && (header.version_minor == 4 || header.version_minor == 5))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /**
@@ -342,7 +360,7 @@ namespace seal
 
             SEALHeader_3_4 &operator=(const Serialization::SEALHeader assign)
             {
-                std::memcpy(this, &assign, sizeof(Serialization::SEALHeader));
+                std::memcpy(this, &assign, Serialization::seal_header_size);
                 return *this;
             }
 
