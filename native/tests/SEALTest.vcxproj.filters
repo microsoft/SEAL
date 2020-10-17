@@ -116,10 +116,10 @@
     <ClCompile Include="seal\batchencoder.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\intarray.cpp">
+    <ClCompile Include="seal\ckks.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="seal\ckks.cpp">
+	<ClCompile Include="seal\dynarray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="seal\testrunner.cpp">
