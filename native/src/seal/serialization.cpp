@@ -219,7 +219,7 @@ namespace seal
     }
 
     streamoff Serialization::Save(
-        function<void(ostream &stream)> save_members, streamoff raw_size, ostream &stream, compr_mode_type compr_mode,
+        function<void(ostream &)> save_members, streamoff raw_size, ostream &stream, compr_mode_type compr_mode,
         bool clear_on_destruction)
     {
         if (!save_members)
@@ -336,7 +336,7 @@ namespace seal
     }
 
     streamoff Serialization::Load(
-        function<void(istream &stream)> load_members, istream &stream, bool clear_on_destruction)
+        function<void(istream &, SEALVersion)> load_members, istream &stream, bool clear_on_destruction)
     {
         if (!load_members)
         {
@@ -366,11 +366,15 @@ namespace seal
                 throw logic_error("loaded SEALHeader is invalid");
             }
 
+            // Read header version information so we can call, if necessary, the
+            // correct variant of load_members.
+            SEALVersion version{ header.version_major, header.version_minor, 0, 0 };
+
             switch (header.compr_mode)
             {
             case compr_mode_type::none:
                 // Read rest of the data
-                load_members(stream);
+                load_members(stream, version);
                 if (header.size != safe_cast<uint64_t>(stream.tellg() - stream_start_pos))
                 {
                     throw logic_error("invalid data size");
@@ -395,7 +399,7 @@ namespace seal
                 {
                     throw logic_error("stream decompression failed");
                 }
-                load_members(temp_stream);
+                load_members(temp_stream, version);
                 break;
             }
 #endif
@@ -418,7 +422,7 @@ namespace seal
                 {
                     throw logic_error("stream decompression failed");
                 }
-                load_members(temp_stream);
+                load_members(temp_stream, version);
                 break;
             }
 #endif
@@ -444,7 +448,7 @@ namespace seal
     }
 
     streamoff Serialization::Save(
-        function<void(ostream &stream)> save_members, streamoff raw_size, seal_byte *out, size_t size,
+        function<void(ostream &)> save_members, streamoff raw_size, seal_byte *out, size_t size,
         compr_mode_type compr_mode, bool clear_on_destruction)
     {
         if (!out)
@@ -465,7 +469,8 @@ namespace seal
     }
 
     streamoff Serialization::Load(
-        function<void(istream &stream)> load_members, const seal_byte *in, size_t size, bool clear_on_destruction)
+        function<void(istream &, SEALVersion)> load_members, const seal_byte *in, size_t size,
+        bool clear_on_destruction)
     {
         if (!in)
         {

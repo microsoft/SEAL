@@ -8,6 +8,8 @@
 The performance improvement should be expected to be around 20-30x.
 - Added support for Shake256 extendable output function for pseudo-random number generation.
 The user can choose to set the default to Blake2xb (faster) or Shake256, when configuring the build system.
+There is slight change in how seeded ciphertexts and public keys are serialized, partly due to this new flexibility.
+Microsoft SEAL 3.6 is backwards compatible when deserializing ciphertexts and public keys, but it does not support serializing in the old format.
 
 ### API Changes
 
@@ -28,6 +30,8 @@ These were poorly named and have been replaced with overloads of `KeyGenerator::
 - Added a `Shake256PRNG` and `Shake256PRNGFactory` classes.
 Renamed `BlakePRNG` class to `Blake2xbPRNG`, and `BlakePRNGFactory` class to `Blake2xbPRNGFactory`.
 - Added a serializable `UniformRandomGeneratorInfo` class that represents the type of an extendable output function and a seed value.
+- Added `native/src/seal/version.h` defining a struct `SEALVersion`.
+This is used internally to route deserialization logic to correct functions depending on loaded `SEALHeader` version.
 
 ### Other
 
@@ -36,6 +40,7 @@ Renamed `BlakePRNG` class to `Blake2xbPRNG`, and `BlakePRNGFactory` class to `Bl
 - Added `.pre-commit-config.yaml` (check out [pre-commit](https://pre-commit.com) if you are not familiar with this tool).
 - Added `seal::util::DWTHandler` and `seal::util::Arithmetic` class templates that unify the implementation of FFT (used by `CKKSEncoder`) and NTT (used by polynomial arithmetic).
 - The performance of encoding and decoding in CKKS are improved.
+- The performance of randomness generation for ciphertexts and keys (RLWE samples) is improved.
 
 ### File Changes
 
@@ -46,6 +51,7 @@ Renamed files and directories:
 New files:
 
 - [native/src/seal/util/dwthandler.h](native/src/seal/util/dwthandler.h)
+- [native/src/seal/version.h](native/src/seal/version.h)
 
 Removed files:
 

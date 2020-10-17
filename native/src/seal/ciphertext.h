@@ -8,6 +8,7 @@
 #include "seal/memorymanager.h"
 #include "seal/randomgen.h"
 #include "seal/valcheck.h"
+#include "seal/version.h"
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
 #include <algorithm>
@@ -497,7 +498,7 @@ namespace seal
         inline std::streamoff unsafe_load(const SEALContext &context, std::istream &stream)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Ciphertext::load_members, this, context, _1), stream);
+            return Serialization::Load(std::bind(&Ciphertext::load_members, this, context, _1, _2), stream);
         }
 
         /**
@@ -564,7 +565,7 @@ namespace seal
         inline std::streamoff unsafe_load(const SEALContext &context, const seal_byte *in, std::size_t size)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Ciphertext::load_members, this, context, _1), in, size);
+            return Serialization::Load(std::bind(&Ciphertext::load_members, this, context, _1, _2), in, size);
         }
 
         /**
@@ -668,11 +669,11 @@ namespace seal
 
         void resize_internal(std::size_t size, std::size_t poly_modulus_degree, std::size_t coeff_modulus_size);
 
-        void expand_seed(const SEALContext &context, const UniformRandomGeneratorInfo &prng_info);
+        void expand_seed(const SEALContext &context, const UniformRandomGeneratorInfo &prng_info, SEALVersion version);
 
         void save_members(std::ostream &stream) const;
 
-        void load_members(const SEALContext &context, std::istream &stream);
+        void load_members(const SEALContext &context, std::istream &stream, SEALVersion version);
 
         inline bool has_seed_marker() const noexcept
         {

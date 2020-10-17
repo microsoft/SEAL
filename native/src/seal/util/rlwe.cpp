@@ -19,12 +19,13 @@ namespace seal
     namespace util
     {
         void sample_poly_ternary(
-            shared_ptr<UniformRandomGenerator> rng, const EncryptionParameters &parms, uint64_t *destination)
+            shared_ptr<UniformRandomGenerator> prng, const EncryptionParameters &parms, uint64_t *destination)
         {
             auto coeff_modulus = parms.coeff_modulus();
             size_t coeff_modulus_size = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
-            RandomToStandardAdapter engine(rng);
+
+            RandomToStandardAdapter engine(prng);
             uniform_int_distribution<uint64_t> dist(0, 2);
 
             SEAL_ITERATE(iter(destination), coeff_count, [&](auto &I) {
@@ -37,7 +38,7 @@ namespace seal
         }
 
         void sample_poly_normal(
-            shared_ptr<UniformRandomGenerator> rng, const EncryptionParameters &parms, uint64_t *destination)
+            shared_ptr<UniformRandomGenerator> prng, const EncryptionParameters &parms, uint64_t *destination)
         {
             auto coeff_modulus = parms.coeff_modulus();
             size_t coeff_modulus_size = coeff_modulus.size();
@@ -49,7 +50,7 @@ namespace seal
                 return;
             }
 
-            RandomToStandardAdapter engine(rng);
+            RandomToStandardAdapter engine(prng);
             ClippedNormalDistribution dist(
                 0, global_variables::noise_standard_deviation, global_variables::noise_max_deviation);
 
@@ -63,7 +64,7 @@ namespace seal
         }
 
         void sample_poly_cbd(
-            shared_ptr<UniformRandomGenerator> rng, const EncryptionParameters &parms, uint64_t *destination)
+            shared_ptr<UniformRandomGenerator> prng, const EncryptionParameters &parms, uint64_t *destination)
         {
             auto coeff_modulus = parms.coeff_modulus();
             size_t coeff_modulus_size = coeff_modulus.size();
@@ -77,20 +78,21 @@ namespace seal
 
             if (!are_close(global_variables::noise_standard_deviation, 3.2))
             {
-                throw logic_error(
-                    "center binomial distribution only supports standard deviation 3.2, use discrete Gaussian instead");
+                throw logic_error("centered binomial distribution only supports standard deviation 3.2; use rounded "
+                                  "Gaussian instead");
             }
 
-            auto cbd = [&](shared_ptr<UniformRandomGenerator> rng) {
+            auto cbd = [&](shared_ptr<UniformRandomGenerator> prng) {
                 unsigned char x[6];
-                rng->generate(6, reinterpret_cast<seal_byte *>(x));
+                prng->generate(6, reinterpret_cast<seal_byte *>(x));
                 x[2] &= 0x1F;
                 x[5] &= 0x1F;
-                return hamming_weight(x[0]) + hamming_weight(x[1]) + hamming_weight(x[2]) - hamming_weight(x[3]) - hamming_weight(x[4]) - hamming_weight(x[5]);
+                return hamming_weight(x[0]) + hamming_weight(x[1]) + hamming_weight(x[2]) - hamming_weight(x[3]) -
+                       hamming_weight(x[4]) - hamming_weight(x[5]);
             };
 
             SEAL_ITERATE(iter(destination), coeff_count, [&](auto &I) {
-                int32_t noise = cbd(rng);
+                int32_t noise = cbd(prng);
                 uint64_t flag = static_cast<uint64_t>(-static_cast<int64_t>(noise < 0));
                 SEAL_ITERATE(
                     iter(StrideIter<uint64_t *>(&I, coeff_count), coeff_modulus), coeff_modulus_size,
@@ -99,15 +101,45 @@ namespace seal
         }
 
         void sample_poly_uniform(
-            shared_ptr<UniformRandomGenerator> rng, const EncryptionParameters &parms, uint64_t *destination)
+            shared_ptr<UniformRandomGenerator> prng, const EncryptionParameters &parms, uint64_t *destination)
+        {
+            // Extract encryption parameters
+            auto coeff_modulus = parms.coeff_modulus();
+            size_t coeff_modulus_size = coeff_modulus.size();
+            size_t coeff_count = parms.poly_modulus_degree();
+            size_t dest_byte_count = mul_safe(coeff_modulus_size, coeff_count, sizeof(uint64_t));
+
+            constexpr uint64_t max_random = static_cast<uint64_t>(0xFFFFFFFFFFFFFFFFULL);
+
+            // Fill the destination buffer with fresh randomness
+            prng->generate(dest_byte_count, reinterpret_cast<seal_byte *>(destination));
+
+            for (size_t j = 0; j < coeff_modulus_size; j++)
+            {
+                auto &modulus = coeff_modulus[j];
+                uint64_t max_multiple = max_random - barrett_reduce_64(max_random, modulus) - 1;
+                for (size_t i = 0; i < coeff_count; i++)
+                {
+                    // This ensures uniform distribution
+                    uint64_t &rand = destination[i + j * coeff_count];
+                    while (rand >= max_multiple)
+                    {
+                        prng->generate(sizeof(uint64_t), reinterpret_cast<seal_byte *>(&rand));
+                    }
+                    rand = barrett_reduce_64(rand, modulus);
+                }
+            }
+        }
+
+        void sample_poly_uniform_seal_3_5(
+            shared_ptr<UniformRandomGenerator> prng, const EncryptionParameters &parms, uint64_t *destination)
         {
             // Extract encryption parameters
             auto coeff_modulus = parms.coeff_modulus();
             size_t coeff_modulus_size = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
 
-            // Set up source of randomness that produces 32 bit random things
-            RandomToStandardAdapter engine(rng);
+            RandomToStandardAdapter engine(prng);
 
             constexpr uint64_t max_random = static_cast<uint64_t>(0xFFFFFFFFFFFFFFFFULL);
             for (size_t j = 0; j < coeff_modulus_size; j++)

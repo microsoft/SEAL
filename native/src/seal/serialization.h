@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "seal/version.h"
 #include "seal/util/defines.h"
 #include <cstdint>
 #include <cstring>
@@ -243,7 +244,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Save(
-            std::function<void(std::ostream &stream)> save_members, std::streamoff raw_size, std::ostream &stream,
+            std::function<void(std::ostream &)> save_members, std::streamoff raw_size, std::ostream &stream,
             compr_mode_type compr_mode, bool clear_on_destruction = false);
 
         /**
@@ -253,8 +254,9 @@ namespace seal
         a function that deserializes the member variables of an object from the
         given stream.
 
-        @param[in] load_members A function taking an std::istream reference as an
-        argument, possibly reading some number of bytes from it
+        @param[in] load_members A function taking an std::istream reference and
+        a SEALVersion struct as arguments, possibly reading some number of bytes
+        from the std::istream, possibly depending on the SEALVersion object
         @param[in] stream The stream to read from
         @throws std::invalid_argument if load_members is invalid
         @throws std::logic_error if the data cannot be loaded by this version of
@@ -262,7 +264,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Load(
-            std::function<void(std::istream &stream)> load_members, std::istream &stream,
+            std::function<void(std::istream &, SEALVersion)> load_members, std::istream &stream,
             bool clear_on_destruction = false);
 
         /**
@@ -292,8 +294,8 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Save(
-            std::function<void(std::ostream &stream)> save_members, std::streamoff raw_size, seal_byte *out,
-            std::size_t size, compr_mode_type compr_mode, bool clear_on_destruction = false);
+            std::function<void(std::ostream &)> save_members, std::streamoff raw_size, seal_byte *out, std::size_t size,
+            compr_mode_type compr_mode, bool clear_on_destruction = false);
 
         /**
         Deserializes data from a memory location that was serialized by Save.
@@ -303,7 +305,8 @@ namespace seal
         of an object from the given stream.
 
         @param[in] load_members A function that takes an std::istream reference as
-        an argument and reads some number of bytes from it
+        a SEALVersion struct as arguments, possibly reading some number of bytes
+        from the std::istream, possibly depending on the SEALVersion object
         @param[in] in The memory location to read from
         @param[in] size The number of bytes available in the given memory location
         @throws std::invalid_argument if load_members is invalid, if in is null,
@@ -313,7 +316,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Load(
-            std::function<void(std::istream &stream)> load_members, const seal_byte *in, std::size_t size,
+            std::function<void(std::istream &, SEALVersion)> load_members, const seal_byte *in, std::size_t size,
             bool clear_on_destruction = false);
 
     private:

@@ -5,6 +5,7 @@
 
 #include "seal/dynarray.h"
 #include "seal/memorymanager.h"
+#include "seal/version.h"
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
 #include <algorithm>
@@ -50,6 +51,15 @@ namespace seal
         Creates a new UniformRandomGeneratorInfo.
         */
         UniformRandomGeneratorInfo() = default;
+
+        /**
+        Creates a new UniformRandomGeneratorInfo.
+
+        @param[in] type The PRNG type
+        @param[in] seed The PRNG seed
+        */
+        UniformRandomGeneratorInfo(prng_type type, prng_seed_type seed) : type_(type), seed_(std::move(seed))
+        {}
 
         /**
         Creates a new UniformRandomGeneratorInfo by copying a given one.
@@ -137,9 +147,25 @@ namespace seal
         }
 
         /**
+        Returns a reference to the PRNG type.
+        */
+        SEAL_NODISCARD inline prng_type &type() noexcept
+        {
+            return type_;
+        }
+
+        /**
         Returns a reference to the PRNG seed.
         */
         SEAL_NODISCARD inline const prng_seed_type &seed() const noexcept
+        {
+            return seed_;
+        }
+
+        /**
+        Returns a reference to the PRNG seed.
+        */
+        SEAL_NODISCARD inline prng_seed_type &seed() noexcept
         {
             return seed_;
         }
@@ -209,7 +235,7 @@ namespace seal
             using namespace std::placeholders;
             UniformRandomGeneratorInfo new_info;
             auto in_size =
-                Serialization::Load(std::bind(&UniformRandomGeneratorInfo::load_members, &new_info, _1), stream);
+                Serialization::Load(std::bind(&UniformRandomGeneratorInfo::load_members, &new_info, _1, _2), stream);
             std::swap(*this, new_info);
             return in_size;
         }
@@ -253,7 +279,7 @@ namespace seal
             using namespace std::placeholders;
             UniformRandomGeneratorInfo new_info;
             auto in_size =
-                Serialization::Load(std::bind(&UniformRandomGeneratorInfo::load_members, &new_info, _1), in, size);
+                Serialization::Load(std::bind(&UniformRandomGeneratorInfo::load_members, &new_info, _1, _2), in, size);
             std::swap(*this, new_info);
             return in_size;
         }
@@ -261,7 +287,7 @@ namespace seal
     public:
         void save_members(std::ostream &stream) const;
 
-        void load_members(std::istream &stream);
+        void load_members(std::istream &stream, SEALVersion version);
 
         prng_type type_ = prng_type::unknown;
 

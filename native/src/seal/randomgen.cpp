@@ -100,7 +100,7 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
-    void UniformRandomGeneratorInfo::load_members(istream &stream)
+    void UniformRandomGeneratorInfo::load_members(istream &stream, SEAL_MAYBE_UNUSED SEALVersion version)
     {
         // Throw exceptions on std::ios_base::badbit and std::ios_base::failbit
         auto old_except_mask = stream.exceptions();

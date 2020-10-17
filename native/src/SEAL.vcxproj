@@ -77,6 +77,7 @@
     <ClInclude Include="seal\util\uintcore.h" />
     <ClInclude Include="seal\util\ztools.h" />
     <ClInclude Include="seal\valcheck.h" />
+    <ClInclude Include="seal\version.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="seal\batchencoder.cpp" />

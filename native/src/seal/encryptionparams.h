@@ -7,6 +7,7 @@
 #include "seal/modulus.h"
 #include "seal/randomgen.h"
 #include "seal/serialization.h"
+#include "seal/version.h"
 #include "seal/util/defines.h"
 #include "seal/util/globals.h"
 #include "seal/util/hash.h"
@@ -393,7 +394,8 @@ namespace seal
         {
             using namespace std::placeholders;
             EncryptionParameters new_parms(scheme_type::none);
-            auto in_size = Serialization::Load(std::bind(&EncryptionParameters::load_members, &new_parms, _1), stream);
+            auto in_size =
+                Serialization::Load(std::bind(&EncryptionParameters::load_members, &new_parms, _1, _2), stream);
             std::swap(*this, new_parms);
             return in_size;
         }
@@ -437,7 +439,7 @@ namespace seal
             using namespace std::placeholders;
             EncryptionParameters new_parms(scheme_type::none);
             auto in_size =
-                Serialization::Load(std::bind(&EncryptionParameters::load_members, &new_parms, _1), in, size);
+                Serialization::Load(std::bind(&EncryptionParameters::load_members, &new_parms, _1, _2), in, size);
             std::swap(*this, new_parms);
             return in_size;
         }
@@ -482,7 +484,7 @@ namespace seal
 
         void save_members(std::ostream &stream) const;
 
-        void load_members(std::istream &stream);
+        void load_members(std::istream &stream, SEALVersion version);
 
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
 

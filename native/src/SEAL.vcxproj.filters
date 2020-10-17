@@ -92,6 +92,9 @@
     <ClInclude Include="seal\valcheck.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="seal\version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="seal\util\blake2.h">
       <Filter>Header Files\util</Filter>
     </ClInclude>

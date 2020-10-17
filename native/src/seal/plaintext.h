@@ -8,6 +8,7 @@
 #include "seal/encryptionparams.h"
 #include "seal/memorymanager.h"
 #include "seal/valcheck.h"
+#include "seal/version.h"
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
 #include "seal/util/polycore.h"
@@ -585,7 +586,7 @@ namespace seal
         inline std::streamoff unsafe_load(const SEALContext &context, std::istream &stream)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Plaintext::load_members, this, context, _1), stream);
+            return Serialization::Load(std::bind(&Plaintext::load_members, this, context, _1, _2), stream);
         }
 
         /**
@@ -651,7 +652,7 @@ namespace seal
         inline std::streamoff unsafe_load(const SEALContext &context, const seal_byte *in, std::size_t size)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Plaintext::load_members, this, context, _1), in, size);
+            return Serialization::Load(std::bind(&Plaintext::load_members, this, context, _1, _2), in, size);
         }
 
         /**
@@ -745,7 +746,7 @@ namespace seal
     private:
         void save_members(std::ostream &stream) const;
 
-        void load_members(const SEALContext &context, std::istream &stream);
+        void load_members(const SEALContext &context, std::istream &stream, SEALVersion version);
 
         parms_id_type parms_id_ = parms_id_zero;
 

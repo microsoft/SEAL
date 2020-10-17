@@ -4,6 +4,7 @@
 #pragma once
 
 #include "seal/serialization.h"
+#include "seal/version.h"
 #include "seal/util/defines.h"
 #include "seal/util/hestdparms.h"
 #include "seal/util/uintcore.h"
@@ -308,7 +309,7 @@ namespace seal
         inline std::streamoff load(std::istream &stream)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Modulus::load_members, this, _1), stream);
+            return Serialization::Load(std::bind(&Modulus::load_members, this, _1, _2), stream);
         }
 
         /**
@@ -347,7 +348,7 @@ namespace seal
         inline std::streamoff load(const seal_byte *in, std::size_t size)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Modulus::load_members, this, _1), in, size);
+            return Serialization::Load(std::bind(&Modulus::load_members, this, _1, _2), in, size);
         }
 
         /**
@@ -363,7 +364,7 @@ namespace seal
 
         void save_members(std::ostream &stream) const;
 
-        void load_members(std::istream &stream);
+        void load_members(std::istream &stream, SEALVersion version);
 
         std::uint64_t value_ = 0;
 
