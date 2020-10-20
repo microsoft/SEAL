@@ -48,6 +48,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/serializable.h
         ${CMAKE_CURRENT_LIST_DIR}/serialization.h
         ${CMAKE_CURRENT_LIST_DIR}/valcheck.h
+        ${CMAKE_CURRENT_LIST_DIR}/version.h
     DESTINATION
         ${SEAL_INCLUDES_INSTALL_DIR}/seal
 )

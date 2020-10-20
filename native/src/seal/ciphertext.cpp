@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 #include "seal/ciphertext.h"
-#include "seal/randomgen.h"
 #include "seal/util/defines.h"
 #include "seal/util/pointer.h"
 #include "seal/util/polyarithsmallmod.h"
@@ -115,13 +114,26 @@ namespace seal
         coeff_modulus_size_ = coeff_modulus_size;
     }
 
-    void Ciphertext::expand_seed(const SEALContext &context, const random_seed_type &seed)
+    void Ciphertext::expand_seed(
+        const SEALContext &context, const UniformRandomGeneratorInfo &prng_info, SEALVersion version)
     {
         auto context_data_ptr = context.get_context_data(parms_id_);
 
-        // Set up the BlakePRNG with a given seed.
-        // Rejection sampling to generate a uniform random polynomial.
-        sample_poly_uniform(make_shared<BlakePRNG>(seed), context_data_ptr->parms(), data(1));
+        // Set up a PRNG from the given info and sample the second polynomial
+        auto prng = prng_info.make_prng();
+        if (!prng)
+        {
+            throw logic_error("unsupported prng_type");
+        }
+
+        if (version.major == 3 && (version.minor == 4 || version.minor == 5))
+        {
+            sample_poly_uniform_seal_3_5(prng, context_data_ptr->parms(), data(1));
+        }
+        else
+        {
+            sample_poly_uniform(prng, context_data_ptr->parms(), data(1));
+        }
     }
 
     streamoff Ciphertext::save_size(compr_mode_type compr_mode) const
@@ -138,8 +150,8 @@ namespace seal
                 data_.pool());
 
             data_size = add_safe(
-                safe_cast<size_t>(alias_data.save_size(compr_mode_type::none)), // data_(0)
-                sizeof(random_seed_type));                                      // seed
+                safe_cast<size_t>(alias_data.save_size(compr_mode_type::none)),                    // data_(0)
+                static_cast<size_t>(UniformRandomGeneratorInfo::SaveSize(compr_mode_type::none))); // seed
         }
         else
         {
@@ -180,14 +192,14 @@ namespace seal
 
             if (has_seed_marker())
             {
-                random_seed_type seed;
-                copy_n(data(1) + 1, seed.size(), seed.begin());
+                UniformRandomGeneratorInfo info;
+                size_t info_size = static_cast<size_t>(UniformRandomGeneratorInfo::SaveSize(compr_mode_type::none));
+                info.load(reinterpret_cast<const seal_byte *>(data(1) + 1), info_size);
 
                 size_t data_size = data_.size();
                 size_t half_size = data_size / 2;
                 // Save_members must be a const method.
-                // Create an alias of data_, must be handled with care.
-                // Alternatively, create and serialize a half copy of data_.
+                // Create an alias of data_; must be handled with care.
                 DynArray<ct_coeff_type> alias_data(data_.pool_);
                 alias_data.size_ = half_size;
                 alias_data.capacity_ = half_size;
@@ -195,8 +207,8 @@ namespace seal
                 swap(alias_data.data_, alias_ptr);
                 alias_data.save(stream, compr_mode_type::none);
 
-                // Save the seed
-                stream.write(reinterpret_cast<char *>(&seed), sizeof(random_seed_type));
+                // Save the UniformRandomGeneratorInfo
+                info.save(stream, compr_mode_type::none);
             }
             else
             {
@@ -217,7 +229,7 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
-    void Ciphertext::load_members(const SEALContext &context, istream &stream)
+    void Ciphertext::load_members(const SEALContext &context, istream &stream, SEAL_MAYBE_UNUSED SEALVersion version)
     {
         // Verify parameters
         if (!context.parameters_set())
@@ -285,15 +297,31 @@ namespace seal
             auto seeded_uint64_count = poly_modulus_degree64 * coeff_modulus_size64;
 
             // This is the case where we need to expand a seed, otherwise full
-            // ciphertext data was (possibly) loaded and do nothing
+            // ciphertext data was already (possibly) loaded and we are done
             if (unsigned_eq(new_data.data_.size(), seeded_uint64_count))
             {
-                // Single polynomial size data was loaded, so we are in the
-                // seeded ciphertext case. Next load the seed.
-                random_seed_type seed;
-                stream.read(reinterpret_cast<char *>(&seed), sizeof(random_seed_type));
+                // Single polynomial size data was loaded, so we are in the seeded
+                // ciphertext case. Next load the UniformRandomGeneratorInfo.
+                UniformRandomGeneratorInfo prng_info;
+
+                if (version.major == 3 && version.minor >= 6)
+                {
+                    prng_info.load(stream);
+                }
+                else if (version.major == 3 && version.minor <= 5)
+                {
+                    // We only need to load the hash value; only Blake2xb is supported
+                    prng_info.type() = prng_type::blake2xb;
+                    stream.read(reinterpret_cast<char *>(&prng_info.seed()), prng_seed_byte_count);
+                }
+                else
+                {
+                    throw logic_error("incompatible version");
+                }
+
+                // Set up a UniformRandomGenerator and expand
                 new_data.data_.resize(total_uint64_count);
-                new_data.expand_seed(context, seed);
+                new_data.expand_seed(context, prng_info, version);
             }
 
             // Verify that the buffer is correct

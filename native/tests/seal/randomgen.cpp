@@ -4,10 +4,12 @@
 #include "seal/keygenerator.h"
 #include "seal/randomgen.h"
 #include <algorithm>
+#include <array>
 #include <cstdint>
 #include <memory>
 #include <numeric>
 #include <set>
+#include <sstream>
 #include <thread>
 #include "gtest/gtest.h"
 
@@ -21,6 +23,9 @@ namespace sealtest
         class SequentialRandomGenerator : public UniformRandomGenerator
         {
         public:
+            SequentialRandomGenerator(const prng_seed_type &seed) : UniformRandomGenerator(seed)
+            {}
+
             SequentialRandomGenerator() : UniformRandomGenerator({})
             {}
 
@@ -34,6 +39,11 @@ namespace sealtest
                 value = static_cast<uint8_t>(static_cast<size_t>(value) + buffer_size_);
             }
 
+            SEAL_NODISCARD prng_type type() const noexcept override
+            {
+                return prng_type::unknown;
+            }
+
         private:
             uint8_t value = 0;
         };
@@ -41,7 +51,7 @@ namespace sealtest
         class SequentialRandomGeneratorFactory : public UniformRandomGeneratorFactory
         {
         private:
-            SEAL_NODISCARD auto create_impl(SEAL_MAYBE_UNUSED random_seed_type seed)
+            SEAL_NODISCARD auto create_impl(SEAL_MAYBE_UNUSED prng_seed_type seed)
                 -> shared_ptr<UniformRandomGenerator> override
             {
                 return make_shared<SequentialRandomGenerator>();
@@ -86,18 +96,18 @@ namespace sealtest
 
     TEST(RandomGenerator, RandomGeneratorFactorySeed)
     {
-        shared_ptr<UniformRandomGeneratorFactory> factory(make_shared<BlakePRNGFactory>());
+        shared_ptr<UniformRandomGeneratorFactory> factory(make_shared<Blake2xbPRNGFactory>());
         ASSERT_TRUE(factory->use_random_seed());
 
-        factory = make_shared<BlakePRNGFactory>(random_seed_type{});
+        factory = make_shared<Blake2xbPRNGFactory>(prng_seed_type{});
         ASSERT_FALSE(factory->use_random_seed());
-        ASSERT_EQ(random_seed_type{}, factory->default_seed());
+        ASSERT_EQ(prng_seed_type{}, factory->default_seed());
 
-        factory = make_shared<BlakePRNGFactory>(random_seed_type{ 1, 2, 3, 4, 5, 6, 7, 8 });
+        factory = make_shared<Blake2xbPRNGFactory>(prng_seed_type{ 1, 2, 3, 4, 5, 6, 7, 8 });
         ASSERT_FALSE(factory->use_random_seed());
-        ASSERT_EQ(random_seed_type({ 1, 2, 3, 4, 5, 6, 7, 8 }), factory->default_seed());
+        ASSERT_EQ(prng_seed_type({ 1, 2, 3, 4, 5, 6, 7, 8 }), factory->default_seed());
 
-        factory = make_shared<BlakePRNGFactory>();
+        factory = make_shared<Blake2xbPRNGFactory>();
         ASSERT_TRUE(factory->use_random_seed());
     }
 
@@ -213,6 +223,84 @@ namespace sealtest
             uint64_t value = 0;
             generator2->generate(sizeof(value), reinterpret_cast<seal_byte *>(&value));
             ASSERT_TRUE(find(results.begin(), results.end(), value) != results.end());
+        }
+    }
+
+    TEST(RandomGenerator, UniformRandomGeneratorInfo)
+    {
+        UniformRandomGeneratorInfo info;
+        ASSERT_EQ(prng_type::unknown, info.type());
+        ASSERT_TRUE(info.has_valid_prng_type());
+        prng_seed_type seed_arr = {};
+        ASSERT_EQ(seed_arr, info.seed());
+
+        seed_arr = { 1, 2, 3, 4, 5, 6, 7, 8 };
+        {
+            shared_ptr<UniformRandomGenerator> rg(make_unique<Blake2xbPRNG>(seed_arr));
+            info = rg->info();
+
+            ASSERT_EQ(prng_type::blake2xb, info.type());
+            ASSERT_TRUE(info.has_valid_prng_type());
+            ASSERT_EQ(seed_arr, info.seed());
+
+            auto rg2 = info.make_prng();
+            ASSERT_TRUE(rg2);
+            for (int i = 0; i < 100; i++)
+            {
+                ASSERT_EQ(rg->generate(), rg2->generate());
+            }
+        }
+        {
+            shared_ptr<UniformRandomGenerator> rg(make_unique<Shake256PRNG>(seed_arr));
+            info = rg->info();
+
+            ASSERT_EQ(prng_type::shake256, info.type());
+            ASSERT_TRUE(info.has_valid_prng_type());
+            ASSERT_EQ(seed_arr, info.seed());
+
+            auto rg2 = info.make_prng();
+            ASSERT_TRUE(rg2);
+            for (int i = 0; i < 100; i++)
+            {
+                ASSERT_EQ(rg->generate(), rg2->generate());
+            }
+        }
+        {
+            shared_ptr<UniformRandomGenerator> rg(make_unique<SequentialRandomGenerator>(seed_arr));
+            info = rg->info();
+
+            ASSERT_EQ(prng_type::unknown, info.type());
+            ASSERT_TRUE(info.has_valid_prng_type());
+            ASSERT_EQ(seed_arr, info.seed());
+
+            auto rg2 = info.make_prng();
+            ASSERT_FALSE(rg2);
+        }
+    }
+
+    TEST(RandomGenerator, UniformRandomGeneratorInfoSaveLoad)
+    {
+        UniformRandomGeneratorInfo info, info2;
+        stringstream ss;
+        auto size = info.save(ss, compr_mode_type::none);
+        ASSERT_EQ(size, info.save_size(compr_mode_type::none));
+        info2.load(ss);
+        ASSERT_TRUE(info == info2);
+
+        prng_seed_type seed_arr = { 1, 2, 3, 4, 5, 6, 7, 8 };
+        {
+            shared_ptr<UniformRandomGenerator> rg(make_unique<Blake2xbPRNG>(seed_arr));
+            info = rg->info();
+            info.save(ss);
+            info2.load(ss);
+            ASSERT_TRUE(info == info2);
+        }
+        {
+            shared_ptr<UniformRandomGenerator> rg(make_unique<Shake256PRNG>(seed_arr));
+            info = rg->info();
+            info.save(ss);
+            info2.load(ss);
+            ASSERT_TRUE(info == info2);
         }
     }
 } // namespace sealtest

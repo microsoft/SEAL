@@ -7,6 +7,7 @@
 #include "seal/memorymanager.h"
 #include "seal/publickey.h"
 #include "seal/valcheck.h"
+#include "seal/version.h"
 #include <iostream>
 #include <vector>
 
@@ -216,7 +217,7 @@ namespace seal
         inline std::streamoff unsafe_load(const SEALContext &context, std::istream &stream)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&KSwitchKeys::load_members, this, context, _1), stream);
+            return Serialization::Load(std::bind(&KSwitchKeys::load_members, this, context, _1, _2), stream);
         }
 
         /**
@@ -284,7 +285,7 @@ namespace seal
         inline std::streamoff unsafe_load(const SEALContext &context, const seal_byte *in, std::size_t size)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&KSwitchKeys::load_members, this, context, _1), in, size);
+            return Serialization::Load(std::bind(&KSwitchKeys::load_members, this, context, _1, _2), in, size);
         }
 
         /**
@@ -326,7 +327,7 @@ namespace seal
     private:
         void save_members(std::ostream &stream) const;
 
-        void load_members(const SEALContext &context, std::istream &stream);
+        void load_members(const SEALContext &context, std::istream &stream, SEALVersion version);
 
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
 

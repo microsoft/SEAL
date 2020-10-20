@@ -5,6 +5,7 @@
 
 #include "seal/memorymanager.h"
 #include "seal/serialization.h"
+#include "seal/version.h"
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
 #include "seal/util/pointer.h"
@@ -551,7 +552,7 @@ namespace seal
         inline std::streamoff load(std::istream &stream, std::size_t in_size_bound = 0)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&DynArray<T>::load_members, this, _1, in_size_bound), stream);
+            return Serialization::Load(std::bind(&DynArray<T>::load_members, this, _1, _2, in_size_bound), stream);
         }
 
         /**
@@ -596,7 +597,7 @@ namespace seal
         inline std::streamoff load(const seal_byte *in, std::size_t size, std::size_t in_size_bound = 0)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&DynArray<T>::load_members, this, _1, in_size_bound), in, size);
+            return Serialization::Load(std::bind(&DynArray<T>::load_members, this, _1, _2, in_size_bound), in, size);
         }
 
     private:
@@ -630,7 +631,7 @@ namespace seal
             stream.exceptions(old_except_mask);
         }
 
-        void load_members(std::istream &stream, std::size_t in_size_bound)
+        void load_members(std::istream &stream, SEAL_MAYBE_UNUSED SEALVersion version, std::size_t in_size_bound)
         {
             auto old_except_mask = stream.exceptions();
             try

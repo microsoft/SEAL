@@ -7,6 +7,7 @@
 #include "seal/modulus.h"
 #include "seal/randomgen.h"
 #include "seal/serialization.h"
+#include "seal/version.h"
 #include "seal/util/defines.h"
 #include "seal/util/globals.h"
 #include "seal/util/hash.h"
@@ -386,15 +387,15 @@ namespace seal
 
         @param[in] stream The stream to load the EncryptionParameters from
         @throws std::logic_error if the data cannot be loaded by this version of
-        Microsoft SEAL, if the loaded data is invalid, if decompression failed,
-        or if the loaded size exceeds in_size_bound
+        Microsoft SEAL, if the loaded data is invalid or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff load(std::istream &stream)
         {
             using namespace std::placeholders;
             EncryptionParameters new_parms(scheme_type::none);
-            auto in_size = Serialization::Load(std::bind(&EncryptionParameters::load_members, &new_parms, _1), stream);
+            auto in_size =
+                Serialization::Load(std::bind(&EncryptionParameters::load_members, &new_parms, _1, _2), stream);
             std::swap(*this, new_parms);
             return in_size;
         }
@@ -430,8 +431,7 @@ namespace seal
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if the data cannot be loaded by this version of
-        Microsoft SEAL, if the loaded data is invalid, if decompression failed,
-        or if the loaded size exceeds in_size_bound
+        Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff load(const seal_byte *in, std::size_t size)
@@ -439,7 +439,7 @@ namespace seal
             using namespace std::placeholders;
             EncryptionParameters new_parms(scheme_type::none);
             auto in_size =
-                Serialization::Load(std::bind(&EncryptionParameters::load_members, &new_parms, _1), in, size);
+                Serialization::Load(std::bind(&EncryptionParameters::load_members, &new_parms, _1, _2), in, size);
             std::swap(*this, new_parms);
             return in_size;
         }
@@ -484,7 +484,7 @@ namespace seal
 
         void save_members(std::ostream &stream) const;
 
-        void load_members(std::istream &stream);
+        void load_members(std::istream &stream, SEALVersion version);
 
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
 

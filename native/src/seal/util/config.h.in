@@ -21,7 +21,7 @@
 
 // Security
 #cmakedefine SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
-#cmakedefine SEAL_USE_GAUSSIAN
+#cmakedefine SEAL_USE_GAUSSIAN_NOISE
 
 // Intrinsics
 #cmakedefine SEAL_USE_INTRIN
