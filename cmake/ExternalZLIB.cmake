@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+
 FetchContent_Declare(
     zlib
     GIT_REPOSITORY https://github.com/madler/zlib.git

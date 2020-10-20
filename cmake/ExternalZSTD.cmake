@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+
 FetchContent_Declare(
     zstd
     GIT_REPOSITORY https://github.com/facebook/zstd.git

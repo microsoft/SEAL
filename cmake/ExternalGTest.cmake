@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+
 FetchContent_Declare(
     googletest
     GIT_REPOSITORY https://github.com/google/googletest.git

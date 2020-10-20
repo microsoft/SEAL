@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+
 include(CheckCXXCompilerFlag)
 
 # For easier adding of CXX compiler flags

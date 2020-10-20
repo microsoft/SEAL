@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+
 # Remove native/src/gsl directory which is no longer used in version >= 3.5.0
 if(NOT MSVC AND EXISTS ${SEAL_INCLUDES_BUILD_DIR}/gsl)
     message(STATUS "Removing ${SEAL_INCLUDES_BUILD_DIR}/gsl; this is no longer used by Microsoft SEAL >= 3.5.0")
