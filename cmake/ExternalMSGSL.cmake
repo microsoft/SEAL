@@ -17,3 +17,4 @@ mark_as_advanced(FETCHCONTENT_UPDATES_DISCONNECTED_MSGSL)
 add_subdirectory(
     ${msgsl_SOURCE_DIR}
     EXCLUDE_FROM_ALL)
+set(SEAL_MSGSL_INCLUDE_DIRS "${msgsl_SOURCE_DIR}/include")

@@ -323,8 +323,8 @@ seal_set_language(seal_obj)
 seal_set_include_directories(seal_obj)
 
 if(SEAL_USE_MSGSL AND NOT MSVC)
-    target_link_libraries(seal_obj PRIVATE ${GSL})
-    target_include_directories(seal PUBLIC $<BUILD_INTERFACE:${SEAL_MSGSL_INCLUDE_DIR}>)
+    target_link_libraries(seal_obj PUBLIC ${GSL})
+#    target_include_directories(seal_obj PUBLIC $<BUILD_INTERFACE:${SEAL_MSGSL_INCLUDE_DIRS}>)
 endif()
 
 if(SEAL_USE_ZLIB AND NOT MSVC)
@@ -333,7 +333,7 @@ endif()
 
 if(SEAL_USE_ZSTD AND NOT MSVC)
     target_link_libraries(seal_obj PRIVATE ${ZSTD})
-    target_include_directories(seal_obj PRIVATE $<BUILD_INTERFACE:${SEAL_ZSTD_INCLUDE_DIR}>)
+    target_include_directories(seal_obj PRIVATE $<BUILD_INTERFACE:${SEAL_ZSTD_INCLUDE_DIRS}>)
 endif()
 
 # Always build the static library
@@ -383,7 +383,7 @@ if(SEAL_BUILD_SEAL_C)
     seal_set_language(sealc)
     seal_set_include_directories(sealc)
 
-    target_link_libraries(sealc PUBLIC seal)
+    target_link_libraries(sealc PUBLIC seal ${GSL} ${ZLIB} ${ZSTD})
 
     seal_install_target(sealc SEALTargets)
 endif()
@@ -442,7 +442,7 @@ option(SEAL_BUILD_EXAMPLES ${SEAL_BUILD_EXAMPLES_OPTION_STR} OFF)
 if(SEAL_BUILD_EXAMPLES)
     add_executable(sealexamples)
     add_subdirectory(native/examples)
-    target_link_libraries(sealexamples PRIVATE seal)
+    target_link_libraries(sealexamples PRIVATE seal ${GSL} ${ZLIB} ${ZSTD})
 endif()
 
 ##################
@@ -456,7 +456,7 @@ option(SEAL_BUILD_TESTS ${SEAL_BUILD_TESTS_OPTION_STR} OFF)
 if(SEAL_BUILD_TESTS)
     add_executable(sealtest)
     add_subdirectory(native/tests/seal)
-    target_link_libraries(sealtest PRIVATE seal gtest)
+    target_link_libraries(sealtest PRIVATE seal ${GSL} ${ZLIB} ${ZSTD} ${GTEST})
 endif()
 
 #######################################

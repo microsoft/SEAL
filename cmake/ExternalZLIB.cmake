@@ -33,6 +33,6 @@ add_subdirectory(
 # ZLIB creates a file zconf.h into it, which must be visible to the compiler.
 set(SEAL_ZLIB_INCLUDE_DIRS
     ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zlib-src
-    ${zlib_SOURCE_DIR})
+    ${zlib_SOURCE_DIRS})
 set_target_properties(zlibstatic PROPERTIES
     INTERFACE_INCLUDE_DIRECTORIES "${SEAL_ZLIB_INCLUDE_DIRS}")

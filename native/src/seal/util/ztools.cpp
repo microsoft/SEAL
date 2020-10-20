@@ -434,8 +434,9 @@ namespace seal
 #pragma clang diagnostic push
 #pragma clang diagnostic ignored "-Wsign-conversion"
 #endif
-#include "common/zstd_internal.h"
+#define ZSTD_STATIC_LINKING_ONLY
 #include "zstd.h"
+#include "common/zstd_errors.h"
 #if (SEAL_COMPILER == SEAL_COMPILER_GCC)
 #pragma GCC diagnostic pop
 #elif (SEAL_COMPILER == SEAL_COMPILER_CLANG)
