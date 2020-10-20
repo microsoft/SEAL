@@ -160,7 +160,6 @@ namespace seal
 #endif
 
 // Which random number generator to use by default
-#define SEAL_DEFAULT_PRNG Blake2xb
 #define SEAL_DEFAULT_PRNG_FACTORY SEAL_JOIN(SEAL_DEFAULT_PRNG, PRNGFactory)
 
 // Which distribution to use for noise sampling: rounded Gaussian or Centered Binomial Distribution

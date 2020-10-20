@@ -229,6 +229,14 @@ set(SEAL_USE_GAUSSIAN_NOISE_STR "Use a rounded Gaussian distribution for noise s
 option(SEAL_USE_GAUSSIAN_NOISE ${SEAL_USE_GAUSSIAN_NOISE_STR} OFF)
 mark_as_advanced(FORCE SEAL_USE_GAUSSIAN_NOISE)
 
+# [option] SEAL_DEFAULT_PRNG (default: Blake2xb)
+# Choose either Blake2xb or Shake256 to be the default PRNG.
+set(SEAL_DEFAULT_PRNG_STR "Choose the default PRNG")
+set(SEAL_DEFAULT_PRNG "Blake2xb" CACHE STRING ${SEAL_DEFAULT_PRNG_STR} FORCE)
+set_property(CACHE SEAL_DEFAULT_PRNG PROPERTY
+    STRINGS "Blake2xb" "Shake256")
+mark_as_advanced(FORCE SEAL_DEFAULT_PRNG)
+
 # [option] SEAL_USE_INTRIN (default: ON)
 set(SEAL_USE_INTRIN_OPTION_STR "Use intrinsics")
 option(SEAL_USE_INTRIN ${SEAL_USE_INTRIN_OPTION_STR} ON)
