@@ -6,9 +6,9 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/madler/zlib.git
     GIT_TAG        cacf7f1d4e3d44d871b605da3b647f07d718623f # 1.2.11
 )
-FetchContent_GetProperties(zlib)
 FetchContent_Populate(zlib)
-set(SKIP_INSTALL_ALL ON CACHE BOOL "" FORCE)
+FetchContent_GetProperties(zlib)
+#set(SKIP_INSTALL_ALL ON CACHE BOOL "" FORCE)
 mark_as_advanced(AMD64)
 mark_as_advanced(ASM686)
 mark_as_advanced(EXECUTABLE_OUTPUT_PATH)
@@ -33,6 +33,4 @@ add_subdirectory(
 # ZLIB creates a file zconf.h into it, which must be visible to the compiler.
 set(SEAL_ZLIB_INCLUDE_DIRS
     ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zlib-src
-    ${zlib_SOURCE_DIRS})
-set_target_properties(zlibstatic PROPERTIES
-    INTERFACE_INCLUDE_DIRECTORIES "${SEAL_ZLIB_INCLUDE_DIRS}")
+    ${zlib_SOURCE_DIR})

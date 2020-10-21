@@ -6,8 +6,8 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/microsoft/GSL.git
     GIT_TAG        0f6dbc9e2915ef5c16830f3fa3565738de2a9230 # 3.1.0
 )
-FetchContent_GetProperties(msgsl)
 FetchContent_Populate(msgsl)
+FetchContent_GetProperties(msgsl)
 set(GSL_CXX_STANDARD "14" CACHE STRING "" FORCE)
 set(GSL_TEST OFF CACHE BOOL "" FORCE)
 mark_as_advanced(GSL_CXX_STANDARD )

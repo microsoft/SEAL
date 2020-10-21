@@ -55,6 +55,10 @@ set(SEAL_USE_ZSTD @SEAL_USE_ZSTD@)
 # Add the current directory to the module search path
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
+if(SEAL_USE_MSGSL)
+    seal_find_dependency(Microsoft.GSL)
+endif()
+
 set(CMAKE_THREAD_PREFER_PTHREAD TRUE)
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
 seal_find_dependency(Threads)
