@@ -17,7 +17,7 @@ set(ZLIB_CMAKE_ARGS
     -DSKIP_INSTALL_ALL=ON
     -Wno-dev)
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/cache_init.txt)
-    list(APPEND ZLIB_CMAKE_ARGS -C"${CMAKE_CURRENT_LIST_DIR}/cache_init.txt")
+    list(APPEND ZLIB_CMAKE_ARGS -C../cache_init.txt)
 endif()
 
 include(ExternalProject)

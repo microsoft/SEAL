@@ -13,7 +13,7 @@ endif()
 
 set(MSGSL_CMAKE_ARGS -DCMAKE_BUILD_TYPE=Release -DGSL_TEST=OFF)
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/cache_init.txt)
-    list(APPEND MSGSL_CMAKE_ARGS -C"${CMAKE_CURRENT_LIST_DIR}/cache_init.txt")
+    list(APPEND MSGSL_CMAKE_ARGS -C../cache_init.txt)
 endif()
 
 include(ExternalProject)

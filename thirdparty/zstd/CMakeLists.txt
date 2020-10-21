@@ -21,7 +21,7 @@ set(ZSTD_CMAKE_ARGS
     -DZSTD_MULTITHREAD_SUPPORT=OFF
     -Wno-dev)
 if(EXISTS ${CMAKE_CURRENT_LIST_DIR}/cache_init.txt)
-    list(APPEND ZSTD_CMAKE_ARGS -C"${CMAKE_CURRENT_LIST_DIR}/cache_init.txt")
+    list(APPEND ZSTD_CMAKE_ARGS -C../cache_init.txt)
 endif()
 
 include(ExternalProject)
