@@ -106,10 +106,10 @@ include(SEALMacros)
 #########################
 if(NOT MSVC) ## TODO: remove
 
-# [option] SEAL_BUILD_DEPS (default: ON)
+# [option] SEAL_BUILD_DEPS (default: OFF)
 # Download and build missing dependencies, throw error if disabled.
 set(SEAL_BUILD_DEPS_OPTION_STR "Automatically downloand and build unmet dependencies")
-option(SEAL_BUILD_DEPS ${SEAL_BUILD_DEPS_OPTION_STR} ON)
+option(SEAL_BUILD_DEPS ${SEAL_BUILD_DEPS_OPTION_STR} OFF)
 
 if(SEAL_BUILD_DEPS)
     include(FetchContent)
@@ -320,50 +320,47 @@ if(NOT SEAL_EXPLICIT_MEMSET_FOUND)
     set(SEAL_USE_EXPLICIT_MEMSET OFF CACHE BOOL ${SEAL_USE_EXPLICIT_MEMSET_OPTION_STR} FORCE)
 endif()
 
-# Create an object library to compile sources only once
-add_library(seal_obj OBJECT)
-
 # Add source files to library and header files to install
+set(SEAL_SOURCE_FILES "")
 add_subdirectory(native/src/seal)
 
-# Set C++ language version and include directories for the object library
-seal_set_language(seal_obj)
-seal_set_include_directories(seal_obj)
-
-if(SEAL_USE_MSGSL AND NOT MSVC)
-    target_link_libraries(seal_obj PUBLIC ${GSL})
-#    target_include_directories(seal_obj PUBLIC $<BUILD_INTERFACE:${SEAL_MSGSL_INCLUDE_DIRS}>)
-endif()
-
-if(SEAL_USE_ZLIB AND NOT MSVC)
-    target_link_libraries(seal_obj PRIVATE ${ZLIB})
-endif()
-
-if(SEAL_USE_ZSTD AND NOT MSVC)
-    target_link_libraries(seal_obj PRIVATE ${ZSTD})
-    target_include_directories(seal_obj PRIVATE $<BUILD_INTERFACE:${SEAL_ZSTD_INCLUDE_DIRS}>)
-endif()
-
-# Always build the static library
-add_library(seal STATIC $<TARGET_OBJECTS:seal_obj>)
-seal_set_version(seal)
-seal_set_version_filename(seal)
-seal_set_language(seal)
-seal_set_include_directories(seal)
-seal_link_threads(seal)
-seal_install_target(seal SEALTargets)
-
-# Conditionally build the shared library
-if(BUILD_SHARED_LIBS)
-    add_library(seal_shared SHARED $<TARGET_OBJECTS:seal_obj>)
-    set_target_properties(seal_shared PROPERTIES OUTPUT_NAME seal)
-    seal_set_version(seal_shared)
+if(NOT BUILD_SHARED_LIBS)
+    add_library(seal STATIC ${SEAL_SOURCE_FILES})
+    seal_set_version_filename(seal)
+    set(SEAL_LIB "seal")
+else()
+    add_library(seal_shared SHARED ${SEAL_SOURCE_FILES})
     seal_set_soversion(seal_shared)
-    seal_set_language(seal_shared)
-    seal_set_include_directories(seal_shared)
-    seal_link_threads(seal_shared)
+    set_target_properties(seal_shared PROPERTIES OUTPUT_NAME seal)
+    set(SEAL_LIB "seal_shared")
+endif()
+seal_set_language(${SEAL_LIB})
+seal_set_include_directories(${SEAL_LIB})
+seal_set_version(${SEAL_LIB})
+seal_link_threads(${SEAL_LIB})
+seal_install_target(${SEAL_LIB} SEALTargets)
 
-    seal_install_target(seal_shared SEALTargets)
+# MSGSL is always made part of the link interface.
+if(SEAL_USE_MSGSL AND NOT MSVC)
+    target_link_libraries(${SEAL_LIB} PUBLIC ${GSL})
+endif()
+
+# ZLIB and ZSTD are made part of the link interface,
+# unless SEAL downloaded and built them in which case archives are combined to SEAL static library.
+if(NOT BUILD_SHARED_LIBS AND SEAL_USE_ZLIB AND NOT ZLIB_FOUND AND SEAL_BUILD_DEPS AND NOT MSVC)
+    target_link_libraries(${SEAL_LIB} PRIVATE ${ZLIB})
+    seal_combine_archives(seal ${ZLIB})
+else()
+    target_link_libraries(${SEAL_LIB} PUBLIC ${ZLIB})
+endif()
+
+if(NOT BUILD_SHARED_LIBS AND SEAL_USE_ZLIB AND NOT ZLIB_FOUND AND SEAL_BUILD_DEPS AND NOT MSVC)
+    target_link_libraries(${SEAL_LIB} PRIVATE ${ZSTD})
+    target_include_directories(seal PRIVATE $<BUILD_INTERFACE:${SEAL_ZSTD_INCLUDE_DIRS}>)
+    seal_combine_archives(seal ${ZSTD})
+else()
+    target_link_libraries(${SEAL_LIB} PUBLIC ${ZSTD})
+    target_include_directories(seal PUBLIC $<BUILD_INTERFACE:${SEAL_ZSTD_INCLUDE_DIRS}>)
 endif()
 
 #########################

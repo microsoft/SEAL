@@ -2,7 +2,7 @@
 # Licensed under the MIT license.
 
 # Source files in this directory
-target_sources(seal_obj PRIVATE
+set(SEAL_SOURCE_FILES ${SEAL_SOURCE_FILES}
     ${CMAKE_CURRENT_LIST_DIR}/blake2b.c
     ${CMAKE_CURRENT_LIST_DIR}/blake2xb.c
     ${CMAKE_CURRENT_LIST_DIR}/clipnormal.cpp
@@ -70,3 +70,5 @@ install(
     DESTINATION
         ${SEAL_INCLUDES_INSTALL_DIR}/seal/util
 )
+
+set(SEAL_SOURCE_FILES ${SEAL_SOURCE_FILES} PARENT_SCOPE)

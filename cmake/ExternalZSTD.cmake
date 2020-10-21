@@ -26,4 +26,6 @@ mark_as_advanced(FETCHCONTENT_UPDATES_DISCONNECTED_ZSTD)
 add_subdirectory(
     ${zstd_SOURCE_DIR}/build/cmake
     EXCLUDE_FROM_ALL)
-set(SEAL_ZSTD_INCLUDE_DIRS "${zstd_SOURCE_DIR}/lib")
+set(SEAL_ZSTD_INCLUDE_DIRS
+    ${zstd_SOURCE_DIR}/lib
+    ${zstd_SOURCE_DIR}/lib/common)
