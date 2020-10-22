@@ -395,46 +395,44 @@ endif()
 include(CheckTypeSize)
 check_type_size("size_t" SIZET LANGUAGE C)
 
-set(SEAL_BUILD_SEAL_C_OPTION_STR "Build C library for Microsoft SEAL")
+set(SEAL_BUILD_SEAL_C_OPTION_STR "Build C export library for Microsoft SEAL")
 cmake_dependent_option(SEAL_BUILD_SEAL_C ${SEAL_BUILD_SEAL_C_OPTION_STR} OFF "${SIZET} EQUAL 8" OFF)
 
-set(BUILD_SHARED_SEALC_LIB_OPTION_STR "Build shared C export library for Microsoft SEAL")
-cmake_dependent_option(BUILD_SHARED_SEALC_LIB ${BUILD_SHARED_SEALC_LIB_OPTION_STR} ON "SEAL_BUILD_SEAL_C" OFF)
+set(BUILD_STATIC_SEALC_LIB_OPTION_STR "Build static C library for Microsoft SEAL")
+cmake_dependent_option(BUILD_STATIC_SEALC_LIB ${BUILD_STATIC_SEALC_LIB_OPTION_STR} OFF "SEAL_BUILD_SEAL_C" OFF)
 
 unset(SIZET CACHE)
 unset(HAVE_SIZET CACHE)
 
-# Create static SEAL_C library but add no source files yet
+# Create SEAL_C library but add no source files yet
 if(SEAL_BUILD_SEAL_C)
-    add_library(sealc_static STATIC)
+    if(BUILD_STATIC_SEALC_LIB)
+        add_library(sealc STATIC)
+    else()
+        add_library(sealc SHARED)
+    endif()
 
     # Add source files to library and header files to install
     add_subdirectory(native/src/seal/c)
-    seal_set_language(sealc_static)
-    seal_set_include_directories(sealc_static)
-
-    if(NOT BUILD_SHARED_LIBS)
-        target_link_libraries(sealc_static PUBLIC seal)
+    seal_set_version(sealc)
+    if(BUILD_STATIC_SEALC_LIB)
+        seal_set_version_filename(sealc)
     else()
-        target_link_libraries(sealc_static PUBLIC seal_shared)
+        seal_set_soversion(sealc)
     endif()
+    seal_set_language(sealc)
+    seal_set_include_directories(sealc)
 
-    seal_install_target(sealc_static SEALTargets)
-endif()
-
-# Create shared SEAL_C library
-if(BUILD_SHARED_SEALC_LIB)
-    add_library(sealc SHARED ${CMAKE_CURRENT_SOURCE_DIR}/native/src/seal/c/stdafx.cpp)
-    target_link_libraries(sealc PUBLIC sealc_static)
     if(NOT BUILD_SHARED_LIBS)
         target_link_libraries(sealc PUBLIC seal)
     else()
         target_link_libraries(sealc PUBLIC seal_shared)
     endif()
-    seal_set_version(sealc)
-    seal_set_soversion(sealc)
-    seal_set_language(sealc)
-    seal_set_include_directories(sealc)
+
+    if(BUILD_STATIC_SEALC_LIB)
+        seal_combine_archives(sealc seal)
+    endif()
+
     seal_install_target(sealc SEALTargets)
 endif()
 
