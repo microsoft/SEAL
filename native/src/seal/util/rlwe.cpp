@@ -105,6 +105,9 @@ namespace seal
             auto coeff_modulus = parms.coeff_modulus();
             size_t coeff_modulus_size = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
+            size_t num_bytes = mul_safe(sizeof(uint64_t), mul_safe(coeff_count, coeff_modulus_size));
+            // First, uniform random in [0, 2^64)
+            rng->generate(num_bytes, reinterpret_cast<SEAL_BYTE *>(destination));
 
             // Set up source of randomness that produces 32 bit random things.
             RandomToStandardAdapter engine(rng);
@@ -114,16 +117,15 @@ namespace seal
             {
                 auto &modulus = coeff_modulus[j];
                 uint64_t max_multiple = max_random - barrett_reduce_64(max_random, modulus) - 1;
-                for (size_t i = 0; i < coeff_count; i++)
-                {
+                std::transform(destination, destination + coeff_count, destination, [&](uint64_t rand) {
                     // This ensures uniform distribution.
-                    uint64_t rand;
-                    do
+                    while (rand >= max_multiple)
                     {
                         rand = (static_cast<uint64_t>(engine()) << 32) | static_cast<uint64_t>(engine());
-                    } while (rand >= max_multiple);
-                    destination[i + j * coeff_count] = barrett_reduce_64(rand, modulus);
-                }
+                    }
+                    return barrett_reduce_64(rand, modulus);
+                });
+                destination += coeff_count;
             }
         }
 
