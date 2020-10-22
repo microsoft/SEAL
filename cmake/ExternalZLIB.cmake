@@ -6,9 +6,12 @@ FetchContent_Declare(
     GIT_REPOSITORY https://github.com/madler/zlib.git
     GIT_TAG        cacf7f1d4e3d44d871b605da3b647f07d718623f # 1.2.11
 )
-FetchContent_Populate(zlib)
 FetchContent_GetProperties(zlib)
-#set(SKIP_INSTALL_ALL ON CACHE BOOL "" FORCE)
+if(NOT zlib_POPULATED)
+    FetchContent_Populate(zlib)
+endif()
+
+set(SKIP_INSTALL_ALL ON CACHE BOOL "" FORCE)
 mark_as_advanced(AMD64)
 mark_as_advanced(ASM686)
 mark_as_advanced(EXECUTABLE_OUTPUT_PATH)
@@ -24,13 +27,15 @@ mark_as_advanced(ZLIB_BUILD_STATIC)
 mark_as_advanced(SKIP_INSTALL_ALL)
 mark_as_advanced(FETCHCONTENT_SOURCE_DIR_ZLIB)
 mark_as_advanced(FETCHCONTENT_UPDATES_DISCONNECTED_ZLIB)
+
 # ZLIB has no VERSION given to project(), needs to suppress CMP0048 warning
 set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS TRUE CACHE INTERNAL "Suppress CMP0048 warning" FORCE)
 add_subdirectory(
     ${zlib_SOURCE_DIR}
     EXCLUDE_FROM_ALL)
+
 # Set the ZLIB include directories; we have to include also ZLIB binary directory because
 # ZLIB creates a file zconf.h into it, which must be visible to the compiler.
-set(SEAL_ZLIB_INCLUDE_DIRS
-    ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zlib-src
-    ${zlib_SOURCE_DIR})
+#set(SEAL_ZLIB_INCLUDE_DIRS
+#    ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/zlib-src
+#    ${zlib_SOURCE_DIR})
