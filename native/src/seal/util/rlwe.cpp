@@ -92,7 +92,7 @@ namespace seal
             };
 
             SEAL_ITERATE(iter(destination), coeff_count, [&](auto &I) {
-                int32_t noise = cbd(prng);
+                int32_t noise = cbd();
                 uint64_t flag = static_cast<uint64_t>(-static_cast<int64_t>(noise < 0));
                 SEAL_ITERATE(
                     iter(StrideIter<uint64_t *>(&I, coeff_count), coeff_modulus), coeff_modulus_size,
