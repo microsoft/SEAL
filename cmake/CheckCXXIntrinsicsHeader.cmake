@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+
 # Check for intrin.h or x64intrin.h
 if(SEAL_USE_INTRIN)
     if(MSVC)

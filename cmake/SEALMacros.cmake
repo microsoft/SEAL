@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+
 # Set the C++ language version
 macro(seal_set_language target)
     if(SEAL_USE_CXX17)

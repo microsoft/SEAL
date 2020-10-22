@@ -228,7 +228,7 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
-    void Plaintext::load_members(const SEALContext &context, istream &stream)
+    void Plaintext::load_members(const SEALContext &context, istream &stream, SEAL_MAYBE_UNUSED SEALVersion version)
     {
         // Verify parameters
         if (!context.parameters_set())

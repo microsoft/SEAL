@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+
 # Check for memset_s
 check_cxx_source_runs("
     #define __STDC_WANT_LIB_EXT1__ 1

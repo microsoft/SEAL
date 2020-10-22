@@ -415,8 +415,6 @@ namespace seal
 
         Encryptor &operator=(Encryptor &&assign) = delete;
 
-        MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
-
         void encrypt_zero_internal(
             parms_id_type parms_id, bool is_asymmetric, bool save_seed, Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool()) const;

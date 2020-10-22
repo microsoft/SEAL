@@ -51,6 +51,19 @@ set(SEAL_ENFORCE_HE_STD_SECURITY @SEAL_ENFORCE_HE_STD_SECURITY@)
 set(SEAL_USE_MSGSL @SEAL_USE_MSGSL@)
 set(SEAL_USE_ZLIB @SEAL_USE_ZLIB@)
 set(SEAL_USE_ZSTD @SEAL_USE_ZSTD@)
+set(SEAL_BUILD_DEPS @SEAL_BUILD_DEPS@)
+
+if(SEAL_USE_MSGSL AND NOT SEAL_BUILD_DEPS)
+    seal_find_dependency(Microsoft.GSL)
+endif()
+
+if(SEAL_USE_ZLIB AND NOT SEAL_BUILD_DEPS)
+    seal_find_dependency(ZLIB)
+endif()
+
+if(SEAL_USE_ZSTD AND NOT SEAL_BUILD_DEPS)
+    seal_find_dependency(zstd)
+endif()
 
 # Add the current directory to the module search path
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
@@ -63,13 +76,16 @@ include(${CMAKE_CURRENT_LIST_DIR}/SEALTargets.cmake)
 
 if(TARGET SEAL::seal)
     set(SEAL_FOUND TRUE)
+    set(SEAL_STATIC_FOUND TRUE)
 endif()
 
 if(TARGET SEAL::seal_shared)
+    set(SEAL_FOUND TRUE)
     set(SEAL_SHARED_FOUND TRUE)
 endif()
 
 if(TARGET SEAL::sealc)
+    set(SEAL_FOUND TRUE)
     set(SEAL_C_FOUND TRUE)
 endif()
 
@@ -80,8 +96,11 @@ if(SEAL_FOUND)
     if(SEAL_DEBUG AND NOT SEAL_FIND_QUIETLY)
         message(STATUS "Performance warning: Microsoft SEAL compiled in debug mode")
     endif()
-
     set(SEAL_TARGETS_AVAILABLE "Microsoft SEAL -> Targets available: SEAL::seal")
+
+    if(SEAL_STATIC_FOUND)
+        string(APPEND SEAL_TARGETS_AVAILABLE ", SEAL::seal")
+    endif()
     if(SEAL_SHARED_FOUND)
         string(APPEND SEAL_TARGETS_AVAILABLE ", SEAL::seal_shared")
     endif()

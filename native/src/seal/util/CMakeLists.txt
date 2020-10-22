@@ -2,12 +2,13 @@
 # Licensed under the MIT license.
 
 # Source files in this directory
-target_sources(seal_obj PRIVATE
+set(SEAL_SOURCE_FILES ${SEAL_SOURCE_FILES}
     ${CMAKE_CURRENT_LIST_DIR}/blake2b.c
     ${CMAKE_CURRENT_LIST_DIR}/blake2xb.c
     ${CMAKE_CURRENT_LIST_DIR}/clipnormal.cpp
     ${CMAKE_CURRENT_LIST_DIR}/common.cpp
     ${CMAKE_CURRENT_LIST_DIR}/croots.cpp
+    ${CMAKE_CURRENT_LIST_DIR}/fips202.c
     ${CMAKE_CURRENT_LIST_DIR}/globals.cpp
     ${CMAKE_CURRENT_LIST_DIR}/galois.cpp
     ${CMAKE_CURRENT_LIST_DIR}/hash.cpp
@@ -42,6 +43,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/croots.h
         ${CMAKE_CURRENT_LIST_DIR}/defines.h
         ${CMAKE_CURRENT_LIST_DIR}/dwthandler.h
+        ${CMAKE_CURRENT_LIST_DIR}/fips202.h
         ${CMAKE_CURRENT_LIST_DIR}/galois.h
         ${CMAKE_CURRENT_LIST_DIR}/gcc.h
         ${CMAKE_CURRENT_LIST_DIR}/globals.h
@@ -68,3 +70,5 @@ install(
     DESTINATION
         ${SEAL_INCLUDES_INSTALL_DIR}/seal/util
 )
+
+set(SEAL_SOURCE_FILES ${SEAL_SOURCE_FILES} PARENT_SCOPE)

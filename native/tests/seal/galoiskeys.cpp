@@ -161,12 +161,12 @@ namespace sealtest
             parms.set_poly_modulus_degree(8);
             parms.set_plain_modulus(65537);
             parms.set_coeff_modulus(CoeffModulus::Create(8, { 60, 60 }));
-            random_seed_type seed;
+            prng_seed_type seed;
             for (auto &i : seed)
             {
                 i = random_uint64();
             }
-            auto rng = make_shared<BlakePRNGFactory>(BlakePRNGFactory(seed));
+            auto rng = make_shared<Blake2xbPRNGFactory>(Blake2xbPRNGFactory(seed));
             parms.set_random_generator(rng);
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
@@ -184,12 +184,12 @@ namespace sealtest
             parms.set_poly_modulus_degree(256);
             parms.set_plain_modulus(65537);
             parms.set_coeff_modulus(CoeffModulus::Create(256, { 60, 50 }));
-            random_seed_type seed;
+            prng_seed_type seed;
             for (auto &i : seed)
             {
                 i = random_uint64();
             }
-            auto rng = make_shared<BlakePRNGFactory>(BlakePRNGFactory(seed));
+            auto rng = make_shared<Blake2xbPRNGFactory>(Blake2xbPRNGFactory(seed));
             parms.set_random_generator(rng);
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);

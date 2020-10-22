@@ -38,7 +38,7 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
-    void Modulus::load_members(istream &stream)
+    void Modulus::load_members(istream &stream, SEAL_MAYBE_UNUSED SEALVersion version)
     {
         auto old_except_mask = stream.exceptions();
         try

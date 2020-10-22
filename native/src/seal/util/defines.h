@@ -159,8 +159,15 @@ namespace seal
 #define SEAL_ITERATE std::for_each_n
 #endif
 
-// Which random number generator factory to use by default
-#define SEAL_DEFAULT_RNG_FACTORY BlakePRNGFactory()
+// Which random number generator to use by default
+#define SEAL_DEFAULT_PRNG_FACTORY SEAL_JOIN(SEAL_DEFAULT_PRNG, PRNGFactory)
+
+// Which distribution to use for noise sampling: rounded Gaussian or Centered Binomial Distribution
+#ifdef SEAL_USE_GAUSSIAN_NOISE
+#define SEAL_NOISE_SAMPLER sample_poly_normal
+#else
+#define SEAL_NOISE_SAMPLER sample_poly_cbd
+#endif
 
 // Use generic functions as (slower) fallback
 #ifndef SEAL_ADD_CARRY_UINT64

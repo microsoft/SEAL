@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+
 if(SEAL_USE_INTRIN)
     cmake_push_check_state(RESET)
     set(CMAKE_REQUIRED_QUIET TRUE)

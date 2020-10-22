@@ -18,7 +18,7 @@ namespace seal
 {
     namespace util
     {
-        void seal_memzero(void *const data, size_t size)
+        void seal_memzero(void *data, size_t size)
         {
 #if (SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS)
             SecureZeroMemory(data, size);
