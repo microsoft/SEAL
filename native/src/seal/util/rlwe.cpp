@@ -82,7 +82,7 @@ namespace seal
                                   "Gaussian instead");
             }
 
-            auto cbd = [&](shared_ptr<UniformRandomGenerator> prng) {
+            auto cbd = [&]() {
                 unsigned char x[6];
                 prng->generate(6, reinterpret_cast<seal_byte *>(x));
                 x[2] &= 0x1F;
