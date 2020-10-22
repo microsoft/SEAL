@@ -2,7 +2,7 @@
 # Licensed under the MIT license.
 
 # Source files in this directory
-target_sources(sealc PRIVATE
+target_sources(sealc_static PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/batchencoder.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ciphertext.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ckksencoder.cpp
