@@ -2,7 +2,7 @@
 # Licensed under the MIT license.
 
 # Source files in this directory
-target_sources(seal_obj PRIVATE
+set(SEAL_SOURCE_FILES ${SEAL_SOURCE_FILES}
     ${CMAKE_CURRENT_LIST_DIR}/batchencoder.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ciphertext.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ckks.cpp
@@ -54,3 +54,4 @@ install(
 )
 
 add_subdirectory(util)
+set(SEAL_SOURCE_FILES ${SEAL_SOURCE_FILES} PARENT_SCOPE)

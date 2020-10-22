@@ -1,50 +1,23 @@
-# Download and configure
-if(SEAL_USE_MSGSL AND NOT MSVC)
-    message(STATUS "Setting up MSGSL ...")
-    if(NOT CMAKE_TOOLCHAIN_FILE)
-        execute_process(
-            COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" .
-            OUTPUT_QUIET
-            RESULT_VARIABLE result
-            WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/msgsl)
-    else()
-        seal_create_cache_entries(${SEAL_THIRDPARTY_DIR}/msgsl)
-        if(EXISTS ${SEAL_THIRDPARTY_DIR}/msgsl/CMakeCache.txt)
-            # Force regenerating make files. When cross compiling we might be
-            # compiling more than one platform at a time.
-            file(REMOVE ${SEAL_THIRDPARTY_DIR}/msgsl/CMakeCache.txt)
-        endif()
-        execute_process(
-            COMMAND ${CMAKE_COMMAND} -G "${CMAKE_GENERATOR}" . -Ccache_init.txt
-            OUTPUT_QUIET
-            RESULT_VARIABLE result
-            WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/msgsl)
-    endif()
-    if(result)
-        message(WARNING "Failed to download MSGSL (${result}); disabling `SEAL_USE_MSGSL`")
-    endif()
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+
+FetchContent_Declare(
+    msgsl
+    GIT_REPOSITORY https://github.com/microsoft/GSL.git
+    GIT_TAG        0f6dbc9e2915ef5c16830f3fa3565738de2a9230 # 3.1.0
+)
+FetchContent_GetProperties(msgsl)
+if(NOT msgsl_POPULATED)
+    FetchContent_Populate(msgsl)
 endif()
 
-# Build
-if(SEAL_USE_MSGSL AND NOT MSVC)
-    execute_process(
-        COMMAND ${CMAKE_COMMAND} --build .
-        OUTPUT_QUIET
-        RESULT_VARIABLE result
-        WORKING_DIRECTORY ${SEAL_THIRDPARTY_DIR}/msgsl)
-    if(result)
-        message(WARNING "Failed to build MSGSL (${result}); disabling `SEAL_USE_MSGSL`")
-    endif()
-    set(GSL_CXX_STANDARD "14" CACHE STRING "" FORCE)
-    mark_as_advanced(GSL_CXX_STANDARD )
-    set(GSL_TEST OFF CACHE BOOL "" FORCE)
-    mark_as_advanced(GSL_TEST)
-endif()
+set(GSL_CXX_STANDARD "14" CACHE STRING "" FORCE)
+set(GSL_TEST OFF CACHE BOOL "" FORCE)
+mark_as_advanced(GSL_CXX_STANDARD )
+mark_as_advanced(GSL_TEST)
+mark_as_advanced(FETCHCONTENT_SOURCE_DIR_MSGSL)
+mark_as_advanced(FETCHCONTENT_UPDATES_DISCONNECTED_MSGSL)
 
-# Set up the targets
-if(SEAL_USE_MSGSL AND NOT MSVC)
-    add_subdirectory(
-        ${SEAL_THIRDPARTY_DIR}/msgsl/src
-        EXCLUDE_FROM_ALL)
-    set(SEAL_MSGSL_INCLUDE_DIR ${SEAL_THIRDPARTY_DIR}/msgsl/src/include)
-endif()
+add_subdirectory(
+    ${msgsl_SOURCE_DIR}
+    EXCLUDE_FROM_ALL)

@@ -1,3 +1,6 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+
 set(SEAL_USE_STD_BYTE OFF)
 set(SEAL_USE_SHARED_MUTEX OFF)
 set(SEAL_USE_IF_CONSTEXPR OFF)
