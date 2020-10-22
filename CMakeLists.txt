@@ -106,10 +106,10 @@ include(SEALMacros)
 #########################
 if(NOT MSVC) ## TODO: remove
 
-# [option] SEAL_BUILD_DEPS (default: OFF)
+# [option] SEAL_BUILD_DEPS (default: ON)
 # Download and build missing dependencies, throw error if disabled.
 set(SEAL_BUILD_DEPS_OPTION_STR "Automatically downloand and build unmet dependencies")
-option(SEAL_BUILD_DEPS ${SEAL_BUILD_DEPS_OPTION_STR} OFF)
+option(SEAL_BUILD_DEPS ${SEAL_BUILD_DEPS_OPTION_STR} ON)
 
 if(SEAL_BUILD_DEPS)
     include(FetchContent)
