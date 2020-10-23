@@ -193,6 +193,10 @@ if(SEAL_BUILD_TESTS)
     endif()
 endif()
 
+else() # TODO: remove
+set(SEAL_USE_MSGSL ON)
+set(SEAL_USE_ZLIB ON)
+set(SEAL_USE_ZSTD ON)
 endif()
 ####################
 # SEAL C++ library #
