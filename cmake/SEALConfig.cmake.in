@@ -63,6 +63,16 @@ endif()
 
 if(SEAL_USE_ZSTD AND NOT SEAL_BUILD_DEPS)
     seal_find_dependency(zstd)
+    if(NOT TARGET zstd::libzstd_static)
+        if(TARGET libzstd)
+            get_target_property(libzstd_type libzstd TYPE)
+            if(libzstd_type STREQUAL "SHARED")
+                set(zstd_static "libzstd")
+            else()
+                message(FATAL_ERROR "ZSTD must be static")
+            endif()
+        endif()
+    endif()
 endif()
 
 # Add the current directory to the module search path

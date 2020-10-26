@@ -436,7 +436,7 @@ namespace seal
 #endif
 #define ZSTD_STATIC_LINKING_ONLY
 #include "zstd.h"
-#include "common/zstd_errors.h"
+#include "zstd_errors.h"
 #if (SEAL_COMPILER == SEAL_COMPILER_GCC)
 #pragma GCC diagnostic pop
 #elif (SEAL_COMPILER == SEAL_COMPILER_CLANG)
