@@ -223,7 +223,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\zlib\build\$(Platform);$(ProjectDir)\..\..\thirdparty\zlib\src;$(ProjectDir)\..\..\thirdparty\zstd\src\lib;$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\zlib\build\$(Platform);$(ProjectDir)\..\..\thirdparty\zlib\src;$(ProjectDir)\..\..\thirdparty\zstd\src\lib;$(ProjectDir)\..\..\thirdparty\zstd\src\lib\common;$(ProjectDir)</AdditionalIncludeDirectories>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -255,7 +255,7 @@
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\zlib\build\$(Platform);$(ProjectDir)\..\..\thirdparty\zlib\src;$(ProjectDir)\..\..\thirdparty\zstd\src\lib;$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\zlib\build\$(Platform);$(ProjectDir)\..\..\thirdparty\zlib\src;$(ProjectDir)\..\..\thirdparty\zstd\src\lib;$(ProjectDir)\..\..\thirdparty\zstd\src\lib\common;$(ProjectDir)</AdditionalIncludeDirectories>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -288,7 +288,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\zlib\build\$(Platform);$(ProjectDir)\..\..\thirdparty\zlib\src;$(ProjectDir)\..\..\thirdparty\zstd\src\lib;$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\zlib\build\$(Platform);$(ProjectDir)\..\..\thirdparty\zlib\src;$(ProjectDir)\..\..\thirdparty\zstd\src\lib;$(ProjectDir)\..\..\thirdparty\zstd\src\lib\common;$(ProjectDir)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>
@@ -323,7 +323,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\zlib\build\$(Platform);$(ProjectDir)\..\..\thirdparty\zlib\src;$(ProjectDir)\..\..\thirdparty\zstd\src\lib;$(ProjectDir)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\..\thirdparty\zlib\build\$(Platform);$(ProjectDir)\..\..\thirdparty\zlib\src;$(ProjectDir)\..\..\thirdparty\zstd\src\lib;$(ProjectDir)\..\..\thirdparty\zstd\src\lib\common;$(ProjectDir)</AdditionalIncludeDirectories>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <LanguageStandard>stdcpp17</LanguageStandard>

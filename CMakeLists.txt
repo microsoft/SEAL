@@ -211,6 +211,7 @@ set(SEAL_USE_MSGSL ON)
 set(SEAL_USE_ZLIB ON)
 set(SEAL_USE_ZSTD ON)
 endif()
+
 ####################
 # SEAL C++ library #
 ####################
