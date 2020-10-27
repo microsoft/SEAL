@@ -13,15 +13,6 @@ cmake_minimum_required(VERSION 3.12)
 
 project(SEAL VERSION 3.6.0 LANGUAGES CXX C)
 
-# Check operating system: for Windows, use Visual Studio solution/project files.
-if(MSVC)
-    if(ALLOW_COMMAND_LINE_BUILD)
-        message(STATUS "Configuring for Visual Studio")
-    else()
-        message(FATAL_ERROR "Please build Microsoft SEAL using the attached Visual Studio solution/project files")
-    endif()
-endif()
-
 ########################
 # Global configuration #
 ########################
@@ -104,7 +95,6 @@ include(SEALMacros)
 #########################
 # External dependencies #
 #########################
-if(NOT MSVC) ## TODO: remove
 
 # [option] SEAL_BUILD_DEPS (default: ON)
 # Download and build missing dependencies, throw error if disabled.
@@ -206,15 +196,9 @@ if(SEAL_BUILD_TESTS)
     endif()
 endif()
 
-else() # TODO: remove
-    set(SEAL_USE_MSGSL ON)
-    set(SEAL_USE_ZLIB ON)
-    set(SEAL_USE_ZSTD ON)
-
-    find_package(BCrypt MODULE)
-    if(NOT BCrypt_FOUND)
-        message(FATAL_ERROR "Failed to find BCrypt.")
-    endif()
+find_package(BCrypt MODULE)
+if(NOT BCrypt_FOUND)
+    message(FATAL_ERROR "Failed to find BCrypt.")
 endif()
 
 ####################
@@ -346,7 +330,7 @@ if(NOT BUILD_SHARED_LIBS)
     seal_link_threads(seal)
     seal_install_target(seal SEALTargets)
 
-    if(SEAL_USE_MSGSL AND NOT MSVC)
+    if(SEAL_USE_MSGSL)
         if(SEAL_BUILD_DEPS)
             target_include_directories(seal PUBLIC $<BUILD_INTERFACE:${msgsl_SOURCE_DIR}/include>)
         else()
@@ -354,7 +338,7 @@ if(NOT BUILD_SHARED_LIBS)
         endif()
     endif()
 
-    if(SEAL_USE_ZLIB AND NOT MSVC)
+    if(SEAL_USE_ZLIB)
         if(SEAL_BUILD_DEPS)
             add_dependencies(seal ${zlib})
             seal_combine_archives(seal ${zlib})
@@ -363,7 +347,7 @@ if(NOT BUILD_SHARED_LIBS)
         endif()
     endif()
 
-    if(SEAL_USE_ZSTD AND NOT MSVC)
+    if(SEAL_USE_ZSTD)
         if(SEAL_BUILD_DEPS)
             add_dependencies(seal ${zstd_static})
             target_include_directories(seal PUBLIC $<BUILD_INTERFACE:${zstd_SOURCE_DIR}/lib>)
@@ -390,7 +374,7 @@ else()
     seal_link_threads(seal_shared)
     seal_install_target(seal_shared SEALTargets)
 
-    if(SEAL_USE_MSGSL AND NOT MSVC)
+    if(SEAL_USE_MSGSL)
         if(SEAL_BUILD_DEPS)
             target_include_directories(seal_shared PUBLIC $<BUILD_INTERFACE:${msgsl_SOURCE_DIR}/include>)
         else()
@@ -398,7 +382,7 @@ else()
         endif()
     endif()
 
-    if(SEAL_USE_ZLIB AND NOT MSVC)
+    if(SEAL_USE_ZLIB)
         if(SEAL_BUILD_DEPS)
             target_link_libraries(seal_shared PRIVATE ${zlib})
         else()
@@ -406,7 +390,7 @@ else()
         endif()
     endif()
 
-    if(SEAL_USE_ZSTD AND NOT MSVC)
+    if(SEAL_USE_ZSTD)
         if(SEAL_BUILD_DEPS)
             target_link_libraries(seal_shared PRIVATE ${zstd_static})
         else()
