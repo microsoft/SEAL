@@ -57,21 +57,28 @@ endmacro()
 
 # Manually combine archives, using ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} to keep temporary files.
 macro(seal_combine_archives target dependency)
-    if(CMAKE_HOST_WIN32)
-        get_filename_component(CXX_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
-        set(AR_CMD_PATH "${CXX_DIR}/llvm-ar.exe")
-        file(TO_NATIVE_PATH "${AR_CMD_PATH}" AR_CMD_PATH)
-        set(DEL_CMD "del")
-        set(DEL_CMD_OPTS "")
-    else()
-        set(AR_CMD_PATH "ar")
-        set(DEL_CMD "rm")
-        set(DEL_CMD_OPTS "-rf")
+    if(MSVC)
+        add_custom_command(TARGET ${target} POST_BUILD
+            COMMAND lib.exe /OUT:$<TARGET_FILE:${target}> $<TARGET_FILE:${target}> $<TARGET_FILE:${dependency}>
+            DEPENDS $<TARGET_FILE:${target}> $<TARGET_FILE:${dependency}>
+            WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
+    elseif()
+        if(CMAKE_HOST_WIN32)
+            get_filename_component(CXX_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
+            set(AR_CMD_PATH "${CXX_DIR}/llvm-ar.exe")
+            file(TO_NATIVE_PATH "${AR_CMD_PATH}" AR_CMD_PATH)
+            set(DEL_CMD "del")
+            set(DEL_CMD_OPTS "")
+        else()
+            set(AR_CMD_PATH "ar")
+            set(DEL_CMD "rm")
+            set(DEL_CMD_OPTS "-rf")
+        endif()
+        add_custom_command(TARGET ${target} POST_BUILD
+            COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:${target}>
+            COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:${dependency}>
+            COMMAND "${AR_CMD_PATH}" rcs $<TARGET_FILE:${target}> *.o
+            COMMAND ${DEL_CMD} ${DEL_CMD_OPTS} *.o
+            WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
     endif()
-    add_custom_command(TARGET ${target} POST_BUILD
-        COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:${target}>
-        COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:${dependency}>
-        COMMAND "${AR_CMD_PATH}" rcs $<TARGET_FILE:${target}> *.o
-        COMMAND ${DEL_CMD} ${DEL_CMD_OPTS} *.o
-        WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
 endmacro()

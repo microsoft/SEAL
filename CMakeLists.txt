@@ -207,9 +207,14 @@ if(SEAL_BUILD_TESTS)
 endif()
 
 else() # TODO: remove
-set(SEAL_USE_MSGSL ON)
-set(SEAL_USE_ZLIB ON)
-set(SEAL_USE_ZSTD ON)
+    set(SEAL_USE_MSGSL ON)
+    set(SEAL_USE_ZLIB ON)
+    set(SEAL_USE_ZSTD ON)
+
+    find_package(BCrypt MODULE)
+    if(NOT BCrypt_FOUND)
+        message(FATAL_ERROR "Failed to find BCrypt.")
+    endif()
 endif()
 
 ####################
@@ -369,6 +374,11 @@ if(NOT BUILD_SHARED_LIBS)
         endif()
     endif()
 
+    if(MSVC)
+        target_link_libraries(seal PRIVATE BCrypt::bcrypt)
+        seal_combine_archives(seal BCrypt::bcrypt)
+    endif()
+
 # Build only a shared library
 else()
     add_library(seal_shared SHARED ${SEAL_SOURCE_FILES})
@@ -402,6 +412,10 @@ else()
         else()
             target_link_libraries(seal_shared PRIVATE ${zstd_static})
         endif()
+    endif()
+
+    if(MSVC)
+        target_link_libraries(seal_shared PRIVATE BCrypt::bcrypt)
     endif()
 endif()
 
