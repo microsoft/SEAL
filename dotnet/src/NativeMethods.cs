@@ -16,7 +16,7 @@ namespace Microsoft.Research.SEAL
         private const string sealc = "sealc";
 #endif
 
-        #region Version methods
+#region Version methods
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Version_Major(out byte value);
@@ -317,16 +317,10 @@ namespace Microsoft.Research.SEAL
         internal static extern void Evaluator_AddPlain(IntPtr thisptr, IntPtr encrypted, IntPtr plain, IntPtr destination);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void Evaluator_AddPlain2(IntPtr thisptr, IntPtr plain1, IntPtr plain2, IntPtr destination);
-
-        [DllImport(sealc, PreserveSig = false)]
         internal static extern void Evaluator_Sub(IntPtr thisptr, IntPtr encrypted1, IntPtr encrypted2, IntPtr destination);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Evaluator_SubPlain(IntPtr thisptr, IntPtr encrypted, IntPtr plain, IntPtr destination);
-
-        [DllImport(sealc, PreserveSig = false)]
-        internal static extern void Evaluator_SubPlain2(IntPtr thisptr, IntPtr plain1, IntPtr plain2, IntPtr destination);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Evaluator_Multiply(IntPtr thisptr, IntPtr encrypted1, IntPtr encrypted2, IntPtr destination, IntPtr pool);
@@ -424,12 +418,6 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Ciphertext_Destroy(IntPtr thisptr);
-
-        [DllImport(sealc, PreserveSig = false)]
-        internal static extern void Ciphertext_UInt64Count(IntPtr thisptr, out ulong uint64Count);
-
-        [DllImport(sealc, PreserveSig = false)]
-        internal static extern void Ciphertext_UInt64CountCapacity(IntPtr thisptr, out ulong uint64CountCapacity);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Ciphertext_Size(IntPtr thisptr, out ulong size);
@@ -581,12 +569,6 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Plaintext_Capacity(IntPtr thisptr, out ulong capacity);
-
-        [DllImport(sealc, PreserveSig = false)]
-        internal static extern void Plaintext_UInt64Count(IntPtr thisptr, out ulong uint64Count);
-
-        [DllImport(sealc, PreserveSig = false)]
-        internal static extern void Plaintext_UInt64CountCapacity(IntPtr thisptr, out ulong uint64CountCapacity);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Plaintext_SignificantCoeffCount(IntPtr thisptr, out ulong significantCoeffCount);
@@ -970,17 +952,11 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, EntryPoint = "BatchEncoder_Encode2", PreserveSig = false)]
         internal static extern void BatchEncoder_Encode(IntPtr thisptr, ulong count, long[] values, IntPtr destination);
 
-        [DllImport(sealc, EntryPoint = "BatchEncoder_Encode3", PreserveSig = false)]
-        internal static extern void BatchEncoder_Encode(IntPtr thisptr, IntPtr plain, IntPtr pool);
-
         [DllImport(sealc, EntryPoint = "BatchEncoder_Decode1", PreserveSig = false)]
         internal static extern void BatchEncoder_Decode(IntPtr thisptr, IntPtr plain, ref ulong count, ulong[] destination, IntPtr pool);
 
         [DllImport(sealc, EntryPoint = "BatchEncoder_Decode2", PreserveSig = false)]
         internal static extern void BatchEncoder_Decode(IntPtr thisptr, IntPtr plain, ref ulong count, long[] destination, IntPtr pool);
-
-        [DllImport(sealc, EntryPoint = "BatchEncoder_Decode3", PreserveSig = false)]
-        internal static extern void BatchEncoder_Decode(IntPtr thisptr, IntPtr plain, IntPtr pool);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void BatchEncoder_GetSlotCount(IntPtr thisptr, out ulong slotCount);
