@@ -37,5 +37,10 @@
       <ForceLoad>True</ForceLoad>
       <IsCxx>True</IsCxx>
     </NativeReference>
+    <NativeReference Include="$(MSBuildThisFileDirectory)../runtimes/ios64/libseal.a">
+      <Kind>Static</Kind>
+      <ForceLoad>True</ForceLoad>
+      <IsCxx>True</IsCxx>
+    </NativeReference>
   </ItemGroup>
 </Project>
