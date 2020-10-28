@@ -429,10 +429,6 @@ if(SEAL_BUILD_SEAL_C)
         target_link_libraries(sealc PUBLIC seal_shared)
     endif()
 
-    if(BUILD_STATIC_SEALC_LIB)
-        seal_combine_archives(sealc seal)
-    endif()
-
     seal_install_target(sealc SEALTargets)
 endif()
 
