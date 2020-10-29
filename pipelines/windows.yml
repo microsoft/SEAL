@@ -49,6 +49,20 @@ steps:
               Invoke-WebRequest -Uri "$env:SEALNetSigningCertificate" -OutFile $CertOutFile
           }
 
+- task: CMake@1
+  displayName: 'Configure SEAL'
+  inputs:
+    cmakeArgs: .. -DCMAKE_BUILD_TYPE='Debug' -DSEAL_BUILD_DEPS=ON -DSEAL_BUILD_TESTS=ON -DSEAL_BUILD_EXAMPLES=ON
+    workingDirectory: '$(Build.SourcesDirectory)/build'
+
+- task: MSBuild@1
+  displayName: 'Build SEAL'
+  inputs:
+    solution: '$(Build.SourcesDirectory)/build/seal.sln'
+    msbuildArchitecture: 'x64'
+    platform: 'x64'
+    configuration: 'Debug'
+
 - task: VSBuild@1
   displayName: 'Build solution SEAL'
   inputs:
