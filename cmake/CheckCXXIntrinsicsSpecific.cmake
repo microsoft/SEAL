@@ -37,9 +37,9 @@ if(SEAL_USE_INTRIN)
         set(CMAKE_EXTRA_INCLUDE_FILES ${SEAL_INTRIN_HEADER})
         check_type_size("__int128" INT128 LANGUAGE CXX)
         if(NOT INT128 EQUAL 16)
-            set(SEAL__INT128_FOUND ON)
+            set(SEAL___INT128_FOUND ON)
         else()
-            set(SEAL__INT128_FOUND OFF)
+            set(SEAL___INT128_FOUND OFF)
         endif()
 
         # Check for __builtin_clzll
@@ -48,7 +48,7 @@ if(SEAL_USE_INTRIN)
                 volatile auto res = __builtin_clzll(0);
                 return 0;
             }"
-            SEAL__BUILTIN_CLZLL_FOUND
+            SEAL___BUILTIN_CLZLL_FOUND
         )
     endif()
 
@@ -60,7 +60,7 @@ if(SEAL_USE_INTRIN)
             volatile auto res = _addcarry_u64(0,0,0,&a);
             return 0;
         }"
-        SEAL_ADDCARRY_U64_FOUND
+        SEAL__ADDCARRY_U64_FOUND
     )
 
     # Check for _subborrow_u64
@@ -71,7 +71,7 @@ if(SEAL_USE_INTRIN)
             volatile auto res = _subborrow_u64(0,0,0,&a);
             return 0;
         }"
-        SEAL_USE_SUBBORROW_U64
+        SEAL__SUBBORROW_U64_FOUND
     )
 
     cmake_pop_check_state()
