@@ -341,7 +341,7 @@ namespace seal
         */
         SEAL_NODISCARD inline std::size_t max_size() const noexcept
         {
-            return std::numeric_limits<std::size_t>::max();
+            return (std::numeric_limits<std::size_t>::max)();
         }
 
         /**

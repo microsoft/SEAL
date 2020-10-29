@@ -449,7 +449,7 @@ namespace seal
                 return util::seal_he_std_parms_256_tc(poly_modulus_degree);
 
             case sec_level_type::none:
-                return std::numeric_limits<int>::max();
+                return (std::numeric_limits<int>::max)();
 
             default:
                 return 0;
