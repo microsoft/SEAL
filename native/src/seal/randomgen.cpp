@@ -10,6 +10,7 @@
 #if (SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS)
 #include <Windows.h>
 #include <bcrypt.h>
+#pragma comment(lib, "bcrypt")
 #endif
 
 using namespace std;

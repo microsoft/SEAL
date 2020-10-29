@@ -196,11 +196,6 @@ if(SEAL_BUILD_TESTS)
     endif()
 endif()
 
-find_package(BCrypt MODULE)
-if(NOT BCrypt_FOUND)
-    message(FATAL_ERROR "Failed to find BCrypt.")
-endif()
-
 ####################
 # SEAL C++ library #
 ####################
@@ -358,11 +353,6 @@ if(NOT BUILD_SHARED_LIBS)
         else()
             target_link_libraries(seal PRIVATE ${zstd_static})
         endif()
-    endif()
-
-    if(MSVC)
-        target_link_libraries(seal PRIVATE BCrypt::bcrypt)
-        seal_combine_archives(seal BCrypt::bcrypt)
     endif()
 
 # Build only a shared library
