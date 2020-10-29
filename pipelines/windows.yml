@@ -63,13 +63,6 @@ steps:
     platform: 'x64'
     configuration: 'Debug'
 
-- task: VSBuild@1
-  displayName: 'Build solution SEAL'
-  inputs:
-    solution: 'SEAL.sln'
-    platform: 'x64'
-    configuration: ${{ parameters.configuration }}
-
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
   displayName: 'Run Roslyn Analyzers'
 
@@ -84,14 +77,14 @@ steps:
     configuration: ${{ parameters.configuration }}
     diagnosticsEnabled: True
 
-- task: VSTest@2
-  displayName: 'VsTest - dotnet tests'
-  inputs:
-    testAssemblyVer2: |
-        **\${{ parameters.configuration }}\**\sealnettest.dll
-        !**\obj\**
-    configuration: ${{ parameters.configuration }}
-    diagnosticsEnabled: True
+#- task: VSTest@2
+#  displayName: 'VsTest - dotnet tests'
+#  inputs:
+#    testAssemblyVer2: |
+#        **\${{ parameters.configuration }}\**\sealnettest.dll
+#        !**\obj\**
+#    configuration: ${{ parameters.configuration }}
+#    diagnosticsEnabled: True
 
 - task: PublishSymbols@2
   displayName: 'Publish symbols path'
