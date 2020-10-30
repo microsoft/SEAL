@@ -8,7 +8,7 @@ steps:
   displayName: 'NuGet restore from Solution'
   inputs:
     command: 'restore'
-    restoreSolution: 'SEALNet.sln'
+    restoreSolution: 'dotnet/SEALNet.sln'
     feedsToUse: 'select'
 
 - task: NuGetCommand@2
@@ -80,7 +80,7 @@ steps:
 - task: MSBuild@1
   displayName: 'Build SEALNet'
   inputs:
-    solution: '$(Build.SourcesDirectory)/SEALNet.sln'
+    solution: '$(Build.SourcesDirectory)/dotnet/SEALNet.sln'
     msbuildArchitecture: 'x64'
     platform: 'x64'
     configuration: 'Debug'
