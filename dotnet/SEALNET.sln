@@ -2,79 +2,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29215.179
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNet", "dotnet\src\SEALNet.csproj", "{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNet", "src\SEALNet.csproj", "{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNetTest", "dotnet\tests\SEALNetTest.csproj", "{D0FCCA29-F0F8-49A3-9615-24FF899F1909}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNetTest", "tests\SEALNetTest.csproj", "{D0FCCA29-F0F8-49A3-9615-24FF899F1909}"
 	ProjectSection(ProjectDependencies) = postProject
 		{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E} = {D7ED94EC-3FAB-4B87-AB5F-0308EA92520E}
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNetExamples", "dotnet\examples\SEALNetExamples.csproj", "{18DA9F90-3131-461A-A3E8-40AC0B1D7632}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "dotnet", "dotnet", "{0786F255-C3A7-4912-A669-12273E7AE013}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNetExamples", "examples\SEALNetExamples.csproj", "{18DA9F90-3131-461A-A3E8-40AC0B1D7632}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{33C15AAC-6E56-477E-A118-3451FD21AC49}"
 	ProjectSection(SolutionItems) = preProject
-		dotnet\nuget\NUGET.md = dotnet\nuget\NUGET.md
-		dotnet\nuget\SEALNet-multi.nuspec.in = dotnet\nuget\SEALNet-multi.nuspec.in
-		dotnet\nuget\SEALNet.nuspec.in = dotnet\nuget\SEALNet.nuspec.in
-		dotnet\nuget\SEALNet.targets.in = dotnet\nuget\SEALNet.targets.in
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C73A600E-7F50-467C-9228-58AC2C1A7DDA}"
-	ProjectSection(SolutionItems) = preProject
-		.clang-format = .clang-format
-		.gitignore = .gitignore
-		CHANGES.md = CHANGES.md
-		CMakeLists.txt = CMakeLists.txt
-		CODE_OF_CONDUCT.md = CODE_OF_CONDUCT.md
-		CONTRIBUTING.md = CONTRIBUTING.md
-		ISSUES.md = ISSUES.md
-		LICENSE = LICENSE
-		NOTICE = NOTICE
-		README.md = README.md
-		SECURITY.md = SECURITY.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "thirdparty", "thirdparty", "{6B00D0DE-8A17-44B8-BF47-F372E9189434}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "zlib", "zlib", "{5E524D23-AD60-45AF-B279-0322941E9F31}"
-	ProjectSection(SolutionItems) = preProject
-		thirdparty\zlib\CMakeLists.txt = thirdparty\zlib\CMakeLists.txt
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "msgsl", "msgsl", "{B4EF7358-C76B-4142-9746-B082114B1DDD}"
-	ProjectSection(SolutionItems) = preProject
-		thirdparty\msgsl\CMakeLists.txt = thirdparty\msgsl\CMakeLists.txt
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "googletest", "googletest", "{0DD76E94-59E1-49D4-9ED7-8C696B89F26E}"
-	ProjectSection(SolutionItems) = preProject
-		thirdparty\googletest\CMakeLists.txt = thirdparty\googletest\CMakeLists.txt
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "cmake", "cmake", "{256C7291-7A4D-466A-BF88-535B541D2CAC}"
-	ProjectSection(SolutionItems) = preProject
-		cmake\SEALConfig.cmake.in = cmake\SEALConfig.cmake.in
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "pipelines", "pipelines", "{03B08661-29E2-4806-9F10-F1B7013D717D}"
-	ProjectSection(SolutionItems) = preProject
-		pipelines\jobs.yml = pipelines\jobs.yml
-		pipelines\nix.yml = pipelines\nix.yml
-		pipelines\nuget.yml = pipelines\nuget.yml
-		pipelines\pipeline-CI-Debug-Linux.yml = pipelines\pipeline-CI-Debug-Linux.yml
-		pipelines\pipeline-CI-Debug-macOS.yml = pipelines\pipeline-CI-Debug-macOS.yml
-		pipelines\pipeline-CI-Debug-Windows.yml = pipelines\pipeline-CI-Debug-Windows.yml
-		pipelines\pipeline-CI-Release-All.yml = pipelines\pipeline-CI-Release-All.yml
-		pipelines\pipeline-NuGet.yml = pipelines\pipeline-NuGet.yml
-		pipelines\pipeline-PR-Debug-All.yml = pipelines\pipeline-PR-Debug-All.yml
-		pipelines\windows.yml = pipelines\windows.yml
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "zstd", "zstd", "{0FC3AB9D-3FE4-4BCB-9470-EA174B1ECDFF}"
-	ProjectSection(SolutionItems) = preProject
-		thirdparty\zstd\CMakeLists.txt = thirdparty\zstd\CMakeLists.txt
+		nuget\NUGET.md = nuget\NUGET.md
+		nuget\SEALNet-multi.nuspec.in = nuget\SEALNet-multi.nuspec.in
+		nuget\SEALNet.nuspec.in = nuget\SEALNet.nuspec.in
+		nuget\SEALNet.targets.in = nuget\SEALNet.targets.in
 	EndProjectSection
 EndProject
 Global
