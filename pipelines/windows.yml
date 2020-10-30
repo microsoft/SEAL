@@ -77,14 +77,22 @@ steps:
     configuration: ${{ parameters.configuration }}
     diagnosticsEnabled: True
 
-#- task: VSTest@2
-#  displayName: 'VsTest - dotnet tests'
-#  inputs:
-#    testAssemblyVer2: |
-#        **\${{ parameters.configuration }}\**\sealnettest.dll
-#        !**\obj\**
-#    configuration: ${{ parameters.configuration }}
-#    diagnosticsEnabled: True
+- task: MSBuild@1
+  displayName: 'Build SEALNet'
+  inputs:
+    solution: '$(Build.SourcesDirectory)/SEALNet.sln'
+    msbuildArchitecture: 'x64'
+    platform: 'x64'
+    configuration: 'Debug'
+
+- task: VSTest@2
+  displayName: 'VsTest - dotnet tests'
+  inputs:
+    testAssemblyVer2: |
+        **\${{ parameters.configuration }}\**\sealnettest.dll
+        !**\obj\**
+    configuration: ${{ parameters.configuration }}
+    diagnosticsEnabled: True
 
 - task: PublishSymbols@2
   displayName: 'Publish symbols path'
