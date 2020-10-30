@@ -9,6 +9,7 @@
     <SignAssembly Condition="'$(OS)' == 'Windows_NT' And '$(SEALNetSigningCertificate)' != ''">true</SignAssembly>
     <AssemblyOriginatorKeyFile Condition="'$(OS)' == 'Windows_NT' And '$(SEALNetSigningCertificate)' != ''">SEALNetCert.snk</AssemblyOriginatorKeyFile>
     <DelaySign Condition="'$(OS)' == 'Windows_NT' And '$(SEALNetSigningCertificate)' != ''">true</DelaySign>
+    <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
   <PropertyGroup>
     <DocumentationFile>$(ProjectDir)../../lib/dotnet/$(Configuration)/SEALNet.xml</DocumentationFile>
