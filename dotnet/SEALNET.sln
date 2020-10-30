@@ -1,80 +1,37 @@
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
-VisualStudioVersion = 16.0.29215.179
+VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNet", "src\SEALNet.csproj", "{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNet", "src\SEALNet.csproj", "{1FA5DA9A-A2F0-4CC5-9072-5CBA2D1E3D2E}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNetTest", "tests\SEALNetTest.csproj", "{D0FCCA29-F0F8-49A3-9615-24FF899F1909}"
-	ProjectSection(ProjectDependencies) = postProject
-		{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E} = {D7ED94EC-3FAB-4B87-AB5F-0308EA92520E}
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNetExamples", "examples\SEALNetExamples.csproj", "{4D86EEEA-D0CA-46F5-9199-C70A5C637739}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNetExamples", "examples\SEALNetExamples.csproj", "{18DA9F90-3131-461A-A3E8-40AC0B1D7632}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NuGet", "NuGet", "{33C15AAC-6E56-477E-A118-3451FD21AC49}"
-	ProjectSection(SolutionItems) = preProject
-		nuget\NUGET.md = nuget\NUGET.md
-		nuget\SEALNet-multi.nuspec.in = nuget\SEALNet-multi.nuspec.in
-		nuget\SEALNet.nuspec.in = nuget\SEALNet.nuspec.in
-		nuget\SEALNet.targets.in = nuget\SEALNet.targets.in
-	EndProjectSection
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SEALNetTest", "tests\SEALNetTest.csproj", "{BA3D23D1-93AF-40ED-9771-D4346708CD53}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|Win32 = Debug|Win32
-		Debug|x64 = Debug|x64
-		Release|Win32 = Release|Win32
-		Release|x64 = Release|x64
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E}.Debug|Win32.Build.0 = Debug|Any CPU
-		{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E}.Debug|x64.Build.0 = Debug|Any CPU
-		{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E}.Release|Win32.ActiveCfg = Release|Any CPU
-		{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E}.Release|Win32.Build.0 = Release|Any CPU
-		{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E}.Release|x64.ActiveCfg = Release|Any CPU
-		{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E}.Release|x64.Build.0 = Release|Any CPU
-		{D0FCCA29-F0F8-49A3-9615-24FF899F1909}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{D0FCCA29-F0F8-49A3-9615-24FF899F1909}.Debug|Win32.Build.0 = Debug|Any CPU
-		{D0FCCA29-F0F8-49A3-9615-24FF899F1909}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{D0FCCA29-F0F8-49A3-9615-24FF899F1909}.Debug|x64.Build.0 = Debug|Any CPU
-		{D0FCCA29-F0F8-49A3-9615-24FF899F1909}.Release|Win32.ActiveCfg = Release|Any CPU
-		{D0FCCA29-F0F8-49A3-9615-24FF899F1909}.Release|Win32.Build.0 = Release|Any CPU
-		{D0FCCA29-F0F8-49A3-9615-24FF899F1909}.Release|x64.ActiveCfg = Release|Any CPU
-		{D0FCCA29-F0F8-49A3-9615-24FF899F1909}.Release|x64.Build.0 = Release|Any CPU
-		{18DA9F90-3131-461A-A3E8-40AC0B1D7632}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{18DA9F90-3131-461A-A3E8-40AC0B1D7632}.Debug|Win32.Build.0 = Debug|Any CPU
-		{18DA9F90-3131-461A-A3E8-40AC0B1D7632}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{18DA9F90-3131-461A-A3E8-40AC0B1D7632}.Debug|x64.Build.0 = Debug|Any CPU
-		{18DA9F90-3131-461A-A3E8-40AC0B1D7632}.Release|Win32.ActiveCfg = Release|Any CPU
-		{18DA9F90-3131-461A-A3E8-40AC0B1D7632}.Release|Win32.Build.0 = Release|Any CPU
-		{18DA9F90-3131-461A-A3E8-40AC0B1D7632}.Release|x64.ActiveCfg = Release|Any CPU
-		{18DA9F90-3131-461A-A3E8-40AC0B1D7632}.Release|x64.Build.0 = Release|Any CPU
+		{1FA5DA9A-A2F0-4CC5-9072-5CBA2D1E3D2E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1FA5DA9A-A2F0-4CC5-9072-5CBA2D1E3D2E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1FA5DA9A-A2F0-4CC5-9072-5CBA2D1E3D2E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1FA5DA9A-A2F0-4CC5-9072-5CBA2D1E3D2E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4D86EEEA-D0CA-46F5-9199-C70A5C637739}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4D86EEEA-D0CA-46F5-9199-C70A5C637739}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4D86EEEA-D0CA-46F5-9199-C70A5C637739}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4D86EEEA-D0CA-46F5-9199-C70A5C637739}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BA3D23D1-93AF-40ED-9771-D4346708CD53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BA3D23D1-93AF-40ED-9771-D4346708CD53}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BA3D23D1-93AF-40ED-9771-D4346708CD53}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BA3D23D1-93AF-40ED-9771-D4346708CD53}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{D7ED94EC-3FAB-4B87-AB5F-0308EA92520E} = {0786F255-C3A7-4912-A669-12273E7AE013}
-		{D0FCCA29-F0F8-49A3-9615-24FF899F1909} = {0786F255-C3A7-4912-A669-12273E7AE013}
-		{18DA9F90-3131-461A-A3E8-40AC0B1D7632} = {0786F255-C3A7-4912-A669-12273E7AE013}
-		{33C15AAC-6E56-477E-A118-3451FD21AC49} = {0786F255-C3A7-4912-A669-12273E7AE013}
-		{6B00D0DE-8A17-44B8-BF47-F372E9189434} = {C73A600E-7F50-467C-9228-58AC2C1A7DDA}
-		{5E524D23-AD60-45AF-B279-0322941E9F31} = {6B00D0DE-8A17-44B8-BF47-F372E9189434}
-		{B4EF7358-C76B-4142-9746-B082114B1DDD} = {6B00D0DE-8A17-44B8-BF47-F372E9189434}
-		{0DD76E94-59E1-49D4-9ED7-8C696B89F26E} = {6B00D0DE-8A17-44B8-BF47-F372E9189434}
-		{256C7291-7A4D-466A-BF88-535B541D2CAC} = {C73A600E-7F50-467C-9228-58AC2C1A7DDA}
-		{03B08661-29E2-4806-9F10-F1B7013D717D} = {C73A600E-7F50-467C-9228-58AC2C1A7DDA}
-		{0FC3AB9D-3FE4-4BCB-9470-EA174B1ECDFF} = {6B00D0DE-8A17-44B8-BF47-F372E9189434}
-	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {15A17F22-F747-4B82-BF5F-E0224AF4B3ED}
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
-	EndGlobalSection
-	GlobalSection(Performance) = preSolution
-		HasPerformanceSessions = true
+		SolutionGuid = {B7A5CCFA-4DAB-43A3-85A1-19146401238B}
 	EndGlobalSection
 EndGlobal
