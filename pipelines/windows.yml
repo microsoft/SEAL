@@ -49,12 +49,19 @@ steps:
               Invoke-WebRequest -Uri "$env:SEALNetSigningCertificate" -OutFile $CertOutFile
           }
 
-- task: VSBuild@1
-  displayName: 'Build solution SEAL'
+- task: CMake@1
+  displayName: 'Configure SEAL'
   inputs:
-    solution: 'SEAL.sln'
+    cmakeArgs: .. -DCMAKE_BUILD_TYPE='Debug' -DSEAL_BUILD_DEPS=ON -DSEAL_BUILD_TESTS=ON -DSEAL_BUILD_EXAMPLES=ON
+    workingDirectory: '$(Build.SourcesDirectory)/build'
+
+- task: MSBuild@1
+  displayName: 'Build SEAL'
+  inputs:
+    solution: '$(Build.SourcesDirectory)/build/seal.sln'
+    msbuildArchitecture: 'x64'
     platform: 'x64'
-    configuration: ${{ parameters.configuration }}
+    configuration: 'Debug'
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
   displayName: 'Run Roslyn Analyzers'
@@ -70,14 +77,14 @@ steps:
     configuration: ${{ parameters.configuration }}
     diagnosticsEnabled: True
 
-- task: VSTest@2
-  displayName: 'VsTest - dotnet tests'
-  inputs:
-    testAssemblyVer2: |
-        **\${{ parameters.configuration }}\**\sealnettest.dll
-        !**\obj\**
-    configuration: ${{ parameters.configuration }}
-    diagnosticsEnabled: True
+#- task: VSTest@2
+#  displayName: 'VsTest - dotnet tests'
+#  inputs:
+#    testAssemblyVer2: |
+#        **\${{ parameters.configuration }}\**\sealnettest.dll
+#        !**\obj\**
+#    configuration: ${{ parameters.configuration }}
+#    diagnosticsEnabled: True
 
 - task: PublishSymbols@2
   displayName: 'Publish symbols path'
