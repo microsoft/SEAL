@@ -62,7 +62,7 @@ macro(seal_combine_archives target dependency)
             COMMAND lib.exe /OUT:$<TARGET_FILE:${target}> $<TARGET_FILE:${target}> $<TARGET_FILE:${dependency}>
             DEPENDS $<TARGET_FILE:${target}> $<TARGET_FILE:${dependency}>
             WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
-    elseif()
+    else()
         if(CMAKE_HOST_WIN32)
             get_filename_component(CXX_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
             set(AR_CMD_PATH "${CXX_DIR}/llvm-ar.exe")
