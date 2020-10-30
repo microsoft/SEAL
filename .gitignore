@@ -15,6 +15,7 @@ native/src/gsl/
 !dotnet/nuget/*.nuspec.in
 dotnet/nuget/*.nuspec
 dotnet/nuget/SEALNet.targets
+CMakeSettings.json
 
 # Build
 bin/
