@@ -8,7 +8,8 @@ steps:
   displayName: 'NuGet restore from Solution'
   inputs:
     command: 'restore'
-    restoreSolution: 'dotnet/SEALNet.sln'
+    restoreDirectory: dotnet
+    restoreSolution: 'SEALNet.sln'
     feedsToUse: 'select'
 
 - task: NuGetCommand@2
