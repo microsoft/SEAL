@@ -8,8 +8,6 @@
 cmake/SEALConfig.cmake
 cmake/SEALConfigVersion.cmake
 cmake/SEALTargets.cmake
-thirdparty/*/**
-!thirdparty/*/CMakeLists.txt
 native/src/seal/util/config.h
 native/src/gsl/
 !dotnet/nuget/*.nuspec.in
@@ -23,6 +21,7 @@ lib/
 build/
 *.build
 env
+thirdparty/
 
 ########################################################################################
 #### The following are based on templates from https://github.com/github/gitignore. ####
