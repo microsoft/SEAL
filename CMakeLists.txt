@@ -561,11 +561,11 @@ configure_file(
 
 # Supporting local building of NuGet package
 if(MSVC)
-    set(SEAL_WINDOWS_SEAL_C_PATH ${SEAL_SOURCE_DIR}/lib/x64/$Configuration$/sealc.dll)
+    set(SEAL_WINDOWS_SEAL_C_PATH ${CMAKE_LIBRARY_RUNTIME_DIRECTORY}/sealc.dll)
 elseif(UNIX)
-    set(SEAL_LINUX_SEAL_C_PATH ${SEAL_SOURCE_DIR}/lib/libsealc.so)
+    set(SEAL_LINUX_SEAL_C_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsealc.so)
 elseif(APPLE)
-    set(SEAL_MACOS_SEAL_C_PATH ${SEAL_SOURCE_DIR}/lib/libsealc.dylib)
+    set(SEAL_MACOS_SEAL_C_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsealc.dylib)
 endif()
 
 # Create SEALNet.nuspec for a local NuGet pack from SEALNet.nuspec.in

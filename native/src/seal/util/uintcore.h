@@ -322,7 +322,7 @@ namespace seal
             }
             else
             {
-                std::size_t min_uint64_count = std::min(value_uint64_count, result_uint64_count);
+                std::size_t min_uint64_count = std::min<>(value_uint64_count, result_uint64_count);
                 std::copy_n(value, min_uint64_count, result);
                 std::fill(result + min_uint64_count, result + result_uint64_count, std::uint64_t(0));
             }
@@ -432,7 +432,7 @@ namespace seal
             operand1 += operand1_uint64_count - 1;
             operand2 += operand2_uint64_count - 1;
 
-            std::size_t min_uint64_count = std::min(operand1_uint64_count, operand2_uint64_count);
+            std::size_t min_uint64_count = std::min<>(operand1_uint64_count, operand2_uint64_count);
 
             operand1_uint64_count -= min_uint64_count;
             for (; (result == 0) && operand1_uint64_count--; operand1--)
