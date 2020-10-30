@@ -36,7 +36,7 @@ if(SEAL_USE_INTRIN)
         # Check for presence of __int128
         set(CMAKE_EXTRA_INCLUDE_FILES ${SEAL_INTRIN_HEADER})
         check_type_size("__int128" INT128 LANGUAGE CXX)
-        if(NOT INT128 EQUAL 16)
+        if(INT128 EQUAL 16)
             set(SEAL___INT128_FOUND ON)
         else()
             set(SEAL___INT128_FOUND OFF)
