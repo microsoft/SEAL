@@ -7,10 +7,9 @@
     <Company>Microsoft Corporation</Company>
     <Description>.NET wrapper unit tests for Microsoft SEAL</Description>
     <Copyright>Microsoft Corporation 2020</Copyright>
-    <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
 
-  <PropertyGroup>
+  <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
     <PlatformTarget>x64</PlatformTarget>
     <OutputPath>$(ProjectDir)../../bin/dotnet/$(Configuration)</OutputPath>
   </PropertyGroup>
@@ -27,8 +26,8 @@
 
   <ItemGroup>
     <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Windows))" Include="$(ProjectDir)..\..\bin\sealc.dll" />
-    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Linux))" Include="$(ProjectDir)../../lib/libsealc.so.*" />
-    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(OSX))" Include="$(ProjectDir)../../lib/libsealc*.dylib" />
+    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Linux))" Include="$(ProjectDir)..\..\lib\libsealc.so.*" />
+    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(OSX))" Include="$(ProjectDir)..\..\lib\libsealc*.dylib" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

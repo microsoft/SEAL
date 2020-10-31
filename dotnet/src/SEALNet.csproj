@@ -9,19 +9,18 @@
     <SignAssembly Condition="'$(OS)' == 'Windows_NT' And '$(SEALNetSigningCertificate)' != ''">true</SignAssembly>
     <AssemblyOriginatorKeyFile Condition="'$(OS)' == 'Windows_NT' And '$(SEALNetSigningCertificate)' != ''">SEALNetCert.snk</AssemblyOriginatorKeyFile>
     <DelaySign Condition="'$(OS)' == 'Windows_NT' And '$(SEALNetSigningCertificate)' != ''">true</DelaySign>
-    <Platforms>AnyCPU;x64;x86</Platforms>
   </PropertyGroup>
-  <PropertyGroup>
-    <DocumentationFile>$(ProjectDir)../../lib/dotnet/$(Configuration)/SEALNet.xml</DocumentationFile>
+  <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
+    <DocumentationFile>$(ProjectDir)..\..\lib\dotnet\$(Configuration)/SEALNet.xml</DocumentationFile>
     <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>$(ProjectDir)../../lib/dotnet/$(Configuration)</OutputPath>
+    <OutputPath>$(ProjectDir)..\..\lib\dotnet\$(Configuration)</OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)'=='Release'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <DefineConstants />
     <DebugType>pdbonly</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)'=='Debug'">
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
 </Project>
