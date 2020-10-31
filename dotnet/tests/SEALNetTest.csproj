@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Windows))" Include="$(ProjectDir)..\..\bin\sealc.dll" />
+    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Windows))" Include="$(ProjectDir)..\..\bin\$(Configuration)\sealc.dll" />
     <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Linux))" Include="$(ProjectDir)..\..\lib\libsealc.so.*" />
     <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(OSX))" Include="$(ProjectDir)..\..\lib\libsealc*.dylib" />
   </ItemGroup>
