@@ -118,16 +118,15 @@ namespace seal
             {
                 auto &modulus = coeff_modulus[j];
                 uint64_t max_multiple = max_random - barrett_reduce_64(max_random, modulus) - 1;
-                for (size_t i = 0; i < coeff_count; i++)
-                {
+                transform(destination, destination + coeff_count, destination, [&](uint64_t rand) {
                     // This ensures uniform distribution
-                    uint64_t &rand = destination[i + j * coeff_count];
                     while (rand >= max_multiple)
                     {
                         prng->generate(sizeof(uint64_t), reinterpret_cast<seal_byte *>(&rand));
                     }
-                    rand = barrett_reduce_64(rand, modulus);
-                }
+                    return barrett_reduce_64(rand, modulus);
+                });
+                destination += coeff_count;
             }
         }
 

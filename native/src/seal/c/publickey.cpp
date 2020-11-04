@@ -3,7 +3,6 @@
 
 // SEALNet
 #include "seal/c/publickey.h"
-#include "seal/c/stdafx.h"
 #include "seal/c/utilities.h"
 
 // SEAL

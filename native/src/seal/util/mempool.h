@@ -209,7 +209,7 @@ namespace seal
             static const std::size_t max_single_alloc_byte_count;
 
             // Number of different size allocations allowed by a single memory pool
-            static constexpr std::size_t max_pool_head_count = std::numeric_limits<std::size_t>::max();
+            static constexpr std::size_t max_pool_head_count = (std::numeric_limits<std::size_t>::max)();
 
             // Largest allowed size of batch allocation
             static const std::size_t max_batch_alloc_byte_count;

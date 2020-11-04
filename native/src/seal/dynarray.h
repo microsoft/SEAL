@@ -341,7 +341,7 @@ namespace seal
         */
         SEAL_NODISCARD inline std::size_t max_size() const noexcept
         {
-            return std::numeric_limits<std::size_t>::max();
+            return (std::numeric_limits<std::size_t>::max)();
         }
 
         /**
@@ -396,7 +396,7 @@ namespace seal
         */
         inline void reserve(std::size_t capacity)
         {
-            std::size_t copy_size = std::min(capacity, size_);
+            std::size_t copy_size = std::min<>(capacity, size_);
 
             // Create new allocation and copy over value
             auto new_data(util::allocate<T>(capacity, pool_));

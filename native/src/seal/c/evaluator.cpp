@@ -7,7 +7,6 @@
 
 // SEALNet
 #include "seal/c/evaluator.h"
-#include "seal/c/stdafx.h"
 #include "seal/c/utilities.h"
 
 // SEAL

@@ -62,10 +62,10 @@ namespace seal
         private:
             void safe_gbump(std::streamsize count)
             {
-                constexpr std::streamsize int_max = static_cast<std::streamsize>(std::numeric_limits<int>::max());
+                constexpr std::streamsize int_max = static_cast<std::streamsize>((std::numeric_limits<int>::max)());
                 while (count > int_max)
                 {
-                    gbump(std::numeric_limits<int>::max());
+                    gbump((std::numeric_limits<int>::max)());
                     count -= int_max;
                 }
 
@@ -75,10 +75,10 @@ namespace seal
 
             void safe_pbump(std::streamsize count)
             {
-                constexpr std::streamsize int_max = static_cast<std::streamsize>(std::numeric_limits<int>::max());
+                constexpr std::streamsize int_max = static_cast<std::streamsize>((std::numeric_limits<int>::max)());
                 while (count > int_max)
                 {
-                    pbump(std::numeric_limits<int>::max());
+                    pbump((std::numeric_limits<int>::max)());
                     count -= int_max;
                 }
 
@@ -117,8 +117,8 @@ namespace seal
 
             std::streamsize xsgetn(char_type *s, std::streamsize count) override
             {
-                std::streamsize avail = std::max(
-                    std::streamsize(0), std::min(count, safe_cast<std::streamsize>(std::distance(gptr(), egptr()))));
+                std::streamsize avail = std::max<>(
+                    std::streamsize(0), std::min<>(count, safe_cast<std::streamsize>(std::distance(gptr(), egptr()))));
                 std::copy_n(gptr(), avail, s);
                 safe_gbump(avail);
                 return avail;
@@ -227,9 +227,9 @@ namespace seal
                     {
                         expand_size();
                     }
-                    std::streamsize avail = std::max(
+                    std::streamsize avail = std::max<>(
                         std::streamsize(0),
-                        std::min(remaining, safe_cast<std::streamsize>(std::distance(pptr(), epptr()))));
+                        std::min<>(remaining, safe_cast<std::streamsize>(std::distance(pptr(), epptr()))));
                     std::copy_n(s, avail, pptr());
                     safe_pbump(avail);
                     remaining -= avail;
@@ -313,8 +313,8 @@ namespace seal
 
             std::streamsize xsgetn(char_type *s, std::streamsize count) override
             {
-                std::streamsize avail = std::max(
-                    std::streamsize(0), std::min(count, safe_cast<std::streamsize>(std::distance(head_, end_))));
+                std::streamsize avail = std::max<>(
+                    std::streamsize(0), std::min<>(count, safe_cast<std::streamsize>(std::distance(head_, end_))));
                 std::copy_n(head_, avail, s);
                 std::advance(head_, avail);
                 return avail;
@@ -415,8 +415,8 @@ namespace seal
 
             std::streamsize xsputn(const char_type *s, std::streamsize count) override
             {
-                std::streamsize avail = std::max(
-                    std::streamsize(0), std::min(count, safe_cast<std::streamsize>(std::distance(head_, end_))));
+                std::streamsize avail = std::max<>(
+                    std::streamsize(0), std::min<>(count, safe_cast<std::streamsize>(std::distance(head_, end_))));
                 std::copy_n(s, avail, head_);
                 std::advance(head_, avail);
                 return avail;

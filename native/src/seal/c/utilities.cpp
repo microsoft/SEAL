@@ -6,7 +6,6 @@
 #include <iterator>
 
 // SEALNet
-#include "seal/c/stdafx.h"
 #include "seal/c/utilities.h"
 
 // SEAL

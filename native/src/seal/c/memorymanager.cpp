@@ -1,9 +1,11 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+// STD
+#include <utility>
+
 // SEALNet
 #include "seal/c/memorymanager.h"
-#include "seal/c/stdafx.h"
 #include "seal/c/utilities.h"
 
 // SEAL
@@ -100,7 +102,7 @@ SEAL_C_FUNC MemoryManager_SwitchProfile(void *new_profile)
     MMProf *new_mm_profile = nullptr;
     IfFailRet(CreateProfileCopy(profile, &new_mm_profile));
 
-    MemoryManager::SwitchProfile(static_cast<MMProf *>(new_mm_profile));
+    MemoryManager::SwitchProfile(move(static_cast<MMProf *>(new_mm_profile)));
     return S_OK;
 }
 
