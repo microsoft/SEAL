@@ -373,10 +373,6 @@ else()
             target_link_libraries(seal_shared PRIVATE ${zstd_static})
         endif()
     endif()
-
-    if(MSVC)
-        target_link_libraries(seal_shared PRIVATE BCrypt::bcrypt)
-    endif()
 endif()
 
 #########################
