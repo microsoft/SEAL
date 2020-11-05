@@ -57,6 +57,20 @@ jobs:
         ${{ if eq(parameters.debug, 'false') }}:
           configuration: 'Release'
 
+- ${{ if eq(parameters.name, 'iOS') }}:
+  - job: ${{ parameters.name }}
+    displayName: ${{ parameters.name }}
+    pool:
+      vmImage: 'macos-latest'
+    steps:
+    - template: ios.yml
+      parameters:
+        artifactName: ios-drop
+        ${{ if eq(parameters.debug, 'true') }}:
+          configuration: 'Debug'
+        ${{ if eq(parameters.debug, 'false') }}:
+          configuration: 'Release'
+
 - ${{ if eq(parameters.name, 'Android') }}:
   - job: ${{ parameters.name }}
     displayName: ${{ parameters.name }}

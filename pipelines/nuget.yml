@@ -28,6 +28,12 @@ steps:
           artifactName: 'android-drop'
           downloadPath: '$(Build.ArtifactStagingDirectory)'
 
+    - task: DownloadBuildArtifacts@0
+      inputs:
+          downloadType: 'single'
+          artifactName: 'ios-drop'
+          downloadPath: '$(Build.ArtifactStagingDirectory)'
+
     - task: CopyFiles@2
       displayName: 'Copy Targets File to: $(Build.ArtifactStagingDirectory)'
       inputs:
@@ -63,13 +69,20 @@ steps:
           Contents: '**'
           TargetFolder: '$(Build.ArtifactStagingDirectory)\windows-drop\lib\'
 
+    - task: CopyFiles@2
+      displayName: 'Copy iOS Files to: $(Build.ArtifactStagingDirectory)'
+      inputs:
+          SourceFolder: '$(Build.ArtifactStagingDirectory)\ios-drop\lib\'
+          Contents: '**'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)\windows-drop\lib\'
+
     - task: NuGetCommand@2
       displayName: 'Build NuGet Package'
       inputs:
           command: 'pack'
           packagesToPack: '$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\nuget\SEALNet-multi.nuspec'
           packDestination: '$(Build.ArtifactStagingDirectory)\windows-drop\dotnet\nuget\Release'
-          buildProperties: 'Configuration=Release;NUGET_WINDOWS_SEAL_C_PATH=$(Build.ArtifactStagingDirectory)\windows-drop\lib\x64\Release\sealc.dll;NUGET_LINUX_SEAL_C_PATH=$(Build.ArtifactStagingDirectory)\windows-drop\lib\libsealc.so;NUGET_MACOS_SEAL_C_PATH=$(Build.ArtifactStagingDirectory)\windows-drop\lib\libsealc.dylib;NUGET_ANDROIDARM64_SEAL_C_PATH=$(Build.ArtifactStagingDirectory)\windows-drop\lib\arm64-v8a\libsealc.so;NUGET_ANDROIDX64_SEAL_C_PATH=$(Build.ArtifactStagingDirectory)\windows-drop\lib\x86_64\libsealc.so'
+          buildProperties: 'Configuration=Release;NUGET_WINDOWS_SEAL_C_PATH=$(Build.ArtifactStagingDirectory)\windows-drop\bin\Release\sealc.dll;NUGET_LINUX_SEAL_C_PATH=$(Build.ArtifactStagingDirectory)\windows-drop\lib\libsealc.so;NUGET_MACOS_SEAL_C_PATH=$(Build.ArtifactStagingDirectory)\windows-drop\lib\libsealc.dylib;NUGET_ANDROIDARM64_SEAL_C_PATH=$(Build.ArtifactStagingDirectory)\windows-drop\lib\arm64-v8a\libsealc.so;NUGET_ANDROIDX64_SEAL_C_PATH=$(Build.ArtifactStagingDirectory)\windows-drop\lib\x86_64\libsealc.so;NUGET_IOS64_SEAL_C_PATH=$(Build.ArtifactStagingDirectory)\windows-drop\lib\libsealc.a;NUGET_IOS64_SEAL_PATH=$(Build.ArtifactStagingDirectory)\windows-drop\lib\libseal.a'
 
     - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
       displayName: 'ESRP CodeSigning NuGet package'

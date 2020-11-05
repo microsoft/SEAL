@@ -10,9 +10,13 @@ namespace Microsoft.Research.SEAL
     [Guid("A7AAD62F-3A48-4188-B6C3-523C294CFDAD")]
     static class NativeMethods
     {
+#if SEAL_IOS
+        private const string sealc = "__Internal";
+#else
         private const string sealc = "sealc";
+#endif
 
-        #region Version methods
+#region Version methods
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Version_Major(out byte value);
@@ -23,9 +27,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Version_Patch(out byte value);
 
-        #endregion
+#endregion
 
-        #region EncryptionParameterQualifiers methods
+#region EncryptionParameterQualifiers methods
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void EPQ_Create(IntPtr copy, out IntPtr epq);
@@ -60,9 +64,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
         internal static extern void EPQ_ParameterErrorMessage(IntPtr thisptr, StringBuilder outstr, out ulong length);
 
-        #endregion
+#endregion
 
-        #region Modulus methods
+#region Modulus methods
 
         [DllImport(sealc, EntryPoint = "Modulus_Create1", PreserveSig = false)]
         internal static extern void Modulus_Create(ulong value, out IntPtr smallModulus);
@@ -118,9 +122,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Modulus_Reduce(IntPtr thisptr, ulong value, out ulong result);
 
-        #endregion
+#endregion
 
-        #region EncryptionParameters methods
+#region EncryptionParameters methods
 
         [DllImport(sealc, EntryPoint = "EncParams_Create1", PreserveSig = false)]
         internal static extern void EncParams_Create(byte scheme, out IntPtr encParams);
@@ -179,9 +183,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void EncParams_Load(IntPtr thisptr, byte[] inptr, ulong size, out long inBytes);
 
-        #endregion
+#endregion
 
-        #region CoeffModulus methods
+#region CoeffModulus methods
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void CoeffModulus_MaxBitCount(ulong polyModulusDegree, int secLevel, out int bitCount);
@@ -200,9 +204,9 @@ namespace Microsoft.Research.SEAL
             int[] bitSizes,
             [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffArray);
 
-        #endregion
+#endregion
 
-        #region SEALContext methods
+#region SEALContext methods
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void SEALContext_Create(
@@ -247,9 +251,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void SEALContext_UsingKeyswitching(IntPtr thisptr, out bool usingKeySwitching);
 
-        #endregion
+#endregion
 
-        #region ContextData methods
+#region ContextData methods
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void ContextData_Destroy(IntPtr thisptr);
@@ -290,9 +294,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void ContextData_ChainIndex(IntPtr thisptr, out ulong index);
 
-        #endregion
+#endregion
 
-        #region Evaluator methods
+#region Evaluator methods
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Evaluator_Create(IntPtr sealContext, out IntPtr evaluator);
@@ -313,16 +317,10 @@ namespace Microsoft.Research.SEAL
         internal static extern void Evaluator_AddPlain(IntPtr thisptr, IntPtr encrypted, IntPtr plain, IntPtr destination);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void Evaluator_AddPlain2(IntPtr thisptr, IntPtr plain1, IntPtr plain2, IntPtr destination);
-
-        [DllImport(sealc, PreserveSig = false)]
         internal static extern void Evaluator_Sub(IntPtr thisptr, IntPtr encrypted1, IntPtr encrypted2, IntPtr destination);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Evaluator_SubPlain(IntPtr thisptr, IntPtr encrypted, IntPtr plain, IntPtr destination);
-
-        [DllImport(sealc, PreserveSig = false)]
-        internal static extern void Evaluator_SubPlain2(IntPtr thisptr, IntPtr plain1, IntPtr plain2, IntPtr destination);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Evaluator_Multiply(IntPtr thisptr, IntPtr encrypted1, IntPtr encrypted2, IntPtr destination, IntPtr pool);
@@ -387,9 +385,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Evaluator_ContextUsingKeyswitching(IntPtr thisptr, out bool usingKeySwitching);
 
-        #endregion
+#endregion
 
-        #region Ciphertext methods
+#region Ciphertext methods
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Ciphertext_Create1(IntPtr pool, out IntPtr cipher);
@@ -420,12 +418,6 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Ciphertext_Destroy(IntPtr thisptr);
-
-        [DllImport(sealc, PreserveSig = false)]
-        internal static extern void Ciphertext_UInt64Count(IntPtr thisptr, out ulong uint64Count);
-
-        [DllImport(sealc, PreserveSig = false)]
-        internal static extern void Ciphertext_UInt64CountCapacity(IntPtr thisptr, out ulong uint64CountCapacity);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Ciphertext_Size(IntPtr thisptr, out ulong size);
@@ -499,9 +491,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Ciphertext_UnsafeLoad(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
 
-        #endregion
+#endregion
 
-        #region Plaintext methods
+#region Plaintext methods
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Plaintext_Create1(IntPtr memoryPoolHandle, out IntPtr plainText);
@@ -579,12 +571,6 @@ namespace Microsoft.Research.SEAL
         internal static extern void Plaintext_Capacity(IntPtr thisptr, out ulong capacity);
 
         [DllImport(sealc, PreserveSig = false)]
-        internal static extern void Plaintext_UInt64Count(IntPtr thisptr, out ulong uint64Count);
-
-        [DllImport(sealc, PreserveSig = false)]
-        internal static extern void Plaintext_UInt64CountCapacity(IntPtr thisptr, out ulong uint64CountCapacity);
-
-        [DllImport(sealc, PreserveSig = false)]
         internal static extern void Plaintext_SignificantCoeffCount(IntPtr thisptr, out ulong significantCoeffCount);
 
         [DllImport(sealc, PreserveSig = false)]
@@ -617,9 +603,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Plaintext_UnsafeLoad(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
 
-        #endregion
+#endregion
 
-        #region KSwitchKeys methods
+#region KSwitchKeys methods
 
         [DllImport(sealc, EntryPoint = "KSwitchKeys_Create1", PreserveSig = false)]
         internal static extern void KSwitchKeys_Create(out IntPtr kswitchKeys);
@@ -669,16 +655,16 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void KSwitchKeys_UnsafeLoad(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
 
-        #endregion
+#endregion
 
-        #region GaloisKeys methods
+#region GaloisKeys methods
 
         [DllImport(sealc, EntryPoint = "GaloisKeys_GetIndex", PreserveSig = false)]
         internal static extern void GaloisKeys_GetIndex(uint galoisElt, out ulong index);
 
-        #endregion
+#endregion
 
-        #region KeyGenerator methods
+#region KeyGenerator methods
 
         [DllImport(sealc, EntryPoint = "KeyGenerator_Create1", PreserveSig = false)]
         internal static extern void KeyGenerator_Create(IntPtr sealContext, out IntPtr keyGenerator);
@@ -710,16 +696,16 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void KeyGenerator_ContextUsingKeyswitching(IntPtr thisptr, out bool result);
 
-        #endregion
+#endregion
 
-        #region RelinKeys methods
+#region RelinKeys methods
 
         [DllImport(sealc, EntryPoint = "RelinKeys_GetIndex", PreserveSig = false)]
         internal static extern void RelinKeys_GetIndex(ulong keyPower, out ulong index);
 
-        #endregion
+#endregion
 
-        #region PublicKey methods
+#region PublicKey methods
 
         [DllImport(sealc, EntryPoint = "PublicKey_Create1", PreserveSig = false)]
         internal static extern void PublicKey_Create(out IntPtr publicKey);
@@ -754,9 +740,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void PublicKey_UnsafeLoad(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
 
-        #endregion
+#endregion
 
-        #region SecretKey methods
+#region SecretKey methods
 
         [DllImport(sealc, EntryPoint = "SecretKey_Create1", PreserveSig = false)]
         internal static extern void SecretKey_Create(out IntPtr secretKey);
@@ -791,9 +777,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void SecretKey_UnsafeLoad(IntPtr thisptr, IntPtr context, byte[] inptr, ulong size, out long inBytes);
 
-        #endregion
+#endregion
 
-        #region MemoryManager methods
+#region MemoryManager methods
 
         [DllImport(sealc, EntryPoint = "MemoryManager_GetPool1", PreserveSig = false)]
         internal static extern void MemoryManager_GetPool(int profOpt, bool clearOnDestruction, out IntPtr handle);
@@ -804,9 +790,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void MemoryManager_SwitchProfile(IntPtr newProfile);
 
-        #endregion
+#endregion
 
-        #region MMProf methods
+#region MMProf methods
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void MMProf_CreateGlobal(out IntPtr profile);
@@ -826,9 +812,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void MMProf_Destroy(IntPtr thisptr);
 
-        #endregion
+#endregion
 
-        #region MemoryPoolHandle methods
+#region MemoryPoolHandle methods
 
         [DllImport(sealc, EntryPoint = "MemoryPoolHandle_Create1", PreserveSig = false)]
         internal static extern void MemoryPoolHandle_Create(out IntPtr handlePtr);
@@ -866,9 +852,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void MemoryPoolHandle_Equals(IntPtr thisptr, IntPtr otherptr, out bool result);
 
-        #endregion
+#endregion
 
-        #region Encryptor methods
+#region Encryptor methods
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Encryptor_Create(IntPtr context, IntPtr publicKey, IntPtr secretKey, out IntPtr encryptor);
@@ -900,9 +886,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Encryptor_Destroy(IntPtr thisptr);
 
-        #endregion
+#endregion
 
-        #region Decryptor methods
+#region Decryptor methods
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Decryptor_Create(IntPtr context, IntPtr secretKey, out IntPtr decryptor);
@@ -916,9 +902,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Decryptor_InvariantNoiseBudget(IntPtr thisptr, IntPtr encrypted, out int invariantNoiseBudget);
 
-        #endregion
+#endregion
 
-        #region CKKSEncoder methods
+#region CKKSEncoder methods
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void CKKSEncoder_Create(IntPtr context, out IntPtr ckksEncoder);
@@ -950,9 +936,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void CKKSEncoder_SlotCount(IntPtr thisptr, out ulong slotCount);
 
-        #endregion
+#endregion
 
-        #region BatchEncoder methods
+#region BatchEncoder methods
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void BatchEncoder_Create(IntPtr context, out IntPtr batchEncoder);
@@ -966,24 +952,18 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, EntryPoint = "BatchEncoder_Encode2", PreserveSig = false)]
         internal static extern void BatchEncoder_Encode(IntPtr thisptr, ulong count, long[] values, IntPtr destination);
 
-        [DllImport(sealc, EntryPoint = "BatchEncoder_Encode3", PreserveSig = false)]
-        internal static extern void BatchEncoder_Encode(IntPtr thisptr, IntPtr plain, IntPtr pool);
-
         [DllImport(sealc, EntryPoint = "BatchEncoder_Decode1", PreserveSig = false)]
         internal static extern void BatchEncoder_Decode(IntPtr thisptr, IntPtr plain, ref ulong count, ulong[] destination, IntPtr pool);
 
         [DllImport(sealc, EntryPoint = "BatchEncoder_Decode2", PreserveSig = false)]
         internal static extern void BatchEncoder_Decode(IntPtr thisptr, IntPtr plain, ref ulong count, long[] destination, IntPtr pool);
 
-        [DllImport(sealc, EntryPoint = "BatchEncoder_Decode3", PreserveSig = false)]
-        internal static extern void BatchEncoder_Decode(IntPtr thisptr, IntPtr plain, IntPtr pool);
-
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void BatchEncoder_GetSlotCount(IntPtr thisptr, out ulong slotCount);
 
-        #endregion
+#endregion
 
-        #region ValCheck methods
+#region ValCheck methods
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void ValCheck_Plaintext_IsValidFor(IntPtr plaintext, IntPtr context, out bool result);
@@ -1006,9 +986,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void ValCheck_GaloisKeys_IsValidFor(IntPtr galoisKeys, IntPtr context, out bool result);
 
-        #endregion
+#endregion
 
-        #region Serialization methods
+#region Serialization methods
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Serialization_SEALMagic(out ushort result);
@@ -1028,7 +1008,7 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Serialization_IsValidHeader(byte[] headerptr, ulong size, out bool result);
 
-        #endregion
+#endregion
 
         public static class Errors
         {

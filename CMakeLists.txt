@@ -386,17 +386,28 @@ check_type_size("size_t" SIZET LANGUAGE C)
 set(SEAL_BUILD_SEAL_C_OPTION_STR "Build C export library for Microsoft SEAL")
 cmake_dependent_option(SEAL_BUILD_SEAL_C ${SEAL_BUILD_SEAL_C_OPTION_STR} OFF "${SIZET} EQUAL 8" OFF)
 
+set(BUILD_STATIC_SEALC_LIB_OPTION_STR "Build static C library for Microsoft SEAL")
+cmake_dependent_option(BUILD_STATIC_SEALC_LIB ${BUILD_STATIC_SEALC_LIB_OPTION_STR} OFF "SEAL_BUILD_SEAL_C" OFF)
+
 unset(SIZET CACHE)
 unset(HAVE_SIZET CACHE)
 
-# Create shared SEAL_C library but add no source files yet
+# Create SEAL_C library but add no source files yet
 if(SEAL_BUILD_SEAL_C)
-    add_library(sealc SHARED)
+    if(BUILD_STATIC_SEALC_LIB)
+        add_library(sealc STATIC)
+    else()
+        add_library(sealc SHARED)
+    endif()
 
     # Add source files to library and header files to install
     add_subdirectory(native/src/seal/c)
     seal_set_version(sealc)
-    seal_set_soversion(sealc)
+    if(BUILD_STATIC_SEALC_LIB)
+        seal_set_version_filename(sealc)
+    else()
+        seal_set_soversion(sealc)
+    endif()
     seal_set_language(sealc)
     seal_set_include_directories(sealc)
 

@@ -15,12 +15,16 @@
     <PlatformTarget>x64</PlatformTarget>
     <OutputPath>$(ProjectDir)..\..\lib\dotnet\$(Configuration)</OutputPath>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(BuildIOS)' != ''">
+    <DefineConstants>$(DefineConstants);SEAL_IOS</DefineConstants>
+    <DocumentationFile>$(ProjectDir)..\..\lib\dotnet\ios\$(Configuration)\SEALNet.xml</DocumentationFile>
+    <OutputPath>$(ProjectDir)..\..\lib\dotnet\ios\$(Configuration)</OutputPath>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DefineConstants />
     <DebugType>pdbonly</DebugType>
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <DefineConstants>$(DefineConstants);DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
 </Project>
