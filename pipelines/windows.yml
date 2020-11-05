@@ -61,7 +61,7 @@ steps:
     solution: '$(Build.SourcesDirectory)/build/seal.sln'
     msbuildArchitecture: 'x64'
     platform: 'x64'
-    configuration: 'Debug'
+    configuration: '${{ parameters.configuration }}'
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
   displayName: 'Run Roslyn Analyzers'
@@ -83,7 +83,17 @@ steps:
     solution: '$(Build.SourcesDirectory)/dotnet/SEALNet.sln'
     msbuildArchitecture: 'x64'
     platform: 'x64'
-    configuration: 'Debug'
+    configuration: '${{ parameters.configuration }}'
+
+- ${{ if eq(parameters.configuration, 'Release') }}:
+  - task: MSBuild@1
+    displayName: 'Build SEALNet for iOS'
+    inputs:
+      solution: '$(Build.SourceDirectory)/dotnet/SEALNet.sln'
+      msbuildArchitecture: 'x64'
+      platform: 'x64'
+      msbuildArguments: '/p:BuildIOS'
+      configuration: '${{ parameters.configuration }}'
 
 - task: VSTest@2
   displayName: 'VsTest - dotnet tests'
@@ -127,12 +137,68 @@ steps:
           }
         ]
 
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'ESRP Add Strong Name to iOS assembly'
+    inputs:
+      ConnectedServiceName: 'ESRP CodeSigning'
+      FolderPath: lib/dotnet/ios/${{ parameters.configuration }}/netstandard2.0
+      Pattern: '*.dll'
+      signConfigType: inlineSignParams
+      inlineOperation: |
+        [
+          {
+              "KeyCode" : "CP-235845-SN",
+              "OperationCode" : "StrongNameSign",
+              "Parameters" : {},
+              "ToolName" : "sign",
+              "ToolVersion" : "1.0"
+          },
+          {
+              "KeyCode" : "CP-235845-SN",
+              "OperationCode" : "StrongNameVerify",
+              "Parameters" : {},
+              "ToolName" : "sign",
+              "ToolVersion" : "1.0"
+          }
+        ]
+
 - ${{ if eq(parameters.configuration, 'Release') }}:
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: 'ESRP CodeSigning .NET Standard 2.0'
     inputs:
       ConnectedServiceName: 'ESRP CodeSigning'
       FolderPath: lib/dotnet/${{ parameters.configuration }}/netstandard2.0
+      Pattern: '*.dll'
+      signConfigType: inlineSignParams
+      inlineOperation: |
+        [
+          {
+              "KeyCode": "CP-230012",
+              "OperationCode": "SigntoolSign",
+              "Parameters": {
+                  "OpusName": "Microsoft.Research.SEAL",
+                  "OpusInfo": "https://github.com/microsoft/SEAL",
+                  "FileDigest": "/fd \"SHA256\"",
+                  "PageHash": "/PH",
+                  "TimeStamp": "/tr \"http://rfc3161.gtm.corp.microsoft.com/TSS/HttpTspServer\" /td sha256"
+              },
+              "ToolName": "sign",
+              "ToolVersion": "1.0"
+          },
+          {
+              "KeyCode": "CP-230012",
+              "OperationCode": "SigntoolVerify",
+              "Parameters": {},
+              "ToolName": "sign",
+              "ToolVersion": "1.0"
+          }
+        ]
+
+  - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
+    displayName: 'ESRP CodeSigning .NET Standard 2.0 for iOS assembly'
+    inputs:
+      ConnectedServiceName: 'ESRP CodeSigning'
+      FolderPath: lib/dotnet/ios/${{ parameters.configuration }}/netstandard2.0
       Pattern: '*.dll'
       signConfigType: inlineSignParams
       inlineOperation: |
