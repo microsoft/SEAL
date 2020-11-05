@@ -89,10 +89,10 @@ steps:
   - task: MSBuild@1
     displayName: 'Build SEALNet for iOS'
     inputs:
-      solution: '$(Build.SourcesDirectory)/dotnet/SEALNet.sln'
+      solution: '$(Build.SourcesDirectory)/dotnet/src/SEALNet.csproj'
       msbuildArchitecture: 'x64'
       platform: 'x64'
-      msbuildArguments: '/p:BuildIOS'
+      msbuildArguments: '/p:BuildIOS=1'
       configuration: '${{ parameters.configuration }}'
 
 - task: VSTest@2
