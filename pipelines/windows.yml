@@ -230,7 +230,7 @@ steps:
     displayName: 'ESRP CodeSigning native'
     inputs:
       ConnectedServiceName: 'ESRP CodeSigning'
-      FolderPath: lib/${{ parameters.configuration }}
+      FolderPath: bin/${{ parameters.configuration }}
       Pattern: '*.dll'
       signConfigType: inlineSignParams
       inlineOperation: |
