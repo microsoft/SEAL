@@ -6,10 +6,11 @@
 
 - Added support for [Zstandard](https://github.com/facebook/zstd) compression as a much more efficient alternative to ZLIB.
 The performance improvement should be expected to be around 20-30x.
-- Added support for Shake256 extendable output function for pseudo-random number generation.
-The user can choose to set the default to Blake2xb (faster) or Shake256, when configuring the build system.
-There is slight change in how seeded ciphertexts and public keys are serialized, partly due to this new flexibility.
+- Added support for Shake256 XOF for pseudo-random number generation.
+The user can choose to change the default from Blake2xb (faster) to Shake256 (FIPS-202) when configuring the build system.
+There is slight change in how seeded ciphertexts and public keys are serialized due to the flexibility of supporting multiple hash functions.
 Microsoft SEAL 3.6 is backwards compatible with 3.4 and 3.5 when deserializing, but it does not support serializing in the old formats.
+- Added support for iOS.
 
 ### API Changes
 
