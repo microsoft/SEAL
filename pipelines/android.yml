@@ -39,7 +39,7 @@ steps:
 - task: CopyFiles@2
   displayName: Copy files to staging directory
   inputs:
-    SourceFolder: '$(Build.BinariesDirectory)\lib'
+    SourceFolder: '$(Build.SourcesDirectory)\lib'
     Contents: '**/libsealc.so'
     TargetFolder: '$(Build.ArtifactStagingDirectory)\lib'
 
