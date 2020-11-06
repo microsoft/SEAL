@@ -526,16 +526,14 @@ endif()
 #######################################
 
 # Create SEALNetExamples.csproj and SEALNetTest.csproj for building dotnet with Visual Studio
-if(WIN32)
-    configure_file(
-        ${CMAKE_CURRENT_LIST_DIR}/dotnet/tests/SEALNetTest.csproj.in
-        ${CMAKE_CURRENT_LIST_DIR}/dotnet/tests/SEALNetTest.csproj
-        @ONLY)
-    configure_file(
-        ${CMAKE_CURRENT_LIST_DIR}/dotnet/examples/SEALNetExamples.csproj.in
-        ${CMAKE_CURRENT_LIST_DIR}/dotnet/examples/SEALNetExamples.csproj
-        @ONLY)
-endif()
+configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/dotnet/tests/SEALNetTest.csproj.in
+    ${CMAKE_CURRENT_LIST_DIR}/dotnet/tests/SEALNetTest.csproj
+    @ONLY)
+configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/dotnet/examples/SEALNetExamples.csproj.in
+    ${CMAKE_CURRENT_LIST_DIR}/dotnet/examples/SEALNetExamples.csproj
+    @ONLY)
 
 # Set the sealc dynamic library file names to be included in creating
 # the NuGet package. When building a multi-platform NuGet package, the
