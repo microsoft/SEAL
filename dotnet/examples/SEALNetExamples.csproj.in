@@ -1,11 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <IsPackable>false</IsPackable>
     <Authors>Microsoft Research</Authors>
     <Company>Microsoft Corporation</Company>
-    <Description>.NET wrapper unit tests for Microsoft SEAL</Description>
+    <Description>.NET wrapper examples for Microsoft SEAL</Description>
     <Copyright>Microsoft Corporation 2020</Copyright>
   </PropertyGroup>
 
@@ -15,19 +15,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="2.0.0" />
-    <PackageReference Include="MSTest.TestFramework" Version="2.0.0" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="$(ProjectDir)../src/SEALNet.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Windows))" Include="$(ProjectDir)..\..\bin\$(Configuration)\sealc.dll" />
-    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Linux))" Include="$(ProjectDir)..\..\lib\libsealc.so.*" />
-    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(OSX))" Include="$(ProjectDir)..\..\lib\libsealc*.dylib" />
+    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Windows))" Include="@CMAKE_RUNTIME_OUTPUT_DIRECTORY@\sealc.dll" />
+    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Linux))" Include="@CMAKE_LIBRARY_OUTPUT_DIRECTORY@\libsealc.so.*" />
+    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(OSX))" Include="@CMAKE_LIBRARY_OUTPUT_DIRECTORY@\libsealc*.dylib" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

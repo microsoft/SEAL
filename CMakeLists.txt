@@ -26,7 +26,8 @@ include(CheckCXXSourceRuns)
 include(CheckTypeSize)
 include (CheckSymbolExists)
 # Extra modules
-list(APPEND CMAKE_MODULE_PATH ${SEAL_SOURCE_DIR}/cmake)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
+include(SEALMacros)
 
 # Always build position-independent-code
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -89,8 +90,6 @@ set(SEAL_INCLUDES_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/SEAL-${SEAL_VERSION_MA
 
 # Cleaning up artifacts from previous versions
 include(CleanArtifacts)
-
-include(SEALMacros)
 
 #########################
 # External dependencies #
@@ -189,7 +188,7 @@ endif()
 # Build a shared library if set to ON. Build a static library regardlessly.
 set(BUILD_SHARED_LIBS_STR "Build shared library")
 option(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_STR} OFF)
-if(MSVC AND BUILD_SHARED_LIBS)
+if(WIN32 AND BUILD_SHARED_LIBS)
     message(FATAL_ERROR "On Windows only static build is supported; set `BUILD_SHARED_LIBS=OFF`")
 endif()
 
@@ -471,7 +470,7 @@ export(
     FILE ${SEAL_TARGETS_FILENAME})
 
 # In UNIX-like platforms install MSGSL header files if SEAL_BUILD_DEPS is ON
-if(SEAL_USE_MSGSL AND SEAL_BUILD_DEPS AND NOT MSVC)
+if(SEAL_USE_MSGSL AND SEAL_BUILD_DEPS AND NOT WIN32)
     install(
         DIRECTORY
             ${msgsl_SOURCE_DIR}/include/gsl
@@ -479,6 +478,12 @@ if(SEAL_USE_MSGSL AND SEAL_BUILD_DEPS AND NOT MSVC)
             ${SEAL_INCLUDES_INSTALL_DIR}
     )
 endif()
+
+# Create pkg-config file
+configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/pkgconfig/seal.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/seal-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR}.pc
+    @ONLY)
 
 #####################
 # SEAL C++ examples #
@@ -520,6 +525,18 @@ endif()
 # Configure SEALNet and NuGet package #
 #######################################
 
+# Create SEALNetExamples.csproj and SEALNetTest.csproj for building dotnet with Visual Studio
+if(WIN32)
+    configure_file(
+        ${CMAKE_CURRENT_LIST_DIR}/dotnet/tests/SEALNetTest.csproj.in
+        ${CMAKE_CURRENT_LIST_DIR}/dotnet/tests/SEALNetTest.csproj
+        @ONLY)
+    configure_file(
+        ${CMAKE_CURRENT_LIST_DIR}/dotnet/examples/SEALNetExamples.csproj.in
+        ${CMAKE_CURRENT_LIST_DIR}/dotnet/examples/SEALNetExamples.csproj
+        @ONLY)
+endif()
+
 # Set the sealc dynamic library file names to be included in creating
 # the NuGet package. When building a multi-platform NuGet package, the
 # dynamic library paths need to be specified explicitly in the NuGet
@@ -534,7 +551,7 @@ unset(SEAL_MACOS_SEAL_C_PATH)
 # Create SEALNet-multi.nuspec for a multi-platform NuGet package
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet-multi.nuspec.in
-    ${CMAKE_CURRENT_BINARY_DIR}/dotnet/nuget/SEALNet-multi.nuspec
+    ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet-multi.nuspec
     @ONLY)
 
 set(SEAL_WINDOWS_SEAL_C_PATH "")
@@ -544,27 +561,22 @@ set(SEAL_MACOS_SEAL_C_PATH "")
 # Create SEALNet.nuspec for a local NuGet pack from SEALNet.nuspec.in
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.nuspec.in
-    ${CMAKE_CURRENT_BINARY_DIR}/dotnet/nuget/SEALNet.nuspec
+    ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.nuspec
     @ONLY)
 
 # Create SEALNet.targets from SEALNet.targets.in
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.targets.in
-    ${CMAKE_CURRENT_BINARY_DIR}/dotnet/nuget/SEALNet.targets
-    @ONLY)
-
-# Create pkg-config file
-configure_file(
-    ${CMAKE_CURRENT_LIST_DIR}/pkgconfig/seal.pc.in
-    ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/seal-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR}.pc}
+    ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.targets
     @ONLY)
 
 # Supporting local building of NuGet package
-if(MSVC)
+if(WIN32)
     set(SEAL_WINDOWS_SEAL_C_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sealc.dll)
 elseif(UNIX AND NOT APPLE)
     set(SEAL_LINUX_SEAL_C_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsealc.so)
 elseif(APPLE)
     set(SEAL_MACOS_SEAL_C_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsealc.dylib)
 endif()
+message(STATUS "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsealc.so")
 
