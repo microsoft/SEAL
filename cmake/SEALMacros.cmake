@@ -33,7 +33,7 @@ macro(seal_set_include_directories target)
         $<BUILD_INTERFACE:${SEAL_INCLUDES_BUILD_DIR}>
         $<INSTALL_INTERFACE:${SEAL_INCLUDES_INSTALL_DIR}>)
     target_include_directories(${target} PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}>
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/native/src/>
         $<INSTALL_INTERFACE:${SEAL_INCLUDES_INSTALL_DIR}>)
 endmacro()
 

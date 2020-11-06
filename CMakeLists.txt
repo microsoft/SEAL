@@ -298,7 +298,7 @@ endif()
 set(SEAL_SOURCE_FILES "")
 add_subdirectory(native/src/seal)
 # Create the config file
-configure_file(${CMAKE_CURRENT_LIST_DIR}/native/src/seal/util/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/seal/util/config.h)
+configure_file(${CMAKE_CURRENT_LIST_DIR}/native/src/seal/util/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/native/src/seal/util/config.h)
 install(
     FILES
         ${CMAKE_CURRENT_BINARY_DIR}/seal/util/config.h
@@ -576,5 +576,4 @@ elseif(UNIX AND NOT APPLE)
 elseif(APPLE)
     set(SEAL_MACOS_SEAL_C_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsealc.dylib)
 endif()
-message(STATUS "${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsealc.so")
 
