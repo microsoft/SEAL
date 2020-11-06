@@ -71,21 +71,21 @@ endif()
 
 # Required files and directories
 include(GNUInstallDirs)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/${OUTLIB_PATH})
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/${OUTLIB_PATH})
-set(CMAKE_LIBRARY_RUNTIME_DIRECTORY ${SEAL_SOURCE_DIR}/bin)
-set(SEAL_TARGETS_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALTargets.cmake)
-set(SEAL_CONFIG_IN_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake.in)
-set(SEAL_CONFIG_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfig.cmake)
-set(SEAL_PKGCONFIG_IN_FILENAME ${SEAL_SOURCE_DIR}/pkgconfig/seal.pc.in)
-set(SEAL_PKGCONFIG_FILENAME ${SEAL_SOURCE_DIR}/pkgconfig/seal-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR}.pc)
-set(SEAL_CONFIG_VERSION_FILENAME ${SEAL_SOURCE_DIR}/cmake/SEALConfigVersion.cmake)
+# Source Tree
+set(SEAL_INCLUDES_BUILD_DIR ${CMAKE_CURRENT_LIST_DIR}/native/src)
+set(SEAL_THIRDPARTY_DIR ${CMAKE_CURRENT_LIST_DIR}/thirdparty)
+set(SEAL_CONFIG_IN_FILENAME ${CMAKE_CURRENT_LIST_DIR}/cmake/SEALConfig.cmake.in)
+# Build tree
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUTLIB_PATH})
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUTLIB_PATH})
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+set(SEAL_TARGETS_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/cmake/SEALTargets.cmake)
+set(SEAL_CONFIG_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/cmake/SEALConfig.cmake)
+set(SEAL_CONFIG_VERSION_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/cmake/SEALConfigVersion.cmake)
+# Install
 set(SEAL_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
 set(SEAL_PKGCONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 set(SEAL_INCLUDES_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
-set(SEAL_INCLUDES_BUILD_DIR ${SEAL_SOURCE_DIR}/native/src)
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${SEAL_SOURCE_DIR}/bin)
-set(SEAL_THIRDPARTY_DIR ${SEAL_SOURCE_DIR}/thirdparty)
 
 # Cleaning up artifacts from previous versions
 include(CleanArtifacts)
@@ -298,6 +298,13 @@ endif()
 # Add source files to library and header files to install
 set(SEAL_SOURCE_FILES "")
 add_subdirectory(native/src/seal)
+# Create the config file
+configure_file(${CMAKE_CURRENT_LIST_DIR}/native/src/seal/util/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/seal/util/config.h)
+install(
+    FILES
+        ${CMAKE_CURRENT_BINARY_DIR}/seal/util/config.h
+    DESTINATION
+        ${SEAL_INCLUDES_INSTALL_DIR}/seal/util)
 
 # Build only a static library
 if(NOT BUILD_SHARED_LIBS)
@@ -526,37 +533,38 @@ unset(SEAL_MACOS_SEAL_C_PATH)
 
 # Create SEALNet-multi.nuspec for a multi-platform NuGet package
 configure_file(
-    ${SEAL_SOURCE_DIR}/dotnet/nuget/SEALNet-multi.nuspec.in
-    ${SEAL_SOURCE_DIR}/dotnet/nuget/SEALNet-multi.nuspec
+    ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet-multi.nuspec.in
+    ${CMAKE_CURRENT_BINARY_DIR}/dotnet/nuget/SEALNet-multi.nuspec
     @ONLY)
 
 set(SEAL_WINDOWS_SEAL_C_PATH "")
 set(SEAL_LINUX_SEAL_C_PATH "")
 set(SEAL_MACOS_SEAL_C_PATH "")
 
+# Create SEALNet.nuspec for a local NuGet pack from SEALNet.nuspec.in
+configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.nuspec.in
+    ${CMAKE_CURRENT_BINARY_DIR}/dotnet/nuget/SEALNet.nuspec
+    @ONLY)
+
+# Create SEALNet.targets from SEALNet.targets.in
+configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.targets.in
+    ${CMAKE_CURRENT_BINARY_DIR}/dotnet/nuget/SEALNet.targets
+    @ONLY)
+
 # Create pkg-config file
 configure_file(
-     ${SEAL_PKGCONFIG_IN_FILENAME}
-     ${SEAL_PKGCONFIG_FILENAME}
-     @ONLY)
+    ${CMAKE_CURRENT_LIST_DIR}/pkgconfig/seal.pc.in
+    ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/seal-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR}.pc}
+    @ONLY)
 
 # Supporting local building of NuGet package
 if(MSVC)
-    set(SEAL_WINDOWS_SEAL_C_PATH ${CMAKE_LIBRARY_RUNTIME_DIRECTORY}/sealc.dll)
-elseif(UNIX)
+    set(SEAL_WINDOWS_SEAL_C_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sealc.dll)
+elseif(UNIX AND NOT APPLE)
     set(SEAL_LINUX_SEAL_C_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsealc.so)
 elseif(APPLE)
     set(SEAL_MACOS_SEAL_C_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsealc.dylib)
 endif()
 
-# Create SEALNet.nuspec for a local NuGet pack from SEALNet.nuspec.in
-configure_file(
-    ${SEAL_SOURCE_DIR}/dotnet/nuget/SEALNet.nuspec.in
-    ${SEAL_SOURCE_DIR}/dotnet/nuget/SEALNet.nuspec
-    @ONLY)
-
-# Create SEALNet.targets from SEALNet.targets.in
-configure_file(
-    ${SEAL_SOURCE_DIR}/dotnet/nuget/SEALNet.targets.in
-    ${SEAL_SOURCE_DIR}/dotnet/nuget/SEALNet.targets
-    @ONLY)

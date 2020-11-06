@@ -28,9 +28,6 @@ set(SEAL_SOURCE_FILES ${SEAL_SOURCE_FILES}
     ${CMAKE_CURRENT_LIST_DIR}/ztools.cpp
 )
 
-# Create the config file
-configure_file(${CMAKE_CURRENT_LIST_DIR}/config.h.in ${CMAKE_CURRENT_LIST_DIR}/config.h)
-
 # Add header files for installation
 install(
     FILES
@@ -39,7 +36,6 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/clang.h
         ${CMAKE_CURRENT_LIST_DIR}/clipnormal.h
         ${CMAKE_CURRENT_LIST_DIR}/common.h
-        ${CMAKE_CURRENT_LIST_DIR}/config.h
         ${CMAKE_CURRENT_LIST_DIR}/croots.h
         ${CMAKE_CURRENT_LIST_DIR}/defines.h
         ${CMAKE_CURRENT_LIST_DIR}/dwthandler.h
