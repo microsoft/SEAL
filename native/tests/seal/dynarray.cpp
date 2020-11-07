@@ -4,6 +4,7 @@
 #include "seal/dynarray.h"
 #include "seal/memorymanager.h"
 #include <sstream>
+#include "gsl/span"
 #include "gtest/gtest.h"
 
 using namespace seal;
@@ -146,7 +147,49 @@ namespace sealtest
             ASSERT_EQ(88, static_cast<int>(pool.alloc_byte_count()));
         }
     }
+#ifdef SEAL_USE_MSGSL
+    TEST(DynArrayTest, FromSpan)
+    {
+        // Constructors
+        vector<int> coeffs{};
+        DynArray<int> arr(coeffs);
+        ASSERT_TRUE(arr.empty());
 
+        coeffs = { 0 };
+        arr = DynArray<int>(coeffs);
+        ASSERT_EQ(1ULL, arr.size());
+        ASSERT_EQ(1ULL, arr.capacity());
+        ASSERT_TRUE(equal(coeffs.begin(), coeffs.end(), arr.begin()));
+
+        arr = DynArray<int>(coeffs, 2);
+        ASSERT_EQ(1ULL, arr.size());
+        ASSERT_EQ(2ULL, arr.capacity());
+        ASSERT_TRUE(equal(coeffs.begin(), coeffs.end(), arr.begin()));
+
+        coeffs = { 1, 2 };
+        arr = DynArray<int>(coeffs);
+        ASSERT_EQ(2ULL, arr.size());
+        ASSERT_EQ(2ULL, arr.capacity());
+        ASSERT_TRUE(equal(coeffs.begin(), coeffs.end(), arr.begin()));
+
+        arr = DynArray<int>(coeffs, 3);
+        ASSERT_EQ(2ULL, arr.size());
+        ASSERT_EQ(3ULL, arr.capacity());
+        ASSERT_TRUE(equal(coeffs.begin(), coeffs.end(), arr.begin()));
+
+        // Setter
+        coeffs = {};
+        arr = coeffs;
+        ASSERT_EQ(0ULL, arr.size());
+        ASSERT_EQ(3ULL, arr.capacity());
+
+        coeffs = { 5, 4, 3, 2, 1 };
+        arr = coeffs;
+        ASSERT_EQ(5ULL, arr.size());
+        ASSERT_EQ(5ULL, arr.capacity());
+        ASSERT_TRUE(equal(coeffs.begin(), coeffs.end(), arr.begin()));
+    }
+#endif
     TEST(DynArrayTest, SaveLoadDynArray)
     {
         DynArray<int32_t> arr(6, 4);

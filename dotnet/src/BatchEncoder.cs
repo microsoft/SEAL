@@ -50,8 +50,11 @@ namespace Microsoft.Research.SEAL
     {
         /// <summary>
         /// Creates a BatchEncoder. It is necessary that the encryption parameters
-        /// given through the SEALContext object support batching.
         /// </summary>
+        /// <remarks>
+        /// Creates a BatchEncoder. It is necessary that the encryption parameters
+        /// given through the SEALContext object support batching.
+        /// </remarks>
         /// <param name="context">The SEALContext</param>
         /// @param[in] context
         /// <exception cref="ArgumentNullException">if context is null.</exception>
@@ -75,6 +78,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Creates a plaintext from a given matrix.
+        /// </summary>
+        /// <remarks>
         /// Creates a plaintext from a given matrix. This function "batches" a given matrix
         /// of integers modulo the plaintext modulus into a plaintext element, and stores
         /// the result in the destination parameter. The input vector must have size at most equal
@@ -85,7 +91,7 @@ namespace Microsoft.Research.SEAL
         ///
         /// If the destination plaintext overlaps the input values in memory, the behavior of
         /// this function is undefined.
-        /// </summary>
+        /// </remarks>
         /// <param name="values">The matrix of integers modulo plaintext modulus to batch</param>
         /// <param name="destination">The plaintext polynomial to overwrite with the result</param>
         /// <exception cref="ArgumentNullException">if either values or destination are null</exception>
@@ -102,6 +108,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Creates a plaintext from a given matrix.
+        /// </summary>
+        /// <remarks>
         /// Creates a plaintext from a given matrix. This function "batches" a given matrix
         /// of integers modulo the plaintext modulus into a plaintext element, and stores
         /// the result in the destination parameter. The input vector must have size at most equal
@@ -112,7 +121,7 @@ namespace Microsoft.Research.SEAL
         ///
         /// If the destination plaintext overlaps the input values in memory, the behavior of
         /// this function is undefined.
-        /// </summary>
+        /// </remarks>
         /// <param name="values">The matrix of integers modulo plaintext modulus to batch</param>
         /// <param name="destination">The plaintext polynomial to overwrite with the result</param>
         /// <exception cref="ArgumentNullException">if either values or destionation are null</exception>
@@ -129,13 +138,16 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Inverse of encode.
+        /// </summary>
+        /// <remarks>
         /// Inverse of encode. This function "unbatches" a given plaintext into a matrix
         /// of integers modulo the plaintext modulus, and stores the result in the destination
         /// parameter. The input plaintext must have degrees less than the polynomial modulus,
         /// and coefficients less than the plaintext modulus, i.e. it must be a valid plaintext
         /// for the encryption parameters. Dynamic memory allocations in the process are
         /// allocated from the memory pool pointed to by the given MemoryPoolHandle.
-        /// </summary>
+        /// </remarks>
         /// <param name="plain">The plaintext polynomial to unbatch</param>
         /// <param name="destination">The matrix to be overwritten with the values in the slots</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
@@ -166,13 +178,16 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Inverse of encode.
+        /// </summary>
+        /// <remarks>
         /// Inverse of encode. This function "unbatches" a given plaintext into a matrix
         /// of integers modulo the plaintext modulus, and stores the result in the destination
         /// parameter. The input plaintext must have degrees less than the polynomial modulus,
         /// and coefficients less than the plaintext modulus, i.e. it must be a valid plaintext
         /// for the encryption parameters. Dynamic memory allocations in the process are
         /// allocated from the memory pool pointed to by the given MemoryPoolHandle.
-        /// </summary>
+        /// </remarks>
         /// <param name="plain">The plaintext polynomial to unbatch</param>
         /// <param name="destination">The matrix to be overwritten with the values in the slots</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>

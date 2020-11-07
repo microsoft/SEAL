@@ -176,7 +176,35 @@ namespace seal
             util::Pointer<T> &&ptr, std::size_t size, bool fill_zero, MemoryPoolHandle pool = MemoryManager::GetPool())
             : DynArray(std::move(ptr), size, size, fill_zero, std::move(pool))
         {}
+#ifdef SEAL_USE_MSGSL
+        /**
+        Creates a new DynArray with given capacity, initialized with data from
+        a given buffer.
 
+        @param[in] values Desired contents of the array
+        @param[in] capacity The capacity of the array
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if capacity is less than the size of values
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        explicit DynArray(
+            gsl::span<const T> values, std::size_t capacity, MemoryPoolHandle pool = MemoryManager::GetPool())
+            : DynArray(capacity, values.size(), std::move(pool))
+        {
+            std::copy(values.begin(), values.end(), data_.get());
+        }
+
+        /**
+        Creates a new DynArray initialized with data from a given buffer.
+
+        @param[in] values Desired contents of the array
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        explicit DynArray(gsl::span<const T> values, MemoryPoolHandle pool = MemoryManager::GetPool())
+            : DynArray(values, values.size(), std::move(pool))
+        {}
+#endif
         /**
         Constructs a new DynArray by copying a given one.
 
@@ -187,7 +215,7 @@ namespace seal
               data_(util::allocate<T>(copy.size_, pool_))
         {
             // Copy over value
-            std::copy_n(copy.cbegin(), copy.size_, begin());
+            std::copy(copy.cbegin(), copy.cend(), begin());
         }
 
         /**
@@ -237,7 +265,7 @@ namespace seal
         */
         SEAL_NODISCARD inline T *end() noexcept
         {
-            return size_ ? begin() + size_ : begin();
+            return begin() + size_;
         }
 
         /**
@@ -253,7 +281,7 @@ namespace seal
         */
         SEAL_NODISCARD inline const T *cend() const noexcept
         {
-            return size_ ? cbegin() + size_ : cbegin();
+            return cbegin() + size_;
         }
 #ifdef SEAL_USE_MSGSL
         /**
@@ -446,7 +474,7 @@ namespace seal
             // At this point we know for sure that size_ <= capacity_ < size so need
             // to reallocate to bigger
             auto new_data(util::allocate<T>(size, pool_));
-            std::copy_n(cbegin(), size_, new_data.get());
+            std::copy(cbegin(), cend(), new_data.get());
             if (fill_zero)
             {
                 std::fill(new_data.get() + size_, new_data.get() + size, T(0));
@@ -457,7 +485,24 @@ namespace seal
             capacity_ = size;
             size_ = size;
         }
+#ifdef SEAL_USE_MSGSL
+        /**
+        Copies data from a given buffer to the current DynArray.
 
+        @param[in] values Desired contents of the array
+        */
+        inline DynArray<T> &operator=(gsl::span<const T> values)
+        {
+            // First resize to correct size ignoring any existing data
+            resize(0, false);
+            resize(values.size(), false);
+
+            // Size is guaranteed to be OK now so copy over
+            std::copy(values.begin(), values.end(), begin());
+
+            return *this;
+        }
+#endif
         /**
         Copies a given DynArray to the current one.
 
@@ -475,7 +520,7 @@ namespace seal
             resize(assign.size_);
 
             // Size is guaranteed to be OK now so copy over
-            std::copy_n(assign.cbegin(), assign.size_, begin());
+            std::copy(assign.cbegin(), assign.cend(), begin());
 
             return *this;
         }

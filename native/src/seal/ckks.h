@@ -17,7 +17,7 @@
 #include <type_traits>
 #include <vector>
 #ifdef SEAL_USE_MSGSL
-#include <gsl/span>
+#include "gsl/span"
 #endif
 
 namespace seal

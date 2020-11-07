@@ -9,6 +9,9 @@
 #include "seal/plaintext.h"
 #include <vector>
 #include "gtest/gtest.h"
+#ifdef SEAL_USE_MSGSL
+#include "gsl/span"
+#endif
 
 using namespace seal;
 using namespace seal::util;
@@ -79,7 +82,49 @@ namespace sealtest
         plain2.parms_id() = { 1ULL, 2ULL, 3ULL, 5ULL };
         ASSERT_FALSE(plain == plain2);
     }
+#ifdef SEAL_USE_MSGSL
+    TEST(PlaintextTest, FromSpan)
+    {
+        // Constructors
+        vector<uint64_t> coeffs{};
+        Plaintext plain(coeffs);
+        ASSERT_TRUE(plain.is_zero());
 
+        coeffs = { 0 };
+        plain = Plaintext(coeffs);
+        ASSERT_EQ(1ULL, plain.coeff_count());
+        ASSERT_EQ(1ULL, plain.capacity());
+        ASSERT_TRUE(equal(coeffs.begin(), coeffs.end(), plain.data()));
+
+        plain = Plaintext(coeffs, 2);
+        ASSERT_EQ(1ULL, plain.coeff_count());
+        ASSERT_EQ(2ULL, plain.capacity());
+        ASSERT_TRUE(equal(coeffs.begin(), coeffs.end(), plain.data()));
+
+        coeffs = { 1, 2 };
+        plain = Plaintext(coeffs);
+        ASSERT_EQ(2ULL, plain.coeff_count());
+        ASSERT_EQ(2ULL, plain.capacity());
+        ASSERT_TRUE(equal(coeffs.begin(), coeffs.end(), plain.data()));
+
+        plain = Plaintext(coeffs, 3);
+        ASSERT_EQ(2ULL, plain.coeff_count());
+        ASSERT_EQ(3ULL, plain.capacity());
+        ASSERT_TRUE(equal(coeffs.begin(), coeffs.end(), plain.data()));
+
+        // Setter
+        coeffs = {};
+        plain = coeffs;
+        ASSERT_EQ(0ULL, plain.coeff_count());
+        ASSERT_EQ(3ULL, plain.capacity());
+
+        coeffs = { 5, 4, 3, 2, 1 };
+        plain = coeffs;
+        ASSERT_EQ(5ULL, plain.coeff_count());
+        ASSERT_EQ(5ULL, plain.capacity());
+        ASSERT_TRUE(equal(coeffs.begin(), coeffs.end(), plain.data()));
+    }
+#endif
     TEST(PlaintextTest, SaveLoadPlaintext)
     {
         stringstream stream;

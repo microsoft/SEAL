@@ -33,6 +33,7 @@ Renamed `BlakePRNG` class to `Blake2xbPRNG`, and `BlakePRNGFactory` class to `Bl
 - Added a serializable `UniformRandomGeneratorInfo` class that represents the type of an extendable output function and a seed value.
 - Added `native/src/seal/version.h` defining a struct `SEALVersion`.
 This is used internally to route deserialization logic to correct functions depending on loaded `SEALHeader` version.
+- Added API for creating `DynArray` and `Plaintext` objects from a `gsl::span<std::uint64_t>` (C++) or `IEnumerable<ulong>` (C#).
 
 ### Other
 

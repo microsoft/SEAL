@@ -519,6 +519,9 @@ namespace Microsoft.Research.SEAL
         [DllImport(sealc, EntryPoint = "Plaintext_Set3", PreserveSig = false)]
         internal static extern void Plaintext_Set(IntPtr thisptr, ulong constCoeff);
 
+        [DllImport(sealc, EntryPoint = "Plaintext_Set4", PreserveSig = false)]
+        internal static extern void Plaintext_Set(IntPtr thisptr, ulong capacity, ulong[] coeffs);
+
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Plaintext_Destroy(IntPtr thisptr);
 

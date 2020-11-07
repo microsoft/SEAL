@@ -30,6 +30,15 @@ using ph = struct Plaintext::PlaintextPrivateHelper
     {
         swap(plain->data_, new_data);
     }
+
+    static void set(seal::Plaintext *plain, uint64_t coeff_count, uint64_t *coeffs)
+    {
+        plain->data_.resize(0, false);
+        plain->data_.resize(coeff_count, false);
+        copy_n(coeffs, coeff_count, plain->data_.begin());
+        plain->coeff_count_ = coeff_count;
+        plain->parms_id_ = parms_id_zero;
+    }
 };
 
 SEAL_C_FUNC Plaintext_Create1(void *memoryPoolHandle, void **plaintext)
@@ -150,15 +159,17 @@ SEAL_C_FUNC Plaintext_Set3(void *thisptr, uint64_t const_coeff)
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
-    try
-    {
-        *plain = const_coeff;
-        return S_OK;
-    }
-    catch (const logic_error &)
-    {
-        return E_INVALIDARG;
-    }
+    *plain = const_coeff;
+    return S_OK;
+}
+
+SEAL_C_FUNC Plaintext_Set4(void *thisptr, uint64_t count, uint64_t *coeffs)
+{
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
+    IfNullRet(plain, E_POINTER);
+
+    ph::set(plain, count, coeffs);
+    return S_OK;
 }
 
 SEAL_C_FUNC Plaintext_Destroy(void *thisptr)

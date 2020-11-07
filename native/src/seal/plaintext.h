@@ -17,7 +17,7 @@
 #include <stdexcept>
 #include <string>
 #ifdef SEAL_USE_MSGSL
-#include <gsl/span>
+#include "gsl/span"
 #endif
 
 namespace seal
@@ -98,7 +98,37 @@ namespace seal
             std::size_t capacity, std::size_t coeff_count, MemoryPoolHandle pool = MemoryManager::GetPool())
             : coeff_count_(coeff_count), data_(capacity, coeff_count_, std::move(pool))
         {}
+#ifdef SEAL_USE_MSGSL
+        /**
+        Constructs a plaintext representing a polynomial with given coefficient
+        values. The coefficient count of the polynomial is set to the number of
+        coefficient values provided, and the capacity is set to the given value.
 
+        @param[in] coeffs Desired values of the plaintext coefficients
+        @param[in] capacity The capacity
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if capacity is less than the size of coeffs
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        explicit Plaintext(
+            gsl::span<const pt_coeff_type> coeffs, std::size_t capacity,
+            MemoryPoolHandle pool = MemoryManager::GetPool())
+            : coeff_count_(coeffs.size()), data_(coeffs, capacity, std::move(pool))
+        {}
+
+        /**
+        Constructs a plaintext representing a polynomial with given coefficient
+        values. The coefficient count of the polynomial is set to the number of
+        coefficient values provided, and the capacity is set to the same value.
+
+        @param[in] coeffs Desired values of the plaintext coefficients
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        explicit Plaintext(gsl::span<const pt_coeff_type> coeffs, MemoryPoolHandle pool = MemoryManager::GetPool())
+            : coeff_count_(coeffs.size()), data_(coeffs, std::move(pool))
+        {}
+#endif
         /**
         Constructs a plaintext from a given hexadecimal string describing the
         plaintext polynomial.
@@ -262,20 +292,36 @@ namespace seal
         Plaintext &operator=(const std::string &hex_poly);
 
         /**
-        Sets the value of the current plaintext to a given constant polynomial.
-        The coefficient count is set to one.
+        Sets the value of the current plaintext to a given constant polynomial and
+        sets the parms_id to parms_id_zero, effectively marking the plaintext as
+        not NTT transformed. The coefficient count is set to one.
 
         @param[in] const_coeff The constant coefficient
-        @throws std::logic_error if the plaintext is NTT transformed
         */
         Plaintext &operator=(pt_coeff_type const_coeff)
         {
             data_.resize(1);
             data_[0] = const_coeff;
             coeff_count_ = 1;
+            parms_id_ = parms_id_zero;
             return *this;
         }
+#ifdef SEAL_USE_MSGSL
+        /**
+        Sets the coefficients of the current plaintext to given values and sets
+        the parms_id to parms_id_zero, effectively marking the plaintext as not
+        NTT transformed.
 
+        @param[in] coeffs Desired values of the plaintext coefficients
+        */
+        Plaintext &operator=(gsl::span<const pt_coeff_type> coeffs)
+        {
+            data_ = coeffs;
+            coeff_count_ = coeffs.size();
+            parms_id_ = parms_id_zero;
+            return *this;
+        }
+#endif
         /**
         Sets a given range of coefficients of a plaintext polynomial to zero; does
         nothing if length is zero.

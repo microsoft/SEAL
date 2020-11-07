@@ -8,7 +8,7 @@
 #include "seal/util/defines.h"
 #include <vector>
 #ifdef SEAL_USE_MSGSL
-#include <gsl/span>
+#include "gsl/span"
 #endif
 
 namespace seal
