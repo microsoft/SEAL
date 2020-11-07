@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Windows))" Include="@CMAKE_RUNTIME_OUTPUT_DIRECTORY@\sealc.dll" />
+    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Windows))" Include="@CMAKE_RUNTIME_OUTPUT_DIRECTORY@\$(Configuration)\sealc.dll" />
     <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Linux))" Include="@CMAKE_LIBRARY_OUTPUT_DIRECTORY@\libsealc.so.*" />
     <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(OSX))" Include="@CMAKE_LIBRARY_OUTPUT_DIRECTORY@\libsealc*.dylib" />
   </ItemGroup>
