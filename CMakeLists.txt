@@ -460,10 +460,8 @@ install(
 
 # Install the pkg-config file
 install(
-    FILES
-        ${SEAL_PKGCONFIG_FILENAME}
-    DESTINATION
-        ${SEAL_PKGCONFIG_INSTALL_DIR})
+    FILES ${SEAL_PKGCONFIG_FILENAME}
+    DESTINATION ${SEAL_PKGCONFIG_INSTALL_DIR})
 
 # We export SEALTargets from the build tree so it can be used by other projects
 # without requiring an install.
@@ -472,21 +470,20 @@ export(
     NAMESPACE SEAL::
     FILE ${SEAL_TARGETS_FILENAME})
 
-# In UNIX-like platforms install MSGSL header files if SEAL_BUILD_DEPS is ON
-if(SEAL_USE_MSGSL AND SEAL_BUILD_DEPS AND NOT WIN32)
+# Install MSGSL header files if SEAL_BUILD_DEPS is ON
+if(SEAL_USE_MSGSL AND SEAL_BUILD_DEPS)
     install(
-        DIRECTORY
-            ${msgsl_SOURCE_DIR}/include/gsl
-        DESTINATION
-            ${SEAL_INCLUDES_INSTALL_DIR}
-    )
+        DIRECTORY ${msgsl_SOURCE_DIR}/include/gsl
+        DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
 endif()
 
 # Create pkg-config file
-configure_file(
-    ${CMAKE_CURRENT_LIST_DIR}/pkgconfig/seal.pc.in
-    ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/seal-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR}.pc
-    @ONLY)
+if(NOT WIN32)
+    configure_file(
+        ${CMAKE_CURRENT_LIST_DIR}/pkgconfig/seal.pc.in
+        ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/seal-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR}.pc
+        @ONLY)
+endif()
 
 #####################
 # SEAL C++ examples #
