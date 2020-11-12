@@ -395,23 +395,36 @@ endif()
 # SEAL C export library #
 #########################
 
-# Check that size_t is 8 bytes
-include(CheckTypeSize)
-check_type_size("size_t" SIZET LANGUAGE C)
-
+# [option] SEAL_BUILD_SEAL_C (default: OFF)
 set(SEAL_BUILD_SEAL_C_OPTION_STR "Build C export library for Microsoft SEAL")
-cmake_dependent_option(SEAL_BUILD_SEAL_C ${SEAL_BUILD_SEAL_C_OPTION_STR} OFF "${SIZET} EQUAL 8" OFF)
+option(SEAL_BUILD_SEAL_C ${SEAL_BUILD_SEAL_C_OPTION_STR} OFF)
 
-set(BUILD_STATIC_SEAL_C_OPTION_STR "Build static C library for Microsoft SEAL")
-cmake_dependent_option(BUILD_STATIC_SEAL_C ${BUILD_STATIC_SEAL_C_OPTION_STR} OFF "SEAL_BUILD_SEAL_C" OFF)
-mark_as_advanced(BUILD_STATIC_SEAL_C)
-
-unset(SIZET CACHE)
-unset(HAVE_SIZET CACHE)
+set(SEAL_BUILD_STATIC_SEAL_C_OPTION_STR "Build static C library for Microsoft SEAL")
+cmake_dependent_option(SEAL_BUILD_STATIC_SEAL_C ${SEAL_BUILD_STATIC_SEAL_C_OPTION_STR} OFF "SEAL_BUILD_SEAL_C" OFF)
+mark_as_advanced(SEAL_BUILD_STATIC_SEAL_C)
 
 # Create SEAL_C library but add no source files yet
 if(SEAL_BUILD_SEAL_C)
-    if(BUILD_STATIC_SEAL_C)
+    # Check that size_t is 8 bytes
+    include(CheckTypeSize)
+    check_type_size("size_t" SIZET LANGUAGE C)
+    if(NOT "${SIZET} EQUAL 8")
+        unset(SIZET CACHE)
+        unset(HAVE_SIZET CACHE)
+        message(FATAL_ERROR "SEAL_C requires 64-bit platform")
+    endif()
+    unset(SIZET CACHE)
+    unset(HAVE_SIZET CACHE)
+
+    if(BUILD_SHARED_LIBS)
+        message(FATAL_ERROR "SEAL_C requires `BUILD_SHARED_LIBS=OFF`")
+    endif()
+
+    if(NOT SEAL_BUILD_DEPS)
+        message(FATAL_ERROR "SEAL_C requires `SEAL_BUILD_DEPS=ON`")
+    endif()
+
+    if(SEAL_BUILD_STATIC_SEAL_C)
         add_library(sealc STATIC)
     else()
         add_library(sealc SHARED)
@@ -420,7 +433,7 @@ if(SEAL_BUILD_SEAL_C)
     # Add source files to library and header files to install
     add_subdirectory(native/src/seal/c)
     seal_set_version(sealc)
-    if(BUILD_STATIC_SEAL_C)
+    if(SEAL_BUILD_STATIC_SEAL_C)
         seal_set_version_filename(sealc)
     else()
         seal_set_soversion(sealc)
@@ -428,11 +441,7 @@ if(SEAL_BUILD_SEAL_C)
     seal_set_language(sealc)
     seal_set_include_directories(sealc)
 
-    if(NOT BUILD_SHARED_LIBS)
-        target_link_libraries(sealc PUBLIC seal)
-    else()
-        message(FATAL_ERROR "SEAL_C requires `BUILD_SHARED_LIBS=OFF`")
-    endif()
+    target_link_libraries(sealc PUBLIC seal)
 
     seal_install_target(sealc SEALTargets)
 endif()

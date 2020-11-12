@@ -3,7 +3,7 @@ steps:
   displayName: 'CMake SEAL'
   inputs:
     workingDirectory: '$(Build.SourcesDirectory)'
-    cmakeArgs: '-GXcode -DSEAL_BUILD_SEAL_C=ON -DBUILD_STATIC_SEAL_C=ON -DCMAKE_SYSTEM_NAME=iOS "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64" -C cmake/memset_s.iOS.cmake .'
+    cmakeArgs: '-GXcode -DSEAL_BUILD_SEAL_C=ON -DSEAL_BUILD_STATIC_SEAL_C=ON -DCMAKE_SYSTEM_NAME=iOS "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64" -C cmake/memset_s.iOS.cmake .'
 
 - script: |
       cd $BUILD_SOURCESDIRECTORY

@@ -20,32 +20,29 @@ Decryptions of Microsoft SEAL ciphertexts should be treated as private informati
     - [Core Concepts](#core-concepts)
     - [Homomorphic Encryption](#homomorphic-encryption)
     - [Microsoft SEAL](#microsoft-seal-1)
-  - [Building Microsoft SEAL](#building-microsoft-seal)
+  - [Getting Started](#getting-started)
     - [Optional Dependencies](#optional-dependencies)
       - [Microsoft GSL](#microsoft-gsl)
       - [ZLIB and Zstandard](#zlib-and-zstandard)
+    - [Installing with VCPKG (Windows, Unix-like)](#installing-with-vcpkg-windows-unix-like)
+    - [Installing with Homebrew (macOS)](#installing-with-homebrew-macos)
+    - [Installing NuGet Package (Windows, Linux, macOS, Android, iOS)](#installing-nuget-package-windows-linux-macos-android-ios)
+  - [Building Microsoft SEAL Manually (C/C++)](#building-microsoft-seal-manually-cc)
     - [Building with CMake](#building-with-cmake)
-      - [Building Microsoft SEAL](#building-microsoft-seal-1)
-      - [[Optional] Debug and Release Modes](#optional-debug-and-release-modes)
-      - [[Optional] Microsoft GSL](#optional-microsoft-gsl-1)
-      - [[Optional] ZLIB](#optional-zlib-1)
-      - [[Optional] Zstandard](#optional-zstandard-1)
-      - [[Optional] Shared Library](#optional-shared-library)
-      - [Building Examples](#building-examples)
-      - [Building Unit Tests](#building-unit-tests)
+      - [Basic CMake Options](#basic-cmake-options)
+      - [Advanced CMake Options](#advanced-cmake-options)
+      - [Building Microsoft SEAL](#building-microsoft-seal)
       - [Installing Microsoft SEAL](#installing-microsoft-seal)
       - [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake)
-    - [VCPKG](#vcpkg)
     - [Linux, macOS, and FreeBSD](#linux-macos-and-freebsd)
+    - [Android and iOS](#android-and-ios)
     - [Windows](#windows)
       - [Platform](#platform)
-      - [Building Microsoft SEAL](#building-microsoft-seal-2)
+      - [Building Microsoft SEAL](#building-microsoft-seal-1)
       - [[Optional] Debug and Release builds](#optional-debug-and-release-builds)
-      - [Building Examples](#building-examples-1)
-      - [Building Unit Tests](#building-unit-tests-1)
-    - [Android and iOS](#android-and-ios)
+      - [Building Examples](#building-examples)
+      - [Building Unit Tests](#building-unit-tests)
   - [Microsoft SEAL for .NET](#microsoft-seal-for-net)
-    - [From NuGet package](#from-nuget-package)
     - [Windows](#windows-1)
       - [Native Library](#native-library)
       - [.NET Library](#net-library)
@@ -60,7 +57,7 @@ Decryptions of Microsoft SEAL ciphertexts should be treated as private informati
       - [.NET Unit Tests](#net-unit-tests-1)
       - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application-1)
     - [Android and iOS](#android-and-ios-1)
-  - [Getting Started](#getting-started)
+  - [Getting Started](#getting-started-1)
   - [Contributing](#contributing)
   - [Citing Microsoft SEAL](#citing-microsoft-seal)
     - [Version 3.6](#version-36)
@@ -102,10 +99,14 @@ Homomorphic encryption cannot be used to enable data scientist to circumvent GDP
 For example, there is no way for a cloud service to use homomorphic encryption to draw insights from encrypted customer data.
 Instead, results of encrypted computations remain encrypted and can only be decrypted by the owner of the data, e.g., a cloud service customer.
 
-Most homomorphic encryption schemes provide weaker security guarantees than traditional encryption schemes. Two things are important to be aware of:
+Most homomorphic encryption schemes provide weaker security guarantees than traditional encryption schemes.
+Two things are important to be aware of:
+
 1. Information about decryptions of ciphertexts must not be shared with anyone; see [Correct Use of Microsoft SEAL](#correct-use-of-microsoft-seal).
-1. A ciphertext protects the data that it encrypts from anyone without access to the secret key.
-A ciphertext does not protect anything from anyone with access to the secret key.
+
+1. A ciphertext protects the underlying data from anyone who does not have the secret key.
+
+A ciphertext does not protect anything from anyone who has the secret key.
 For example, a server cannot apply a proprietary algorithm on encrypted data, return it to the secret key owner, and expect that its algorithm remains protected.
 
 ### Microsoft SEAL
@@ -124,7 +125,7 @@ The CKKS scheme allows additions and multiplications on encrypted real or comple
 In applications such as summing up encrypted real numbers, evaluating machine learning models on encrypted data, or computing distances of encrypted locations CKKS is going to be by far the best choice.
 For applications where exact values are necessary, the BFV scheme is the only choice.
 
-## Building Microsoft SEAL
+## Getting Started
 
 ### Optional Dependencies
 
@@ -132,12 +133,12 @@ Microsoft SEAL has no required dependencies, but certain optional features can b
 The build system can either download and build the dependencies, or alternatively search for pre-installed libraries.
 Most users will probably want to use the first approach for its convenience. The optional dependencies and their tested versions (other versions may work as well) are as follows.
 
-|Optional dependency  |Tested version      |Use                                                               |
-|---------------------|--------------------|------------------------------------------------------------------|
-|[Microsoft GSL](https://github.com/microsoft/GSL)  |3.1.0  |API extensions                                   |
-|[ZLIB](https://github.com/madler/zlib)             |1.2.11 |Compressed serialization                         |
-|[Zstandard](https://github.com/facebook/zstd)      |1.4.5  |Compressed serialization (much faster than ZLIB) |
-|[GoogleTest](https://github.com/google/googletest) |1.10.0 |For running tests                                |
+| Optional dependency                                | Tested version | Use                                              |
+| -------------------------------------------------- | -------------- | ------------------------------------------------ |
+| [Microsoft GSL](https://github.com/microsoft/GSL)  | 3.1.0          | API extensions                                   |
+| [ZLIB](https://github.com/madler/zlib)             | 1.2.11         | Compressed serialization                         |
+| [Zstandard](https://github.com/facebook/zstd)      | 1.4.5          | Compressed serialization (much faster than ZLIB) |
+| [GoogleTest](https://github.com/google/googletest) | 1.10.0         | For running tests                                |
 
 #### Microsoft GSL
 
@@ -162,33 +163,123 @@ If both ZLIB and Zstandard support are enabled, Zstandard is used by default due
 In most common applications of Microsoft SEAL the size of a `SecretKey` would not be deliberately revealed to untrusted parties.
 If this is a concern, one can always save the `SecretKey` in an uncompressed form.
 
-### Building with CMake
+### Installing with VCPKG (Windows, Unix-like)
 
+For Visual Studio and Visual Studio Code, see ...
+
+### Installing with Homebrew (macOS)
+
+### Installing NuGet Package (Windows, Linux, macOS, Android, iOS)
+
+For .NET developers the easiest way of installing Microsoft SEAL is by using the multiplatform NuGet package available at [NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet).
+Simply add this package into your .NET project as a dependency and you are ready to go.
+
+To develop mobile applications using Microsoft SEAL and .NET for Android and iOS, just add this package to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project. The native shared library and the .NET wrapper compile only for 64-bit platforms, so only `arm64-v8a` / `x86_64` Android ABIs and `arm64` / `x86_64` iOS architectures are supported.
+
+## Building Microsoft SEAL Manually
+
+### Building C++ Components
+
+On all platforms Microsoft SEAL is built with CMake.
 We recommend using out-of-source build although in-source build works.
 Below we give instructions for how to configure, build, and install Microsoft SEAL either system-wide (global install), or for a single user (local install).
 A system-wide install requires elevated (root) privileges.
 
 **NOTE:** Microsoft SEAL compiled with Clang++ has much better runtime performance than that compiled with GNU G++.
 
+#### Requirements
+
+Visual Studio 2019 is required to build Microsoft SEAL.
+
+#### Building Microsoft SEAL
+
+We assume that Microsoft SEAL has been cloned into a directory called `SEAL` and all commands presented below are assumed to be executed in the directory `SEAL`.
+
+You can build Microsoft SEAL library (out-of-source) for your machine by executing the following commands:
+
+```shell
+cmake -S . -B build
+cmake --build build
+```
+
+Various configuration options can be specified and passed to the CMake build system.
+These are decribed below in sections [Basic CMake Options](#basic-cmake-options) and [Advanced CMake Options](#advanced-cmake-options).
+
+#### Installing Microsoft SEAL
+
+If you have root access to the system you can install Microsoft SEAL system-wide as follows:
+
+```shell
+cmake -S . -B build
+cmake --build build
+sudo cmake --install build
+```
+
+To instead install Microsoft SEAL locally, e.g., to `~/mylibs/`, do the following:
+
+```shell
+cmake -S . -B build -DCMAKE_INSTALL_PREFIX=~/mylibs
+cmake --build build
+sudo cmake --install build
+```
+
+#### Building on Windows
+
+On Windows the same scripts above work in a developer command prompt for Visual Studio.
+The right x64 or x86 version of command prompt ...
+
+Ninja/Visual Studio generators.
+Please choose the right platform before building Microsoft SEAL.
+The `SEAL_C` project and the .NET wrapper library `SEALNet` can only be built for `x64`.
+With Ninja generator ...
+With Visual Studio generator, a specific architecture flag `-A x64` or `-A x86` should be provided.
+
+Visual Studio / Visual Stuido Code open as CMake project.
+
+Replace `sudo` with administrator.
+
+This results in the static library `seal.lib` to be created in `lib\$(Platform)\$(Configuration)`.
+When linking with applications, you need to add `native\src\` (full path) as an include directory for Microsoft SEAL header files.
+
+#### Linux, macOS, and FreeBSD
+
+Microsoft SEAL is very easy to configure and build in Linux and macOS using CMake (>= 3.12).
+A modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0) is needed.
+In macOS the Xcode toolchain (>= 9.3) will work.
+
+In macOS you will need CMake with command line tools. For this, you can either
+
+1. install the cmake package with [Homebrew](https://brew.sh), or
+1. download CMake directly from [cmake.org/download](https://cmake.org/download) and
+[enable command line tools](https://stackoverflow.com/questions/30668601/installing-cmake-command-line-tools-on-a-mac).
+
+#### Android and iOS
+
+Microsoft SEAL can be compiled for Android.
+Under the `android` directory of the source tree you will find an [Android Studio](https://developer.android.com/studio) project that you can use to compile the library for Android.
+This project is meant only to generate native libraries that can then be called through the .NET library described in the following sections.
+Specifically, it does not contain any wrappers that can be used from the Java language.
+
 #### Basic CMake Options
 
 The following options can be used with CMake to configure the build. The default value for each option is denoted with boldface in the **Values** column.
 
-|CMake option     |Values |Information                           |
-|-----------------|-------|--------------------------------------|
-|CMAKE_BUILD_TYPE |**Release**</br>Debug</br>RelWithDebInfo</br>MinSizeRel</br> |Set to `Debug` if you are developing Microsoft SEAL itself, or debugging some complex issue. Use `Release` otherwise. |
-|BUILD_SHARED_LIBS |ON / **OFF** |Set to `ON` to build a shared library instead of a static library. Not supported in Windows. |
-|SEAL_BUILD_DEPS |**ON** / OFF |Set to `ON` to automatically download and build [optional dependencies](#optional-dependencies); otherwise CMake will attempt to locate pre-installed dependencies. |
-|SEAL_BUILD_EXAMPLES |ON / **OFF** |Build the C++ examples in [native/examples](native/examples). |
-|SEAL_BUILD_SEAL_C |ON / **OFF** |Build the C wrapper (shared) library SEAL_C. This is used by the C# wrapper and most users should have no reason to build it. |
-|SEAL_BUILD_TESTS |ON / **OFF** |Build the tests to check that Microsoft SEAL works correctly. |
-|SEAL_USE_CXX17 |**ON** / OFF |Set to `ON` to build Microsoft SEAL as C++17 for a positive performance impact. |
-|SEAL_USE_INTRIN |**ON** / OFF |Set to `ON` to use compiler intrinsics for improved performance. CMake will automatically detect which intrinsics are available and enable them accordingly. |
-|SEAL_USE_MSGSL |**ON** / OFF |Build with Microsoft GSL support. |
-|SEAL_USE_ZLIB |**ON** / OFF |Build with ZLIB support. |
-|SEAL_USE_ZSTD |**ON** / OFF |Build with Zstandard support. |
+| CMake option        | Values                                                       | Information                                                                                                                                                                                            |
+| ------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| CMAKE_BUILD_TYPE    | **Release**</br>Debug</br>RelWithDebInfo</br>MinSizeRel</br> | `Debug` and `MinSizeRel` have worse run-time performance. `Debug` inserts additional assertion code. Set to `Release` unless you are developing Microsoft SEAL itself or debugging some complex issue. |
+| SEAL_BUILD_EXAMPLES | ON / **OFF**                                                 | Build the C++ examples in [native/examples](native/examples).                                                                                                                                          |
+| SEAL_BUILD_TESTS    | ON / **OFF**                                                 | Build the tests to check that Microsoft SEAL works correctly.                                                                                                                                          |
+| SEAL_BUILD_DEPS     | **ON** / OFF                                                 | Set to `ON` to automatically download and build [optional dependencies](#optional-dependencies); otherwise CMake will attempt to locate pre-installed dependencies.                                    |
+| SEAL_USE_MSGSL      | **ON** / OFF                                                 | Build with Microsoft GSL support.                                                                                                                                                                      |
+| SEAL_USE_ZLIB       | **ON** / OFF                                                 | Build with ZLIB support.                                                                                                                                                                               |
+| SEAL_USE_ZSTD       | **ON** / OFF                                                 | Build with Zstandard support.                                                                                                                                                                          |
+| BUILD_SHARED_LIBS   | ON / **OFF**                                                 | Set to `ON` to build a shared library instead of a static library. Not supported in Windows.                                                                                                           |
+| SEAL_BUILD_SEAL_C   | ON / **OFF**                                                 | Build the C wrapper library SEAL_C. This is used by the C# wrapper and most users should have no reason to build it.                                                                                   |
+| SEAL_USE_CXX17      | **ON** / OFF                                                 | Set to `ON` to build Microsoft SEAL as C++17 for a positive performance impact.                                                                                                                        |
+| SEAL_USE_INTRIN     | **ON** / OFF                                                 | Set to `ON` to use compiler intrinsics for improved performance. CMake will automatically detect which intrinsics are available and enable them accordingly.                                           |
 
-As usual, these options can be passed to CMake with the `-D` flag. For example, one could run
+As usual, these options can be passed to CMake with the `-D` flag.
+For example, one could run
 ```shell
 cmake -S . -B build -DSEAL_BUILD_EXAMPLES=ON
 ```
@@ -198,40 +289,12 @@ to configure a release build of a static Microsoft SEAL library and also build t
 
 The following options can be used with CMake to further configure the build. Most users should have no reason to change these, which is why they are marked as advanced.
 
-|CMake option     |Values |Information                           |
-|-----------------|-------|--------------------------------------|
-|SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT |**ON** / OFF |Set to `ON` to throw an exception when Microsoft SEAL produces a ciphertext with no key-dependent component. For example, subtracting a ciphertext from itself, or multiplying a ciphertext with a plaintext zero yield identically zero ciphertexts that should not be considered as valid ciphertexts. |
-|SEAL_DEFAULT_PRNG |**Blake2xb**</br>Shake256 |Microsoft SEAL supports both Blake2xb and Shake256 XOFs for generating random bytes. Blake2xb is much faster, but it is not standardized, whereas Shake256 is a FIPS standard. |
-|SEAL_USE_GAUSSIAN_NOISE |ON / **OFF** |Set to `ON` to use a non-constant time rounded continuous Gaussian for the error distribution; otherwise a centered binomial distribution &ndash; with similar standard deviation &ndash; is used. |
-
-#### Building Microsoft SEAL
-
-We assume that Microsoft SEAL has been cloned into a directory called `SEAL` and all commands presented below are assumed to be executed in the directory `SEAL`.
-
-You can build Microsoft SEAL library for your machine by executing the following commands:
-
-```shell
-cmake .
-make
-```
-
-#### Installing Microsoft SEAL
-
-If you have root access to the system you can install Microsoft SEAL system-wide as follows:
-
-```shell
-cmake .
-make
-sudo make install
-```
-
-To instead install Microsoft SEAL locally, e.g., to `~/mylibs/`, do the following:
-
-```shell
-cmake . -DCMAKE_INSTALL_PREFIX=~/mylibs
-make
-make install
-```
+| CMake option                         | Values                    | Information                                                                                                                                                                                                                                                                                              |
+| ------------------------------------ | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT | **ON** / OFF              | Set to `ON` to throw an exception when Microsoft SEAL produces a ciphertext with no key-dependent component. For example, subtracting a ciphertext from itself, or multiplying a ciphertext with a plaintext zero yield identically zero ciphertexts that should not be considered as valid ciphertexts. |
+| SEAL_BUILD_STATIC_SEAL_C             | ON / **OFF**              | Set to `ON` to build SEAL_C as a static library instead of a shared library.                                                                                                                                                                                                                             |
+| SEAL_DEFAULT_PRNG                    | **Blake2xb**</br>Shake256 | Microsoft SEAL supports both Blake2xb and Shake256 XOFs for generating random bytes. Blake2xb is much faster, but it is not standardized, whereas Shake256 is a FIPS standard.                                                                                                                           |
+| SEAL_USE_GAUSSIAN_NOISE              | ON / **OFF**              | Set to `ON` to use a non-constant time rounded continuous Gaussian for the error distribution; otherwise a centered binomial distribution &ndash; with slightly larger standard deviation &ndash; is used.                                                                                               |
 
 #### Linking with Microsoft SEAL through CMake
 
@@ -251,63 +314,9 @@ cd <directory containing your CMakeLists.txt>
 cmake . -DCMAKE_PREFIX_PATH=~/mylibs
 ```
 
-### VCPKG
-
-### Linux, macOS, and FreeBSD
-
-Microsoft SEAL is very easy to configure and build in Linux and macOS using CMake (>= 3.12).
-A modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0) is needed.
-In macOS the Xcode toolchain (>= 9.3) will work.
-
-In macOS you will need CMake with command line tools. For this, you can either
-
-1. install the cmake package with [Homebrew](https://brew.sh), or
-1. download CMake directly from [cmake.org/download](https://cmake.org/download) and
-[enable command line tools](https://stackoverflow.com/questions/30668601/installing-cmake-command-line-tools-on-a-mac).
-
-### Windows
-
-Microsoft SEAL comes with a Microsoft Visual Studio 2019 solution file `SEAL.sln` that can be used to conveniently build the library, examples, and unit tests.
-Visual Studio 2019 is required to build Microsoft SEAL.
-
-#### Platform
-
-The Visual Studio solution `SEAL.sln` is configured to build Microsoft SEAL both for `Win32` and `x64` platforms. Please choose the right platform before building Microsoft SEAL.
-The `SEAL_C` project and the .NET wrapper library `SEALNet` can only be built for `x64`.
-
-#### Building Microsoft SEAL
-
-Build the SEAL project `native\src\SEAL.vcxproj` from `SEAL.sln`.
-This results in the static library `seal.lib` to be created in `lib\$(Platform)\$(Configuration)`.
-When linking with applications, you need to add `native\src\` (full path) as an include directory for Microsoft SEAL header files.
-
-#### [Optional] Debug and Release builds
-
-You can easily switch from Visual Studio build configuration menu whether Microsoft SEAL should be built in `Debug` mode (no optimizations) or in `Release` mode.
-Please note that `Debug` mode should not be used except for debugging Microsoft SEAL itself, as the performance will be orders of magnitude worse than in `Release` mode.
-
-#### Building Examples
-
-Build the SEALExamples project `native\examples\SEALExamples.vcxproj` from `SEAL.sln`.
-This results in an executable `sealexamples.exe` to be created in `bin\$(Platform)\$(Configuration)`.
-
-#### Building Unit Tests
-
-The unit tests require the Google Test framework to be installed.
-The appropriate NuGet package is already listed in `native\tests\packages.config`, so once you attempt to build the SEALTest project `native\tests\SEALTest.vcxproj` from `SEAL.sln` Visual Studio will automatically download and install it for you.
-
-### Android and iOS
-Microsoft SEAL can be compiled for Android. Under the `android` directory of the source tree you will find an [Android Studio](https://developer.android.com/studio) project that you can use to compile the library for Android. This project is meant only to generate native libraries that can then be called through the .NET library described in the following sections. Specifically, it does not contain any wrappers that can be used from the Java language.
-
-
-## Microsoft SEAL for .NET
+### Building .NET Components
 
 Microsoft SEAL provides a .NET Standard library that wraps the functionality in Microsoft SEAL for use in .NET development.
-
-### From NuGet package
-
-For .NET developers the easiest way of installing Microsoft SEAL is by using the multi-platform NuGet package available at [NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet).
-Simply add this package into your .NET project as a dependency and you are ready to go.
 
 ### Windows
 
@@ -368,8 +377,8 @@ Microsoft SEAL by default does not build SEAL_C.
 You can enable it in CMake configuration options as follows:
 
 ```shell
-cmake . -DSEAL_BUILD_SEAL_C=ON
-make
+cmake -S . -B build -DSEAL_BUILD_SEAL_C=ON
+make -C build
 ```
 
 This results in a shared native library `libsealc.so*` in Linux or `libsealc*.dylib` in macOS.
@@ -379,7 +388,7 @@ Then your application will always be able to find and load it.
 Assuming Microsoft SEAL is build and installed globally, you can install the shared native library globally as follows:
 
 ```shell
-sudo make install
+sudo make -C build install
 ```
 
 #### .NET Library
@@ -430,24 +439,22 @@ The easiest way to ensure this is to copy the native shared library to the same 
 You can use [Android Studio](https://developer.android.com/studio) to build the native shared library used by the .NET Standard wrapper library for Android.
 If you want to build for iOS, please take a look at our [iOS pipeline](pipelines/ios.yml) file to see how to configure and build the native library using CMake and Xcode.
 
-However, the easiest and recommended way to use Microsoft SEAL in both Android and iOS is through the multiplatform NuGet package you can find at [NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet). Just add this package to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project in order to develop mobile applications using Microsoft SEAL and .NET. The native shared library and the .NET wrapper compile only for 64 bits, so only `arm64-v8a` / `x86_64` Android ABIs and `arm64` / `x86_64` iOS architectures are supported.
-
-## Getting Started
+## Learning to Use Microsoft SEAL
 
 Using Microsoft SEAL will require the user to invest some time in learning fundamental concepts in homomorphic encryption.
 The code comes with heavily commented examples that are designed to gradually teach such concepts as well as to demonstrate much of the API.
 The code examples are available (and identical) in C++ and C#, and are divided into several source files in `native/examples/` (C++) and `dotnet/examples/` (C#), as follows:
 
-|C++                  |C#                  |Description                                                                 |
-|---------------------|--------------------|----------------------------------------------------------------------------|
-|`examples.cpp`       |`Examples.cs`       |The example runner application                                              |
-|`1_bfv_basics.cpp`   |`1_BFV_Basics.cs`   |Encrypted modular arithmetic using the BFV scheme                           |
-|`2_encoders.cpp`     |`2_Encoders.cs`     |Encoding more complex data into Microsoft SEAL plaintext objects            |
-|`3_levels.cpp`       |`3_Levels.cs`       |Introduces the concept of levels; prerequisite for using the CKKS scheme    |
-|`4_ckks_basics.cpp`  |`4_CKKS_Basics.cs`  |Encrypted real number arithmetic using the CKKS scheme                      |
-|`5_rotation.cpp`     |`5_Rotation.cs`     |Performing cyclic rotations on encrypted vectors in the BFV and CKKS schemes|
-|`6_serialization.cpp`|`6_Serialization.cs`|Serializing objects in Microsoft SEAL                                       |
-|`7_performance.cpp`  |`7_Performance.cs`  |Performance tests                                                           |
+| C++                   | C#                   | Description                                                                  |
+| --------------------- | -------------------- | ---------------------------------------------------------------------------- |
+| `examples.cpp`        | `Examples.cs`        | The example runner application                                               |
+| `1_bfv_basics.cpp`    | `1_BFV_Basics.cs`    | Encrypted modular arithmetic using the BFV scheme                            |
+| `2_encoders.cpp`      | `2_Encoders.cs`      | Encoding more complex data into Microsoft SEAL plaintext objects             |
+| `3_levels.cpp`        | `3_Levels.cs`        | Introduces the concept of levels; prerequisite for using the CKKS scheme     |
+| `4_ckks_basics.cpp`   | `4_CKKS_Basics.cs`   | Encrypted real number arithmetic using the CKKS scheme                       |
+| `5_rotation.cpp`      | `5_Rotation.cs`      | Performing cyclic rotations on encrypted vectors in the BFV and CKKS schemes |
+| `6_serialization.cpp` | `6_Serialization.cs` | Serializing objects in Microsoft SEAL                                        |
+| `7_performance.cpp`   | `7_Performance.cs`   | Performance tests                                                            |
 
 It is recommeded to read the comments and the code snippets along with command line printout from running an example.
 For easier navigation, command line printout provides the line number in the associated source file where the associated code snippets start.
