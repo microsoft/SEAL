@@ -9,7 +9,7 @@ Users of previous versions of the library should look at the [list of changes](C
 
 ### Correct Use of Microsoft SEAL
 
-Decryptions of Microsoft SEAL ciphertexts should be treated as private information only available to the secret key owner. Sharing information directly or indirectly about a decryption should be thought of as equivalent to sharing information about the secret key itself. If it is absolutely necessary to share information about the decryption of a ciphertext, the number of bits shared should be kept to a minimum, and no more decryptions under the same secret key should be performed. We strongly recommend any commercial applications of Microsoft SEAL to be reviewed by cryptography experts familiar with these matters.
+Decryptions of Microsoft SEAL ciphertexts should be treated as private information only available to the secret key owner. Sharing information directly or indirectly about a decryption should be thought of as equivalent to sharing information about the secret key itself. If it is absolutely necessary to share information about the decryption of a ciphertext, the number of bits shared should be kept to a minimum, and no more decryptions under the same secret key should be performed. Commercial applications of Microsoft SEAL, or any homomorphic encryption library, should be carefully reviewed by cryptography experts who are familiar with these matters.
 
 ## Contents
 
@@ -22,10 +22,8 @@ Decryptions of Microsoft SEAL ciphertexts should be treated as private informati
     - [Microsoft SEAL](#microsoft-seal-1)
   - [Building Microsoft SEAL](#building-microsoft-seal)
     - [Optional Dependencies](#optional-dependencies)
-<!--      - [Microsoft GSL](#microsoft-gsl)
-      - [ZLIB](#zlib)
-      - [Zstandard](#zstandard)
-      - [GoogleTest](#googletest) -->
+      - [Microsoft GSL](#microsoft-gsl)
+      - [ZLIB and Zstandard](#zlib-and-zstandard)
     - [Building with CMake](#building-with-cmake)
       - [Building Microsoft SEAL](#building-microsoft-seal-1)
       - [[Optional] Debug and Release Modes](#optional-debug-and-release-modes)
@@ -104,6 +102,12 @@ Homomorphic encryption cannot be used to enable data scientist to circumvent GDP
 For example, there is no way for a cloud service to use homomorphic encryption to draw insights from encrypted customer data.
 Instead, results of encrypted computations remain encrypted and can only be decrypted by the owner of the data, e.g., a cloud service customer.
 
+Most homomorphic encryption schemes provide weaker security guarantees than traditional encryption schemes. Two things are important to be aware of:
+1. Information about decryptions of ciphertexts must not be shared with anyone; see [Correct Use of Microsoft SEAL](#correct-use-of-microsoft-seal).
+1. A ciphertext protects the data that it encrypts from anyone without access to the secret key.
+A ciphertext does not protect anything from anyone with access to the secret key.
+For example, a server cannot apply a proprietary algorithm on encrypted data, return it to the secret key owner, and expect that its algorithm remains protected.
+
 ### Microsoft SEAL
 
 Microsoft SEAL is a homomorphic encryption library that allows additions and multiplications to be performed on encrypted integers or real numbers.
@@ -124,43 +128,39 @@ For applications where exact values are necessary, the BFV scheme is the only ch
 
 ### Optional Dependencies
 
-Microsoft SEAL has no required dependencies, but certain optional features can be enabled if it is compiled with support for specific third-party libraries such as Microsoft GSL, ZLIB, and Google Test.
-In SEAL >= 3.5.0 third-party libraries are (if enabled) downloaded, configured, and built as CMake external projects defined in `thirdparty/*/CMakeLists.txt`.
-This workflow is carried out automatically by the CMake toolchain or pre-build commands defined in `native/src/SEAL.vcxproj`, and as such requires no manual steps from the user.
+Microsoft SEAL has no required dependencies, but certain optional features can be enabled when compiling with support for specific third-party libraries.
+The build system can either download and build the dependencies, or alternatively search for pre-installed libraries.
+Most users will probably want to use the first approach for its convenience. The optional dependencies and their tested versions (other versions may work as well) are as follows.
+
+|Optional dependency  |Tested version      |Use                                                               |
+|---------------------|--------------------|------------------------------------------------------------------|
+|[Microsoft GSL](https://github.com/microsoft/GSL)  |3.1.0  |API extensions                                   |
+|[ZLIB](https://github.com/madler/zlib)             |1.2.11 |Compressed serialization                         |
+|[Zstandard](https://github.com/facebook/zstd)      |1.4.5  |Compressed serialization (much faster than ZLIB) |
+|[GoogleTest](https://github.com/google/googletest) |1.10.0 |For running tests                                |
 
 #### Microsoft GSL
 
 Microsoft GSL (Guidelines Support Library) is a header-only library that implements `gsl::span`: a *view type* that provides safe (bounds-checked) array access to memory.
 For example, if Microsoft GSL is available, Microsoft SEAL can allow `BatchEncoder` and `CKKSEncoder` to encode from and decode to a `gsl::span` instead of `std::vector`, which can in some cases have a significant performance benefit.
 
-**NOTE:** Microsoft SEAL >= 3.5.0 is compatible with Microsoft GSL >= 3.0.0, and does not use an existing Microsoft GSL installed on the system.
-Microsoft SEAL < 3.5.0 is compatible with Microsoft GSL < 3.0.0, and can use an existing Microsoft GSL installed on the system.
+#### ZLIB and Zstandard
 
-#### ZLIB
-
-ZLIB is a widely used compression library that implements the DEFLATE compression algorithm.
-Microsoft SEAL can use ZLIB (if present) to automatically compress data that is serialized.
-`Ciphertext` objects consist of a large number of integers modulo specific prime numbers (`coeff_modulus` primes).
-When using the CKKS scheme, although these prime numbers can often be quite small (e.g., 30 bits), the numbers are nevertheless serialized as 64-bit integers.
-In this case, more than half of data in a ciphertext are zeros that can be compressed away with a compression library, such as ZLIB.
+ZLIB and Zstandard are widely used compression libraries. Microsoft SEAL can optionally use these libraries to compress data that is serialized.
+One may ask how can compression help when ciphertext and key data is supposed to look random.
+In Microsoft SEAL `Ciphertext` objects consist of a large number of integers modulo specific prime numbers (`coeff_modulus` primes).
+When using the CKKS scheme in particular, these prime numbers can be quite small (e.g., 30 bits), but the data is nevertheless serialized as 64-bit integers.
+Therefore, it is not uncommon that almost half of the ciphertext bytes are zeros, and applying a general-purpose compression algorithm is a convenient way of getting rid this wasted space.
 The BFV scheme benefits typically less from this technique, because the prime numbers used for the `coeff_modulus` encryption parameter tend to be larger, and integers modulo these prime numbers fill more of each 64-bit word.
-The compression is not only applied to `Ciphertext` objects, but to every serializable Microsoft SEAL object.
+Compressed serialization can be applied to any serializable Microsoft SEAL object &ndash; not just to `Ciphertext` and keys .
 
-If ZLIB is available, it will be automatically used for serialization (see `Serialization::compr_mode_default` in `native/src/seal/serialization.h`.
+If Microsoft SEAL is compiled with ZLIB or Zstandard support, compression will automatically be used for serialization; see `Serialization::compr_mode_default` in [native/src/seal/serialization.h](native/src/seal/serialization.h).
 However, it is always possible to explicitly pass `compr_mode_type::none` to serialization methods to disable compression.
+If both ZLIB and Zstandard support are enabled, Zstandard is used by default due to its much better performance.
 
-**WARNING:** The compression rate for a `SecretKey` can (in theory at least) reveal information about the key.
+**Note:** The compression rate for a `SecretKey` can (in theory at least) reveal information about the key.
 In most common applications of Microsoft SEAL the size of a `SecretKey` would not be deliberately revealed to untrusted parties.
-If this is a concern, one can always save the `SecretKey` in an uncompressed form by passing `compr_mode_type::none` to `SecretKey::save`.
-
-#### Zstandard
-
-ZLIB compression can be extremely slow.
-In Microsoft SEAL >= 3.6.0 [Zstandard](https://github.com/facebook/zstd) is supported and preferred as an alternative.
-It is easy to compile Microsoft SEAL to support one or both of the compression libraries.
-This will ensure that any received ciphertext can be decompressed and used.
-
-#### GoogleTest
+If this is a concern, one can always save the `SecretKey` in an uncompressed form.
 
 ### Building with CMake
 
@@ -169,6 +169,40 @@ Below we give instructions for how to configure, build, and install Microsoft SE
 A system-wide install requires elevated (root) privileges.
 
 **NOTE:** Microsoft SEAL compiled with Clang++ has much better runtime performance than that compiled with GNU G++.
+
+#### Basic CMake Options
+
+The following options can be used with CMake to configure the build. The default value for each option is denoted with boldface in the **Values** column.
+
+|CMake option     |Values |Information                           |
+|-----------------|-------|--------------------------------------|
+|CMAKE_BUILD_TYPE |**Release**</br>Debug</br>RelWithDebInfo</br>MinSizeRel</br> |Set to `Debug` if you are developing Microsoft SEAL itself, or debugging some complex issue. Use `Release` otherwise. |
+|BUILD_SHARED_LIBS |ON / **OFF** |Set to `ON` to build a shared library instead of a static library. Not supported in Windows. |
+|SEAL_BUILD_DEPS |**ON** / OFF |Set to `ON` to automatically download and build [optional dependencies](#optional-dependencies); otherwise CMake will attempt to locate pre-installed dependencies. |
+|SEAL_BUILD_EXAMPLES |ON / **OFF** |Build the C++ examples in [native/examples](native/examples). |
+|SEAL_BUILD_SEAL_C |ON / **OFF** |Build the C wrapper (shared) library SEAL_C. This is used by the C# wrapper and most users should have no reason to build it. |
+|SEAL_BUILD_TESTS |ON / **OFF** |Build the tests to check that Microsoft SEAL works correctly. |
+|SEAL_USE_CXX17 |**ON** / OFF |Set to `ON` to build Microsoft SEAL as C++17 for a positive performance impact. |
+|SEAL_USE_INTRIN |**ON** / OFF |Set to `ON` to use compiler intrinsics for improved performance. CMake will automatically detect which intrinsics are available and enable them accordingly. |
+|SEAL_USE_MSGSL |**ON** / OFF |Build with Microsoft GSL support. |
+|SEAL_USE_ZLIB |**ON** / OFF |Build with ZLIB support. |
+|SEAL_USE_ZSTD |**ON** / OFF |Build with Zstandard support. |
+
+As usual, these options can be passed to CMake with the `-D` flag. For example, one could run
+```shell
+cmake -S . -B build -DSEAL_BUILD_EXAMPLES=ON
+```
+to configure a release build of a static Microsoft SEAL library and also build the examples.
+
+#### Advanced CMake Options
+
+The following options can be used with CMake to further configure the build. Most users should have no reason to change these, which is why they are marked as advanced.
+
+|CMake option     |Values |Information                           |
+|-----------------|-------|--------------------------------------|
+|SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT |**ON** / OFF |Set to `ON` to throw an exception when Microsoft SEAL produces a ciphertext with no key-dependent component. For example, subtracting a ciphertext from itself, or multiplying a ciphertext with a plaintext zero yield identically zero ciphertexts that should not be considered as valid ciphertexts. |
+|SEAL_DEFAULT_PRNG |**Blake2xb**</br>Shake256 |Microsoft SEAL supports both Blake2xb and Shake256 XOFs for generating random bytes. Blake2xb is much faster, but it is not standardized, whereas Shake256 is a FIPS standard. |
+|SEAL_USE_GAUSSIAN_NOISE |ON / **OFF** |Set to `ON` to use a non-constant time rounded continuous Gaussian for the error distribution; otherwise a centered binomial distribution &ndash; with similar standard deviation &ndash; is used. |
 
 #### Building Microsoft SEAL
 
@@ -180,86 +214,6 @@ You can build Microsoft SEAL library for your machine by executing the following
 cmake .
 make
 ```
-
-#### [Optional] Debug and Release Modes
-
-By default Microsoft SEAL is built in `Release` mode.
-You can easily switch between `Debug` mode (no optimizations) or `Release` mode in CMake configuration options as follows:
-
-```shell
-cmake . -DCMAKE_BUILD_TYPE=Debug
-make
-```
-
-Please note that `Debug` mode should not be used except for debugging Microsoft SEAL itself, as the performance will be orders of magnitude worse than in `Release` mode.
-
-#### [Optional] Microsoft GSL
-
-By default Microsoft GSL is downloaded as part of Microsoft SEAL library.
-Microsoft GSL's header files are copied to `native/src/GSL` to be portable with Microsoft SEAL at the time of installation.
-You can disable the dependency on Microsoft GSL in CMake configuration options as follows:
-
-```shell
-cmake . -DSEAL_USE_MSGSL=OFF
-make
-```
-
-#### [Optional] ZLIB
-
-By default ZLIB is downloaded and compiled as part of Microsoft SEAL library.
-ZLIB's static archive is included in Microsoft SEAL's static or shared target object.
-You can disable the dependency on ZLIB in CMake configuration options as follows:
-
-```shell
-cmake . -DSEAL_USE_ZLIB=OFF
-make
-```
-
-#### [Optional] Zstandard
-
-By default Zstandard is downloaded and compiled as part of Microsoft SEAL library.
-Zstandard's static archive is included in Microsoft SEAL's static or shared target object.
-You can disable the dependency on Zstandard in CMake configuration options as follows:
-
-```shell
-cmake . -DSEAL_USE_ZSTD=OFF
-make
-```
-
-#### [Optional] Shared Library
-
-By default Microsoft SEAL builds only a static library that is `libseal-3.6.a` on Unix-like platforms.
-You can enable building a shared library, `libseal.so*` in Linux or `libseal*.dylib` in macOS, in CMake configuration options as follows:
-
-```shell
-cmake . -DBUILD_SHARED_LIBS=ON
-make
-```
-
-#### Building Examples
-
-By default Microsoft SEAL does not build examples. You can enable building examples in CMake configuration options as follows:
-
-```shell
-cmake . -DSEAL_BUILD_EXAMPLES=ON
-make
-```
-
-The `sealexamples` executable is located in `native/bin/`.
-
-#### Building Unit Tests
-
-By default Microsoft SEAL does not build tests.
-You can enable building tests in CMake configuration options as follows:
-
-```shell
-cmake . -DSEAL_BUILD_TESTS=ON
-make
-```
-
-This downloads and compiles the [GoogleTest](https://github.com/google/googletest) framework as a part of Microsoft SEAL.
-The `sealtest` executable is located in `native/bin/`.
-All unit tests should pass successfully.
 
 #### Installing Microsoft SEAL
 
