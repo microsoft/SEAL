@@ -24,7 +24,7 @@ include(CheckIncludeFiles)
 include(CheckCXXSourceCompiles)
 include(CheckCXXSourceRuns)
 include(CheckTypeSize)
-include (CheckSymbolExists)
+include(CheckSymbolExists)
 # Extra modules
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 include(SEALMacros)
@@ -383,6 +383,14 @@ else()
     endif()
 endif()
 
+# Add standard alias targets for SEAL::seal and SEAL::seal_shared
+if(TARGET seal)
+    add_library(SEAL::seal ALIAS seal)
+endif()
+if(TARGET seal_shared)
+    add_library(SEAL::seal_shared ALIAS seal_shared)
+endif()
+
 #########################
 # SEAL C export library #
 #########################
@@ -429,6 +437,11 @@ if(SEAL_BUILD_SEAL_C)
     seal_install_target(sealc SEALTargets)
 endif()
 
+# Add standard alias target for SEAL::sealc
+if(TARGET sealc)
+    add_library(SEAL::sealc ALIAS sealc)
+endif()
+
 #################################
 # Installation and CMake config #
 #################################
@@ -459,11 +472,11 @@ install(
     DESTINATION ${SEAL_CONFIG_INSTALL_DIR})
 
 # Install the pkg-config file
-install(
-    FILES
-        ${SEAL_PKGCONFIG_FILENAME}
-    DESTINATION
-        ${SEAL_PKGCONFIG_INSTALL_DIR})
+if(UNIX OR APPLE)
+    install(
+        FILES ${SEAL_PKGCONFIG_FILENAME}
+        DESTINATION ${SEAL_PKGCONFIG_INSTALL_DIR})
+endif()
 
 # We export SEALTargets from the build tree so it can be used by other projects
 # without requiring an install.
@@ -482,11 +495,32 @@ if(SEAL_USE_MSGSL AND SEAL_BUILD_DEPS AND NOT WIN32)
     )
 endif()
 
-# Create pkg-config file
-configure_file(
-    ${CMAKE_CURRENT_LIST_DIR}/pkgconfig/seal.pc.in
-    ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/seal-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR}.pc
-    @ONLY)
+##############
+# pkg-config #
+##############
+
+## Set the requirements according to the current configuration
+#if(SEAL_USE_MSGSL AND NOT WIN32)
+    #if(SEAL_BUILD_DEPS)
+        #set(SEAL_PKGCONFIG_MSGSL_INCLUDE_FLAG "-I${msgsl_SOURCE_DIR}/include")
+    #else()
+        #target_include_directories(seal PUBLIC Microsoft.GSL::GSL)
+        #get_target_property(SEAL_MSGSL_INCLUDE_DIR Microsoft.GSL::GSL INCLUDE_DIRECTORIES)
+        #set(SEAL_PKGCONFIG_MSGSL_INCLUDE_FLAG "-I${SEAL_MSGSL_INCLUDE_DIR}")
+    #endif()
+#endif()
+
+#if(SEAL_USE_ZLIB AND NOT WIN32)
+    #set(SEAL_PKGCONFIG_REQUIRES_PRIVATE "")
+#endif()
+
+# Create the pkg-config file
+if(UNIX OR APPLE)
+    configure_file(
+        ${CMAKE_CURRENT_LIST_DIR}/pkgconfig/seal.pc.in
+        ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/seal-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR}.pc
+        @ONLY)
+endif()
 
 #####################
 # SEAL C++ examples #
