@@ -255,10 +255,13 @@ In macOS you will need CMake with command line tools. For this, you can either
 
 #### Android and iOS
 
-Microsoft SEAL can be compiled for Android.
+Microsoft SEAL can be compiled for Android and iOS.
 Under the `android` directory of the source tree you will find an [Android Studio](https://developer.android.com/studio) project that you can use to compile the library for Android.
-This project is meant only to generate native libraries that can then be called through the .NET library described in the following sections.
-Specifically, it does not contain any wrappers that can be used from the Java language.
+
+To build the library for iOS, please take a look at the [pipeline file](pipelines/ios.yml) to see how to configure and build the native library. 
+
+The native libraries generated through these methods are meant to be called only through the .NET library described in the following sections.
+Specifically, it does not contain any wrappers that can be used from the Java language (for Android) or Objective C (for iOS).
 
 #### Basic CMake Options
 
@@ -438,6 +441,8 @@ The easiest way to ensure this is to copy the native shared library to the same 
 
 You can use [Android Studio](https://developer.android.com/studio) to build the native shared library used by the .NET Standard wrapper library for Android.
 If you want to build for iOS, please take a look at our [iOS pipeline](pipelines/ios.yml) file to see how to configure and build the native library using CMake and Xcode.
+
+However, the recommended way of using SEAL for .NET in Android and iOS is to add a reference to the multiplatform [NuGet package](https://www.nuget.org/packages/Microsoft.Research.SEALNet) to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project.
 
 ## Learning to Use Microsoft SEAL
 
