@@ -473,7 +473,10 @@ The easiest way to ensure this is to copy the native shared library to the same 
 
 ### Android and iOS
 
-You can use [Android Studio](https://developer.android.com/studio) to build the native shared library used by the .NET Standard wrapper library. However, the easiest and recommended way to use Microsoft SEAL in Android is through the multiplatform NuGet package you can find at [NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet). Just add this package to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project in order to develop mobile applications using Microsoft SEAL and .NET. The native shared library and the .NET wrapper compile only for 64 bits, so only `arm64-v8a` and `x86_64` Android ABIs are supported.
+You can use [Android Studio](https://developer.android.com/studio) to build the native shared library used by the .NET Standard wrapper library for Android.
+If you want to build for iOS, please take a look at our [iOS pipeline](pipelines/ios.yml) file to see how to configure and build the native library using CMake and Xcode.
+
+However, the easiest and recommended way to use Microsoft SEAL in both Android and iOS is through the multiplatform NuGet package you can find at [NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet). Just add this package to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project in order to develop mobile applications using Microsoft SEAL and .NET. The native shared library and the .NET wrapper compile only for 64 bits, so only `arm64-v8a` / `x86_64` Android ABIs and `arm64` / `x86_64` iOS architectures are supported.
 
 ## Getting Started
 
