@@ -485,14 +485,11 @@ export(
     NAMESPACE SEAL::
     FILE ${SEAL_TARGETS_FILENAME})
 
-# In UNIX-like platforms install MSGSL header files if SEAL_BUILD_DEPS is ON
-if(SEAL_USE_MSGSL AND SEAL_BUILD_DEPS AND NOT WIN32)
+# Install MSGSL header files if SEAL_BUILD_DEPS is ON
+if(SEAL_USE_MSGSL AND SEAL_BUILD_DEPS)
     install(
-        DIRECTORY
-            ${msgsl_SOURCE_DIR}/include/gsl
-        DESTINATION
-            ${SEAL_INCLUDES_INSTALL_DIR}
-    )
+        DIRECTORY ${msgsl_SOURCE_DIR}/include/gsl
+        DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
 endif()
 
 ##############

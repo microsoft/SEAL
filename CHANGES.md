@@ -2,15 +2,23 @@
 
 ## Version 3.6.0
 
-### New features
+### New Features
 
 - Added support for [Zstandard](https://github.com/facebook/zstd) compression as a much more efficient alternative to ZLIB.
 The performance improvement should be expected to be around 20-30x.
-- Added support for Shake256 XOF for pseudo-random number generation.
-The user can choose to change the default from Blake2xb (faster) to Shake256 (FIPS-202) when configuring the build system.
-There is slight change in how seeded ciphertexts and public keys are serialized due to the flexibility of supporting multiple hash functions.
-Microsoft SEAL 3.6 is backwards compatible with 3.4 and 3.5 when deserializing, but it does not support serializing in the old formats.
-- Added support for iOS.
+- Added support for Shake256 (FIPS-202) XOF for pseudo-random number generation in addition to the default Blake2xb (faster).
+- Microsoft SEAL 3.6 is backwards compatible with 3.4 and 3.5 when deserializing, but it does not support serializing in the old formats.
+- Added support for iOS in the [NuGet package of Microsoft SEAL](https://www.nuget.org/packages/Microsoft.Research.SEALNet).
+- The build system is unified for all platforms.
+There is no longer a Visual Studio solution file (`seal.sln`) for Windows.
+There is a separate solution file for the dotnet library ([dotnet/SEALNet.sln](dotnet/SEALNet.sln)).
+
+### New Build Configurations
+
+- `SEAL_BUILD_DEPS` controls whether dependencies are downloaded and built into Microsoft SEAL or searched from the system.
+- Only a shared library will be built when `BUILD_SHARED_LIBS` is set to `ON`. Previously a static library was always built.
+- Error is sampled from a centered binomial distribution by default unless `SEAL_USE_GAUSSIAN_NOISE` is set to `ON`.
+- Blake2xb is used as XOF for PRNG by default unless `SEAL_DEFAULT_PRNG` is set to `"Shake256"`.
 
 ### API Changes
 
@@ -49,11 +57,17 @@ This is used internally to route deserialization logic to correct functions depe
 Renamed files and directories:
 
 - `native/src/seal/intarray.h` to [native/src/seal/dynarray.h](native/src/seal/dynarray.h)
+- `dotnet/tests/SEALNetTest.csproj` to [dotnet/tests/SEALNetTest.csproj.in](dotnet/tests/SEALNetTest.csproj.in)
+- `dotnet/examples/SEALNetExamples.csproj` to [dotnet/examples/SEALNetExamples.csproj.in](dotnet/examples/SEALNetExamples.csproj.in)
 
 New files:
 
 - [native/src/seal/util/dwthandler.h](native/src/seal/util/dwthandler.h)
+- [native/src/seal/util/fips202.h](native/src/seal/util/fips202.h)
+- [native/src/seal/util/fips202.c](native/src/seal/util/fips202.c)
 - [native/src/seal/version.h](native/src/seal/version.h)
+- [dotnet/SEALNet.sln](dotnet/SEALNet.sln)
+- [.pre-commit-config.yaml](.pre-commit-config.yaml)
 
 Removed files:
 
@@ -61,12 +75,24 @@ Removed files:
 - `dotnet/src/IntegerEncoder.cs`
 - `dotnet/tests/BigUIntTests.cs`
 - `dotnet/tests/IntegerEncoderTests.cs`
+- `native/examples/SEALExamples.vcxproj`
+- `native/examples/SEALExamples.vcxproj.filters`
+- `native/src/CMakeConfig.cmd`
+- `native/src/SEAL_C.vcxproj`
+- `native/src/SEAL_C.vcxproj.filters`
+- `native/src/SEAL.vcxproj`
+- `native/src/SEAL.vcxproj.filters`
 - `native/src/seal/biguint.h`
 - `native/src/seal/biguint.cpp`
 - `native/src/seal/intencoder.h`
 - `native/src/seal/intencoder.cpp`
+- `native/tests/packages.config`
+- `native/tests/SEALTest.vcxproj`
+- `native/tests/SEALTest.vcxproj.filters`
 - `native/tests/seal/biguint.cpp`
 - `native/tests/seal/intencoder.cpp`
+- `thirdparty/`
+- `SEAL.sln`
 
 ## Version 3.5.9
 

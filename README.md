@@ -7,66 +7,71 @@ For more information about the Microsoft SEAL project, see [sealcrypto.org](http
 This document pertains to Microsoft SEAL version 3.6.
 Users of previous versions of the library should look at the [list of changes](CHANGES.md).
 
+### Correct Use of Microsoft SEAL
+
+Decryptions of Microsoft SEAL ciphertexts should be treated as private information only available to the secret key owner. Sharing information directly or indirectly about a decryption should be thought of as equivalent to sharing information about the secret key itself. If it is absolutely necessary to share information about the decryption of a ciphertext, the number of bits shared should be kept to a minimum, and no more decryptions under the same secret key should be performed. We strongly recommend any commercial applications of Microsoft SEAL to be reviewed by cryptography experts familiar with these matters.
+
 ## Contents
 
 - [Microsoft SEAL](#microsoft-seal)
+    - [Correct Use of Microsoft SEAL](#correct-use-of-microsoft-seal)
   - [Contents](#contents)
   - [Introduction](#introduction)
-    <!-- - [Core Concepts](#core-concepts)
+    - [Core Concepts](#core-concepts)
     - [Homomorphic Encryption](#homomorphic-encryption)
-    - [Microsoft SEAL](#microsoft-seal-1) -->
+    - [Microsoft SEAL](#microsoft-seal-1)
   - [Building Microsoft SEAL](#building-microsoft-seal)
     - [Optional Dependencies](#optional-dependencies)
-      <!-- - [Microsoft GSL](#microsoft-gsl)
+<!--      - [Microsoft GSL](#microsoft-gsl)
       - [ZLIB](#zlib)
-      - [Zstandard](#zstandard) -->
-    - [Windows](#windows)
-      <!-- - [Platform](#platform)
+      - [Zstandard](#zstandard)
+      - [GoogleTest](#googletest) -->
+    - [Building with CMake](#building-with-cmake)
       - [Building Microsoft SEAL](#building-microsoft-seal-1)
-      - [[Optional] Debug and Release builds](#optional-debug-and-release-builds)
-      - [[Optional] Microsoft GSL](#optional-microsoft-gsl)
-      - [[Optional] ZLIB](#optional-zlib)
-      - [[Optional] Zstandard](#optional-zstandard)
-      - [Building Examples](#building-examples)
-      - [Building Unit Tests](#building-unit-tests) -->
-    - [Linux, macOS, and FreeBSD](#linux-macos-and-freebsd)
-      <!-- - [Building Microsoft SEAL](#building-microsoft-seal-2)
       - [[Optional] Debug and Release Modes](#optional-debug-and-release-modes)
       - [[Optional] Microsoft GSL](#optional-microsoft-gsl-1)
       - [[Optional] ZLIB](#optional-zlib-1)
       - [[Optional] Zstandard](#optional-zstandard-1)
       - [[Optional] Shared Library](#optional-shared-library)
+      - [Building Examples](#building-examples)
+      - [Building Unit Tests](#building-unit-tests)
+      - [Installing Microsoft SEAL](#installing-microsoft-seal)
+      - [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake)
+    - [VCPKG](#vcpkg)
+    - [Linux, macOS, and FreeBSD](#linux-macos-and-freebsd)
+    - [Windows](#windows)
+      - [Platform](#platform)
+      - [Building Microsoft SEAL](#building-microsoft-seal-2)
+      - [[Optional] Debug and Release builds](#optional-debug-and-release-builds)
       - [Building Examples](#building-examples-1)
       - [Building Unit Tests](#building-unit-tests-1)
-      - [Installing Microsoft SEAL](#installing-microsoft-seal)
-      - [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake) -->
-    - [Android](#android)
+    - [Android and iOS](#android-and-ios)
   - [Microsoft SEAL for .NET](#microsoft-seal-for-net)
     - [From NuGet package](#from-nuget-package)
     - [Windows](#windows-1)
-      <!-- - [Native Library](#native-library)
+      - [Native Library](#native-library)
       - [.NET Library](#net-library)
       - [.NET Examples](#net-examples)
       - [.NET Unit Tests](#net-unit-tests)
       - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application)
-      - [Building Your Own NuGet Package](#building-your-own-nuget-package) -->
+      - [Building Your Own NuGet Package](#building-your-own-nuget-package)
     - [Linux and macOS](#linux-and-macos)
-      <!-- - [Native Library](#native-library-1)
+      - [Native Library](#native-library-1)
       - [.NET Library](#net-library-1)
       - [.NET Examples](#net-examples-1)
       - [.NET Unit Tests](#net-unit-tests-1)
-      - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application-1) -->
-    - [Android](#android-1)
+      - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application-1)
+    - [Android and iOS](#android-and-ios-1)
   - [Getting Started](#getting-started)
   - [Contributing](#contributing)
   - [Citing Microsoft SEAL](#citing-microsoft-seal)
-    <!-- - [Version 3.6](#version-36)
+    - [Version 3.6](#version-36)
     - [Version 3.5](#version-35)
     - [Version 3.4](#version-34)
     - [Version 3.3](#version-33)
     - [Version 3.2](#version-32)
     - [Version 3.1](#version-31)
-    - [Version 3.0](#version-30) -->
+    - [Version 3.0](#version-30)
 
 ## Introduction
 
@@ -155,67 +160,11 @@ In Microsoft SEAL >= 3.6.0 [Zstandard](https://github.com/facebook/zstd) is supp
 It is easy to compile Microsoft SEAL to support one or both of the compression libraries.
 This will ensure that any received ciphertext can be decompressed and used.
 
-### Windows
+#### GoogleTest
 
-Microsoft SEAL comes with a Microsoft Visual Studio 2019 solution file `SEAL.sln` that can be used to conveniently build the library, examples, and unit tests.
-Visual Studio 2019 is required to build Microsoft SEAL.
+### Building with CMake
 
-#### Platform
-
-The Visual Studio solution `SEAL.sln` is configured to build Microsoft SEAL both for `Win32` and `x64` platforms. Please choose the right platform before building Microsoft SEAL.
-The `SEAL_C` project and the .NET wrapper library `SEALNet` can only be built for `x64`.
-
-#### Building Microsoft SEAL
-
-Build the SEAL project `native\src\SEAL.vcxproj` from `SEAL.sln`.
-This results in the static library `seal.lib` to be created in `lib\$(Platform)\$(Configuration)`.
-When linking with applications, you need to add `native\src\` (full path) as an include directory for Microsoft SEAL header files.
-
-#### [Optional] Debug and Release builds
-
-You can easily switch from Visual Studio build configuration menu whether Microsoft SEAL should be built in `Debug` mode (no optimizations) or in `Release` mode.
-Please note that `Debug` mode should not be used except for debugging Microsoft SEAL itself, as the performance will be orders of magnitude worse than in `Release` mode.
-
-#### [Optional] Microsoft GSL
-
-By default Microsoft GSL is downloaded as part of Microsoft SEAL library.
-Microsoft GSL's header files are copied to `native\src\GSL` to be portable with Microsoft SEAL at the time of installation.
-You can disable the dependency on Microsoft GSL by commenting out `#cmakedefine SEAL_USE_MSGSL` in [native\src\seal\util\config.h.in](native\src\seal\util\config.h.in).
-
-#### [Optional] ZLIB
-
-By default ZLIB is downloaded and compiled as part of Microsoft SEAL library.
-ZLIB's static archive is included in Microsoft SEAL's static or shared target object.
-You can disable the dependency on ZLIB by commenting out `#cmakedefine SEAL_USE_ZLIB` in [native\src\seal\util\config.h.in](native\src\seal\util\config.h.in).
-
-#### [Optional] Zstandard
-
-By default Zstandard is downloaded and compiled as part of Microsoft SEAL library.
-Zstandard's static archive is included in Microsoft SEAL's static or shared target object.
-You can disable the dependency on Zstandard by commenting out `#cmakedefine SEAL_USE_ZSTD` in [native\src\seal\util\config.h.in](native\src\seal\util\config.h.in).
-
-#### Building Examples
-
-Build the SEALExamples project `native\examples\SEALExamples.vcxproj` from `SEAL.sln`.
-This results in an executable `sealexamples.exe` to be created in `bin\$(Platform)\$(Configuration)`.
-
-#### Building Unit Tests
-
-The unit tests require the Google Test framework to be installed.
-The appropriate NuGet package is already listed in `native\tests\packages.config`, so once you attempt to build the SEALTest project `native\tests\SEALTest.vcxproj` from `SEAL.sln` Visual Studio will automatically download and install it for you.
-
-### Linux, macOS, and FreeBSD
-
-Microsoft SEAL is very easy to configure and build in Linux and macOS using CMake (>= 3.12).
-A modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0) is needed.
-In macOS the Xcode toolchain (>= 9.3) will work.
-
-In macOS you will need CMake with command line tools. For this, you can either
-
-1. install the cmake package with [Homebrew](https://brew.sh), or
-1. download CMake directly from [cmake.org/download](https://cmake.org/download) and
-[enable command line tools](https://stackoverflow.com/questions/30668601/installing-cmake-command-line-tools-on-a-mac).
-
+We recommend using out-of-source build although in-source build works.
 Below we give instructions for how to configure, build, and install Microsoft SEAL either system-wide (global install), or for a single user (local install).
 A system-wide install requires elevated (root) privileges.
 
@@ -348,7 +297,52 @@ cd <directory containing your CMakeLists.txt>
 cmake . -DCMAKE_PREFIX_PATH=~/mylibs
 ```
 
-### Android
+### VCPKG
+
+### Linux, macOS, and FreeBSD
+
+Microsoft SEAL is very easy to configure and build in Linux and macOS using CMake (>= 3.12).
+A modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0) is needed.
+In macOS the Xcode toolchain (>= 9.3) will work.
+
+In macOS you will need CMake with command line tools. For this, you can either
+
+1. install the cmake package with [Homebrew](https://brew.sh), or
+1. download CMake directly from [cmake.org/download](https://cmake.org/download) and
+[enable command line tools](https://stackoverflow.com/questions/30668601/installing-cmake-command-line-tools-on-a-mac).
+
+### Windows
+
+Microsoft SEAL comes with a Microsoft Visual Studio 2019 solution file `SEAL.sln` that can be used to conveniently build the library, examples, and unit tests.
+Visual Studio 2019 is required to build Microsoft SEAL.
+
+#### Platform
+
+The Visual Studio solution `SEAL.sln` is configured to build Microsoft SEAL both for `Win32` and `x64` platforms. Please choose the right platform before building Microsoft SEAL.
+The `SEAL_C` project and the .NET wrapper library `SEALNet` can only be built for `x64`.
+
+#### Building Microsoft SEAL
+
+Build the SEAL project `native\src\SEAL.vcxproj` from `SEAL.sln`.
+This results in the static library `seal.lib` to be created in `lib\$(Platform)\$(Configuration)`.
+When linking with applications, you need to add `native\src\` (full path) as an include directory for Microsoft SEAL header files.
+
+#### [Optional] Debug and Release builds
+
+You can easily switch from Visual Studio build configuration menu whether Microsoft SEAL should be built in `Debug` mode (no optimizations) or in `Release` mode.
+Please note that `Debug` mode should not be used except for debugging Microsoft SEAL itself, as the performance will be orders of magnitude worse than in `Release` mode.
+
+#### Building Examples
+
+Build the SEALExamples project `native\examples\SEALExamples.vcxproj` from `SEAL.sln`.
+This results in an executable `sealexamples.exe` to be created in `bin\$(Platform)\$(Configuration)`.
+
+#### Building Unit Tests
+
+The unit tests require the Google Test framework to be installed.
+The appropriate NuGet package is already listed in `native\tests\packages.config`, so once you attempt to build the SEALTest project `native\tests\SEALTest.vcxproj` from `SEAL.sln` Visual Studio will automatically download and install it for you.
+
+### Android and iOS
 Microsoft SEAL can be compiled for Android. Under the `android` directory of the source tree you will find an [Android Studio](https://developer.android.com/studio) project that you can use to compile the library for Android. This project is meant only to generate native libraries that can then be called through the .NET library described in the following sections. Specifically, it does not contain any wrappers that can be used from the Java language.
 
 
@@ -477,7 +471,7 @@ To use Microsoft SEAL for .NET in your own application you need to:
 1. ensure the native shared library is available for your application when run.
 The easiest way to ensure this is to copy the native shared library to the same directory where your application's executable is located.
 
-### Android
+### Android and iOS
 
 You can use [Android Studio](https://developer.android.com/studio) to build the native shared library used by the .NET Standard wrapper library. However, the easiest and recommended way to use Microsoft SEAL in Android is through the multiplatform NuGet package you can find at [NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet). Just add this package to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project in order to develop mobile applications using Microsoft SEAL and .NET. The native shared library and the .NET wrapper compile only for 64 bits, so only `arm64-v8a` and `x86_64` Android ABIs are supported.
 
