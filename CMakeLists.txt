@@ -394,7 +394,7 @@ if(SEAL_BUILD_SEAL_C)
     # Check that size_t is 8 bytes
     include(CheckTypeSize)
     check_type_size("size_t" SIZET LANGUAGE C)
-    if(NOT "${SIZET} EQUAL 8")
+    if(NOT ${SIZET} EQUAL 8)
         unset(SIZET CACHE)
         unset(HAVE_SIZET CACHE)
         message(FATAL_ERROR "SEAL_C requires 64-bit platform")
