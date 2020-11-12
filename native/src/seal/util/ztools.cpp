@@ -30,7 +30,7 @@ namespace seal
                 class PointerStorage
                 {
                 public:
-                    PointerStorage(MemoryPoolHandle pool) : pool_(pool)
+                    PointerStorage(MemoryPoolHandle pool) : pool_(move(pool))
                     {}
 
                     void *allocate(size_t size)

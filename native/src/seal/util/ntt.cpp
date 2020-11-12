@@ -95,7 +95,7 @@ namespace seal
 
             // Other constructors
             NTTTablesCreateIter(int coeff_count_power, vector<Modulus> modulus, MemoryPoolHandle pool)
-                : coeff_count_power_(coeff_count_power), modulus_(modulus), pool_(pool)
+                : coeff_count_power_(coeff_count_power), modulus_(modulus), pool_(move(pool))
             {}
 
             // Require copy and move constructors and assignments

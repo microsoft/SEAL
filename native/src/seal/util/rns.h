@@ -103,7 +103,7 @@ namespace seal
             }
 
         private:
-            RNSBase(MemoryPoolHandle pool) : pool_(pool), size_(0)
+            RNSBase(MemoryPoolHandle pool) : pool_(std::move(pool)), size_(0)
             {
                 if (!pool_)
                 {
