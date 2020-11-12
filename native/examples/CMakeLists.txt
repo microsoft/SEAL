@@ -1,14 +1,44 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
-target_sources(sealexamples
-    PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}/examples.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/1_bfv_basics.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/2_encoders.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/3_levels.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/4_ckks_basics.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/5_rotation.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/6_serialization.cpp
-        ${CMAKE_CURRENT_LIST_DIR}/7_performance.cpp
-)
+cmake_minimum_required(VERSION 3.12)
+
+project(SEALExamples VERSION 3.6.0 LANGUAGES CXX)
+
+# If not called from root CMakeLists.txt
+if(NOT DEFINED SEAL_BUILD_EXAMPLES)
+    set(SEAL_BUILD_EXAMPLES ON)
+
+    set(SEAL_DIR "${CMAKE_CURRENT_LIST_DIR}/../../build" CACHE STRING "Directory to SEAL build tree")
+    # Import Microsoft SEAL
+    find_package(SEAL 3.6.0 EXACT REQUIRED
+        # Providing a path so this can be built without installing Microsoft SEAL
+        PATHS ${SEAL_DIR}/cmake
+    )
+
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+endif()
+
+if(SEAL_BUILD_EXAMPLES)
+    add_executable(sealexamples)
+
+    target_sources(sealexamples
+        PRIVATE
+            ${CMAKE_CURRENT_LIST_DIR}/examples.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/1_bfv_basics.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/2_encoders.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/3_levels.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/4_ckks_basics.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/5_rotation.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/6_serialization.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/7_performance.cpp
+    )
+
+    if(TARGET SEAL::seal)
+        target_link_libraries(sealexamples PRIVATE SEAL::seal)
+    elseif(TARGET SEAL::seal_shared)
+        target_link_libraries(sealexamples PRIVATE SEAL::seal_shared)
+    else()
+        message(FATAL_ERROR "Cannot find target SEAL::seal or SEAL::seal_shared")
+    endif()
+endif()

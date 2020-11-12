@@ -4,7 +4,9 @@
 #include "seal/dynarray.h"
 #include "seal/memorymanager.h"
 #include <sstream>
-#include "gsl/span"
+#ifdef SEAL_USE_MSGSL
+#include <gsl/span>
+#endif
 #include "gtest/gtest.h"
 
 using namespace seal;

@@ -167,20 +167,6 @@ if(SEAL_USE_ZSTD)
     endif()
 endif()
 
-# if SEAL_BUILD_TESTS is ON, use googletest
-if(SEAL_BUILD_TESTS)
-    if (SEAL_BUILD_DEPS)
-        message(STATUS "Download GTest ...")
-        include(ExternalGTest)
-        add_library(GTest::gtest ALIAS gtest)
-    else()
-        find_package(GTest 1.10.0 CONFIG)
-        if(NOT GTest_FOUND)
-            message(FATAL_ERROR "Failed to find GTest")
-        endif()
-    endif()
-endif()
-
 ####################
 # SEAL C++ library #
 ####################
@@ -537,13 +523,7 @@ set(SEAL_BUILD_EXAMPLES_OPTION_STR "Build C++ examples for Microsoft SEAL")
 option(SEAL_BUILD_EXAMPLES ${SEAL_BUILD_EXAMPLES_OPTION_STR} OFF)
 
 if(SEAL_BUILD_EXAMPLES)
-    add_executable(sealexamples)
     add_subdirectory(native/examples)
-    if(NOT BUILD_SHARED_LIBS)
-        target_link_libraries(sealexamples PRIVATE seal)
-    else()
-        target_link_libraries(sealexamples PRIVATE seal_shared)
-    endif()
 endif()
 
 ##################
@@ -555,13 +535,7 @@ set(SEAL_BUILD_TESTS_OPTION_STR "Build C++ tests for Microsoft SEAL")
 option(SEAL_BUILD_TESTS ${SEAL_BUILD_TESTS_OPTION_STR} OFF)
 
 if(SEAL_BUILD_TESTS)
-    add_executable(sealtest)
-    add_subdirectory(native/tests/seal)
-    if(NOT BUILD_SHARED_LIBS)
-        target_link_libraries(sealtest PRIVATE seal GTest::gtest)
-    else()
-        target_link_libraries(sealtest PRIVATE seal_shared GTest::gtest)
-    endif()
+    add_subdirectory(native/tests)
 endif()
 
 #######################################
