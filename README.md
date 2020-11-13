@@ -190,6 +190,32 @@ Simply add this package into your .NET project as a dependency and you are ready
 
 To develop mobile applications using Microsoft SEAL and .NET for Android and iOS, just add this package to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project. Unlike the Microsoft SEAL C++ library, the .NET wrapper library works only on 64-bit platforms, so only `arm64-v8a`/`x86_64` Android ABIs and `arm64`/`x86_64` iOS architectures are supported.
 
+### Examples
+
+Using Microsoft SEAL will require the user to invest some time in learning fundamental concepts in homomorphic encryption.
+The code comes with heavily commented examples that are designed to gradually teach such concepts as well as to demonstrate a large fraction of the API.
+The examples are available (and identical) in C++ and C#, and are divided into several source files in `native/examples/` (C++) and `dotnet/examples/` (C#), as follows.
+
+| C++                   | C#                   | Description                                                                  |
+| --------------------- | -------------------- | ---------------------------------------------------------------------------- |
+| `examples.cpp`        | `Examples.cs`        | The example runner application                                               |
+| `1_bfv_basics.cpp`    | `1_BFV_Basics.cs`    | Encrypted modular arithmetic using the BFV scheme                            |
+| `2_encoders.cpp`      | `2_Encoders.cs`      | Encoding more complex data into Microsoft SEAL plaintext objects             |
+| `3_levels.cpp`        | `3_Levels.cs`        | Introduces the concept of levels; prerequisite for using the CKKS scheme     |
+| `4_ckks_basics.cpp`   | `4_CKKS_Basics.cs`   | Encrypted real number arithmetic using the CKKS scheme                       |
+| `5_rotation.cpp`      | `5_Rotation.cs`      | Performing cyclic rotations on encrypted vectors in the BFV and CKKS schemes |
+| `6_serialization.cpp` | `6_Serialization.cs` | Serializing objects in Microsoft SEAL                                        |
+| `7_performance.cpp`   | `7_Performance.cs`   | Performance tests                                                            |
+
+It is recommended to read the comments and the code snippets along with command line printout from running an example.
+For easier navigation, command line printout provides the line number in the associated source file where the associated code snippets start.
+To build the examples, see [Building Microsoft SEAL Manually](#building-microsoft-seal-manually).
+
+**Note:** It is impossible to know how to use Microsoft SEAL correctly without studying all of the examples.
+They are designed to provide the reader with the necessary conceptual background on homomorphic encryption.
+Reusing code directly from the examples will not work well, as the examples are often demonstrating individual pieces of functionality, and are not optimized for performance.
+Writing Microsoft SEAL code without studying the examples in depth will inevitably result in code that is vulnerable, malfunctioning, or extremely slow.
+
 ## Building Microsoft SEAL Manually
 
 ### Building C++ Components
@@ -481,29 +507,6 @@ You can use [Android Studio](https://developer.android.com/studio) to build the 
 If you want to build for iOS, please take a look at our [iOS pipeline](pipelines/ios.yml) file to see how to configure and build the native library using CMake and Xcode.
 
 However, the recommended way of using SEAL for .NET in Android and iOS is to add a reference to the multiplatform [NuGet package](https://www.nuget.org/packages/Microsoft.Research.SEALNet) to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project.
-
-## Learning to Use Microsoft SEAL
-
-Using Microsoft SEAL will require the user to invest some time in learning fundamental concepts in homomorphic encryption.
-The code comes with heavily commented examples that are designed to gradually teach such concepts as well as to demonstrate much of the API.
-The code examples are available (and identical) in C++ and C#, and are divided into several source files in `native/examples/` (C++) and `dotnet/examples/` (C#), as follows:
-
-| C++                   | C#                   | Description                                                                  |
-| --------------------- | -------------------- | ---------------------------------------------------------------------------- |
-| `examples.cpp`        | `Examples.cs`        | The example runner application                                               |
-| `1_bfv_basics.cpp`    | `1_BFV_Basics.cs`    | Encrypted modular arithmetic using the BFV scheme                            |
-| `2_encoders.cpp`      | `2_Encoders.cs`      | Encoding more complex data into Microsoft SEAL plaintext objects             |
-| `3_levels.cpp`        | `3_Levels.cs`        | Introduces the concept of levels; prerequisite for using the CKKS scheme     |
-| `4_ckks_basics.cpp`   | `4_CKKS_Basics.cs`   | Encrypted real number arithmetic using the CKKS scheme                       |
-| `5_rotation.cpp`      | `5_Rotation.cs`      | Performing cyclic rotations on encrypted vectors in the BFV and CKKS schemes |
-| `6_serialization.cpp` | `6_Serialization.cs` | Serializing objects in Microsoft SEAL                                        |
-| `7_performance.cpp`   | `7_Performance.cs`   | Performance tests                                                            |
-
-It is recommeded to read the comments and the code snippets along with command line printout from running an example.
-For easier navigation, command line printout provides the line number in the associated source file where the associated code snippets start.
-
-**WARNING:** It is impossible to use Microsoft SEAL correctly without reading all examples or by simply re-using the code from examples.
-Any developer attempting to do so will inevitably produce code that is ***vulnerable***, ***malfunctioning***, or ***extremely slow***.
 
 ## Contributing
 
