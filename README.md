@@ -27,26 +27,22 @@ Commercial applications of Microsoft SEAL, or any homomorphic encryption library
     - [Optional Dependencies](#optional-dependencies)
       - [Microsoft GSL](#microsoft-gsl)
       - [ZLIB and Zstandard](#zlib-and-zstandard)
-    - [Installing with VCPKG (Windows, Unix-like)](#installing-with-vcpkg-windows-unix-like)
-    - [Installing with Homebrew (macOS)](#installing-with-homebrew-macos)
     - [Installing from NuGet Package (Windows, Linux, macOS, Android, iOS)](#installing-from-nuget-package-windows-linux-macos-android-ios)
+    - [Examples](#examples)
   - [Building Microsoft SEAL Manually](#building-microsoft-seal-manually)
-    - [Building with CMake](#building-with-cmake)
-      - [Basic CMake Options](#basic-cmake-options)
-      - [Advanced CMake Options](#advanced-cmake-options)
+    - [Building C++ Components](#building-c-components)
+      - [Requirements](#requirements)
       - [Building Microsoft SEAL](#building-microsoft-seal)
       - [Installing Microsoft SEAL](#installing-microsoft-seal)
+      - [Building on Windows](#building-on-windows)
+      - [Linux, macOS, and FreeBSD](#linux-macos-and-freebsd)
+      - [Android and iOS](#android-and-ios)
+      - [Basic CMake Options](#basic-cmake-options)
+      - [Advanced CMake Options](#advanced-cmake-options)
       - [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake)
-    - [Linux, macOS, and FreeBSD](#linux-macos-and-freebsd)
-    - [Android and iOS](#android-and-ios)
+      - [Examples and Tests](#examples-and-tests)
+    - [Building .NET Components](#building-net-components)
     - [Windows](#windows)
-      - [Platform](#platform)
-      - [Building Microsoft SEAL](#building-microsoft-seal-1)
-      - [[Optional] Debug and Release builds](#optional-debug-and-release-builds)
-      - [Building Examples](#building-examples)
-      - [Building Unit Tests](#building-unit-tests)
-  - [Microsoft SEAL for .NET](#microsoft-seal-for-net)
-    - [Windows](#windows-1)
       - [Native Library](#native-library)
       - [.NET Library](#net-library)
       - [.NET Examples](#net-examples)
@@ -60,7 +56,6 @@ Commercial applications of Microsoft SEAL, or any homomorphic encryption library
       - [.NET Unit Tests](#net-unit-tests-1)
       - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application-1)
     - [Android and iOS](#android-and-ios-1)
-  - [Getting Started](#getting-started-1)
   - [Contributing](#contributing)
   - [Citing Microsoft SEAL](#citing-microsoft-seal)
     - [Version 3.6](#version-36)
@@ -209,7 +204,7 @@ The examples are available (and identical) in C++ and C#, and are divided into s
 
 It is recommended to read the comments and the code snippets along with command line printout from running an example.
 For easier navigation, command line printout provides the line number in the associated source file where the associated code snippets start.
-To build the examples, see [Building Microsoft SEAL Manually](#building-microsoft-seal-manually).
+To build the examples, see [Examples and Tests](#examples-and-tests).
 
 **Note:** It is impossible to know how to use Microsoft SEAL correctly without studying all of the examples.
 They are designed to provide the reader with the necessary conceptual background on homomorphic encryption.
@@ -374,11 +369,24 @@ target_link_libraries(<your target> SEAL::seal)
 ```
 
 If Microsoft SEAL was installed globally, the above `find_package` command will likely find the library automatically.
-To link with a locally installed Microsoft SEAL, e.g., installed in `~/mylibs` as described above, you may need to tell CMake where to look for Microsoft SEAL when you configure your application by running:
+To link with a Microsoft SEAL installed locally or by a package manager, e.g., installed in `~/mylibs` as described above, you may need to tell CMake where to look for Microsoft SEAL when you configure your application by running:
 
 ```bash
 cd <directory containing your CMakeLists.txt>
 cmake . -DCMAKE_PREFIX_PATH=~/mylibs
+```
+
+See [native/examples/CMakeLists.txt](native/examples/CMakeLists.txt) as a sample CMake project that is linked with Microsoft SEAL.
+
+#### Examples and Tests
+
+When building Microsoft SEAL, examples and tests can be built by enabling [Basic CMake Options](basic-cmake-options): `SEAL_BUILD_EXAMPES` and `SEAL_BUILD_TESTS`.
+Alternatively, both [examples](native/examples/CMakeLists.txt) and [tests](native/tests/CMakeLists.txt) can be built as standalone CMake projects that are linked with Microsoft SEAL installed to `~/mylibs`, by following the scripts below. Omit `-DCMAKE_PREFIX_PATH` if Microsoft is installed globally.
+
+```bash
+cd native/<examples-or-tests>
+cmake -S . -B build -DCMAKE_PREFIX_PATH=~/mylibs
+cmake --build build
 ```
 
 ### Building .NET Components
