@@ -29,8 +29,8 @@ Commercial applications of Microsoft SEAL, or any homomorphic encryption library
       - [ZLIB and Zstandard](#zlib-and-zstandard)
     - [Installing with VCPKG (Windows, Unix-like)](#installing-with-vcpkg-windows-unix-like)
     - [Installing with Homebrew (macOS)](#installing-with-homebrew-macos)
-    - [Installing NuGet Package (Windows, Linux, macOS, Android, iOS)](#installing-nuget-package-windows-linux-macos-android-ios)
-  - [Building Microsoft SEAL Manually (C/C++)](#building-microsoft-seal-manually-cc)
+    - [Installing from NuGet Package (Windows, Linux, macOS, Android, iOS)](#installing-from-nuget-package-windows-linux-macos-android-ios)
+  - [Building Microsoft SEAL Manually](#building-microsoft-seal-manually)
     - [Building with CMake](#building-with-cmake)
       - [Basic CMake Options](#basic-cmake-options)
       - [Advanced CMake Options](#advanced-cmake-options)
@@ -130,11 +130,20 @@ For applications where exact values are necessary, the BFV scheme is the only ch
 
 ## Getting Started
 
+There are multiple ways of installing Microsoft SEAL and starting to use it.
+The easiest way is to use a package manager such as [vcpkg](https://github.com/microsoft/vcpkg) or [Homebrew](https://formulae.brew.sh/formula/seal) to download, build, and install the library.
+The .NET library is available as a multiplatform [NuGet package](https://www.nuget.org/packages/Microsoft.Research.SEALNet).
+Finally, one can build Microsoft SEAL manually with a multiplatform CMake build system; see [Building Microsoft SEAL Manually](#building-microsoft-seal-manually) for details.
+
 ### Optional Dependencies
 
 Microsoft SEAL has no required dependencies, but certain optional features can be enabled when compiling with support for specific third-party libraries.
-The build system can either download and build the dependencies, or alternatively search for pre-installed libraries.
-Most users will probably want to use the first approach for its convenience. The optional dependencies and their tested versions (other versions may work as well) are as follows.
+
+When [building manually](#building-microsoft-seal-manually), one can choose to have the Microsoft SEAL build system download and build the dependencies, or alternatively search the system directories for pre-installed dependencies.
+On the other extreme, the downloadable [NuGet package](https://www.nuget.org/packages/Microsoft.Research.SEALNet) cannot be configured at all, but it is always possible to [build a custom NuGet package](#building-your-own-nuget-package).
+Other package managers offer varying amounts of opportunities for configuring the dependencies and [other build options](#basic-cmake-options).
+
+The optional dependencies and their tested versions (other versions may work as well) are as follows.
 
 | Optional dependency                                | Tested version | Use                                              |
 | -------------------------------------------------- | -------------- | ------------------------------------------------ |
@@ -146,12 +155,14 @@ Most users will probably want to use the first approach for its convenience. The
 #### Microsoft GSL
 
 Microsoft GSL (Guidelines Support Library) is a header-only library that implements `gsl::span`: a *view type* that provides safe (bounds-checked) array access to memory.
+
 For example, if Microsoft GSL is available, Microsoft SEAL can allow `BatchEncoder` and `CKKSEncoder` to encode from and decode to a `gsl::span` instead of `std::vector`, which can in some cases have a significant performance benefit.
 
 #### ZLIB and Zstandard
 
 ZLIB and Zstandard are widely used compression libraries. Microsoft SEAL can optionally use these libraries to compress data that is serialized.
-One may ask how can compression help when ciphertext and key data is supposed to look random.
+
+One may ask how compression can help when ciphertext and key data is supposed to be indistinguishable from random.
 In Microsoft SEAL `Ciphertext` objects consist of a large number of integers modulo specific prime numbers (`coeff_modulus` primes).
 When using the CKKS scheme in particular, these prime numbers can be quite small (e.g., 30 bits), but the data is nevertheless serialized as 64-bit integers.
 Therefore, it is not uncommon that almost half of the ciphertext bytes are zeros, and applying a general-purpose compression algorithm is a convenient way of getting rid this wasted space.
@@ -172,12 +183,12 @@ If this is a concern, one can always save the `SecretKey` in an uncompressed for
 
 <!-- ### Installing with Homebrew (macOS) -->
 
-### Installing NuGet Package (Windows, Linux, macOS, Android, iOS)
+### Installing from NuGet Package (Windows, Linux, macOS, Android, iOS)
 
 For .NET developers the easiest way of installing Microsoft SEAL is by using the multiplatform NuGet package available at [NuGet.org](https://www.nuget.org/packages/Microsoft.Research.SEALNet).
 Simply add this package into your .NET project as a dependency and you are ready to go.
 
-To develop mobile applications using Microsoft SEAL and .NET for Android and iOS, just add this package to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project. The native shared library and the .NET wrapper compile only for 64-bit platforms, so only `arm64-v8a` / `x86_64` Android ABIs and `arm64` / `x86_64` iOS architectures are supported.
+To develop mobile applications using Microsoft SEAL and .NET for Android and iOS, just add this package to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project. Unlike the Microsoft SEAL C++ library, the .NET wrapper library works only on 64-bit platforms, so only `arm64-v8a`/`x86_64` Android ABIs and `arm64`/`x86_64` iOS architectures are supported.
 
 ## Building Microsoft SEAL Manually
 
