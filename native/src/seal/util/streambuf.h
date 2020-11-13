@@ -238,7 +238,7 @@ namespace seal
                 return count;
             }
 
-            DynArray<char> buf_{ MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, clear_on_destruction_) };
+            DynArray<char> buf_{ MemoryManager::GetPool(mm_prof_opt::mm_force_new, clear_on_destruction_) };
 
             std::streamsize size_;
 

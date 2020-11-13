@@ -74,7 +74,7 @@ namespace seal
         */
         SecretKey &operator=(const SecretKey &assign)
         {
-            Plaintext new_sk(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
+            Plaintext new_sk(MemoryManager::GetPool(mm_prof_opt::mm_force_new, true));
             new_sk = assign.sk_;
             std::swap(sk_, new_sk);
             return *this;
@@ -155,7 +155,7 @@ namespace seal
             using namespace std::placeholders;
 
             // We use a fresh memory pool with `clear_on_destruction' enabled.
-            Plaintext new_sk(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
+            Plaintext new_sk(MemoryManager::GetPool(mm_prof_opt::mm_force_new, true));
             auto in_size = Serialization::Load(
                 std::bind(&Plaintext::load_members, &new_sk, std::move(context), _1, _2), stream,
                 /* clear_on_destruction */ true);
@@ -229,7 +229,7 @@ namespace seal
             using namespace std::placeholders;
 
             // We use a fresh memory pool with `clear_on_destruction' enabled.
-            Plaintext new_sk(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
+            Plaintext new_sk(MemoryManager::GetPool(mm_prof_opt::mm_force_new, true));
             auto in_size =
                 Serialization::Load(std::bind(&Plaintext::load_members, &new_sk, std::move(context), _1, _2), in, size);
             std::swap(sk_, new_sk);
@@ -293,6 +293,6 @@ namespace seal
 
     private:
         // We use a fresh memory pool with `clear_on_destruction' enabled.
-        Plaintext sk_{ MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true) };
+        Plaintext sk_{ MemoryManager::GetPool(mm_prof_opt::mm_force_new, true) };
     };
 } // namespace seal

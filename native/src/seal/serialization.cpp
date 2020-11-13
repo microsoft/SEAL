@@ -275,7 +275,7 @@ namespace seal
                 temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
                 save_members(temp_stream);
 
-                auto safe_pool(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
+                auto safe_pool(MemoryManager::GetPool(mm_prof_opt::mm_force_new, true));
 
                 // Create temporary aliasing DynArray to wrap safe_buffer
                 DynArray<seal_byte> safe_buffer_array(
@@ -301,7 +301,7 @@ namespace seal
                 temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
                 save_members(temp_stream);
 
-                auto safe_pool(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, clear_on_destruction));
+                auto safe_pool(MemoryManager::GetPool(mm_prof_opt::mm_force_new, clear_on_destruction));
 
                 // Create temporary aliasing DynArray to wrap safe_buffer
                 DynArray<seal_byte> safe_buffer_array(
@@ -398,7 +398,7 @@ namespace seal
                 // Throw an exception on non-zero return value
                 if (ztools::zlib_inflate_stream(
                         stream, safe_cast<streamoff>(compr_size), temp_stream,
-                        MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, clear_on_destruction)))
+                        MemoryManager::GetPool(mm_prof_opt::mm_force_new, clear_on_destruction)))
                 {
                     throw logic_error("stream decompression failed");
                 }
@@ -421,7 +421,7 @@ namespace seal
                 // Throw an exception on non-zero return value
                 if (ztools::zstd_inflate_stream(
                         stream, safe_cast<streamoff>(compr_size), temp_stream,
-                        MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, clear_on_destruction)))
+                        MemoryManager::GetPool(mm_prof_opt::mm_force_new, clear_on_destruction)))
                 {
                     throw logic_error("stream decompression failed");
                 }

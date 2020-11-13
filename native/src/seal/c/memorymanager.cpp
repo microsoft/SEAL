@@ -66,8 +66,8 @@ SEAL_C_FUNC MemoryManager_GetPool1(int prof_opt, bool clear_on_destruction, void
     mm_prof_opt profile_opt = static_cast<mm_prof_opt>(prof_opt);
     MemoryPoolHandle handle;
 
-    // clear_on_destruction is only used when using FORCE_NEW
-    if (profile_opt == mm_prof_opt::FORCE_NEW)
+    // clear_on_destruction is only used when using mm_force_new
+    if (profile_opt == mm_prof_opt::mm_force_new)
     {
         handle = MemoryManager::GetPool(profile_opt, clear_on_destruction);
     }

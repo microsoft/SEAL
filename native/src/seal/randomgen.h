@@ -311,13 +311,14 @@ namespace seal
         UniformRandomGenerator(prng_seed_type seed)
             : seed_([&seed]() {
                   // Create a new seed allocation
-                  DynArray<std::uint64_t> new_seed(seed.size(), MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true));
+                  DynArray<std::uint64_t> new_seed(
+                      seed.size(), MemoryManager::GetPool(mm_prof_opt::mm_force_new, true));
 
                   // Assign the given seed and return
                   std::copy(seed.cbegin(), seed.cend(), new_seed.begin());
                   return new_seed;
               }()),
-              buffer_(buffer_size_, MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true)),
+              buffer_(buffer_size_, MemoryManager::GetPool(mm_prof_opt::mm_force_new, true)),
               buffer_begin_(buffer_.begin()), buffer_end_(buffer_.end()), buffer_head_(buffer_.end())
         {}
 

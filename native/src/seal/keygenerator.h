@@ -353,7 +353,7 @@ namespace seal
         GaloisKeys create_galois_keys(const std::vector<std::uint32_t> &galois_elts, bool save_seed);
 
         // We use a fresh memory pool with `clear_on_destruction' enabled.
-        MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
+        MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::mm_force_new, true);
 
         SEALContext context_;
 

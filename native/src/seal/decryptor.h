@@ -120,7 +120,7 @@ namespace seal
         void dot_product_ct_sk_array(const Ciphertext &encrypted, util::RNSIter destination, MemoryPoolHandle pool);
 
         // We use a fresh memory pool with `clear_on_destruction' enabled.
-        MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
+        MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::mm_force_new, true);
 
         SEALContext context_;
 

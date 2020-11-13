@@ -169,7 +169,7 @@ namespace seal
             }
 #endif
             // We use a fresh memory pool with `clear_on_destruction' enabled
-            MemoryPoolHandle pool = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
+            MemoryPoolHandle pool = MemoryManager::GetPool(mm_prof_opt::mm_force_new, true);
 
             auto &context_data = *context.get_context_data(parms_id);
             auto &parms = context_data.parms();
@@ -242,7 +242,7 @@ namespace seal
             }
 #endif
             // We use a fresh memory pool with `clear_on_destruction' enabled.
-            MemoryPoolHandle pool = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, true);
+            MemoryPoolHandle pool = MemoryManager::GetPool(mm_prof_opt::mm_force_new, true);
 
             auto &context_data = *context.get_context_data(parms_id);
             auto &parms = context_data.parms();

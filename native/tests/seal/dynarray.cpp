@@ -225,8 +225,8 @@ namespace sealtest
 
     TEST(DynArrayTest, Assign)
     {
-        DynArray<char> arr(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW));
-        DynArray<char> arr2(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW));
+        DynArray<char> arr(MemoryManager::GetPool(mm_prof_opt::mm_force_new));
+        DynArray<char> arr2(MemoryManager::GetPool(mm_prof_opt::mm_force_new));
         ASSERT_NE(&static_cast<util::MemoryPool &>(arr.pool()), &static_cast<util::MemoryPool &>(arr2.pool()));
 
         arr = arr2;

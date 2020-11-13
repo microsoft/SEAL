@@ -248,10 +248,10 @@ namespace seal
     */
     enum mm_prof_opt : mm_prof_opt_t
     {
-        DEFAULT = 0x0,
-        FORCE_GLOBAL = 0x1,
-        FORCE_NEW = 0x2,
-        FORCE_THREAD_LOCAL = 0x4
+        mm_default = 0x0,
+        mm_force_global = 0x1,
+        mm_force_new = 0x2,
+        mm_force_thread_local = 0x4
     };
 
     /**
@@ -471,12 +471,12 @@ namespace seal
         profile and prof_opt. The following values for prof_opt have an effect
         independent of the current profile:
 
-            mm_prof_opt::FORCE_NEW: return MemoryPoolHandle::New()
-            mm_prof_opt::FORCE_GLOBAL: return MemoryPoolHandle::Global()
-            mm_prof_opt::FORCE_THREAD_LOCAL: return MemoryPoolHandle::ThreadLocal()
+            mm_prof_opt::force_new: return MemoryPoolHandle::New()
+            mm_prof_opt::force_global: return MemoryPoolHandle::Global()
+            mm_prof_opt::force_thread_local: return MemoryPoolHandle::ThreadLocal()
 
         Other values for prof_opt are forwarded to the current profile and, depending
-        on the profile, may or may not have an effect. The value mm_prof_opt::DEFAULT
+        on the profile, may or may not have an effect. The value mm_prof_opt::default
         will always invoke a default behavior for the current profile.
 
         @param[in] prof_opt A mm_prof_opt_t parameter used to provide additional
@@ -487,13 +487,13 @@ namespace seal
         {
             switch (prof_opt)
             {
-            case mm_prof_opt::FORCE_GLOBAL:
+            case mm_prof_opt::mm_force_global:
                 return MemoryPoolHandle::Global();
 
-            case mm_prof_opt::FORCE_NEW:
+            case mm_prof_opt::mm_force_new:
                 return MemoryPoolHandle::New(std::forward<Args>(args)...);
 #ifndef _M_CEE
-            case mm_prof_opt::FORCE_THREAD_LOCAL:
+            case mm_prof_opt::mm_force_thread_local:
                 return MemoryPoolHandle::ThreadLocal();
 #endif
             default:
@@ -513,7 +513,7 @@ namespace seal
 
         SEAL_NODISCARD static inline MemoryPoolHandle GetPool()
         {
-            return GetPool(mm_prof_opt::DEFAULT);
+            return GetPool(mm_prof_opt::mm_default);
         }
 
     private:
