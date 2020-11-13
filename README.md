@@ -9,7 +9,10 @@ Users of previous versions of the library should look at the [list of changes](C
 
 ### Correct Use of Microsoft SEAL
 
-Decryptions of Microsoft SEAL ciphertexts should be treated as private information only available to the secret key owner. Sharing information directly or indirectly about a decryption should be thought of as equivalent to sharing information about the secret key itself. If it is absolutely necessary to share information about the decryption of a ciphertext, the number of bits shared should be kept to a minimum, and no more decryptions under the same secret key should be performed. Commercial applications of Microsoft SEAL, or any homomorphic encryption library, should be carefully reviewed by cryptography experts who are familiar with these matters.
+Homomorphic encryption schemes have various and often unexpected security models that may be surprising even to cryptography experts.
+In particular, decryptions of Microsoft SEAL ciphertexts should be treated as private information only available to the secret key owner, and sharing information directly or indirectly about a decryption should be thought of as equivalent to sharing information about the secret key itself.
+If it is absolutely necessary to share information about the decryption of a ciphertext, the number of bits shared should be kept to a minimum, and no more decryptions under the same secret key should be performed.
+Commercial applications of Microsoft SEAL, or any homomorphic encryption library, should be carefully reviewed by experts who are familiar with these matters.
 
 ## Contents
 
@@ -258,7 +261,7 @@ In macOS you will need CMake with command line tools. For this, you can either
 Microsoft SEAL can be compiled for Android and iOS.
 Under the `android` directory of the source tree you will find an [Android Studio](https://developer.android.com/studio) project that you can use to compile the library for Android.
 
-To build the library for iOS, please take a look at the [pipeline file](pipelines/ios.yml) to see how to configure and build the native library. 
+To build the library for iOS, please take a look at the [pipeline file](pipelines/ios.yml) to see how to configure and build the native library.
 
 The native libraries generated through these methods are meant to be called only through the .NET library described in the following sections.
 Specifically, it does not contain any wrappers that can be used from the Java language (for Android) or Objective C (for iOS).

@@ -5,7 +5,7 @@
 #include "seal/memorymanager.h"
 #include <sstream>
 #ifdef SEAL_USE_MSGSL
-#include <gsl/span>
+#include "gsl/span"
 #endif
 #include "gtest/gtest.h"
 
