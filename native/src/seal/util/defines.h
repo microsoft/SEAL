@@ -118,7 +118,6 @@ static_assert(sizeof(unsigned long long) == 8, "Require sizeof(unsigned long lon
 namespace seal
 {
     using seal_byte = std::byte;
-    using SEAL_BYTE = seal_byte;
 } // namespace seal
 #else
 namespace seal
@@ -126,8 +125,6 @@ namespace seal
     enum class seal_byte : unsigned char
     {
     };
-
-    using SEAL_BYTE = seal_byte;
 } // namespace seal
 #endif
 

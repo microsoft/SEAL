@@ -212,8 +212,8 @@ Writing Microsoft SEAL code without studying the examples in depth will inevitab
 
 On all platforms Microsoft SEAL is built with CMake.
 We recommend using out-of-source build although in-source build works.
-Below we give instructions for how to configure, build, and install Microsoft SEAL either system-wide (global install), or for a single user (local install).
-A system-wide install requires elevated (root) privileges.
+Below we give instructions for how to configure, build, and install Microsoft SEAL either globally (system-wide), or locally (for a single user).
+A global install requires elevated (root or administrator) privileges.
 
 #### Requirements
 
@@ -237,7 +237,7 @@ cmake -S . -B build
 cmake --build build
 ```
 
-After the build completes, the output binaries can thenbe found in `build/lib/` and `build/bin/` directories.
+After the build completes, the output binaries can be found in `build/lib/` and `build/bin/` directories.
 
 Various configuration options can be specified and passed to the CMake build system.
 These are decribed below in sections [Basic CMake Options](#basic-cmake-options) and [Advanced CMake Options](#advanced-cmake-options).
