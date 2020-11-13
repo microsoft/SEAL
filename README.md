@@ -166,11 +166,11 @@ If both ZLIB and Zstandard support are enabled, Zstandard is used by default due
 In most common applications of Microsoft SEAL the size of a `SecretKey` would not be deliberately revealed to untrusted parties.
 If this is a concern, one can always save the `SecretKey` in an uncompressed form.
 
-### Installing with VCPKG (Windows, Unix-like)
+<!-- ### Installing with VCPKG (Windows, Unix-like) -->
+<!-- To install Microsoft SEAL with all dependencies enabled, run `./vcpkg install seal` or `./vcpkg install seal:x64-windows-static` on Windows. -->
+<!-- To install Microsoft SEAL with partial dependencies enabled, for example, only `ms-gsl`, run `./vcpkg install seal[core,ms-gsl]` or `./vcpkg install seal[core,ms-gsl]:x64-windows-static` on Windows. -->
 
-For Visual Studio and Visual Studio Code, see ...
-
-### Installing with Homebrew (macOS)
+<!-- ### Installing with Homebrew (macOS) -->
 
 ### Installing NuGet Package (Windows, Linux, macOS, Android, iOS)
 
@@ -192,7 +192,12 @@ A system-wide install requires elevated (root) privileges.
 
 #### Requirements
 
-Visual Studio 2019 is required to build Microsoft SEAL.
+| System | Toolchain |
+|---|---|
+| Windows | Visual Studio 2019 |
+| Linux | Clang++ (>= 5.0) or GNU G++ (>= 6.0), CMake (>= 3.12) |
+| macOS/iOS | Xcode toolchain (>= 9.3), CMake (>= 3.12) |
+| Android | Android Studio |
 
 #### Building Microsoft SEAL
 
@@ -200,7 +205,7 @@ We assume that Microsoft SEAL has been cloned into a directory called `SEAL` and
 
 You can build Microsoft SEAL library (out-of-source) for your machine by executing the following commands:
 
-```shell
+```bash
 cmake -S . -B build
 cmake --build build
 ```
@@ -212,7 +217,7 @@ These are decribed below in sections [Basic CMake Options](#basic-cmake-options)
 
 If you have root access to the system you can install Microsoft SEAL system-wide as follows:
 
-```shell
+```bash
 cmake -S . -B build
 cmake --build build
 sudo cmake --install build
@@ -220,7 +225,7 @@ sudo cmake --install build
 
 To instead install Microsoft SEAL locally, e.g., to `~/mylibs/`, do the following:
 
-```shell
+```bash
 cmake -S . -B build -DCMAKE_INSTALL_PREFIX=~/mylibs
 cmake --build build
 sudo cmake --install build
@@ -259,12 +264,31 @@ In macOS you will need CMake with command line tools. For this, you can either
 #### Android and iOS
 
 Microsoft SEAL can be compiled for Android and iOS.
-Under the `android` directory of the source tree you will find an [Android Studio](https://developer.android.com/studio) project that you can use to compile the library for Android.
+Under the [android](android) directory of the source tree you will find an [Android Studio](https://developer.android.com/studio) project that you can use to compile the library for Android.
 
-To build the library for iOS, please take a look at the [pipeline file](pipelines/ios.yml) to see how to configure and build the native library.
+To build the library for iOS, use the following scripts:
+
+```bash
+# Configure CMake
+cmake -S . -B build -GXcode -DSEAL_BUILD_SEAL_C=ON -DSEAL_BUILD_STATIC_SEAL_C=ON -DCMAKE_SYSTEM_NAME=iOS "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64" -C cmake/memset_s.iOS.cmake
+
+# Build libseal*.a for x86_64
+xcodebuild -project build/SEAL.xcodeproj -sdk iphonesimulator -arch x86_64 -configuration Release clean build
+mkdir -p build/lib/x86_64
+cp build/lib/Release/libseal*.a build/lib/x86_64
+
+# Build libseal*.a for arm64
+xcodebuild -project SEAL.xcodeproj -sdk iphoneos -arch arm64 -configuration Release clean build
+mkdir -p build/lib/arm64
+cp build/lib/Release/libseal*.a build/lib/arm64
+
+# Combine libseal-*.a into libseal.a and libsealc-*.a into libsealc.a
+lipo -create -output build/lib/libseal.a build/lib/x86_64/libseal-*.a arm64/libseal-*.a
+lipo -create -output build/lib/libsealc.a build/lib/x86_64/libsealc-*.a build/lib/arm64/libsealc-*.a
+```
 
 The native libraries generated through these methods are meant to be called only through the .NET library described in the following sections.
-Specifically, it does not contain any wrappers that can be used from the Java language (for Android) or Objective C (for iOS).
+Specifically, they do not contain any wrappers that can be used from Java (for Android) or Objective C (for iOS).
 
 #### Basic CMake Options
 
@@ -286,7 +310,7 @@ The following options can be used with CMake to configure the build. The default
 
 As usual, these options can be passed to CMake with the `-D` flag.
 For example, one could run
-```shell
+```bash
 cmake -S . -B build -DSEAL_BUILD_EXAMPLES=ON
 ```
 to configure a release build of a static Microsoft SEAL library and also build the examples.
@@ -307,7 +331,7 @@ The following options can be used with CMake to further configure the build. Mos
 It is very easy to link your own applications and libraries with Microsoft SEAL if you use CMake.
 Simply add the following to your `CMakeLists.txt`:
 
-```shell
+```bash
 find_package(SEAL 3.6 REQUIRED)
 target_link_libraries(<your target> SEAL::seal)
 ```
@@ -315,7 +339,7 @@ target_link_libraries(<your target> SEAL::seal)
 If Microsoft SEAL was installed globally, the above `find_package` command will likely find the library automatically.
 To link with a locally installed Microsoft SEAL, e.g., installed in `~/mylibs` as described above, you may need to tell CMake where to look for Microsoft SEAL when you configure your application by running:
 
-```shell
+```bash
 cd <directory containing your CMakeLists.txt>
 cmake . -DCMAKE_PREFIX_PATH=~/mylibs
 ```
@@ -382,7 +406,7 @@ The SEALNetExamples and SEALNetTest projects take care of copying the native sha
 Microsoft SEAL by default does not build SEAL_C.
 You can enable it in CMake configuration options as follows:
 
-```shell
+```bash
 cmake -S . -B build -DSEAL_BUILD_SEAL_C=ON
 make -C build
 ```
@@ -393,7 +417,7 @@ If you have root access to the system, you have the option to install the native
 Then your application will always be able to find and load it.
 Assuming Microsoft SEAL is build and installed globally, you can install the shared native library globally as follows:
 
-```shell
+```bash
 sudo make -C build install
 ```
 
@@ -401,7 +425,7 @@ sudo make -C build install
 
 To build the .NET Standard library, do the following:
 
-```shell
+```bash
 dotnet build dotnet/src --configuration <Debug|Release>
 ```
 
@@ -413,7 +437,7 @@ The optional `dotnet` parameter `--configuration <Debug|Release>` can be used to
 
 To build and run the .NET examples, do:
 
-```shell
+```bash
 dotnet run -p dotnet/examples
 ```
 
@@ -424,7 +448,7 @@ You can use the `dotnet` parameter `--configuration <Debug|Release>` to run eith
 
 To build and run the .NET unit tests, do:
 
-```shell
+```bash
 dotnet test dotnet/tests
 ```
 
@@ -484,7 +508,7 @@ To cite Microsoft SEAL in academic papers, please use the following BibTeX entri
     @misc{sealcrypto,
         title = {{M}icrosoft {SEAL} (release 3.6)},
         howpublished = {\url{https://github.com/Microsoft/SEAL}},
-        month = sep,
+        month = nov,
         year = 2020,
         note = {Microsoft Research, Redmond, WA.},
         key = {SEAL}
