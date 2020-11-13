@@ -9,12 +9,8 @@ project(SEALExamples VERSION 3.6.0 LANGUAGES CXX)
 if(NOT DEFINED SEAL_BUILD_EXAMPLES)
     set(SEAL_BUILD_EXAMPLES ON)
 
-    set(SEAL_DIR "${CMAKE_CURRENT_LIST_DIR}/../../build" CACHE STRING "Directory to SEAL build tree")
     # Import Microsoft SEAL
-    find_package(SEAL 3.6.0 EXACT REQUIRED
-        # Providing a path so this can be built without installing Microsoft SEAL
-        PATHS ${SEAL_DIR}/cmake
-    )
+    find_package(SEAL 3.6.0 EXACT REQUIRED)
 
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 endif()

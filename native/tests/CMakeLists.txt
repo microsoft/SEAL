@@ -9,12 +9,8 @@ project(SEALTest VERSION 3.6.0 LANGUAGES CXX C)
 if(NOT DEFINED SEAL_BUILD_TESTS)
     set(SEAL_BUILD_TESTS ON)
 
-    set(SEAL_DIR "${CMAKE_CURRENT_LIST_DIR}/../../build" CACHE STRING "Directory to SEAL build tree")
     # Import Microsoft SEAL
-    find_package(SEAL 3.6.0 EXACT REQUIRED
-        # Providing a path so this can be built without installing Microsoft SEAL
-        PATHS ${SEAL_DIR}/cmake
-    )
+    find_package(SEAL 3.6.0 EXACT REQUIRED)
 
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUTLIB_PATH})
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
@@ -27,7 +23,7 @@ if(NOT DEFINED SEAL_BUILD_DEPS)
     option(SEAL_BUILD_DEPS ${SEAL_BUILD_DEPS_OPTION_STR} ON)
 endif()
 
-# if SEAL_BUILD_TESTS is ON, use googletest
+# if SEAL_BUILD_TESTS is ON, use GoogleTest
 if(SEAL_BUILD_TESTS)
     if (SEAL_BUILD_DEPS)
         list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../../cmake)
@@ -39,13 +35,13 @@ if(SEAL_BUILD_TESTS)
         mark_as_advanced(FETCHCONTENT_FULLY_DISCONNECTED)
         mark_as_advanced(FETCHCONTENT_UPDATES_DISCONNECTED)
         mark_as_advanced(FETCHCONTENT_QUIET)
-        message(STATUS "Download GTest ...")
+        message(STATUS "Download GoogleTest ...")
         include(ExternalGTest)
         add_library(GTest::gtest ALIAS gtest)
     else()
         find_package(GTest 1.10.0 CONFIG)
         if(NOT GTest_FOUND)
-            message(FATAL_ERROR "Failed to find GTest")
+            message(FATAL_ERROR "Failed to find GoogleTest")
         endif()
     endif()
 
