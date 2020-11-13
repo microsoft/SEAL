@@ -34,32 +34,26 @@ Commercial applications of Microsoft SEAL, or any homomorphic encryption library
       - [Requirements](#requirements)
       - [Building Microsoft SEAL](#building-microsoft-seal)
       - [Installing Microsoft SEAL](#installing-microsoft-seal)
-      - [Building on Windows](#building-on-windows)
-      - [Android and iOS](#android-and-ios)
+      - [Building and Installing on Windows](#building-and-installing-on-windows)
+      - [Building for Android and iOS](#building-for-android-and-ios)
       - [Basic CMake Options](#basic-cmake-options)
       - [Advanced CMake Options](#advanced-cmake-options)
       - [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake)
       - [Examples and Tests](#examples-and-tests)
     - [Building .NET Components](#building-net-components)
-      - [Windows](#windows)
+      - [Windows, Linux, and macOS](#windows-linux-and-macos)
+      - [Android and iOS](#android-and-ios)
       - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application)
       - [Building Your Own NuGet Package](#building-your-own-nuget-package)
-    - [Linux and macOS](#linux-and-macos)
-      - [Native Library](#native-library)
-      - [.NET Library](#net-library)
-      - [.NET Examples](#net-examples)
-      - [.NET Unit Tests](#net-unit-tests)
-      - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application-1)
-    - [Android and iOS](#android-and-ios-1)
   - [Contributing](#contributing)
   - [Citing Microsoft SEAL](#citing-microsoft-seal)
-    - [Version 3.6](#version-36)
+<!--    - [Version 3.6](#version-36)
     - [Version 3.5](#version-35)
     - [Version 3.4](#version-34)
     - [Version 3.3](#version-33)
     - [Version 3.2](#version-32)
     - [Version 3.1](#version-31)
-    - [Version 3.0](#version-30)
+    - [Version 3.0](#version-30) -->
 
 ## Introduction
 
@@ -232,7 +226,7 @@ We assume that Microsoft SEAL has been cloned into a directory called `SEAL` and
 
 You can build Microsoft SEAL library (out-of-source) for your machine by executing the following commands:
 
-```bash
+```PowerShell
 cmake -S . -B build
 cmake --build build
 ```
@@ -246,7 +240,7 @@ These are decribed below in sections [Basic CMake Options](#basic-cmake-options)
 
 If you have root access to the system you can install Microsoft SEAL globally as follows:
 
-```bash
+```PowerShell
 cmake -S . -B build
 cmake --build build
 sudo cmake --install build
@@ -254,7 +248,7 @@ sudo cmake --install build
 
 To instead install Microsoft SEAL locally, e.g., to `~/mylibs/`, do the following:
 
-```bash
+```PowerShell
 cmake -S . -B build -DCMAKE_INSTALL_PREFIX=~/mylibs
 cmake --build build
 sudo cmake --install build
@@ -299,7 +293,7 @@ Under the [android/](android/) directory of the source tree you will find an [An
 
 To build the library for iOS, use the following scripts:
 
-```bash
+```PowerShell
 # Configure CMake
 cmake -S . -B build -GXcode -DSEAL_BUILD_SEAL_C=ON -DSEAL_BUILD_STATIC_SEAL_C=ON -DCMAKE_SYSTEM_NAME=iOS "-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64" -C cmake/memset_s.iOS.cmake
 
@@ -341,7 +335,7 @@ The following options can be used with CMake to configure the build. The default
 
 As usual, these options can be passed to CMake with the `-D` flag.
 For example, one could run
-```bash
+```PowerShell
 cmake -S . -B build -DSEAL_BUILD_EXAMPLES=ON
 ```
 to configure a release build of a static Microsoft SEAL library and also build the examples.
@@ -362,7 +356,7 @@ The following options can be used with CMake to further configure the build. Mos
 It is very easy to link your own applications and libraries with Microsoft SEAL if you use CMake.
 Simply add the following to your `CMakeLists.txt`:
 
-```bash
+```PowerShell
 find_package(SEAL 3.6 REQUIRED)
 target_link_libraries(<your target> SEAL::seal)
 ```
@@ -370,7 +364,7 @@ target_link_libraries(<your target> SEAL::seal)
 If Microsoft SEAL was installed globally, the above `find_package` command will likely find the library automatically.
 To link with a Microsoft SEAL installed locally, e.g., installed in `~/mylibs` as described above, you may need to tell CMake where to look for Microsoft SEAL when you configure your application by running:
 
-```bash
+```PowerShell
 cd <directory containing your CMakeLists.txt>
 cmake . -DCMAKE_PREFIX_PATH=~/mylibs
 ```
@@ -383,7 +377,7 @@ When building Microsoft SEAL, examples and tests can be built by setting `SEAL_B
 Alternatively, both [examples](native/examples/CMakeLists.txt) and [tests](native/tests/CMakeLists.txt) can be built as standalone CMake projects linked with Microsoft SEAL (installed in `~/mylibs`), by following the commands below.
 Omit setting `SEAL_ROOT` if the library is installed globally.
 
-```bash
+```PowerShell
 cd native/<examples|tests>
 cmake -S . -B build -DSEAL_ROOT=~/mylibs
 cmake --build build
@@ -403,7 +397,7 @@ Building the SEAL_C library with CMake will generates project files for the .NET
 The SEAL_C library must be discoverable when running a .NET application, e.g., be present in the same directory as your executable, which is taken care of by the .NET examples and tests project files.
 Run the following scripts to build each project:
 
-```bash
+```PowerShell
 dotnet build dotnet/src --configuration <Debug|Release> # Build .NET wrapper library
 dotnet test dotnet/tests # Build and run .NET unit tests
 dotnet run -p dotnet/examples # Build and run .NET examples
