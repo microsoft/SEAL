@@ -270,20 +270,34 @@ sudo cmake --install build
 
 #### Building on Windows
 
-On Windows the same scripts above work in a developer command prompt for Visual Studio.
-The right x64 or x86 version of command prompt ...
+On Windows the same scripts above work in a developer command prompt for Visual Studio, using either the `Ninja` or `Visual Studio 16 2019` generators.
 
-Ninja/Visual Studio generators.
-Please choose the right platform before building Microsoft SEAL.
-The `SEAL_C` project and the .NET wrapper library `SEALNet` can only be built for `x64`.
-With Ninja generator ...
-With Visual Studio generator, a specific architecture flag `-A x64` or `-A x86` should be provided.
+When using the `Ninja` generator, please use the appropriate command prompt depending on the platform you want to build for. If you want to build for x64, please use the `x64 Native Tools Command Prompt for Visual Studio 2019` command prompt to configure and build the library. If you want to build for x86, please use the `x86 Native Tools Command Prompt for Visual Studio 2019` command prompt to configure and build the library:
 
-Visual Studio / Visual Stuido Code open as CMake project.
+```PowerShell
+cmake -S . -B build -GNinja
+cmake --build build
+```
 
-Replace `sudo` with administrator.
+When using the `Visual Studio 16 2019` generator you can use the `Developer Command Prompt for VS 2019` command prompt to configure and build the library. By default the generated platform will be `x64`. You can specify the desired platform using the architecture flag `-A`:
 
-This results in the static library `seal.lib` to be created in `lib\$(Platform)\$(Configuration)`.
+```PowerShell
+# Generate and build for x64
+cmake -S . -B build -G "Visual Studio 16 2019" -A x64
+cmake --build build
+
+# Generate and build for x86
+cmake -S . -B build -G "Visual Studio 16 2019" -A Win32
+cmake --build build
+```
+
+**Note**: The `SEAL_C` project and the .NET wrapper library `SEALNet` can only be built for the `x64` platform.
+
+Installing the library in Windows works as well. Instead of using the `sudo` command, however, you need to run `cmake --install build` from a command prompt with Administrator permissions. Files will be installed by default to `C:\Program Files (x86)\SEAL`.
+
+Visual Studio 2019 provides support for CMake-based projects. You can select the menu option `File / Open / Folder...` and navigate to the folder where the Microsoft SEAL repository is located. After opening the folder, Visual Studio will detect that this is a CMake-based project and will enable the menu command `Project / CMake settings for SEAL`. This will open the CMake settings editor that provides a user interface where you can create different configurations and set different CMake variables.
+
+This results in the static library `seal.lib` to be created in `build\lib\$(Configuration)`.
 When linking with applications, you need to add `native\src\` (full path) as an include directory for Microsoft SEAL header files.
 
 #### Android and iOS
