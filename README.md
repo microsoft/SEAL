@@ -35,7 +35,6 @@ Commercial applications of Microsoft SEAL, or any homomorphic encryption library
       - [Building Microsoft SEAL](#building-microsoft-seal)
       - [Installing Microsoft SEAL](#installing-microsoft-seal)
       - [Building on Windows](#building-on-windows)
-      - [Linux, macOS, and FreeBSD](#linux-macos-and-freebsd)
       - [Android and iOS](#android-and-ios)
       - [Basic CMake Options](#basic-cmake-options)
       - [Advanced CMake Options](#advanced-cmake-options)
