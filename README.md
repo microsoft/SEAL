@@ -133,7 +133,7 @@ When [building manually](#building-microsoft-seal-manually), one can choose to h
 On the other extreme, the downloadable [NuGet package](https://www.nuget.org/packages/Microsoft.Research.SEALNet) cannot be configured at all, but it is always possible to [build a custom NuGet package](#building-your-own-nuget-package).
 Other package managers offer varying amounts of opportunities for configuring the dependencies and [other build options](#basic-cmake-options).
 
-The optional dependencies and their tested versions (other versions may work as well) are as follows.
+The optional dependencies and their tested versions (other versions may work as well) are as follows:
 
 | Optional dependency                                | Tested version | Use                                              |
 | -------------------------------------------------- | -------------- | ------------------------------------------------ |
@@ -183,8 +183,8 @@ To develop mobile applications using Microsoft SEAL and .NET for Android and iOS
 ### Examples
 
 Using Microsoft SEAL will require the user to invest some time in learning fundamental concepts in homomorphic encryption.
-The code comes with heavily commented examples that are designed to gradually teach such concepts as well as to demonstrate a large fraction of the API.
-The examples are available (and identical) in C++ and C#, and are divided into several source files in `native/examples/` (C++) and `dotnet/examples/` (C#), as follows.
+The code comes with heavily commented examples that are designed to gradually teach such concepts as well as demonstrate a large fraction of the API.
+The examples are available (and identical) in C++ and C#, and are divided into several source files in `native/examples/` (C++) and `dotnet/examples/` (C#), as follows:
 
 | C++                   | C#                   | Description                                                                  |
 | --------------------- | -------------------- | ---------------------------------------------------------------------------- |
@@ -201,7 +201,7 @@ It is recommended to read the comments and the code snippets along with command 
 For easier navigation, command line printout provides the line number in the associated source file where the associated code snippets start.
 To build the examples, see [Examples and Tests](#examples-and-tests) or [Building .NET Components](#building-net-components).
 
-**Note:** It is impossible to know how to use Microsoft SEAL correctly without studying all of the examples.
+**Note:** It is impossible to know how to use Microsoft SEAL correctly without studying examples 1&ndash;6.
 They are designed to provide the reader with the necessary conceptual background on homomorphic encryption.
 Reusing code directly from the examples will not work well, as the examples are often demonstrating individual pieces of functionality, and are not optimized for performance.
 Writing Microsoft SEAL code without studying the examples in depth will inevitably result in code that is vulnerable, malfunctioning, or extremely slow.
@@ -215,16 +215,16 @@ We recommend using out-of-source build although in-source build works.
 Below we give instructions for how to configure, build, and install Microsoft SEAL either system-wide (global install), or for a single user (local install).
 A system-wide install requires elevated (root) privileges.
 
-**Note:** Microsoft SEAL compiled with Clang++ has much better runtime performance than that compiled with GNU G++.
-
 #### Requirements
 
 | System | Toolchain |
 |---|---|
-| Windows | Visual Studio 2019 |
+| Windows | Visual Studio 2019 with C++ CMake Tools for Windows |
 | Linux | Clang++ (>= 5.0) or GNU G++ (>= 6.0), CMake (>= 3.12) |
 | macOS/iOS | Xcode toolchain (>= 9.3), CMake (>= 3.12) |
 | Android | Android Studio |
+
+**Note:** Microsoft SEAL compiled with Clang++ has much better runtime performance than one compiled with GNU G++.
 
 #### Building Microsoft SEAL
 
@@ -237,12 +237,14 @@ cmake -S . -B build
 cmake --build build
 ```
 
+After the build completes, the output binaries can thenbe found in `build/lib/` and `build/bin/` directories.
+
 Various configuration options can be specified and passed to the CMake build system.
 These are decribed below in sections [Basic CMake Options](#basic-cmake-options) and [Advanced CMake Options](#advanced-cmake-options).
 
 #### Installing Microsoft SEAL
 
-If you have root access to the system you can install Microsoft SEAL system-wide as follows:
+If you have root access to the system you can install Microsoft SEAL globally as follows:
 
 ```bash
 cmake -S . -B build
@@ -258,7 +260,7 @@ cmake --build build
 sudo cmake --install build
 ```
 
-#### Building on Windows
+#### Building and Installing on Windows
 
 On Windows the same scripts above work in a developer command prompt for Visual Studio.
 The right x64 or x86 version of command prompt ...
@@ -276,7 +278,7 @@ Replace `sudo` with administrator.
 This results in the static library `seal.lib` to be created in `lib\$(Platform)\$(Configuration)`.
 When linking with applications, you need to add `native\src\` (full path) as an include directory for Microsoft SEAL header files.
 
-#### Android and iOS
+#### Building for Android and iOS
 
 Microsoft SEAL can be compiled for Android and iOS.
 Under the [android/](android/) directory of the source tree you will find an [Android Studio](https://developer.android.com/studio) project that you can use to compile the library for Android.
@@ -352,22 +354,24 @@ target_link_libraries(<your target> SEAL::seal)
 ```
 
 If Microsoft SEAL was installed globally, the above `find_package` command will likely find the library automatically.
-To link with a Microsoft SEAL installed locally or by a package manager, e.g., installed in `~/mylibs` as described above, you may need to tell CMake where to look for Microsoft SEAL when you configure your application by running:
+To link with a Microsoft SEAL installed locally, e.g., installed in `~/mylibs` as described above, you may need to tell CMake where to look for Microsoft SEAL when you configure your application by running:
 
 ```bash
 cd <directory containing your CMakeLists.txt>
 cmake . -DCMAKE_PREFIX_PATH=~/mylibs
 ```
 
+If Microsoft SEAL was installed using a package manager like vcpkg or Homebrew, please refer to their documentation for how to link with the installed library. For example, vcpkg requires you to specify the vcpkg CMake toolchain file when configuring your project.
+
 #### Examples and Tests
 
 When building Microsoft SEAL, examples and tests can be built by setting `SEAL_BUILD_EXAMPLES=ON` and `SEAL_BUILD_TESTS=ON`; see [Basic CMake Options](basic-cmake-options).
-Alternatively, both [examples](native/examples/CMakeLists.txt) and [tests](native/tests/CMakeLists.txt) can be built as standalone CMake projects that are linked with Microsoft SEAL (installed to `~/mylibs`), by following the scripts below.
-Omit `-DCMAKE_PREFIX_PATH` if Microsoft is installed globally.
+Alternatively, both [examples](native/examples/CMakeLists.txt) and [tests](native/tests/CMakeLists.txt) can be built as standalone CMake projects linked with Microsoft SEAL (installed in `~/mylibs`), by following the commands below.
+Omit setting `SEAL_ROOT` if the library is installed globally.
 
 ```bash
 cd native/<examples|tests>
-cmake -S . -B build -DCMAKE_PREFIX_PATH=~/mylibs
+cmake -S . -B build -DSEAL_ROOT=~/mylibs
 cmake --build build
 ```
 
