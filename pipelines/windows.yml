@@ -116,7 +116,7 @@ steps:
     displayName: 'ESRP Add Strong Name'
     inputs:
       ConnectedServiceName: 'ESRP CodeSigning'
-      FolderPath: lib/dotnet/${{ parameters.configuration }}/netstandard2.0
+      FolderPath: bin/dotnet/${{ parameters.configuration }}/netstandard2.0
       Pattern: '*.dll'
       signConfigType: inlineSignParams
       inlineOperation: |
@@ -141,7 +141,7 @@ steps:
     displayName: 'ESRP Add Strong Name to iOS assembly'
     inputs:
       ConnectedServiceName: 'ESRP CodeSigning'
-      FolderPath: lib/dotnet/ios/${{ parameters.configuration }}/netstandard2.0
+      FolderPath: bin/dotnet/ios/${{ parameters.configuration }}/netstandard2.0
       Pattern: '*.dll'
       signConfigType: inlineSignParams
       inlineOperation: |
@@ -167,7 +167,7 @@ steps:
     displayName: 'ESRP CodeSigning .NET Standard 2.0'
     inputs:
       ConnectedServiceName: 'ESRP CodeSigning'
-      FolderPath: lib/dotnet/${{ parameters.configuration }}/netstandard2.0
+      FolderPath: bin/dotnet/${{ parameters.configuration }}/netstandard2.0
       Pattern: '*.dll'
       signConfigType: inlineSignParams
       inlineOperation: |
@@ -198,7 +198,7 @@ steps:
     displayName: 'ESRP CodeSigning .NET Standard 2.0 for iOS assembly'
     inputs:
       ConnectedServiceName: 'ESRP CodeSigning'
-      FolderPath: lib/dotnet/ios/${{ parameters.configuration }}/netstandard2.0
+      FolderPath: bin/dotnet/ios/${{ parameters.configuration }}/netstandard2.0
       Pattern: '*.dll'
       signConfigType: inlineSignParams
       inlineOperation: |

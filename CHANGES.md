@@ -57,6 +57,7 @@ This is used internally to route deserialization logic to correct functions depe
 Renamed files and directories:
 
 - `native/src/seal/intarray.h` to [native/src/seal/dynarray.h](native/src/seal/dynarray.h)
+- `dotnet/src/SEALNet.csproj` to [dotnet/src/SEALNet.csproj.in](dotnet/src/SEALNet.csproj.in)
 - `dotnet/tests/SEALNetTest.csproj` to [dotnet/tests/SEALNetTest.csproj.in](dotnet/tests/SEALNetTest.csproj.in)
 - `dotnet/examples/SEALNetExamples.csproj` to [dotnet/examples/SEALNetExamples.csproj.in](dotnet/examples/SEALNetExamples.csproj.in)
 

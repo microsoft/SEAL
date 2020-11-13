@@ -41,18 +41,14 @@ Commercial applications of Microsoft SEAL, or any homomorphic encryption library
       - [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake)
       - [Examples and Tests](#examples-and-tests)
     - [Building .NET Components](#building-net-components)
-    - [Windows](#windows)
+      - [Windows](#windows)
+      - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application)
+      - [Building Your Own NuGet Package](#building-your-own-nuget-package)
+    - [Linux and macOS](#linux-and-macos)
       - [Native Library](#native-library)
       - [.NET Library](#net-library)
       - [.NET Examples](#net-examples)
       - [.NET Unit Tests](#net-unit-tests)
-      - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application)
-      - [Building Your Own NuGet Package](#building-your-own-nuget-package)
-    - [Linux and macOS](#linux-and-macos)
-      - [Native Library](#native-library-1)
-      - [.NET Library](#net-library-1)
-      - [.NET Examples](#net-examples-1)
-      - [.NET Unit Tests](#net-unit-tests-1)
       - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application-1)
     - [Android and iOS](#android-and-ios-1)
   - [Contributing](#contributing)
@@ -203,7 +199,7 @@ The examples are available (and identical) in C++ and C#, and are divided into s
 
 It is recommended to read the comments and the code snippets along with command line printout from running an example.
 For easier navigation, command line printout provides the line number in the associated source file where the associated code snippets start.
-To build the examples, see [Examples and Tests](#examples-and-tests).
+To build the examples, see [Examples and Tests](#examples-and-tests) or [Building .NET Components](#building-net-components).
 
 **Note:** It is impossible to know how to use Microsoft SEAL correctly without studying all of the examples.
 They are designed to provide the reader with the necessary conceptual background on homomorphic encryption.
@@ -363,15 +359,14 @@ cd <directory containing your CMakeLists.txt>
 cmake . -DCMAKE_PREFIX_PATH=~/mylibs
 ```
 
-See [native/examples/CMakeLists.txt](native/examples/CMakeLists.txt) as a sample CMake project that is linked with Microsoft SEAL.
-
 #### Examples and Tests
 
-When building Microsoft SEAL, examples and tests can be built by enabling [Basic CMake Options](basic-cmake-options): `SEAL_BUILD_EXAMPES` and `SEAL_BUILD_TESTS`.
-Alternatively, both [examples](native/examples/CMakeLists.txt) and [tests](native/tests/CMakeLists.txt) can be built as standalone CMake projects that are linked with Microsoft SEAL installed to `~/mylibs`, by following the scripts below. Omit `-DCMAKE_PREFIX_PATH` if Microsoft is installed globally.
+When building Microsoft SEAL, examples and tests can be built by setting `SEAL_BUILD_EXAMPLES=ON` and `SEAL_BUILD_TESTS=ON`; see [Basic CMake Options](basic-cmake-options).
+Alternatively, both [examples](native/examples/CMakeLists.txt) and [tests](native/tests/CMakeLists.txt) can be built as standalone CMake projects that are linked with Microsoft SEAL (installed to `~/mylibs`), by following the scripts below.
+Omit `-DCMAKE_PREFIX_PATH` if Microsoft is installed globally.
 
 ```bash
-cd native/<examples-or-tests>
+cd native/<examples|tests>
 cmake -S . -B build -DCMAKE_PREFIX_PATH=~/mylibs
 cmake --build build
 ```
@@ -379,35 +374,22 @@ cmake --build build
 ### Building .NET Components
 
 Microsoft SEAL provides a .NET Standard library that wraps the functionality in Microsoft SEAL for use in .NET development.
+[NuGet package](https://www.nuget.org/packages/Microsoft.Research.SEALNet) is recommended unless development of Microsoft SEAL or building a custom NuGet package is intended.
+Prior to building .NET components, the C wrapper library SEAL_C must be built following [Building C++ Components](#building-c-components).
+The SEAL_C library is meant to be used only by the .NET library, not by end users, and needs to be present in the same directory as your executable when running a .NET application.
 
-### Windows
+#### Windows, Linux, and macOS
 
-The Microsoft Visual Studio 2019 solution file `SEAL.sln` contains the projects necessary to build the .NET assembly, a backing native shared library, .NET examples, and unit tests.
+For compiling .NET code you will need to install a [.NET Core SDK (>= 3.1)](https://dotnet.microsoft.com/download).
 
-#### Native Library
+#### Windows
 
-Microsoft SEAL for .NET requires a native library that is invoked by the managed .NET library.
-Build the SEAL_C project `native\src\SEAL_C_.vcxproj` from `SEAL.sln`.
-Building SEAL_C results in the dynamic library `sealc.dll` to be created in `lib\$(Platform)\$(Configuration)`.
-This library is meant to be used only by the .NET library, not by end users, and needs to be present in the same directory as your executable when running a .NET application.
+The Microsoft Visual Studio 2019 solution file `dotnet/SEALNet.sln` contains the projects necessary to build a backing native shared library, .NET examples, and unit tests.
+The projects are generated by CMake when SEAL_C is built.
 
-#### .NET Library
-
-Once you have built the shared native library (see above), build the SEALNet project `dotnet\src\SEALNet.csproj` from `SEAL.sln`.
-Building SEALNet results in the assembly `SEALNet.dll` to be created in `lib\dotnet\$(Configuration)\netstandard2.0`.
-This is the assembly you can reference in your application.
-
-#### .NET Examples
-
-Build the SEALNetExamples project `dotnet\examples\SEALNetExamples.csproj` from `SEAL.sln`.
-This results in the assembly `SEALNetExamples.dll` to be created in `bin\dotnet\$(Configuration)\netcoreapp3.1`.
-The project takes care of copying the native SEAL_C library to the output directory.
-
-#### .NET Unit Tests
-
-Build the SEALNetTest project `dotnet\tests\SEALNetTest.csproj` from `SEAL.sln`.
-This results in the assembly `SEALNetTest.dll` to be created in `bin\dotnet\$(Configuration)\netcoreapp3.1`.
-The project takes care of copying the native SEAL_C library to the output directory.
+- .NET Library: build the SEALNet project `dotnet\src\SEALNet.csproj` to have the assembly `SEALNet.dll` created in `lib\dotnet\$(Configuration)\netstandard2.0` and usable in your application.
+- .NET Examples: build the SEALNetExamples project `dotnet\examples\SEALNetExamples.csproj` to have the assembly `SEALNetExamples.dll` created in `bin\dotnet\$(Configuration)\netcoreapp3.1`, which copies the native SEAL_C library to the output directory.
+- .NET Unit Tests: build the SEALNetTest project `dotnet\tests\SEALNetTest.csproj` to have the assembly `SEALNetTest.dll` created in `bin\dotnet\$(Configuration)\netcoreapp3.1`, which copies the native SEAL_C library to the output directory.
 
 #### Using Microsoft SEAL for .NET in Your Own Application
 
