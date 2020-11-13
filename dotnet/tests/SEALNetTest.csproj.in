@@ -11,7 +11,7 @@
 
   <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
     <PlatformTarget>x64</PlatformTarget>
-    <OutputPath>$(ProjectDir)../../bin/dotnet/$(Configuration)</OutputPath>
+    <OutputPath>@CMAKE_RUNTIME_OUTPUT_DIRECTORY@/dotnet/$(Configuration)</OutputPath>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,8 +26,8 @@
 
   <ItemGroup>
     <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Windows))" Include="@CMAKE_RUNTIME_OUTPUT_DIRECTORY@\$(Configuration)\sealc.dll" />
-    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Linux))" Include="@CMAKE_LIBRARY_OUTPUT_DIRECTORY@\libsealc.so.*" />
-    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(OSX))" Include="@CMAKE_LIBRARY_OUTPUT_DIRECTORY@\libsealc*.dylib" />
+    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Linux))" Include="@CMAKE_LIBRARY_OUTPUT_DIRECTORY@/libsealc.so.*" />
+    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(OSX))" Include="@CMAKE_LIBRARY_OUTPUT_DIRECTORY@/libsealc*.dylib" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

@@ -542,7 +542,11 @@ endif()
 # Configure SEALNet and NuGet package #
 #######################################
 
-# Create SEALNetExamples.csproj and SEALNetTest.csproj for building dotnet with Visual Studio
+# Create SEALNet.csproj, SEALNetExamples.csproj and SEALNetTest.csproj for building dotnet with Visual Studio
+configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/dotnet/src/SEALNet.csproj.in
+    ${CMAKE_CURRENT_LIST_DIR}/dotnet/src/SEALNet.csproj
+    @ONLY)
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/tests/SEALNetTest.csproj.in
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/tests/SEALNetTest.csproj

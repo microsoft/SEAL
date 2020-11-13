@@ -12,6 +12,8 @@ native/src/seal/util/config.h
 native/src/gsl/
 !dotnet/nuget/*.nuspec.in
 dotnet/nuget/*.nuspec
+!dotnet/src/SEALNet.csproj.in
+dotnet/src/SEALNet.csproj
 !dotnet/tests/SEALNetTest.csproj.in
 dotnet/tests/SEALNetTest.csproj
 !dotnet/examples/SEALNetExamples.csproj.in

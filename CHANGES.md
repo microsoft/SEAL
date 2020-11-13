@@ -5,28 +5,20 @@
 ### New Features
 
 - Added support for [Zstandard](https://github.com/facebook/zstd) compression as a much more efficient alternative to ZLIB.
-The performance improvement should be expected to be around 20-30x.
-- Added support for Shake256 (FIPS-202) XOF for pseudo-random number generation in addition to the default Blake2xb (faster).
-- Microsoft SEAL 3.6 is backwards compatible with 3.4 and 3.5 when deserializing, but it does not support serializing in the old formats.
+The performance improvement is around 20&ndash;30x.
 - Added support for iOS in the [NuGet package of Microsoft SEAL](https://www.nuget.org/packages/Microsoft.Research.SEALNet).
 - The build system is unified for all platforms.
 There is no longer a Visual Studio solution file (`seal.sln`) for Windows.
 There is a separate solution file for the dotnet library ([dotnet/SEALNet.sln](dotnet/SEALNet.sln)).
+- Added support for Shake256 (FIPS-202) XOF for pseudo-random number generation in addition to the default Blake2xb (faster).
+- Microsoft SEAL 3.6 is backwards compatible with 3.4 and 3.5 when deserializing, but it does not support serializing in the old formats.
 
-### New Build Configurations
+### Major API Changes
 
-- `SEAL_BUILD_DEPS` controls whether dependencies are downloaded and built into Microsoft SEAL or searched from the system.
-- Only a shared library will be built when `BUILD_SHARED_LIBS` is set to `ON`. Previously a static library was always built.
-- Error is sampled from a centered binomial distribution by default unless `SEAL_USE_GAUSSIAN_NOISE` is set to `ON`.
-- Blake2xb is used as XOF for PRNG by default unless `SEAL_DEFAULT_PRNG` is set to `"Shake256"`.
-
-### API Changes
-
-- Added `std::hash` implementation for `EncryptionParameters` (in addition to `parms_id_type`) so it is possible to create e.g. `std::unordered_map` of `EncryptionParameters`.
+- All C++ `enum` labels are consistently in lowercase. Most importantly, `scheme_type::BFV` and `scheme_type::CKKS` are changed to `scheme_type::bfv` and `scheme_type::ckks`.
+- Changed `seal::SEAL_BYTE` to `seal::seal_byte`; all uppercase names are used only for preprocessor macros.
 - Removed `BatchEncoder` API for encoding and decoding `Plaintext` objects inplace.
 This is because a `Plaintext` object with slot-data written into the coefficients is (confusingly) not valid to be used for encryption.
-- Added API to `UniformRandomGeneratorFactory` to find whether the factory uses a default seed (absolutely only for debugging purposes!), and to retrieve that seed.
-- Added public API for modular reduction to the `Modulus` class.
 - Removed `IntegerEncoder` and `BigUInt` classes.
 `IntegerEncoder` results in inefficient homomorphic evaluation and lacks sane correctness properties, so it was basically impossible to use in real applications.
 The `BigUInt` class was only used by the `IntegerEncoder`.
@@ -35,18 +27,32 @@ The `BigUInt` class was only used by the `IntegerEncoder`.
 - Removed the `KeyGenerator::relin_keys_local` and `KeyGenerator::galois_keys_local` functions.
 These were poorly named and have been replaced with overloads of `KeyGenerator::create_relin_keys` and `KeyGenerator::create_galois_keys` that take an out-parameter of type `RelinKeys` or `GaloisKeys`.
 - Renamed `IntArray` to `DynArray` (dynamic array) and removed unnecessary limitations on the object type template parameter.
+- Added public API for modular reduction to the `Modulus` class.
+- Added API for creating `DynArray` and `Plaintext` objects from a `gsl::span<std::uint64_t>` (C++) or `IEnumerable<ulong>` (C#).
+
+### Minor API Changes
+
+- Added `std::hash` implementation for `EncryptionParameters` (in addition to `parms_id_type`) so it is possible to create e.g. `std::unordered_map` of `EncryptionParameters`.
+- Added API to `UniformRandomGeneratorFactory` to find whether the factory uses a default seed and to retrieve that seed.
 - Added const overloads for `DynArray::begin` and `DynArray::end`.
 - Added a `Shake256PRNG` and `Shake256PRNGFactory` classes.
 Renamed `BlakePRNG` class to `Blake2xbPRNG`, and `BlakePRNGFactory` class to `Blake2xbPRNGFactory`.
 - Added a serializable `UniformRandomGeneratorInfo` class that represents the type of an extendable output function and a seed value.
-- Added `native/src/seal/version.h` defining a struct `SEALVersion`.
+- Added [native/src/seal/version.h](native/src/seal/version.h) defining a struct `SEALVersion`.
 This is used internally to route deserialization logic to correct functions depending on loaded `SEALHeader` version.
-- Added API for creating `DynArray` and `Plaintext` objects from a `gsl::span<std::uint64_t>` (C++) or `IEnumerable<ulong>` (C#).
+
+### New Build Options
+
+- `SEAL_BUILD_DEPS` controls whether dependencies are downloaded and built into Microsoft SEAL or searched from the system.
+- Only a shared library will be built when `BUILD_SHARED_LIBS` is set to `ON`. Previously a static library was always built.
+- Encryption error is sampled from a Centered Binomial Distribution (CBD) by default unless `SEAL_USE_GAUSSIAN_NOISE` is set to `ON`.
+Sampling from a CBD is constant-time and faster than sampling from a Gaussian distribution, which is why it is used by many of the NIST PQC finalists.
+- `SEAL_DEFAULT_PRNG` controls which XOF is used for pseudo-random number generation.
+The available values are `Blake2xb` (default) and `Shake256`.
 
 ### Other
 
 - Moved all files related to pkg-config to `pkgconfig/` subdirectory.
-- Added a new typedef `seal::seal_byte` for the unnecessarily capitalized `seal::SEAL_BYTE`.
 - Added `.pre-commit-config.yaml` (check out [pre-commit](https://pre-commit.com) if you are not familiar with this tool).
 - Added `seal::util::DWTHandler` and `seal::util::Arithmetic` class templates that unify the implementation of FFT (used by `CKKSEncoder`) and NTT (used by polynomial arithmetic).
 - The performance of encoding and decoding in CKKS are improved.
@@ -54,13 +60,14 @@ This is used internally to route deserialization logic to correct functions depe
 
 ### File Changes
 
-Renamed files and directories:
+#### Renamed files and directories
 
 - `native/src/seal/intarray.h` to [native/src/seal/dynarray.h](native/src/seal/dynarray.h)
+- `dotnet/src/SEALNet.csproj` to [dotnet/src/SEALNet.csproj.in](dotnet/src/SEALNet.csproj.in)
 - `dotnet/tests/SEALNetTest.csproj` to [dotnet/tests/SEALNetTest.csproj.in](dotnet/tests/SEALNetTest.csproj.in)
 - `dotnet/examples/SEALNetExamples.csproj` to [dotnet/examples/SEALNetExamples.csproj.in](dotnet/examples/SEALNetExamples.csproj.in)
 
-New files:
+#### New files
 
 - [native/src/seal/util/dwthandler.h](native/src/seal/util/dwthandler.h)
 - [native/src/seal/util/fips202.h](native/src/seal/util/fips202.h)
@@ -69,7 +76,7 @@ New files:
 - [dotnet/SEALNet.sln](dotnet/SEALNet.sln)
 - [.pre-commit-config.yaml](.pre-commit-config.yaml)
 
-Removed files:
+#### Removed files
 
 - `dotnet/src/BigUInt.cs`
 - `dotnet/src/IntegerEncoder.cs`

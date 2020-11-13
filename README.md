@@ -27,40 +27,30 @@ Commercial applications of Microsoft SEAL, or any homomorphic encryption library
     - [Optional Dependencies](#optional-dependencies)
       - [Microsoft GSL](#microsoft-gsl)
       - [ZLIB and Zstandard](#zlib-and-zstandard)
-    - [Installing with VCPKG (Windows, Unix-like)](#installing-with-vcpkg-windows-unix-like)
-    - [Installing with Homebrew (macOS)](#installing-with-homebrew-macos)
     - [Installing from NuGet Package (Windows, Linux, macOS, Android, iOS)](#installing-from-nuget-package-windows-linux-macos-android-ios)
+    - [Examples](#examples)
   - [Building Microsoft SEAL Manually](#building-microsoft-seal-manually)
-    - [Building with CMake](#building-with-cmake)
-      - [Basic CMake Options](#basic-cmake-options)
-      - [Advanced CMake Options](#advanced-cmake-options)
+    - [Building C++ Components](#building-c-components)
+      - [Requirements](#requirements)
       - [Building Microsoft SEAL](#building-microsoft-seal)
       - [Installing Microsoft SEAL](#installing-microsoft-seal)
+      - [Building on Windows](#building-on-windows)
+      - [Android and iOS](#android-and-ios)
+      - [Basic CMake Options](#basic-cmake-options)
+      - [Advanced CMake Options](#advanced-cmake-options)
       - [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake)
-    - [Linux, macOS, and FreeBSD](#linux-macos-and-freebsd)
-    - [Android and iOS](#android-and-ios)
-    - [Windows](#windows)
-      - [Platform](#platform)
-      - [Building Microsoft SEAL](#building-microsoft-seal-1)
-      - [[Optional] Debug and Release builds](#optional-debug-and-release-builds)
-      - [Building Examples](#building-examples)
-      - [Building Unit Tests](#building-unit-tests)
-  - [Microsoft SEAL for .NET](#microsoft-seal-for-net)
-    - [Windows](#windows-1)
+      - [Examples and Tests](#examples-and-tests)
+    - [Building .NET Components](#building-net-components)
+      - [Windows](#windows)
+      - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application)
+      - [Building Your Own NuGet Package](#building-your-own-nuget-package)
+    - [Linux and macOS](#linux-and-macos)
       - [Native Library](#native-library)
       - [.NET Library](#net-library)
       - [.NET Examples](#net-examples)
       - [.NET Unit Tests](#net-unit-tests)
-      - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application)
-      - [Building Your Own NuGet Package](#building-your-own-nuget-package)
-    - [Linux and macOS](#linux-and-macos)
-      - [Native Library](#native-library-1)
-      - [.NET Library](#net-library-1)
-      - [.NET Examples](#net-examples-1)
-      - [.NET Unit Tests](#net-unit-tests-1)
       - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application-1)
     - [Android and iOS](#android-and-ios-1)
-  - [Getting Started](#getting-started-1)
   - [Contributing](#contributing)
   - [Citing Microsoft SEAL](#citing-microsoft-seal)
     - [Version 3.6](#version-36)
@@ -143,7 +133,7 @@ When [building manually](#building-microsoft-seal-manually), one can choose to h
 On the other extreme, the downloadable [NuGet package](https://www.nuget.org/packages/Microsoft.Research.SEALNet) cannot be configured at all, but it is always possible to [build a custom NuGet package](#building-your-own-nuget-package).
 Other package managers offer varying amounts of opportunities for configuring the dependencies and [other build options](#basic-cmake-options).
 
-The optional dependencies and their tested versions (other versions may work as well) are as follows.
+The optional dependencies and their tested versions (other versions may work as well) are as follows:
 
 | Optional dependency                                | Tested version | Use                                              |
 | -------------------------------------------------- | -------------- | ------------------------------------------------ |
@@ -193,8 +183,8 @@ To develop mobile applications using Microsoft SEAL and .NET for Android and iOS
 ### Examples
 
 Using Microsoft SEAL will require the user to invest some time in learning fundamental concepts in homomorphic encryption.
-The code comes with heavily commented examples that are designed to gradually teach such concepts as well as to demonstrate a large fraction of the API.
-The examples are available (and identical) in C++ and C#, and are divided into several source files in `native/examples/` (C++) and `dotnet/examples/` (C#), as follows.
+The code comes with heavily commented examples that are designed to gradually teach such concepts as well as demonstrate a large fraction of the API.
+The examples are available (and identical) in C++ and C#, and are divided into several source files in `native/examples/` (C++) and `dotnet/examples/` (C#), as follows:
 
 | C++                   | C#                   | Description                                                                  |
 | --------------------- | -------------------- | ---------------------------------------------------------------------------- |
@@ -209,9 +199,9 @@ The examples are available (and identical) in C++ and C#, and are divided into s
 
 It is recommended to read the comments and the code snippets along with command line printout from running an example.
 For easier navigation, command line printout provides the line number in the associated source file where the associated code snippets start.
-To build the examples, see [Building Microsoft SEAL Manually](#building-microsoft-seal-manually).
+To build the examples, see [Examples and Tests](#examples-and-tests) or [Building .NET Components](#building-net-components).
 
-**Note:** It is impossible to know how to use Microsoft SEAL correctly without studying all of the examples.
+**Note:** It is impossible to know how to use Microsoft SEAL correctly without studying examples 1&ndash;6.
 They are designed to provide the reader with the necessary conceptual background on homomorphic encryption.
 Reusing code directly from the examples will not work well, as the examples are often demonstrating individual pieces of functionality, and are not optimized for performance.
 Writing Microsoft SEAL code without studying the examples in depth will inevitably result in code that is vulnerable, malfunctioning, or extremely slow.
@@ -222,19 +212,19 @@ Writing Microsoft SEAL code without studying the examples in depth will inevitab
 
 On all platforms Microsoft SEAL is built with CMake.
 We recommend using out-of-source build although in-source build works.
-Below we give instructions for how to configure, build, and install Microsoft SEAL either system-wide (global install), or for a single user (local install).
-A system-wide install requires elevated (root) privileges.
-
-**Note:** Microsoft SEAL compiled with Clang++ has much better runtime performance than that compiled with GNU G++.
+Below we give instructions for how to configure, build, and install Microsoft SEAL either globally (system-wide), or locally (for a single user).
+A global install requires elevated (root or administrator) privileges.
 
 #### Requirements
 
 | System | Toolchain |
 |---|---|
-| Windows | Visual Studio 2019 |
+| Windows | Visual Studio 2019 with C++ CMake Tools for Windows |
 | Linux | Clang++ (>= 5.0) or GNU G++ (>= 6.0), CMake (>= 3.12) |
 | macOS/iOS | Xcode toolchain (>= 9.3), CMake (>= 3.12) |
 | Android | Android Studio |
+
+**Note:** Microsoft SEAL compiled with Clang++ has much better runtime performance than one compiled with GNU G++.
 
 #### Building Microsoft SEAL
 
@@ -247,12 +237,14 @@ cmake -S . -B build
 cmake --build build
 ```
 
+After the build completes, the output binaries can be found in `build/lib/` and `build/bin/` directories.
+
 Various configuration options can be specified and passed to the CMake build system.
 These are decribed below in sections [Basic CMake Options](#basic-cmake-options) and [Advanced CMake Options](#advanced-cmake-options).
 
 #### Installing Microsoft SEAL
 
-If you have root access to the system you can install Microsoft SEAL system-wide as follows:
+If you have root access to the system you can install Microsoft SEAL globally as follows:
 
 ```bash
 cmake -S . -B build
@@ -268,7 +260,7 @@ cmake --build build
 sudo cmake --install build
 ```
 
-#### Building on Windows
+#### Building and Installing on Windows
 
 On Windows the same scripts above work in a developer command prompt for Visual Studio, using either the `Ninja` or `Visual Studio 16 2019` generators.
 
@@ -300,7 +292,7 @@ Visual Studio 2019 provides support for CMake-based projects. You can select the
 This results in the static library `seal.lib` to be created in `build\lib\$(Configuration)`.
 When linking with applications, you need to add `native\src\` (full path) as an include directory for Microsoft SEAL header files.
 
-#### Android and iOS
+#### Building for Android and iOS
 
 Microsoft SEAL can be compiled for Android and iOS.
 Under the [android/](android/) directory of the source tree you will find an [Android Studio](https://developer.android.com/studio) project that you can use to compile the library for Android.
@@ -376,124 +368,58 @@ target_link_libraries(<your target> SEAL::seal)
 ```
 
 If Microsoft SEAL was installed globally, the above `find_package` command will likely find the library automatically.
-To link with a locally installed Microsoft SEAL, e.g., installed in `~/mylibs` as described above, you may need to tell CMake where to look for Microsoft SEAL when you configure your application by running:
+To link with a Microsoft SEAL installed locally, e.g., installed in `~/mylibs` as described above, you may need to tell CMake where to look for Microsoft SEAL when you configure your application by running:
 
 ```bash
 cd <directory containing your CMakeLists.txt>
 cmake . -DCMAKE_PREFIX_PATH=~/mylibs
 ```
 
+If Microsoft SEAL was installed using a package manager like vcpkg or Homebrew, please refer to their documentation for how to link with the installed library. For example, vcpkg requires you to specify the vcpkg CMake toolchain file when configuring your project.
+
+#### Examples and Tests
+
+When building Microsoft SEAL, examples and tests can be built by setting `SEAL_BUILD_EXAMPLES=ON` and `SEAL_BUILD_TESTS=ON`; see [Basic CMake Options](basic-cmake-options).
+Alternatively, both [examples](native/examples/CMakeLists.txt) and [tests](native/tests/CMakeLists.txt) can be built as standalone CMake projects linked with Microsoft SEAL (installed in `~/mylibs`), by following the commands below.
+Omit setting `SEAL_ROOT` if the library is installed globally.
+
+```bash
+cd native/<examples|tests>
+cmake -S . -B build -DSEAL_ROOT=~/mylibs
+cmake --build build
+```
+
 ### Building .NET Components
 
 Microsoft SEAL provides a .NET Standard library that wraps the functionality in Microsoft SEAL for use in .NET development.
+[NuGet package](https://www.nuget.org/packages/Microsoft.Research.SEALNet) is recommended unless development of Microsoft SEAL or building a custom NuGet package is intended.
+Prior to building .NET components, the C wrapper library SEAL_C must be built following [Building C++ Components](#building-c-components).
+The SEAL_C library is meant to be used only by the .NET library, not by end users.
 
-### Windows
+#### Windows, Linux, and macOS
 
-The Microsoft Visual Studio 2019 solution file `SEAL.sln` contains the projects necessary to build the .NET assembly, a backing native shared library, .NET examples, and unit tests.
-
-#### Native Library
-
-Microsoft SEAL for .NET requires a native library that is invoked by the managed .NET library.
-Build the SEAL_C project `native\src\SEAL_C_.vcxproj` from `SEAL.sln`.
-Building SEAL_C results in the dynamic library `sealc.dll` to be created in `lib\$(Platform)\$(Configuration)`.
-This library is meant to be used only by the .NET library, not by end users, and needs to be present in the same directory as your executable when running a .NET application.
-
-#### .NET Library
-
-Once you have built the shared native library (see above), build the SEALNet project `dotnet\src\SEALNet.csproj` from `SEAL.sln`.
-Building SEALNet results in the assembly `SEALNet.dll` to be created in `lib\dotnet\$(Configuration)\netstandard2.0`.
-This is the assembly you can reference in your application.
-
-#### .NET Examples
-
-Build the SEALNetExamples project `dotnet\examples\SEALNetExamples.csproj` from `SEAL.sln`.
-This results in the assembly `SEALNetExamples.dll` to be created in `bin\dotnet\$(Configuration)\netcoreapp3.1`.
-The project takes care of copying the native SEAL_C library to the output directory.
-
-#### .NET Unit Tests
-
-Build the SEALNetTest project `dotnet\tests\SEALNetTest.csproj` from `SEAL.sln`.
-This results in the assembly `SEALNetTest.dll` to be created in `bin\dotnet\$(Configuration)\netcoreapp3.1`.
-The project takes care of copying the native SEAL_C library to the output directory.
-
-#### Using Microsoft SEAL for .NET in Your Own Application
-
-To use Microsoft SEAL for .NET in your own application you need to:
-
-1. add a reference in your project to `SEALNet.dll`;
-1. ensure `sealc.dll` is available for your application when run.
-The easiest way to ensure this is to copy `sealc.dll` to the same directory where your application's executable is located.
-
-#### Building Your Own NuGet Package
-
-You can build your own NuGet package for Microsoft SEAL by following the instructions in [NUGET.md](dotnet/nuget/NUGET.md).
-
-### Linux and macOS
-
-Microsoft SEAL for .NET relies on a native shared library that can be easily configured and built using CMake (>= 3.12) and a modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0).
-In macOS the Xcode toolchain (>= 9.3) will work.
-
-For compiling .NET code you will need to install a .NET Core SDK (>= 3.1).
-You can follow these [instructions for installing in Linux](https://dotnet.microsoft.com/download?initial-os=linux), or for [installing in macOS](https://dotnet.microsoft.com/download?initial-os=macos).
-
-#### Native Library
-
-If you only intend to run the examples and unit tests provided with Microsoft SEAL, you do not need to install the native shared library.
-You only need to compile it.
-The SEALNetExamples and SEALNetTest projects take care of copying the native shared library to the appropriate assembly output directory.
-
-Microsoft SEAL by default does not build SEAL_C.
-You can enable it in CMake configuration options as follows:
+For compiling .NET code you will need to install a [.NET Core SDK (>= 3.1)](https://dotnet.microsoft.com/download).
+Building the SEAL_C library with CMake will generates project files for the .NET wrapper library, examples, and unit tests.
+The SEAL_C library must be discoverable when running a .NET application, e.g., be present in the same directory as your executable, which is taken care of by the .NET examples and tests project files.
+Run the following scripts to build each project:
 
 ```bash
-cmake -S . -B build -DSEAL_BUILD_SEAL_C=ON
-make -C build
+dotnet build dotnet/src --configuration <Debug|Release> # Build .NET wrapper library
+dotnet test dotnet/tests # Build and run .NET unit tests
+dotnet run -p dotnet/examples # Build and run .NET examples
 ```
 
-This results in a shared native library `libsealc.so*` in Linux or `libsealc*.dylib` in macOS.
-
-If you have root access to the system, you have the option to install the native shared library globally.
-Then your application will always be able to find and load it.
-Assuming Microsoft SEAL is build and installed globally, you can install the shared native library globally as follows:
-
-```bash
-sudo make -C build install
-```
-
-#### .NET Library
-
-To build the .NET Standard library, do the following:
-
-```bash
-dotnet build dotnet/src --configuration <Debug|Release>
-```
-
-This will result in a `SEALNet.dll` assembly to be created in `lib/dotnet/$(Configuration)/netstandard2.0`.
-This assembly is the one you will want to reference in your own projects.
-The optional `dotnet` parameter `--configuration <Debug|Release>` can be used to build either a `Debug` or `Release` version of the assembly.
-
-#### .NET Examples
-
-To build and run the .NET examples, do:
-
-```bash
-dotnet run -p dotnet/examples
-```
-
-As mentioned before, the .NET project will copy the shared native library to the assembly output directory.
-You can use the `dotnet` parameter `--configuration <Debug|Release>` to run either `Debug` or `Release` versions of the examples.
-
-#### .NET Unit Tests
-
-To build and run the .NET unit tests, do:
-
-```bash
-dotnet test dotnet/tests
-```
-
-All unit tests should pass.
-You can use the `dotnet` parameter `--configuration <Debug|Release>` to run `Debug` or `Relase` unit tests.
+You can use the `dotnet` parameter `--configuration <Debug|Release>` to run `Debug` or `Relase` examples and unit tests.
 And you can use `--verbosity detailed` to print the list of unit tests that are being run.
+
+On Windows, one can also build the Microsoft Visual Studio 2019 solution file `dotnet/SEALNet.sln` that contains the three projects.
+
+#### Android and iOS
+
+You can use [Android Studio](https://developer.android.com/studio) to build the native shared library used by the .NET Standard wrapper library for Android.
+If you want to build for iOS, please take a look at our [iOS pipeline](pipelines/ios.yml) file to see how to configure and build the native library using CMake and Xcode.
+
+However, the recommended way of using SEAL for .NET in Android and iOS is to add a reference to the multiplatform [NuGet package](https://www.nuget.org/packages/Microsoft.Research.SEALNet) to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project.
 
 #### Using Microsoft SEAL for .NET in Your Own Application
 
@@ -503,12 +429,12 @@ To use Microsoft SEAL for .NET in your own application you need to:
 1. ensure the native shared library is available for your application when run.
 The easiest way to ensure this is to copy the native shared library to the same directory where your application's executable is located.
 
-### Android and iOS
+#### Building Your Own NuGet Package
 
-You can use [Android Studio](https://developer.android.com/studio) to build the native shared library used by the .NET Standard wrapper library for Android.
-If you want to build for iOS, please take a look at our [iOS pipeline](pipelines/ios.yml) file to see how to configure and build the native library using CMake and Xcode.
+You can build your own NuGet package for Microsoft SEAL by following the instructions in [NUGET.md](dotnet/nuget/NUGET.md).
 
-However, the recommended way of using SEAL for .NET in Android and iOS is to add a reference to the multiplatform [NuGet package](https://www.nuget.org/packages/Microsoft.Research.SEALNet) to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project.
+As mentioned before, the .NET project will copy the shared native library to the assembly output directory.
+You can use the `dotnet` parameter `--configuration <Debug|Release>` to run either `Debug` or `Release` versions of the examples.
 
 ## Contributing
 
