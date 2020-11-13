@@ -225,7 +225,7 @@ We recommend using out-of-source build although in-source build works.
 Below we give instructions for how to configure, build, and install Microsoft SEAL either system-wide (global install), or for a single user (local install).
 A system-wide install requires elevated (root) privileges.
 
-**NOTE:** Microsoft SEAL compiled with Clang++ has much better runtime performance than that compiled with GNU G++.
+**Note:** Microsoft SEAL compiled with Clang++ has much better runtime performance than that compiled with GNU G++.
 
 #### Requirements
 
@@ -286,22 +286,10 @@ Replace `sudo` with administrator.
 This results in the static library `seal.lib` to be created in `lib\$(Platform)\$(Configuration)`.
 When linking with applications, you need to add `native\src\` (full path) as an include directory for Microsoft SEAL header files.
 
-#### Linux, macOS, and FreeBSD
-
-Microsoft SEAL is very easy to configure and build in Linux and macOS using CMake (>= 3.12).
-A modern version of GNU G++ (>= 6.0) or Clang++ (>= 5.0) is needed.
-In macOS the Xcode toolchain (>= 9.3) will work.
-
-In macOS you will need CMake with command line tools. For this, you can either
-
-1. install the cmake package with [Homebrew](https://brew.sh), or
-1. download CMake directly from [cmake.org/download](https://cmake.org/download) and
-[enable command line tools](https://stackoverflow.com/questions/30668601/installing-cmake-command-line-tools-on-a-mac).
-
 #### Android and iOS
 
 Microsoft SEAL can be compiled for Android and iOS.
-Under the [android](android) directory of the source tree you will find an [Android Studio](https://developer.android.com/studio) project that you can use to compile the library for Android.
+Under the [android/](android/) directory of the source tree you will find an [Android Studio](https://developer.android.com/studio) project that you can use to compile the library for Android.
 
 To build the library for iOS, use the following scripts:
 
