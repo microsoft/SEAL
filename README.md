@@ -14,10 +14,16 @@ In particular, decryptions of Microsoft SEAL ciphertexts should be treated as pr
 If it is absolutely necessary to share information about the decryption of a ciphertext, the number of bits shared should be kept to a minimum, and no more decryptions under the same secret key should be performed.
 Commercial applications of Microsoft SEAL, or any homomorphic encryption library, should be carefully reviewed by experts who are familiar with these matters.
 
+### Acknowledgments
+
+Many people have contributed substantially to Microsoft SEAL without being represented in the Git history.
+Therefore, we wish to express special gratitude to [Hao Chen](https://github.com/haochenuw), Yongsoo Song, John Wernsing, [Rachel Player](https://github.com/rachelplayer), [Peter Rindal](https://github.com/ladnir), [Amir Jalali](https://github.com/amirjalali65), [Kyoohyung Han](https://github.com/KyoohyungHan), Ilia Iliashenko, and many Microsoft Research interns who more or less directly contributed to the library.
+
 ## Contents
 
 - [Microsoft SEAL](#microsoft-seal)
     - [Correct Use of Microsoft SEAL](#correct-use-of-microsoft-seal)
+    - [Acknowledgments](#acknowledgments)
   - [Contents](#contents)
   - [Introduction](#introduction)
     - [Core Concepts](#core-concepts)
