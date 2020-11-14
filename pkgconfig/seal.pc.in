@@ -14,4 +14,4 @@ Requires: @SEAL_PKGCONFIG_ZLIB_REQUIRES_STRING@
 Requires: @SEAL_PKGCONFIG_ZSTD_REQUIRES_STRING@
 
 Libs: -L${libdir} -lseal-@SEAL_VERSION_MAJOR@.@SEAL_VERSION_MINOR@
-Cflags: -I${includedir}
+Cflags: @SEAL_LANG_FLAG@ -I${includedir}
