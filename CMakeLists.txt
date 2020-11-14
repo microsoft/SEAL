@@ -507,13 +507,13 @@ if(UNIX OR APPLE)
         # Create the Microsoft GSL pkg-config file
         configure_file(${SEAL_PKGCONFIG_MSGSL_IN_FILENAME} ${SEAL_PKGCONFIG_MSGSL_FILENAME} @ONLY)
 
-        set(SEAL_PKGCONFIG_MSGSL_REQUIRES_STRING "seal_msgsl = ${Microsoft.GSL_VERSION}")
+        set(SEAL_PKGCONFIG_MSGSL_REQUIRES_STRING "seal_msgsl >= ${Microsoft.GSL_VERSION_MAJOR}")
     endif()
     if(SEAL_USE_ZLIB AND NOT SEAL_BUILD_DEPS)
         set(SEAL_PKGCONFIG_ZLIB_REQUIRES_STRING "zlib = ${ZLIB_VERSION_STRING}")
     endif()
     if(SEAL_USE_ZSTD AND NOT SEAL_BUILD_DEPS)
-        set(SEAL_PKGCONFIG_ZSTD_REQUIRES_STRING "libzstd = ${zstd_VERSION}")
+        set(SEAL_PKGCONFIG_ZSTD_REQUIRES_STRING "libzstd >= ${zstd_VERSION_MAJOR}")
     endif()
 
     # Create the pkg-config file
