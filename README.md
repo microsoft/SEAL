@@ -27,7 +27,7 @@ Commercial applications of Microsoft SEAL, or any homomorphic encryption library
     - [Optional Dependencies](#optional-dependencies)
       - [Microsoft GSL](#microsoft-gsl)
       - [ZLIB and Zstandard](#zlib-and-zstandard)
-    - [Installing from NuGet Package (Windows, Linux, macOS, Android, iOS)](#installing-from-nuget-package-windows-linux-macos-android-ios)
+    - [Installing from NuGet Package](#installing-from-nuget-package-windows-linux-macos-android-ios)
     - [Examples](#examples)
   - [Building Microsoft SEAL Manually](#building-microsoft-seal-manually)
     - [Building C++ Components](#building-c-components)
@@ -43,7 +43,7 @@ Commercial applications of Microsoft SEAL, or any homomorphic encryption library
     - [Building .NET Components](#building-net-components)
       - [Windows, Linux, and macOS](#windows-linux-and-macos)
       - [Android and iOS](#android-and-ios)
-      - [Using Microsoft SEAL for .NET in Your Own Application](#using-microsoft-seal-for-net-in-your-own-application)
+      - [Using Microsoft SEAL for .NET](#using-microsoft-seal-for-net)
       - [Building Your Own NuGet Package](#building-your-own-nuget-package)
   - [Contributing](#contributing)
   - [Citing Microsoft SEAL](#citing-microsoft-seal)
@@ -265,7 +265,7 @@ cmake -S . -B build -G Ninja
 cmake --build build
 ```
 
-When using the "Visual Studio 16 2019" generator you can use the **Developer Command Prompt for VS 2019** command prompt to configure and build the library. By default the generated platform will be x64. You can specify the desired platform using the architecture flag `-A` and the desired configuration using `--config`.
+When using the "Visual Studio 16 2019" generator you can use the **Developer Command Prompt for VS 2019** command prompt to configure and build the library. By default the generated platform will be x64. You can specify the desired platform using the architecture flag `-A <x64|Win32>` and the desired configuration using `--config <Debug|Release>`.
 
 ```PowerShell
 # Generate and build for x64 in Release mode
@@ -385,11 +385,11 @@ cmake --build build
 ### Building .NET Components
 
 Microsoft SEAL provides a .NET Standard library that wraps the functionality in Microsoft SEAL for use in .NET development.
-[NuGet package](https://www.nuget.org/packages/Microsoft.Research.SEALNet) is recommended unless development of Microsoft SEAL or building a custom NuGet package is intended.
+Using the existing [NuGet package](https://www.nuget.org/packages/Microsoft.Research.SEALNet) is highly recommended, unless development of Microsoft SEAL or building a custom NuGet package is intended.
 Prior to building .NET components, the C wrapper library SEAL_C must be built following [Building C++ Components](#building-c-components).
-The SEAL_C library is meant to be used only by the .NET library, not by end users.
+The SEAL_C library is meant to be used only by the .NET library, not by end-users.
 
-**Note**: The `SEAL_C` project and the .NET wrapper library `SEALNet` only supports 64-bit platforms.
+**Note**: SEAL_C and the .NET library only support 64-bit platforms.
 
 #### Windows, Linux, and macOS
 
@@ -404,32 +404,26 @@ dotnet test dotnet/tests # Build and run .NET unit tests
 dotnet run -p dotnet/examples # Build and run .NET examples
 ```
 
-You can use the `dotnet` parameter `--configuration <Debug|Release>` to run `Debug` or `Relase` examples and unit tests.
-And you can use `--verbosity detailed` to print the list of unit tests that are being run.
+You can use `--configuration <Debug|Release>` to run `Debug` or `Release` examples and unit tests.
+You can use `--verbosity detailed` to print the list of unit tests that are being run.
 
-On Windows, one can also build the Microsoft Visual Studio 2019 solution file `dotnet/SEALNet.sln` that contains the three projects.
+On Windows, you can also use the Microsoft Visual Studio 2019 solution file `dotnet/SEALNet.sln` to build all three projects.
 
 #### Android and iOS
 
-You can use [Android Studio](https://developer.android.com/studio) to build the native shared library used by the .NET Standard wrapper library for Android.
-If you want to build for iOS, please take a look at our [iOS pipeline](pipelines/ios.yml) file to see how to configure and build the native library using CMake and Xcode.
+While it is possible to build your own custom NuGet package for Android or iOS (see [Building for Android and iOS](#building-for-android-and-ios) for the native component), this is not easy and is not recommended. Instead, please add a reference to the multiplatform [NuGet package](https://www.nuget.org/packages/Microsoft.Research.SEALNet) to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project.
 
-However, the recommended way of using SEAL for .NET in Android and iOS is to add a reference to the multiplatform [NuGet package](https://www.nuget.org/packages/Microsoft.Research.SEALNet) to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project.
-
-#### Using Microsoft SEAL for .NET in Your Own Application
+#### Using Microsoft SEAL for .NET
 
 To use Microsoft SEAL for .NET in your own application you need to:
 
-1. add a reference in your project to `SEALNet.dll`;
-1. ensure the native shared library is available for your application when run.
+1. Add a reference in your project to `SEALNet.dll`;
+1. Ensure the native shared library is available for your application when run.
 The easiest way to ensure this is to copy the native shared library to the same directory where your application's executable is located.
 
 #### Building Your Own NuGet Package
 
 You can build your own NuGet package for Microsoft SEAL by following the instructions in [NUGET.md](dotnet/nuget/NUGET.md).
-
-As mentioned before, the .NET project will copy the shared native library to the assembly output directory.
-You can use the `dotnet` parameter `--configuration <Debug|Release>` to run either `Debug` or `Release` versions of the examples.
 
 ## Contributing
 

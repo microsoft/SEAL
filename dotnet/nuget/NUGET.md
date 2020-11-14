@@ -1,8 +1,7 @@
 # Creating a NuGet package
 
 After building `dotnet\src\SEALNet.csproj` you can create a NuGet package that you can
-use to easily add Microsoft SEAL capabilities to all of your .NET projects. Currently
-the NuGet package is only supported in Windows.
+use to easily add Microsoft SEAL capabilities to all of your .NET projects.
 
 You will need to do the following:
 1. Compile both SEAL and SEAL_C projects with CMake; make sure you have the file `bin\sealc.dll`. Build `dotnet\src\SEALNet.csproj`.
