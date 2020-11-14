@@ -52,7 +52,9 @@ The available values are `Blake2xb` (default) and `Shake256`.
 
 ### Other
 
-- Moved all files related to pkg-config to `pkgconfig/` subdirectory.
+- The pkg-config system has been improved.
+All files related to pkg-config have been moved to [pkgconfig/](pkgconfig/).
+CMake creates now also a pkg-config file `seal_shared.pc` for compiling against a shared Microsoft SEAL if `BUILD_SHARED_LIBS` is set to `ON`.
 - Added `.pre-commit-config.yaml` (check out [pre-commit](https://pre-commit.com) if you are not familiar with this tool).
 - Added `seal::util::DWTHandler` and `seal::util::Arithmetic` class templates that unify the implementation of FFT (used by `CKKSEncoder`) and NTT (used by polynomial arithmetic).
 - The performance of encoding and decoding in CKKS are improved.
