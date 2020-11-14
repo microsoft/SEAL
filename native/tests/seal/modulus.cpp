@@ -154,7 +154,10 @@ namespace sealtest
     {
         Modulus mod;
         uint64_t res = 0;
-        ASSERT_THROW(res = mod.reduce(10), logic_error);
+        if (!res)
+        {
+            ASSERT_THROW(res = mod.reduce(10), logic_error);
+        }
 
         mod = 2;
         ASSERT_EQ(0, mod.reduce(0));
