@@ -72,23 +72,39 @@ endif()
 
 # Required files and directories
 include(GNUInstallDirs)
+
 # Source Tree
-set(SEAL_INCLUDES_BUILD_DIR ${CMAKE_CURRENT_LIST_DIR}/native/src)
+set(SEAL_INCLUDES_DIR ${CMAKE_CURRENT_LIST_DIR}/native/src)
 set(SEAL_THIRDPARTY_DIR ${CMAKE_CURRENT_LIST_DIR}/thirdparty)
 set(SEAL_CONFIG_IN_FILENAME ${CMAKE_CURRENT_LIST_DIR}/cmake/SEALConfig.cmake.in)
+set(SEAL_CONFIG_H_IN_FILENAME ${SEAL_INCLUDES_DIR}/seal/util/config.h.in)
+
 # Build tree
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUTLIB_PATH})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUTLIB_PATH})
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+set(SEAL_INCLUDES_BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR}/native/src)
 set(SEAL_TARGETS_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/cmake/SEALTargets.cmake)
 set(SEAL_CONFIG_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/cmake/SEALConfig.cmake)
 set(SEAL_CONFIG_VERSION_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/cmake/SEALConfigVersion.cmake)
+set(SEAL_CONFIG_H_FILENAME ${SEAL_INCLUDES_BUILD_DIR}/seal/util/config.h)
+
 # Install
 set(SEAL_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
-set(SEAL_PKGCONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
 set(SEAL_INCLUDES_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
 
-# Cleaning up artifacts from previous versions
+# pkg-config
+set(SEAL_PKGCONFIG_IN_DIR ${CMAKE_CURRENT_LIST_DIR}/pkgconfig)
+set(SEAL_PKGCONFIG_IN_FILENAME ${SEAL_PKGCONFIG_IN_DIR}/seal.pc.in)
+set(SEAL_PKGCONFIG_SHARED_IN_FILENAME ${SEAL_PKGCONFIG_IN_DIR}/seal_shared.pc.in)
+set(SEAL_PKGCONFIG_MSGSL_IN_FILENAME ${SEAL_PKGCONFIG_IN_DIR}/seal_msgsl.pc.in)
+set(SEAL_PKGCONFIG_DIR ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig)
+set(SEAL_PKGCONFIG_FILENAME ${SEAL_PKGCONFIG_DIR}/seal.pc)
+set(SEAL_PKGCONFIG_SHARED_FILENAME ${SEAL_PKGCONFIG_DIR}/seal_shared.pc)
+set(SEAL_PKGCONFIG_MSGSL_FILENAME ${SEAL_PKGCONFIG_DIR}/seal_msgsl.pc)
+set(SEAL_PKGCONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/pkgconfig)
+
+# Clean up artifacts from previous versions
 include(CleanArtifacts)
 
 #########################
@@ -286,12 +302,10 @@ set(SEAL_SOURCE_FILES "")
 add_subdirectory(native/src/seal)
 
 # Create the config file
-configure_file(${CMAKE_CURRENT_LIST_DIR}/native/src/seal/util/config.h.in ${CMAKE_CURRENT_BINARY_DIR}/native/src/seal/util/config.h)
+configure_file(${SEAL_CONFIG_H_IN_FILENAME} ${SEAL_CONFIG_H_FILENAME})
 install(
-    FILES
-        ${CMAKE_CURRENT_BINARY_DIR}/native/src/seal/util/config.h
-    DESTINATION
-        ${SEAL_INCLUDES_INSTALL_DIR}/seal/util)
+    FILES ${SEAL_CONFIG_H_FILENAME}
+    DESTINATION ${SEAL_INCLUDES_INSTALL_DIR}/seal/util)
 
 # Build only a static library
 if(NOT BUILD_SHARED_LIBS)
@@ -466,13 +480,6 @@ install(
         ${SEAL_CONFIG_VERSION_FILENAME}
     DESTINATION ${SEAL_CONFIG_INSTALL_DIR})
 
-# Install the pkg-config file
-if(UNIX OR APPLE)
-    install(
-        FILES ${SEAL_PKGCONFIG_FILENAME}
-        DESTINATION ${SEAL_PKGCONFIG_INSTALL_DIR})
-endif()
-
 # We export SEALTargets from the build tree so it can be used by other projects
 # without requiring an install.
 export(
@@ -491,27 +498,51 @@ endif()
 # pkg-config #
 ##############
 
-## Set the requirements according to the current configuration
-#if(SEAL_USE_MSGSL AND NOT WIN32)
-    #if(SEAL_BUILD_DEPS)
-        #set(SEAL_PKGCONFIG_MSGSL_INCLUDE_FLAG "-I${msgsl_SOURCE_DIR}/include")
-    #else()
-        #target_include_directories(seal PUBLIC Microsoft.GSL::GSL)
-        #get_target_property(SEAL_MSGSL_INCLUDE_DIR Microsoft.GSL::GSL INCLUDE_DIRECTORIES)
-        #set(SEAL_PKGCONFIG_MSGSL_INCLUDE_FLAG "-I${SEAL_MSGSL_INCLUDE_DIR}")
-    #endif()
-#endif()
-
-#if(SEAL_USE_ZLIB AND NOT WIN32)
-    #set(SEAL_PKGCONFIG_REQUIRES_PRIVATE "")
-#endif()
-
-# Create the pkg-config file
 if(UNIX OR APPLE)
-    configure_file(
-        ${CMAKE_CURRENT_LIST_DIR}/pkgconfig/seal.pc.in
-        ${CMAKE_CURRENT_BINARY_DIR}/pkgconfig/seal-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR}.pc
-        @ONLY)
+    # Set the requirements according to the current configuration
+    if(SEAL_USE_MSGSL AND NOT SEAL_BUILD_DEPS)
+        # Extract the include directories from Microsoft.GSL::GSL
+        get_target_property(
+            SEAL_PKGCONFIG_MSGSL_INCLUDE_DIR
+            Microsoft.GSL::GSL
+            INTERFACE_INCLUDE_DIRECTORIES)
+
+        # Create the Microsoft GSL pkg-config file
+        configure_file(${SEAL_PKGCONFIG_MSGSL_IN_FILENAME} ${SEAL_PKGCONFIG_MSGSL_FILENAME} @ONLY)
+
+        set(SEAL_PKGCONFIG_MSGSL_REQUIRES_STRING "seal_msgsl = ${Microsoft.GSL_VERSION}")
+    endif()
+    if(SEAL_USE_ZLIB AND NOT SEAL_BUILD_DEPS)
+        set(SEAL_PKGCONFIG_ZLIB_REQUIRES_STRING "zlib = ${ZLIB_VERSION_STRING}")
+    endif()
+    if(SEAL_USE_ZSTD AND NOT SEAL_BUILD_DEPS)
+        set(SEAL_PKGCONFIG_ZSTD_REQUIRES_STRING "libzstd = ${zstd_VERSION}")
+    endif()
+
+    # Create the pkg-config file
+    if(TARGET seal)
+        configure_file(${SEAL_PKGCONFIG_IN_FILENAME} ${SEAL_PKGCONFIG_FILENAME} @ONLY)
+    endif()
+    if(TARGET seal_shared)
+        configure_file(${SEAL_PKGCONFIG_SHARED_IN_FILENAME} ${SEAL_PKGCONFIG_SHARED_FILENAME} @ONLY)
+    endif()
+
+    # Install the pkg-config files
+    if(EXISTS ${SEAL_PKGCONFIG_FILENAME})
+        install(
+            FILES ${SEAL_PKGCONFIG_FILENAME}
+            DESTINATION ${SEAL_PKGCONFIG_INSTALL_DIR})
+    endif()
+    if(EXISTS ${SEAL_PKGCONFIG_SHARED_FILENAME})
+        install(
+            FILES ${SEAL_PKGCONFIG_SHARED_FILENAME}
+            DESTINATION ${SEAL_PKGCONFIG_INSTALL_DIR})
+    endif()
+    if(EXISTS ${SEAL_PKGCONFIG_MSGSL_FILENAME})
+        install(
+            FILES ${SEAL_PKGCONFIG_MSGSL_FILENAME}
+            DESTINATION ${SEAL_PKGCONFIG_INSTALL_DIR})
+    endif()
 endif()
 
 #####################
@@ -542,7 +573,8 @@ endif()
 # Configure SEALNet and NuGet package #
 #######################################
 
-# Create SEALNet.csproj, SEALNetExamples.csproj and SEALNetTest.csproj for building dotnet with Visual Studio
+# Create SEALNet.csproj, SEALNetExamples.csproj and SEALNetTest.csproj
+# for building dotnet with Visual Studio
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/src/SEALNet.csproj.in
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/src/SEALNet.csproj

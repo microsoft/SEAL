@@ -6,12 +6,12 @@ libdir=${prefix}/lib
 includedir=${prefix}/@SEAL_INCLUDES_INSTALL_DIR@
 
 Name: Microsoft SEAL
-Version: @SEAL_VERSION@
+Version: @SEAL_VERSION_MAJOR@.@SEAL_VERSION_MINOR@
 Description: An easy-to-use homomorphic encryption library
 
 Requires: @SEAL_PKGCONFIG_MSGSL_REQUIRES_STRING@
 Requires: @SEAL_PKGCONFIG_ZLIB_REQUIRES_STRING@
 Requires: @SEAL_PKGCONFIG_ZSTD_REQUIRES_STRING@
 
-Libs: -L${libdir} -lseal-@SEAL_VERSION_MAJOR@.@SEAL_VERSION_MINOR@
+Libs: -L${libdir} -lseal
 Cflags: -I${includedir}

@@ -1,0 +1,8 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+
+Name: Microsoft GSL for Microsoft SEAL
+Version: @Microsoft.GSL_VERSION@
+Description: Guidelines Support Library
+
+Cflags: -I@SEAL_PKGCONFIG_MSGSL_INCLUDE_DIR@
