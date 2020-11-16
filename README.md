@@ -14,52 +14,37 @@ In particular, decryptions of Microsoft SEAL ciphertexts should be treated as pr
 If it is absolutely necessary to share information about the decryption of a ciphertext, the number of bits shared should be kept to a minimum, and no more decryptions under the same secret key should be performed.
 Commercial applications of Microsoft SEAL, or any homomorphic encryption library, should be carefully reviewed by experts who are familiar with these matters.
 
-### Acknowledgments
-
-Many people have contributed substantially to Microsoft SEAL without being represented in the Git history.
-We wish to express special gratitude to John Wernsing, [Hao Chen](https://github.com/haochenuw), Yongsoo Song, [Olli Saarikivi](https://github.com/olsaarik), [Rachel Player](https://github.com/rachelplayer), [Gizem Cetin](https://github.com/gizemscetin), [Peter Rindal](https://github.com/ladnir), [Amir Jalali](https://github.com/amirjalali65), [Kyoohyung Han](https://github.com/KyoohyungHan), [Sadegh Riazi](https://www.sadeghr.com), [Ilia Iliashenko](https://homes.esat.kuleuven.be/~ilia), [Roshan Dathathri](https://roshandathathri.github.io), [Pardis Emami-Naeini](https://homes.cs.washington.edu/~pemamina), [Sangeeta Chowdhary](https://github.com/sangeeta0201), [Deepika Natarajan](https://github.com/dnat112), and [Michael Rosenberg](https://github.com/rozbb).
-
 ## Contents
 
-- [Microsoft SEAL](#microsoft-seal)
-    - [Correct Use of Microsoft SEAL](#correct-use-of-microsoft-seal)
-    - [Acknowledgments](#acknowledgments)
-  - [Contents](#contents)
-  - [Introduction](#introduction)
-    - [Core Concepts](#core-concepts)
-    - [Homomorphic Encryption](#homomorphic-encryption)
-    - [Microsoft SEAL](#microsoft-seal-1)
-  - [Getting Started](#getting-started)
-    - [Optional Dependencies](#optional-dependencies)
-      - [Microsoft GSL](#microsoft-gsl)
-      - [ZLIB and Zstandard](#zlib-and-zstandard)
-    - [Installing from NuGet Package](#installing-from-nuget-package-windows-linux-macos-android-ios)
-    - [Examples](#examples)
-  - [Building Microsoft SEAL Manually](#building-microsoft-seal-manually)
-    - [Building C++ Components](#building-c-components)
-      - [Requirements](#requirements)
-      - [Building Microsoft SEAL](#building-microsoft-seal)
-      - [Installing Microsoft SEAL](#installing-microsoft-seal)
-      - [Building and Installing on Windows](#building-and-installing-on-windows)
-      - [Building for Android and iOS](#building-for-android-and-ios)
-      - [Basic CMake Options](#basic-cmake-options)
-      - [Advanced CMake Options](#advanced-cmake-options)
-      - [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake)
-      - [Examples and Tests](#examples-and-tests)
-    - [Building .NET Components](#building-net-components)
-      - [Windows, Linux, and macOS](#windows-linux-and-macos)
-      - [Android and iOS](#android-and-ios)
-      - [Using Microsoft SEAL for .NET](#using-microsoft-seal-for-net)
-      - [Building Your Own NuGet Package](#building-your-own-nuget-package)
-  - [Contributing](#contributing)
-  - [Citing Microsoft SEAL](#citing-microsoft-seal)
-<!--    - [Version 3.6](#version-36)
-    - [Version 3.5](#version-35)
-    - [Version 3.4](#version-34)
-    - [Version 3.3](#version-33)
-    - [Version 3.2](#version-32)
-    - [Version 3.1](#version-31)
-    - [Version 3.0](#version-30) -->
+- [Introduction](#introduction)
+  - [Core Concepts](#core-concepts)
+  - [Homomorphic Encryption](#homomorphic-encryption)
+  - [Microsoft SEAL](#microsoft-seal-1)
+- [Getting Started](#getting-started)
+  - [Optional Dependencies](#optional-dependencies)
+    - [Microsoft GSL](#microsoft-gsl)
+    - [ZLIB and Zstandard](#zlib-and-zstandard)
+  - [Installing from NuGet Package](#installing-from-nuget-package-windows-linux-macos-android-ios)
+  - [Examples](#examples)
+- [Building Microsoft SEAL Manually](#building-microsoft-seal-manually)
+  - [Building C++ Components](#building-c-components)
+    - [Requirements](#requirements)
+    - [Building Microsoft SEAL](#building-microsoft-seal)
+    - [Installing Microsoft SEAL](#installing-microsoft-seal)
+    - [Building and Installing on Windows](#building-and-installing-on-windows)
+    - [Building for Android and iOS](#building-for-android-and-ios)
+    - [Basic CMake Options](#basic-cmake-options)
+    - [Advanced CMake Options](#advanced-cmake-options)
+    - [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake)
+    - [Examples and Tests](#examples-and-tests)
+  - [Building .NET Components](#building-net-components)
+    - [Windows, Linux, and macOS](#windows-linux-and-macos)
+    - [Android and iOS](#android-and-ios)
+    - [Using Microsoft SEAL for .NET](#using-microsoft-seal-for-net)
+    - [Building Your Own NuGet Package](#building-your-own-nuget-package)
+- [Contributing](#contributing)
+- [Citing Microsoft SEAL](#citing-microsoft-seal)
+- [Acknowledgments](#acknowledgments)
 
 ## Introduction
 
@@ -199,7 +184,7 @@ The examples are available (and identical) in C++ and C#, and are divided into s
 
 It is recommended to read the comments and the code snippets along with command line printout from running an example.
 For easier navigation, command line printout provides the line number in the associated source file where the associated code snippets start.
-To build the examples, see [Examples and Tests](#examples-and-tests) or [Building .NET Components](#building-net-components).
+To build the examples, see [Examples and Tests](#examples-and-tests) (C++) and [Building .NET Components](#building-net-components) (C#).
 
 **Note:** It is impossible to know how to use Microsoft SEAL correctly without studying examples 1&ndash;6.
 They are designed to provide the reader with the necessary conceptual background on homomorphic encryption.
@@ -529,3 +514,8 @@ To cite Microsoft SEAL in academic papers, please use the following BibTeX entri
         key = {SEAL}
     }
 ```
+
+## Acknowledgments
+
+Many people have contributed substantially to Microsoft SEAL without being represented in the Git history.
+We wish to express special gratitude to John Wernsing, [Hao Chen](https://github.com/haochenuw), Yongsoo Song, [Olli Saarikivi](https://github.com/olsaarik), [Rachel Player](https://github.com/rachelplayer), [Gizem Cetin](https://github.com/gizemscetin), [Peter Rindal](https://github.com/ladnir), [Amir Jalali](https://github.com/amirjalali65), [Kyoohyung Han](https://github.com/KyoohyungHan), [Sadegh Riazi](https://www.sadeghr.com), [Ilia Iliashenko](https://homes.esat.kuleuven.be/~ilia), [Roshan Dathathri](https://roshandathathri.github.io), [Pardis Emami-Naeini](https://homes.cs.washington.edu/~pemamina), [Sangeeta Chowdhary](https://github.com/sangeeta0201), [Deepika Natarajan](https://github.com/dnat112), and [Michael Rosenberg](https://github.com/rozbb).
