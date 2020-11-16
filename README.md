@@ -82,7 +82,7 @@ Instead, meaningful use-cases are in scenarios where strict privacy requirements
 Typically, homomorphic encryption schemes have a single secret key which is held by the data owner.
 For scenarios where multiple different private data owners wish to engage in collaborative computation, homomorphic encryption is probably not a reasonable solution.
 
-Homomorphic encryption cannot be used to enable data scientist to circumvent GDPR.
+Homomorphic encryption cannot be used to enable data scientists to circumvent GDPR.
 For example, there is no way for a cloud service to use homomorphic encryption to draw insights from encrypted customer data.
 Instead, results of encrypted computations remain encrypted and can only be decrypted by the owner of the data, e.g., a cloud service customer.
 
