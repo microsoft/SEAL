@@ -17,7 +17,7 @@ Commercial applications of Microsoft SEAL, or any homomorphic encryption library
 ### Acknowledgments
 
 Many people have contributed substantially to Microsoft SEAL without being represented in the Git history.
-Therefore, we wish to express special gratitude to [Hao Chen](https://github.com/haochenuw), Yongsoo Song, John Wernsing, [Rachel Player](https://github.com/rachelplayer), [Peter Rindal](https://github.com/ladnir), [Amir Jalali](https://github.com/amirjalali65), [Kyoohyung Han](https://github.com/KyoohyungHan), Ilia Iliashenko, and many Microsoft Research interns who more or less directly contributed to the library.
+We wish to express special gratitude to John Wernsing, [Hao Chen](https://github.com/haochenuw), Yongsoo Song, [Olli Saarikivi](https://github.com/olsaarik), [Rachel Player](https://github.com/rachelplayer), [Gizem Cetin](https://github.com/gizemscetin), [Peter Rindal](https://github.com/ladnir), [Amir Jalali](https://github.com/amirjalali65), [Kyoohyung Han](https://github.com/KyoohyungHan), [Sadegh Riazi](https://www.sadeghr.com), [Ilia Iliashenko](https://homes.esat.kuleuven.be/~ilia), [Roshan Dathathri](https://roshandathathri.github.io), [Pardis Emami-Naeini](https://homes.cs.washington.edu/~pemamina), [Sangeeta Chowdhary](https://github.com/sangeeta0201), [Deepika Natarajan](https://github.com/dnat112), and [Michael Rosenberg](https://github.com/rozbb).
 
 ## Contents
 
@@ -275,13 +275,13 @@ When using the "Visual Studio 16 2019" generator you can use the **Developer Com
 
 ```PowerShell
 # Generate and build for x64 in Release mode
-cmake -S . -B build -G "Visual Studio 16 2019" -A x64 --config Release
-cmake --build build
+cmake -S . -B build -G "Visual Studio 16 2019" -A x64
+cmake --build build --config Release
 ```
 ```PowerShell
 # Generate and build for x86 in Release mode
-cmake -S . -B build -G "Visual Studio 16 2019" -A Win32 --config Release
-cmake --build build
+cmake -S . -B build -G "Visual Studio 16 2019" -A Win32
+cmake --build build --config Release
 ```
 
 Installing the library in Windows works as well. Instead of using the `sudo` command, however, you need to run `cmake --install build` from a command prompt with Administrator permissions. Files will be installed by default to `C:\Program Files (x86)\SEAL`.
