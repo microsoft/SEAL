@@ -1,11 +1,11 @@
 # List of Changes
 
+## Version 3.6.0
+
 ### Hotfix - 11/16/2020
 
 - Fixed issues with CMake system overwriting existing `FETCH_CONTENT_BASE_DIR` ([(Issue 242)](https://github.com/microsoft/SEAL/issues/242)).
 - Corrected mistakes and typos in [README.md](README.md).
-
-## Version 3.6.0
 
 ### New Features
 
