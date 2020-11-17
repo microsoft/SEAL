@@ -19,13 +19,13 @@ endif()
 if(NOT DEFINED SEAL_BUILD_DEPS)
     # [option] SEAL_BUILD_DEPS (default: ON)
     # Download and build missing dependencies, throw error if disabled.
-    set(SEAL_BUILD_DEPS_OPTION_STR "Automatically downloand and build unmet dependencies")
+    set(SEAL_BUILD_DEPS_OPTION_STR "Automatically download and build unmet dependencies")
     option(SEAL_BUILD_DEPS ${SEAL_BUILD_DEPS_OPTION_STR} ON)
 endif()
 
 # if SEAL_BUILD_TESTS is ON, use GoogleTest
 if(SEAL_BUILD_TESTS)
-    if (SEAL_BUILD_DEPS)
+    if(SEAL_BUILD_DEPS)
         list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../../cmake)
         message(STATUS ${CMAKE_MODULE_PATH})
         set(SEAL_THIRDPARTY_DIR ${CMAKE_CURRENT_LIST_DIR}/../../thirdparty)

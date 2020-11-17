@@ -10,6 +10,15 @@ macro(seal_set_language target)
     endif()
 endmacro()
 
+# Include a file to fetch thirdparty content
+macro(fetch_thirdparty_content content_file)
+    set(SEAL_FETCHCONTENT_BASE_DIR_OLD ${FETCHCONTENT_BASE_DIR})
+    set(FETCHCONTENT_BASE_DIR ${SEAL_THIRDPARTY_DIR} CACHE STRING "" FORCE)
+    include(${content_file})
+    set(FETCHCONTENT_BASE_DIR ${SEAL_FETCHCONTENT_BASE_DIR_OLD} CACHE STRING "" FORCE)
+    unset(SEAL_FETCHCONTENT_BASE_DIR_OLD)
+endmacro()
+
 # Set the VERSION property
 macro(seal_set_version target)
     set_target_properties(${target} PROPERTIES VERSION ${SEAL_VERSION})
