@@ -5,8 +5,6 @@ cmake_minimum_required(VERSION 3.12)
 
 project(SEALTest VERSION 3.6.0 LANGUAGES CXX C)
 
-set(THIRDPARTY_BINARY_DIR ${CMAKE_CURRENT_LIST_DIR})
-
 # If not called from root CMakeLists.txt
 if(NOT DEFINED SEAL_BUILD_TESTS)
     set(SEAL_BUILD_TESTS ON)
@@ -16,6 +14,9 @@ if(NOT DEFINED SEAL_BUILD_TESTS)
 
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUTLIB_PATH})
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+    set(THIRDPARTY_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/thirdparty)
+else()
+    set(THIRDPARTY_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/../../thirdparty)
 endif()
 
 if(NOT DEFINED SEAL_BUILD_DEPS)
@@ -30,7 +31,6 @@ if(SEAL_BUILD_TESTS)
     if(SEAL_BUILD_DEPS)
         list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../../cmake)
         set(SEAL_THIRDPARTY_DIR ${CMAKE_CURRENT_LIST_DIR}/../../thirdparty)
-        set(GTEST_BINARY_DIR ${CMAKE_CURRENT_LIST_DIR}/../../thirdparty)
         seal_fetch_thirdparty_content(ExternalGTest)
         add_library(GTest::gtest ALIAS gtest)
     else()
