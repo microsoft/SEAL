@@ -26,7 +26,7 @@ if(NOT zlib_POPULATED)
     mark_as_advanced(FETCHCONTENT_SOURCE_DIR_ZLIB)
     mark_as_advanced(FETCHCONTENT_UPDATES_DISCONNECTED_ZLIB)
 
-# ZLIB has no VERSION given to project(), needs to suppress CMP0048 warning
+    # ZLIB has no VERSION given to project(), needs to suppress CMP0048 warning
     set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS TRUE CACHE INTERNAL "Suppress CMP0048 warning" FORCE)
     add_subdirectory(
         ${zlib_SOURCE_DIR}
