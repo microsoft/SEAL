@@ -21,6 +21,6 @@ if(NOT googletest_POPULATED)
 
     add_subdirectory(
         ${googletest_SOURCE_DIR}
-        ${googletest_BINARY_DIR}
+        ${CMAKE_CURRENT_BINARY_DIR}/thirdparty/googletest-src
         EXCLUDE_FROM_ALL)
 endif()
