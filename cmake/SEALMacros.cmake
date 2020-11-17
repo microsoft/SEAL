@@ -11,7 +11,7 @@ macro(seal_set_language target)
 endmacro()
 
 # Include a file to fetch thirdparty content
-macro(fetch_thirdparty_content content_file)
+macro(seal_fetch_thirdparty_content content_file)
     set(SEAL_FETCHCONTENT_BASE_DIR_OLD ${FETCHCONTENT_BASE_DIR})
     set(FETCHCONTENT_BASE_DIR ${SEAL_THIRDPARTY_DIR} CACHE STRING "" FORCE)
     include(${content_file})
