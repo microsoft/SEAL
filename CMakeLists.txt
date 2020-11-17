@@ -375,6 +375,8 @@ else()
     endif()
 
     if(SEAL_USE_ZSTD)
+        target_include_directories(seal_shared PRIVATE $<BUILD_INTERFACE:${zstd_SOURCE_DIR}/lib>)
+        target_include_directories(seal_shared PRIVATE $<BUILD_INTERFACE:${zstd_SOURCE_DIR}/lib/common>)
         target_link_libraries(seal_shared PRIVATE ${zstd_static})
     endif()
 endif()
