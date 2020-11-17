@@ -4,11 +4,11 @@
 
 ### Hotfix - 11/17/2020
 
--  Fixed issue with CMake system where `BUILD_SHARED_LIBS=ON` and `SEAL_BUILD_DEPS=ON` resulted in Zstandard header files not being visible to the build [(Issue 242)](https://github.com/microsoft/SEAL/issues/242).
+- Fixed issue with CMake system where `BUILD_SHARED_LIBS=ON` and `SEAL_BUILD_DEPS=ON` resulted in Zstandard header files not being visible to the build [(Issue 242)](https://github.com/microsoft/SEAL/issues/242).
 
 ### Hotfix - 11/16/2020
 
-- Fixed issues with CMake system overwriting existing `FETCH_CONTENT_BASE_DIR` [(Issue 242)](https://github.com/microsoft/SEAL/issues/242).
+- Fixed issues with CMake system overwriting existing `FETCHCONTENT_BASE_DIR` [(Issue 242)](https://github.com/microsoft/SEAL/issues/242).
 - Corrected mistakes and typos in [README.md](README.md).
 
 ### New Features
