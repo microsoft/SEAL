@@ -7,12 +7,9 @@ For more information about the Microsoft SEAL project, see [sealcrypto.org](http
 This document pertains to Microsoft SEAL version 3.6.
 Users of previous versions of the library should look at the [list of changes](CHANGES.md).
 
-### Correct Use of Microsoft SEAL
+## News
 
-Homomorphic encryption schemes have various and often unexpected security models that may be surprising even to cryptography experts.
-In particular, decryptions of Microsoft SEAL ciphertexts should be treated as private information only available to the secret key owner, and sharing information directly or indirectly about a decryption should be thought of as equivalent to sharing information about the secret key itself.
-If it is absolutely necessary to share information about the decryption of a ciphertext, the number of bits shared should be kept to a minimum, and no more decryptions under the same secret key should be performed.
-Commercial applications of Microsoft SEAL, or any homomorphic encryption library, should be carefully reviewed by experts who are familiar with these matters.
+The [EVA compiler for CKKS](https://arxiv.org/abs/1912.11951) is available at [GitHub.com/Microsoft/EVA](https://GitHub.com/Microsoft/EVA). See [CKKS Programming with EVA](#ckks-programming-with-eva) below for more information.
 
 ## Contents
 
@@ -26,6 +23,7 @@ Commercial applications of Microsoft SEAL, or any homomorphic encryption library
     - [ZLIB and Zstandard](#zlib-and-zstandard)
   - [Installing from NuGet Package](#installing-from-nuget-package-windows-linux-macos-android-ios)
   - [Examples](#examples)
+  - [CKKS Programming with EVA](#ckks-programming-with-eva)
 - [Building Microsoft SEAL Manually](#building-microsoft-seal-manually)
   - [Building C++ Components](#building-c-components)
     - [Requirements](#requirements)
@@ -77,15 +75,7 @@ Homomorphic encryption cannot be used to enable data scientists to circumvent GD
 For example, there is no way for a cloud service to use homomorphic encryption to draw insights from encrypted customer data.
 Instead, results of encrypted computations remain encrypted and can only be decrypted by the owner of the data, e.g., a cloud service customer.
 
-Most homomorphic encryption schemes provide weaker security guarantees than traditional encryption schemes.
-Two things are important to be aware of:
-
-1. Information about decryptions of ciphertexts must not be shared with anyone; see [Correct Use of Microsoft SEAL](#correct-use-of-microsoft-seal).
-
-1. A ciphertext protects the underlying data from anyone who does not have the secret key.
-
-A ciphertext does not protect anything from anyone who has the secret key.
-For example, a server cannot apply a proprietary algorithm on encrypted data, return it to the secret key owner, and expect that its algorithm remains protected.
+Most homomorphic encryption schemes provide weaker security guarantees than traditional encryption schemes. You need to read [SECURITY.md](SECURITY.md) if you are thinking of building production software using Microsoft SEAL.
 
 ### Microsoft SEAL
 
@@ -106,7 +96,9 @@ For applications where exact values are necessary, the BFV scheme is the only ch
 ## Getting Started
 
 There are multiple ways of installing Microsoft SEAL and starting to use it.
-The easiest way is to use a package manager such as [vcpkg](https://github.com/microsoft/vcpkg) or [Homebrew](https://formulae.brew.sh/formula/seal) to download, build, and install the library.
+The easiest way is to use a package manager to download, build, and install the library.
+For example, [vcpkg](https://github.com/microsoft/vcpkg) works on most platforms and will be up-to-date with the lastest release of Microsoft SEAL.
+On macOS you can also use [Homebrew](https://formulae.brew.sh/formula/seal).
 The .NET library is available as a multiplatform [NuGet package](https://www.nuget.org/packages/Microsoft.Research.SEALNet).
 Finally, one can build Microsoft SEAL manually with a multiplatform CMake build system; see [Building Microsoft SEAL Manually](#building-microsoft-seal-manually) for details.
 
@@ -190,6 +182,18 @@ To build the examples, see [Examples and Tests](#examples-and-tests) (C++) and [
 They are designed to provide the reader with the necessary conceptual background on homomorphic encryption.
 Reusing code directly from the examples will not work well, as the examples are often demonstrating individual pieces of functionality, and are not optimized for performance.
 Writing Microsoft SEAL code without studying the examples in depth will inevitably result in code that is vulnerable, malfunctioning, or extremely slow.
+
+### CKKS Programming with EVA
+
+When studying the examples above, it will become clear that the CKKS scheme can be unfriendly to beginners.
+Even relatively simple computations can be challenging to get to work due to the limitations of the rescaling operation and the requirement of aligning scales at different levels.
+
+We have created a new compiler tool called EVA that helps resolve these challenges to a large extent.
+EVA allows programmers to express desired encrypted computations in Python. It optimizes the computations for Microsoft SEAL, selects appropriate encryption parameters, and provides a convenient Python API for encrypting the input, executing the computation, and decrypting the result.
+EVA is available at [GitHub.com/Microsoft/EVA](https://GitHub.com/Microsoft/EVA).
+Try it out, and let us know what you think!
+
+**Note:** EVA only supports the CKKS scheme. There are no immediate plans to support the BFV scheme.
 
 ## Building Microsoft SEAL Manually
 
