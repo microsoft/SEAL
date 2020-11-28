@@ -752,7 +752,21 @@ EMSCRIPTEN_BINDINGS(SEAL) {
                 // If the original assign was const, this will default to a copy assignment
                 self = std::move(assign);
             }));
-
+    class_<Serializable<PublicKey>>("Serializable<PublicKey>")
+        .function("saveToString",  optional_override([](Serializable<PublicKey> &self, compr_mode_type compr_mode) {
+            std::ostringstream buffer;
+            self.save(buffer, compr_mode);
+            std::string contents = buffer.str();
+            std::string encoded = b64encode(contents);
+            return encoded;
+        }))        
+        .function("saveToArray",  optional_override([](Serializable<PublicKey> &self, compr_mode_type compr_mode) {
+            std::ostringstream buffer;
+            self.save(buffer, compr_mode);
+            std::string const contents {buffer.str()};
+            std::vector<std::uint8_t> const strVector{contents.begin(), contents.end()};
+            return strVector;
+        }));
     class_<Serializable<RelinKeys>>("Serializable<RelinKeys>")
         .function("saveToString",  optional_override([](Serializable<RelinKeys> &self, compr_mode_type compr_mode) {
             std::ostringstream buffer;
