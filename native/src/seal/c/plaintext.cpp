@@ -7,7 +7,6 @@
 
 // SEALNet
 #include "seal/c/plaintext.h"
-#include "seal/c/stdafx.h"
 #include "seal/c/utilities.h"
 
 // SEAL
@@ -19,24 +18,28 @@ using namespace seal;
 using namespace seal::c;
 using namespace seal::util;
 
-namespace seal
+// Enables access to private members of seal::Plaintext.
+using ph = struct Plaintext::PlaintextPrivateHelper
 {
-    /**
-    Enables access to private members of seal::Plaintext.
-    */
-    struct Plaintext::PlaintextPrivateHelper
+    static void set_scale(seal::Plaintext *plain, double new_scale)
     {
-        static void set_scale(seal::Plaintext *plain, double new_scale)
-        {
-            plain->scale_ = new_scale;
-        }
+        plain->scale_ = new_scale;
+    }
 
-        static void swap_data(seal::Plaintext *plain, seal::IntArray<uint64_t> &new_data)
-        {
-            swap(plain->data_, new_data);
-        }
-    };
-} // namespace seal
+    static void swap_data(seal::Plaintext *plain, seal::DynArray<uint64_t> &new_data)
+    {
+        swap(plain->data_, new_data);
+    }
+
+    static void set(seal::Plaintext *plain, uint64_t coeff_count, uint64_t *coeffs)
+    {
+        plain->data_.resize(0, false);
+        plain->data_.resize(coeff_count, false);
+        copy_n(coeffs, coeff_count, plain->data_.begin());
+        plain->coeff_count_ = coeff_count;
+        plain->parms_id_ = parms_id_zero;
+    }
+};
 
 SEAL_C_FUNC Plaintext_Create1(void *memoryPoolHandle, void **plaintext)
 {
@@ -156,15 +159,17 @@ SEAL_C_FUNC Plaintext_Set3(void *thisptr, uint64_t const_coeff)
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
-    try
-    {
-        *plain = const_coeff;
-        return S_OK;
-    }
-    catch (const logic_error &)
-    {
-        return E_INVALIDARG;
-    }
+    *plain = const_coeff;
+    return S_OK;
+}
+
+SEAL_C_FUNC Plaintext_Set4(void *thisptr, uint64_t count, uint64_t *coeffs)
+{
+    Plaintext *plain = FromVoid<Plaintext>(thisptr);
+    IfNullRet(plain, E_POINTER);
+
+    ph::set(plain, count, coeffs);
+    return S_OK;
 }
 
 SEAL_C_FUNC Plaintext_Destroy(void *thisptr)
@@ -419,7 +424,7 @@ SEAL_C_FUNC Plaintext_SetScale(void *thisptr, double scale)
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
-    Plaintext::PlaintextPrivateHelper::set_scale(plain, scale);
+    ph::set_scale(plain, scale);
     return S_OK;
 }
 
@@ -441,11 +446,11 @@ SEAL_C_FUNC Plaintext_SwapData(void *thisptr, uint64_t count, uint64_t *new_data
     IfNullRet(plain, E_POINTER);
     IfNullRet(new_data, E_POINTER);
 
-    IntArray<uint64_t> new_array(plain->pool());
+    DynArray<uint64_t> new_array(plain->pool());
     new_array.resize(count);
     copy_n(new_data, count, new_array.begin());
 
-    Plaintext::PlaintextPrivateHelper::swap_data(plain, new_array);
+    ph::swap_data(plain, new_array);
     return S_OK;
 }
 
@@ -491,7 +496,7 @@ SEAL_C_FUNC Plaintext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_
     try
     {
         *out_bytes = util::safe_cast<int64_t>(plain->save(
-            reinterpret_cast<SEAL_BYTE *>(outptr), util::safe_cast<size_t>(size),
+            reinterpret_cast<seal_byte *>(outptr), util::safe_cast<size_t>(size),
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
@@ -511,17 +516,17 @@ SEAL_C_FUNC Plaintext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_
 
 SEAL_C_FUNC Plaintext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(inptr, E_POINTER);
     IfNullRet(in_bytes, E_POINTER);
 
     try
     {
         *in_bytes = util::safe_cast<int64_t>(
-            plain->unsafe_load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
+            plain->unsafe_load(*ctx, reinterpret_cast<seal_byte *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -540,17 +545,17 @@ SEAL_C_FUNC Plaintext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, u
 
 SEAL_C_FUNC Plaintext_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(inptr, E_POINTER);
     IfNullRet(in_bytes, E_POINTER);
 
     try
     {
         *in_bytes = util::safe_cast<int64_t>(
-            plain->load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
+            plain->load(*ctx, reinterpret_cast<seal_byte *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)

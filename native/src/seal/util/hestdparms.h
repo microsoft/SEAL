@@ -16,7 +16,7 @@ namespace seal
         from a ternary {-1, 0, 1} distribution.
         */
         // Ternary secret; 128 bits classical security
-        SEAL_NODISCARD constexpr int SEAL_HE_STD_PARMS_128_TC(std::size_t poly_modulus_degree) noexcept
+        SEAL_NODISCARD constexpr int seal_he_std_parms_128_tc(std::size_t poly_modulus_degree) noexcept
         {
             switch (poly_modulus_degree)
             {
@@ -37,7 +37,7 @@ namespace seal
         }
 
         // Ternary secret; 192 bits classical security
-        SEAL_NODISCARD constexpr int SEAL_HE_STD_PARMS_192_TC(std::size_t poly_modulus_degree) noexcept
+        SEAL_NODISCARD constexpr int seal_he_std_parms_192_tc(std::size_t poly_modulus_degree) noexcept
         {
             switch (poly_modulus_degree)
             {
@@ -58,7 +58,7 @@ namespace seal
         }
 
         // Ternary secret; 256 bits classical security
-        SEAL_NODISCARD constexpr int SEAL_HE_STD_PARMS_256_TC(std::size_t poly_modulus_degree) noexcept
+        SEAL_NODISCARD constexpr int seal_he_std_parms_256_tc(std::size_t poly_modulus_degree) noexcept
         {
             switch (poly_modulus_degree)
             {
@@ -79,7 +79,7 @@ namespace seal
         }
 
         // Ternary secret; 128 bits quantum security
-        SEAL_NODISCARD constexpr int SEAL_HE_STD_PARMS_128_TQ(std::size_t poly_modulus_degree) noexcept
+        SEAL_NODISCARD constexpr int seal_he_std_parms_128_tq(std::size_t poly_modulus_degree) noexcept
         {
             switch (poly_modulus_degree)
             {
@@ -100,7 +100,7 @@ namespace seal
         }
 
         // Ternary secret; 192 bits quantum security
-        SEAL_NODISCARD constexpr int SEAL_HE_STD_PARMS_192_TQ(std::size_t poly_modulus_degree) noexcept
+        SEAL_NODISCARD constexpr int seal_he_std_parms_192_tq(std::size_t poly_modulus_degree) noexcept
         {
             switch (poly_modulus_degree)
             {
@@ -121,7 +121,7 @@ namespace seal
         }
 
         // Ternary secret; 256 bits quantum security
-        SEAL_NODISCARD constexpr int SEAL_HE_STD_PARMS_256_TQ(std::size_t poly_modulus_degree) noexcept
+        SEAL_NODISCARD constexpr int seal_he_std_parms_256_tq(std::size_t poly_modulus_degree) noexcept
         {
             switch (poly_modulus_degree)
             {
@@ -142,6 +142,6 @@ namespace seal
         }
 
         // Standard deviation for error distribution
-        constexpr double SEAL_HE_STD_PARMS_ERROR_STD_DEV = 3.20;
+        constexpr double seal_he_std_parms_error_std_dev = 3.2;
     } // namespace util
 } // namespace seal

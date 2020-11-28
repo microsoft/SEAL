@@ -1,5 +1,117 @@
 # List of Changes
 
+## Version 3.6.0
+
+### Hotfix - 11/17/2020
+
+- Fixed an issue with CMake system where `BUILD_SHARED_LIBS=ON` and `SEAL_BUILD_DEPS=ON` resulted in Zstandard header files not being visible to the build [(Issue 242)](https://github.com/microsoft/SEAL/issues/242).
+
+### Hotfix - 11/16/2020
+
+- Fixed issues with CMake system overwriting existing `FETCHCONTENT_BASE_DIR` [(Issue 242)](https://github.com/microsoft/SEAL/issues/242).
+- Corrected mistakes and typos in [README.md](README.md).
+
+### New Features
+
+- Added support for [Zstandard](https://github.com/facebook/zstd) compression as a much more efficient alternative to ZLIB.
+The performance improvement is around 20&ndash;30x.
+- Added support for iOS in the [NuGet package of Microsoft SEAL](https://www.nuget.org/packages/Microsoft.Research.SEALNet).
+- The build system is unified for all platforms.
+There is no longer a Visual Studio solution file (`seal.sln`) for Windows.
+There is a separate solution file for the dotnet library ([dotnet/SEALNet.sln](dotnet/SEALNet.sln)).
+- Added support for Shake256 (FIPS-202) XOF for pseudo-random number generation in addition to the default Blake2xb (faster).
+- Microsoft SEAL 3.6 is backwards compatible with 3.4 and 3.5 when deserializing, but it does not support serializing in the old formats.
+
+### Major API Changes
+
+- All C++ `enum` labels are consistently in lowercase. Most importantly, `scheme_type::BFV` and `scheme_type::CKKS` are changed to `scheme_type::bfv` and `scheme_type::ckks`.
+- Changed `seal::SEAL_BYTE` to `seal::seal_byte`; all uppercase names are used only for preprocessor macros.
+- Removed `BatchEncoder` API for encoding and decoding `Plaintext` objects inplace.
+This is because a `Plaintext` object with slot-data written into the coefficients is (confusingly) not valid to be used for encryption.
+- Removed `IntegerEncoder` and `BigUInt` classes.
+`IntegerEncoder` results in inefficient homomorphic evaluation and lacks sane correctness properties, so it was basically impossible to use in real applications.
+The `BigUInt` class was only used by the `IntegerEncoder`.
+- All `Encryptor::encrypt` variants have now two overloads: one that takes a `Ciphertext` out-parameter, and one that returns a `Serializable<Ciphertext>`.
+- Changed the names of the public key generation functions to clearly express that a new key is created each time, e.g., `KeyGenerator::create_public_key`.
+- Removed the `KeyGenerator::relin_keys_local` and `KeyGenerator::galois_keys_local` functions.
+These were poorly named and have been replaced with overloads of `KeyGenerator::create_relin_keys` and `KeyGenerator::create_galois_keys` that take an out-parameter of type `RelinKeys` or `GaloisKeys`.
+- Renamed `IntArray` to `DynArray` (dynamic array) and removed unnecessary limitations on the object type template parameter.
+- Added public API for modular reduction to the `Modulus` class.
+- Added API for creating `DynArray` and `Plaintext` objects from a `gsl::span<std::uint64_t>` (C++) or `IEnumerable<ulong>` (C#).
+
+### Minor API Changes
+
+- Added `std::hash` implementation for `EncryptionParameters` (in addition to `parms_id_type`) so it is possible to create e.g. `std::unordered_map` of `EncryptionParameters`.
+- Added API to `UniformRandomGeneratorFactory` to find whether the factory uses a default seed and to retrieve that seed.
+- Added const overloads for `DynArray::begin` and `DynArray::end`.
+- Added a `Shake256PRNG` and `Shake256PRNGFactory` classes.
+Renamed `BlakePRNG` class to `Blake2xbPRNG`, and `BlakePRNGFactory` class to `Blake2xbPRNGFactory`.
+- Added a serializable `UniformRandomGeneratorInfo` class that represents the type of an extendable output function and a seed value.
+- Added [native/src/seal/version.h](native/src/seal/version.h) defining a struct `SEALVersion`.
+This is used internally to route deserialization logic to correct functions depending on loaded `SEALHeader` version.
+
+### New Build Options
+
+- `SEAL_BUILD_DEPS` controls whether dependencies are downloaded and built into Microsoft SEAL or searched from the system.
+- Only a shared library will be built when `BUILD_SHARED_LIBS` is set to `ON`. Previously a static library was always built.
+- Encryption error is sampled from a Centered Binomial Distribution (CBD) by default unless `SEAL_USE_GAUSSIAN_NOISE` is set to `ON`.
+Sampling from a CBD is constant-time and faster than sampling from a Gaussian distribution, which is why it is used by many of the NIST PQC finalists.
+- `SEAL_DEFAULT_PRNG` controls which XOF is used for pseudo-random number generation.
+The available values are `Blake2xb` (default) and `Shake256`.
+
+### Other
+
+- The pkg-config system has been improved.
+All files related to pkg-config have been moved to [pkgconfig/](pkgconfig/).
+CMake creates now also a pkg-config file `seal_shared.pc` for compiling against a shared Microsoft SEAL if `BUILD_SHARED_LIBS` is set to `ON`.
+- Added `.pre-commit-config.yaml` (check out [pre-commit](https://pre-commit.com) if you are not familiar with this tool).
+- Added `seal::util::DWTHandler` and `seal::util::Arithmetic` class templates that unify the implementation of FFT (used by `CKKSEncoder`) and NTT (used by polynomial arithmetic).
+- The performance of encoding and decoding in CKKS are improved.
+- The performance of randomness generation for ciphertexts and keys (RLWE samples) is improved.
+
+### File Changes
+
+#### Renamed files and directories
+
+- `native/src/seal/intarray.h` to [native/src/seal/dynarray.h](native/src/seal/dynarray.h)
+- `dotnet/src/SEALNet.csproj` to [dotnet/src/SEALNet.csproj.in](dotnet/src/SEALNet.csproj.in)
+- `dotnet/tests/SEALNetTest.csproj` to [dotnet/tests/SEALNetTest.csproj.in](dotnet/tests/SEALNetTest.csproj.in)
+- `dotnet/examples/SEALNetExamples.csproj` to [dotnet/examples/SEALNetExamples.csproj.in](dotnet/examples/SEALNetExamples.csproj.in)
+
+#### New files
+
+- [native/src/seal/util/dwthandler.h](native/src/seal/util/dwthandler.h)
+- [native/src/seal/util/fips202.h](native/src/seal/util/fips202.h)
+- [native/src/seal/util/fips202.c](native/src/seal/util/fips202.c)
+- [native/src/seal/version.h](native/src/seal/version.h)
+- [dotnet/SEALNet.sln](dotnet/SEALNet.sln)
+- [.pre-commit-config.yaml](.pre-commit-config.yaml)
+
+#### Removed files
+
+- `dotnet/src/BigUInt.cs`
+- `dotnet/src/IntegerEncoder.cs`
+- `dotnet/tests/BigUIntTests.cs`
+- `dotnet/tests/IntegerEncoderTests.cs`
+- `native/examples/SEALExamples.vcxproj`
+- `native/examples/SEALExamples.vcxproj.filters`
+- `native/src/CMakeConfig.cmd`
+- `native/src/SEAL_C.vcxproj`
+- `native/src/SEAL_C.vcxproj.filters`
+- `native/src/SEAL.vcxproj`
+- `native/src/SEAL.vcxproj.filters`
+- `native/src/seal/biguint.h`
+- `native/src/seal/biguint.cpp`
+- `native/src/seal/intencoder.h`
+- `native/src/seal/intencoder.cpp`
+- `native/tests/packages.config`
+- `native/tests/SEALTest.vcxproj`
+- `native/tests/SEALTest.vcxproj.filters`
+- `native/tests/seal/biguint.cpp`
+- `native/tests/seal/intencoder.cpp`
+- `thirdparty/`
+- `SEAL.sln`
+
 ## Version 3.5.9
 
 ### Bug fixes
@@ -64,7 +176,7 @@ This struct handles precomputation data for Barrett style modular multiplication
 
 ## Version 3.5.4
 
-### Bug fixes
+### Bug Fixes
 
 - `std::void_t` was introduced only in C++17; switched to using a custom implementation [(Issue 180)](https://github.com/microsoft/SEAL/issues/180).
 - Fixed two independent bugs in `native/src/CMakeConfig.cmd`: The first prevented SEAL to be built in a directory with spaces in the path due to missing quotation marks. Another issue caused MSVC to fail when building SEAL for multiple architectures.
@@ -80,14 +192,14 @@ Instead, the outer lambda function parameter should be wrapped inside another ca
 
 ## Version 3.5.3
 
-### Bug fixes
+### Bug Fixes
 
 - Fixed a bug in `seal::util::IterTuple<...>` where a part of the `value_type` was constructed incorrectly.
 - Fixed a bug in `Evaluator::mod_switch_drop_to_next` that caused non-inplace modulus switching to fail [(Issue 179)](https://github.com/microsoft/SEAL/issues/179). Thanks s0l0ist!
 
 ## Version 3.5.2
 
-### Bug fixes
+### Bug Fixes
 
 - Merged pull request [PR 178](https://github.com/microsoft/SEAL/pull/178) to fix a lambda capture issue when building on GCC 7.5.
 - Fixed issue where SEAL.vcxproj could not be compiled with MSBuild outside the solution [(Issue 171)](https://github.com/microsoft/SEAL/issues/171).
@@ -95,7 +207,7 @@ Instead, the outer lambda function parameter should be wrapped inside another ca
 - Fixed issue in NuSpec file that made local NuGet package generation fail.
 - Fixed issue in NuSpec where XML documentation was not included into the package.
 
-### New features
+### New Features
 
 - Huge improvements to SEAL iterators, including `seal::util::iter` and `seal::util::reverse_iter` functions that can create any type of iterator from appropriate parameters.
 - Added `seal::util::SeqIter<T>` iterator for iterating a sequence of numbers for convenient iteration indexing.

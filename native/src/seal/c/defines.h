@@ -6,6 +6,9 @@
 // STD
 #include <cstddef>
 
+// SEALNet
+#include "seal/c/stdafx.h"
+
 // Check that std::size_t is 64 bits
 static_assert(sizeof(std::size_t) == 8, "Require sizeof(std::size_t) == 8");
 
@@ -16,7 +19,7 @@ static_assert(sizeof(std::size_t) == 8, "Require sizeof(std::size_t) == 8");
 static_assert(false, "Require architecture == x64");
 #endif
 
-#ifdef SEAL_C_EXPORTS
+#if defined(SEAL_C_EXPORTS) || defined(seal_c_EXPORTS) || defined(sealc_EXPORTS)
 #define SEAL_C_DECOR extern "C" __declspec(dllexport)
 #else
 #define SEAL_C_DECOR extern "C" __declspec(dllimport)

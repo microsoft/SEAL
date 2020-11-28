@@ -6,7 +6,6 @@
 
 // SEALNet
 #include "seal/c/ckksencoder.h"
-#include "seal/c/stdafx.h"
 #include "seal/c/utilities.h"
 
 // SEAL
@@ -18,13 +17,13 @@ using namespace seal::c;
 
 SEAL_C_FUNC CKKSEncoder_Create(void *context, void **ckks_encoder)
 {
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     IfNullRet(ckks_encoder, E_POINTER);
 
     try
     {
-        CKKSEncoder *encoder = new CKKSEncoder(sharedctx);
+        CKKSEncoder *encoder = new CKKSEncoder(*ctx);
         *ckks_encoder = encoder;
         return S_OK;
     }

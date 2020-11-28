@@ -30,9 +30,9 @@ namespace SEALNetExamples
             Console.WriteLine();
 
             using KeyGenerator keygen = new KeyGenerator(context);
-            using PublicKey publicKey = keygen.PublicKey;
             using SecretKey secretKey = keygen.SecretKey;
-            using RelinKeys relinKeys = keygen.RelinKeysLocal();
+            keygen.CreatePublicKey(out PublicKey publicKey);
+            keygen.CreateRelinKeys(out RelinKeys relinKeys);
             using Encryptor encryptor = new Encryptor(context, publicKey);
             using Evaluator evaluator = new Evaluator(context);
             using Decryptor decryptor = new Decryptor(context, secretKey);
@@ -74,14 +74,14 @@ namespace SEALNetExamples
             Rotations require yet another type of special key called `Galois keys'. These
             are easily obtained from the KeyGenerator.
             */
-            using GaloisKeys galKeys = keygen.GaloisKeysLocal();
+            keygen.CreateGaloisKeys(out GaloisKeys galoisKeys);
 
             /*
             Now rotate both matrix rows 3 steps to the left, decrypt, decode, and print.
             */
             Utilities.PrintLine();
             Console.WriteLine("Rotate rows 3 steps left.");
-            evaluator.RotateRowsInplace(encryptedMatrix, 3, galKeys);
+            evaluator.RotateRowsInplace(encryptedMatrix, 3, galoisKeys);
             using Plaintext plainResult = new Plaintext();
             Console.WriteLine("    + Noise budget after rotation: {0} bits",
                 decryptor.InvariantNoiseBudget(encryptedMatrix));
@@ -96,7 +96,7 @@ namespace SEALNetExamples
             */
             Utilities.PrintLine();
             Console.WriteLine("Rotate columns.");
-            evaluator.RotateColumnsInplace(encryptedMatrix, galKeys);
+            evaluator.RotateColumnsInplace(encryptedMatrix, galoisKeys);
             Console.WriteLine("    + Noise budget after rotation: {0} bits",
                 decryptor.InvariantNoiseBudget(encryptedMatrix));
             Console.WriteLine("    + Decrypt and decode ...... Correct.");
@@ -109,7 +109,7 @@ namespace SEALNetExamples
             */
             Utilities.PrintLine();
             Console.WriteLine("Rotate rows 4 steps right.");
-            evaluator.RotateRowsInplace(encryptedMatrix, -4, galKeys);
+            evaluator.RotateRowsInplace(encryptedMatrix, -4, galoisKeys);
             Console.WriteLine("    + Noise budget after rotation: {0} bits",
                 decryptor.InvariantNoiseBudget(encryptedMatrix));
             Console.WriteLine("    + Decrypt and decode ...... Correct.");
@@ -142,10 +142,10 @@ namespace SEALNetExamples
             Console.WriteLine();
 
             using KeyGenerator keygen = new KeyGenerator(context);
-            using PublicKey publicKey = keygen.PublicKey;
             using SecretKey secretKey = keygen.SecretKey;
-            using RelinKeys relinKeys = keygen.RelinKeysLocal();
-            using GaloisKeys galKeys = keygen.GaloisKeysLocal();
+            keygen.CreatePublicKey(out PublicKey publicKey);
+            keygen.CreateRelinKeys(out RelinKeys relinKeys);
+            keygen.CreateGaloisKeys(out GaloisKeys galoisKeys);
             using Encryptor encryptor = new Encryptor(context, publicKey);
             using Evaluator evaluator = new Evaluator(context);
             using Decryptor decryptor = new Decryptor(context, secretKey);
@@ -176,7 +176,7 @@ namespace SEALNetExamples
             using Ciphertext rotated = new Ciphertext();
             Utilities.PrintLine();
             Console.WriteLine("Rotate 2 steps left.");
-            evaluator.RotateVector(encrypted, 2, galKeys, rotated);
+            evaluator.RotateVector(encrypted, 2, galoisKeys, rotated);
             Console.WriteLine("    + Decrypt and decode ...... Correct.");
             decryptor.Decrypt(encrypted, plain);
             List<double> result = new List<double>();

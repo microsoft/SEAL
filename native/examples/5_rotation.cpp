@@ -15,21 +15,23 @@ void example_rotation_bfv()
 {
     print_example_banner("Example: Rotation / Rotation in BFV");
 
-    EncryptionParameters parms(scheme_type::BFV);
+    EncryptionParameters parms(scheme_type::bfv);
 
     size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     parms.set_plain_modulus(PlainModulus::Batching(poly_modulus_degree, 20));
 
-    auto context = SEALContext::Create(parms);
+    SEALContext context(parms);
     print_parameters(context);
     cout << endl;
 
     KeyGenerator keygen(context);
-    PublicKey public_key = keygen.public_key();
     SecretKey secret_key = keygen.secret_key();
-    RelinKeys relin_keys = keygen.relin_keys_local();
+    PublicKey public_key;
+    keygen.create_public_key(public_key);
+    RelinKeys relin_keys;
+    keygen.create_relin_keys(relin_keys);
     Encryptor encryptor(context, public_key);
     Evaluator evaluator(context);
     Decryptor decryptor(context, secret_key);
@@ -70,14 +72,15 @@ void example_rotation_bfv()
     Rotations require yet another type of special key called `Galois keys'. These
     are easily obtained from the KeyGenerator.
     */
-    GaloisKeys gal_keys = keygen.galois_keys_local();
+    GaloisKeys galois_keys;
+    keygen.create_galois_keys(galois_keys);
 
     /*
     Now rotate both matrix rows 3 steps to the left, decrypt, decode, and print.
     */
     print_line(__LINE__);
     cout << "Rotate rows 3 steps left." << endl;
-    evaluator.rotate_rows_inplace(encrypted_matrix, 3, gal_keys);
+    evaluator.rotate_rows_inplace(encrypted_matrix, 3, galois_keys);
     Plaintext plain_result;
     cout << "    + Noise budget after rotation: " << decryptor.invariant_noise_budget(encrypted_matrix) << " bits"
          << endl;
@@ -91,7 +94,7 @@ void example_rotation_bfv()
     */
     print_line(__LINE__);
     cout << "Rotate columns." << endl;
-    evaluator.rotate_columns_inplace(encrypted_matrix, gal_keys);
+    evaluator.rotate_columns_inplace(encrypted_matrix, galois_keys);
     cout << "    + Noise budget after rotation: " << decryptor.invariant_noise_budget(encrypted_matrix) << " bits"
          << endl;
     cout << "    + Decrypt and decode ...... Correct." << endl;
@@ -104,7 +107,7 @@ void example_rotation_bfv()
     */
     print_line(__LINE__);
     cout << "Rotate rows 4 steps right." << endl;
-    evaluator.rotate_rows_inplace(encrypted_matrix, -4, gal_keys);
+    evaluator.rotate_rows_inplace(encrypted_matrix, -4, galois_keys);
     cout << "    + Noise budget after rotation: " << decryptor.invariant_noise_budget(encrypted_matrix) << " bits"
          << endl;
     cout << "    + Decrypt and decode ...... Correct." << endl;
@@ -128,21 +131,24 @@ void example_rotation_ckks()
     /*
     Rotations in the CKKS scheme work very similarly to rotations in BFV.
     */
-    EncryptionParameters parms(scheme_type::CKKS);
+    EncryptionParameters parms(scheme_type::ckks);
 
     size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 40, 40, 40, 40, 40 }));
 
-    auto context = SEALContext::Create(parms);
+    SEALContext context(parms);
     print_parameters(context);
     cout << endl;
 
     KeyGenerator keygen(context);
-    PublicKey public_key = keygen.public_key();
     SecretKey secret_key = keygen.secret_key();
-    RelinKeys relin_keys = keygen.relin_keys_local();
-    GaloisKeys gal_keys = keygen.galois_keys_local();
+    PublicKey public_key;
+    keygen.create_public_key(public_key);
+    RelinKeys relin_keys;
+    keygen.create_relin_keys(relin_keys);
+    GaloisKeys galois_keys;
+    keygen.create_galois_keys(galois_keys);
     Encryptor encryptor(context, public_key);
     Evaluator evaluator(context);
     Decryptor decryptor(context, secret_key);
@@ -174,7 +180,7 @@ void example_rotation_ckks()
     Ciphertext rotated;
     print_line(__LINE__);
     cout << "Rotate 2 steps left." << endl;
-    evaluator.rotate_vector(encrypted, 2, gal_keys, rotated);
+    evaluator.rotate_vector(encrypted, 2, galois_keys, rotated);
     cout << "    + Decrypt and decode ...... Correct." << endl;
     decryptor.decrypt(rotated, plain);
     vector<double> result;

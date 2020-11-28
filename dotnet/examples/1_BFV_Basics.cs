@@ -125,18 +125,17 @@ namespace SEALNetExamples
             object. This is a heavy class that checks the validity and properties of the
             parameters we just set.
 
-            C# 8.0 introduced the `using` declaration for local variables. This is a very
+            C# 8.0 introduced the `using' declaration for local variables. This is a very
             convenient addition to the language: it causes the Dispose method for the
             object to be called at the end of the enclosing scope (in this case the end
             of this function), hence automatically releasing the native resources held by
-            the object. This is helpful, because releasing the native resources returns
-            the allocated memory to the memory pool, speeding up further allocations.
-            Another way would be to call GC::Collect() at a convenient point in the code,
-            but this may be less optimal as it may still cause unnecessary allocations
-            of memory if native resources were not released early enough. In this program
-            we call GC::Collect() after every example (see Examples.cs) to make sure
-            everything is returned to the memory pool at latest before running the next
-            example.
+            the object. Releasing the native resources returns the allocated memory to
+            the Microsoft SEAL memory pool, speeding up further allocations. Another way
+            would be to call GC::Collect() at a convenient point in the code, but this is
+            less optimal: it may still cause unnecessary allocations if native resources
+            were not released early enough. In this program we call GC::Collect() after
+            every example (see `Examples.cs') to make sure everything is returned to the
+            memory pool at latest before running the next example.
             */
             using SEALContext context = new SEALContext(parms);
 
@@ -166,16 +165,22 @@ namespace SEALNetExamples
 
             We are now ready to generate the secret and public keys. For this purpose
             we need an instance of the KeyGenerator class. Constructing a KeyGenerator
-            automatically generates the public and secret key, which can immediately be
-            read to local variables.
+            automatically generates a secret key. We can then create as many public
+            keys for it as we want using KeyGenerator.CreatePublicKey.
+
+            Note that KeyGenerator.CreatePublicKey has another overload that takes no
+            parameters and returns a Serializable<PublicKey> object. We will discuss
+            this in `6_Serialization.cs'.
             */
             using KeyGenerator keygen = new KeyGenerator(context);
-            using PublicKey publicKey = keygen.PublicKey;
             using SecretKey secretKey = keygen.SecretKey;
+            keygen.CreatePublicKey(out PublicKey publicKey);
 
             /*
             To be able to encrypt we need to construct an instance of Encryptor. Note
-            that the Encryptor only requires the public key, as expected.
+            that the Encryptor only requires the public key, as expected. It is also
+            possible to use Microsoft SEAL in secret-key mode by providing the Encryptor
+            the secret key instead. We will discuss this in `6_Serialization.cs'.
             */
             using Encryptor encryptor = new Encryptor(context, publicKey);
 
@@ -222,7 +227,10 @@ namespace SEALNetExamples
             Console.WriteLine($"Express x = {x} as a plaintext polynomial 0x{xPlain}.");
 
             /*
-            We then encrypt the plaintext, producing a ciphertext.
+            We then encrypt the plaintext, producing a ciphertext. We note that the
+            Encryptor.Encrypt function has another overload that takes as input only
+            a plaintext and returns a Serializable<Ciphertext> object. We will discuss
+            this in `6_Serialization.cs'.
             */
             Utilities.PrintLine();
             using Ciphertext xEncrypted = new Ciphertext();
@@ -353,14 +361,10 @@ namespace SEALNetExamples
             Relinearization is used similarly in both the BFV and the CKKS schemes, but
             in this example we continue using BFV. We repeat our computation from before,
             but this time relinearize after every multiplication.
-
-            Here we use the function KeyGenerator.RelinKeysLocal(). In production code
-            it is much better to use KeyGenerator.RelinKeys() instead. We will explain
-            and discuss these differences in `6_Serialization.cs'.
             */
             Utilities.PrintLine();
             Console.WriteLine("Generate locally usable relinearization keys.");
-            using RelinKeys relinKeys = keygen.RelinKeysLocal();
+            keygen.CreateRelinKeys(out RelinKeys relinKeys);
 
             /*
             We now repeat the computation relinearizing after each multiplication.

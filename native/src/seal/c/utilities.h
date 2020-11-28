@@ -49,11 +49,6 @@ namespace seal
         void BuildModulusPointers(const std::vector<seal::Modulus> &in_mods, uint64_t *length, void **out_mods);
 
         /**
-        Get a shared pointer to a SEALContext from a void pointer.
-        */
-        const std::shared_ptr<seal::SEALContext> &SharedContextFromVoid(void *context);
-
-        /**
         Get a parms_id_type from an uint64_t pointer
         */
         inline void CopyParmsId(const uint64_t *src, seal::parms_id_type &dest)

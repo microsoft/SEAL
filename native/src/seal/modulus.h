@@ -3,8 +3,8 @@
 
 #pragma once
 
-#include "seal/memorymanager.h"
 #include "seal/serialization.h"
+#include "seal/version.h"
 #include "seal/util/defines.h"
 #include "seal/util/hestdparms.h"
 #include "seal/util/uintcore.h"
@@ -13,7 +13,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <iostream>
-#include <numeric>
 #include <vector>
 
 namespace seal
@@ -171,7 +170,7 @@ namespace seal
         */
         SEAL_NODISCARD inline bool operator!=(const Modulus &compare) const noexcept
         {
-            return !(value_ == compare.value_);
+            return !operator==(compare);
         }
 
         /**
@@ -181,7 +180,7 @@ namespace seal
         */
         SEAL_NODISCARD inline bool operator!=(std::uint64_t compare) const noexcept
         {
-            return value_ != compare;
+            return !operator==(compare);
         }
 
         /**
@@ -281,9 +280,8 @@ namespace seal
         }
 
         /**
-        Saves the Modulus to an output stream. The full state of the modulus is
-        serialized. The output is in binary format and not human-readable. The output
-        stream must have the "binary" flag set.
+        Saves the Modulus to an output stream. The output is in binary format
+        and not human-readable. The output stream must have the "binary" flag set.
 
         @param[out] stream The stream to save the Modulus to
         @param[in] compr_mode The desired compression mode
@@ -301,8 +299,7 @@ namespace seal
         }
 
         /**
-        Loads a Modulus from an input stream overwriting the current
-        Modulus.
+        Loads a Modulus from an input stream overwriting the current Modulus.
 
         @param[in] stream The stream to load the Modulus from
         @throws std::logic_error if the data cannot be loaded by this version of
@@ -312,12 +309,12 @@ namespace seal
         inline std::streamoff load(std::istream &stream)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Modulus::load_members, this, _1), stream);
+            return Serialization::Load(std::bind(&Modulus::load_members, this, _1, _2), stream);
         }
 
         /**
-        Saves the Modulus to a given memory location. The full state of the
-        modulus is serialized. The output is in binary format and not human-readable.
+        Saves the Modulus to a given memory location. The output is in binary
+        format and not human-readable.
 
         @param[out] out The memory location to write the Modulus to
         @param[in] size The number of bytes available in the given memory location
@@ -329,7 +326,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            seal_byte *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
@@ -348,18 +345,26 @@ namespace seal
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff load(const seal_byte *in, std::size_t size)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Modulus::load_members, this, _1), in, size);
+            return Serialization::Load(std::bind(&Modulus::load_members, this, _1, _2), in, size);
         }
+
+        /**
+        Reduces a given unsigned integer modulo this modulus.
+
+        @param[in] value The unsigned integer to reduce
+        @throws std::logic_error if the Modulus is zero
+        */
+        SEAL_NODISCARD std::uint64_t reduce(std::uint64_t value) const;
 
     private:
         void set_value(std::uint64_t value);
 
         void save_members(std::ostream &stream) const;
 
-        void load_members(std::istream &stream);
+        void load_members(std::istream &stream, SEALVersion version);
 
         std::uint64_t value_ = 0;
 
@@ -435,16 +440,16 @@ namespace seal
             switch (sec_level)
             {
             case sec_level_type::tc128:
-                return util::SEAL_HE_STD_PARMS_128_TC(poly_modulus_degree);
+                return util::seal_he_std_parms_128_tc(poly_modulus_degree);
 
             case sec_level_type::tc192:
-                return util::SEAL_HE_STD_PARMS_192_TC(poly_modulus_degree);
+                return util::seal_he_std_parms_192_tc(poly_modulus_degree);
 
             case sec_level_type::tc256:
-                return util::SEAL_HE_STD_PARMS_256_TC(poly_modulus_degree);
+                return util::seal_he_std_parms_256_tc(poly_modulus_degree);
 
             case sec_level_type::none:
-                return std::numeric_limits<int>::max();
+                return (std::numeric_limits<int>::max)();
 
             default:
                 return 0;

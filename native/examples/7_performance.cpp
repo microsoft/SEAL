@@ -6,14 +6,14 @@
 using namespace std;
 using namespace seal;
 
-void bfv_performance_test(shared_ptr<SEALContext> context)
+void bfv_performance_test(SEALContext context)
 {
     chrono::high_resolution_clock::time_point time_start, time_end;
 
     print_parameters(context);
     cout << endl;
 
-    auto &parms = context->first_context_data()->parms();
+    auto &parms = context.first_context_data()->parms();
     auto &plain_modulus = parms.plain_modulus();
     size_t poly_modulus_degree = parms.poly_modulus_degree();
 
@@ -22,24 +22,25 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
     cout << "Done" << endl;
 
     auto secret_key = keygen.secret_key();
-    auto public_key = keygen.public_key();
+    PublicKey public_key;
+    keygen.create_public_key(public_key);
 
     RelinKeys relin_keys;
     GaloisKeys gal_keys;
     chrono::microseconds time_diff;
-    if (context->using_keyswitching())
+    if (context.using_keyswitching())
     {
         /*
         Generate relinearization keys.
         */
         cout << "Generating relinearization keys: ";
         time_start = chrono::high_resolution_clock::now();
-        relin_keys = keygen.relin_keys_local();
+        keygen.create_relin_keys(relin_keys);
         time_end = chrono::high_resolution_clock::now();
         time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         cout << "Done [" << time_diff.count() << " microseconds]" << endl;
 
-        if (!context->key_context_data()->qualifiers().using_batching)
+        if (!context.key_context_data()->qualifiers().using_batching)
         {
             cout << "Given encryption parameters do not support batching." << endl;
             return;
@@ -54,7 +55,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         */
         cout << "Generating Galois keys: ";
         time_start = chrono::high_resolution_clock::now();
-        gal_keys = keygen.galois_keys_local();
+        keygen.create_galois_keys(gal_keys);
         time_end = chrono::high_resolution_clock::now();
         time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         cout << "Done [" << time_diff.count() << " microseconds]" << endl;
@@ -64,7 +65,6 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
     Decryptor decryptor(context, secret_key);
     Evaluator evaluator(context);
     BatchEncoder batch_encoder(context);
-    IntegerEncoder encoder(context);
 
     /*
     These will hold the total times used by each operation.
@@ -81,7 +81,13 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
     chrono::microseconds time_rotate_rows_one_step_sum(0);
     chrono::microseconds time_rotate_rows_random_sum(0);
     chrono::microseconds time_rotate_columns_sum(0);
-
+    chrono::microseconds time_serialize_sum(0);
+#ifdef SEAL_USE_ZLIB
+    chrono::microseconds time_serialize_zlib_sum(0);
+#endif
+#ifdef SEAL_USE_ZSTD
+    chrono::microseconds time_serialize_zstd_sum(0);
+#endif
     /*
     How many times to run the test?
     */
@@ -95,11 +101,11 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
     random_device rd;
     for (size_t i = 0; i < slot_count; i++)
     {
-        pod_vector.push_back(rd() % plain_modulus.value());
+        pod_vector.push_back(plain_modulus.reduce(rd()));
     }
 
     cout << "Running tests ";
-    for (long long i = 0; i < count; i++)
+    for (size_t i = 0; i < static_cast<size_t>(count); i++)
     {
         /*
         [Batching]
@@ -107,7 +113,9 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         into the polynomial. Note how the plaintext we create is of the exactly
         right size so unnecessary reallocations are avoided.
         */
-        Plaintext plain(parms.poly_modulus_degree(), 0);
+        Plaintext plain(poly_modulus_degree, 0);
+        Plaintext plain1(poly_modulus_degree, 0);
+        Plaintext plain2(poly_modulus_degree, 0);
         time_start = chrono::high_resolution_clock::now();
         batch_encoder.encode(pod_vector, plain);
         time_end = chrono::high_resolution_clock::now();
@@ -143,7 +151,6 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         [Decryption]
         We decrypt what we just encrypted.
         */
-        Plaintext plain2(poly_modulus_degree, 0);
         time_start = chrono::high_resolution_clock::now();
         decryptor.decrypt(encrypted, plain2);
         time_end = chrono::high_resolution_clock::now();
@@ -158,9 +165,11 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         We create two ciphertexts and perform a few additions with them.
         */
         Ciphertext encrypted1(context);
-        encryptor.encrypt(encoder.encode(static_cast<uint64_t>(i)), encrypted1);
+        batch_encoder.encode(vector<uint64_t>(slot_count, i), plain1);
+        encryptor.encrypt(plain1, encrypted1);
         Ciphertext encrypted2(context);
-        encryptor.encrypt(encoder.encode(static_cast<uint64_t>(i + 1)), encrypted2);
+        batch_encoder.encode(vector<uint64_t>(slot_count, i + 1), plain1);
+        encryptor.encrypt(plain2, encrypted2);
         time_start = chrono::high_resolution_clock::now();
         evaluator.add_inplace(encrypted1, encrypted1);
         evaluator.add_inplace(encrypted2, encrypted2);
@@ -201,7 +210,7 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         time_end = chrono::high_resolution_clock::now();
         time_square_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
-        if (context->using_keyswitching())
+        if (context.using_keyswitching())
         {
             /*
             [Relinearize]
@@ -250,6 +259,37 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
         }
 
         /*
+        [Serialize Ciphertext]
+        */
+        size_t buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::none));
+        vector<seal_byte> buf(buf_size);
+        time_start = chrono::high_resolution_clock::now();
+        encrypted.save(buf.data(), buf_size, compr_mode_type::none);
+        time_end = chrono::high_resolution_clock::now();
+        time_serialize_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
+#ifdef SEAL_USE_ZLIB
+        /*
+        [Serialize Ciphertext (ZLIB)]
+        */
+        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::zlib));
+        buf.resize(buf_size);
+        time_start = chrono::high_resolution_clock::now();
+        encrypted.save(buf.data(), buf_size, compr_mode_type::zlib);
+        time_end = chrono::high_resolution_clock::now();
+        time_serialize_zlib_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
+#endif
+#ifdef SEAL_USE_ZSTD
+        /*
+        [Serialize Ciphertext (Zstandard)]
+        */
+        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::zstd));
+        buf.resize(buf_size);
+        time_start = chrono::high_resolution_clock::now();
+        encrypted.save(buf.data(), buf_size, compr_mode_type::zstd);
+        time_end = chrono::high_resolution_clock::now();
+        time_serialize_zstd_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
+#endif
+        /*
         Print a dot to indicate progress.
         */
         cout << ".";
@@ -271,7 +311,13 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
     auto avg_rotate_rows_one_step = time_rotate_rows_one_step_sum.count() / (2 * count);
     auto avg_rotate_rows_random = time_rotate_rows_random_sum.count() / count;
     auto avg_rotate_columns = time_rotate_columns_sum.count() / count;
-
+    auto avg_serialize = time_serialize_sum.count() / count;
+#ifdef SEAL_USE_ZLIB
+    auto avg_serialize_zlib = time_serialize_zlib_sum.count() / count;
+#endif
+#ifdef SEAL_USE_ZSTD
+    auto avg_serialize_zstd = time_serialize_zstd_sum.count() / count;
+#endif
     cout << "Average batch: " << avg_batch << " microseconds" << endl;
     cout << "Average unbatch: " << avg_unbatch << " microseconds" << endl;
     cout << "Average encrypt: " << avg_encrypt << " microseconds" << endl;
@@ -280,24 +326,31 @@ void bfv_performance_test(shared_ptr<SEALContext> context)
     cout << "Average multiply: " << avg_multiply << " microseconds" << endl;
     cout << "Average multiply plain: " << avg_multiply_plain << " microseconds" << endl;
     cout << "Average square: " << avg_square << " microseconds" << endl;
-    if (context->using_keyswitching())
+    if (context.using_keyswitching())
     {
         cout << "Average relinearize: " << avg_relinearize << " microseconds" << endl;
         cout << "Average rotate rows one step: " << avg_rotate_rows_one_step << " microseconds" << endl;
         cout << "Average rotate rows random: " << avg_rotate_rows_random << " microseconds" << endl;
         cout << "Average rotate columns: " << avg_rotate_columns << " microseconds" << endl;
     }
+    cout << "Average serialize ciphertext: " << avg_serialize << " microseconds" << endl;
+#ifdef SEAL_USE_ZLIB
+    cout << "Average compressed (ZLIB) serialize ciphertext: " << avg_serialize_zlib << " microseconds" << endl;
+#endif
+#ifdef SEAL_USE_ZSTD
+    cout << "Average compressed (Zstandard) serialize ciphertext: " << avg_serialize_zstd << " microseconds" << endl;
+#endif
     cout.flush();
 }
 
-void ckks_performance_test(shared_ptr<SEALContext> context)
+void ckks_performance_test(SEALContext context)
 {
     chrono::high_resolution_clock::time_point time_start, time_end;
 
     print_parameters(context);
     cout << endl;
 
-    auto &parms = context->first_context_data()->parms();
+    auto &parms = context.first_context_data()->parms();
     size_t poly_modulus_degree = parms.poly_modulus_degree();
 
     cout << "Generating secret/public keys: ";
@@ -305,21 +358,22 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
     cout << "Done" << endl;
 
     auto secret_key = keygen.secret_key();
-    auto public_key = keygen.public_key();
+    PublicKey public_key;
+    keygen.create_public_key(public_key);
 
     RelinKeys relin_keys;
     GaloisKeys gal_keys;
     chrono::microseconds time_diff;
-    if (context->using_keyswitching())
+    if (context.using_keyswitching())
     {
         cout << "Generating relinearization keys: ";
         time_start = chrono::high_resolution_clock::now();
-        relin_keys = keygen.relin_keys_local();
+        keygen.create_relin_keys(relin_keys);
         time_end = chrono::high_resolution_clock::now();
         time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         cout << "Done [" << time_diff.count() << " microseconds]" << endl;
 
-        if (!context->first_context_data()->qualifiers().using_batching)
+        if (!context.first_context_data()->qualifiers().using_batching)
         {
             cout << "Given encryption parameters do not support batching." << endl;
             return;
@@ -327,7 +381,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
 
         cout << "Generating Galois keys: ";
         time_start = chrono::high_resolution_clock::now();
-        gal_keys = keygen.galois_keys_local();
+        keygen.create_galois_keys(gal_keys);
         time_end = chrono::high_resolution_clock::now();
         time_diff = chrono::duration_cast<chrono::microseconds>(time_end - time_start);
         cout << "Done [" << time_diff.count() << " microseconds]" << endl;
@@ -351,7 +405,13 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
     chrono::microseconds time_rotate_one_step_sum(0);
     chrono::microseconds time_rotate_random_sum(0);
     chrono::microseconds time_conjugate_sum(0);
-
+    chrono::microseconds time_serialize_sum(0);
+#ifdef SEAL_USE_ZLIB
+    chrono::microseconds time_serialize_zlib_sum(0);
+#endif
+#ifdef SEAL_USE_ZSTD
+    chrono::microseconds time_serialize_zstd_sum(0);
+#endif
     /*
     How many times to run the test?
     */
@@ -453,7 +513,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
         time_end = chrono::high_resolution_clock::now();
         time_square_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
 
-        if (context->using_keyswitching())
+        if (context.using_keyswitching())
         {
             /*
             [Relinearize]
@@ -500,6 +560,37 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
         }
 
         /*
+        [Serialize Ciphertext]
+        */
+        size_t buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::none));
+        vector<seal_byte> buf(buf_size);
+        time_start = chrono::high_resolution_clock::now();
+        encrypted.save(buf.data(), buf_size, compr_mode_type::none);
+        time_end = chrono::high_resolution_clock::now();
+        time_serialize_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
+#ifdef SEAL_USE_ZLIB
+        /*
+        [Serialize Ciphertext (ZLIB)]
+        */
+        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::zlib));
+        buf.resize(buf_size);
+        time_start = chrono::high_resolution_clock::now();
+        encrypted.save(buf.data(), buf_size, compr_mode_type::zlib);
+        time_end = chrono::high_resolution_clock::now();
+        time_serialize_zlib_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
+#endif
+#ifdef SEAL_USE_ZSTD
+        /*
+        [Serialize Ciphertext (Zstandard)]
+        */
+        buf_size = static_cast<size_t>(encrypted.save_size(compr_mode_type::zstd));
+        buf.resize(buf_size);
+        time_start = chrono::high_resolution_clock::now();
+        encrypted.save(buf.data(), buf_size, compr_mode_type::zstd);
+        time_end = chrono::high_resolution_clock::now();
+        time_serialize_zstd_sum += chrono::duration_cast<chrono::microseconds>(time_end - time_start);
+#endif
+        /*
         Print a dot to indicate progress.
         */
         cout << ".";
@@ -522,7 +613,13 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
     auto avg_rotate_one_step = time_rotate_one_step_sum.count() / (2 * count);
     auto avg_rotate_random = time_rotate_random_sum.count() / count;
     auto avg_conjugate = time_conjugate_sum.count() / count;
-
+    auto avg_serialize = time_serialize_sum.count() / count;
+#ifdef SEAL_USE_ZLIB
+    auto avg_serialize_zlib = time_serialize_zlib_sum.count() / count;
+#endif
+#ifdef SEAL_USE_ZSTD
+    auto avg_serialize_zstd = time_serialize_zstd_sum.count() / count;
+#endif
     cout << "Average encode: " << avg_encode << " microseconds" << endl;
     cout << "Average decode: " << avg_decode << " microseconds" << endl;
     cout << "Average encrypt: " << avg_encrypt << " microseconds" << endl;
@@ -531,7 +628,7 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
     cout << "Average multiply: " << avg_multiply << " microseconds" << endl;
     cout << "Average multiply plain: " << avg_multiply_plain << " microseconds" << endl;
     cout << "Average square: " << avg_square << " microseconds" << endl;
-    if (context->using_keyswitching())
+    if (context.using_keyswitching())
     {
         cout << "Average relinearize: " << avg_relinearize << " microseconds" << endl;
         cout << "Average rescale: " << avg_rescale << " microseconds" << endl;
@@ -539,6 +636,13 @@ void ckks_performance_test(shared_ptr<SEALContext> context)
         cout << "Average rotate vector random: " << avg_rotate_random << " microseconds" << endl;
         cout << "Average complex conjugate: " << avg_conjugate << " microseconds" << endl;
     }
+    cout << "Average serialize ciphertext: " << avg_serialize << " microseconds" << endl;
+#ifdef SEAL_USE_ZLIB
+    cout << "Average compressed (ZLIB) serialize ciphertext: " << avg_serialize_zlib << " microseconds" << endl;
+#endif
+#ifdef SEAL_USE_ZSTD
+    cout << "Average compressed (Zstandard) serialize ciphertext: " << avg_serialize_zstd << " microseconds" << endl;
+#endif
     cout.flush();
 }
 
@@ -546,26 +650,26 @@ void example_bfv_performance_default()
 {
     print_example_banner("BFV Performance Test with Degrees: 4096, 8192, and 16384");
 
-    EncryptionParameters parms(scheme_type::BFV);
+    EncryptionParameters parms(scheme_type::bfv);
     size_t poly_modulus_degree = 4096;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     parms.set_plain_modulus(786433);
-    bfv_performance_test(SEALContext::Create(parms));
+    bfv_performance_test(parms);
 
     cout << endl;
     poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     parms.set_plain_modulus(786433);
-    bfv_performance_test(SEALContext::Create(parms));
+    bfv_performance_test(parms);
 
     cout << endl;
     poly_modulus_degree = 16384;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     parms.set_plain_modulus(786433);
-    bfv_performance_test(SEALContext::Create(parms));
+    bfv_performance_test(parms);
 
     /*
     Comment out the following to run the biggest example.
@@ -575,7 +679,7 @@ void example_bfv_performance_default()
     // parms.set_poly_modulus_degree(poly_modulus_degree);
     // parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     // parms.set_plain_modulus(786433);
-    // bfv_performance_test(SEALContext::Create(parms));
+    // bfv_performance_test(parms);
 }
 
 void example_bfv_performance_custom()
@@ -599,7 +703,7 @@ void example_bfv_performance_custom()
     string banner = "BFV Performance Test with Degree: ";
     print_example_banner(banner + to_string(poly_modulus_degree));
 
-    EncryptionParameters parms(scheme_type::BFV);
+    EncryptionParameters parms(scheme_type::bfv);
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     if (poly_modulus_degree == 1024)
@@ -610,7 +714,7 @@ void example_bfv_performance_custom()
     {
         parms.set_plain_modulus(786433);
     }
-    bfv_performance_test(SEALContext::Create(parms));
+    bfv_performance_test(parms);
 }
 
 void example_ckks_performance_default()
@@ -619,23 +723,23 @@ void example_ckks_performance_default()
 
     // It is not recommended to use BFVDefault primes in CKKS. However, for performance
     // test, BFVDefault primes are good enough.
-    EncryptionParameters parms(scheme_type::CKKS);
+    EncryptionParameters parms(scheme_type::ckks);
     size_t poly_modulus_degree = 4096;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
-    ckks_performance_test(SEALContext::Create(parms));
+    ckks_performance_test(parms);
 
     cout << endl;
     poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
-    ckks_performance_test(SEALContext::Create(parms));
+    ckks_performance_test(parms);
 
     cout << endl;
     poly_modulus_degree = 16384;
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
-    ckks_performance_test(SEALContext::Create(parms));
+    ckks_performance_test(parms);
 
     /*
     Comment out the following to run the biggest example.
@@ -644,7 +748,7 @@ void example_ckks_performance_default()
     // poly_modulus_degree = 32768;
     // parms.set_poly_modulus_degree(poly_modulus_degree);
     // parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
-    // ckks_performance_test(SEALContext::Create(parms));
+    // ckks_performance_test(parms);
 }
 
 void example_ckks_performance_custom()
@@ -668,10 +772,10 @@ void example_ckks_performance_custom()
     string banner = "CKKS Performance Test with Degree: ";
     print_example_banner(banner + to_string(poly_modulus_degree));
 
-    EncryptionParameters parms(scheme_type::CKKS);
+    EncryptionParameters parms(scheme_type::ckks);
     parms.set_poly_modulus_degree(poly_modulus_degree);
     parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
-    ckks_performance_test(SEALContext::Create(parms));
+    ckks_performance_test(parms);
 }
 
 /*

@@ -5,7 +5,6 @@
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/scalingvariant.h"
 #include "seal/util/uintarith.h"
-#include <stdexcept>
 
 using namespace std;
 

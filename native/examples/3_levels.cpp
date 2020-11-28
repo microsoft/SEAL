@@ -42,7 +42,7 @@ void example_levels()
     node can be identified by the parms_id of its specific encryption parameters
     (poly_modulus_degree remains the same but coeff_modulus varies).
     */
-    EncryptionParameters parms(scheme_type::BFV);
+    EncryptionParameters parms(scheme_type::bfv);
 
     size_t poly_modulus_degree = 8192;
     parms.set_poly_modulus_degree(poly_modulus_degree);
@@ -89,7 +89,7 @@ void example_levels()
     */
     parms.set_plain_modulus(PlainModulus::Batching(poly_modulus_degree, 20));
 
-    auto context = SEALContext::Create(parms);
+    SEALContext context(parms);
     print_parameters(context);
     cout << endl;
 
@@ -109,7 +109,7 @@ void example_levels()
     /*
     First print the key level parameter information.
     */
-    auto context_data = context->key_context_data();
+    auto context_data = context.key_context_data();
     cout << "----> Level (chain index): " << context_data->chain_index();
     cout << " ...... key_context_data()" << endl;
     cout << "      parms_id: " << context_data->parms_id() << endl;
@@ -126,15 +126,15 @@ void example_levels()
     /*
     Next iterate over the remaining (data) levels.
     */
-    context_data = context->first_context_data();
+    context_data = context.first_context_data();
     while (context_data)
     {
         cout << " Level (chain index): " << context_data->chain_index();
-        if (context_data->parms_id() == context->first_parms_id())
+        if (context_data->parms_id() == context.first_parms_id())
         {
             cout << " ...... first_context_data()" << endl;
         }
-        else if (context_data->parms_id() == context->last_parms_id())
+        else if (context_data->parms_id() == context.last_parms_id())
         {
             cout << " ...... last_context_data()" << endl;
         }
@@ -164,24 +164,17 @@ void example_levels()
     We create some keys and check that indeed they appear at the highest level.
     */
     KeyGenerator keygen(context);
-    auto public_key = keygen.public_key();
     auto secret_key = keygen.secret_key();
-    auto relin_keys = keygen.relin_keys_local();
+    PublicKey public_key;
+    keygen.create_public_key(public_key);
+    RelinKeys relin_keys;
+    keygen.create_relin_keys(relin_keys);
 
-    /*
-    In this example we create a local version of the GaloisKeys object using
-    KeyGenerator::galois_keys_local(). In a production setting where the Galois
-    keys would need to be communicated to a server, it would be much better to
-    use KeyGenerator::galois_keys(), which outputs a Serializable<GaloisKeys>
-    object for compressed serialization.
-    */
-    auto galois_keys = keygen.galois_keys_local();
     print_line(__LINE__);
     cout << "Print the parameter IDs of generated elements." << endl;
     cout << "    + public_key:  " << public_key.parms_id() << endl;
     cout << "    + secret_key:  " << secret_key.parms_id() << endl;
     cout << "    + relin_keys:  " << relin_keys.parms_id() << endl;
-    cout << "    + galois_keys: " << galois_keys.parms_id() << endl;
 
     Encryptor encryptor(context, public_key);
     Evaluator evaluator(context);
@@ -206,7 +199,7 @@ void example_levels()
     */
     print_line(__LINE__);
     cout << "Perform modulus switching on encrypted and print." << endl;
-    context_data = context->first_context_data();
+    context_data = context.first_context_data();
     cout << "---->";
     while (context_data->next_context_data())
     {
@@ -300,9 +293,9 @@ void example_levels()
     /*
     In BFV modulus switching is not necessary and in some cases the user might
     not want to create the modulus switching chain, except for the highest two
-    levels. This can be done by passing a bool `false' to SEALContext::Create.
+    levels. This can be done by passing a bool `false' to SEALContext constructor.
     */
-    context = SEALContext::Create(parms, false);
+    context = SEALContext(parms, false);
 
     /*
     We can check that indeed the modulus switching chain has been created only
@@ -313,7 +306,7 @@ void example_levels()
     print_line(__LINE__);
     cout << "Print the modulus switching chain." << endl;
     cout << "---->";
-    for (context_data = context->key_context_data(); context_data; context_data = context_data->next_context_data())
+    for (context_data = context.key_context_data(); context_data; context_data = context_data->next_context_data())
     {
         cout << " Level (chain index): " << context_data->chain_index() << endl;
         cout << "      parms_id: " << context_data->parms_id() << endl;

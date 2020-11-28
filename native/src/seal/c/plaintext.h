@@ -29,6 +29,8 @@ SEAL_C_FUNC Plaintext_Set2(void *thisptr, char *hex_poly);
 
 SEAL_C_FUNC Plaintext_Set3(void *thisptr, uint64_t const_coeff);
 
+SEAL_C_FUNC Plaintext_Set4(void *thisptr, uint64_t count, uint64_t *coeffs);
+
 SEAL_C_FUNC Plaintext_Destroy(void *thisptr);
 
 SEAL_C_FUNC Plaintext_CoeffCount(void *thisptr, uint64_t *coeff_count);

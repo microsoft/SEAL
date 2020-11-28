@@ -139,7 +139,7 @@ namespace seal
         {
             SEAL_IF_CONSTEXPR(std::is_unsigned<T>::value)
             {
-                if (in1 && (in2 > std::numeric_limits<T>::max() / in1))
+                if (in1 && (in2 > (std::numeric_limits<T>::max)() / in1))
                 {
                     throw std::logic_error("unsigned overflow");
                 }
@@ -147,7 +147,7 @@ namespace seal
             else
             {
                 // Positive inputs
-                if ((in1 > 0) && (in2 > 0) && (in2 > std::numeric_limits<T>::max() / in1))
+                if ((in1 > 0) && (in2 > 0) && (in2 > (std::numeric_limits<T>::max)() / in1))
                 {
                     throw std::logic_error("signed overflow");
                 }
@@ -156,12 +156,12 @@ namespace seal
 #pragma warning(disable : 4146)
 #endif
                 // Negative inputs
-                else if ((in1 < 0) && (in2 < 0) && ((-in2) > std::numeric_limits<T>::max() / (-in1)))
+                else if ((in1 < 0) && (in2 < 0) && ((-in2) > (std::numeric_limits<T>::max)() / (-in1)))
                 {
                     throw std::logic_error("signed overflow");
                 }
                 // Negative in1; positive in2
-                else if ((in1 < 0) && (in2 > 0) && (in2 > std::numeric_limits<T>::max() / (-in1)))
+                else if ((in1 < 0) && (in2 > 0) && (in2 > (std::numeric_limits<T>::max)() / (-in1)))
                 {
                     throw std::logic_error("signed underflow");
                 }
@@ -169,7 +169,7 @@ namespace seal
 #pragma warning(pop)
 #endif
                 // Positive in1; negative in2
-                else if ((in1 > 0) && (in2 < 0) && (in2 < std::numeric_limits<T>::min() / in1))
+                else if ((in1 > 0) && (in2 < 0) && (in2 < (std::numeric_limits<T>::min)() / in1))
                 {
                     throw std::logic_error("signed underflow");
                 }
@@ -194,18 +194,18 @@ namespace seal
         {
             SEAL_IF_CONSTEXPR(std::is_unsigned<T>::value)
             {
-                if (in2 > std::numeric_limits<T>::max() - in1)
+                if (in2 > (std::numeric_limits<T>::max)() - in1)
                 {
                     throw std::logic_error("unsigned overflow");
                 }
             }
             else
             {
-                if (in1 > 0 && (in2 > std::numeric_limits<T>::max() - in1))
+                if (in1 > 0 && (in2 > (std::numeric_limits<T>::max)() - in1))
                 {
                     throw std::logic_error("signed overflow");
                 }
-                else if (in1 < 0 && (in2 < std::numeric_limits<T>::min() - in1))
+                else if (in1 < 0 && (in2 < (std::numeric_limits<T>::min)() - in1))
                 {
                     throw std::logic_error("signed underflow");
                 }
@@ -231,11 +231,11 @@ namespace seal
             }
             else
             {
-                if (in1 < 0 && (in2 > std::numeric_limits<T>::max() + in1))
+                if (in1 < 0 && (in2 > (std::numeric_limits<T>::max)() + in1))
                 {
                     throw std::logic_error("signed underflow");
                 }
-                else if (in1 > 0 && (in2 < std::numeric_limits<T>::min() + in1))
+                else if (in1 > 0 && (in2 < (std::numeric_limits<T>::min)() + in1))
                 {
                     throw std::logic_error("signed overflow");
                 }
@@ -291,26 +291,26 @@ namespace seal
                     // Non-negative number; compare as std::uint64_t
                     // Cannot use unsigned_leq with C++14 for lack of `if constexpr'
                     return static_cast<std::uint64_t>(value) <=
-                           static_cast<std::uint64_t>(std::numeric_limits<T>::max());
+                           static_cast<std::uint64_t>((std::numeric_limits<T>::max)());
                 }
                 else
                 {
                     // Negative number; compare as std::int64_t
                     return (
-                        static_cast<std::int64_t>(value) >= static_cast<std::int64_t>(std::numeric_limits<T>::min()));
+                        static_cast<std::int64_t>(value) >= static_cast<std::int64_t>((std::numeric_limits<T>::min)()));
                 }
             }
             else SEAL_IF_CONSTEXPR(std::is_floating_point<T>::value)
             {
                 // Converting to floating-point
-                return (static_cast<double>(value) <= static_cast<double>(std::numeric_limits<T>::max())) &&
-                       (static_cast<double>(value) >= -static_cast<double>(std::numeric_limits<T>::max()));
+                return (static_cast<double>(value) <= static_cast<double>((std::numeric_limits<T>::max)())) &&
+                       (static_cast<double>(value) >= -static_cast<double>((std::numeric_limits<T>::max)()));
             }
             else
             {
                 // Converting from floating-point
-                return (static_cast<double>(value) <= static_cast<double>(std::numeric_limits<T>::max())) &&
-                       (static_cast<double>(value) >= static_cast<double>(std::numeric_limits<T>::min()));
+                return (static_cast<double>(value) <= static_cast<double>((std::numeric_limits<T>::max)())) &&
+                       (static_cast<double>(value) >= static_cast<double>((std::numeric_limits<T>::min)()));
             }
         }
 
@@ -364,6 +364,14 @@ namespace seal
         constexpr int nibbles_per_byte = 2;
 
         constexpr int nibbles_per_uint64 = bytes_per_uint64 * nibbles_per_byte;
+
+        SEAL_NODISCARD inline constexpr int hamming_weight(unsigned char value)
+        {
+            int t = static_cast<int>(value);
+            t -= (t >> 1) & 0x55;
+            t = (t & 0x33) + ((t >> 2) & 0x33);
+            return (t + (t >> 4)) & 0x0F;
+        }
 
         template <typename T, typename = std::enable_if_t<is_uint32_v<T> || is_uint64_v<T>>>
         SEAL_NODISCARD inline constexpr T reverse_bits(T operand) noexcept
@@ -567,6 +575,6 @@ namespace seal
             return value == T{ 0 };
         }
 
-        void seal_memzero(void *const data, std::size_t size);
+        void seal_memzero(void *data, std::size_t size);
     } // namespace util
 } // namespace seal

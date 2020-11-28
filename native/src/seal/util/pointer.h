@@ -15,9 +15,9 @@ namespace seal
 {
     namespace util
     {
-        // Specialization for SEAL_BYTE
+        // Specialization for seal_byte
         template <>
-        class SEAL_NODISCARD Pointer<SEAL_BYTE>
+        class SEAL_NODISCARD Pointer<seal_byte>
         {
             friend class MemoryPoolST;
             friend class MemoryPoolMT;
@@ -31,7 +31,7 @@ namespace seal
             Pointer() = default;
 
             // Move of the same type
-            Pointer(Pointer<SEAL_BYTE> &&source) noexcept
+            Pointer(Pointer<seal_byte> &&source) noexcept
                 : data_(source.data_), head_(source.head_), item_(source.item_), alias_(source.alias_)
             {
                 source.data_ = nullptr;
@@ -41,29 +41,29 @@ namespace seal
             }
 
             // Move of the same type
-            Pointer(Pointer<SEAL_BYTE> &&source, SEAL_BYTE value) : Pointer(std::move(source))
+            Pointer(Pointer<seal_byte> &&source, seal_byte value) : Pointer(std::move(source))
             {
                 std::fill_n(data_, head_->item_byte_count(), value);
             }
 
             // Copy a range of elements
             template <typename InputIt>
-            Pointer(InputIt first, Pointer<SEAL_BYTE> &&source) : Pointer(std::move(source))
+            Pointer(InputIt first, Pointer<seal_byte> &&source) : Pointer(std::move(source))
             {
                 std::copy_n(first, head_->item_byte_count(), data_);
             }
 
-            SEAL_NODISCARD inline SEAL_BYTE &operator[](std::size_t index)
+            SEAL_NODISCARD inline seal_byte &operator[](std::size_t index)
             {
                 return data_[index];
             }
 
-            SEAL_NODISCARD inline const SEAL_BYTE &operator[](std::size_t index) const
+            SEAL_NODISCARD inline const seal_byte &operator[](std::size_t index) const
             {
                 return data_[index];
             }
 
-            inline auto &operator=(Pointer<SEAL_BYTE> &&assign) noexcept
+            inline auto &operator=(Pointer<seal_byte> &&assign) noexcept
             {
                 acquire(std::move(assign));
                 return *this;
@@ -74,17 +74,17 @@ namespace seal
                 return data_ != nullptr;
             }
 
-            SEAL_NODISCARD inline SEAL_BYTE *get() const noexcept
+            SEAL_NODISCARD inline seal_byte *get() const noexcept
             {
                 return data_;
             }
 
-            SEAL_NODISCARD inline SEAL_BYTE *operator->() const noexcept
+            SEAL_NODISCARD inline seal_byte *operator->() const noexcept
             {
                 return data_;
             }
 
-            SEAL_NODISCARD inline SEAL_BYTE &operator*() const
+            SEAL_NODISCARD inline seal_byte &operator*() const
             {
                 return *data_;
             }
@@ -113,7 +113,7 @@ namespace seal
                 alias_ = false;
             }
 
-            void acquire(Pointer<SEAL_BYTE> &other) noexcept
+            void acquire(Pointer<seal_byte> &other) noexcept
             {
                 if (this == &other)
                 {
@@ -132,7 +132,7 @@ namespace seal
                 other.alias_ = false;
             }
 
-            inline void acquire(Pointer<SEAL_BYTE> &&other) noexcept
+            inline void acquire(Pointer<seal_byte> &&other) noexcept
             {
                 acquire(other);
             }
@@ -147,22 +147,22 @@ namespace seal
                 return (data_ != nullptr);
             }
 
-            SEAL_NODISCARD inline static Pointer<SEAL_BYTE> Owning(SEAL_BYTE *pointer) noexcept
+            SEAL_NODISCARD inline static Pointer<seal_byte> Owning(seal_byte *pointer) noexcept
             {
                 return { pointer, false };
             }
 
-            SEAL_NODISCARD inline static auto Aliasing(SEAL_BYTE *pointer) noexcept -> Pointer<SEAL_BYTE>
+            SEAL_NODISCARD inline static auto Aliasing(seal_byte *pointer) noexcept -> Pointer<seal_byte>
             {
                 return { pointer, true };
             }
 
         private:
-            Pointer(const Pointer<SEAL_BYTE> &copy) = delete;
+            Pointer(const Pointer<seal_byte> &copy) = delete;
 
-            Pointer<SEAL_BYTE> &operator=(const Pointer<SEAL_BYTE> &assign) = delete;
+            Pointer<seal_byte> &operator=(const Pointer<seal_byte> &assign) = delete;
 
-            Pointer(SEAL_BYTE *pointer, bool alias) noexcept : data_(pointer), alias_(alias)
+            Pointer(seal_byte *pointer, bool alias) noexcept : data_(pointer), alias_(alias)
             {}
 
             Pointer(class MemoryPoolHead *head)
@@ -178,7 +178,7 @@ namespace seal
                 data_ = item_->data();
             }
 
-            SEAL_BYTE *data_ = nullptr;
+            seal_byte *data_ = nullptr;
 
             MemoryPoolHead *head_ = nullptr;
 
@@ -194,8 +194,8 @@ namespace seal
             friend class MemoryPoolMT;
 
         public:
-            friend class Pointer<SEAL_BYTE>;
-            friend class ConstPointer<SEAL_BYTE>;
+            friend class Pointer<seal_byte>;
+            friend class ConstPointer<seal_byte>;
             friend class ConstPointer<T>;
 
             Pointer() = default;
@@ -210,8 +210,8 @@ namespace seal
                 source.alias_ = false;
             }
 
-            // Move when T is not SEAL_BYTE
-            Pointer(Pointer<SEAL_BYTE> &&source)
+            // Move when T is not seal_byte
+            Pointer(Pointer<seal_byte> &&source)
             {
                 // Cannot acquire a non-pool pointer of different type
                 if (!source.head_ && source.data_)
@@ -241,9 +241,9 @@ namespace seal
                 source.alias_ = false;
             }
 
-            // Move when T is not SEAL_BYTE
+            // Move when T is not seal_byte
             template <typename... Args>
-            Pointer(Pointer<SEAL_BYTE> &&source, Args &&... args)
+            Pointer(Pointer<seal_byte> &&source, Args &&... args)
             {
                 // Cannot acquire a non-pool pointer of different type
                 if (!source.head_ && source.data_)
@@ -270,9 +270,9 @@ namespace seal
                 source.alias_ = false;
             }
 
-            // Copy a range when T is not SEAL_BYTE
+            // Copy a range when T is not seal_byte
             template <typename InputIt>
-            Pointer(InputIt first, Pointer<SEAL_BYTE> &&source)
+            Pointer(InputIt first, Pointer<seal_byte> &&source)
             {
                 // Cannot acquire a non-pool pointer of different type
                 if (!source.head_ && source.data_)
@@ -312,7 +312,7 @@ namespace seal
                 return *this;
             }
 
-            inline auto &operator=(Pointer<SEAL_BYTE> &&assign)
+            inline auto &operator=(Pointer<seal_byte> &&assign)
             {
                 acquire(std::move(assign));
                 return *this;
@@ -396,7 +396,7 @@ namespace seal
                 acquire(other);
             }
 
-            void acquire(Pointer<SEAL_BYTE> &other)
+            void acquire(Pointer<seal_byte> &other)
             {
                 // Cannot acquire a non-pool pointer of different type
                 if (!other.head_ && other.data_)
@@ -427,7 +427,7 @@ namespace seal
                 other.alias_ = false;
             }
 
-            inline void acquire(Pointer<SEAL_BYTE> &&other)
+            inline void acquire(Pointer<seal_byte> &&other)
             {
                 acquire(other);
             }
@@ -525,9 +525,9 @@ namespace seal
             bool alias_ = false;
         };
 
-        // Specialization for SEAL_BYTE
+        // Specialization for seal_byte
         template <>
-        class SEAL_NODISCARD ConstPointer<SEAL_BYTE>
+        class SEAL_NODISCARD ConstPointer<seal_byte>
         {
             friend class MemoryPoolST;
             friend class MemoryPoolMT;
@@ -539,7 +539,7 @@ namespace seal
             ConstPointer() = default;
 
             // Move of the same type
-            ConstPointer(Pointer<SEAL_BYTE> &&source) noexcept
+            ConstPointer(Pointer<seal_byte> &&source) noexcept
                 : data_(source.data_), head_(source.head_), item_(source.item_), alias_(source.alias_)
             {
                 source.data_ = nullptr;
@@ -549,13 +549,13 @@ namespace seal
             }
 
             // Move of the same type
-            ConstPointer(Pointer<SEAL_BYTE> &&source, SEAL_BYTE value) : ConstPointer(std::move(source))
+            ConstPointer(Pointer<seal_byte> &&source, seal_byte value) : ConstPointer(std::move(source))
             {
                 std::fill_n(data_, head_->item_byte_count(), value);
             }
 
             // Move of the same type
-            ConstPointer(ConstPointer<SEAL_BYTE> &&source) noexcept
+            ConstPointer(ConstPointer<seal_byte> &&source) noexcept
                 : data_(source.data_), head_(source.head_), item_(source.item_), alias_(source.alias_)
             {
                 source.data_ = nullptr;
@@ -565,31 +565,31 @@ namespace seal
             }
 
             // Move of the same type
-            ConstPointer(ConstPointer<SEAL_BYTE> &&source, SEAL_BYTE value) : ConstPointer(std::move(source))
+            ConstPointer(ConstPointer<seal_byte> &&source, seal_byte value) : ConstPointer(std::move(source))
             {
                 std::fill_n(data_, head_->item_byte_count(), value);
             }
 
             // Copy a range of elements
             template <typename InputIt>
-            ConstPointer(InputIt first, ConstPointer<SEAL_BYTE> &&source) : ConstPointer(std::move(source))
+            ConstPointer(InputIt first, ConstPointer<seal_byte> &&source) : ConstPointer(std::move(source))
             {
                 std::copy_n(first, head_->item_byte_count(), data_);
             }
 
-            inline auto &operator=(ConstPointer<SEAL_BYTE> &&assign) noexcept
+            inline auto &operator=(ConstPointer<seal_byte> &&assign) noexcept
             {
                 acquire(std::move(assign));
                 return *this;
             }
 
-            inline auto &operator=(Pointer<SEAL_BYTE> &&assign) noexcept
+            inline auto &operator=(Pointer<seal_byte> &&assign) noexcept
             {
                 acquire(std::move(assign));
                 return *this;
             }
 
-            SEAL_NODISCARD inline const SEAL_BYTE &operator[](std::size_t index) const
+            SEAL_NODISCARD inline const seal_byte &operator[](std::size_t index) const
             {
                 return data_[index];
             }
@@ -599,17 +599,17 @@ namespace seal
                 return data_ != nullptr;
             }
 
-            SEAL_NODISCARD inline const SEAL_BYTE *get() const noexcept
+            SEAL_NODISCARD inline const seal_byte *get() const noexcept
             {
                 return data_;
             }
 
-            SEAL_NODISCARD inline const SEAL_BYTE *operator->() const noexcept
+            SEAL_NODISCARD inline const seal_byte *operator->() const noexcept
             {
                 return data_;
             }
 
-            SEAL_NODISCARD inline const SEAL_BYTE &operator*() const
+            SEAL_NODISCARD inline const seal_byte &operator*() const
             {
                 return *data_;
             }
@@ -633,7 +633,7 @@ namespace seal
                 alias_ = false;
             }
 
-            void acquire(Pointer<SEAL_BYTE> &other) noexcept
+            void acquire(Pointer<seal_byte> &other) noexcept
             {
                 release();
 
@@ -647,12 +647,12 @@ namespace seal
                 other.alias_ = false;
             }
 
-            inline void acquire(Pointer<SEAL_BYTE> &&other) noexcept
+            inline void acquire(Pointer<seal_byte> &&other) noexcept
             {
                 acquire(other);
             }
 
-            void acquire(ConstPointer<SEAL_BYTE> &other) noexcept
+            void acquire(ConstPointer<seal_byte> &other) noexcept
             {
                 if (this == &other)
                 {
@@ -671,7 +671,7 @@ namespace seal
                 other.alias_ = false;
             }
 
-            inline void acquire(ConstPointer<SEAL_BYTE> &&other) noexcept
+            inline void acquire(ConstPointer<seal_byte> &&other) noexcept
             {
                 acquire(other);
             }
@@ -686,22 +686,22 @@ namespace seal
                 return (data_ != nullptr);
             }
 
-            SEAL_NODISCARD inline static auto Owning(SEAL_BYTE *pointer) noexcept -> ConstPointer<SEAL_BYTE>
+            SEAL_NODISCARD inline static auto Owning(seal_byte *pointer) noexcept -> ConstPointer<seal_byte>
             {
                 return { pointer, false };
             }
 
-            SEAL_NODISCARD inline static auto Aliasing(const SEAL_BYTE *pointer) noexcept -> ConstPointer<SEAL_BYTE>
+            SEAL_NODISCARD inline static auto Aliasing(const seal_byte *pointer) noexcept -> ConstPointer<seal_byte>
             {
-                return { const_cast<SEAL_BYTE *>(pointer), true };
+                return { const_cast<seal_byte *>(pointer), true };
             }
 
         private:
-            ConstPointer(const ConstPointer<SEAL_BYTE> &copy) = delete;
+            ConstPointer(const ConstPointer<seal_byte> &copy) = delete;
 
-            ConstPointer &operator=(const ConstPointer<SEAL_BYTE> &assign) = delete;
+            ConstPointer &operator=(const ConstPointer<seal_byte> &assign) = delete;
 
-            ConstPointer(SEAL_BYTE *pointer, bool alias) noexcept : data_(pointer), alias_(alias)
+            ConstPointer(seal_byte *pointer, bool alias) noexcept : data_(pointer), alias_(alias)
             {}
 
             ConstPointer(class MemoryPoolHead *head)
@@ -717,7 +717,7 @@ namespace seal
                 data_ = item_->data();
             }
 
-            SEAL_BYTE *data_ = nullptr;
+            seal_byte *data_ = nullptr;
 
             MemoryPoolHead *head_ = nullptr;
 
@@ -745,8 +745,8 @@ namespace seal
                 source.alias_ = false;
             }
 
-            // Move when T is not SEAL_BYTE
-            ConstPointer(Pointer<SEAL_BYTE> &&source)
+            // Move when T is not seal_byte
+            ConstPointer(Pointer<seal_byte> &&source)
             {
                 // Cannot acquire a non-pool pointer of different type
                 if (!source.head_ && source.data_)
@@ -776,9 +776,9 @@ namespace seal
                 source.alias_ = false;
             }
 
-            // Move when T is not SEAL_BYTE
+            // Move when T is not seal_byte
             template <typename... Args>
-            ConstPointer(Pointer<SEAL_BYTE> &&source, Args &&... args)
+            ConstPointer(Pointer<seal_byte> &&source, Args &&... args)
             {
                 // Cannot acquire a non-pool pointer of different type
                 if (!source.head_ && source.data_)
@@ -805,9 +805,9 @@ namespace seal
                 source.alias_ = false;
             }
 
-            // Copy a range when T is not SEAL_BYTE
+            // Copy a range when T is not seal_byte
             template <typename InputIt>
-            ConstPointer(InputIt first, Pointer<SEAL_BYTE> &&source)
+            ConstPointer(InputIt first, Pointer<seal_byte> &&source)
             {
                 // Cannot acquire a non-pool pointer of different type
                 if (!source.head_ && source.data_)
@@ -841,8 +841,8 @@ namespace seal
                 source.alias_ = false;
             }
 
-            // Move when T is not SEAL_BYTE
-            ConstPointer(ConstPointer<SEAL_BYTE> &&source)
+            // Move when T is not seal_byte
+            ConstPointer(ConstPointer<seal_byte> &&source)
             {
                 // Cannot acquire a non-pool pointer of different type
                 if (!source.head_ && source.data_)
@@ -872,9 +872,9 @@ namespace seal
                 source.alias_ = false;
             }
 
-            // Move when T is not SEAL_BYTE
+            // Move when T is not seal_byte
             template <typename... Args>
-            ConstPointer(ConstPointer<SEAL_BYTE> &&source, Args &&... args)
+            ConstPointer(ConstPointer<seal_byte> &&source, Args &&... args)
             {
                 // Cannot acquire a non-pool pointer of different type
                 if (!source.head_ && source.data_)
@@ -901,9 +901,9 @@ namespace seal
                 source.alias_ = false;
             }
 
-            // Copy a range when T is not SEAL_BYTE
+            // Copy a range when T is not seal_byte
             template <typename InputIt>
-            ConstPointer(InputIt first, ConstPointer<SEAL_BYTE> &&source)
+            ConstPointer(InputIt first, ConstPointer<seal_byte> &&source)
             {
                 // Cannot acquire a non-pool pointer of different type
                 if (!source.head_ && source.data_)
@@ -933,7 +933,7 @@ namespace seal
                 return *this;
             }
 
-            inline auto &operator=(ConstPointer<SEAL_BYTE> &&assign)
+            inline auto &operator=(ConstPointer<seal_byte> &&assign)
             {
                 acquire(std::move(assign));
                 return *this;
@@ -945,7 +945,7 @@ namespace seal
                 return *this;
             }
 
-            inline auto &operator=(Pointer<SEAL_BYTE> &&assign)
+            inline auto &operator=(Pointer<seal_byte> &&assign)
             {
                 acquire(std::move(assign));
                 return *this;
@@ -1029,7 +1029,7 @@ namespace seal
                 acquire(other);
             }
 
-            void acquire(ConstPointer<SEAL_BYTE> &other)
+            void acquire(ConstPointer<seal_byte> &other)
             {
                 // Cannot acquire a non-pool pointer of different type
                 if (!other.head_ && other.data_)
@@ -1060,7 +1060,7 @@ namespace seal
                 other.alias_ = false;
             }
 
-            inline void acquire(ConstPointer<SEAL_BYTE> &&other)
+            inline void acquire(ConstPointer<seal_byte> &&other)
             {
                 acquire(other);
             }
@@ -1084,7 +1084,7 @@ namespace seal
                 acquire(other);
             }
 
-            void acquire(Pointer<SEAL_BYTE> &other)
+            void acquire(Pointer<seal_byte> &other)
             {
                 // Cannot acquire a non-pool pointer of different type
                 if (!other.head_ && other.data_)
@@ -1115,7 +1115,7 @@ namespace seal
                 other.alias_ = false;
             }
 
-            inline void acquire(Pointer<SEAL_BYTE> &&other)
+            inline void acquire(Pointer<seal_byte> &&other)
             {
                 acquire(other);
             }

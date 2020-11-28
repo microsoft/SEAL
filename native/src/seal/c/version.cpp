@@ -2,7 +2,6 @@
 // Licensed under the MIT license.
 
 // SEALNet
-#include "seal/c/stdafx.h"
 #include "seal/c/utilities.h"
 #include "seal/c/version.h"
 

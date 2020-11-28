@@ -3,7 +3,7 @@
 
 #include "seal/util/croots.h"
 #include <complex>
-#include <iostream>
+
 using namespace std;
 
 namespace seal

@@ -3,7 +3,6 @@
 
 // SEALNet
 #include "seal/c/serialization.h"
-#include "seal/c/stdafx.h"
 #include "seal/c/utilities.h"
 
 // SEAL
@@ -56,7 +55,7 @@ SEAL_C_FUNC Serialization_IsCompatibleVersion(uint8_t *headerptr, uint64_t size,
 
     Serialization::SEALHeader header;
     memcpy(
-        reinterpret_cast<SEAL_BYTE *>(&header), reinterpret_cast<SEAL_BYTE *>(headerptr),
+        reinterpret_cast<seal_byte *>(&header), reinterpret_cast<seal_byte *>(headerptr),
         sizeof(Serialization::SEALHeader));
     *result = Serialization::IsCompatibleVersion(header);
     return S_OK;
@@ -73,7 +72,7 @@ SEAL_C_FUNC Serialization_IsValidHeader(uint8_t *headerptr, uint64_t size, bool 
 
     Serialization::SEALHeader header;
     memcpy(
-        reinterpret_cast<SEAL_BYTE *>(&header), reinterpret_cast<SEAL_BYTE *>(headerptr),
+        reinterpret_cast<seal_byte *>(&header), reinterpret_cast<seal_byte *>(headerptr),
         sizeof(Serialization::SEALHeader));
     *result = Serialization::IsValidHeader(header);
     return S_OK;

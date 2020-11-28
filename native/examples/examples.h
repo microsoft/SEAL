@@ -53,14 +53,9 @@ inline void print_example_banner(std::string title)
 /*
 Helper function: Prints the parameters in a SEALContext.
 */
-inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
+inline void print_parameters(const seal::SEALContext &context)
 {
-    // Verify parameters
-    if (!context)
-    {
-        throw std::invalid_argument("context is not set");
-    }
-    auto &context_data = *context->key_context_data();
+    auto &context_data = *context.key_context_data();
 
     /*
     Which scheme are we using?
@@ -68,10 +63,10 @@ inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
     std::string scheme_name;
     switch (context_data.parms().scheme())
     {
-    case seal::scheme_type::BFV:
+    case seal::scheme_type::bfv:
         scheme_name = "BFV";
         break;
-    case seal::scheme_type::CKKS:
+    case seal::scheme_type::ckks:
         scheme_name = "CKKS";
         break;
     default:
@@ -99,7 +94,7 @@ inline void print_parameters(std::shared_ptr<seal::SEALContext> context)
     /*
     For the BFV scheme print the plain_modulus parameter.
     */
-    if (context_data.parms().scheme() == seal::scheme_type::BFV)
+    if (context_data.parms().scheme() == seal::scheme_type::bfv)
     {
         std::cout << "|   plain_modulus: " << context_data.parms().plain_modulus().value() << std::endl;
     }

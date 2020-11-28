@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "seal/version.h"
 #include "seal/util/defines.h"
 #include <cstdint>
 #include <cstring>
@@ -24,8 +25,12 @@ namespace seal
         // No compression is used.
         none = 0,
 #ifdef SEAL_USE_ZLIB
-        // Use Deflate compression
-        deflate = 1,
+        // Use ZLIB compression
+        zlib = 1,
+#endif
+#ifdef SEAL_USE_ZSTD
+        // Use Zstandard compression
+        zstd = 2,
 #endif
     };
 
@@ -38,10 +43,12 @@ namespace seal
     {
     public:
         /**
-        The compression mode used by default.
+        The compression mode used by default; prefer Zstandard
         */
-#ifdef SEAL_USE_ZLIB
-        static constexpr compr_mode_type compr_mode_default = compr_mode_type::deflate;
+#if defined(SEAL_USE_ZSTD)
+        static constexpr compr_mode_type compr_mode_default = compr_mode_type::zstd;
+#elif defined(SEAL_USE_ZLIB)
+        static constexpr compr_mode_type compr_mode_default = compr_mode_type::zlib;
 #else
         static constexpr compr_mode_type compr_mode_default = compr_mode_type::none;
 #endif
@@ -83,6 +90,8 @@ namespace seal
             std::uint64_t size = 0;
         };
 
+        static_assert(sizeof(SEALHeader) == seal_header_size);
+
         /**
         Returns true if the given byte corresponds to a supported compression mode.
 
@@ -95,7 +104,11 @@ namespace seal
             case static_cast<std::uint8_t>(compr_mode_type::none):
                 /* fall through */
 #ifdef SEAL_USE_ZLIB
-            case static_cast<std::uint8_t>(compr_mode_type::deflate):
+            case static_cast<std::uint8_t>(compr_mode_type::zlib):
+                /* fall through */
+#endif
+#ifdef SEAL_USE_ZSTD
+            case static_cast<std::uint8_t>(compr_mode_type::zstd):
 #endif
                 return true;
             }
@@ -130,7 +143,25 @@ namespace seal
         */
         SEAL_NODISCARD static bool IsCompatibleVersion(const SEALHeader &header) noexcept
         {
-            return (header.version_major == SEAL_VERSION_MAJOR && header.version_minor == SEAL_VERSION_MINOR);
+            // Exact same version
+            if (header.version_major == SEAL_VERSION_MAJOR && header.version_minor == SEAL_VERSION_MINOR)
+            {
+                return true;
+            }
+
+            // Different major versions not supported
+            if (header.version_major != SEAL_VERSION_MAJOR)
+            {
+                return false;
+            }
+
+            // Support Microsoft SEAL 3.4 and 3.5
+            if (header.version_major == 3 && (header.version_minor == 4 || header.version_minor == 5))
+            {
+                return true;
+            }
+
+            return false;
         }
 
         /**
@@ -190,7 +221,7 @@ namespace seal
         contain a SEALHeader
         @throws std::runtime_error if I/O operations failed
         */
-        static std::streamoff SaveHeader(const SEALHeader &header, SEAL_BYTE *out, std::size_t size);
+        static std::streamoff SaveHeader(const SEALHeader &header, seal_byte *out, std::size_t size);
 
         /**
         Loads a SEALHeader from a given memory location.
@@ -204,7 +235,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff LoadHeader(
-            const SEAL_BYTE *in, std::size_t size, SEALHeader &header, bool try_upgrade_if_invalid = true);
+            const seal_byte *in, std::size_t size, SEALHeader &header, bool try_upgrade_if_invalid = true);
 
         /**
         Evaluates save_members and compresses the output according to the given
@@ -215,11 +246,13 @@ namespace seal
 
         For any given compression mode, raw_size must be the exact right size
         (in bytes) of what save_members writes to a stream in the uncompressed
-        mode. Otherwise the behavior of Save is unspecified.
+        mode plus the size of SEALHeader. Otherwise the behavior of Save is
+        unspecified.
 
         @param[in] save_members A function taking an std::ostream reference as an
         argument, possibly writing some number of bytes into it
         @param[in] raw_size The exact uncompressed output size of save_members
+        plus the size of SEALHeader
         @param[out] stream The stream to write to
         @param[in] compr_mode The desired compression mode
         @throws std::invalid_argument if save_members is invalid
@@ -229,7 +262,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Save(
-            std::function<void(std::ostream &stream)> save_members, std::streamoff raw_size, std::ostream &stream,
+            std::function<void(std::ostream &)> save_members, std::streamoff raw_size, std::ostream &stream,
             compr_mode_type compr_mode, bool clear_on_destruction = false);
 
         /**
@@ -239,8 +272,9 @@ namespace seal
         a function that deserializes the member variables of an object from the
         given stream.
 
-        @param[in] load_members A function taking an std::istream reference as an
-        argument, possibly reading some number of bytes from it
+        @param[in] load_members A function taking an std::istream reference and
+        a SEALVersion struct as arguments, possibly reading some number of bytes
+        from the std::istream, possibly depending on the SEALVersion object
         @param[in] stream The stream to read from
         @throws std::invalid_argument if load_members is invalid
         @throws std::logic_error if the data cannot be loaded by this version of
@@ -248,7 +282,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Load(
-            std::function<void(std::istream &stream)> load_members, std::istream &stream,
+            std::function<void(std::istream &, SEALVersion)> load_members, std::istream &stream,
             bool clear_on_destruction = false);
 
         /**
@@ -261,11 +295,13 @@ namespace seal
 
         For any given compression mode, raw_size must be the exact right size
         (in bytes) of what save_members writes to a stream in the uncompressed
-        mode. Otherwise the behavior of Save is unspecified.
+        mode plus the size of SEALHeader. Otherwise the behavior of Save is
+        unspecified.
 
         @param[in] save_members A function that takes an std::ostream reference as
         an argument and writes some number of bytes into it
         @param[in] raw_size The exact uncompressed output size of save_members
+        plus the size of SEALHeader
         @param[out] out The memory location to write to
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
@@ -276,8 +312,8 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Save(
-            std::function<void(std::ostream &stream)> save_members, std::streamoff raw_size, SEAL_BYTE *out,
-            std::size_t size, compr_mode_type compr_mode, bool clear_on_destruction = false);
+            std::function<void(std::ostream &)> save_members, std::streamoff raw_size, seal_byte *out, std::size_t size,
+            compr_mode_type compr_mode, bool clear_on_destruction = false);
 
         /**
         Deserializes data from a memory location that was serialized by Save.
@@ -287,7 +323,8 @@ namespace seal
         of an object from the given stream.
 
         @param[in] load_members A function that takes an std::istream reference as
-        an argument and reads some number of bytes from it
+        a SEALVersion struct as arguments, possibly reading some number of bytes
+        from the std::istream, possibly depending on the SEALVersion object
         @param[in] in The memory location to read from
         @param[in] size The number of bytes available in the given memory location
         @throws std::invalid_argument if load_members is invalid, if in is null,
@@ -297,7 +334,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Load(
-            std::function<void(std::istream &stream)> load_members, const SEAL_BYTE *in, std::size_t size,
+            std::function<void(std::istream &, SEALVersion)> load_members, const seal_byte *in, std::size_t size,
             bool clear_on_destruction = false);
 
     private:
@@ -323,7 +360,7 @@ namespace seal
 
             SEALHeader_3_4 &operator=(const Serialization::SEALHeader assign)
             {
-                std::memcpy(this, &assign, sizeof(Serialization::SEALHeader));
+                std::memcpy(this, &assign, Serialization::seal_header_size);
                 return *this;
             }
 

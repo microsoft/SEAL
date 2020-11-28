@@ -61,7 +61,7 @@ namespace sealtest
 
         TEST(RNSBaseTest, Copy)
         {
-            auto pool = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW);
+            auto pool = MemoryManager::GetPool(mm_prof_opt::mm_force_new);
             RNSBase base({ 3, 4 }, pool);
             ASSERT_EQ(2l, pool.use_count());
             {
@@ -133,7 +133,7 @@ namespace sealtest
 
         TEST(RNSBaseTest, Extend)
         {
-            auto pool = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW);
+            auto pool = MemoryManager::GetPool(mm_prof_opt::mm_force_new);
             RNSBase base({ 3 }, pool);
             ASSERT_EQ(2l, pool.use_count());
 
@@ -170,7 +170,7 @@ namespace sealtest
 
         TEST(RNSBaseTest, Drop)
         {
-            auto pool = MemoryManager::GetPool(mm_prof_opt::FORCE_NEW);
+            auto pool = MemoryManager::GetPool(mm_prof_opt::mm_force_new);
             RNSBase base({ 3, 5, 7, 11 }, pool);
             ASSERT_EQ(2l, pool.use_count());
 

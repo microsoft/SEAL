@@ -19,13 +19,63 @@ void example_serialization()
     print_example_banner("Example: Serialization");
 
     /*
-    We require ZLIB support for this example to be available.
+    We require ZLIB or Zstandard support for this example to be available.
     */
-#ifndef SEAL_USE_ZLIB
-    cout << "ZLIB support is not enabled; this example is not available." << endl;
+#if (!defined(SEAL_USE_ZSTD) && !defined(SEAL_USE_ZLIB))
+    cout << "Neither ZLIB nor Zstandard support is enabled; this example is not available." << endl;
     cout << endl;
     return;
 #else
+    /*
+    We start by briefly discussing the Serializable<T> class template. This is
+    a wrapper class that can wrap any serializable class, which include:
+
+        - EncryptionParameters
+        - Modulus
+        - Plaintext and Ciphertext
+        - SecretKey, PublicKey, RelinKeys, and GaloisKeys
+
+    Serializable<T> provides minimal functionality needed to serialize the wrapped
+    object by simply forwarding the calls to corresponding functions of the wrapped
+    object of type T. The need for Serializable<T> comes from the fact that many
+    Microsoft SEAL objects consist of two parts, one of which is pseudorandom data
+    independent of the other part. Until the object is actually being used, the
+    pseudorandom part can be instead stored as a seed. We will call objects with
+    property `seedable'.
+
+    For example, GaloisKeys can often be very large in size, but in reality half
+    of the data is pseudorandom and can be stored as a seed. Since GaloisKeys are
+    never used by the party that generates them, so it makes sense to expand the
+    seed at the point deserialization. On the other hand, we cannot allow the user
+    to accidentally try to use an unexpanded GaloisKeys object, which is prevented
+    at by ensuring it is always wrapped in a Serializable<GaloisKeys> and can only
+    be serialized.
+
+    Only some Microsoft SEAL objects are seedable. Specifically, they are:
+
+        - PublicKey, RelinKeys, and GaloisKeys
+        - Ciphertext in secret-key mode (from Encryptor::encrypt_symmetric or
+          Encryptor::encrypt_zero_symmetric)
+
+    Importantly, ciphertexts in public-key mode are not seedable. Thus, it may
+    be beneficial to use Microsoft SEAL in secret-key mode whenever the public
+    key is not truly needed.
+
+    There are a handful of functions that output Serializable<T> objects:
+
+        - Encryptor::encrypt (and variants) output Serializable<Ciphertext>
+        - KeyGenerator::create_... output Serializable<T> for different key types
+
+    Note that Encryptor::encrypt is included in the above list, yet it produces
+    ciphertexts in public-key mode that are not seedable. This is for the sake of
+    consistency in the API for public-key and secret-key encryption. Functions
+    that output Serializable<T> objects also have overloads that take a normal
+    object of type T as a destination parameter, overwriting it. These overloads
+    can be convenient for local testing where no serialization is needed and the
+    object needs to be used at the point of construction. Such an object can no
+    longer be transformed back to a seeded state.
+    */
+
     /*
     To simulate client-server interaction, we set up a shared C++ stream. In real
     use-cases this can be a network buffer, a filestream, or any shared resource.
@@ -56,7 +106,7 @@ void example_serialization()
     accordingly.
     */
     {
-        EncryptionParameters parms(scheme_type::CKKS);
+        EncryptionParameters parms(scheme_type::ckks);
         size_t poly_modulus_degree = 8192;
         parms.set_poly_modulus_degree(poly_modulus_degree);
         parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 50, 20, 50 }));
@@ -78,52 +128,64 @@ void example_serialization()
         Before moving on, we will take some time to discuss further options in
         serialization. These will become particularly important when the user
         needs to optimize communication and storage sizes.
-        */
 
-        /*
-        It is possible to enable or disable ZLIB ("deflate") compression for
-        serialization by providing EncryptionParameters::save with the desired
-        compression mode as in the following examples:
+        It is possible to enable or disable compression for serialization by
+        providing EncryptionParameters::save with the desired compression mode as
+        in the following examples:
 
             auto size = parms.save(shared_stream, compr_mode_type::none);
-            auto size = parms.save(shared_stream, compr_mode_type::deflate);
+            auto size = parms.save(shared_stream, compr_mode_type::zlib);
+            auto size = parms.save(shared_stream, compr_mode_type::zstd);
 
-        If Microsoft SEAL is compiled with ZLIB support, the default is to use
-        compr_mode_type::deflate, so to instead disable compression one would use
-        the first version of the two.
+        If Microsoft SEAL is compiled with Zstandard or ZLIB support, the default
+        is to use one of them. If available, Zstandard is preferred over ZLIB due
+        to its speed.
+
+        Compression can have a substantial impact on the serialized data size,
+        because ciphertext and key data consists of many uniformly random integers
+        modulo the coeff_modulus primes. Especially when using CKKS, the primes in
+        coeff_modulus can be relatively small compared to the 64-bit words used to
+        store the ciphertext and key data internally. Serialization writes full
+        64-bit words to the destination buffer or stream, possibly leaving in many
+        zero bytes corresponding to the high-order bytes of the 64-bit words. One
+        convenient way to get rid of these zeros is to apply a general-purpose
+        compression algorithm on the encrypted data. The compression rate can be
+        significant (up to 50-60%) when using CKKS with small primes.
         */
 
         /*
         It is also possible to serialize data directly to a buffer. For this, one
         needs to know an upper bound for the required buffer size, which can be
         obtained using the EncryptionParameters::save_size function. This function
-        also accepts the desired compression mode, with compr_mode_type::deflate
-        being the default when Microsoft SEAL is compiled with ZLIB support.
+        also accepts the desired compression mode, or uses the default option
+        otherwise.
 
         In more detail, the output of EncryptionParameters::save_size is as follows:
 
             - Exact buffer size required for compr_mode_type::none;
-            - Upper bound on the size required for compr_mode_type::deflate.
+            - Upper bound on the size required for compr_mode_type::zlib or
+              compr_mode_type::zstd.
 
         As we can see from the print-out, the sizes returned by these functions
         are significantly larger than the compressed size written into the shared
         stream in the beginning. This is normal: compression yielded a significant
-        improvement in the data size, yet it is hard to estimate the size of the
-        compressed data.
+        improvement in the data size, however, it is impossible to know ahead of
+        time the exact size of the compressed data. If compression is not used,
+        then the size is exactly determined by the encryption parameters.
         */
         print_line(__LINE__);
         cout << "EncryptionParameters: data size upper bound (compr_mode_type::none): "
              << parms.save_size(compr_mode_type::none) << endl;
         cout << "             "
-             << "EncryptionParameters: data size upper bound (compr_mode_type::deflate): "
-             << parms.save_size(compr_mode_type::deflate) << endl;
+             << "EncryptionParameters: data size upper bound (compression): "
+             << parms.save_size(/* Serialization::compr_mode_default */) << endl;
 
         /*
         As an example, we now serialize the encryption parameters to a fixed size
         buffer.
         */
-        vector<SEAL_BYTE> byte_buffer(static_cast<size_t>(parms.save_size()));
-        parms.save(reinterpret_cast<SEAL_BYTE *>(byte_buffer.data()), byte_buffer.size());
+        vector<seal_byte> byte_buffer(static_cast<size_t>(parms.save_size()));
+        parms.save(reinterpret_cast<seal_byte *>(byte_buffer.data()), byte_buffer.size());
 
         /*
         To illustrate deserialization, we load back the encryption parameters
@@ -134,7 +196,7 @@ void example_serialization()
         of the buffer is only used for a sanity check.
         */
         EncryptionParameters parms2;
-        parms2.load(reinterpret_cast<const SEAL_BYTE *>(byte_buffer.data()), byte_buffer.size());
+        parms2.load(reinterpret_cast<const seal_byte *>(byte_buffer.data()), byte_buffer.size());
 
         /*
         We can check that the saved and loaded encryption parameters indeed match.
@@ -164,11 +226,12 @@ void example_serialization()
         */
         parms_stream.seekg(0, parms_stream.beg);
 
-        auto context = SEALContext::Create(parms);
+        SEALContext context(parms);
 
         KeyGenerator keygen(context);
         auto sk = keygen.secret_key();
-        auto pk = keygen.public_key();
+        PublicKey pk;
+        keygen.create_public_key(pk);
 
         /*
         We need to save the secret key so we can decrypt later.
@@ -176,43 +239,44 @@ void example_serialization()
         sk.save(sk_stream);
 
         /*
-        In this example we will also use relinearization keys. For realinearization
-        and Galois keys the KeyGenerator::relin_keys and KeyGenerator::galois_keys
-        functions return special Serializable<T> objects. These objects are meant
-        to be serialized and never used locally. On the other hand, for local use
-        of RelinKeys and GaloisKeys, the functions KeyGenerator::relin_keys_local
-        and KeyGenerator::galois_keys_local can be used to create the RelinKeys
-        and GaloisKeys objects directly. The difference is that the Serializable<T>
-        objects contain a partly seeded version of the RelinKeys (or GaloisKeys)
-        that will result in a significantly smaller size when serialized. Using
-        this method has no impact on security. Such seeded RelinKeys (GaloisKeys)
-        must be expanded before being used in computations; this is automatically
-        done by deserialization.
+        As in previous examples, in this example we will encrypt in public-key
+        mode. If we want to send a public key over the network, we should instead
+        have created it as a seeded object as follows:
+
+            Serializable<PublicKey> pk = keygen.create_public_key();
+
+        In this example we will also use relinearization keys. These we will
+        absolutely want to create as seeded objects to minimize communication
+        cost, unlike in prior examples.
         */
-        Serializable<RelinKeys> rlk = keygen.relin_keys();
+        Serializable<RelinKeys> rlk = keygen.create_relin_keys();
 
         /*
-        Before continuing, we demonstrate the significant space saving from this
-        method.
+        To demonstrate the significant space saving from this method, we will
+        create another set of relinearization keys, this time fully expanded.
+        */
+        RelinKeys rlk_big;
+        keygen.create_relin_keys(rlk_big);
+
+        /*
+        We serialize both relinearization keys to demonstrate the concrete size
+        difference. If compressed serialization is used, the compression rate
+        will be the same in both cases. We omit specifying the compression mode
+        to use the default, as determined by the Microsoft SEAL build system.
         */
         auto size_rlk = rlk.save(data_stream);
+        auto size_rlk_big = rlk_big.save(data_stream);
 
-        RelinKeys rlk_local = keygen.relin_keys_local();
-        auto size_rlk_local = rlk_local.save(data_stream);
-
-        /*
-        Now compare the serialized sizes of rlk and rlk_local.
-        */
         print_line(__LINE__);
         cout << "Serializable<RelinKeys>: wrote " << size_rlk << " bytes" << endl;
         cout << "             "
-             << "RelinKeys (local): wrote " << size_rlk_local << " bytes" << endl;
+             << "RelinKeys wrote " << size_rlk_big << " bytes" << endl;
 
         /*
-        Seek back in data_stream to where rlk data ended, i.e., size_rlk_local
+        Seek back in data_stream to where rlk data ended, i.e., size_rlk_big
         bytes backwards from current position.
         */
-        data_stream.seekp(-size_rlk_local, data_stream.cur);
+        data_stream.seekp(-size_rlk_big, data_stream.cur);
 
         /*
         Next set up the CKKSEncoder and Encryptor, and encrypt some numbers.
@@ -224,69 +288,45 @@ void example_serialization()
         encoder.encode(4.5, scale, plain2);
 
         Encryptor encryptor(context, pk);
-        Ciphertext encrypted1, encrypted2;
-        encryptor.encrypt(plain1, encrypted1);
-        encryptor.encrypt(plain2, encrypted2);
 
         /*
-        Now, we could serialize both encrypted1 and encrypted2 to data_stream
-        using Ciphertext::save. However, for this example, we demonstrate another
-        size-saving trick that can come in handy.
-
-        As you noticed, we set up the Encryptor using the public key. Clearly this
-        indicates that the CKKS scheme is a public-key encryption scheme. However,
-        both BFV and CKKS can operate also in a symmetric-key mode. This can be
-        beneficial when the public-key functionality is not exactly needed, like
-        in simple outsourced computation scenarios. The benefit is that in these
-        cases it is possible to produce ciphertexts that are partly seeded, hence
-        significantly smaller. Such ciphertexts must be expanded before being used
-        in computations; this is automatically done by deserialization.
-
-        To use symmetric-key encryption, we need to set up the Encryptor with the
-        secret key instead.
+        The client will not compute on ciphertexts that it creates, so it can
+        just as well create Serializable<Ciphertext> objects. In fact, we do
+        not even need to name those objects and instead immediately call
+        Serializable<Ciphertext>::save.
         */
-        Encryptor sym_encryptor(context, sk);
-        Serializable<Ciphertext> sym_encrypted1 = sym_encryptor.encrypt_symmetric(plain1);
-        Serializable<Ciphertext> sym_encrypted2 = sym_encryptor.encrypt_symmetric(plain2);
+        auto size_encrypted1 = encryptor.encrypt(plain1).save(data_stream);
 
         /*
-        Before continuing, we demonstrate the significant space saving from this
-        method.
+        As we discussed in the beginning of this example, ciphertexts can be
+        created in a seeded state in secret-key mode, providing a huge reduction
+        in the data size upon serialization. To do this, we need to provide the
+        Encryptor with the secret key in its constructor, or at a later point
+        with the Encryptor::set_secret_key function, and use the
+        Encryptor::encrypt_symmetric function to encrypt.
         */
-        auto size_sym_encrypted1 = sym_encrypted1.save(data_stream);
-        auto size_encrypted1 = encrypted1.save(data_stream);
+        encryptor.set_secret_key(sk);
+        auto size_sym_encrypted2 = encryptor.encrypt_symmetric(plain2).save(data_stream);
 
         /*
-        Now compare the serialized sizes of encrypted1 and sym_encrypted1.
+        The size reduction is substantial.
         */
         print_line(__LINE__);
-        cout << "Serializable<Ciphertext> (symmetric-key): wrote " << size_sym_encrypted1 << " bytes" << endl;
+        cout << "Serializable<Ciphertext> (public-key): wrote " << size_encrypted1 << " bytes" << endl;
         cout << "             "
-             << "Ciphertext (public-key): wrote " << size_encrypted1 << " bytes" << endl;
+             << "Serializable<Ciphertext> (seeded secret-key): wrote " << size_sym_encrypted2 << " bytes" << endl;
 
         /*
-        Seek back in data_stream to where sym_encrypted1 data ended, i.e.,
-        size_encrypted1 bytes backwards from current position and write
-        sym_encrypted2 right after sym_encrypted1.
-        */
-        data_stream.seekp(-size_encrypted1, data_stream.cur);
-        sym_encrypted2.save(data_stream);
-
-        /*
-        We have seen how using KeyGenerator::relin_keys (KeyGenerator::galois_keys)
-        can result in huge space savings over the local variants when the objects
-        are not needed for local use. We have seen how symmetric-key encryption
-        can be used to achieve much smaller ciphertext sizes when the public-key
-        functionality is not needed.
+        We have seen how creating seeded objects can result in huge space
+        savings compared to creating unseeded objects. This is particularly
+        important when creating Galois keys, which can be very large. We have
+        seen how secret-key encryption can be used to achieve much smaller
+        ciphertext sizes when the public-key functionality is not needed.
 
         We would also like to draw attention to the fact there we could easily
         serialize multiple Microsoft SEAL objects sequentially in a stream. Each
         object writes its own size into the stream, so deserialization knows
-        exactly how many bytes to read. We will see this working next.
-
-        Finally, we would like to point out that none of these methods provide any
-        space savings unless Microsoft SEAL is compiled with ZLIB support, or when
-        serialized with compr_mode_type::none.
+        exactly how many bytes to read. We will see this working below.
         */
     }
 
@@ -298,7 +338,7 @@ void example_serialization()
         EncryptionParameters parms;
         parms.load(parms_stream);
         parms_stream.seekg(0, parms_stream.beg);
-        auto context = SEALContext::Create(parms);
+        SEALContext context(parms);
 
         Evaluator evaluator(context);
 
@@ -325,19 +365,18 @@ void example_serialization()
         evaluator.rescale_to_next_inplace(encrypted_prod);
 
         /*
-        We use data_stream to communicate encrypted_prod back to the client. There
-        is no way to save the encrypted_prod as Serializable<Ciphertext> even
-        though it is still a symmetric-key encryption: only freshly encrypted
-        ciphertexts can be seeded. Note how the size of the result ciphertext is
-        smaller than the size of a fresh ciphertext because it is at a lower level
-        due to the rescale operation.
+        we use data_stream to communicate encrypted_prod back to the client.
+        there is no way to save the encrypted_prod as a seeded object: only
+        freshly encrypted secret-key ciphertexts can be seeded. Note how the
+        size of the result ciphertext is smaller than the size of a fresh
+        ciphertext because it is at a lower level due to the rescale operation.
         */
         data_stream.seekp(0, parms_stream.beg);
         data_stream.seekg(0, parms_stream.beg);
         auto size_encrypted_prod = encrypted_prod.save(data_stream);
 
         print_line(__LINE__);
-        cout << "Ciphertext (symmetric-key): wrote " << size_encrypted_prod << " bytes" << endl;
+        cout << "Ciphertext (secret-key): wrote " << size_encrypted_prod << " bytes" << endl;
     }
 
     /*
@@ -347,7 +386,7 @@ void example_serialization()
         EncryptionParameters parms;
         parms.load(parms_stream);
         parms_stream.seekg(0, parms_stream.beg);
-        auto context = SEALContext::Create(parms);
+        SEALContext context(parms);
 
         /*
         Load back the secret key from sk_stream.

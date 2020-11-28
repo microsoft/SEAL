@@ -21,7 +21,7 @@ void example_ckks_basics()
 
     We start by setting up the CKKS scheme.
     */
-    EncryptionParameters parms(scheme_type::CKKS);
+    EncryptionParameters parms(scheme_type::ckks);
 
     /*
     We saw in `2_encoders.cpp' that multiplication in CKKS causes scales
@@ -82,14 +82,18 @@ void example_ckks_basics()
     */
     double scale = pow(2.0, 40);
 
-    auto context = SEALContext::Create(parms);
+    SEALContext context(parms);
     print_parameters(context);
     cout << endl;
 
     KeyGenerator keygen(context);
-    auto public_key = keygen.public_key();
     auto secret_key = keygen.secret_key();
-    auto relin_keys = keygen.relin_keys_local();
+    PublicKey public_key;
+    keygen.create_public_key(public_key);
+    RelinKeys relin_keys;
+    keygen.create_relin_keys(relin_keys);
+    GaloisKeys gal_keys;
+    keygen.create_galois_keys(gal_keys);
     Encryptor encryptor(context, public_key);
     Evaluator evaluator(context);
     Decryptor decryptor(context, secret_key);
@@ -102,9 +106,10 @@ void example_ckks_basics()
     input.reserve(slot_count);
     double curr_point = 0;
     double step_size = 1.0 / (static_cast<double>(slot_count) - 1);
-    for (size_t i = 0; i < slot_count; i++, curr_point += step_size)
+    for (size_t i = 0; i < slot_count; i++)
     {
         input.push_back(curr_point);
+        curr_point += step_size;
     }
     cout << "Input vector: " << endl;
     print_vector(input, 3, 7);
@@ -204,11 +209,11 @@ void example_ckks_basics()
     print_line(__LINE__);
     cout << "Parameters used by all three terms are different." << endl;
     cout << "    + Modulus chain index for x3_encrypted: "
-         << context->get_context_data(x3_encrypted.parms_id())->chain_index() << endl;
+         << context.get_context_data(x3_encrypted.parms_id())->chain_index() << endl;
     cout << "    + Modulus chain index for x1_encrypted: "
-         << context->get_context_data(x1_encrypted.parms_id())->chain_index() << endl;
+         << context.get_context_data(x1_encrypted.parms_id())->chain_index() << endl;
     cout << "    + Modulus chain index for plain_coeff0: "
-         << context->get_context_data(plain_coeff0.parms_id())->chain_index() << endl;
+         << context.get_context_data(plain_coeff0.parms_id())->chain_index() << endl;
     cout << endl;
 
     /*

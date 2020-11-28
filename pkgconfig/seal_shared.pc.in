@@ -1,0 +1,17 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+
+prefix=@CMAKE_INSTALL_PREFIX@
+libdir=${prefix}/lib
+includedir=${prefix}/@SEAL_INCLUDES_INSTALL_DIR@
+
+Name: Microsoft SEAL
+Version: @SEAL_VERSION_MAJOR@.@SEAL_VERSION_MINOR@
+Description: An easy-to-use homomorphic encryption library
+
+Requires: @SEAL_PKGCONFIG_MSGSL_REQUIRES_STRING@
+Requires: @SEAL_PKGCONFIG_ZLIB_REQUIRES_STRING@
+Requires: @SEAL_PKGCONFIG_ZSTD_REQUIRES_STRING@
+
+Libs: -L${libdir} -lseal
+Cflags: @SEAL_LANG_FLAG@ -I${includedir}

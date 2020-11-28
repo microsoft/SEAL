@@ -3,7 +3,6 @@
 
 // SEALNet
 #include "seal/c/kswitchkeys.h"
-#include "seal/c/stdafx.h"
 #include "seal/c/utilities.h"
 
 // SEAL
@@ -35,16 +34,14 @@ namespace
     }
 } // namespace
 
-namespace seal
+// Enables access to private members of seal::PublicKey.
+using ph = struct PublicKey::PublicKeyPrivateHelper
 {
-    struct PublicKey::PublicKeyPrivateHelper
+    inline static PublicKey Create(MemoryPoolHandle pool)
     {
-        inline static PublicKey Create(MemoryPoolHandle pool)
-        {
-            return PublicKey(pool);
-        }
-    };
-} // namespace seal
+        return PublicKey(pool);
+    }
+};
 
 SEAL_C_FUNC KSwitchKeys_Create1(void **kswitch_keys)
 {
@@ -140,7 +137,7 @@ SEAL_C_FUNC KSwitchKeys_AddKeyList(void *thisptr, uint64_t count, void **key_lis
     for (uint64_t i = 0; i < count; i++)
     {
         PublicKey *pkey = key[i];
-        PublicKey new_pkey(PublicKey::PublicKeyPrivateHelper::Create(keys->pool()));
+        PublicKey new_pkey(ph::Create(keys->pool()));
         new_pkey = *pkey;
 
         keys->data().back().emplace_back(move(new_pkey));
@@ -215,7 +212,7 @@ SEAL_C_FUNC KSwitchKeys_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint
     try
     {
         *out_bytes = util::safe_cast<int64_t>(keys->save(
-            reinterpret_cast<SEAL_BYTE *>(outptr), util::safe_cast<size_t>(size),
+            reinterpret_cast<seal_byte *>(outptr), util::safe_cast<size_t>(size),
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
@@ -235,17 +232,17 @@ SEAL_C_FUNC KSwitchKeys_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint
 
 SEAL_C_FUNC KSwitchKeys_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     KSwitchKeys *keys = FromVoid<KSwitchKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(inptr, E_POINTER);
     IfNullRet(in_bytes, E_POINTER);
 
     try
     {
         *in_bytes = util::safe_cast<int64_t>(
-            keys->unsafe_load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
+            keys->unsafe_load(*ctx, reinterpret_cast<seal_byte *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)
@@ -264,17 +261,17 @@ SEAL_C_FUNC KSwitchKeys_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr,
 
 SEAL_C_FUNC KSwitchKeys_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
 {
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     KSwitchKeys *keys = FromVoid<KSwitchKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(context);
-    IfNullRet(sharedctx.get(), E_POINTER);
     IfNullRet(inptr, E_POINTER);
     IfNullRet(in_bytes, E_POINTER);
 
     try
     {
         *in_bytes = util::safe_cast<int64_t>(
-            keys->load(sharedctx, reinterpret_cast<SEAL_BYTE *>(inptr), util::safe_cast<size_t>(size)));
+            keys->load(*ctx, reinterpret_cast<seal_byte *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
     catch (const invalid_argument &)

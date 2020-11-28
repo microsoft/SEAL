@@ -18,34 +18,66 @@ namespace SEALNetTest
         {
             {
                 SEALContext context = GlobalContext.BFVContext;
-                KeyGenerator keyGen = new KeyGenerator(context);
-                PublicKey publicKey = keyGen.PublicKey;
-                SecretKey secretKey = keyGen.SecretKey;
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreatePublicKey(out PublicKey publicKey);
+                SecretKey secretKey = keygen.SecretKey;
                 Encryptor encryptor = new Encryptor(context, publicKey, secretKey);
 
                 Assert.IsNotNull(encryptor);
 
                 Plaintext plain = new Plaintext("1x^1 + 1");
-
                 Ciphertext cipher = new Ciphertext();
                 Assert.AreEqual(0ul, cipher.Size);
                 encryptor.Encrypt(plain, cipher);
                 Assert.IsNotNull(cipher);
                 Assert.AreEqual(2ul, cipher.Size);
             }
+            using (MemoryStream stream = new MemoryStream())
             {
                 SEALContext context = GlobalContext.BFVContext;
-                KeyGenerator keyGen = new KeyGenerator(context);
-                SecretKey secretKey = keyGen.SecretKey;
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreatePublicKey(out PublicKey publicKey);
+                Encryptor encryptor = new Encryptor(context, publicKey);
+
+                Assert.IsNotNull(encryptor);
+
+                Plaintext plain = new Plaintext("1x^1 + 1");
+                encryptor.Encrypt(plain).Save(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                Ciphertext cipher = new Ciphertext();
+                cipher.Load(context, stream);
+                Assert.IsNotNull(cipher);
+                Assert.AreEqual(2ul, cipher.Size);
+            }
+            {
+                SEALContext context = GlobalContext.BFVContext;
+                KeyGenerator keygen = new KeyGenerator(context);
+                SecretKey secretKey = keygen.SecretKey;
                 Encryptor encryptor = new Encryptor(context, secretKey);
 
                 Assert.IsNotNull(encryptor);
 
                 Plaintext plain = new Plaintext("1x^1 + 1");
-
                 Ciphertext cipher = new Ciphertext();
                 Assert.AreEqual(0ul, cipher.Size);
                 encryptor.EncryptSymmetric(plain, cipher);
+                Assert.IsNotNull(cipher);
+                Assert.AreEqual(2ul, cipher.Size);
+            }
+            using (MemoryStream stream = new MemoryStream())
+            {
+                SEALContext context = GlobalContext.BFVContext;
+                KeyGenerator keygen = new KeyGenerator(context);
+                SecretKey secretKey = keygen.SecretKey;
+                Encryptor encryptor = new Encryptor(context, secretKey);
+
+                Assert.IsNotNull(encryptor);
+
+                Plaintext plain = new Plaintext("1x^1 + 1");
+                encryptor.EncryptSymmetric(plain).Save(stream);
+                stream.Seek(0, SeekOrigin.Begin);
+                Ciphertext cipher = new Ciphertext();
+                cipher.Load(context, stream);
                 Assert.IsNotNull(cipher);
                 Assert.AreEqual(2ul, cipher.Size);
             }
@@ -56,11 +88,11 @@ namespace SEALNetTest
         {
             {
                 SEALContext context = GlobalContext.BFVContext;
-                KeyGenerator keyGen = new KeyGenerator(context);
-                PublicKey publicKey = keyGen.PublicKey;
-                SecretKey secretKey = keyGen.SecretKey;
-                Decryptor decryptor = new Decryptor(context, secretKey);
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreatePublicKey(out PublicKey publicKey);
+                SecretKey secretKey = keygen.SecretKey;
 
+                Decryptor decryptor = new Decryptor(context, secretKey);
                 Assert.IsNotNull(decryptor);
 
                 Ciphertext cipher = new Ciphertext();
@@ -106,6 +138,33 @@ namespace SEALNetTest
                 }
                 using (MemoryStream stream = new MemoryStream())
                 {
+                    Encryptor encryptor = new Encryptor(context, publicKey);
+
+                    encryptor.EncryptZero().Save(stream);
+                    stream.Seek(0, SeekOrigin.Begin);
+                    cipher.Load(context, stream);
+                    Assert.IsFalse(cipher.IsNTTForm);
+                    Assert.IsFalse(cipher.IsTransparent);
+                    Assert.AreEqual(cipher.Scale, 1.0, double.Epsilon);
+                    decryptor.Decrypt(cipher, plain);
+                    Assert.IsTrue(plain.IsZero);
+                }
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    Encryptor encryptor = new Encryptor(context, publicKey);
+
+                    encryptor.EncryptZero(nextParms).Save(stream);
+                    stream.Seek(0, SeekOrigin.Begin);
+                    cipher.Load(context, stream);
+                    Assert.IsFalse(cipher.IsNTTForm);
+                    Assert.IsFalse(cipher.IsTransparent);
+                    Assert.AreEqual(cipher.Scale, 1.0, double.Epsilon);
+                    Assert.AreEqual(cipher.ParmsId, nextParms);
+                    decryptor.Decrypt(cipher, plain);
+                    Assert.IsTrue(plain.IsZero);
+                }
+                using (MemoryStream stream = new MemoryStream())
+                {
                     Encryptor encryptor = new Encryptor(context, secretKey);
 
                     encryptor.EncryptZeroSymmetric().Save(stream);
@@ -134,9 +193,9 @@ namespace SEALNetTest
             }
             {
                 SEALContext context = GlobalContext.CKKSContext;
-                KeyGenerator keyGen = new KeyGenerator(context);
-                PublicKey publicKey = keyGen.PublicKey;
-                SecretKey secretKey = keyGen.SecretKey;
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreatePublicKey(out PublicKey publicKey);
+                SecretKey secretKey = keygen.SecretKey;
                 Decryptor decryptor = new Decryptor(context, secretKey);
                 CKKSEncoder encoder = new CKKSEncoder(context);
 
@@ -216,6 +275,48 @@ namespace SEALNetTest
                 }
                 using (MemoryStream stream = new MemoryStream())
                 {
+                    Encryptor encryptor = new Encryptor(context, publicKey);
+
+                    encryptor.EncryptZero().Save(stream);
+                    stream.Seek(0, SeekOrigin.Begin);
+                    cipher.Load(context, stream);
+                    Assert.IsTrue(cipher.IsNTTForm);
+                    Assert.IsFalse(cipher.IsTransparent);
+                    Assert.AreEqual(cipher.Scale, 1.0, double.Epsilon);
+                    cipher.Scale = Math.Pow(2.0, 30);
+                    decryptor.Decrypt(cipher, plain);
+
+                    encoder.Decode(plain, res);
+                    foreach (Complex val in res)
+                    {
+                        Assert.AreEqual(val.Real, 0.0, 0.01);
+                        Assert.AreEqual(val.Imaginary, 0.0, 0.01);
+                    }
+                }
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    Encryptor encryptor = new Encryptor(context, publicKey);
+
+                    encryptor.EncryptZero(nextParms).Save(stream);
+                    stream.Seek(0, SeekOrigin.Begin);
+                    cipher.Load(context, stream);
+                    Assert.IsTrue(cipher.IsNTTForm);
+                    Assert.IsFalse(cipher.IsTransparent);
+                    Assert.AreEqual(cipher.Scale, 1.0, double.Epsilon);
+                    cipher.Scale = Math.Pow(2.0, 30);
+                    Assert.AreEqual(cipher.ParmsId, nextParms);
+                    decryptor.Decrypt(cipher, plain);
+                    Assert.AreEqual(plain.ParmsId, nextParms);
+
+                    encoder.Decode(plain, res);
+                    foreach (Complex val in res)
+                    {
+                        Assert.AreEqual(val.Real, 0.0, 0.01);
+                        Assert.AreEqual(val.Imaginary, 0.0, 0.01);
+                    }
+                }
+                using (MemoryStream stream = new MemoryStream())
+                {
                     Encryptor encryptor = new Encryptor(context, secretKey);
 
                     encryptor.EncryptZeroSymmetric().Save(stream);
@@ -264,7 +365,7 @@ namespace SEALNetTest
         {
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
-            PublicKey pubKey = keygen.PublicKey;
+            keygen.CreatePublicKey(out PublicKey pubKey);
             PublicKey pubKey_invalid = new PublicKey();
             SecretKey secKey = keygen.SecretKey;
             SecretKey secKey_invalid = new SecretKey();
@@ -282,7 +383,6 @@ namespace SEALNetTest
             Utilities.AssertThrows<ArgumentException>(() => encryptor.SetPublicKey(pubKey_invalid));
             Utilities.AssertThrows<ArgumentException>(() => encryptor.SetSecretKey(secKey_invalid));
 
-            Utilities.AssertThrows<ArgumentNullException>(() => encryptor.Encrypt(plain, null));
             Utilities.AssertThrows<ArgumentNullException>(() => encryptor.Encrypt(null, cipher));
             Utilities.AssertThrows<ArgumentException>(() => encryptor.Encrypt(plain, cipher, pool_invalid));
             Utilities.AssertThrows<ArgumentException>(() => encryptor.EncryptZero(cipher, pool_invalid));

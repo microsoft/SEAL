@@ -50,13 +50,15 @@ namespace Microsoft.Research.SEAL
     {
         /// <summary>
         /// Creates a BatchEncoder. It is necessary that the encryption parameters
-        /// given through the SEALContext object support batching.
         /// </summary>
+        /// <remarks>
+        /// Creates a BatchEncoder. It is necessary that the encryption parameters
+        /// given through the SEALContext object support batching.
+        /// </remarks>
         /// <param name="context">The SEALContext</param>
         /// @param[in] context
         /// <exception cref="ArgumentNullException">if context is null.</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
-        /// parameters are not valid for batching</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid for batching</exception>
         /// <exception cref="ArgumentException">if scheme is not SchemeType.BFV</exception>
         public BatchEncoder(SEALContext context)
         {
@@ -76,6 +78,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Creates a plaintext from a given matrix.
+        /// </summary>
+        /// <remarks>
         /// Creates a plaintext from a given matrix. This function "batches" a given matrix
         /// of integers modulo the plaintext modulus into a plaintext element, and stores
         /// the result in the destination parameter. The input vector must have size at most equal
@@ -86,7 +91,7 @@ namespace Microsoft.Research.SEAL
         ///
         /// If the destination plaintext overlaps the input values in memory, the behavior of
         /// this function is undefined.
-        /// </summary>
+        /// </remarks>
         /// <param name="values">The matrix of integers modulo plaintext modulus to batch</param>
         /// <param name="destination">The plaintext polynomial to overwrite with the result</param>
         /// <exception cref="ArgumentNullException">if either values or destination are null</exception>
@@ -103,6 +108,9 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Creates a plaintext from a given matrix.
+        /// </summary>
+        /// <remarks>
         /// Creates a plaintext from a given matrix. This function "batches" a given matrix
         /// of integers modulo the plaintext modulus into a plaintext element, and stores
         /// the result in the destination parameter. The input vector must have size at most equal
@@ -113,7 +121,7 @@ namespace Microsoft.Research.SEAL
         ///
         /// If the destination plaintext overlaps the input values in memory, the behavior of
         /// this function is undefined.
-        /// </summary>
+        /// </remarks>
         /// <param name="values">The matrix of integers modulo plaintext modulus to batch</param>
         /// <param name="destination">The plaintext polynomial to overwrite with the result</param>
         /// <exception cref="ArgumentNullException">if either values or destionation are null</exception>
@@ -130,39 +138,16 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Creates a plaintext from a given matrix. This function "batches" a given matrix
-        /// of integers modulo the plaintext modulus in-place into a plaintext ready to be
-        /// encrypted. The matrix is given as a plaintext element whose first N/2 coefficients
-        /// represent the first row of the matrix, and the second N/2 coefficients represent the
-        /// second row, where N denotes the degree of the polynomial modulus. The input plaintext
-        /// must have degress less than the polynomial modulus, and coefficients less than the
-        /// plaintext modulus, i.e. it must be a valid plaintext for the encryption parameters.
-        /// Dynamic memory allocations in the process are allocated from the memory pool pointed
-        /// to by the given MemoryPoolHandle.
+        /// Inverse of encode.
         /// </summary>
-        /// <param name="plain">The matrix of integers modulo plaintext modulus to batch</param>
-        /// <param name="pool"></param>
-        /// <exception cref="ArgumentNullException">if plain is null.</exception>
-        /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
-        /// <exception cref="ArgumentException">if plain is in NTT form</exception>
-        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public void Encode(Plaintext plain, MemoryPoolHandle pool = null)
-        {
-            if (null == plain)
-                throw new ArgumentNullException(nameof(plain));
-
-            IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-            NativeMethods.BatchEncoder_Encode(NativePtr, plain.NativePtr, poolPtr);
-        }
-
-        /// <summary>
+        /// <remarks>
         /// Inverse of encode. This function "unbatches" a given plaintext into a matrix
         /// of integers modulo the plaintext modulus, and stores the result in the destination
-        /// parameter. The input plaintext must have degress less than the polynomial modulus,
+        /// parameter. The input plaintext must have degrees less than the polynomial modulus,
         /// and coefficients less than the plaintext modulus, i.e. it must be a valid plaintext
         /// for the encryption parameters. Dynamic memory allocations in the process are
         /// allocated from the memory pool pointed to by the given MemoryPoolHandle.
-        /// </summary>
+        /// </remarks>
         /// <param name="plain">The plaintext polynomial to unbatch</param>
         /// <param name="destination">The matrix to be overwritten with the values in the slots</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
@@ -193,13 +178,16 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Inverse of encode.
+        /// </summary>
+        /// <remarks>
         /// Inverse of encode. This function "unbatches" a given plaintext into a matrix
         /// of integers modulo the plaintext modulus, and stores the result in the destination
-        /// parameter. The input plaintext must have degress less than the polynomial modulus,
+        /// parameter. The input plaintext must have degrees less than the polynomial modulus,
         /// and coefficients less than the plaintext modulus, i.e. it must be a valid plaintext
         /// for the encryption parameters. Dynamic memory allocations in the process are
         /// allocated from the memory pool pointed to by the given MemoryPoolHandle.
-        /// </summary>
+        /// </remarks>
         /// <param name="plain">The plaintext polynomial to unbatch</param>
         /// <param name="destination">The matrix to be overwritten with the values in the slots</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
@@ -227,30 +215,6 @@ namespace Microsoft.Research.SEAL
             {
                 destination.Add(destArray[i]);
             }
-        }
-
-        /// <summary>
-        /// Inverse of encode. This function "unbatches" a given plaintext in-place into
-        /// a matrix of integers modulo the plaintext modulus. The input plaintext must have
-        /// degress less than the polynomial modulus, and coefficients less than the plaintext
-        /// modulus, i.e. it must be a valid plaintext for the encryption parameters. Dynamic
-        /// memory allocations in the process are allocated from the memory pool pointed to by
-        /// the given MemoryPoolHandle.
-        /// </summary>
-        /// <param name="plain">The plaintext polynomial to unbatch</param>
-        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentNullException">if plain is null</exception>
-        /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
-        /// <exception cref="ArgumentException">if plain is in NTT form</exception>
-        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public void Decode(Plaintext plain, MemoryPoolHandle pool = null)
-        {
-            if (null == plain)
-                throw new ArgumentNullException(nameof(plain));
-
-            IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-
-            NativeMethods.BatchEncoder_Decode(NativePtr, plain.NativePtr, poolPtr);
         }
 
         /// <summary>

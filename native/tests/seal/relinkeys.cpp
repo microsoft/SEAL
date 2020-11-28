@@ -19,16 +19,16 @@ namespace sealtest
     {
         stringstream stream;
         {
-            EncryptionParameters parms(scheme_type::BFV);
+            EncryptionParameters parms(scheme_type::bfv);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(1 << 6);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60 }));
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
             RelinKeys keys;
             RelinKeys test_keys;
-            keys = keygen.relin_keys_local();
+            keygen.create_relin_keys(keys);
             keys.save(stream);
             test_keys.load(context, stream);
             ASSERT_EQ(keys.size(), test_keys.size());
@@ -39,26 +39,26 @@ namespace sealtest
                 {
                     ASSERT_EQ(keys.key(j + 2)[i].data().size(), test_keys.key(j + 2)[i].data().size());
                     ASSERT_EQ(
-                        keys.key(j + 2)[i].data().int_array().size(),
-                        test_keys.key(j + 2)[i].data().int_array().size());
+                        keys.key(j + 2)[i].data().dyn_array().size(),
+                        test_keys.key(j + 2)[i].data().dyn_array().size());
                     ASSERT_TRUE(is_equal_uint(
                         keys.key(j + 2)[i].data().data(), test_keys.key(j + 2)[i].data().data(),
-                        keys.key(j + 2)[i].data().int_array().size()));
+                        keys.key(j + 2)[i].data().dyn_array().size()));
                 }
             }
         }
         {
-            EncryptionParameters parms(scheme_type::BFV);
+            EncryptionParameters parms(scheme_type::bfv);
             parms.set_poly_modulus_degree(256);
             parms.set_plain_modulus(1 << 6);
             parms.set_coeff_modulus(CoeffModulus::Create(256, { 60, 50 }));
 
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
 
             RelinKeys keys;
             RelinKeys test_keys;
-            keys = keygen.relin_keys_local();
+            keygen.create_relin_keys(keys);
             keys.save(stream);
             test_keys.load(context, stream);
             ASSERT_EQ(keys.size(), test_keys.size());
@@ -69,11 +69,11 @@ namespace sealtest
                 {
                     ASSERT_EQ(keys.key(j + 2)[i].data().size(), test_keys.key(j + 2)[i].data().size());
                     ASSERT_EQ(
-                        keys.key(j + 2)[i].data().int_array().size(),
-                        test_keys.key(j + 2)[i].data().int_array().size());
+                        keys.key(j + 2)[i].data().dyn_array().size(),
+                        test_keys.key(j + 2)[i].data().dyn_array().size());
                     ASSERT_TRUE(is_equal_uint(
                         keys.key(j + 2)[i].data().data(), test_keys.key(j + 2)[i].data().data(),
-                        keys.key(j + 2)[i].data().int_array().size()));
+                        keys.key(j + 2)[i].data().dyn_array().size()));
                 }
             }
         }
@@ -82,20 +82,19 @@ namespace sealtest
     {
         // Returns true if a, b contains the same error.
         auto compare_kswitchkeys = [](const KSwitchKeys &a, const KSwitchKeys &b, const SecretKey &sk,
-                                      shared_ptr<SEALContext> context) {
+                                      const SEALContext &context) {
             auto compare_error = [](const Ciphertext &a_ct, const Ciphertext &b_ct, const SecretKey &sk1,
-                                    shared_ptr<SEALContext> context1) {
-                auto get_error = [](const Ciphertext &encrypted, const SecretKey &sk2,
-                                    shared_ptr<SEALContext> context2) {
+                                    const SEALContext &context1) {
+                auto get_error = [](const Ciphertext &encrypted, const SecretKey &sk2, const SEALContext &context2) {
                     auto pool = MemoryManager::GetPool();
-                    auto &context_data = *context2->get_context_data(encrypted.parms_id());
+                    auto &context_data = *context2.get_context_data(encrypted.parms_id());
                     auto &parms = context_data.parms();
                     auto &coeff_modulus = parms.coeff_modulus();
                     size_t coeff_count = parms.poly_modulus_degree();
                     size_t coeff_modulus_size = coeff_modulus.size();
                     size_t rns_poly_uint64_count = util::mul_safe(coeff_count, coeff_modulus_size);
 
-                    IntArray<Ciphertext::ct_coeff_type> error;
+                    DynArray<Ciphertext::ct_coeff_type> error;
                     error.resize(rns_poly_uint64_count);
                     auto destination = error.begin();
 
@@ -145,47 +144,49 @@ namespace sealtest
 
         stringstream stream;
         {
-            EncryptionParameters parms(scheme_type::BFV);
+            EncryptionParameters parms(scheme_type::bfv);
             parms.set_poly_modulus_degree(8);
             parms.set_plain_modulus(65537);
             parms.set_coeff_modulus(CoeffModulus::Create(8, { 60, 60 }));
-            random_seed_type seed;
+            prng_seed_type seed;
             for (auto &i : seed)
             {
                 i = random_uint64();
             }
-            auto rng = make_shared<BlakePRNGFactory>(BlakePRNGFactory(seed));
+            auto rng = make_shared<Blake2xbPRNGFactory>(Blake2xbPRNGFactory(seed));
             parms.set_random_generator(rng);
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
             SecretKey secret_key = keygen.secret_key();
 
-            keygen.relin_keys().save(stream);
+            keygen.create_relin_keys().save(stream);
             RelinKeys test_keys;
             test_keys.load(context, stream);
-            RelinKeys keys = keygen.relin_keys_local();
+            RelinKeys keys;
+            keygen.create_relin_keys(keys);
             compare_kswitchkeys(keys, test_keys, secret_key, context);
         }
         {
-            EncryptionParameters parms(scheme_type::BFV);
+            EncryptionParameters parms(scheme_type::bfv);
             parms.set_poly_modulus_degree(256);
             parms.set_plain_modulus(65537);
             parms.set_coeff_modulus(CoeffModulus::Create(256, { 60, 50 }));
-            random_seed_type seed;
+            prng_seed_type seed;
             for (auto &i : seed)
             {
                 i = random_uint64();
             }
-            auto rng = make_shared<BlakePRNGFactory>(BlakePRNGFactory(seed));
+            auto rng = make_shared<Blake2xbPRNGFactory>(Blake2xbPRNGFactory(seed));
             parms.set_random_generator(rng);
-            auto context = SEALContext::Create(parms, false, sec_level_type::none);
+            SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
             SecretKey secret_key = keygen.secret_key();
 
-            keygen.relin_keys().save(stream);
+            keygen.create_relin_keys().save(stream);
             RelinKeys test_keys;
             test_keys.load(context, stream);
-            RelinKeys keys = keygen.relin_keys_local();
+            RelinKeys keys;
+            keygen.create_relin_keys(keys);
             compare_kswitchkeys(keys, test_keys, secret_key, context);
         }
     }

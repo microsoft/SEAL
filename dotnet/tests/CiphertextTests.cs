@@ -114,7 +114,9 @@ namespace SEALNetTest
         {
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
-            Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
+            keygen.CreatePublicKey(out PublicKey publicKey);
+
+            Encryptor encryptor = new Encryptor(context, publicKey);
             Plaintext plain = new Plaintext("2x^3 + 4x^2 + 5x^1 + 6");
             Ciphertext cipher = new Ciphertext();
 
@@ -156,7 +158,9 @@ namespace SEALNetTest
         {
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
-            Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
+            keygen.CreatePublicKey(out PublicKey publicKey);
+
+            Encryptor encryptor = new Encryptor(context, publicKey);
             Plaintext plain = new Plaintext("1");
             Ciphertext cipher = new Ciphertext();
 
@@ -176,7 +180,9 @@ namespace SEALNetTest
         {
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
-            Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
+            keygen.CreatePublicKey(out PublicKey publicKey);
+
+            Encryptor encryptor = new Encryptor(context, publicKey);
             Plaintext plain = new Plaintext("1");
             Ciphertext cipher = new Ciphertext(context);
 
@@ -194,7 +200,9 @@ namespace SEALNetTest
         {
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
-            Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
+            keygen.CreatePublicKey(out PublicKey publicKey);
+
+            Encryptor encryptor = new Encryptor(context, publicKey);
             Plaintext plain = new Plaintext("1");
             Ciphertext cipher = new Ciphertext();
 
@@ -217,7 +225,9 @@ namespace SEALNetTest
         {
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
-            Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
+            keygen.CreatePublicKey(out PublicKey publicKey);
+
+            Encryptor encryptor = new Encryptor(context, publicKey);
             Plaintext plain = new Plaintext("1");
             Ciphertext cipher = new Ciphertext();
 
@@ -240,8 +250,10 @@ namespace SEALNetTest
                 expandModChain: true,
                 secLevel: SecLevelType.None);
             KeyGenerator keygen = new KeyGenerator(context);
-            GaloisKeys galoisKeys = keygen.GaloisKeysLocal();
-            Encryptor encryptor = new Encryptor(context, keygen.PublicKey);
+            keygen.CreatePublicKey(out PublicKey publicKey);
+            keygen.CreateGaloisKeys(out GaloisKeys galoisKeys);
+
+            Encryptor encryptor = new Encryptor(context, publicKey);
             Evaluator evaluator = new Evaluator(context);
             CKKSEncoder encoder = new CKKSEncoder(context);
 

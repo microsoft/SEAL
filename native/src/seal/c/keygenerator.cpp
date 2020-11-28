@@ -7,7 +7,6 @@
 
 // SEALNet
 #include "seal/c/keygenerator.h"
-#include "seal/c/stdafx.h"
 #include "seal/c/utilities.h"
 
 // SEAL
@@ -19,38 +18,44 @@ using namespace seal;
 using namespace seal::c;
 using namespace seal::util;
 
-struct seal::KeyGenerator::KeyGeneratorPrivateHelper
+// Enables access to private members of seal::KeyGenerator.
+using ph = struct seal::KeyGenerator::KeyGeneratorPrivateHelper
 {
-    static RelinKeys relin_keys(KeyGenerator *keygen, bool save_seed)
+    static PublicKey create_public_key(KeyGenerator *keygen, bool save_seed)
     {
-        return keygen->relin_keys(size_t(1), save_seed);
+        return keygen->generate_pk(save_seed);
     }
 
-    static GaloisKeys galois_keys(KeyGenerator *keygen, const vector<uint32_t> &galois_elts, bool save_seed)
+    static RelinKeys create_relin_keys(KeyGenerator *keygen, bool save_seed)
     {
-        return keygen->galois_keys(galois_elts, save_seed);
+        return keygen->create_relin_keys(size_t(1), save_seed);
+    }
+
+    static GaloisKeys create_galois_keys(KeyGenerator *keygen, const vector<uint32_t> &galois_elts, bool save_seed)
+    {
+        return keygen->create_galois_keys(galois_elts, save_seed);
     }
 
     static const GaloisTool *galois_tool(KeyGenerator *keygen)
     {
-        return keygen->context_->key_context_data()->galois_tool();
+        return keygen->context_.key_context_data()->galois_tool();
     }
 
     static bool using_keyswitching(const KeyGenerator &keygen)
     {
-        return keygen.context_->using_keyswitching();
+        return keygen.context_.using_keyswitching();
     }
 };
 
-SEAL_C_FUNC KeyGenerator_Create1(void *sealContext, void **key_generator)
+SEAL_C_FUNC KeyGenerator_Create1(void *context, void **key_generator)
 {
-    const auto &sharedctx = SharedContextFromVoid(sealContext);
-    IfNullRet(sharedctx.get(), E_POINTER);
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     IfNullRet(key_generator, E_POINTER);
 
     try
     {
-        KeyGenerator *keygen = new KeyGenerator(sharedctx);
+        KeyGenerator *keygen = new KeyGenerator(*ctx);
         *key_generator = keygen;
         return S_OK;
     }
@@ -60,17 +65,17 @@ SEAL_C_FUNC KeyGenerator_Create1(void *sealContext, void **key_generator)
     }
 }
 
-SEAL_C_FUNC KeyGenerator_Create2(void *sealContext, void *secret_key, void **key_generator)
+SEAL_C_FUNC KeyGenerator_Create2(void *context, void *secret_key, void **key_generator)
 {
-    const auto &sharedctx = SharedContextFromVoid(sealContext);
-    IfNullRet(sharedctx.get(), E_POINTER);
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     SecretKey *secret_key_ptr = FromVoid<SecretKey>(secret_key);
     IfNullRet(secret_key_ptr, E_POINTER);
     IfNullRet(key_generator, E_POINTER);
 
     try
     {
-        KeyGenerator *keygen = new KeyGenerator(sharedctx, *secret_key_ptr);
+        KeyGenerator *keygen = new KeyGenerator(*ctx, *secret_key_ptr);
         *key_generator = keygen;
         return S_OK;
     }
@@ -89,7 +94,7 @@ SEAL_C_FUNC KeyGenerator_Destroy(void *thisptr)
     return S_OK;
 }
 
-SEAL_C_FUNC KeyGenerator_RelinKeys(void *thisptr, bool save_seed, void **relin_keys)
+SEAL_C_FUNC KeyGenerator_CreateRelinKeys(void *thisptr, bool save_seed, void **relin_keys)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
     IfNullRet(keygen, E_POINTER);
@@ -97,7 +102,7 @@ SEAL_C_FUNC KeyGenerator_RelinKeys(void *thisptr, bool save_seed, void **relin_k
 
     try
     {
-        RelinKeys *relinKeys = new RelinKeys(KeyGenerator::KeyGeneratorPrivateHelper::relin_keys(keygen, save_seed));
+        RelinKeys *relinKeys = new RelinKeys(ph::create_relin_keys(keygen, save_seed));
         *relin_keys = relinKeys;
         return S_OK;
     }
@@ -111,7 +116,7 @@ SEAL_C_FUNC KeyGenerator_RelinKeys(void *thisptr, bool save_seed, void **relin_k
     }
 }
 
-SEAL_C_FUNC KeyGenerator_GaloisKeysFromElts(
+SEAL_C_FUNC KeyGenerator_CreateGaloisKeysFromElts(
     void *thisptr, uint64_t count, uint32_t *galois_elts, bool save_seed, void **galois_keys)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
@@ -124,8 +129,7 @@ SEAL_C_FUNC KeyGenerator_GaloisKeysFromElts(
 
     try
     {
-        GaloisKeys *keys =
-            new GaloisKeys(KeyGenerator::KeyGeneratorPrivateHelper::galois_keys(keygen, galois_elts_vec, save_seed));
+        GaloisKeys *keys = new GaloisKeys(ph::create_galois_keys(keygen, galois_elts_vec, save_seed));
         *galois_keys = keys;
         return S_OK;
     }
@@ -139,7 +143,7 @@ SEAL_C_FUNC KeyGenerator_GaloisKeysFromElts(
     }
 }
 
-SEAL_C_FUNC KeyGenerator_GaloisKeysFromSteps(
+SEAL_C_FUNC KeyGenerator_CreateGaloisKeysFromSteps(
     void *thisptr, uint64_t count, int *steps, bool save_seed, void **galois_keys)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
@@ -153,9 +157,8 @@ SEAL_C_FUNC KeyGenerator_GaloisKeysFromSteps(
 
     try
     {
-        galois_elts_vec = KeyGenerator::KeyGeneratorPrivateHelper::galois_tool(keygen)->get_elts_from_steps(steps_vec);
-        GaloisKeys *keys =
-            new GaloisKeys(KeyGenerator::KeyGeneratorPrivateHelper::galois_keys(keygen, galois_elts_vec, save_seed));
+        galois_elts_vec = ph::galois_tool(keygen)->get_elts_from_steps(steps_vec);
+        GaloisKeys *keys = new GaloisKeys(ph::create_galois_keys(keygen, galois_elts_vec, save_seed));
         *galois_keys = keys;
         return S_OK;
     }
@@ -169,18 +172,17 @@ SEAL_C_FUNC KeyGenerator_GaloisKeysFromSteps(
     }
 }
 
-SEAL_C_FUNC KeyGenerator_GaloisKeysAll(void *thisptr, bool save_seed, void **galois_keys)
+SEAL_C_FUNC KeyGenerator_CreateGaloisKeysAll(void *thisptr, bool save_seed, void **galois_keys)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
     IfNullRet(keygen, E_POINTER);
     IfNullRet(galois_keys, E_POINTER);
 
-    vector<uint32_t> galois_elts_vec = KeyGenerator::KeyGeneratorPrivateHelper::galois_tool(keygen)->get_elts_all();
+    vector<uint32_t> galois_elts_vec = ph::galois_tool(keygen)->get_elts_all();
 
     try
     {
-        GaloisKeys *keys =
-            new GaloisKeys(KeyGenerator::KeyGeneratorPrivateHelper::galois_keys(keygen, galois_elts_vec, save_seed));
+        GaloisKeys *keys = new GaloisKeys(ph::create_galois_keys(keygen, galois_elts_vec, save_seed));
         *galois_keys = keys;
         return S_OK;
     }
@@ -194,13 +196,13 @@ SEAL_C_FUNC KeyGenerator_GaloisKeysAll(void *thisptr, bool save_seed, void **gal
     }
 }
 
-SEAL_C_FUNC KeyGenerator_PublicKey(void *thisptr, void **public_key)
+SEAL_C_FUNC KeyGenerator_CreatePublicKey(void *thisptr, bool save_seed, void **public_key)
 {
     KeyGenerator *keygen = FromVoid<KeyGenerator>(thisptr);
     IfNullRet(keygen, E_POINTER);
     IfNullRet(public_key, E_POINTER);
 
-    PublicKey *key = new PublicKey(keygen->public_key());
+    PublicKey *key = new PublicKey(ph::create_public_key(keygen, save_seed));
     *public_key = key;
     return S_OK;
 }
@@ -222,6 +224,6 @@ SEAL_C_FUNC KeyGenerator_ContextUsingKeyswitching(void *thisptr, bool *using_key
     IfNullRet(keygen, E_POINTER);
     IfNullRet(using_keyswitching, E_POINTER);
 
-    *using_keyswitching = KeyGenerator::KeyGeneratorPrivateHelper::using_keyswitching(*keygen);
+    *using_keyswitching = ph::using_keyswitching(*keygen);
     return S_OK;
 }

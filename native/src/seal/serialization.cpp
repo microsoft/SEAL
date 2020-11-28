@@ -1,18 +1,14 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/context.h"
-#include "seal/intarray.h"
+#include "seal/dynarray.h"
 #include "seal/memorymanager.h"
 #include "seal/serialization.h"
 #include "seal/util/common.h"
 #include "seal/util/streambuf.h"
 #include "seal/util/ztools.h"
-#include <algorithm>
 #include <stdexcept>
-#include <type_traits>
 #include <typeinfo>
-#include <utility>
 
 using namespace std;
 using namespace seal::util;
@@ -95,9 +91,13 @@ namespace seal
 
         switch (compr_mode)
         {
+#ifdef SEAL_USE_ZSTD
+        case compr_mode_type::zstd:
+            return ztools::zstd_deflate_size_bound(in_size);
+#endif
 #ifdef SEAL_USE_ZLIB
-        case compr_mode_type::deflate:
-            return ztools::deflate_size_bound(in_size);
+        case compr_mode_type::zlib:
+            return ztools::zlib_deflate_size_bound(in_size);
 #endif
         case compr_mode_type::none:
             // No compression
@@ -151,6 +151,9 @@ namespace seal
                 legacy_headers::SEALHeader_3_4 header_3_4(header);
 
                 SEALHeader new_header;
+                new_header.version_major = 3;
+                new_header.version_minor = 4;
+
                 // Copy over the fields; of course the result may not be valid depending on whether the input was a
                 // valid version 3.4 header
                 new_header.compr_mode = header_3_4.compr_mode;
@@ -179,7 +182,7 @@ namespace seal
         return static_cast<streamoff>(sizeof(SEALHeader));
     }
 
-    streamoff Serialization::SaveHeader(const SEALHeader &header, SEAL_BYTE *out, size_t size)
+    streamoff Serialization::SaveHeader(const SEALHeader &header, seal_byte *out, size_t size)
     {
         if (!out)
         {
@@ -199,7 +202,7 @@ namespace seal
     }
 
     streamoff Serialization::LoadHeader(
-        const SEAL_BYTE *in, size_t size, SEALHeader &header, bool try_upgrade_if_invalid)
+        const seal_byte *in, size_t size, SEALHeader &header, bool try_upgrade_if_invalid)
     {
         if (!in)
         {
@@ -219,7 +222,7 @@ namespace seal
     }
 
     streamoff Serialization::Save(
-        function<void(ostream &stream)> save_members, streamoff raw_size, ostream &stream, compr_mode_type compr_mode,
+        function<void(ostream &)> save_members, streamoff raw_size, ostream &stream, compr_mode_type compr_mode,
         bool clear_on_destruction)
     {
         if (!save_members)
@@ -261,29 +264,53 @@ namespace seal
                 save_members(stream);
                 break;
 #ifdef SEAL_USE_ZLIB
-            case compr_mode_type::deflate:
+            case compr_mode_type::zlib:
             {
-                // First save_members to a temporary byte stream; set the size
-                // of the temporary stream to be right from the start to avoid
-                // extra reallocs.
+                // First save_members to a temporary byte stream; set the size of the temporary stream to be right from
+                // the start to avoid extra reallocs.
                 SafeByteBuffer safe_buffer(
-                    ztools::deflate_size_bound(raw_size - static_cast<streamoff>(sizeof(SEALHeader))),
+                    ztools::zlib_deflate_size_bound(raw_size - static_cast<streamoff>(sizeof(SEALHeader))),
                     clear_on_destruction);
                 iostream temp_stream(&safe_buffer);
                 temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
                 save_members(temp_stream);
 
-                auto safe_pool(MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, clear_on_destruction));
+                auto safe_pool(MemoryManager::GetPool(mm_prof_opt::mm_force_new, true));
 
-                // Create temporary aliasing IntArray to wrap safe_buffer
-                IntArray<SEAL_BYTE> safe_buffer_array(
-                    Pointer<SEAL_BYTE>::Aliasing(safe_buffer.data()), safe_buffer.size(),
+                // Create temporary aliasing DynArray to wrap safe_buffer
+                DynArray<seal_byte> safe_buffer_array(
+                    Pointer<seal_byte>::Aliasing(safe_buffer.data()), safe_buffer.size(),
                     static_cast<size_t>(temp_stream.tellp()), false, safe_pool);
 
-                // After compression, write_header_deflate_buffer will write the
-                // final size to the given header and write the header to stream,
-                // before writing the compressed output.
-                ztools::write_header_deflate_buffer(
+                // After compression, write_header_deflate_buffer will write the final size to the given header and
+                // write the header to stream, before writing the compressed output.
+                ztools::zlib_write_header_deflate_buffer(
+                    safe_buffer_array, reinterpret_cast<void *>(&header), stream, safe_pool);
+                break;
+            }
+#endif
+#ifdef SEAL_USE_ZSTD
+            case compr_mode_type::zstd:
+            {
+                // First save_members to a temporary byte stream; set the size of the temporary stream to be right from
+                // the start to avoid extra reallocs.
+                SafeByteBuffer safe_buffer(
+                    ztools::zstd_deflate_size_bound(raw_size - static_cast<streamoff>(sizeof(SEALHeader))),
+                    clear_on_destruction);
+                iostream temp_stream(&safe_buffer);
+                temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
+                save_members(temp_stream);
+
+                auto safe_pool(MemoryManager::GetPool(mm_prof_opt::mm_force_new, clear_on_destruction));
+
+                // Create temporary aliasing DynArray to wrap safe_buffer
+                DynArray<seal_byte> safe_buffer_array(
+                    Pointer<seal_byte>::Aliasing(safe_buffer.data()), safe_buffer.size(),
+                    static_cast<size_t>(temp_stream.tellp()), false, safe_pool);
+
+                // After compression, write_header_deflate_buffer will write the final size to the given header and
+                // write the header to stream, before writing the compressed output.
+                ztools::zstd_write_header_deflate_buffer(
                     safe_buffer_array, reinterpret_cast<void *>(&header), stream, safe_pool);
                 break;
             }
@@ -312,7 +339,7 @@ namespace seal
     }
 
     streamoff Serialization::Load(
-        function<void(istream &stream)> load_members, istream &stream, bool clear_on_destruction)
+        function<void(istream &, SEALVersion)> load_members, istream &stream, bool clear_on_destruction)
     {
         if (!load_members)
         {
@@ -342,18 +369,45 @@ namespace seal
                 throw logic_error("loaded SEALHeader is invalid");
             }
 
+            // Read header version information so we can call, if necessary, the
+            // correct variant of load_members.
+            SEALVersion version{ header.version_major, header.version_minor, 0, 0 };
+
             switch (header.compr_mode)
             {
             case compr_mode_type::none:
                 // Read rest of the data
-                load_members(stream);
+                load_members(stream, version);
                 if (header.size != safe_cast<uint64_t>(stream.tellg() - stream_start_pos))
                 {
                     throw logic_error("invalid data size");
                 }
                 break;
 #ifdef SEAL_USE_ZLIB
-            case compr_mode_type::deflate:
+            case compr_mode_type::zlib:
+            {
+                auto compr_size = header.size - safe_cast<uint64_t>(stream.tellg() - stream_start_pos);
+
+                // We don't know the decompressed size, but use compr_size as
+                // starting point for the buffer.
+                SafeByteBuffer safe_buffer(safe_cast<streamsize>(compr_size));
+
+                iostream temp_stream(&safe_buffer);
+                temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
+
+                // Throw an exception on non-zero return value
+                if (ztools::zlib_inflate_stream(
+                        stream, safe_cast<streamoff>(compr_size), temp_stream,
+                        MemoryManager::GetPool(mm_prof_opt::mm_force_new, clear_on_destruction)))
+                {
+                    throw logic_error("stream decompression failed");
+                }
+                load_members(temp_stream, version);
+                break;
+            }
+#endif
+#ifdef SEAL_USE_ZSTD
+            case compr_mode_type::zstd:
             {
                 auto compr_size = header.size - safe_cast<uint64_t>(stream.tellg() - stream_start_pos);
 
@@ -364,14 +418,14 @@ namespace seal
                 iostream temp_stream(&safe_buffer);
                 temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
 
-                constexpr int Z_OK = 0;
-                if (ztools::inflate_stream(
+                // Throw an exception on non-zero return value
+                if (ztools::zstd_inflate_stream(
                         stream, safe_cast<streamoff>(compr_size), temp_stream,
-                        MemoryManager::GetPool(mm_prof_opt::FORCE_NEW, clear_on_destruction)) != Z_OK)
+                        MemoryManager::GetPool(mm_prof_opt::mm_force_new, clear_on_destruction)))
                 {
-                    throw logic_error("stream inflate failed");
+                    throw logic_error("stream decompression failed");
                 }
-                load_members(temp_stream);
+                load_members(temp_stream, version);
                 break;
             }
 #endif
@@ -397,7 +451,7 @@ namespace seal
     }
 
     streamoff Serialization::Save(
-        function<void(ostream &stream)> save_members, streamoff raw_size, SEAL_BYTE *out, size_t size,
+        function<void(ostream &)> save_members, streamoff raw_size, seal_byte *out, size_t size,
         compr_mode_type compr_mode, bool clear_on_destruction)
     {
         if (!out)
@@ -418,7 +472,8 @@ namespace seal
     }
 
     streamoff Serialization::Load(
-        function<void(istream &stream)> load_members, const SEAL_BYTE *in, size_t size, bool clear_on_destruction)
+        function<void(istream &, SEALVersion)> load_members, const seal_byte *in, size_t size,
+        bool clear_on_destruction)
     {
         if (!in)
         {

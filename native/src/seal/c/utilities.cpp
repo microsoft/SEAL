@@ -6,7 +6,6 @@
 #include <iterator>
 
 // SEALNet
-#include "seal/c/stdafx.h"
 #include "seal/c/utilities.h"
 
 // SEAL
@@ -20,19 +19,6 @@ using namespace std;
 using namespace seal;
 using namespace seal::c;
 using namespace seal::util;
-
-namespace seal
-{
-    namespace c
-    {
-        extern unordered_map<SEALContext *, shared_ptr<SEALContext>> pointer_store_;
-
-        extern ReaderWriterLocker pointer_store_locker_;
-
-        // This is here only so we have a null shared pointer to return.
-        shared_ptr<SEALContext> null_context_;
-    } // namespace c
-} // namespace seal
 
 unique_ptr<MemoryPoolHandle> seal::c::MemHandleFromVoid(void *voidptr)
 {
@@ -56,25 +42,6 @@ void seal::c::BuildModulusPointers(const vector<Modulus> &in_mods, uint64_t *len
 
     Modulus **mod_ptr_array = reinterpret_cast<Modulus **>(out_mods);
     transform(in_mods.begin(), in_mods.end(), mod_ptr_array, [](const auto &mod) { return new Modulus(mod); });
-}
-
-const shared_ptr<SEALContext> &seal::c::SharedContextFromVoid(void *context)
-{
-    SEALContext *ctx = FromVoid<SEALContext>(context);
-    if (nullptr == ctx)
-    {
-        return null_context_;
-    }
-
-    ReaderLock lock(pointer_store_locker_.acquire_read());
-
-    const auto &ctxiter = pointer_store_.find(ctx);
-    if (ctxiter == pointer_store_.end())
-    {
-        return null_context_;
-    }
-
-    return ctxiter->second;
 }
 
 HRESULT seal::c::ToStringHelper(const string &str, char *outstr, uint64_t *length)

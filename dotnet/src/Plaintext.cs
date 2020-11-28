@@ -3,7 +3,9 @@
 
 using Microsoft.Research.SEAL.Tools;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 
@@ -97,6 +99,43 @@ namespace Microsoft.Research.SEAL
 
             NativeMethods.Plaintext_Create3(capacity, coeffCount, poolPtr, out IntPtr ptr);
             NativePtr = ptr;
+        }
+
+        /// <summary>
+        /// Constructs a plaintext representing a polynomial with given coefficient values.
+        /// </summary>
+        /// <remarks>
+        /// Constructs a plaintext representing a polynomial with given coefficient values.
+        /// The coefficient count of the polynomial is set to the number of coefficient
+        /// values provided, and the capacity is set to the given value.
+        /// </remarks>
+        /// <param name="coeffs">Desired values of the plaintext coefficients</param>
+        /// <param name="capacity">The capacity</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentException">if capacity is less than the size of coeffs</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="ArgumentNullException">if coeffs is null</exception>
+        public Plaintext(IEnumerable<ulong> coeffs, ulong capacity, MemoryPoolHandle pool = null)
+            : this(capacity, 0, pool)
+        {
+            Set(coeffs);
+        }
+
+        /// <summary>
+        /// Constructs a plaintext representing a polynomial with given coefficient values.
+        /// </summary>
+        /// <remarks>
+        /// Constructs a plaintext representing a polynomial with given coefficient values.
+        /// The coefficient count of the polynomial is set to the number of coefficient
+        /// values provided, and the capacity is set to the same value.
+        /// </remarks>
+        /// <param name="coeffs">Desired values of the plaintext coefficients</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="ArgumentNullException">if coeffs is null</exception>
+        public Plaintext(IEnumerable<ulong> coeffs, MemoryPoolHandle pool = null) : this(pool)
+        {
+            Set(coeffs);
         }
 
         /// <summary>
@@ -225,7 +264,6 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Copies a given plaintext to the current one.
         /// </summary>
-        ///
         /// <param name="assign">The plaintext to copy from</param>
         /// <exception cref="ArgumentNullException">if assign is null</exception>
         public void Set(Plaintext assign)
@@ -272,12 +310,29 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Sets the coefficients of the current plaintext to given values.
+        /// </summary>
+        /// <remarks>
+        /// Sets the coefficients of the current plaintext to given values, and sets the ParmsId to ParmsId.Zero,
+        /// effectively marking the plaintext as not NTT transformed.
+        /// </remarks>
+        /// <param name="coeffs">Desired values of the plaintext coefficients</param>
+        /// <exception cref="ArgumentNullException">if coeffs is null</exception>
+        public void Set(IEnumerable<ulong> coeffs)
+        {
+            if (null == coeffs)
+                throw new ArgumentNullException(nameof(coeffs));
+
+            ulong[] coeffArr = coeffs.ToArray();
+            NativeMethods.Plaintext_Set(NativePtr, (ulong)coeffArr.LongLength, coeffArr);
+        }
+
+        /// <summary>
         /// Sets the value of the current plaintext to a given constant polynomial.
         /// </summary>
-        ///
         /// <remarks>
-        /// Sets the value of the current plaintext to a given constant polynomial. The coefficient count
-        /// is set to one.
+        /// Sets the value of the current plaintext to a given constant polynomial and sets the ParmsId to ParmsId.Zero,
+        /// effectively marking the plaintext as not NTT transformed. The coefficient count is set to one.
         /// </remarks>
         /// <param name="constCoeff">The constant coefficient</param>
         public void Set(ulong constCoeff)
@@ -285,11 +340,9 @@ namespace Microsoft.Research.SEAL
             NativeMethods.Plaintext_Set(NativePtr, constCoeff);
         }
 
-
         /// <summary>
         /// Sets a given range of coefficients of a plaintext polynomial to zero.
         /// </summary>
-        ///
         /// <param name="startCoeff">The index of the first coefficient to set to zero</param>
         /// <param name="length">The number of coefficients to set to zero</param>
         /// <exception cref="ArgumentOutOfRangeException">if startCoeff is not within [0, CoeffCount)</exception>
@@ -524,8 +577,7 @@ namespace Microsoft.Research.SEAL
         /// null</exception>
         /// <exception cref="ArgumentException">if the stream is closed or does not
         /// support reading</exception>
-        /// <exception cref="ArgumentException">if context is not set or encryption
-        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid</exception>
         /// <exception cref="EndOfStreamException">if the stream ended
         /// unexpectedly</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
@@ -556,8 +608,7 @@ namespace Microsoft.Research.SEAL
         /// null</exception>
         /// <exception cref="ArgumentException">if the stream is closed or does not
         /// support reading</exception>
-        /// <exception cref="ArgumentException">if context is not set or encryption
-        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid</exception>
         /// <exception cref="EndOfStreamException">if the stream ended
         /// unexpectedly</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>

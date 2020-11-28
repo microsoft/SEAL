@@ -16,7 +16,7 @@
 // Do not throw when Evaluator produces transparent ciphertexts
 //#undef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
 
-// In Visual Studio redefine std::byte (SEAL_BYTE)
+// In Visual Studio redefine std::byte (seal_byte)
 #undef SEAL_USE_STD_BYTE
 
 // In Visual Studio for now we disable the use of std::shared_mutex

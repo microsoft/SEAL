@@ -1,19 +1,37 @@
-# Based on templates from https://github.com/github/gitignore.
-
+#######################
 #### SEAL Specific ####
+#######################
+
+# Configuration
+!cmake/*.cmake.in
+!cmake/*.cmake
+cmake/SEALConfig.cmake
+cmake/SEALConfigVersion.cmake
+cmake/SEALTargets.cmake
+native/src/seal/util/config.h
+native/src/gsl/
+!dotnet/nuget/*.nuspec.in
+dotnet/nuget/*.nuspec
+!dotnet/src/SEALNet.csproj.in
+dotnet/src/SEALNet.csproj
+!dotnet/tests/SEALNetTest.csproj.in
+dotnet/tests/SEALNetTest.csproj
+!dotnet/examples/SEALNetExamples.csproj.in
+dotnet/examples/SEALNetExamples.csproj
+dotnet/nuget/SEALNet.targets
+CMakeSettings.json
+
+# Build
 bin/
 lib/
 build/
 *.build
-cmake/*
-!cmake/*.cmake.in
-thirdparty/*/**
-!thirdparty/*/CMakeLists.txt
-native/src/seal/util/config.h
-native/src/gsl/
-dotnet/nuget/*.nuspec
-!dotnet/nuget/*.nuspec.in
-dotnet/nuget/SEALNet.targets
+env
+thirdparty/
+
+########################################################################################
+#### The following are based on templates from https://github.com/github/gitignore. ####
+########################################################################################
 
 *.pc
 .config
