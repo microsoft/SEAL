@@ -1,5 +1,3 @@
-#ifdef EMSCRIPTEN
-
 #include<emscripten/bind.h>
 #include<cstdint>
 #include<stdexcept>
@@ -127,23 +125,19 @@ template<typename T1, typename T2>
 /*
 Helper function: Prints the parameters in a SEALContext.
 */
-std::string printContext(shared_ptr<SEALContext> context) {
-    // Verify parameters
-    if (!context) {
-        throw std::invalid_argument("context is not set");
-    }
-    auto &context_data = *context->key_context_data();
+std::string printContext(const SEALContext &context) {
+    auto context_data = context.key_context_data();
 
     /*
     Which scheme are we using?
     */
     std::string scheme_name;
-    switch (context_data.parms().scheme()) {
-    case seal::scheme_type::BFV:
-        scheme_name = "BFV";
+    switch (context_data->parms().scheme()) {
+    case seal::scheme_type::bfv:
+        scheme_name = "bfv";
         break;
-    case seal::scheme_type::CKKS:
-        scheme_name = "CKKS";
+    case seal::scheme_type::ckks:
+        scheme_name = "ckks";
         break;
     default:
         throw std::invalid_argument("unsupported scheme");
@@ -155,14 +149,14 @@ std::string printContext(shared_ptr<SEALContext> context) {
     oss << "| Encryption parameters :" << std::endl;
     oss << "|   scheme: " << scheme_name << std::endl;
     oss << "|   poly_modulus_degree: " <<
-        context_data.parms().poly_modulus_degree() << std::endl;
+        context_data->parms().poly_modulus_degree() << std::endl;
 
     /*
     Print the size of the true (product) coefficient modulus.
     */
     oss << "|   coeff_modulus size: ";
-    oss << context_data.total_coeff_modulus_bit_count() << " (";
-    auto coeff_modulus = context_data.parms().coeff_modulus();
+    oss << context_data->total_coeff_modulus_bit_count() << " (";
+    auto coeff_modulus = context_data->parms().coeff_modulus();
     std::size_t coeff_modulus_size = coeff_modulus.size();
     for (std::size_t i = 0; i < coeff_modulus_size - 1; i++) {
         oss << coeff_modulus[i].bit_count() << " + ";
@@ -171,10 +165,10 @@ std::string printContext(shared_ptr<SEALContext> context) {
     oss << ") bits" << std::endl;
 
     /*
-    For the BFV scheme print the plain_modulus parameter.
+    For the 'bfv'' scheme print the plain_modulus parameter.
     */
-    if (context_data.parms().scheme() == seal::scheme_type::BFV) {
-        oss << "|   plain_modulus: " << context_data.
+    if (context_data->parms().scheme() == seal::scheme_type::bfv) {
+        oss << "|   plain_modulus: " << context_data->
         parms().plain_modulus().value() << std::endl;
     }
 
@@ -226,10 +220,10 @@ EMSCRIPTEN_BINDINGS(SEAL) {
     emscripten::function("jsArrayStringFromVecInt64", select_overload<val(const std::vector<int64_t> &)>(&jsArrayStringFromVec));
     emscripten::function("jsArrayStringFromVecUint64", select_overload<val(const std::vector<uint64_t> &)>(&jsArrayStringFromVec));
     emscripten::function("jsArrayStringFromVecModulus", select_overload<val(const std::vector<Modulus> &)>(&jsArrayStringFromVecModulus));
-    emscripten::function("vecFromArrayUint8", select_overload<std::vector<uint8_t>(const val &)>(&vecFromJSArray));
-    emscripten::function("vecFromArrayInt32", select_overload<std::vector<int32_t>(const val &)>(&vecFromJSArray));
-    emscripten::function("vecFromArrayUint32", select_overload<std::vector<uint32_t>(const val &)>(&vecFromJSArray));
-    emscripten::function("vecFromArrayFloat64", select_overload<std::vector<double>(const val &)>(&vecFromJSArray));
+    // emscripten::function("vecFromArrayUint8", select_overload<std::vector<uint8_t>(const val &)>(&vecFromJSArray));
+    // emscripten::function("vecFromArrayInt32", select_overload<std::vector<int32_t>(const val &)>(&vecFromJSArray));
+    // emscripten::function("vecFromArrayUint32", select_overload<std::vector<uint32_t>(const val &)>(&vecFromJSArray));
+    // emscripten::function("vecFromArrayFloat64", select_overload<std::vector<double>(const val &)>(&vecFromJSArray));
     emscripten::function("vecFromArrayBigInt64", select_overload<std::vector<int64_t>(const val &)>(&vecFromJSArrayString));
     emscripten::function("vecFromArrayBigUint64", select_overload<std::vector<uint64_t>(const val &)>(&vecFromJSArrayString));
     emscripten::function("vecFromArrayModulus", select_overload<std::vector<Modulus>(const val &)>(&vecFromJSArrayStringModulus));
@@ -278,7 +272,10 @@ EMSCRIPTEN_BINDINGS(SEAL) {
     enum_<compr_mode_type>("ComprModeType")
         .value("none", compr_mode_type::none)
 #ifdef SEAL_USE_ZLIB
-        .value("deflate", compr_mode_type::deflate)
+        .value("zlib", compr_mode_type::zlib)
+#endif
+#ifdef SEAL_USE_ZSTD
+        .value("zstd", compr_mode_type::zstd)
 #endif
         ;
 
@@ -494,7 +491,18 @@ EMSCRIPTEN_BINDINGS(SEAL) {
         }));
 
     class_<SEALContext>("SEALContext")
-        .smart_ptr_constructor("std::shared_ptr<SEALContext>", &SEALContext::Create)
+        .constructor<const EncryptionParameters &, bool, sec_level_type>()
+        .function("copy", optional_override([](SEALContext &self, const SEALContext &copy) {
+            self = copy; // Copy via assignment overload
+        }))
+        .function("clone", optional_override([](const SEALContext &self) {
+            SEALContext clone = self; // Copy via assignment overload
+            return clone;
+        }))
+        .function("move", optional_override([](SEALContext &self, SEALContext &&assign) {
+            // If the original assign was const, this will default to a copy assignment
+            self = std::move(assign);
+        }))
         .function("toHuman", &printContext)
         .function("getContextData", &SEALContext::get_context_data)
         .function("keyContextData", &SEALContext::key_context_data)
@@ -515,7 +523,7 @@ EMSCRIPTEN_BINDINGS(SEAL) {
         }));
 
     class_<Evaluator>("Evaluator")
-        .constructor<std::shared_ptr<SEALContext>> ()
+        .constructor<const SEALContext &> ()
         .function("negate", &Evaluator::negate)
         .function("add", &Evaluator::add)
         .function("addPlain", &Evaluator::add_plain)
@@ -567,7 +575,7 @@ EMSCRIPTEN_BINDINGS(SEAL) {
                 Ciphertext temp = encrypted;
                 int rotateSteps = temp.poly_modulus_degree() / 4;
 
-                if (scheme == scheme_type::CKKS ) {
+                if (scheme == scheme_type::ckks ) {
                     // define recursive lambda
                     auto sum_elements = make_y_combinator([](auto&& sum_elements, Evaluator &self, Ciphertext &a, int steps,
                     const GaloisKeys &gal_keys, Ciphertext &destination, MemoryPoolHandle pool) {
@@ -585,7 +593,7 @@ EMSCRIPTEN_BINDINGS(SEAL) {
                     return;
                 }
 
-                if (scheme == scheme_type::BFV ) {
+                if (scheme == scheme_type::bfv ) {
                     // define recursive lambda
                     auto sum_elements = make_y_combinator([](auto&& sum_elements, Evaluator &self, Ciphertext &a, int steps,
                     const GaloisKeys &gal_keys, Ciphertext &destination, MemoryPoolHandle pool) {
@@ -667,14 +675,14 @@ EMSCRIPTEN_BINDINGS(SEAL) {
             return strVector;
         }))
         .function("loadFromString", optional_override([](KSwitchKeys &self,
-            std::shared_ptr<SEALContext>context,
+            SEALContext &context,
             const std::string &encoded) {
             std::string decoded = b64decode(encoded);
             std::istringstream is(decoded);
             self.load(context, is);
         }))
         .function("loadFromArray", optional_override([](KSwitchKeys &self,
-            std::shared_ptr<SEALContext>context, const val &v) {
+            SEALContext &context, const val &v) {
             // Get the size of the TypedArray input
             const size_t length = v["length"].as<unsigned>();
             // Create a temporary vector to store the TypedArray values
@@ -792,19 +800,20 @@ EMSCRIPTEN_BINDINGS(SEAL) {
         }));
 
     class_<KeyGenerator>("KeyGenerator")
-        .constructor<std::shared_ptr<SEALContext>>()
-        .constructor<std::shared_ptr<SEALContext>, const SecretKey &>()
-        .function("publicKey", &KeyGenerator::public_key)
+        .constructor<const SEALContext &>()
+        .constructor<const SEALContext &, const SecretKey &>()
+        .function("createPublicKey", select_overload<Serializable<PublicKey> () const>(&KeyGenerator::create_public_key))
+        .function("createPublicKeyDest", select_overload<void (PublicKey &) const>(&KeyGenerator::create_public_key))
         .function("secretKey", &KeyGenerator::secret_key)
-        .function("relinKeysLocal", &KeyGenerator::relin_keys_local)
-        .function("relinKeys", select_overload<Serializable<RelinKeys> ()>(&KeyGenerator::relin_keys))
-        .function("galoisKeysLocal", optional_override([](KeyGenerator &self, const val &v) {
+        .function("createRelinKeys", select_overload<Serializable<RelinKeys> ()>(&KeyGenerator::create_relin_keys))
+        .function("createRelinKeysDest", select_overload<void (RelinKeys &)>(&KeyGenerator::create_relin_keys))
+        .function("createGaloisKeys", optional_override([](KeyGenerator &self, const val &v) {
                 // Get the size of the TypedArray input
                 const size_t length = v["length"].as<unsigned>();
 
                 // If empty, generate all steps.
                 if (length == 0) {
-                    return self.galois_keys_local();
+                    return self.create_galois_keys();
                 }
 
                 // Create a temporary vector to store the TypedArray values
@@ -816,15 +825,15 @@ EMSCRIPTEN_BINDINGS(SEAL) {
                 // Set the data in the vector from the JS side.
                 memoryView.call<void>("set", v);
 
-                return self.galois_keys_local(temp);
+                return self.create_galois_keys(temp);
             }))
-        .function("galoisKeys", optional_override([](KeyGenerator &self, const val &v) {
+        .function("createGaloisKeysDest", optional_override([](KeyGenerator &self, const val &v, GaloisKeys &destination) {
                 // Get the size of the TypedArray input
                 const size_t length = v["length"].as<unsigned>();
 
                 // If empty, generate all steps.
                 if (length == 0) {
-                    return self.galois_keys();
+                    return self.create_galois_keys(destination);
                 }
 
                 // Create a temporary vector to store the TypedArray values
@@ -836,7 +845,7 @@ EMSCRIPTEN_BINDINGS(SEAL) {
                 // Set the data in the vector from the JS side.
                 memoryView.call<void>("set", v);
 
-                return self.galois_keys(temp);
+                return self.create_galois_keys(temp, destination);
             }));
     class_<PublicKey>("PublicKey")
         .constructor<>()
@@ -869,14 +878,14 @@ EMSCRIPTEN_BINDINGS(SEAL) {
             return strVector;
         }))
         .function("loadFromString", optional_override([](PublicKey &self,
-            std::shared_ptr<SEALContext>context,
+            SEALContext &context,
             const std::string &encoded) {
             std::string decoded = b64decode(encoded);
             std::istringstream is(decoded);
             self.load(context, is);
         }))
         .function("loadFromArray", optional_override([](PublicKey &self,
-            std::shared_ptr<SEALContext>context, const val &v) {
+            SEALContext &context, const val &v) {
             // Get the size of the TypedArray input
             const size_t length = v["length"].as<unsigned>();
             // Create a temporary vector to store the TypedArray values
@@ -926,14 +935,14 @@ EMSCRIPTEN_BINDINGS(SEAL) {
             return strVector;
         }))
         .function("loadFromString", optional_override([](SecretKey &self,
-            std::shared_ptr<SEALContext>context,
+            SEALContext &context,
             const std::string &encoded) {
             std::string decoded = b64decode(encoded);
             std::istringstream is(decoded);
             self.load(context, is);
         }))
         .function("loadFromArray", optional_override([](SecretKey &self,
-            std::shared_ptr<SEALContext>context, const val &v) {
+            SEALContext &context, const val &v) {
             // Get the size of the TypedArray input
             const size_t length = v["length"].as<unsigned>();
             // Create a temporary vector to store the TypedArray values
@@ -984,14 +993,14 @@ EMSCRIPTEN_BINDINGS(SEAL) {
             return strVector;
         }))
         .function("loadFromString", optional_override([](Plaintext &self,
-            std::shared_ptr<SEALContext>context,
+            SEALContext &context,
             const std::string &encoded) {
             std::string decoded = b64decode(encoded);
             std::istringstream is(decoded);
             self.load(context, is);
         }))
         .function("loadFromArray", optional_override([](Plaintext &self,
-            std::shared_ptr<SEALContext>context, const val &v) {
+            SEALContext &context, const val &v) {
             // Get the size of the TypedArray input
             const size_t length = v["length"].as<unsigned>();
             // Create a temporary vector to store the TypedArray values
@@ -1040,9 +1049,9 @@ EMSCRIPTEN_BINDINGS(SEAL) {
 
     class_<Ciphertext>("Ciphertext")
         .constructor<MemoryPoolHandle>()
-        .constructor<std::shared_ptr<SEALContext>, MemoryPoolHandle>()
-        .constructor<std::shared_ptr<SEALContext>, parms_id_type, MemoryPoolHandle>()
-        .constructor<std::shared_ptr<SEALContext>, parms_id_type, std::size_t, MemoryPoolHandle>()
+        .constructor<const SEALContext &, MemoryPoolHandle>()
+        .constructor<const SEALContext &, parms_id_type, MemoryPoolHandle>()
+        .constructor<const SEALContext &, parms_id_type, std::size_t, MemoryPoolHandle>()
         .function("copy", optional_override([](Ciphertext &self, const Ciphertext &copy) {
                 self = copy; // Copy via assignment overload
             }))
@@ -1071,14 +1080,14 @@ EMSCRIPTEN_BINDINGS(SEAL) {
             return strVector;
         }))
         .function("loadFromString", optional_override([](Ciphertext &self,
-            std::shared_ptr<SEALContext>context,
+            SEALContext &context,
             const std::string &encoded) {
             std::string decoded = b64decode(encoded);
             std::istringstream is(decoded);
             self.load(context, is);
         }))
         .function("loadFromArray", optional_override([](Ciphertext &self,
-            std::shared_ptr<SEALContext>context, const val &v) {
+            SEALContext &context, const val &v) {
             // Get the size of the TypedArray input
             const size_t length = v["length"].as<unsigned>();
             // Create a temporary vector to store the TypedArray values
@@ -1097,8 +1106,7 @@ EMSCRIPTEN_BINDINGS(SEAL) {
             self.load(context, ss);
         }))
         .function("reserve", optional_override([](Ciphertext &self,
-                    std::shared_ptr<SEALContext>context,
-            std::size_t capacity) {
+            const SEALContext &context, std::size_t capacity) {
             return self.reserve(context, capacity);
         }))
         .function("resize", optional_override([](Ciphertext &self,
@@ -1131,15 +1139,8 @@ EMSCRIPTEN_BINDINGS(SEAL) {
             return self.pool();
         }));
 
-    class_<IntegerEncoder>("IntegerEncoder")
-        .constructor<std::shared_ptr<SEALContext>> ()
-        .function("encodeInt32", select_overload<void(std::int32_t, Plaintext &)>(&IntegerEncoder::encode))
-        .function("encodeUint32", select_overload<void(std::uint32_t, Plaintext &)>(&IntegerEncoder::encode))
-        .function("decodeInt32", select_overload<std::int32_t(const Plaintext &)>(&IntegerEncoder::decode_int32))
-        .function("decodeUint32", select_overload<std::uint32_t(const Plaintext &)>(&IntegerEncoder::decode_uint32));
-
     class_<BatchEncoder>("BatchEncoder")
-        .constructor<std::shared_ptr<SEALContext>> ()
+        .constructor<const SEALContext &> ()
         .function("encode", optional_override([](BatchEncoder &self,
             const val &v, Plaintext &destination,
                 const std::string &type) {
@@ -1301,14 +1302,14 @@ EMSCRIPTEN_BINDINGS(SEAL) {
         }));
 
     class_<CKKSEncoder>("CKKSEncoder")
-        .constructor<std::shared_ptr<SEALContext>> ()
+        .constructor<const SEALContext &> ()
         .function("encode", optional_override([](CKKSEncoder &self,
             const val &v, double scale, Plaintext &destination,
                 MemoryPoolHandle pool = MemoryManager::GetPool()) {
             // Get the size of the TypedArray input
             const size_t length = v["length"].as<unsigned>();
 
-            // Reserve the known max CKKS encoder slot count
+            // Reserve the known max ckks encoder slot count
             const size_t MAX_SLOT_COUNT = self.CKKSEncoder::slot_count();
 
             // Create a vector to store the TypedArray values
@@ -1331,7 +1332,7 @@ EMSCRIPTEN_BINDINGS(SEAL) {
             // Create a new vector to store the decoded result
             std::vector<double> destination;
 
-            // Reserve the known max CKKS encoder slot count
+            // Reserve the known max ckks encoder slot count
             const size_t MAX_SLOT_COUNT = self.CKKSEncoder::slot_count();
             destination.reserve(MAX_SLOT_COUNT);
 
@@ -1371,23 +1372,26 @@ EMSCRIPTEN_BINDINGS(SEAL) {
         .function("getPool", &MMProfThreadLocal::get_pool);
 
     class_<Encryptor>("Encryptor")
-        .constructor<std::shared_ptr<SEALContext>, const PublicKey &>()
-        .constructor<std::shared_ptr<SEALContext>, const PublicKey &, const SecretKey &>()
+        .constructor<const SEALContext &, const PublicKey &>()
+        .constructor<const SEALContext &, const PublicKey &, const SecretKey &>()
         .function("setPublicKey", &Encryptor::set_public_key)
         .function("setSecretKey", &Encryptor::set_secret_key)
-        .function("encrypt", &Encryptor::encrypt)
-        .function("encryptSymmetricSerializable", select_overload<Serializable<Ciphertext>(const Plaintext &, MemoryPoolHandle pool) const >(&Encryptor::encrypt_symmetric))
-        .function("encryptSymmetric", select_overload<void(const Plaintext &, Ciphertext &, MemoryPoolHandle pool) const >(&Encryptor::encrypt_symmetric));
+        .function("encrypt", select_overload<Serializable<Ciphertext>(const Plaintext &, MemoryPoolHandle pool) const >(&Encryptor::encrypt))
+        .function("encryptDest", select_overload<void (const Plaintext &, Ciphertext &, MemoryPoolHandle pool) const >(&Encryptor::encrypt))
+        .function("encryptSymmetric", select_overload<Serializable<Ciphertext>(const Plaintext &, MemoryPoolHandle pool) const >(&Encryptor::encrypt_symmetric))
+        .function("encryptSymmetricDest", select_overload<void(const Plaintext &, Ciphertext &, MemoryPoolHandle pool) const >(&Encryptor::encrypt_symmetric))
+        .function("encryptZero", select_overload<Serializable<Ciphertext>(MemoryPoolHandle pool) const >(&Encryptor::encrypt_zero))
+        .function("encryptZeroDest", select_overload<void(Ciphertext &, MemoryPoolHandle pool) const >(&Encryptor::encrypt_zero));
 
     class_<Decryptor>("Decryptor")
-        .constructor<std::shared_ptr<SEALContext>, const SecretKey &>()
+        .constructor<const SEALContext &, const SecretKey &>()
         .function("decrypt", &Decryptor::decrypt)
         .function("invariantNoiseBudget", &Decryptor::invariant_noise_budget);
 
     enum_<scheme_type>("SchemeType")
         .value("none", scheme_type::none)
-        .value("BFV", scheme_type::BFV)
-        .value("CKKS", scheme_type::CKKS);
+        .value("bfv", scheme_type::bfv)
+        .value("ckks", scheme_type::ckks);
 
     //enum_<mm_prof_opt>("mm_prof_opt")
     //    .value("DEFAULT", mm_prof_opt::DEFAULT)
@@ -1396,5 +1400,3 @@ EMSCRIPTEN_BINDINGS(SEAL) {
     //    .value("FORCE_THREAD_LOCAL", mm_prof_opt::FORCE_THREAD_LOCAL)
     //    ;
 }
-
-#endif
