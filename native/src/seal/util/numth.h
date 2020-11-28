@@ -105,11 +105,11 @@ namespace seal
                 y = util::safe_cast<std::uint64_t>(temp);
 
                 temp = a;
-                a = util::sub_safe(prev_a, mul_safe(q, a));
+                a = util::sub_safe(prev_a, util::mul_safe(q, a));
                 prev_a = temp;
 
                 temp = b;
-                b = util::sub_safe(prev_b, mul_safe(q, b));
+                b = util::sub_safe(prev_b, util::mul_safe(q, b));
                 prev_b = temp;
             }
             return std::make_tuple(x, prev_a, prev_b);

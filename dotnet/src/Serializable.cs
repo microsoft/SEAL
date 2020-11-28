@@ -61,13 +61,6 @@ namespace Microsoft.Research.SEAL
     /// to be communicated from a client to a server for encrypted computation.
     /// </para>
     /// <para>
-    /// Serializable objects are created only by the following functions:
-    ///     - Encryptor.EncryptSymmetric
-    ///     - Encryptor.EncryptZeroSymmetric
-    ///     - KeyGenerator.RelinKeys
-    ///     - KeyGenerator.GaloisKeys
-    /// </para>
-    /// <para>
     /// Serializable objects also expose the SaveSize function that behaves just
     /// as the SaveSize functions of other objects in Microsoft SEAL: it returns
     /// an upper bound on the size of a buffer needed to hold the serialized data.
@@ -81,19 +74,20 @@ namespace Microsoft.Research.SEAL
     ///                     |
     ///                     |                Serializable{GaloisKeys}.Save
     ///                     |                with ComprModeType.Deflate
-    ///                     |
-    ///             +-------v-------+
+    ///                     v
+    ///             +---------------+
     ///             | Stream/Buffer |        Size ~1 MB (example)
     ///             +-------+-------+
     ///                     |
     ///                     |
-    ///                  +--v--+
-    ///                  Network             Minimized communication
-    ///                  +--+--+
+    ///                     v
+    ///                +---------+
+    ///                | Network |           Minimized communication
+    ///                +----+----+
     ///                     |
     ///                     |                GaloisKeys.Load
-    ///                     |
-    ///               +-----v------+
+    ///                     v
+    ///               +------------+
     ///               | GaloisKeys |         Size 2 MB (example)
     ///               +------------+
     /// </para>

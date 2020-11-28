@@ -6,8 +6,6 @@
 #include "seal/serialization.h"
 #include "seal/util/defines.h"
 #include "seal/util/streambuf.h"
-#include <cstdint>
-#include <functional>
 #include <ios>
 #include <iostream>
 
@@ -23,12 +21,6 @@ namespace seal
     mode compr_mode_type::deflate due to an implementation detail. This makes
     sense when, e.g., the ciphertexts need to be communicated from a client to
     a server for encrypted computation.
-
-    Serializable objects are created only by the following functions:
-        - Encryptor::encrypt_symmetric
-        - Encryptor::encrypt_zero_symmetric
-        - KeyGenerator::relin_keys
-        - KeyGenerator::galois_keys
 
     Serializable objects also expose the save_size function that behaves just
     as the save_size functions of other objects in Microsoft SEAL: it returns
@@ -140,7 +132,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            seal_byte *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             return obj_.save(out, size, compr_mode);
         }

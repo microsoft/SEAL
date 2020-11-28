@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/intarray.h"
+#include "seal/dynarray.h"
 #include "seal/memorymanager.h"
 #include "seal/util/pointer.h"
 #include "seal/util/uintcore.h"
@@ -60,9 +60,9 @@ namespace sealtest
         MemoryPoolHandle pool = MemoryPoolHandle::New();
         ASSERT_EQ(1L, pool.use_count());
         {
-            IntArray<int> arr(pool);
+            DynArray<int> arr(pool);
             ASSERT_EQ(2L, pool.use_count());
-            IntArray<int> arr2(pool);
+            DynArray<int> arr2(pool);
             ASSERT_EQ(3L, pool.use_count());
         }
         ASSERT_EQ(1L, pool.use_count());

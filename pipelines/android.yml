@@ -14,7 +14,7 @@ steps:
       $ToolsDirectory = Join-Path -Path $Env:BUILD_SOURCESDIRECTORY -ChildPath tools
       $NinjaZipFile = Join-Path $ToolsDirectory -ChildPath ninja.zip
       $NinjaExeFile = Join-Path $ToolsDirectory -ChildPath ninja.exe
-      
+
       Invoke-WebRequest -Uri "https://github.com/ninja-build/ninja/releases/download/v1.10.0/ninja-win.zip" -OutFile $NinjaZipFile
       Expand-Archive -Path $NinjaZipFile -DestinationPath $ToolsDirectory
       Copy-Item -Path $NinjaExeFile -Destination "c:\Program Files\CMake\bin"
@@ -39,9 +39,16 @@ steps:
 - task: CopyFiles@2
   displayName: Copy files to staging directory
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)\lib'
-    Contents: '**/libsealc.so'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)\lib'
+    SourceFolder: '$(Build.SourcesDirectory)\android\app\.cxx\cmake\release\arm64-v8a\lib\arm64-v8a'
+    Contents: 'libsealc.so'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)\lib\arm64-v8a'
+
+- task: CopyFiles@2
+  displayName: Copy files to staging directory
+  inputs:
+    SourceFolder: '$(Build.SourcesDirectory)\android\app\.cxx\cmake\release\x86_64\lib\x86_64'
+    Contents: 'libsealc.so'
+    TargetFolder: '$(Build.ArtifactStagingDirectory)\lib\x86_64'
 
 - task: PublishBuildArtifacts@1
   displayName: Publish build artifacts

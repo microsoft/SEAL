@@ -1,7 +1,7 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "seal/intarray.h"
+#include "seal/dynarray.h"
 #include "seal/util/numth.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/uintarithsmallmod.h"

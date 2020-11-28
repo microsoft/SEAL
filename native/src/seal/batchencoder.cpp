@@ -4,9 +4,7 @@
 #include "seal/batchencoder.h"
 #include "seal/valcheck.h"
 #include "seal/util/common.h"
-#include "seal/util/polycore.h"
 #include <algorithm>
-#include <cstdlib>
 #include <limits>
 #include <random>
 #include <stdexcept>
@@ -16,20 +14,16 @@ using namespace seal::util;
 
 namespace seal
 {
-    BatchEncoder::BatchEncoder(shared_ptr<SEALContext> context) : context_(move(context))
+    BatchEncoder::BatchEncoder(const SEALContext &context) : context_(context)
     {
         // Verify parameters
-        if (!context_)
-        {
-            throw invalid_argument("invalid context");
-        }
-        if (!context_->parameters_set())
+        if (!context_.parameters_set())
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
 
-        auto &context_data = *context_->first_context_data();
-        if (context_data.parms().scheme() != scheme_type::BFV)
+        auto &context_data = *context_.first_context_data();
+        if (context_data.parms().scheme() != scheme_type::bfv)
         {
             throw invalid_argument("unsupported scheme");
         }
@@ -101,7 +95,7 @@ namespace seal
             throw invalid_argument("input cannot be null");
         }
 #endif
-        size_t coeff_count = context_->first_context_data()->parms().poly_modulus_degree();
+        size_t coeff_count = context_.first_context_data()->parms().poly_modulus_degree();
         int logn = get_power_of_two(coeff_count);
         for (size_t i = 0; i < coeff_count; i++)
         {
@@ -115,7 +109,7 @@ namespace seal
 
     void BatchEncoder::encode(const vector<uint64_t> &values_matrix, Plaintext &destination)
     {
-        auto &context_data = *context_->first_context_data();
+        auto &context_data = *context_.first_context_data();
 
         // Validate input parameters
         size_t values_matrix_size = values_matrix.size();
@@ -156,7 +150,7 @@ namespace seal
 
     void BatchEncoder::encode(const vector<int64_t> &values_matrix, Plaintext &destination)
     {
-        auto &context_data = *context_->first_context_data();
+        auto &context_data = *context_.first_context_data();
         uint64_t modulus = context_data.parms().plain_modulus().value();
 
         // Validate input parameters
@@ -200,7 +194,7 @@ namespace seal
 #ifdef SEAL_USE_MSGSL
     void BatchEncoder::encode(gsl::span<const uint64_t> values_matrix, Plaintext &destination)
     {
-        auto &context_data = *context_->first_context_data();
+        auto &context_data = *context_.first_context_data();
 
         // Validate input parameters
         size_t values_matrix_size = static_cast<size_t>(values_matrix.size());
@@ -223,8 +217,7 @@ namespace seal
         destination.resize(slots_);
         destination.parms_id() = parms_id_zero;
 
-        // First write the values to destination coefficients. Read
-        // in top row, then bottom row.
+        // First write the values to destination coefficients. Read in top row, then bottom row.
         for (size_t i = 0; i < values_matrix_size; i++)
         {
             *(destination.data() + matrix_reps_index_map_[i]) = values_matrix[i];
@@ -241,7 +234,7 @@ namespace seal
 
     void BatchEncoder::encode(gsl::span<const int64_t> values_matrix, Plaintext &destination)
     {
-        auto &context_data = *context_->first_context_data();
+        auto &context_data = *context_.first_context_data();
         uint64_t modulus = context_data.parms().plain_modulus().value();
 
         // Validate input parameters
@@ -265,8 +258,7 @@ namespace seal
         destination.resize(slots_);
         destination.parms_id() = parms_id_zero;
 
-        // First write the values to destination coefficients. Read
-        // in top row, then bottom row.
+        // First write the values to destination coefficients. Read in top row, then bottom row.
         for (size_t i = 0; i < values_matrix_size; i++)
         {
             *(destination.data() + matrix_reps_index_map_[i]) =
@@ -283,58 +275,6 @@ namespace seal
         inverse_ntt_negacyclic_harvey(destination.data(), *context_data.plain_ntt_tables());
     }
 #endif
-    void BatchEncoder::encode(Plaintext &plain, MemoryPoolHandle pool)
-    {
-        if (plain.is_ntt_form())
-        {
-            throw invalid_argument("plain cannot be in NTT form");
-        }
-        if (!pool)
-        {
-            throw invalid_argument("pool is uninitialized");
-        }
-
-        auto &context_data = *context_->first_context_data();
-
-        // Validate input parameters
-        if (plain.coeff_count() > context_data.parms().poly_modulus_degree())
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
-#ifdef SEAL_DEBUG
-        if (!all_of(plain.data(), plain.data() + plain.coeff_count(), [&](auto coeff) {
-                return coeff < context_data.parms().plain_modulus().value();
-            }))
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
-#endif
-        // We need to permute the coefficients of plain. To do this, we allocate
-        // temporary space.
-        size_t input_plain_coeff_count = min(plain.coeff_count(), slots_);
-        auto temp(allocate_uint(input_plain_coeff_count, pool));
-        set_uint(plain.data(), input_plain_coeff_count, temp.get());
-
-        // Set plain to full slot count size.
-        plain.resize(slots_);
-        plain.parms_id() = parms_id_zero;
-
-        // First write the values to destination coefficients. Read
-        // in top row, then bottom row.
-        for (size_t i = 0; i < input_plain_coeff_count; i++)
-        {
-            *(plain.data() + matrix_reps_index_map_[i]) = temp[i];
-        }
-        for (size_t i = input_plain_coeff_count; i < slots_; i++)
-        {
-            *(plain.data() + matrix_reps_index_map_[i]) = 0;
-        }
-
-        // Transform destination using inverse of negacyclic NTT
-        // Note: We already performed bit-reversal when reading in the matrix
-        inverse_ntt_negacyclic_harvey(plain.data(), *context_data.plain_ntt_tables());
-    }
-
     void BatchEncoder::decode(const Plaintext &plain, vector<uint64_t> &destination, MemoryPoolHandle pool)
     {
         if (!is_valid_for(plain, context_))
@@ -350,7 +290,7 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
 
-        auto &context_data = *context_->first_context_data();
+        auto &context_data = *context_.first_context_data();
 
         // Set destination size
         destination.resize(slots_);
@@ -367,7 +307,7 @@ namespace seal
         // Transform destination using negacyclic NTT.
         ntt_negacyclic_harvey(temp_dest.get(), *context_data.plain_ntt_tables());
 
-        // Read top row
+        // Read top row, then bottom row
         for (size_t i = 0; i < slots_; i++)
         {
             destination[i] = temp_dest[matrix_reps_index_map_[i]];
@@ -389,7 +329,7 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
 
-        auto &context_data = *context_->first_context_data();
+        auto &context_data = *context_.first_context_data();
         uint64_t modulus = context_data.parms().plain_modulus().value();
 
         // Set destination size
@@ -433,7 +373,7 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
 
-        auto &context_data = *context_->first_context_data();
+        auto &context_data = *context_.first_context_data();
 
         if (unsigned_gt(destination.size(), numeric_limits<int>::max()) || unsigned_neq(destination.size(), slots_))
         {
@@ -452,7 +392,7 @@ namespace seal
         // Transform destination using negacyclic NTT.
         ntt_negacyclic_harvey(temp_dest.get(), *context_data.plain_ntt_tables());
 
-        // Read top row
+        // Read top row, then bottom row
         for (size_t i = 0; i < slots_; i++)
         {
             destination[i] = temp_dest[matrix_reps_index_map_[i]];
@@ -474,7 +414,7 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
 
-        auto &context_data = *context_->first_context_data();
+        auto &context_data = *context_.first_context_data();
         uint64_t modulus = context_data.parms().plain_modulus().value();
 
         if (unsigned_gt(destination.size(), numeric_limits<int>::max()) || unsigned_neq(destination.size(), slots_))
@@ -505,44 +445,4 @@ namespace seal
         }
     }
 #endif
-    void BatchEncoder::decode(Plaintext &plain, MemoryPoolHandle pool)
-    {
-        if (!is_valid_for(plain, context_))
-        {
-            throw invalid_argument("plain is not valid for encryption parameters");
-        }
-        if (plain.is_ntt_form())
-        {
-            throw invalid_argument("plain cannot be in NTT form");
-        }
-        if (!pool)
-        {
-            throw invalid_argument("pool is uninitialized");
-        }
-
-        auto &context_data = *context_->first_context_data();
-
-        // Never include the leading zero coefficient (if present)
-        size_t plain_coeff_count = min(plain.coeff_count(), slots_);
-
-        // Allocate temporary space to store a wide copy of plain
-        auto temp(allocate_uint(slots_, pool));
-
-        // Make a copy of poly
-        set_uint(plain.data(), plain_coeff_count, temp.get());
-        set_zero_uint(slots_ - plain_coeff_count, temp.get() + plain_coeff_count);
-
-        // Transform destination using negacyclic NTT.
-        ntt_negacyclic_harvey(temp.get(), *context_data.plain_ntt_tables());
-
-        // Set plain to full slot count size (note that all new coefficients are
-        // set to zero).
-        plain.resize(slots_);
-
-        // Read top row, then bottom row
-        for (size_t i = 0; i < slots_; i++)
-        {
-            *(plain.data() + i) = temp[matrix_reps_index_map_[i]];
-        }
-    }
 } // namespace seal

@@ -4,14 +4,10 @@
 #pragma once
 
 #include "seal/ciphertext.h"
-#include "seal/encryptionparams.h"
 #include "seal/kswitchkeys.h"
 #include "seal/memorymanager.h"
-#include "seal/util/common.h"
 #include "seal/util/defines.h"
 #include "seal/util/galois.h"
-#include <iostream>
-#include <numeric>
 #include <vector>
 
 namespace seal

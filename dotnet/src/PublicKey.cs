@@ -19,7 +19,10 @@ namespace Microsoft.Research.SEAL
     /// storing the public key not being thread-safe.
     /// </para>
     /// </remarks>
-    public class PublicKey : NativeObject
+    public class PublicKey :
+        NativeObject,
+        ISerializableObject,
+        ISettable<PublicKey>
     {
         /// <summary>
         /// Creates an empty public key.
@@ -146,8 +149,7 @@ namespace Microsoft.Research.SEAL
         /// null</exception>
         /// <exception cref="ArgumentException">if the stream is closed or does not
         /// support reading</exception>
-        /// <exception cref="ArgumentException">if context is not set or encryption
-        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid</exception>
         /// <exception cref="EndOfStreamException">if the stream ended
         /// unexpectedly</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>
@@ -178,8 +180,7 @@ namespace Microsoft.Research.SEAL
         /// null</exception>
         /// <exception cref="ArgumentException">if the stream is closed or does not
         /// support reading</exception>
-        /// <exception cref="ArgumentException">if context is not set or encryption
-        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid</exception>
         /// <exception cref="EndOfStreamException">if the stream ended
         /// unexpectedly</exception>
         /// <exception cref="IOException">if I/O operations failed</exception>

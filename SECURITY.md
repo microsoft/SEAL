@@ -1,4 +1,9 @@
-<!-- BEGIN MICROSOFT SECURITY.MD V0.0.3 BLOCK -->
+## Correct Use of Microsoft SEAL
+
+Homomorphic encryption schemes have various and often unexpected security models that may be surprising even to cryptography experts.
+In particular, decryptions of Microsoft SEAL ciphertexts should be treated as private information only available to the secret key owner, as sharing decryptions of ciphertexts may in some cases lead to leaking the secret key.
+If it is absolutely necessary to share information about the decryption of a ciphertext, for example when building a protocol of some kind, the number of bits shared should be kept to a minimum, and secret keys should be rotated regularly.
+Commercial applications of Microsoft SEAL should be carefully reviewed by cryptography experts who are familiar with homomorphic encryption security models.
 
 ## Security
 
@@ -37,5 +42,3 @@ We prefer all communications to be in English.
 ## Policy
 
 Microsoft follows the principle of [Coordinated Vulnerability Disclosure](https://www.microsoft.com/en-us/msrc/cvd).
-
-<!-- END MICROSOFT SECURITY.MD BLOCK -->

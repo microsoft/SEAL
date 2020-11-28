@@ -4,6 +4,7 @@
 using Microsoft.Research.SEAL;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace SEALNetTest
@@ -79,6 +80,60 @@ namespace SEALNetTest
             Assert.AreEqual(plain3, plain);
             Assert.IsTrue(plain3.IsNTTForm);
             Assert.AreEqual(plain3.ParmsId, context.FirstParmsId);
+        }
+
+        [TestMethod]
+        public void FromEnumerableTest()
+        {
+            bool EqFun(List<ulong> coeffs, Plaintext plain)
+            {
+                bool result = true;
+                for (int i = 0; i < coeffs.Count; i++)
+                {
+                    if (coeffs[i] != plain[(ulong)i])
+                        result = false;
+                }
+                return result;
+            }
+
+            // Constructors
+            List<ulong> coeffs = new List<ulong>{};
+            Plaintext plain = new Plaintext(coeffs);
+            Assert.IsTrue(plain.IsZero);
+
+            coeffs = new List<ulong>{ 0 };
+            plain = new Plaintext(coeffs);
+            Assert.AreEqual(1ul, plain.CoeffCount);
+            Assert.AreEqual(1ul, plain.Capacity);
+            Assert.IsTrue(EqFun(coeffs, plain));
+
+            plain = new Plaintext(coeffs, 2);
+            Assert.AreEqual(1ul, plain.CoeffCount);
+            Assert.AreEqual(2ul, plain.Capacity);
+            Assert.IsTrue(EqFun(coeffs, plain));
+
+            coeffs = new List<ulong>{ 1, 2 };
+            plain = new Plaintext(coeffs);
+            Assert.AreEqual(2ul, plain.CoeffCount);
+            Assert.AreEqual(2ul, plain.Capacity);
+            Assert.IsTrue(EqFun(coeffs, plain));
+
+            plain = new Plaintext(coeffs, 3);
+            Assert.AreEqual(2ul, plain.CoeffCount);
+            Assert.AreEqual(3ul, plain.Capacity);
+            Assert.IsTrue(EqFun(coeffs, plain));
+
+            // Setter
+            coeffs = new List<ulong>{};
+            plain.Set(coeffs);
+            Assert.AreEqual(0ul, plain.CoeffCount);
+            Assert.AreEqual(3ul, plain.Capacity);
+
+            coeffs = new List<ulong>{ 5, 4, 3, 2, 1 };
+            plain.Set(coeffs);
+            Assert.AreEqual(5ul, plain.CoeffCount);
+            Assert.AreEqual(5ul, plain.Capacity);
+            Assert.IsTrue(EqFun(coeffs, plain));
         }
 
         [TestMethod]

@@ -4,18 +4,15 @@
 # Source files in this directory
 target_sources(sealc PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/batchencoder.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/biguint.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ciphertext.cpp
     ${CMAKE_CURRENT_LIST_DIR}/ckksencoder.cpp
     ${CMAKE_CURRENT_LIST_DIR}/contextdata.cpp
     ${CMAKE_CURRENT_LIST_DIR}/decryptor.cpp
-    # ${CMAKE_CURRENT_LIST_DIR}/dllmain.cpp
     ${CMAKE_CURRENT_LIST_DIR}/encryptionparameterqualifiers.cpp
     ${CMAKE_CURRENT_LIST_DIR}/encryptionparameters.cpp
     ${CMAKE_CURRENT_LIST_DIR}/encryptor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/evaluator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/galoiskeys.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/intencoder.cpp
     ${CMAKE_CURRENT_LIST_DIR}/keygenerator.cpp
     ${CMAKE_CURRENT_LIST_DIR}/kswitchkeys.cpp
     ${CMAKE_CURRENT_LIST_DIR}/memorymanager.cpp
@@ -36,7 +33,6 @@ target_sources(sealc PRIVATE
 install(
     FILES
         ${CMAKE_CURRENT_LIST_DIR}/batchencoder.h
-        ${CMAKE_CURRENT_LIST_DIR}/biguint.h
         ${CMAKE_CURRENT_LIST_DIR}/ciphertext.h
         ${CMAKE_CURRENT_LIST_DIR}/ckksencoder.h
         ${CMAKE_CURRENT_LIST_DIR}/contextdata.h
@@ -47,7 +43,6 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/encryptor.h
         ${CMAKE_CURRENT_LIST_DIR}/evaluator.h
         ${CMAKE_CURRENT_LIST_DIR}/galoiskeys.h
-        ${CMAKE_CURRENT_LIST_DIR}/intencoder.h
         ${CMAKE_CURRENT_LIST_DIR}/keygenerator.h
         ${CMAKE_CURRENT_LIST_DIR}/kswitchkeys.h
         ${CMAKE_CURRENT_LIST_DIR}/memorymanager.h

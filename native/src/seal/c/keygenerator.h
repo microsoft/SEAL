@@ -13,23 +13,23 @@
 #include "seal/c/defines.h"
 #include <stdint.h>
 
-SEAL_C_FUNC KeyGenerator_Create1(void *sealContext, void **key_generator);
+SEAL_C_FUNC KeyGenerator_Create1(void *context, void **key_generator);
 
-SEAL_C_FUNC KeyGenerator_Create2(void *sealContext, void *secret_key, void **key_generator);
+SEAL_C_FUNC KeyGenerator_Create2(void *context, void *secret_key, void **key_generator);
 
 SEAL_C_FUNC KeyGenerator_Destroy(void *thisptr);
 
-SEAL_C_FUNC KeyGenerator_RelinKeys(void *thisptr, bool save_seed, void **relin_keys);
+SEAL_C_FUNC KeyGenerator_CreateRelinKeys(void *thisptr, bool save_seed, void **relin_keys);
 
-SEAL_C_FUNC KeyGenerator_GaloisKeysFromElts(
+SEAL_C_FUNC KeyGenerator_CreateGaloisKeysFromElts(
     void *thisptr, uint64_t count, uint32_t *galois_elts, bool save_seed, void **galois_keys);
 
-SEAL_C_FUNC KeyGenerator_GaloisKeysFromSteps(
+SEAL_C_FUNC KeyGenerator_CreateGaloisKeysFromSteps(
     void *thisptr, uint64_t count, int *steps, bool save_seed, void **galois_keys);
 
-SEAL_C_FUNC KeyGenerator_GaloisKeysAll(void *thisptr, bool save_seed, void **galois_keys);
+SEAL_C_FUNC KeyGenerator_CreateGaloisKeysAll(void *thisptr, bool save_seed, void **galois_keys);
 
-SEAL_C_FUNC KeyGenerator_PublicKey(void *thisptr, void **public_key);
+SEAL_C_FUNC KeyGenerator_CreatePublicKey(void *thisptr, bool save_seed, void **public_key);
 
 SEAL_C_FUNC KeyGenerator_SecretKey(void *thisptr, void **secret_key);
 

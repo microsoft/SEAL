@@ -18,8 +18,8 @@
 
 /*
 Minor modifications to the original file have been made and marked
-as `EDIT: ...`. The sole purpose of these edits is to silence misleading
-warnings in Visual Studio.
+as `Microsoft SEAL edit: ...`. The sole purpose of these edits is to silence
+misleading warnings in Visual Studio.
 */
 
 #include <stdint.h>
@@ -50,9 +50,7 @@ int blake2xb_init_key( blake2xb_state *S, const size_t outlen, const void *key, 
   /* Initialize parameter block */
   S->P->digest_length = BLAKE2B_OUTBYTES;
 
-  /*
-  EDIT: explicit cast to silence warnings
-  */
+  /* Microsoft SEAL edit: explicit cast to silence warnings. */
   S->P->key_length    = (uint8_t)keylen;
 
   S->P->fanout        = 1;
@@ -60,9 +58,7 @@ int blake2xb_init_key( blake2xb_state *S, const size_t outlen, const void *key, 
   store32( &S->P->leaf_length, 0 );
   store32( &S->P->node_offset, 0 );
 
-  /*
-  EDIT: explicit cast to silence warnings
-  */
+  /* Microsoft SEAL edit: explicit cast to silence warnings. */
   store32( &S->P->xof_length, (uint32_t)outlen );
 
   S->P->node_depth    = 0;
@@ -132,9 +128,7 @@ int blake2xb_final( blake2xb_state *S, void *out, size_t outlen) {
     const size_t block_size = (outlen < BLAKE2B_OUTBYTES) ? outlen : BLAKE2B_OUTBYTES;
     /* Initialize state */
 
-    /*
-    EDIT: explicit cast to silence warnings.
-    */
+    /* Microsoft SEAL edit: explicit cast to silence warnings. */
     P->digest_length = (uint8_t)block_size;
     store32(&P->node_offset, (uint32_t)i);
 

@@ -38,7 +38,7 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
-    void Modulus::load_members(istream &stream)
+    void Modulus::load_members(istream &stream, SEAL_MAYBE_UNUSED SEALVersion version)
     {
         auto old_except_mask = stream.exceptions();
         try
@@ -102,6 +102,15 @@ namespace seal
             // Set the primality flag
             is_prime_ = util::is_prime(*this);
         }
+    }
+
+    uint64_t Modulus::reduce(uint64_t value) const
+    {
+        if (value_ == 0)
+        {
+            throw logic_error("cannot reduce modulo a zero modulus");
+        }
+        return barrett_reduce_64(value, *this);
     }
 
     vector<Modulus> CoeffModulus::BFVDefault(size_t poly_modulus_degree, sec_level_type sec_level)

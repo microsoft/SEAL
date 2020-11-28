@@ -3,10 +3,8 @@
 
 #pragma once
 
-#include "seal/util/defines.h"
 #include "seal/util/hestdparms.h"
 #include <cstddef>
-#include <cstdint>
 #include <map>
 #include <memory>
 #include <vector>
@@ -35,7 +33,7 @@ For .NET Framework wrapper support (C++/CLI) we need to
             /**
             Default value for the standard deviation of the noise (error) distribution.
             */
-            constexpr double noise_standard_deviation = SEAL_HE_STD_PARMS_ERROR_STD_DEV;
+            constexpr double noise_standard_deviation = seal_he_std_parms_error_std_dev;
 
             constexpr double noise_distribution_width_multiplier = 6;
 
@@ -45,7 +43,7 @@ For .NET Framework wrapper support (C++/CLI) we need to
             This data structure is a key-value storage that maps degrees of the polynomial modulus
             to vectors of Modulus elements so that when used with the default value for the
             standard deviation of the noise distribution (noise_standard_deviation), the security
-            level is at least 128 bits according to http://HomomorphicEncryption.org. This makes
+            level is at least 128 bits according to https://HomomorphicEncryption.org. This makes
             it easy for non-expert users to select secure parameters.
             */
             const std::map<std::size_t, std::vector<Modulus>> &GetDefaultCoeffModulus128();
@@ -54,7 +52,7 @@ For .NET Framework wrapper support (C++/CLI) we need to
             This data structure is a key-value storage that maps degrees of the polynomial modulus
             to vectors of Modulus elements so that when used with the default value for the
             standard deviation of the noise distribution (noise_standard_deviation), the security
-            level is at least 192 bits according to http://HomomorphicEncryption.org. This makes
+            level is at least 192 bits according to https://HomomorphicEncryption.org. This makes
             it easy for non-expert users to select secure parameters.
             */
             const std::map<std::size_t, std::vector<Modulus>> &GetDefaultCoeffModulus192();
@@ -63,7 +61,7 @@ For .NET Framework wrapper support (C++/CLI) we need to
             This data structure is a key-value storage that maps degrees of the polynomial modulus
             to vectors of Modulus elements so that when used with the default value for the
             standard deviation of the noise distribution (noise_standard_deviation), the security
-            level is at least 256 bits according to http://HomomorphicEncryption.org. This makes
+            level is at least 256 bits according to https://HomomorphicEncryption.org. This makes
             it easy for non-expert users to select secure parameters.
             */
             const std::map<std::size_t, std::vector<Modulus>> &GetDefaultCoeffModulus256();

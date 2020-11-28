@@ -25,4 +25,8 @@ stages:
     - template: jobs.yml
       parameters:
         debug: false
+        name: iOS
+    - template: jobs.yml
+      parameters:
+        debug: false
         name: NuGet

@@ -48,7 +48,7 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
-    void EncryptionParameters::load_members(istream &stream)
+    void EncryptionParameters::load_members(istream &stream, SEAL_MAYBE_UNUSED SEALVersion version)
     {
         // Throw exceptions on std::ios_base::badbit and std::ios_base::failbit
         auto old_except_mask = stream.exceptions();

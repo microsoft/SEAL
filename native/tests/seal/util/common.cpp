@@ -130,6 +130,24 @@ namespace sealtest
             ASSERT_EQ(4, divide_round_up(13, 4));
         }
 
+        TEST(Common, HammingWeight)
+        {
+            ASSERT_EQ(0, hamming_weight(0));
+            ASSERT_EQ(8, hamming_weight(0xFF));
+            ASSERT_EQ(4, hamming_weight(0xF0));
+            ASSERT_EQ(4, hamming_weight(0x0F));
+            ASSERT_EQ(2, hamming_weight(0xC0));
+            ASSERT_EQ(2, hamming_weight(0x0C));
+            ASSERT_EQ(2, hamming_weight(0x03));
+            ASSERT_EQ(2, hamming_weight(0x30));
+            ASSERT_EQ(4, hamming_weight(0xAA));
+            ASSERT_EQ(4, hamming_weight(0x55));
+            ASSERT_EQ(5, hamming_weight(0xD6));
+            ASSERT_EQ(5, hamming_weight(0x6D));
+            ASSERT_EQ(7, hamming_weight(0xBF));
+            ASSERT_EQ(7, hamming_weight(0xFB));
+        }
+
         template <typename T>
         void ReverseBits32Helper()
         {

@@ -2,11 +2,9 @@
 // Licensed under the MIT license.
 
 #include "seal/modulus.h"
-#include "seal/util/mempool.h"
 #include "seal/util/ntt.h"
 #include "seal/util/numth.h"
 #include "seal/util/polycore.h"
-#include "seal/util/uintcore.h"
 #include <cstddef>
 #include <cstdint>
 #include <random>

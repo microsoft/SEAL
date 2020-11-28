@@ -50,8 +50,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="publicKey">The public key</param>
         /// <param name="secretKey">The secret key</param>
         /// <exception cref="ArgumentNullException">if context is null</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
-        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid</exception>
         /// <exception cref="ArgumentException">if publicKey is not valid</exception>
         /// <exception cref="ArgumentException">if secretKey is not null and not valid</exception>
         public Encryptor(SEALContext context, PublicKey publicKey, SecretKey secretKey = null)
@@ -86,8 +85,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="context">The SEALContext</param>
         /// <param name="secretKey">The secret key</param>
         /// <exception cref="ArgumentNullException">if context is null</exception>
-        /// <exception cref="ArgumentException">if the context is not set or encryption
-        /// parameters are not valid</exception>
+        /// <exception cref="ArgumentException">if the encryption parameters are not valid</exception>
         /// <exception cref="ArgumentException">if secretKey is not valid</exception>
         public Encryptor(SEALContext context, SecretKey secretKey)
         {
@@ -165,6 +163,41 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Encrypts a plaintext with the public key and returns the ciphertext as
+        /// a serializable object.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Encrypts a plaintext with the public key and returns the ciphertext as
+        /// a serializable object.
+        /// </para>
+        /// <para>
+        /// The encryption parameters for the resulting ciphertext correspond to:
+        /// 1) in BFV, the highest (data) level in the modulus switching chain,
+        /// 2) in CKKS, the encryption parameters of the plaintext.
+        /// Dynamic memory allocations in the process are allocated from the memory
+        /// pool pointed to by the given MemoryPoolHandle.
+        /// </para>
+        /// </remarks>
+        /// <param name="plain">The plaintext to encrypt</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentNullException">if plain is null</exception>
+        /// <exception cref="InvalidOperationException">if a public key is not set</exception>
+        /// <exception cref="ArgumentException">if plain is not valid for the encryption
+        /// parameters</exception>
+        /// <exception cref="ArgumentException">if plain is not in default NTT
+        /// form</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        public Serializable<Ciphertext> Encrypt(
+            Plaintext plain,
+            MemoryPoolHandle pool = null)
+        {
+            Ciphertext destination = new Ciphertext();
+            Encrypt(plain, destination, pool);
+            return new Serializable<Ciphertext>(destination);
+        }
+
+        /// <summary>
         /// Encrypts a zero plaintext with the public key and stores the result in
         /// destination.
         /// </summary>
@@ -204,6 +237,39 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Encrypts a zero plaintext with the public key and returns the ciphertext
+        /// as a serializable object.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Encrypts a zero plaintext with the public key and returns the ciphertext
+        /// as a serializable object.
+        /// </para>
+        /// <para>
+        /// The encryption parameters for the resulting ciphertext correspond to
+        /// the given ParmsId. Dynamic memory allocations in the process are allocated
+        /// from the memory pool pointed to by the given MemoryPoolHandle.
+        /// </para>
+        /// </remarks>
+        /// <param name="parmsId">The ParmsId for the resulting ciphertext</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory
+        /// pool</param>
+        /// <exception cref="ArgumentNullException">if parmsId is null</exception>
+        /// <exception cref="InvalidOperationException">if a public key is not
+        /// set</exception>
+        /// <exception cref="ArgumentException">if parmsId is not valid for the
+        /// encryption parameters</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        public Serializable<Ciphertext> EncryptZero(
+            ParmsId parmsId,
+            MemoryPoolHandle pool = null)
+        {
+            Ciphertext destination = new Ciphertext();
+            EncryptZero(parmsId, destination, pool);
+            return new Serializable<Ciphertext>(destination);
+        }
+
+        /// <summary>
         /// Encrypts a zero plaintext with the public key and stores the result in
         /// destination.
         /// </summary>
@@ -232,6 +298,34 @@ namespace Microsoft.Research.SEAL
 
             IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
             NativeMethods.Encryptor_EncryptZero2(NativePtr, destination.NativePtr, poolHandle);
+        }
+
+        /// <summary>
+        /// Encrypts a zero plaintext with the public key and returns the ciphertext
+        /// as a serializable object.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Encrypts a zero plaintext with the public key and returns the ciphertext
+        /// as a serializable object.
+        /// </para>
+        /// <para>
+        /// The encryption parameters for the resulting ciphertext correspond to the
+        /// highest (data) level in the modulus switching chain. Dynamic memory
+        /// allocations in the process are allocated from the memory pool pointed to
+        /// by the given MemoryPoolHandle.
+        /// </para>
+        /// </remarks>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory
+        /// pool</param>
+        /// <exception cref="InvalidOperationException">if a public key is not
+        /// set</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        public Serializable<Ciphertext> EncryptZero(MemoryPoolHandle pool = null)
+        {
+            Ciphertext destination = new Ciphertext();
+            EncryptZero(destination, pool);
+            return new Serializable<Ciphertext>(destination);
         }
 
         /// <summary>
@@ -275,6 +369,52 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Encrypts a plaintext with the secret key and returns the ciphertext as
+        /// a serializable object.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Encrypts a plaintext with the secret key and returns the ciphertext as
+        /// a serializable object.
+        /// </para>
+        /// <para>
+        /// Half of the ciphertext data is pseudo-randomly generated from a seed to
+        /// reduce the object size. The resulting serializable object cannot be used
+        /// directly and is meant to be serialized for the size reduction to have an
+        /// impact.
+        /// </para>
+        /// <para>
+        /// The encryption parameters for the resulting ciphertext correspond to:
+        /// 1) in BFV, the highest (data) level in the modulus switching chain,
+        /// 2) in CKKS, the encryption parameters of the plaintext.
+        /// Dynamic memory allocations in the process are allocated from the memory
+        /// pool pointed to by the given MemoryPoolHandle.
+        /// </para>
+        /// </remarks>
+        /// <param name="plain">The plaintext to encrypt</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentNullException">if plain is null</exception>
+        /// <exception cref="InvalidOperationException">if a secret key is not set</exception>
+        /// <exception cref="ArgumentException">if plain is not valid for the encryption
+        /// parameters</exception>
+        /// <exception cref="ArgumentException">if plain is not in default NTT
+        /// form</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        public Serializable<Ciphertext> EncryptSymmetric(
+            Plaintext plain,
+            MemoryPoolHandle pool = null)
+        {
+            if (null == plain)
+                throw new ArgumentNullException(nameof(plain));
+
+            IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
+            Ciphertext destination = new Ciphertext();
+            NativeMethods.Encryptor_EncryptSymmetric(
+                NativePtr, plain.NativePtr, true, destination.NativePtr, poolHandle);
+            return new Serializable<Ciphertext>(destination);
+        }
+
+        /// <summary>
         /// Encrypts a zero plaintext with the secret key and stores the result in
         /// destination.
         /// </summary>
@@ -314,6 +454,50 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Encrypts a zero plaintext with the secret key and returns the ciphertext
+        /// as a serializable object.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Encrypts a zero plaintext with the secret key and returns the ciphertext
+        /// as a serializable object.
+        /// </para>
+        /// <para>
+        /// Half of the ciphertext data is pseudo-randomly generated from a seed to
+        /// reduce the object size. The resulting serializable object cannot be used
+        /// directly and is meant to be serialized for the size reduction to have an
+        /// impact.
+        /// </para>
+        /// <para>
+        /// The encryption parameters for the resulting ciphertext correspond to
+        /// the given ParmsId. Dynamic memory allocations in the process are allocated
+        /// from the memory pool pointed to by the given MemoryPoolHandle.
+        /// </para>
+        /// </remarks>
+        /// <param name="parmsId">The ParmsId for the resulting ciphertext</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory
+        /// pool</param>
+        /// <exception cref="ArgumentNullException">if parmsId is null</exception>
+        /// <exception cref="InvalidOperationException">if a secret key is not
+        /// set</exception>
+        /// <exception cref="ArgumentException">if parmsId is not valid for the
+        /// encryption parameters</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        public Serializable<Ciphertext> EncryptZeroSymmetric(
+            ParmsId parmsId,
+            MemoryPoolHandle pool = null)
+        {
+            if (null == parmsId)
+                throw new ArgumentNullException(nameof(parmsId));
+
+            IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
+            Ciphertext destination = new Ciphertext();
+            NativeMethods.Encryptor_EncryptZeroSymmetric1(
+                NativePtr, parmsId.Block, true, destination.NativePtr, poolHandle);
+            return new Serializable<Ciphertext>(destination);
+        }
+
+        /// <summary>
         /// Encrypts a zero plaintext with the secret key and stores the result in
         /// destination.
         /// </summary>
@@ -348,115 +532,25 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Encrypts a plaintext with the secret key and returns the ciphertext as
-        /// a serializable object.
+        /// Encrypts a zero plaintext with the secret key and returns the ciphertext
+        /// as a serializable object.
         /// </summary>
         /// <remarks>
         /// <para>
-        /// Encrypts a plaintext with the secret key and returns the ciphertext as
-        /// a serializable object.
-        /// </para>
-        /// <para>
-        /// The encryption parameters for the resulting ciphertext correspond to:
-        /// 1) in BFV, the highest (data) level in the modulus switching chain,
-        /// 2) in CKKS, the encryption parameters of the plaintext.
-        /// Dynamic memory allocations in the process are allocated from the memory
-        /// pool pointed to by the given MemoryPoolHandle.
+        /// Encrypts a zero plaintext with the secret key and returns the ciphertext
+        /// as a serializable object.
         /// </para>
         /// <para>
         /// Half of the ciphertext data is pseudo-randomly generated from a seed to
         /// reduce the object size. The resulting serializable object cannot be used
         /// directly and is meant to be serialized for the size reduction to have an
         /// impact.
-        /// </para>
-        /// </remarks>
-        /// <param name="plain">The plaintext to encrypt</param>
-        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentNullException">if plain is null</exception>
-        /// <exception cref="InvalidOperationException">if a secret key is not set</exception>
-        /// <exception cref="ArgumentException">if plain is not valid for the encryption
-        /// parameters</exception>
-        /// <exception cref="ArgumentException">if plain is not in default NTT
-        /// form</exception>
-        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public Serializable<Ciphertext> EncryptSymmetric(
-            Plaintext plain,
-            MemoryPoolHandle pool = null)
-        {
-            if (null == plain)
-                throw new ArgumentNullException(nameof(plain));
-
-            IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            Ciphertext destination = new Ciphertext();
-            NativeMethods.Encryptor_EncryptSymmetric(
-                NativePtr, plain.NativePtr, true, destination.NativePtr, poolHandle);
-            return new Serializable<Ciphertext>(destination);
-        }
-
-        /// <summary>
-        /// Encrypts a zero plaintext with the secret key and returns the ciphertext
-        /// as a serializable object.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// Encrypts a zero plaintext with the secret key and returns the ciphertext
-        /// as a serializable object.
-        /// </para>
-        /// <para>
-        /// The encryption parameters for the resulting ciphertext correspond to
-        /// the given ParmsId. Dynamic memory allocations in the process are allocated
-        /// from the memory pool pointed to by the given MemoryPoolHandle.
-        /// </para>
-        /// <para>
-        /// Half of the ciphertext data is pseudo-randomly generated from a seed to
-        /// reduce the object size. The resulting serializable object cannot be used
-        /// directly and is meant to be serialized for the size reduction to have an
-        /// impact.
-        /// </para>
-        /// </remarks>
-        /// <param name="parmsId">The ParmsId for the resulting ciphertext</param>
-        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory
-        /// pool</param>
-        /// <exception cref="ArgumentNullException">if parmsId is null</exception>
-        /// <exception cref="InvalidOperationException">if a secret key is not
-        /// set</exception>
-        /// <exception cref="ArgumentException">if parmsId is not valid for the
-        /// encryption parameters</exception>
-        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public Serializable<Ciphertext> EncryptZeroSymmetric(
-            ParmsId parmsId,
-            MemoryPoolHandle pool = null)
-        {
-            if (null == parmsId)
-                throw new ArgumentNullException(nameof(parmsId));
-
-            IntPtr poolHandle = pool?.NativePtr ?? IntPtr.Zero;
-            Ciphertext destination = new Ciphertext();
-            NativeMethods.Encryptor_EncryptZeroSymmetric1(
-                NativePtr, parmsId.Block, true, destination.NativePtr, poolHandle);
-            return new Serializable<Ciphertext>(destination);
-        }
-
-        /// <summary>
-        /// Encrypts a zero plaintext with the secret key and returns the ciphertext
-        /// as a serializable object.
-        /// </summary>
-        /// <remarks>
-        /// <para>
-        /// Encrypts a zero plaintext with the secret key and returns the ciphertext
-        /// as a serializable object.
         /// </para>
         /// <para>
         /// The encryption parameters for the resulting ciphertext correspond to the
         /// highest (data) level in the modulus switching chain. Dynamic memory
         /// allocations in the process are allocated from the memory pool pointed to
         /// by the given MemoryPoolHandle.
-        /// </para>
-        /// <para>
-        /// Half of the ciphertext data is pseudo-randomly generated from a seed to
-        /// reduce the object size. The resulting serializable object cannot be used
-        /// directly and is meant to be serialized for the size reduction to have an
-        /// impact.
         /// </para>
         /// </remarks>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory

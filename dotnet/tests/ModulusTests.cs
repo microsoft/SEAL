@@ -219,6 +219,26 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void ReduceTest()
+        {
+            Modulus mod = new Modulus();
+            Utilities.AssertThrows<InvalidOperationException>(() => mod.Reduce(10));
+
+            mod.Set(2);
+            Assert.AreEqual((ulong)0, mod.Reduce(0));
+            Assert.AreEqual((ulong)1, mod.Reduce(1));
+            Assert.AreEqual((ulong)0, mod.Reduce(2));
+            Assert.AreEqual((ulong)0, mod.Reduce(0xF0F0F0));
+
+            mod.Set(10);
+            Assert.AreEqual((ulong)0, mod.Reduce(0));
+            Assert.AreEqual((ulong)1, mod.Reduce(1));
+            Assert.AreEqual((ulong)8, mod.Reduce(8));
+            Assert.AreEqual((ulong)7, mod.Reduce(1234567));
+            Assert.AreEqual((ulong)0, mod.Reduce(12345670));
+        }
+
+        [TestMethod]
         public void CreateTest()
         {
             List<Modulus> cm = (List<Modulus>)CoeffModulus.Create(2, new int[]{ });

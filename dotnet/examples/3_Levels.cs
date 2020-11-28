@@ -165,24 +165,15 @@ namespace SEALNetExamples
             We create some keys and check that indeed they appear at the highest level.
             */
             using KeyGenerator keygen = new KeyGenerator(context);
-            using PublicKey publicKey = keygen.PublicKey;
             using SecretKey secretKey = keygen.SecretKey;
-            using RelinKeys relinKeys = keygen.RelinKeysLocal();
+            keygen.CreatePublicKey(out PublicKey publicKey);
+            keygen.CreateRelinKeys(out RelinKeys relinKeys);
 
-            /*
-            In this example we create a local version of the GaloisKeys object using
-            KeyGenerator.GaloisKeysLocal(). In a production setting where the Galois
-            keys would need to be communicated to a server, it would be much better to
-            use KeyGenerator.GaloisKeys(), which outputs a Serializable<GaloisKeys>
-            object for compressed serialization.
-            */
-            using GaloisKeys galoisKeys = keygen.GaloisKeysLocal();
             Utilities.PrintLine();
             Console.WriteLine("Print the parameter IDs of generated elements.");
             Console.WriteLine($"    + publicKey:  {publicKey.ParmsId}");
             Console.WriteLine($"    + secretKey:  {secretKey.ParmsId}");
             Console.WriteLine($"    + relinKeys:  {relinKeys.ParmsId}");
-            Console.WriteLine($"    + galoisKeys: {galoisKeys.ParmsId}");
 
             using Encryptor encryptor = new Encryptor(context, publicKey);
             using Evaluator evaluator = new Evaluator(context);

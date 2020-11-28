@@ -7,7 +7,6 @@
 
 // SEALNet
 #include "seal/c/evaluator.h"
-#include "seal/c/stdafx.h"
 #include "seal/c/utilities.h"
 
 // SEAL
@@ -20,25 +19,24 @@ using namespace seal;
 using namespace seal::c;
 using namespace seal::util;
 
-struct seal::Evaluator::EvaluatorPrivateHelper
+// Enables access to private members of seal::Evaluator.
+using ph = struct seal::Evaluator::EvaluatorPrivateHelper
 {
     static bool using_keyswitching(const Evaluator &ev)
     {
-        return ev.context_->using_keyswitching();
+        return ev.context_.using_keyswitching();
     }
 };
 
-SEAL_C_FUNC Evaluator_Create(void *sealContext, void **evaluator)
+SEAL_C_FUNC Evaluator_Create(void *context, void **evaluator)
 {
-    SEALContext *context = FromVoid<SEALContext>(sealContext);
-    IfNullRet(context, E_POINTER);
-    const auto &sharedctx = SharedContextFromVoid(sealContext);
-    IfNullRet(sharedctx.get(), E_POINTER);
+    const SEALContext *ctx = FromVoid<SEALContext>(context);
+    IfNullRet(ctx, E_POINTER);
     IfNullRet(evaluator, E_POINTER);
 
     try
     {
-        Evaluator *eval = new Evaluator(sharedctx);
+        Evaluator *eval = new Evaluator(*ctx);
         *evaluator = eval;
         return S_OK;
     }
@@ -756,6 +754,6 @@ SEAL_C_FUNC Evaluator_ContextUsingKeyswitching(void *thisptr, bool *using_keyswi
     IfNullRet(eval, E_POINTER);
     IfNullRet(using_keyswitching, E_POINTER);
 
-    *using_keyswitching = Evaluator::EvaluatorPrivateHelper::using_keyswitching(*eval);
+    *using_keyswitching = ph::using_keyswitching(*eval);
     return S_OK;
 }

@@ -2,8 +2,8 @@
 // Licensed under the MIT license.
 
 using System;
-using System.IO;
 using System.Collections.Generic;
+using System.IO;
 using Microsoft.Research.SEAL;
 
 namespace SEALNetExamples
@@ -23,14 +23,65 @@ namespace SEALNetExamples
             Utilities.PrintExampleBanner("Example: Serialization");
 
             /*
-            We require ZLIB support for this example to be available.
+            We require ZLIB or Zstandard support for this example to be available.
             */
-            if (!Serialization.IsSupportedComprMode(ComprModeType.Deflate))
+            if (!Serialization.IsSupportedComprMode(ComprModeType.ZLIB) &&
+                !Serialization.IsSupportedComprMode(ComprModeType.ZSTD))
             {
-                Console.WriteLine("ZLIB support is not enabled; this example is not available.");
+                Console.WriteLine("Neither ZLIB nor Zstandard support is enabled; this example is not available.");
                 Console.WriteLine();
                 return;
             }
+
+            /*
+            We start by briefly discussing the Serializable<T> generic class. This is
+            a wrapper class that can wrap any serializable class, which include:
+
+                - EncryptionParameters
+                - Modulus
+                - Plaintext and Ciphertext
+                - SecretKey, PublicKey, RelinKeys, and GaloisKeys
+
+            Serializable<T> provides minimal functionality needed to serialize the wrapped
+            object by simply forwarding the calls to corresponding functions of the wrapped
+            object of type T. The need for Serializable<T> comes from the fact that many
+            Microsoft SEAL objects consist of two parts, one of which is pseudorandom data
+            independent of the other part. Until the object is actually being used, the
+            pseudorandom part can be instead stored as a seed. We will call objects with
+            property `seedable'.
+
+            For example, GaloisKeys can often be very large in size, but in reality half
+            of the data is pseudorandom and can be stored as a seed. Since GaloisKeys are
+            never used by the party that generates them, so it makes sense to expand the
+            seed at the point deserialization. On the other hand, we cannot allow the user
+            to accidentally try to use an unexpanded GaloisKeys object, which is prevented
+            at by ensuring it is always wrapped in a Serializable<GaloisKeys> and can only
+            be serialized.
+
+            Only some Microsoft SEAL objects are seedable. Specifically, they are:
+
+                - PublicKey, RelinKeys, and GaloisKeys
+                - Ciphertext in secret-key mode (from Encryptor.EncryptSymmetric or
+                  Encryptor.EncryptZeroSymmetric)
+
+            Importantly, ciphertexts in public-key mode are not seedable. Thus, it may
+            be beneficial to use Microsoft SEAL in secret-key mode whenever the public
+            key is not truly needed.
+
+            There are a handful of functions that output Serializable<T> objects:
+
+                - Encryptor.Encrypt (and variants) output Serializable<Ciphertext>
+                - KeyGenerator.Create... output Serializable<T> for different key types
+
+            Note that Encryptor.Encrypt is included in the above list, yet it produces
+            ciphertexts in public-key mode that are not seedable. This is for the sake of
+            consistency in the API for public-key and secret-key encryption. Functions
+            that output Serializable<T> objects also have overloads that take a normal
+            object of type T as a destination parameter, overwriting it. These overloads
+            can be convenient for local testing where no serialization is needed and the
+            object needs to be used at the point of construction. Such an object can no
+            longer be transformed back to a seeded state.
+            */
 
             /*
             To simulate client-server interaction, we set up a shared C# stream. In real
@@ -81,46 +132,57 @@ namespace SEALNetExamples
                 Before moving on, we will take some time to discuss further options in
                 serialization. These will become particularly important when the user
                 needs to optimize communication and storage sizes.
-                */
 
-                /*
-                It is possible to enable or disable ZLIB ("deflate") compression for
-                serialization by providing EncryptionParameters.Save with the desired
-                compression mode as in the following examples:
+                It is possible to enable or disable compression for serialization by
+                providing EncryptionParameters.Save with the desired compression mode as
+                in the following examples:
 
                     long size = parms.Save(sharedStream, ComprModeType.None);
-                    long size = parms.Save(sharedStream, ComprModeType.Deflate);
+                    long size = parms.Save(sharedStream, ComprModeType.ZLIB);
+                    long size = parms.Save(sharedStream, ComprModeType.ZSTD);
 
-                If Microsoft SEAL is compiled with ZLIB support, the default is to use
-                ComprModeType.Deflate, so to instead disable compression one would use
-                the first version of the two.
+                If Microsoft SEAL is compiled with Zstandard or ZLIB support, the default
+                is to use one of them. If available, Zstandard is preferred over ZLIB due
+                to its speed.
+
+                Compression can have a substantial impact on the serialized data size,
+                because ciphertext and key data consists of many uniformly random integers
+                modulo the CoeffModulus primes. Especially when using CKKS, the primes in
+                CoeffModulus can be relatively small compared to the 64-bit words used to
+                store the ciphertext and key data internally. Serialization writes full
+                64-bit words to the destination buffer or stream, possibly leaving in many
+                zero bytes corresponding to the high-order bytes of the 64-bit words. One
+                convenient way to get rid of these zeros is to apply a general-purpose
+                compression algorithm on the encrypted data. The compression rate can be
+                significant (up to 50-60%) when using CKKS with small primes.
                 */
 
                 /*
-                In many cases, when working with fixed size memory, it is necessary
-                to know ahead of time an upper bound on the serialized data size to
-                allocate enough memory. This information is returned by the
-                EncryptionParameters.SaveSize function. This function accepts the
-                desired compression mode, with ComprModeType.Deflate being the default
-                when Microsoft SEAL is compiled with ZLIB support.
+                In many cases, when working with fixed size memory, it is necessary to know
+                ahead of time an upper bound on the serialized data size to allocate enough
+                memory. This information is returned by the EncryptionParameters.SaveSize
+                function. This function accepts the desired compression mode, or uses the
+                default option otherwise.
 
                 In more detail, the output of EncryptionParameters.SaveSize is as follows:
 
                     - Exact buffer size required for ComprModeType.None;
-                    - Upper bound on the size required for ComprModeType.Deflate.
+                    - Upper bound on the size required for ComprModeType.ZLIB or
+                      ComprModeType.ZSTD.
 
                 As we can see from the print-out, the sizes returned by these functions
                 are significantly larger than the compressed size written into the shared
                 stream in the beginning. This is normal: compression yielded a significant
-                improvement in the data size, yet it is hard to estimate the size of the
-                compressed data.
+                improvement in the data size, however, it is impossible to know ahead of
+                time the exact size of the compressed data. If compression is not used,
+                then the size is exactly determined by the encryption parameters.
                 */
                 Utilities.PrintLine();
                 Console.Write("EncryptionParameters: data size upper bound (ComprModeType.None): ");
                 Console.WriteLine(parms.SaveSize(ComprModeType.None));
                 Console.Write("             ");
-                Console.Write("EncryptionParameters: data size upper bound (ComprModeType.Deflate): ");
-                Console.WriteLine(parms.SaveSize(ComprModeType.Deflate));
+                Console.Write("EncryptionParameters: data size upper bound (compression): ");
+                Console.WriteLine(parms.SaveSize(/* Serialization.ComprModeDefault */));
 
                 /*
                 As an example, we now serialize the encryption parameters to a fixed
@@ -163,7 +225,7 @@ namespace SEALNetExamples
 
                 using KeyGenerator keygen = new KeyGenerator(context);
                 using SecretKey sk = keygen.SecretKey;
-                using PublicKey pk = keygen.PublicKey;
+                keygen.CreatePublicKey(out PublicKey pk);
 
                 /*
                 We need to save the secret key so we can decrypt later.
@@ -172,43 +234,43 @@ namespace SEALNetExamples
                 skStream.Seek(0, SeekOrigin.Begin);
 
                 /*
-                In this example we will also use relinearization keys. For realinearization
-                and Galois keys the KeyGenerator.RelinKeys and KeyGenerator.GaloisKeys
-                functions return special Serializable<T> objects. These objects are meant
-                to be serialized and never used locally. On the other hand, for local use
-                of RelinKeys and GaloisKeys, the functions KeyGenerator.RelinKeysLocal
-                and KeyGenerator.GaloisKeysLocal can be used to create the RelinKeys
-                and GaloisKeys objects directly. The difference is that the Serializable<T>
-                objects contain a partly seeded version of the RelinKeys (or GaloisKeys)
-                that will result in a significantly smaller size when serialized. Using
-                this method has no impact on security. Such seeded RelinKeys (GaloisKeys)
-                must be expanded before being used in computations; this is automatically
-                done by deserialization.
+                As in previous examples, in this example we will encrypt in public-key
+                mode. If we want to send a public key over the network, we should instead
+                have created it as a seeded object as follows:
+
+                    Serializable<PublicKey> pk = keygen.CreatePublicKey();
+
+                In this example we will also use relinearization keys. These we will
+                absolutely want to create as seeded objects to minimize communication
+                cost, unlike in prior examples.
                 */
-                using Serializable<RelinKeys> rlk = keygen.RelinKeys();
+                using Serializable<RelinKeys> rlk = keygen.CreateRelinKeys();
 
                 /*
-                Before continuing, we demonstrate the significant space saving from this
-                method.
+                To demonstrate the significant space saving from this method, we will
+                create another set of relinearization keys, this time fully expanded.
+                */
+                keygen.CreateRelinKeys(out RelinKeys rlkBig);
+
+                /*
+                We serialize both relinearization keys to demonstrate the concrete size
+                difference. If compressed serialization is used, the compression rate
+                will be the same in both cases. We omit specifying the compression mode
+                to use the default, as determined by the Microsoft SEAL build system.
                 */
                 long sizeRlk = rlk.Save(dataStream);
+                long sizeRlkBig = rlkBig.Save(dataStream);
 
-                using RelinKeys rlkLocal = keygen.RelinKeysLocal();
-                long sizeRlkLocal = rlkLocal.Save(dataStream);
-
-                /*
-                Now compare the serialized sizes of rlk and rlkLocal.
-                */
                 Utilities.PrintLine();
                 Console.WriteLine($"Serializable<RelinKeys>: wrote {sizeRlk} bytes");
                 Console.Write("             ");
-                Console.WriteLine($"RelinKeys (local): wrote {sizeRlkLocal} bytes");
+                Console.WriteLine($"RelinKeys: wrote {sizeRlkBig} bytes");
 
                 /*
-                Seek back in dataStream to where rlk data ended, i.e., sizeRlkLocal
-                bytes backwards from current position.
+                Seek back in dataStream to where rlk data ended, i.e., sizeRlkBig bytes
+                backwards from current position.
                 */
-                dataStream.Seek(-sizeRlkLocal, SeekOrigin.Current);
+                dataStream.Seek(-sizeRlkBig, SeekOrigin.Current);
 
                 /*
                 Next set up the CKKSEncoder and Encryptor, and encrypt some numbers.
@@ -221,72 +283,51 @@ namespace SEALNetExamples
                 encoder.Encode(4.5, scale, plain2);
 
                 using Encryptor encryptor = new Encryptor(context, pk);
-                using Ciphertext encrypted1 = new Ciphertext(),
-                                encrypted2 = new Ciphertext();
-                encryptor.Encrypt(plain1, encrypted1);
-                encryptor.Encrypt(plain2, encrypted2);
 
                 /*
-                Now, we could serialize both encrypted1 and encrypted2 to dataStream
-                using Ciphertext.Save. However, for this example, we demonstrate another
-                size-saving trick that can come in handy.
-
-                As you noticed, we set up the Encryptor using the public key. Clearly this
-                indicates that the CKKS scheme is a public-key encryption scheme. However,
-                both BFV and CKKS can operate also in a symmetric-key mode. This can be
-                beneficial when the public-key functionality is not exactly needed, like
-                in simple outsourced computation scenarios. The benefit is that in these
-                cases it is possible to produce ciphertexts that are partly seeded, hence
-                significantly smaller. Such ciphertexts must be expanded before being used
-                in computations; this is automatically done by deserialization.
-
-                To use symmetric-key encryption, we need to set up the Encryptor with the
-                secret key instead.
+                The client will not compute on ciphertexts that it creates, so it can
+                just as well create Serializable<Ciphertext> objects. In fact, we do
+                not even need to name those objects and instead immediately call
+                Serializable<Ciphertext>.Save.
                 */
-                using Encryptor symEncryptor = new Encryptor(context, sk);
-                using Serializable<Ciphertext> symEncrypted1 = symEncryptor.EncryptSymmetric(plain1);
-                using Serializable<Ciphertext> symEncrypted2 = symEncryptor.EncryptSymmetric(plain2);
+                long sizeEncrypted1 = encryptor.Encrypt(plain1).Save(dataStream);
 
                 /*
-                Before continuing, we demonstrate the significant space saving from this
-                method.
+                As we discussed in the beginning of this example, ciphertexts can
+                be created in a seeded state in secret-key mode, providing a huge
+                reduction in the data size upon serialization. To do this, we need
+                to provide the Encryptor with the secret key in its constructor, or
+                at a later point with the Encryptor.SetSecretKey function, and use
+                the Encryptor.EncryptSymmetric function to encrypt.
                 */
-                long sizeSymEncrypted1 = symEncrypted1.Save(dataStream);
-                long sizeEncrypted1 = encrypted1.Save(dataStream);
+                encryptor.SetSecretKey(sk);
+                long sizeSymEncrypted2 = encryptor.EncryptSymmetric(plain2).Save(dataStream);
 
                 /*
-                Now compare the serialized sizes of encrypted1 and symEncrypted1.
+                The size reduction is substantial.
                 */
                 Utilities.PrintLine();
-                Console.Write("Serializable<Ciphertext> (symmetric-key): ");
-                Console.WriteLine($"wrote {sizeSymEncrypted1} bytes");
+                Console.WriteLine($"Serializable<Ciphertext> (public-key): wrote {sizeEncrypted1} bytes");
                 Console.Write("             ");
-                Console.WriteLine($"Ciphertext (public-key): wrote {sizeEncrypted1} bytes");
+                Console.Write($"Serializable<Ciphertext> (seeded secret-key): ");
+                Console.WriteLine($"wrote {sizeSymEncrypted2} bytes");
 
                 /*
-                Seek back in dataStream to where symEncrypted1 data ended, i.e.,
-                sizeEncrypted1 bytes backwards from current position and write
-                symEncrypted2 right after symEncrypted1.
+                Seek to the beginning of dataStream.
                 */
-                dataStream.Seek(-sizeEncrypted1, SeekOrigin.Current);
-                symEncrypted2.Save(dataStream);
                 dataStream.Seek(0, SeekOrigin.Begin);
 
                 /*
-                We have seen how using KeyGenerator.RelinKeys (KeyGenerator.GaloisKeys)
-                can result in huge space savings over the local variants when the objects
-                are not needed for local use. We have seen how symmetric-key encryption
-                can be used to achieve much smaller ciphertext sizes when the public-key
-                functionality is not needed.
+                We have seen how creating seeded objects can result in huge space
+                savings compared to creating unseeded objects. This is particularly
+                important when creating Galois keys, which can be very large. We have
+                seen how secret-key encryption can be used to achieve much smaller
+                ciphertext sizes when the public-key functionality is not needed.
 
                 We would also like to draw attention to the fact there we could easily
                 serialize multiple Microsoft SEAL objects sequentially in a stream. Each
                 object writes its own size into the stream, so deserialization knows
-                exactly how many bytes to read. We will see this working next.
-
-                Finally, we would like to point out that none of these methods provide any
-                space savings unless Microsoft SEAL is compiled with ZLIB support, or when
-                serialized with ComprModeType.None.
+                exactly how many bytes to read. We will see this working below.
                 */
             }
 
@@ -326,19 +367,18 @@ namespace SEALNetExamples
                 evaluator.RescaleToNextInplace(encryptedProd);
 
                 /*
-                We use dataStream to communicate encryptedProd back to the client. There
-                is no way to save the encryptedProd as Serializable<Ciphertext> even
-                though it is still a symmetric-key encryption: only freshly encrypted
-                ciphertexts can be seeded. Note how the size of the result ciphertext is
-                smaller than the size of a fresh ciphertext because it is at a lower level
-                due to the rescale operation.
+                We use dataStream to communicate encryptedProd back to the client.
+                There is no way to save the encryptedProd as a seeded object: only
+                freshly encrypted secret-key ciphertexts can be seeded. Note how the
+                size of the result ciphertext is smaller than the size of a fresh
+                ciphertext because it is at a lower level due to the rescale operation.
                 */
                 dataStream.Seek(0, SeekOrigin.Begin);
                 long sizeEncryptedProd = encryptedProd.Save(dataStream);
                 dataStream.Seek(0, SeekOrigin.Begin);
 
                 Utilities.PrintLine();
-                Console.Write($"Ciphertext (symmetric-key): ");
+                Console.Write($"Ciphertext (secret-key): ");
                 Console.WriteLine($"wrote {sizeEncryptedProd} bytes");
             }
 

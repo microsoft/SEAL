@@ -4,22 +4,20 @@
 #pragma once
 
 #include "seal/context.h"
+#include "seal/dynarray.h"
 #include "seal/encryptionparams.h"
-#include "seal/intarray.h"
 #include "seal/memorymanager.h"
 #include "seal/valcheck.h"
+#include "seal/version.h"
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
 #include "seal/util/polycore.h"
-#include "seal/util/ztools.h"
 #include <algorithm>
 #include <functional>
-#include <iostream>
-#include <memory>
 #include <stdexcept>
 #include <string>
 #ifdef SEAL_USE_MSGSL
-#include <gsl/span>
+#include "gsl/span"
 #endif
 
 namespace seal
@@ -40,8 +38,8 @@ namespace seal
     the desired capacity to the constructor as an extra argument, or by calling
     the reserve function at any time.
 
-    When the scheme is scheme_type::BFV each coefficient of a plaintext is a 64-bit
-    word, but when the scheme is scheme_type::CKKS the plaintext is by default
+    When the scheme is scheme_type::bfv each coefficient of a plaintext is a 64-bit
+    word, but when the scheme is scheme_type::ckks the plaintext is by default
     stored in an NTT transformed form with respect to each of the primes in the
     coefficient modulus. Thus, the size of the allocation that is needed is the
     size of the coefficient modulus (number of primes) times the degree of the
@@ -100,7 +98,37 @@ namespace seal
             std::size_t capacity, std::size_t coeff_count, MemoryPoolHandle pool = MemoryManager::GetPool())
             : coeff_count_(coeff_count), data_(capacity, coeff_count_, std::move(pool))
         {}
+#ifdef SEAL_USE_MSGSL
+        /**
+        Constructs a plaintext representing a polynomial with given coefficient
+        values. The coefficient count of the polynomial is set to the number of
+        coefficient values provided, and the capacity is set to the given value.
 
+        @param[in] coeffs Desired values of the plaintext coefficients
+        @param[in] capacity The capacity
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if capacity is less than the size of coeffs
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        explicit Plaintext(
+            gsl::span<const pt_coeff_type> coeffs, std::size_t capacity,
+            MemoryPoolHandle pool = MemoryManager::GetPool())
+            : coeff_count_(coeffs.size()), data_(coeffs, capacity, std::move(pool))
+        {}
+
+        /**
+        Constructs a plaintext representing a polynomial with given coefficient
+        values. The coefficient count of the polynomial is set to the number of
+        coefficient values provided, and the capacity is set to the same value.
+
+        @param[in] coeffs Desired values of the plaintext coefficients
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        explicit Plaintext(gsl::span<const pt_coeff_type> coeffs, MemoryPoolHandle pool = MemoryManager::GetPool())
+            : coeff_count_(coeffs.size()), data_(coeffs, std::move(pool))
+        {}
+#endif
         /**
         Constructs a plaintext from a given hexadecimal string describing the
         plaintext polynomial.
@@ -264,20 +292,36 @@ namespace seal
         Plaintext &operator=(const std::string &hex_poly);
 
         /**
-        Sets the value of the current plaintext to a given constant polynomial.
-        The coefficient count is set to one.
+        Sets the value of the current plaintext to a given constant polynomial and
+        sets the parms_id to parms_id_zero, effectively marking the plaintext as
+        not NTT transformed. The coefficient count is set to one.
 
         @param[in] const_coeff The constant coefficient
-        @throws std::logic_error if the plaintext is NTT transformed
         */
         Plaintext &operator=(pt_coeff_type const_coeff)
         {
             data_.resize(1);
             data_[0] = const_coeff;
             coeff_count_ = 1;
+            parms_id_ = parms_id_zero;
             return *this;
         }
+#ifdef SEAL_USE_MSGSL
+        /**
+        Sets the coefficients of the current plaintext to given values and sets
+        the parms_id to parms_id_zero, effectively marking the plaintext as not
+        NTT transformed.
 
+        @param[in] coeffs Desired values of the plaintext coefficients
+        */
+        Plaintext &operator=(gsl::span<const pt_coeff_type> coeffs)
+        {
+            data_ = coeffs;
+            coeff_count_ = coeffs.size();
+            parms_id_ = parms_id_zero;
+            return *this;
+        }
+#endif
         /**
         Sets a given range of coefficients of a plaintext polynomial to zero; does
         nothing if length is zero.
@@ -324,9 +368,9 @@ namespace seal
         }
 
         /**
-        Returns a reference to the backing IntArray object.
+        Returns a reference to the backing DynArray object.
         */
-        SEAL_NODISCARD inline const auto &int_array() const noexcept
+        SEAL_NODISCARD inline const auto &dyn_array() const noexcept
         {
             return data_;
         }
@@ -580,16 +624,15 @@ namespace seal
 
         @param[in] context The SEALContext
         @param[in] stream The stream to load the plaintext from
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, std::istream &stream)
+        inline std::streamoff unsafe_load(const SEALContext &context, std::istream &stream)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Plaintext::load_members, this, std::move(context), _1), stream);
+            return Serialization::Load(std::bind(&Plaintext::load_members, this, context, _1, _2), stream);
         }
 
         /**
@@ -598,17 +641,16 @@ namespace seal
 
         @param[in] context The SEALContext
         @param[in] stream The stream to load the plaintext from
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(std::shared_ptr<SEALContext> context, std::istream &stream)
+        inline std::streamoff load(const SEALContext &context, std::istream &stream)
         {
             Plaintext new_data(pool());
             auto in_size = new_data.unsafe_load(context, stream);
-            if (!is_valid_for(new_data, std::move(context)))
+            if (!is_valid_for(new_data, context))
             {
                 throw std::logic_error("Plaintext data is invalid");
             }
@@ -630,7 +672,7 @@ namespace seal
         @throws std::runtime_error if I/O operations failed
         */
         inline std::streamoff save(
-            SEAL_BYTE *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
+            seal_byte *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
             using namespace std::placeholders;
             return Serialization::Save(
@@ -646,18 +688,17 @@ namespace seal
         @param[in] context The SEALContext
         @param[in] in The memory location to load the plaintext from
         @param[in] size The number of bytes available in the given memory location
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff unsafe_load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff unsafe_load(const SEALContext &context, const seal_byte *in, std::size_t size)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Plaintext::load_members, this, std::move(context), _1), in, size);
+            return Serialization::Load(std::bind(&Plaintext::load_members, this, context, _1, _2), in, size);
         }
 
         /**
@@ -667,19 +708,18 @@ namespace seal
         @param[in] context The SEALContext
         @param[in] in The memory location to load the PublicKey from
         @param[in] size The number of bytes available in the given memory location
-        @throws std::invalid_argument if the context is not set or encryption
-        parameters are not valid
+        @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::invalid_argument if in is null or if size is too small to
         contain a SEALHeader
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(std::shared_ptr<SEALContext> context, const SEAL_BYTE *in, std::size_t size)
+        inline std::streamoff load(const SEALContext &context, const seal_byte *in, std::size_t size)
         {
             Plaintext new_data(pool());
             auto in_size = new_data.unsafe_load(context, in, size);
-            if (!is_valid_for(new_data, std::move(context)))
+            if (!is_valid_for(new_data, context))
             {
                 throw std::logic_error("Plaintext data is invalid");
             }
@@ -752,7 +792,7 @@ namespace seal
     private:
         void save_members(std::ostream &stream) const;
 
-        void load_members(std::shared_ptr<SEALContext> context, std::istream &stream);
+        void load_members(const SEALContext &context, std::istream &stream, SEALVersion version);
 
         parms_id_type parms_id_ = parms_id_zero;
 
@@ -760,7 +800,7 @@ namespace seal
 
         double scale_ = 1.0;
 
-        IntArray<pt_coeff_type> data_;
+        DynArray<pt_coeff_type> data_;
 
         // SecretKey needs access to save_members/load_members
         friend class SecretKey;
