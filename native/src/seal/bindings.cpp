@@ -23,7 +23,7 @@ void string_to_number(std::string &str, T &numb) {
   Transform a JS TypedArray into a Vector of the appropriate type (zero copy)
 */
 template<typename T>
-    std::vector<T> vecFromJSArray(const val &v) {
+    std::vector<T> vecFromJSArrayFast(const val &v) {
         std::vector<T> rv;
         const size_t l = v["length"].as<std::size_t>();
         rv.resize(l);
@@ -220,10 +220,10 @@ EMSCRIPTEN_BINDINGS(SEAL) {
     emscripten::function("jsArrayStringFromVecInt64", select_overload<val(const std::vector<int64_t> &)>(&jsArrayStringFromVec));
     emscripten::function("jsArrayStringFromVecUint64", select_overload<val(const std::vector<uint64_t> &)>(&jsArrayStringFromVec));
     emscripten::function("jsArrayStringFromVecModulus", select_overload<val(const std::vector<Modulus> &)>(&jsArrayStringFromVecModulus));
-    // emscripten::function("vecFromArrayUint8", select_overload<std::vector<uint8_t>(const val &)>(&vecFromJSArray));
-    // emscripten::function("vecFromArrayInt32", select_overload<std::vector<int32_t>(const val &)>(&vecFromJSArray));
-    // emscripten::function("vecFromArrayUint32", select_overload<std::vector<uint32_t>(const val &)>(&vecFromJSArray));
-    // emscripten::function("vecFromArrayFloat64", select_overload<std::vector<double>(const val &)>(&vecFromJSArray));
+    emscripten::function("vecFromArrayUint8", select_overload<std::vector<uint8_t>(const val &)>(&vecFromJSArrayFast));
+    emscripten::function("vecFromArrayInt32", select_overload<std::vector<int32_t>(const val &)>(&vecFromJSArrayFast));
+    emscripten::function("vecFromArrayUint32", select_overload<std::vector<uint32_t>(const val &)>(&vecFromJSArrayFast));
+    emscripten::function("vecFromArrayFloat64", select_overload<std::vector<double>(const val &)>(&vecFromJSArrayFast));
     emscripten::function("vecFromArrayBigInt64", select_overload<std::vector<int64_t>(const val &)>(&vecFromJSArrayString));
     emscripten::function("vecFromArrayBigUint64", select_overload<std::vector<uint64_t>(const val &)>(&vecFromJSArrayString));
     emscripten::function("vecFromArrayModulus", select_overload<std::vector<Modulus>(const val &)>(&vecFromJSArrayStringModulus));
@@ -802,12 +802,34 @@ EMSCRIPTEN_BINDINGS(SEAL) {
     class_<KeyGenerator>("KeyGenerator")
         .constructor<const SEALContext &>()
         .constructor<const SEALContext &, const SecretKey &>()
-        .function("createPublicKey", select_overload<Serializable<PublicKey> () const>(&KeyGenerator::create_public_key))
-        .function("createPublicKeyDest", select_overload<void (PublicKey &) const>(&KeyGenerator::create_public_key))
         .function("secretKey", &KeyGenerator::secret_key)
-        .function("createRelinKeys", select_overload<Serializable<RelinKeys> ()>(&KeyGenerator::create_relin_keys))
-        .function("createRelinKeysDest", select_overload<void (RelinKeys &)>(&KeyGenerator::create_relin_keys))
-        .function("createGaloisKeys", optional_override([](KeyGenerator &self, const val &v) {
+        .function("createPublicKey", select_overload<void(PublicKey &) const>(&KeyGenerator::create_public_key))
+        .function("createPublicKeySerializable", select_overload<Serializable<PublicKey> () const>(&KeyGenerator::create_public_key))
+        .function("createRelinKeys", select_overload<void(RelinKeys &)>(&KeyGenerator::create_relin_keys))
+        .function("createRelinKeysSerializable", select_overload<Serializable<RelinKeys> ()>(&KeyGenerator::create_relin_keys))
+        .function("createGaloisKeys", optional_override([](KeyGenerator &self, const val &v, GaloisKeys &keys) {
+                // Get the size of the TypedArray input
+                const size_t length = v["length"].as<unsigned>();
+
+                // If empty, generate all steps.
+                if (length == 0) {
+                    self.create_galois_keys(keys);
+                    return;
+                }
+
+                // Create a temporary vector to store the TypedArray values
+                std::vector<std::int32_t> temp;
+                // Resize to the number of elements in the TypedArray
+                temp.resize(length);
+                // Construct a memory view on the temp vector
+                const val memoryView { typed_memory_view(length, temp.data()) };
+                // Set the data in the vector from the JS side.
+                memoryView.call<void>("set", v);
+
+                self.create_galois_keys(temp, keys);
+                return;
+            }))
+        .function("createGaloisKeysSerializable", optional_override([](KeyGenerator &self, const val &v) {
                 // Get the size of the TypedArray input
                 const size_t length = v["length"].as<unsigned>();
 
@@ -826,26 +848,6 @@ EMSCRIPTEN_BINDINGS(SEAL) {
                 memoryView.call<void>("set", v);
 
                 return self.create_galois_keys(temp);
-            }))
-        .function("createGaloisKeysDest", optional_override([](KeyGenerator &self, const val &v, GaloisKeys &destination) {
-                // Get the size of the TypedArray input
-                const size_t length = v["length"].as<unsigned>();
-
-                // If empty, generate all steps.
-                if (length == 0) {
-                    return self.create_galois_keys(destination);
-                }
-
-                // Create a temporary vector to store the TypedArray values
-                std::vector<std::int32_t> temp;
-                // Resize to the number of elements in the TypedArray
-                temp.resize(length);
-                // Construct a memory view on the temp vector
-                const val memoryView { typed_memory_view(length, temp.data()) };
-                // Set the data in the vector from the JS side.
-                memoryView.call<void>("set", v);
-
-                return self.create_galois_keys(temp, destination);
             }));
     class_<PublicKey>("PublicKey")
         .constructor<>()
@@ -1376,12 +1378,12 @@ EMSCRIPTEN_BINDINGS(SEAL) {
         .constructor<const SEALContext &, const PublicKey &, const SecretKey &>()
         .function("setPublicKey", &Encryptor::set_public_key)
         .function("setSecretKey", &Encryptor::set_secret_key)
-        .function("encrypt", select_overload<Serializable<Ciphertext>(const Plaintext &, MemoryPoolHandle pool) const >(&Encryptor::encrypt))
-        .function("encryptDest", select_overload<void (const Plaintext &, Ciphertext &, MemoryPoolHandle pool) const >(&Encryptor::encrypt))
-        .function("encryptSymmetric", select_overload<Serializable<Ciphertext>(const Plaintext &, MemoryPoolHandle pool) const >(&Encryptor::encrypt_symmetric))
-        .function("encryptSymmetricDest", select_overload<void(const Plaintext &, Ciphertext &, MemoryPoolHandle pool) const >(&Encryptor::encrypt_symmetric))
-        .function("encryptZero", select_overload<Serializable<Ciphertext>(MemoryPoolHandle pool) const >(&Encryptor::encrypt_zero))
-        .function("encryptZeroDest", select_overload<void(Ciphertext &, MemoryPoolHandle pool) const >(&Encryptor::encrypt_zero));
+        .function("encrypt", select_overload<void(const Plaintext &, Ciphertext &, MemoryPoolHandle) const>(&Encryptor::encrypt))
+        .function("encryptSerializable", select_overload<Serializable<Ciphertext>(const Plaintext &, MemoryPoolHandle) const >(&Encryptor::encrypt))
+        .function("encryptSymmetric", select_overload<void(const Plaintext &, Ciphertext &, MemoryPoolHandle) const>(&Encryptor::encrypt_symmetric))
+        .function("encryptSymmetricSerializable", select_overload<Serializable<Ciphertext>(const Plaintext &, MemoryPoolHandle) const >(&Encryptor::encrypt_symmetric))
+        .function("encryptZero", select_overload<void(Ciphertext &, MemoryPoolHandle) const >(&Encryptor::encrypt_zero))
+        .function("encryptZeroSerializable", select_overload<Serializable<Ciphertext>(MemoryPoolHandle) const >(&Encryptor::encrypt_zero));
 
     class_<Decryptor>("Decryptor")
         .constructor<const SEALContext &, const SecretKey &>()
