@@ -2,6 +2,10 @@
 
 ## Version 3.6.0
 
+### Hotfix - 12/2/2020
+
+- Fixed an issue with CMake system where a shared Zstandard was not correctly handled (it is not supported).
+
 ### Hotfix - 11/17/2020
 
 - Fixed an issue with CMake system where `BUILD_SHARED_LIBS=ON` and `SEAL_BUILD_DEPS=ON` resulted in Zstandard header files not being visible to the build [(Issue 242)](https://github.com/microsoft/SEAL/issues/242).
