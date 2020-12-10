@@ -582,21 +582,21 @@ namespace seal
                 throw logic_error("invalid rns bases");
             }
 
-            // Set up BaseConvTool for q --> Bsk
+            // Set up BaseConverter for q --> Bsk
             base_q_to_Bsk_conv_ = allocate<BaseConverter>(pool_, *base_q_, *base_Bsk_, pool_);
 
-            // Set up BaseConvTool for q --> {m_tilde}
+            // Set up BaseConverter for q --> {m_tilde}
             base_q_to_m_tilde_conv_ = allocate<BaseConverter>(pool_, *base_q_, RNSBase({ m_tilde_ }, pool_), pool_);
 
-            // Set up BaseConvTool for B --> q
+            // Set up BaseConverter for B --> q
             base_B_to_q_conv_ = allocate<BaseConverter>(pool_, *base_B_, *base_q_, pool_);
 
-            // Set up BaseConvTool for B --> {m_sk}
+            // Set up BaseConverter for B --> {m_sk}
             base_B_to_m_sk_conv_ = allocate<BaseConverter>(pool_, *base_B_, RNSBase({ m_sk_ }, pool_), pool_);
 
             if (base_t_gamma_)
             {
-                // Set up BaseConvTool for q --> {t, gamma}
+                // Set up BaseConverter for q --> {t, gamma}
                 base_q_to_t_gamma_conv_ = allocate<BaseConverter>(pool_, *base_q_, *base_t_gamma_, pool_);
             }
 
@@ -1026,7 +1026,7 @@ namespace seal
             // This is to facilitate Montgomery reduction in the next step of multiplication
             // This is NOT an ideal approach: as mentioned in BEHZ16, multiplication by
             // m_tilde can be easily merge into the base conversion operation; however, then
-            // we could not use the BaseConvTool as below without modifications.
+            // we could not use the BaseConverter as below without modifications.
             SEAL_ALLOCATE_GET_RNS_ITER(temp, coeff_count_, base_q_size, pool);
             multiply_poly_scalar_coeffmod(input, base_q_size, m_tilde_.value(), base_q_->base(), temp);
 

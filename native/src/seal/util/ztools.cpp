@@ -548,6 +548,7 @@ namespace seal
                     // The number of bytes we can read at a time is capped by zstd_process_bytes_in_max
                     size_t process_bytes_in = min<size_t>(in_size, zstd_process_bytes_in_max);
                     ZSTD_inBuffer input = { in.cbegin() + bytes_read_from_in, process_bytes_in, 0 };
+                    size_t prev_pos = 0;
 
                     // Number of bytes left after this round; if we are at the end set flush accordingly
                     in_size -= process_bytes_in;
@@ -621,6 +622,10 @@ namespace seal
                         out_size -= process_bytes_out;
                         out_head += process_bytes_out;
 
+                        // Number of bytes read
+                        bytes_read_from_in += input.pos - prev_pos;
+                        prev_pos = input.pos;
+
                         if (out_is_in)
                         {
                             // Update number of bytes written to in
@@ -630,9 +635,6 @@ namespace seal
                         // Continue while not all input has been read, or while there is data pending in the internal
                         // buffers
                     } while (pending || (input.pos != input.size));
-
-                    // Number of bytes read
-                    bytes_read_from_in += process_bytes_in;
                 } while (in_size);
 
                 if (!out_is_in)
