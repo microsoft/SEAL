@@ -1,6 +1,14 @@
 # List of Changes
 
+## Version 3.6.1
+
+- Fixed a bug reported in [(Issue 248)](https://github.com/microsoft/SEAL/issues/248) and [(Issue 249)](https://github.com/microsoft/SEAL/issues/249): in in-place Zstandard compression the input buffer head location was not correctly updated, resulting in huge memory use.
+
 ## Version 3.6.0
+
+### Hotfix - 12/2/2020
+
+- Fixed an issue with CMake system where a shared Zstandard was not correctly handled (it is not supported).
 
 ### Hotfix - 11/17/2020
 

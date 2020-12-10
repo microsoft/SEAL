@@ -331,7 +331,7 @@ namespace sealtest
             }
         }
 
-        TEST(BaseConvToolTest, Initialize)
+        TEST(BaseConverterTest, Initialize)
         {
             auto pool = MemoryManager::GetPool();
 
@@ -344,7 +344,7 @@ namespace sealtest
             ASSERT_NO_THROW(BaseConverter bct(RNSBase({ 2, 3, 5 }, pool), RNSBase({ 7, 11 }, pool), pool));
         }
 
-        TEST(BaseConvToolTest, Convert)
+        TEST(BaseConverterTest, Convert)
         {
             auto pool = MemoryManager::GetPool();
 
@@ -401,7 +401,7 @@ namespace sealtest
             }
         }
 
-        TEST(BaseConvToolTest, ConvertArray)
+        TEST(BaseConverterTest, ConvertArray)
         {
             auto pool = MemoryManager::GetPool();
 
