@@ -104,6 +104,8 @@ namespace seal
 
         void ckks_decrypt(const Ciphertext &encrypted, Plaintext &destination, MemoryPoolHandle pool);
 
+        void bgv_decrypt(const Ciphertext &encrypted, Plaintext &destination, MemoryPoolHandle pool);
+
         Decryptor(const Decryptor &copy) = delete;
 
         Decryptor(Decryptor &&source) = delete;

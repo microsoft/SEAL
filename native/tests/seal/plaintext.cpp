@@ -191,6 +191,28 @@ namespace sealtest
             ASSERT_TRUE(plain2.is_ntt_form());
         }
         {
+            EncryptionParameters parms(scheme_type::bgv);
+            parms.set_poly_modulus_degree(64);
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 30 }));
+            parms.set_plain_modulus(65537);
+
+            SEALContext context(parms, false, sec_level_type::none);
+
+            plain.parms_id() = parms_id_zero;
+            plain = "1x^63 + 2x^62 + Fx^32 + Ax^9 + 1x^1 + 1";
+            plain.save(stream);
+            plain2.load(context, stream);
+            ASSERT_TRUE(plain.data() != plain2.data());
+            ASSERT_FALSE(plain2.is_ntt_form());
+
+            Evaluator evaluator(context);
+            evaluator.transform_to_ntt_inplace(plain, context.first_parms_id());
+            plain.save(stream);
+            plain2.load(context, stream);
+            ASSERT_TRUE(plain.data() != plain2.data());
+            ASSERT_TRUE(plain2.is_ntt_form());
+        }
+        {
             EncryptionParameters parms(scheme_type::ckks);
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 30 }));

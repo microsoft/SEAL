@@ -49,6 +49,28 @@ namespace seal
             std::uint64_t *destination);
 
         /**
+        Generate a polynomial from a normal distribution, mulitply it with the plaintext moudlus (denoted by t), and store in RNS representation.
+
+        @param[in] prng A uniform random generator
+        @param[in] parms EncryptionParameters used to parameterize an RNS polynomial
+        @param[out] destination Allocated space to store a random polynomial
+        */
+        void sample_poly_normal_t(
+            std::shared_ptr<UniformRandomGenerator> prng, const EncryptionParameters &parms,
+            std::uint64_t *destination);
+
+        /**
+        Generate a polynomial from a centered binomial distribution, mulitply it with the plaintext moudlus, and store in RNS representation.
+
+        @param[in] prng A uniform random generator.
+        @param[in] parms EncryptionParameters used to parameterize an RNS polynomial
+        @param[out] destination Allocated space to store a random polynomial
+        */
+        void sample_poly_cbd_t(
+            std::shared_ptr<UniformRandomGenerator> prng, const EncryptionParameters &parms,
+            std::uint64_t *destination);
+
+        /**
         Generate a uniformly random polynomial and store in RNS representation.
 
         @param[in] prng A uniform random generator

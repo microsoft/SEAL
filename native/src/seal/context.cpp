@@ -86,7 +86,7 @@ namespace seal
             return "valid";
 
         case error_type::invalid_scheme:
-            return "scheme must be BFV or CKKS";
+            return "scheme must be BFV or CKKS or BGV";
 
         case error_type::invalid_coeff_modulus_size:
             return "coeff_modulus's primes' count is not bounded by SEAL_COEFF_MOD_COUNT_MIN(MAX)";
@@ -250,7 +250,7 @@ namespace seal
             return context_data;
         }
 
-        if (parms.scheme() == scheme_type::bfv)
+        if (parms.scheme() == scheme_type::bfv || parms.scheme() == scheme_type::bgv)
         {
             // Plain modulus must be at least 2 and at most 60 bits
             if (plain_modulus.value() >> SEAL_PLAIN_MOD_BIT_COUNT_MAX ||

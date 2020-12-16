@@ -12,6 +12,42 @@ namespace seal
 {
     namespace util
     {
+        void add_plain_without_scaling_variant(
+            const Plaintext &plain, const SEALContext::ContextData &context_data, RNSIter destination)
+        {
+            auto &parms = context_data.parms();
+            auto &coeff_modulus = parms.coeff_modulus();
+            auto &plain_modulus = parms.plain_modulus();
+            size_t coeff_count = plain.coeff_count();
+            size_t coeff_modulus_size = coeff_modulus.size();
+
+            SEAL_ITERATE(iter(destination, coeff_modulus), coeff_modulus_size, [&](auto I){
+                for(size_t j = 0; j < coeff_count; ++j){
+                    //This can be replaced with barrett reduction.
+                    uint64_t plain_mod = modulo_uint(plain.data() + j, 1, plain_modulus);
+                    modulo_uint_inplace(&plain_mod, 1, get<1>(I));
+                    get<0>(I)[j] = add_uint_mod(get<0>(I)[j], plain_mod, get<1>(I));
+                }
+            });
+        }
+
+        void sub_plain_without_scaling_variant(
+            const Plaintext &plain, const SEALContext::ContextData &context_data, RNSIter destination)
+        {
+            auto &parms = context_data.parms();
+            auto &coeff_modulus = parms.coeff_modulus();
+            auto &plain_modulus = parms.plain_modulus();
+            size_t coeff_count = plain.coeff_count();
+            size_t coeff_modulus_size = coeff_modulus.size();
+
+            SEAL_ITERATE(iter(destination, coeff_modulus), coeff_modulus_size, [&](auto I){
+                for(size_t j = 0; j < coeff_count; ++j){
+                    uint64_t plain_mod = modulo_uint(plain.data() + j, 1, plain_modulus);
+                    get<0>(I)[j] = sub_uint_mod(get<0>(I)[j], plain_mod, get<1>(I));
+                }
+            });
+        }
+
         void multiply_add_plain_with_scaling_variant(
             const Plaintext &plain, const SEALContext::ContextData &context_data, RNSIter destination)
         {

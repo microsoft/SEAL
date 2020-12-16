@@ -32,7 +32,7 @@ namespace seal
                 mod.save(stream, compr_mode_type::none);
             }
 
-            // Only BFV uses plain_modulus but save it in any case for simplicity
+            // Only BFV and BGV uses plain_modulus but save it in any case for simplicity
             plain_modulus_.save(stream, compr_mode_type::none);
         }
         catch (const ios_base::failure &)
@@ -99,7 +99,7 @@ namespace seal
             parms.set_poly_modulus_degree(safe_cast<size_t>(poly_modulus_degree64));
             parms.set_coeff_modulus(coeff_modulus);
 
-            // Only BFV uses plain_modulus; set_plain_modulus checks that for
+            // Only BFV and BGV uses plain_modulus; set_plain_modulus checks that for
             // other schemes it is zero
             parms.set_plain_modulus(plain_modulus);
 

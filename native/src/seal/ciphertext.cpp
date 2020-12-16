@@ -322,6 +322,18 @@ namespace seal
                 // Set up a UniformRandomGenerator and expand
                 new_data.data_.resize(total_uint64_count);
                 new_data.expand_seed(context, prng_info, version);
+
+                // In BGV, c1 = -A
+                auto parms = context.get_context_data(parms_id)->parms();
+                if(parms.scheme() == scheme_type::bgv){
+                    uint64_t *c1 = new_data.data(1);
+                    auto coeff_count = parms.poly_modulus_degree();
+                    auto coeff_modulus = parms.coeff_modulus();
+                    size_t coeff_modulus_size = parms.coeff_modulus().size();
+                    for (size_t i = 0; i < coeff_modulus_size; i++){
+                        negate_poly_coeffmod(c1 + i * coeff_count, coeff_count, coeff_modulus[i], c1 + i * coeff_count);
+                    }
+                }
             }
 
             // Verify that the buffer is correct
