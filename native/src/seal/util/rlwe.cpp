@@ -63,6 +63,33 @@ namespace seal
             });
         }
 
+        void sample_poly_normal_t(
+            shared_ptr<UniformRandomGenerator> prng, const EncryptionParameters &parms, uint64_t *destination)
+        {
+            auto coeff_modulus = parms.coeff_modulus();
+            size_t coeff_modulus_size = coeff_modulus.size();
+            size_t coeff_count = parms.poly_modulus_degree();
+            uint64_t plain_modulus = parms.plain_modulus().value();
+
+            if (are_close(global_variables::noise_max_deviation, 0.0))
+            {
+                set_zero_poly(coeff_count, coeff_modulus_size, destination);
+                return;
+            }
+
+            RandomToStandardAdapter engine(prng);
+            ClippedNormalDistribution dist(
+                0, global_variables::noise_standard_deviation, global_variables::noise_max_deviation);
+
+            SEAL_ITERATE(iter(destination), coeff_count, [&](auto &I) {
+                int64_t noise = static_cast<int64_t>(dist(engine));
+                uint64_t flag = static_cast<uint64_t>(-static_cast<int64_t>(noise < 0));
+                SEAL_ITERATE(
+                    iter(StrideIter<uint64_t *>(&I, coeff_count), coeff_modulus), coeff_modulus_size,
+                    [&](auto J) { *get<0>(J) = static_cast<uint64_t>(noise) * plain_modulus + (flag & get<1>(J).value()); });
+            });
+        }
+
         void sample_poly_cbd(
             shared_ptr<UniformRandomGenerator> prng, const EncryptionParameters &parms, uint64_t *destination)
         {
@@ -97,6 +124,44 @@ namespace seal
                 SEAL_ITERATE(
                     iter(StrideIter<uint64_t *>(&I, coeff_count), coeff_modulus), coeff_modulus_size,
                     [&](auto J) { *get<0>(J) = static_cast<uint64_t>(noise) + (flag & get<1>(J).value()); });
+            });
+        }
+
+        void sample_poly_cbd_t(
+            shared_ptr<UniformRandomGenerator> prng, const EncryptionParameters &parms, uint64_t *destination)
+        {
+            auto coeff_modulus = parms.coeff_modulus();
+            size_t coeff_modulus_size = coeff_modulus.size();
+            size_t coeff_count = parms.poly_modulus_degree();
+            uint64_t plain_modulus = parms.plain_modulus().value();
+
+            if (are_close(global_variables::noise_max_deviation, 0.0))
+            {
+                set_zero_poly(coeff_count, coeff_modulus_size, destination);
+                return;
+            }
+
+            if (!are_close(global_variables::noise_standard_deviation, 3.2))
+            {
+                throw logic_error("centered binomial distribution only supports standard deviation 3.2; use rounded "
+                                  "Gaussian instead");
+            }
+
+            auto cbd = [&]() {
+                unsigned char x[6];
+                prng->generate(6, reinterpret_cast<seal_byte *>(x));
+                x[2] &= 0x1F;
+                x[5] &= 0x1F;
+                return hamming_weight(x[0]) + hamming_weight(x[1]) + hamming_weight(x[2]) - hamming_weight(x[3]) -
+                       hamming_weight(x[4]) - hamming_weight(x[5]);
+            };
+
+            SEAL_ITERATE(iter(destination), coeff_count, [&](auto &I) {
+                int32_t noise = cbd();
+                uint64_t flag = static_cast<uint64_t>(-static_cast<int64_t>(noise < 0));
+                SEAL_ITERATE(
+                    iter(StrideIter<uint64_t *>(&I, coeff_count), coeff_modulus), coeff_modulus_size,
+                    [&](auto J) { *get<0>(J) = static_cast<uint64_t>(noise) * plain_modulus + (flag & get<1>(J).value()); });
             });
         }
 
@@ -202,10 +267,12 @@ namespace seal
             auto &context_data = *context.get_context_data(parms_id);
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
+            auto &plain_modulus = parms.plain_modulus();
             size_t coeff_modulus_size = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
             auto ntt_tables = context_data.small_ntt_tables();
             size_t encrypted_size = public_key.data().size();
+            scheme_type type = parms.scheme();
 
             // Make destination have right size and parms_id
             // Ciphertext (c_0,c_1, ...)
@@ -244,17 +311,53 @@ namespace seal
             // c[j] = public_key[j] * u + e[j]
             for (size_t j = 0; j < encrypted_size; j++)
             {
-                SEAL_NOISE_SAMPLER(prng, parms, u.get());
-                for (size_t i = 0; i < coeff_modulus_size; i++)
+                // In BGV, p * e is used
+                if(type == scheme_type::bgv)
                 {
-                    // Addition with e_0, e_1 is in NTT form
-                    if (is_ntt_form)
-                    {
-                        ntt_negacyclic_harvey(u.get() + i * coeff_count, ntt_tables[i]);
+                    // The minimal bit size of coefficient
+                    int min_bit_size = 60;
+                    std::for_each(coeff_modulus.begin(), coeff_modulus.end(), [&min_bit_size](Modulus coeff){
+                        if(coeff.bit_count() < min_bit_size){
+                            min_bit_size = coeff.bit_count();
+                        }
+                    });
+                    // e * p may exceed the limit of modulus, +5 as noise_max_deviation ~ 19.2 
+                    if(plain_modulus.bit_count() + 5 > min_bit_size){
+                        SEAL_NOISE_SAMPLER(prng, parms, u.get());
+                        for (size_t i = 0; i < coeff_modulus_size; i++)
+                        {
+                            multiply_poly_scalar_coeffmod(u.get() + i * coeff_count, coeff_count,
+                                plain_modulus.value(), coeff_modulus[i], u.get() + i * coeff_count);
+    
+                            add_poly_coeffmod(u.get() + i * coeff_count, destination.data(j) + i * coeff_count, coeff_count, coeff_modulus[i],
+                                    destination.data(j) + i * coeff_count);
+                        }
+                    // otherwise we can optimize the sample process of e * p
                     }
-                    add_poly_coeffmod(
-                        u.get() + i * coeff_count, destination.data(j) + i * coeff_count, coeff_count, coeff_modulus[i],
-                        destination.data(j) + i * coeff_count);
+                    else
+                    {
+                        SEAL_NOISE_SAMPLER_T(prng, parms, u.get());
+                        for (size_t i = 0; i < coeff_modulus_size; i++)
+                        {
+                            add_poly_coeffmod(u.get() + i * coeff_count, destination.data(j) + i * coeff_count, coeff_count, coeff_modulus[i],
+                                    destination.data(j) + i * coeff_count);
+                        }
+                    }
+                }
+                else
+                {
+                    SEAL_NOISE_SAMPLER(prng, parms, u.get());
+                    for (size_t i = 0; i < coeff_modulus_size; i++)
+                    {
+                        // Addition with e_0, e_1 is in NTT form
+                        if (is_ntt_form)
+                        {
+                            ntt_negacyclic_harvey(u.get() + i * coeff_count, ntt_tables[i]);
+                        }
+                        add_poly_coeffmod(
+                            u.get() + i * coeff_count, destination.data(j) + i * coeff_count, coeff_count, coeff_modulus[i],
+                            destination.data(j) + i * coeff_count);
+                    }
                 }
             }
         }
@@ -275,10 +378,12 @@ namespace seal
             auto &context_data = *context.get_context_data(parms_id);
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
+            auto &plain_modulus = parms.plain_modulus();
             size_t coeff_modulus_size = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
             auto ntt_tables = context_data.small_ntt_tables();
             size_t encrypted_size = 2;
+            scheme_type type = parms.scheme();
 
             // If a polynomial is too small to store UniformRandomGeneratorInfo,
             // it is best to just disable save_seed. Note that the size needed is
@@ -350,10 +455,26 @@ namespace seal
                 {
                     inverse_ntt_negacyclic_harvey(c0 + i * coeff_count, ntt_tables[i]);
                 }
-                add_poly_coeffmod(
-                    noise.get() + i * coeff_count, c0 + i * coeff_count, coeff_count, coeff_modulus[i],
-                    c0 + i * coeff_count);
-                negate_poly_coeffmod(c0 + i * coeff_count, coeff_count, coeff_modulus[i], c0 + i * coeff_count);
+                // bgv: (c0,c1) = ((as+pe), -a)
+                if(type == scheme_type::bgv)
+                {
+                    // noise = pe
+                    multiply_poly_scalar_coeffmod(
+                        noise.get() + i * coeff_count, coeff_count,
+                        plain_modulus.value(), coeff_modulus[i], noise.get() + i * coeff_count);
+                    // c0 = as + pe
+                    add_poly_coeffmod(
+                        noise.get() + i * coeff_count, c0 + i * coeff_count, coeff_count, coeff_modulus[i],
+                        c0 + i * coeff_count);
+                    // (as + pe, a) -> (as + pe, -a), 
+                    negate_poly_coeffmod(c1 + i * coeff_count, coeff_count, coeff_modulus[i], c1 + i * coeff_count);
+                }
+                else
+                {
+                    add_poly_coeffmod(noise.get() + i * coeff_count, c0 + i * coeff_count, coeff_count, coeff_modulus[i],
+                        c0 + i * coeff_count);
+                    negate_poly_coeffmod(c0 + i * coeff_count, coeff_count, coeff_modulus[i], c0 + i * coeff_count);
+                }
             }
 
             if (!is_ntt_form && !save_seed)

@@ -188,6 +188,13 @@ namespace seal
 #define SEAL_NOISE_SAMPLER sample_poly_cbd
 #endif
 
+#ifdef SEAL_USE_GAUSSIAN_NOISE
+#define SEAL_NOISE_SAMPLER_T sample_poly_normal_t
+#else
+#define SEAL_NOISE_SAMPLER_T sample_poly_cbd_t
+#endif
+
+
 // Use generic functions as (slower) fallback
 #ifndef SEAL_ADD_CARRY_UINT64
 #define SEAL_ADD_CARRY_UINT64(operand1, operand2, carry, result) add_uint64_generic(operand1, operand2, carry, result)

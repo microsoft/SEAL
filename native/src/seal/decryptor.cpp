@@ -101,10 +101,15 @@ namespace seal
         case scheme_type::ckks:
             ckks_decrypt(encrypted, destination, pool_);
             return;
+        
+        case scheme_type::bgv:
+            bgv_decrypt(encrypted, destination, pool_);
+            return;
 
         default:
             throw invalid_argument("unsupported scheme");
         }
+       
     }
 
     void Decryptor::bfv_decrypt(const Ciphertext &encrypted, Plaintext &destination, MemoryPoolHandle pool)
@@ -180,6 +185,35 @@ namespace seal
         // Set destination parameters as in encrypted
         destination.parms_id() = encrypted.parms_id();
         destination.scale() = encrypted.scale();
+    }
+
+    void Decryptor::bgv_decrypt(const Ciphertext &encrypted, Plaintext &destination, MemoryPoolHandle pool)
+    {
+        if (encrypted.is_ntt_form())
+        {
+            throw invalid_argument("encrypted cannot be in NTT form");
+        }
+
+        auto &context_data = *context_.get_context_data(encrypted.parms_id());
+        auto &parms = context_data.parms();
+        auto &coeff_modulus = parms.coeff_modulus();
+        size_t coeff_count = parms.poly_modulus_degree();
+        size_t coeff_modulus_size = coeff_modulus.size();
+
+        SEAL_ALLOCATE_ZERO_GET_RNS_ITER(tmp_dest_modq, coeff_count, coeff_modulus_size, pool);
+
+        dot_product_ct_sk_array(encrypted, tmp_dest_modq, pool_);
+
+        destination.parms_id() = parms_id_zero;
+        destination.resize(coeff_count);
+
+        context_data.rns_tool()->decrypt_modt(tmp_dest_modq, destination.data(), pool);
+       
+        // How many non-zero coefficients do we really have in the result?
+        size_t plain_coeff_count = get_significant_uint64_count_uint(destination.data(), coeff_count);
+       
+        // Resize destination to appropriate size
+        destination.resize(max(plain_coeff_count, size_t(1)));
     }
 
     void Decryptor::compute_secret_key_array(size_t max_power)
@@ -346,7 +380,8 @@ namespace seal
             throw invalid_argument("encrypted is empty");
         }
 
-        if (context_.key_context_data()->parms().scheme() != scheme_type::bfv)
+        auto scheme = context_.key_context_data()->parms().scheme();
+        if (scheme!= scheme_type::bfv && scheme != scheme_type::bgv)
         {
             throw logic_error("unsupported scheme");
         }
@@ -379,7 +414,10 @@ namespace seal
 
         // Multiply by plain_modulus and reduce mod coeff_modulus to get
         // coeff_modulus()*noise.
-        multiply_poly_scalar_coeffmod(noise_poly, coeff_modulus_size, plain_modulus.value(), coeff_modulus, noise_poly);
+        if(scheme == scheme_type::bfv)
+        {
+            multiply_poly_scalar_coeffmod(noise_poly, coeff_modulus_size, plain_modulus.value(), coeff_modulus, noise_poly);
+        }
 
         // CRT-compose the noise
         context_data.rns_tool()->base_q()->compose_array(noise_poly, coeff_count, pool_);

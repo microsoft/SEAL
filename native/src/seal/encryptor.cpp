@@ -111,7 +111,7 @@ namespace seal
         {
             is_ntt_form = true;
         }
-        else if (parms.scheme() != scheme_type::bfv)
+        else if (parms.scheme() != scheme_type::bfv && parms.scheme() != scheme_type::bgv)
         {
             throw invalid_argument("unsupported scheme");
         }
@@ -141,9 +141,15 @@ namespace seal
                         rns_tool->divide_and_round_q_last_ntt_inplace(
                             get<0>(I), prev_context_data.small_ntt_tables(), pool);
                     }
-                    else
+                    // bfv switch-to-next
+                    else if(parms.scheme() != scheme_type::bgv)
                     {
                         rns_tool->divide_and_round_q_last_inplace(get<0>(I), pool);
+                    }
+                    // bgv switch-to-next
+                    else
+                    {
+                        rns_tool->mod_t_and_divide_q_last_inplace(get<0>(I), pool);
                     }
                     set_poly(get<0>(I), coeff_count, coeff_modulus_size, get<1>(I));
                 });
@@ -230,6 +236,18 @@ namespace seal
             add_poly_coeffmod(destination_iter, plain_iter, coeff_modulus_size, coeff_modulus, destination_iter);
 
             destination.scale() = plain.scale();
+        }
+        else if (scheme == scheme_type::bgv)
+        {
+            if (plain.is_ntt_form())
+            {
+                throw invalid_argument("plain cannot be in NTT form");
+            }
+            encrypt_zero_internal(context_.first_parms_id(), is_asymmetric, save_seed, destination, pool);
+            //c_{0} = pk_{0}*u + p*e_{0} + M
+            add_plain_without_scaling_variant(plain, *context_.first_context_data(), 
+                RNSIter(destination.data(0), context_.first_context_data()->parms().poly_modulus_degree()));
+
         }
         else
         {

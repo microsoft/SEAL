@@ -58,7 +58,7 @@ namespace seal
     sense.
 
     @par NTT form
-    When using the BFV scheme (scheme_type::bfv), all plaintexts and ciphertexts should remain by default in the usual
+    When using the BFV/BGV scheme (scheme_type::bfv/bgv), all plaintexts and ciphertexts should remain by default in the usual
     coefficient representation, i.e., not in NTT form. When using the CKKS scheme (scheme_type::ckks), all plaintexts
     and ciphertexts should remain by default in NTT form. We call these scheme-specific NTT states the "default NTT
     form". Some functions, such as add, work even if the inputs are not in the default state, but others, such as
@@ -584,7 +584,7 @@ namespace seal
         @param[in] relin_keys The relinearization keys
         @param[out] destination The ciphertext to overwrite with the multiplication result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if scheme is not scheme_type::bfv
+        @throws std::logic_error if scheme is not scheme_type::bfv or scheme_type::bgv
         @throws std::invalid_argument if encrypteds is empty
         @throws std::invalid_argument if ciphertexts or relin_keys are not valid for the encryption parameters
         @throws std::invalid_argument if encrypteds are not in the default NTT form
@@ -608,7 +608,7 @@ namespace seal
         @param[in] exponent The power to raise the ciphertext to
         @param[in] relin_keys The relinearization keys
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if scheme is not scheme_type::bfv
+        @throws std::logic_error if scheme is not scheme_type::bfv or scheme_type::bgv
         @throws std::invalid_argument if encrypted or relin_keys is not valid for the encryption parameters
         @throws std::invalid_argument if encrypted is not in the default NTT form
         @throws std::invalid_argument if the output scale is too large for the encryption parameters
@@ -634,7 +634,7 @@ namespace seal
         @param[in] relin_keys The relinearization keys
         @param[out] destination The ciphertext to overwrite with the power
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if scheme is not scheme_type::bfv
+        @throws std::logic_error if scheme is not scheme_type::bfv or scheme_type::bgv
         @throws std::invalid_argument if encrypted or relin_keys is not valid for the encryption parameters
         @throws std::invalid_argument if encrypted is not in the default NTT form
         @throws std::invalid_argument if the output scale is too large for the encryption parameters
@@ -866,7 +866,7 @@ namespace seal
         The desired Galois automorphism is given as a Galois element, and must be an odd integer in the interval
         [1, M-1], where M = 2*N, and N = poly_modulus_degree. Used with batching, a Galois element 3^i % M corresponds
         to a cyclic row rotation i steps to the left, and a Galois element 3^(N/2-i) % M corresponds to a cyclic row
-        rotation i steps to the right. The Galois element M-1 corresponds to a column rotation (row swap) in BFV, and
+        rotation i steps to the right. The Galois element M-1 corresponds to a column rotation (row swap) in BFV/BGV, and
         complex conjugation in CKKS. In the polynomial view (not batching), a Galois automorphism by a Galois element p
         changes Enc(plain(x)) to Enc(plain(x^p)).
 
@@ -898,7 +898,7 @@ namespace seal
         The desired Galois automorphism is given as a Galois element, and must be an odd integer in the interval
         [1, M-1], where M = 2*N, and N = poly_modulus_degree. Used with batching, a Galois element 3^i % M corresponds
         to a cyclic row rotation i steps to the left, and a Galois element 3^(N/2-i) % M corresponds to a cyclic row
-        rotation i steps to the right. The Galois element M-1 corresponds to a column rotation (row swap) in BFV, and
+        rotation i steps to the right. The Galois element M-1 corresponds to a column rotation (row swap) in BFV/BGV, and
         complex conjugation in CKKS. In the polynomial view (not batching), a Galois automorphism by a Galois element p
         changes Enc(plain(x)) to Enc(plain(x^p)).
 
@@ -928,7 +928,7 @@ namespace seal
         }
 
         /**
-        Rotates plaintext matrix rows cyclically. When batching is used with the BFV scheme, this function rotates the
+        Rotates plaintext matrix rows cyclically. When batching is used with the BFV/BGV scheme, this function rotates the
         encrypted plaintext matrix rows cyclically to the left (steps > 0) or to the right (steps < 0). Since the size
         of the batched matrix is 2-by-(N/2), where N is the degree of the polynomial modulus, the number of steps to
         rotate must have absolute value at most N/2-1. Dynamic memory allocations in the process are allocated from the
@@ -938,7 +938,7 @@ namespace seal
         @param[in] steps The number of steps to rotate (positive left, negative right)
         @param[in] galois_keys The Galois keys
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if scheme is not scheme_type::bfv
+        @throws std::logic_error if scheme is not scheme_type::bfv or scheme_type::bgv
         @throws std::logic_error if the encryption parameters do not support batching
         @throws std::invalid_argument if encrypted or galois_keys is not valid for
         the encryption parameters
@@ -956,7 +956,8 @@ namespace seal
             Ciphertext &encrypted, int steps, const GaloisKeys &galois_keys,
             MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
-            if (context_.key_context_data()->parms().scheme() != scheme_type::bfv)
+            auto scheme = context_.key_context_data()->parms().scheme();
+            if (scheme != scheme_type::bfv && scheme != scheme_type::bgv)
             {
                 throw std::logic_error("unsupported scheme");
             }
@@ -964,7 +965,7 @@ namespace seal
         }
 
         /**
-        Rotates plaintext matrix rows cyclically. When batching is used with the BFV scheme, this function rotates the
+        Rotates plaintext matrix rows cyclically. When batching is used with the BFV/BGV scheme, this function rotates the
         encrypted plaintext matrix rows cyclically to the left (steps > 0) or to the right (steps < 0) and writes the
         result to the destination parameter. Since the size of the batched matrix is 2-by-(N/2), where N is the degree
         of the polynomial modulus, the number of steps to rotate must have absolute value at most N/2-1. Dynamic memory
@@ -975,7 +976,7 @@ namespace seal
         @param[in] galois_keys The Galois keys
         @param[out] destination The ciphertext to overwrite with the rotated result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if scheme is not scheme_type::bfv
+        @throws std::logic_error if scheme is not scheme_type::bfv or scheme_type::bgv
         @throws std::logic_error if the encryption parameters do not support batching
         @throws std::invalid_argument if encrypted or galois_keys is not valid for
         the encryption parameters
@@ -1007,7 +1008,7 @@ namespace seal
         @param[in] galois_keys The Galois keys
         @param[out] destination The ciphertext to overwrite with the rotated result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if scheme is not scheme_type::bfv
+        @throws std::logic_error if scheme is not scheme_type::bfv or scheme_type::bgv
         @throws std::logic_error if the encryption parameters do not support batching
         @throws std::invalid_argument if encrypted or galois_keys is not valid for
         the encryption parameters
@@ -1021,10 +1022,10 @@ namespace seal
         @throws std::logic_error if result ciphertext is transparent
         */
         inline void rotate_columns_inplace(
-            Ciphertext &encrypted, const GaloisKeys &galois_keys,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) const
-        {
-            if (context_.key_context_data()->parms().scheme() != scheme_type::bfv)
+            Ciphertext &encrypted, const GaloisKeys &galois_keys, MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        {   
+            auto scheme = context_.key_context_data()->parms().scheme();
+            if (scheme != scheme_type::bfv && scheme != scheme_type::bgv)
             {
                 throw std::logic_error("unsupported scheme");
             }
@@ -1032,7 +1033,7 @@ namespace seal
         }
 
         /**
-        Rotates plaintext matrix columns cyclically. When batching is used with the BFV scheme, this function rotates
+        Rotates plaintext matrix columns cyclically. When batching is used with the BFV/BGV scheme, this function rotates
         the encrypted plaintext matrix columns cyclically, and writes the result to the destination parameter. Since the
         size of the batched matrix is 2-by-(N/2), where N is the degree of the polynomial modulus, this means simply
         swapping the two rows. Dynamic memory allocations in the process are allocated from the memory pool pointed to
@@ -1042,7 +1043,7 @@ namespace seal
         @param[in] galois_keys The Galois keys
         @param[out] destination The ciphertext to overwrite with the rotated result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::logic_error if scheme is not scheme_type::bfv
+        @throws std::logic_error if scheme is not scheme_type::bfv or scheme_type::bgv
         @throws std::logic_error if the encryption parameters do not support batching
         @throws std::invalid_argument if encrypted or galois_keys is not valid for
         the encryption parameters
@@ -1210,9 +1211,13 @@ namespace seal
 
         void ckks_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool) const;
 
+        void bgv_multiply(Ciphertext &encrypted1, Ciphertext &encrypted2, MemoryPoolHandle pool) const;
+
         void bfv_square(Ciphertext &encrypted, MemoryPoolHandle pool) const;
 
         void ckks_square(Ciphertext &encrypted, MemoryPoolHandle pool) const;
+
+        void bgv_square(Ciphertext &encrypted, MemoryPoolHandle pool) const;
 
         void relinearize_internal(
             Ciphertext &encrypted, const RelinKeys &relin_keys, std::size_t destination_size,

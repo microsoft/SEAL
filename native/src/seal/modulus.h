@@ -479,6 +479,20 @@ namespace seal
             std::size_t poly_modulus_degree, sec_level_type sec_level = sec_level_type::tc128);
 
         /**
+        Returns a default coefficient modulus for the BFV scheme that guarantees
+        a given security level when using a given poly_modulus_degree, which currently
+        uses the same modulus as BFV.
+        @param[in] poly_modulus_degree The value of the poly_modulus_degree
+        encryption parameter
+        @param[in] sec_level The desired standard security level
+        @throws std::invalid_argument if poly_modulus_degree is not a power-of-two
+        or is too large
+        @throws std::invalid_argument if sec_level is sec_level_type::none
+        */
+        SEAL_NODISCARD static std::vector<Modulus> BGVDefault(
+            std::size_t poly_modulus_degree, sec_level_type sec_level = sec_level_type::tc128);
+
+        /**
         Returns a custom coefficient modulus suitable for use with the specified
         poly_modulus_degree. The return value will be a vector consisting of
         Modulus elements representing distinct prime numbers of bit-lengths

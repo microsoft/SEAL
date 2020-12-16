@@ -159,7 +159,86 @@ namespace seal
             });
         }
 
-        void add_poly_coeffmod(
+        inline void modulo_then_negate_poly_coeffs(
+            ConstCoeffIter poly, std::size_t coeff_count, const Modulus &modulus, CoeffIter result)
+        {
+#ifdef SEAL_DEBUG
+            if (!poly && coeff_count > 0)
+            {
+                throw std::invalid_argument("poly");
+            }
+            if (!result && coeff_count > 0)
+            {
+                throw std::invalid_argument("result");
+            }
+            if (modulus.is_zero())
+            {
+                throw std::invalid_argument("modulus");
+            }
+#endif
+            const uint64_t modulus_value = modulus.value();
+            SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) { 
+                auto coeff = barrett_reduce_64(get<0>(I), modulus);
+                std::int64_t non_zero = (coeff != 0);
+                get<1>(I) = (modulus_value - coeff) & static_cast<std::uint64_t>(-non_zero);
+            });
+        }
+
+        inline void modulo_then_negate_poly_coeffs(
+            ConstRNSIter poly, std::size_t coeff_modulus_size, ConstModulusIter modulus, RNSIter result)
+        {
+#ifdef SEAL_DEBUG
+            if (!poly && coeff_modulus_size > 0)
+            {
+                throw std::invalid_argument("poly");
+            }
+            if (!result && coeff_modulus_size > 0)
+            {
+                throw std::invalid_argument("result");
+            }
+            if (!modulus && coeff_modulus_size > 0)
+            {
+                throw std::invalid_argument("modulus");
+            }
+            if (poly.poly_modulus_degree() != result.poly_modulus_degree())
+            {
+                throw std::invalid_argument("incompatible iterators");
+            }
+#endif
+            auto poly_modulus_degree = result.poly_modulus_degree();
+            SEAL_ITERATE(iter(poly, modulus, result), coeff_modulus_size, [&](auto I) {
+                modulo_then_negate_poly_coeffs(get<0>(I), poly_modulus_degree, get<1>(I), get<2>(I));
+            });   
+        }
+
+        inline void modulo_then_negate_poly_coeffs(
+            ConstPolyIter poly_array, std::size_t size, ConstModulusIter modulus, PolyIter result)
+        {
+#ifdef SEAL_DEBUG
+            if (!poly_array && size > 0)
+            {
+                throw std::invalid_argument("poly_array");
+            }
+            if (!result && size > 0)
+            {
+                throw std::invalid_argument("result");
+            }
+            if (!modulus && size > 0)
+            {
+                throw std::invalid_argument("modulus");
+            }
+            if (poly_array.coeff_modulus_size() != result.coeff_modulus_size())
+            {
+                throw std::invalid_argument("incompatible iterators");
+            }
+#endif
+            auto coeff_modulus_size = result.coeff_modulus_size();
+            SEAL_ITERATE(iter(poly_array, result), size, [&](auto I) {
+                modulo_then_negate_poly_coeffs(get<0>(I), coeff_modulus_size, modulus, get<1>(I));
+            });   
+        }
+
+        inline void add_poly_coeffmod(
             ConstCoeffIter operand1, ConstCoeffIter operand2, std::size_t coeff_count, const Modulus &modulus,
             CoeffIter result);
 

@@ -15,7 +15,7 @@ using namespace std;
 
 namespace sealtest
 {
-    TEST(CiphertextTest, CiphertextBasics)
+    TEST(CiphertextTest, BFVCiphertextBasics)
     {
         EncryptionParameters parms(scheme_type::bfv);
 
@@ -90,7 +90,7 @@ namespace sealtest
         ASSERT_EQ(ctxt.size(), ctxt3.size());
     }
 
-    TEST(CiphertextTest, SaveLoadCiphertext)
+    TEST(CiphertextTest, BFVSaveLoadCiphertext)
     {
         stringstream stream;
         EncryptionParameters parms(scheme_type::bfv);
@@ -126,4 +126,118 @@ namespace sealtest
             is_equal_uint(ctxt.data(), ctxt2.data(), parms.poly_modulus_degree() * parms.coeff_modulus().size() * 2));
         ASSERT_TRUE(ctxt.data() != ctxt2.data());
     }
+
+    TEST(CiphertextTest, BGVCiphertextBasics)
+    {
+        EncryptionParameters parms(scheme_type::bgv);
+
+        parms.set_poly_modulus_degree(2);
+        parms.set_coeff_modulus(CoeffModulus::Create(2, { 30 }));
+        parms.set_plain_modulus(2);
+        //auto context = SEALContext::Create(parms, false, sec_level_type::none);
+        SEALContext context(parms, false, sec_level_type::none);
+
+        Ciphertext ctxt(context);
+        ctxt.reserve(10);
+        ASSERT_EQ(0ULL, ctxt.size());
+        ASSERT_EQ(0ULL, ctxt.dyn_array().size());
+        ASSERT_EQ(10ULL * 2 * 1, ctxt.dyn_array().capacity());
+        ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
+        ASSERT_TRUE(ctxt.parms_id() == context.first_parms_id());
+        ASSERT_FALSE(ctxt.is_ntt_form());
+        const uint64_t *ptr = ctxt.data();
+
+        ctxt.reserve(5);
+        ASSERT_EQ(0ULL, ctxt.size());
+        ASSERT_EQ(0ULL, ctxt.dyn_array().size());
+        ASSERT_EQ(5ULL * 2 * 1, ctxt.dyn_array().capacity());
+        ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
+        ASSERT_TRUE(ptr != ctxt.data());
+        ASSERT_TRUE(ctxt.parms_id() == context.first_parms_id());
+        ptr = ctxt.data();
+
+        ctxt.reserve(10);
+        ASSERT_EQ(0ULL, ctxt.size());
+        ASSERT_EQ(0ULL, ctxt.dyn_array().size());
+        ASSERT_EQ(10ULL * 2 * 1, ctxt.dyn_array().capacity());
+        ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
+        ASSERT_TRUE(ptr != ctxt.data());
+        ASSERT_TRUE(ctxt.parms_id() == context.first_parms_id());
+        ASSERT_FALSE(ctxt.is_ntt_form());
+        ptr = ctxt.data();
+
+        ctxt.reserve(2);
+        ASSERT_EQ(0ULL, ctxt.size());
+        ASSERT_EQ(2ULL * 2 * 1, ctxt.dyn_array().capacity());
+        ASSERT_EQ(0ULL, ctxt.dyn_array().size());
+        ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
+        ASSERT_TRUE(ptr != ctxt.data());
+        ASSERT_TRUE(ctxt.parms_id() == context.first_parms_id());
+        ASSERT_FALSE(ctxt.is_ntt_form());
+        ptr = ctxt.data();
+
+        ctxt.reserve(5);
+        ASSERT_EQ(0ULL, ctxt.size());
+        ASSERT_EQ(5ULL * 2 * 1, ctxt.dyn_array().capacity());
+        ASSERT_EQ(0ULL, ctxt.dyn_array().size());
+        ASSERT_EQ(2ULL, ctxt.poly_modulus_degree());
+        ASSERT_TRUE(ptr != ctxt.data());
+        ASSERT_TRUE(ctxt.parms_id() == context.first_parms_id());
+        ASSERT_FALSE(ctxt.is_ntt_form());
+
+        Ciphertext ctxt2{ ctxt };
+        ASSERT_EQ(ctxt.coeff_modulus_size(), ctxt2.coeff_modulus_size());
+        ASSERT_EQ(ctxt.is_ntt_form(), ctxt2.is_ntt_form());
+        ASSERT_EQ(ctxt.poly_modulus_degree(), ctxt2.poly_modulus_degree());
+        ASSERT_TRUE(ctxt.parms_id() == ctxt2.parms_id());
+        ASSERT_EQ(ctxt.poly_modulus_degree(), ctxt2.poly_modulus_degree());
+        ASSERT_EQ(ctxt.size(), ctxt2.size());
+
+        Ciphertext ctxt3;
+        ctxt3 = ctxt;
+        ASSERT_EQ(ctxt.coeff_modulus_size(), ctxt3.coeff_modulus_size());
+        ASSERT_EQ(ctxt.poly_modulus_degree(), ctxt3.poly_modulus_degree());
+        ASSERT_EQ(ctxt.is_ntt_form(), ctxt3.is_ntt_form());
+        ASSERT_TRUE(ctxt.parms_id() == ctxt3.parms_id());
+        ASSERT_EQ(ctxt.poly_modulus_degree(), ctxt3.poly_modulus_degree());
+        ASSERT_EQ(ctxt.size(), ctxt3.size());
+    }
+
+    TEST(CiphertextTest, BGVSaveLoadCiphertext)
+    {
+        stringstream stream;
+        EncryptionParameters parms(scheme_type::bgv);
+        parms.set_poly_modulus_degree(2);
+        parms.set_coeff_modulus(CoeffModulus::Create(2, { 30 }));
+        parms.set_plain_modulus(2);
+
+        SEALContext context(parms, false, sec_level_type::none);
+
+        Ciphertext ctxt(context);
+        Ciphertext ctxt2;
+        ctxt.save(stream);
+        ctxt2.load(context, stream);
+        ASSERT_TRUE(ctxt.parms_id() == ctxt2.parms_id());
+        ASSERT_FALSE(ctxt.is_ntt_form());
+        ASSERT_FALSE(ctxt2.is_ntt_form());
+
+        parms.set_poly_modulus_degree(1024);
+        parms.set_coeff_modulus(CoeffModulus::BGVDefault(1024));
+        parms.set_plain_modulus(0xF0F0);
+        context = SEALContext(parms, false);
+        KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
+        Encryptor encryptor(context, pk);
+        encryptor.encrypt(Plaintext("Ax^10 + 9x^9 + 8x^8 + 7x^7 + 6x^6 + 5x^5 + 4x^4 + 3x^3 + 2x^2 + 1"), ctxt);
+        ctxt.save(stream);
+        ctxt2.load(context, stream);
+        ASSERT_TRUE(ctxt.parms_id() == ctxt2.parms_id());
+        ASSERT_FALSE(ctxt.is_ntt_form());
+        ASSERT_FALSE(ctxt2.is_ntt_form());
+        ASSERT_TRUE(
+            is_equal_uint(ctxt.data(), ctxt2.data(), parms.poly_modulus_degree() * parms.coeff_modulus().size() * 2));
+        ASSERT_TRUE(ctxt.data() != ctxt2.data());
+    }
+
 } // namespace sealtest
