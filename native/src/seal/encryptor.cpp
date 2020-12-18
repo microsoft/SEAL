@@ -142,7 +142,7 @@ namespace seal
                             get<0>(I), prev_context_data.small_ntt_tables(), pool);
                     }
                     // bfv switch-to-next
-                    else if(parms.scheme() != scheme_type::bgv)
+                    else if (parms.scheme() != scheme_type::bgv)
                     {
                         rns_tool->divide_and_round_q_last_inplace(get<0>(I), pool);
                     }
@@ -244,10 +244,12 @@ namespace seal
                 throw invalid_argument("plain cannot be in NTT form");
             }
             encrypt_zero_internal(context_.first_parms_id(), is_asymmetric, save_seed, destination, pool);
-            //c_{0} = pk_{0}*u + p*e_{0} + M
-            add_plain_without_scaling_variant(plain, *context_.first_context_data(), 
-                RNSIter(destination.data(0), context_.first_context_data()->parms().poly_modulus_degree()));
-
+            auto context_data_ptr = context_.first_context_data();
+            auto &parms = context_data_ptr->parms();
+            size_t coeff_count = parms.poly_modulus_degree();
+            size_t coeff_modulus_size = parms.coeff_modulus().size();
+            // c_{0} = pk_{0}*u + p*e_{0} + M
+            add_plain_without_scaling_variant(plain, *context_data_ptr, RNSIter(destination.data(0), coeff_count));
         }
         else
         {

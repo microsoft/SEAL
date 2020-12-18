@@ -18,16 +18,26 @@ namespace seal
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
             auto &plain_modulus = parms.plain_modulus();
-            size_t coeff_count = plain.coeff_count();
-            size_t coeff_modulus_size = coeff_modulus.size();
+            const size_t coeff_count = plain.coeff_count();
+            const size_t coeff_modulus_size = coeff_modulus.size();
+            if (coeff_count > parms.poly_modulus_degree())
+            {
+                throw std::invalid_argument("add_plain_without_scaling_variant: invalid plaintext");
+            }
 
-            SEAL_ITERATE(iter(destination, coeff_modulus), coeff_modulus_size, [&](auto I){
-                for(size_t j = 0; j < coeff_count; ++j){
-                    //This can be replaced with barrett reduction.
-                    uint64_t plain_mod = modulo_uint(plain.data() + j, 1, plain_modulus);
-                    modulo_uint_inplace(&plain_mod, 1, get<1>(I));
-                    get<0>(I)[j] = add_uint_mod(get<0>(I)[j], plain_mod, get<1>(I));
-                }
+            if (destination.poly_modulus_degree() != parms.poly_modulus_degree())
+            {
+                throw std::invalid_argument("add_plain_without_scaling_variant: invalid destination iter");
+            }
+
+            SEAL_ITERATE(iter(destination, coeff_modulus), coeff_modulus_size, [&](auto I) {
+                const Modulus &cipher_modulus = get<1>(I);
+                std::transform(
+                    plain.data(), plain.data() + coeff_count, get<0>(I), get<0>(I),
+                    [&](uint64_t m, uint64_t c) -> uint64_t {
+                        m = barrett_reduce_64(m, plain_modulus);
+                        return add_uint_mod(c, m, cipher_modulus);
+                    });
             });
         }
 
@@ -37,14 +47,27 @@ namespace seal
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
             auto &plain_modulus = parms.plain_modulus();
-            size_t coeff_count = plain.coeff_count();
-            size_t coeff_modulus_size = coeff_modulus.size();
+            const size_t coeff_count = plain.coeff_count();
+            const size_t coeff_modulus_size = coeff_modulus.size();
 
-            SEAL_ITERATE(iter(destination, coeff_modulus), coeff_modulus_size, [&](auto I){
-                for(size_t j = 0; j < coeff_count; ++j){
-                    uint64_t plain_mod = modulo_uint(plain.data() + j, 1, plain_modulus);
-                    get<0>(I)[j] = sub_uint_mod(get<0>(I)[j], plain_mod, get<1>(I));
-                }
+            if (coeff_count > parms.poly_modulus_degree())
+            {
+                throw std::invalid_argument("sub_plain_without_scaling_variant: invalid plaintext");
+            }
+
+            if (destination.poly_modulus_degree() != parms.poly_modulus_degree())
+            {
+                throw std::invalid_argument("sub_plain_without_scaling_variant: invalid destination iter");
+            }
+
+            SEAL_ITERATE(iter(destination, coeff_modulus), coeff_modulus_size, [&](auto I) {
+                const Modulus &cipher_modulus = get<1>(I);
+                std::transform(
+                    plain.data(), plain.data() + coeff_count, get<0>(I), get<0>(I),
+                    [&](uint64_t m, uint64_t c) -> uint64_t {
+                        m = barrett_reduce_64(m, plain_modulus);
+                        return sub_uint_mod(c, m, cipher_modulus);
+                    });
             });
         }
 
