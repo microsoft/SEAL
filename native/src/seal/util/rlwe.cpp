@@ -85,8 +85,9 @@ namespace seal
                 int64_t noise = static_cast<int64_t>(dist(engine));
                 uint64_t flag = static_cast<uint64_t>(-static_cast<int64_t>(noise < 0));
                 SEAL_ITERATE(
-                    iter(StrideIter<uint64_t *>(&I, coeff_count), coeff_modulus), coeff_modulus_size,
-                    [&](auto J) { *get<0>(J) = static_cast<uint64_t>(noise) * plain_modulus + (flag & get<1>(J).value()); });
+                    iter(StrideIter<uint64_t *>(&I, coeff_count), coeff_modulus), coeff_modulus_size, [&](auto J) {
+                        *get<0>(J) = static_cast<uint64_t>(noise) * plain_modulus + (flag & get<1>(J).value());
+                    });
             });
         }
 
@@ -160,8 +161,9 @@ namespace seal
                 int32_t noise = cbd();
                 uint64_t flag = static_cast<uint64_t>(-static_cast<int64_t>(noise < 0));
                 SEAL_ITERATE(
-                    iter(StrideIter<uint64_t *>(&I, coeff_count), coeff_modulus), coeff_modulus_size,
-                    [&](auto J) { *get<0>(J) = static_cast<uint64_t>(noise) * plain_modulus + (flag & get<1>(J).value()); });
+                    iter(StrideIter<uint64_t *>(&I, coeff_count), coeff_modulus), coeff_modulus_size, [&](auto J) {
+                        *get<0>(J) = static_cast<uint64_t>(noise) * plain_modulus + (flag & get<1>(J).value());
+                    });
             });
         }
 
@@ -312,36 +314,38 @@ namespace seal
             for (size_t j = 0; j < encrypted_size; j++)
             {
                 // In BGV, p * e is used
-                if(type == scheme_type::bgv)
+                if (type == scheme_type::bgv)
                 {
-                    // The minimal bit size of coefficient
-                    int min_bit_size = 60;
-                    std::for_each(coeff_modulus.begin(), coeff_modulus.end(), [&min_bit_size](Modulus coeff){
-                        if(coeff.bit_count() < min_bit_size){
-                            min_bit_size = coeff.bit_count();
-                        }
-                    });
-                    // e * p may exceed the limit of modulus, +5 as noise_max_deviation ~ 19.2 
-                    if(plain_modulus.bit_count() + 5 > min_bit_size){
-                        SEAL_NOISE_SAMPLER(prng, parms, u.get());
-                        for (size_t i = 0; i < coeff_modulus_size; i++)
+                    const int min_bit_size =
+                        std::min_element(coeff_modulus.cbegin(), coeff_modulus.cend(), [](auto a, auto b) {
+                            return a.bit_count() < b.bit_count();
+                        })->bit_count();
+
+                    // e * p may exceed the limit of modulus, +5 as noise_max_deviation ~ 19.2
+                    if (plain_modulus.bit_count() + 5 < min_bit_size)
+                    {
+                        // Optimzation: we sample scaled Gaussian noise with SEAL_NOISE_SAMPLER_T
+                        SEAL_NOISE_SAMPLER_T(prng, parms, u.get());
+                        RNSIter gaussian_iter(u.get(), coeff_count);
+                        if (is_ntt_form)
                         {
-                            multiply_poly_scalar_coeffmod(u.get() + i * coeff_count, coeff_count,
-                                plain_modulus.value(), coeff_modulus[i], u.get() + i * coeff_count);
-    
-                            add_poly_coeffmod(u.get() + i * coeff_count, destination.data(j) + i * coeff_count, coeff_count, coeff_modulus[i],
-                                    destination.data(j) + i * coeff_count);
+                            ntt_negacyclic_harvey(gaussian_iter, coeff_modulus_size, ntt_tables);
                         }
-                    // otherwise we can optimize the sample process of e * p
+                        RNSIter dst_iter(destination.data(j), coeff_count);
+                        add_poly_coeffmod(gaussian_iter, dst_iter, coeff_modulus_size, coeff_modulus, dst_iter);
                     }
                     else
                     {
-                        SEAL_NOISE_SAMPLER_T(prng, parms, u.get());
-                        for (size_t i = 0; i < coeff_modulus_size; i++)
+                        SEAL_NOISE_SAMPLER(prng, parms, u.get());
+                        RNSIter gaussian_iter(u.get(), coeff_count);
+                        if (is_ntt_form)
                         {
-                            add_poly_coeffmod(u.get() + i * coeff_count, destination.data(j) + i * coeff_count, coeff_count, coeff_modulus[i],
-                                    destination.data(j) + i * coeff_count);
+                            ntt_negacyclic_harvey_lazy(gaussian_iter, coeff_modulus_size, ntt_tables);
                         }
+                        RNSIter dst_iter(destination.data(j), coeff_count);
+                        multiply_poly_scalar_coeffmod(
+                            gaussian_iter, coeff_modulus_size, plain_modulus.value(), coeff_modulus, gaussian_iter);
+                        add_poly_coeffmod(gaussian_iter, dst_iter, coeff_modulus_size, coeff_modulus, dst_iter);
                     }
                 }
                 else
@@ -355,8 +359,8 @@ namespace seal
                             ntt_negacyclic_harvey(u.get() + i * coeff_count, ntt_tables[i]);
                         }
                         add_poly_coeffmod(
-                            u.get() + i * coeff_count, destination.data(j) + i * coeff_count, coeff_count, coeff_modulus[i],
-                            destination.data(j) + i * coeff_count);
+                            u.get() + i * coeff_count, destination.data(j) + i * coeff_count, coeff_count,
+                            coeff_modulus[i], destination.data(j) + i * coeff_count);
                     }
                 }
             }
@@ -456,22 +460,23 @@ namespace seal
                     inverse_ntt_negacyclic_harvey(c0 + i * coeff_count, ntt_tables[i]);
                 }
                 // bgv: (c0,c1) = ((as+pe), -a)
-                if(type == scheme_type::bgv)
+                if (type == scheme_type::bgv)
                 {
                     // noise = pe
                     multiply_poly_scalar_coeffmod(
-                        noise.get() + i * coeff_count, coeff_count,
-                        plain_modulus.value(), coeff_modulus[i], noise.get() + i * coeff_count);
+                        noise.get() + i * coeff_count, coeff_count, plain_modulus.value(), coeff_modulus[i],
+                        noise.get() + i * coeff_count);
                     // c0 = as + pe
                     add_poly_coeffmod(
                         noise.get() + i * coeff_count, c0 + i * coeff_count, coeff_count, coeff_modulus[i],
                         c0 + i * coeff_count);
-                    // (as + pe, a) -> (as + pe, -a), 
+                    // (as + pe, a) -> (as + pe, -a),
                     negate_poly_coeffmod(c1 + i * coeff_count, coeff_count, coeff_modulus[i], c1 + i * coeff_count);
                 }
                 else
                 {
-                    add_poly_coeffmod(noise.get() + i * coeff_count, c0 + i * coeff_count, coeff_count, coeff_modulus[i],
+                    add_poly_coeffmod(
+                        noise.get() + i * coeff_count, c0 + i * coeff_count, coeff_count, coeff_modulus[i],
                         c0 + i * coeff_count);
                     negate_poly_coeffmod(c0 + i * coeff_count, coeff_count, coeff_modulus[i], c0 + i * coeff_count);
                 }
