@@ -554,8 +554,9 @@ namespace seal
         encrypted1.scale() = new_scale;
     }
 
-    void Evaluator::bgv_multiply(Ciphertext &encrypted1, Ciphertext &encrypted2, MemoryPoolHandle pool){
-        if(encrypted1.is_ntt_form() || encrypted2.is_ntt_form())
+    void Evaluator::bgv_multiply(Ciphertext &encrypted1, Ciphertext &encrypted2, MemoryPoolHandle pool)
+    {
+        if (encrypted1.is_ntt_form() || encrypted2.is_ntt_form())
         {
             throw invalid_argument("encryped1 or encrypted2 must be not in NTT form");
         }
@@ -576,12 +577,13 @@ namespace seal
         // Set up iterator for the base
         auto coeff_modulus = iter(parms.coeff_modulus());
 
-         // Prepare destination
+        // Prepare destination
         encrypted1.resize(context_, context_data.parms_id(), dest_size);
 
-        //convert c0 and c1 to ntt
+        // convert c0 and c1 to ntt
         ntt_negacyclic_harvey(encrypted1, encrypted1_size, ntt_table);
-        if(&encrypted1 != &encrypted2){
+        if (&encrypted1 != &encrypted2)
+        {
             ntt_negacyclic_harvey(encrypted2, encrypted2_size, ntt_table);
         }
 
@@ -624,9 +626,10 @@ namespace seal
         // Set the final result
         set_poly_array(temp, dest_size, coeff_count, coeff_modulus_size, encrypted1.data());
 
-        //Convert the result (and the original ciphertext) back to non-NTT
+        // Convert the result (and the original ciphertext) back to non-NTT
         inverse_ntt_negacyclic_harvey(encrypted1, encrypted1.size(), ntt_table);
-        if(&encrypted1 != &encrypted2){
+        if (&encrypted1 != &encrypted2)
+        {
             inverse_ntt_negacyclic_harvey(encrypted2, encrypted2.size(), ntt_table);
         }
     }
@@ -892,7 +895,7 @@ namespace seal
             throw invalid_argument("encrypted cannot be in NTT form");
         }
 
-         // Extract encryption parameters.
+        // Extract encryption parameters.
         auto &context_data = *context_.get_context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
         size_t coeff_count = parms.poly_modulus_degree();
@@ -928,7 +931,7 @@ namespace seal
 
         // Set up iterators for input ciphertext
         auto encrypted_iter = iter(encrypted);
-    
+
         // Allocate temporary space for the result
         SEAL_ALLOCATE_ZERO_GET_POLY_ITER(temp, dest_size, coeff_count, coeff_modulus_size, pool);
 
@@ -1055,8 +1058,8 @@ namespace seal
             });
             break;
 
-        case scheme_type::bgv:   
-            SEAL_ITERATE(iter(encrypted_copy), encrypted_size, [&](auto I){
+        case scheme_type::bgv:
+            SEAL_ITERATE(iter(encrypted_copy), encrypted_size, [&](auto I) {
                 rns_tool->mod_t_and_divide_q_last_inplace(I, pool);
             });
             break;
@@ -2399,9 +2402,10 @@ namespace seal
         // Perform modulus switching with scaling
         PolyIter t_poly_prod_iter(t_poly_prod.get(), coeff_count, rns_modulus_size);
         SEAL_ITERATE(iter(encrypted, t_poly_prod_iter), key_component_count, [&](auto I) {
-            if(scheme == scheme_type::bgv)
+            if (scheme == scheme_type::bgv)
             {
-                Modulus plain_modulus = parms.plain_modulus();
+                const Modulus &plain_modulus = parms.plain_modulus();
+                // qk is the special prime
                 uint64_t qk = key_modulus[key_modulus_size - 1].value();
                 uint64_t qp = plain_modulus.value();
                 uint64_t qk_inv_qp = context_.key_context_data()->rns_tool()->q_last_mod_p();
@@ -2411,57 +2415,77 @@ namespace seal
                 inverse_ntt_negacyclic_harvey(t_last, key_ntt_tables[key_modulus_size - 1]);
 
                 // if q_k mod q_p == 1, we can use k = -c mod p
-                if(qk_inv_qp == 1)
+                if (qk_inv_qp == 1)
                 {
-                    SEAL_ITERATE(t_last, coeff_count, [&](auto &J){
+                    // ct mod qi + qk * (t - ct mod qi mod t)
+                    SEAL_ITERATE(t_last, coeff_count, [&](auto &J) {
                         uint64_t c = barrett_reduce_64(J, plain_modulus);
                         J += qk * (qp - c);
                     });
 
-                    SEAL_ITERATE(iter(I, key_modulus, modswitch_factors, key_ntt_tables), decomp_modulus_size, [&](auto J) {
-  
-                        inverse_ntt_negacyclic_harvey(get<0, 1>(J), get<3>(J));
-                    
-                        SEAL_ITERATE(iter(get<0, 1>(J), t_last), coeff_count, [&](auto K) {
-                            uint64_t curr = barrett_reduce_64(get<1>(K), get<1>(J)) ;
-                            get<0>(K) += get<1>(J).value() - curr;
+                    SEAL_ITERATE(
+                        iter(I, key_modulus, modswitch_factors, key_ntt_tables), decomp_modulus_size, [&](auto J) {
+                            auto barrett_reduce_64_lazy = [](uint64_t input, const Modulus &modulus) {
+                                // Reduces input using base 2^64 Barrett reduction
+                                // floor(2^64 / mod) == floor( floor(2^128 / mod) )
+                                unsigned long long tmp[2];
+                                const uint64_t *const_ratio = modulus.const_ratio().data();
+                                multiply_uint64_hw64(input, const_ratio[1], tmp + 1);
+
+                                // Barrett subtraction
+                                return static_cast<uint64_t>(input - tmp[1] * modulus.value());
+                            };
+
+                            const Modulus &modulus = get<1>(J);
+                            /// result at [0, 2qi)
+                            inverse_ntt_negacyclic_harvey_lazy(get<0, 1>(J), get<3>(J));
+
+                            const uint64_t Lqi = modulus.value() << 2;
+                            std::transform(
+                                get<0, 1>(J), get<0, 1>(J) + coeff_count, t_last, get<0, 1>(J),
+                                [&](uint64_t u, uint64_t v) {
+                                    /// lazy substraction, barrett_reduce_64_lazy result at [0, 2qi)
+                                    /// so that we use Lqi = 4*qi here
+                                    return u + Lqi - barrett_reduce_64_lazy(v, modulus);
+                                });
+
+                            multiply_poly_scalar_coeffmod(
+                                get<0, 1>(J), coeff_count, get<2>(J), get<1>(J), get<0, 1>(J));
+                            add_poly_coeffmod(get<0, 1>(J), get<0, 0>(J), coeff_count, get<1>(J), get<0, 0>(J));
                         });
-                    
-                        multiply_poly_scalar_coeffmod(get<0, 1>(J), coeff_count, get<2>(J), get<1>(J), get<0, 1>(J));
-                        add_poly_coeffmod(get<0, 1>(J), get<0, 0>(J), coeff_count, get<1>(J), get<0, 0>(J));
-                    });
-                // when q_k mod q_p != 1, k = -c * q_k mod p
+                    // when q_k mod q_p != 1, k = -c * q_k mod p
                 }
                 else
                 {
-                    SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(k, coeff_count, pool);                
+                    SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(k, coeff_count, pool);
                     modulo_poly_coeffs(t_last, coeff_count, plain_modulus, k);
                     negate_poly_coeffmod(k, coeff_count, plain_modulus, k);
                     multiply_poly_scalar_coeffmod(k, coeff_count, qk_inv_qp, plain_modulus, k);
 
                     SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(delta, coeff_count, pool);
                     SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(c_mod_qi, coeff_count, pool);
-                    SEAL_ITERATE(iter(I, key_modulus, modswitch_factors, key_ntt_tables), decomp_modulus_size, [&](auto J) {
+                    SEAL_ITERATE(
+                        iter(I, key_modulus, modswitch_factors, key_ntt_tables), decomp_modulus_size, [&](auto J) {
+                            inverse_ntt_negacyclic_harvey(get<0, 1>(J), get<3>(J));
+                            // delta = k mod q_i
+                            modulo_poly_coeffs(k, coeff_count, get<1>(J), delta);
+                            // delta = k * q_k mod q_i
+                            multiply_poly_scalar_coeffmod(delta, coeff_count, qk, get<1>(J), delta);
 
-                        inverse_ntt_negacyclic_harvey_lazy(get<0, 1>(J), get<3>(J));
-                    
-                        //delta = k mod q_i
-                        modulo_poly_coeffs(k, coeff_count, get<1>(J), delta);
-                        //delta = k * q_k mod q_i
-                        multiply_poly_scalar_coeffmod(delta, coeff_count, qk, get<1>(J), delta);
-                        //The following 3 steps could be optimized
-                        //c mod q_i
-                        modulo_poly_coeffs(t_last, coeff_count, get<1>(J), c_mod_qi);
-                        //delta = c + k * q_k mod q_i
-                        add_poly_coeffmod(delta, c_mod_qi, coeff_count, get<1>(J), delta);
-                        //sometimes we need to modulo c_{i} with q_{i} since the inverse_ntt is lazy.
-                        modulo_poly_coeffs(get<0, 1>(J), coeff_count, get<1>(J), get<0, 1>(J));
-                        //c_{i} = c_{i} - delta mod q_i
-                        sub_poly_coeffmod(get<0, 1>(J), delta, coeff_count, get<1>(J), get<0, 1>(J));
+                            // c mod q_i
+                            modulo_poly_coeffs(t_last, coeff_count, get<1>(J), c_mod_qi);
+                            // delta = c + k * q_k mod q_i
+                            // c_{i} = c_{i} - delta mod q_i
+                            const uint64_t Lqi = get<1>(J).value() * 2;
+                            SEAL_ITERATE(iter(delta, c_mod_qi, get<0, 1>(J)), coeff_count, [Lqi](auto K) {
+                                get<2>(K) = get<2>(K) + Lqi - (get<0>(K) + get<1>(K));
+                            });
 
-                        multiply_poly_scalar_coeffmod(get<0, 1>(J), coeff_count, get<2>(J), get<1>(J), get<0, 1>(J));
-                        add_poly_coeffmod(get<0, 1>(J), get<0, 0>(J), coeff_count, get<1>(J), get<0, 0>(J));
-                    });
+                            multiply_poly_scalar_coeffmod(
+                                get<0, 1>(J), coeff_count, get<2>(J), get<1>(J), get<0, 1>(J));
+
+                            add_poly_coeffmod(get<0, 1>(J), get<0, 0>(J), coeff_count, get<1>(J), get<0, 0>(J));
+                        });
                 }
             }
             else
@@ -2517,7 +2541,8 @@ namespace seal
                     }
 
                     // ((ct mod qi) - (ct mod qk)) mod qi
-                    SEAL_ITERATE(iter(get<0, 1>(J), t_ntt), coeff_count, [&](auto K) { get<0>(K) += qi_lazy - get<1>(K); });
+                    SEAL_ITERATE(
+                        iter(get<0, 1>(J), t_ntt), coeff_count, [&](auto K) { get<0>(K) += qi_lazy - get<1>(K); });
 
                     // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
                     multiply_poly_scalar_coeffmod(get<0, 1>(J), coeff_count, get<3>(J), get<1>(J), get<0, 1>(J));
