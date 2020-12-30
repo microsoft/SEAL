@@ -58,7 +58,7 @@ namespace Microsoft.Research.SEAL
     /// </para>
     /// <para>
     /// NTT form
-    /// When using the BFV scheme (SchemeType.BFV), all plaintexts and ciphertexts should remain by default in the usual
+    /// When using the BFV or BGV scheme (SchemeType.BFV or SchemeType.BGV), all plaintexts and ciphertexts should remain by default in the usual
     /// coefficient representation, i.e., not in NTT form. When using the CKKS scheme (SchemeType.CKKS), all plaintexts
     /// and ciphertexts should remain by default in NTT form. We call these scheme-specific NTT states the "default NTT
     /// form". Some functions, such as add, work even if the inputs are not in the default state, but others, such as
@@ -740,7 +740,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="destination">The ciphertext to overwrite with the multiplication result</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if encrypteds, relinKeys, or destination is null</exception>
-        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV or SchemeType.BGV</exception>
         /// <exception cref="ArgumentException">if encrypteds is empty</exception>
         /// <exception cref="ArgumentException">if encrypteds or relinKeys are not valid for the encryption
         /// parameters</exception>
@@ -784,7 +784,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="relinKeys">The relinearization keys</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if encrypted or relinKeys is null</exception>
-        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV or SchemeType.BGV</exception>
         /// <exception cref="ArgumentException">if encrypted or relinKeys is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
@@ -816,7 +816,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="relinKeys">The relinearization keys</param>
         /// <param name="destination">The ciphertext to overwrite with the power</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV or SchemeType.BGV</exception>
         /// <exception cref="ArgumentException">if encrypted or relinKeys is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
@@ -1148,7 +1148,7 @@ namespace Microsoft.Research.SEAL
         /// The desired Galois automorphism is given as a Galois element, and must be an odd integer in the interval
         /// [1, M-1], where M = 2*N, and N = PolyModulusDegree. Used with batching, a Galois element 3^i % M corresponds
         /// to a cyclic row rotation i steps to the left, and a Galois element 3^(N/2-i) % M corresponds to a cyclic row
-        /// rotation i steps to the right. The Galois element M-1 corresponds to a column rotation (row swap) in BFV,
+        /// rotation i steps to the right. The Galois element M-1 corresponds to a column rotation (row swap) in BFV or BGV,
         /// and complex conjugation in CKKS. In the polynomial view (not batching), a Galois automorphism by a Galois
         /// element p changes Enc(plain(x)) to Enc(plain(x^p)).
         /// </para>
@@ -1188,7 +1188,7 @@ namespace Microsoft.Research.SEAL
         /// The desired Galois automorphism is given as a Galois element, and must be an odd integer in the interval
         /// [1, M-1], where M = 2*N, and N = PolyModulusDegree. Used with batching, a Galois element 3^i % M corresponds
         /// to a cyclic row rotation i steps to the left, and a Galois element 3^(N/2-i) % M corresponds to a cyclic row
-        /// rotation i steps to the right. The Galois element M-1 corresponds to a column rotation (row swap) in BFV,
+        /// rotation i steps to the right. The Galois element M-1 corresponds to a column rotation (row swap) in BFV or BGV,
         /// and complex conjugation in CKKS. In the polynomial view (not batching), a Galois automorphism by a Galois
         /// element p changes Enc(plain(x)) to Enc(plain(x^p)).
         /// </para>
@@ -1232,7 +1232,7 @@ namespace Microsoft.Research.SEAL
         /// Rotates plaintext matrix rows cyclically.
         /// </summary>
         /// <remarks>
-        /// When batching is used with the BFV scheme, this function rotates the encrypted plaintext matrix rows
+        /// When batching is used with the BFV or BGV scheme, this function rotates the encrypted plaintext matrix rows
         /// cyclically to the left (steps &gt; 0) or to the right (steps &lt; 0). Since the size of the batched matrix
         /// is 2-by-(N/2), where N is the degree of the polynomial modulus, the number of steps to rotate must have
         /// absolute value at most N/2-1. Dynamic memory allocations in the process are allocated from the memory pool
@@ -1244,7 +1244,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if encrypted or galoisKeys is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
-        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV or SchemeType.BGV</exception>
         /// <exception cref="ArgumentException">if encrypted or galoisKeys is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if galoisKeys do not correspond to the top level parameters in the
@@ -1266,7 +1266,7 @@ namespace Microsoft.Research.SEAL
         /// Rotates plaintext matrix rows cyclically.
         /// </summary>
         /// <remarks>
-        /// When batching is used with the BFV scheme, this function rotates the encrypted plaintext matrix rows
+        /// When batching is used with the BFV or BGV scheme, this function rotates the encrypted plaintext matrix rows
         /// cyclically to the left (steps &gt; 0) or to the right (steps &lt; 0) and writes the result to the
         /// destination parameter. Since the size of the batched matrix is 2-by-(N/2), where N is the degree of the
         /// polynomial modulus, the number of steps to rotate must have absolute value at most N/2-1. Dynamic memory
@@ -1279,7 +1279,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if encrypted, galoisKeys, or destination is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
-        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV or SchemeType.BGV</exception>
         /// <exception cref="ArgumentException">if encrypted or galoisKeys is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if galoisKeys do not correspond to the top level parameters in the
@@ -1313,7 +1313,7 @@ namespace Microsoft.Research.SEAL
         /// Rotates plaintext matrix columns cyclically.
         /// </summary>
         /// <remarks>
-        /// When batching is used with the BFV scheme, this function rotates the encrypted plaintext matrix columns
+        /// When batching is used with the BFV or BGV scheme, this function rotates the encrypted plaintext matrix columns
         /// cyclically. Since the size of the batched matrix is 2-by-(N/2), where N is the degree of the polynomial
         /// modulus, this means simply swapping the two rows. Dynamic memory allocations in the process are allocated
         /// from the memory pool pointed to by the given MemoryPoolHandle.
@@ -1323,7 +1323,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if encrypted or galoisKeys is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
-        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV or SchemeType.BGV</exception>
         /// <exception cref="ArgumentException">if encrypted or galoisKeys is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if galoisKeys do not correspond to the top level parameters in the
@@ -1343,7 +1343,7 @@ namespace Microsoft.Research.SEAL
         /// Rotates plaintext matrix columns cyclically.
         /// </summary>
         /// <remarks>
-        /// When batching is used with the BFV scheme, this function rotates the encrypted plaintext matrix columns
+        /// When batching is used with the BFV or BGV scheme, this function rotates the encrypted plaintext matrix columns
         /// cyclically, and writes the result to the destination parameter. Since the size of the batched matrix is
         /// 2-by-(N/2), where N is the degree of the polynomial modulus, this means simply swapping the two rows.
         /// Dynamic memory allocations in the process are allocated from the memory pool pointed to by the given
@@ -1355,7 +1355,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if encrypted, galoisKeys, or destination is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
-        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV or SchemeType.BGV</exception>
         /// <exception cref="ArgumentException">if encrypted or galoisKeys is not valid for the encryption
         /// parameters</exception>
         /// <exception cref="ArgumentException">if galoisKeys do not correspond to the top level parameters in the

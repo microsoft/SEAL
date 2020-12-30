@@ -129,7 +129,7 @@ namespace Microsoft.Research.SEAL
         /// </para>
         /// <para>
         /// The encryption parameters for the resulting ciphertext correspond to:
-        /// 1) in BFV, the highest (data) level in the modulus switching chain,
+        /// 1) in BFV or BGV, the highest (data) level in the modulus switching chain,
         /// 2) in CKKS, the encryption parameters of the plaintext.
         /// Dynamic memory allocations in the process are allocated from the memory
         /// pool pointed to by the given MemoryPoolHandle.
@@ -173,7 +173,7 @@ namespace Microsoft.Research.SEAL
         /// </para>
         /// <para>
         /// The encryption parameters for the resulting ciphertext correspond to:
-        /// 1) in BFV, the highest (data) level in the modulus switching chain,
+        /// 1) in BFV or BGV, the highest (data) level in the modulus switching chain,
         /// 2) in CKKS, the encryption parameters of the plaintext.
         /// Dynamic memory allocations in the process are allocated from the memory
         /// pool pointed to by the given MemoryPoolHandle.
@@ -337,7 +337,7 @@ namespace Microsoft.Research.SEAL
         /// </para>
         /// <para>
         /// The encryption parameters for the resulting ciphertext correspond to:
-        /// 1) in BFV, the highest (data) level in the modulus switching chain,
+        /// 1) in BFV or BGV, the highest (data) level in the modulus switching chain,
         /// 2) in CKKS, the encryption parameters of the plaintext.
         /// Dynamic memory allocations in the process are allocated from the memory
         /// pool pointed to by the given MemoryPoolHandle.
@@ -385,7 +385,7 @@ namespace Microsoft.Research.SEAL
         /// </para>
         /// <para>
         /// The encryption parameters for the resulting ciphertext correspond to:
-        /// 1) in BFV, the highest (data) level in the modulus switching chain,
+        /// 1) in BFV or BGV, the highest (data) level in the modulus switching chain,
         /// 2) in CKKS, the encryption parameters of the plaintext.
         /// Dynamic memory allocations in the process are allocated from the memory
         /// pool pointed to by the given MemoryPoolHandle.

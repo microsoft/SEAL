@@ -90,24 +90,47 @@ namespace SEALNetTest
         [TestMethod]
         public void ExceptionsTest()
         {
-            SEALContext context = GlobalContext.BFVContext;
-            Ciphertext cipher = new Ciphertext();
-
-            using (MemoryStream mem = new MemoryStream())
             {
-                KeyGenerator keygen = new KeyGenerator(context);
-                keygen.CreatePublicKey(out PublicKey publicKey);
-                Encryptor encryptor = new Encryptor(context, publicKey);
+                SEALContext context = GlobalContext.BFVContext;
+                Ciphertext cipher = new Ciphertext();
 
-                Plaintext plain = new Plaintext("2x^3 + 4x^2 + 5x^1 + 6");
-                encryptor.Encrypt(plain, cipher);
-                cipher.Save(mem);
-                mem.Seek(offset: 8, loc: SeekOrigin.Begin);
-                BinaryWriter writer = new BinaryWriter(mem, Encoding.UTF8, true);
-                writer.Write((ulong)0x80000000);
+                using (MemoryStream mem = new MemoryStream())
+                {
+                    KeyGenerator keygen = new KeyGenerator(context);
+                    keygen.CreatePublicKey(out PublicKey publicKey);
+                    Encryptor encryptor = new Encryptor(context, publicKey);
 
-                mem.Seek(offset: 0, loc: SeekOrigin.Begin);
-                Utilities.AssertThrows<InvalidOperationException>(() => cipher.Load(context, mem));
+                    Plaintext plain = new Plaintext("2x^3 + 4x^2 + 5x^1 + 6");
+                    encryptor.Encrypt(plain, cipher);
+                    cipher.Save(mem);
+                    mem.Seek(offset: 8, loc: SeekOrigin.Begin);
+                    BinaryWriter writer = new BinaryWriter(mem, Encoding.UTF8, true);
+                    writer.Write((ulong)0x80000000);
+
+                    mem.Seek(offset: 0, loc: SeekOrigin.Begin);
+                    Utilities.AssertThrows<InvalidOperationException>(() => cipher.Load(context, mem));
+                }
+            }
+            {
+                SEALContext context = GlobalContext.BGVContext;
+                Ciphertext cipher = new Ciphertext();
+
+                using (MemoryStream mem = new MemoryStream())
+                {
+                    KeyGenerator keygen = new KeyGenerator(context);
+                    keygen.CreatePublicKey(out PublicKey publicKey);
+                    Encryptor encryptor = new Encryptor(context, publicKey);
+
+                    Plaintext plain = new Plaintext("2x^3 + 4x^2 + 5x^1 + 6");
+                    encryptor.Encrypt(plain, cipher);
+                    cipher.Save(mem);
+                    mem.Seek(offset: 8, loc: SeekOrigin.Begin);
+                    BinaryWriter writer = new BinaryWriter(mem, Encoding.UTF8, true);
+                    writer.Write((ulong)0x80000000);
+
+                    mem.Seek(offset: 0, loc: SeekOrigin.Begin);
+                    Utilities.AssertThrows<InvalidOperationException>(() => cipher.Load(context, mem));
+                }
             }
         }
     }

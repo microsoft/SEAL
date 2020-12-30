@@ -470,6 +470,52 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Returns a default coefficient modulus for the BGV scheme that guarantees
+        /// a given security level when using a given PolyModulusDegree, according
+        /// to the HomomorphicEncryption.org security standard.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// Returns a default coefficient modulus for the BGV scheme that guarantees
+        /// a given security level when using a given PolyModulusDegree, according
+        /// to the HomomorphicEncryption.org security standard. Note that all security
+        /// guarantees are lost if the output is used with encryption parameters with
+        /// a mismatching value for the PolyModulusDegree. Currently, we just use the 
+        /// parameters of BFV.
+        /// </para>
+        /// <para>
+        /// The coefficient modulus returned by this function will not perform well
+        /// if used with the CKKS scheme.
+        /// </para>
+        /// </remarks>
+        /// <param name="polyModulusDegree">The value of the PolyModulusDegree
+        /// encryption parameter</param>
+        /// <param name="secLevel">The desired standard security level</param>
+        /// <exception cref="ArgumentException">if polyModulusDegree is not
+        /// a power-of-two or is too large</exception>
+        /// <exception cref="ArgumentException">if secLevel is SecLevelType.None</exception>
+        static public IEnumerable<Modulus> BGVDefault(
+            ulong polyModulusDegree, SecLevelType secLevel = SecLevelType.TC128)
+        {
+            List<Modulus> result = null;
+
+            ulong length = 0;
+            NativeMethods.CoeffModulus_BFVDefault(polyModulusDegree, (int)secLevel, ref length, null);
+
+            IntPtr[] coeffArray = new IntPtr[length];
+            NativeMethods.CoeffModulus_BFVDefault(polyModulusDegree, (int)secLevel, ref length, coeffArray);
+
+            result = new List<Modulus>(checked((int)length));
+            foreach (IntPtr sm in coeffArray)
+            {
+                result.Add(new Modulus(sm));
+            }
+
+            return result;
+        }
+
+
+        /// <summary>
         /// Returns a custom coefficient modulus suitable for use with the specified
         /// PolyModulusDegree.
         /// </summary>

@@ -28,7 +28,14 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Cheon-Kim-Kim-Song scheme
         /// </summary>
-        CKKS = 0x2
+        CKKS = 0x2,
+
+        /// <summary>
+        /// Brakerski-Gentry-Vaikuntanathan
+        /// </summary>
+        BGV = 0x3
+
+
     }
 
     /// <summary>
@@ -223,7 +230,7 @@ namespace Microsoft.Research.SEAL
         ///     of a particular form.
         /// </remarks>
         /// <exception cref="ArgumentNullException">if the value being set is null</exception>
-        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV or SchemeType.BGV</exception>
         public Modulus PlainModulus
         {
             get

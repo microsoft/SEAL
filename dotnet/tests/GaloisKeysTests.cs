@@ -25,64 +25,128 @@ namespace SEALNetTest
         [TestMethod]
         public void CreateNonEmptyTest()
         {
-            SEALContext context = GlobalContext.BFVContext;
-            KeyGenerator keygen = new KeyGenerator(context);
-            keygen.CreateGaloisKeys(out GaloisKeys keys);
+            {
+                SEALContext context = GlobalContext.BFVContext;
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreateGaloisKeys(out GaloisKeys keys);
 
-            Assert.IsNotNull(keys);
-            Assert.AreEqual(24ul, keys.Size);
+                Assert.IsNotNull(keys);
+                Assert.AreEqual(24ul, keys.Size);
 
-            GaloisKeys copy = new GaloisKeys(keys);
+                GaloisKeys copy = new GaloisKeys(keys);
 
-            Assert.IsNotNull(copy);
-            Assert.AreEqual(24ul, copy.Size);
+                Assert.IsNotNull(copy);
+                Assert.AreEqual(24ul, copy.Size);
+            }
+            {
+                SEALContext context = GlobalContext.BGVContext;
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreateGaloisKeys(out GaloisKeys keys);
+
+                Assert.IsNotNull(keys);
+                Assert.AreEqual(24ul, keys.Size);
+
+                GaloisKeys copy = new GaloisKeys(keys);
+
+                Assert.IsNotNull(copy);
+                Assert.AreEqual(24ul, copy.Size);
+            }
         }
 
         [TestMethod]
         public void SaveLoadTest()
         {
-            SEALContext context = GlobalContext.BFVContext;
-            KeyGenerator keygen = new KeyGenerator(context);
-            keygen.CreateGaloisKeys(out GaloisKeys keys);
-            GaloisKeys other = new GaloisKeys();
-
-            Assert.IsNotNull(keys);
-            Assert.AreEqual(24ul, keys.Size);
-
-            using (MemoryStream ms = new MemoryStream())
             {
-                keys.Save(ms);
-                ms.Seek(offset: 0, loc: SeekOrigin.Begin);
-                other.Load(context, ms);
-            }
+                SEALContext context = GlobalContext.BFVContext;
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreateGaloisKeys(out GaloisKeys keys);
+                GaloisKeys other = new GaloisKeys();
 
-            Assert.AreEqual(24ul, other.Size);
-            Assert.IsTrue(ValCheck.IsValidFor(other, context));
+                Assert.IsNotNull(keys);
+                Assert.AreEqual(24ul, keys.Size);
 
-            List<IEnumerable<PublicKey>> keysData = new List<IEnumerable<PublicKey>>(keys.Data);
-            List<IEnumerable<PublicKey>> otherData = new List<IEnumerable<PublicKey>>(other.Data);
-
-            Assert.AreEqual(keysData.Count, otherData.Count);
-            for (int i = 0; i < keysData.Count; i++)
-            {
-                List<PublicKey> keysCiphers = new List<PublicKey>(keysData[i]);
-                List<PublicKey> otherCiphers = new List<PublicKey>(otherData[i]);
-
-                Assert.AreEqual(keysCiphers.Count, otherCiphers.Count);
-
-                for (int j = 0; j < keysCiphers.Count; j++)
+                using (MemoryStream ms = new MemoryStream())
                 {
-                    PublicKey keysCipher = keysCiphers[j];
-                    PublicKey otherCipher = otherCiphers[j];
+                    keys.Save(ms);
+                    ms.Seek(offset: 0, loc: SeekOrigin.Begin);
+                    other.Load(context, ms);
+                }
 
-                    Assert.AreEqual(keysCipher.Data.Size, otherCipher.Data.Size);
-                    Assert.AreEqual(keysCipher.Data.PolyModulusDegree, otherCipher.Data.PolyModulusDegree);
-                    Assert.AreEqual(keysCipher.Data.CoeffModulusSize, otherCipher.Data.CoeffModulusSize);
+                Assert.AreEqual(24ul, other.Size);
+                Assert.IsTrue(ValCheck.IsValidFor(other, context));
 
-                    ulong coeffCount = keysCipher.Data.Size * keysCipher.Data.PolyModulusDegree * keysCipher.Data.CoeffModulusSize;
-                    for (ulong k = 0; k < coeffCount; k++)
+                List<IEnumerable<PublicKey>> keysData = new List<IEnumerable<PublicKey>>(keys.Data);
+                List<IEnumerable<PublicKey>> otherData = new List<IEnumerable<PublicKey>>(other.Data);
+
+                Assert.AreEqual(keysData.Count, otherData.Count);
+                for (int i = 0; i < keysData.Count; i++)
+                {
+                    List<PublicKey> keysCiphers = new List<PublicKey>(keysData[i]);
+                    List<PublicKey> otherCiphers = new List<PublicKey>(otherData[i]);
+
+                    Assert.AreEqual(keysCiphers.Count, otherCiphers.Count);
+
+                    for (int j = 0; j < keysCiphers.Count; j++)
                     {
-                        Assert.AreEqual(keysCipher.Data[k], otherCipher.Data[k]);
+                        PublicKey keysCipher = keysCiphers[j];
+                        PublicKey otherCipher = otherCiphers[j];
+
+                        Assert.AreEqual(keysCipher.Data.Size, otherCipher.Data.Size);
+                        Assert.AreEqual(keysCipher.Data.PolyModulusDegree, otherCipher.Data.PolyModulusDegree);
+                        Assert.AreEqual(keysCipher.Data.CoeffModulusSize, otherCipher.Data.CoeffModulusSize);
+
+                        ulong coeffCount = keysCipher.Data.Size * keysCipher.Data.PolyModulusDegree * keysCipher.Data.CoeffModulusSize;
+                        for (ulong k = 0; k < coeffCount; k++)
+                        {
+                            Assert.AreEqual(keysCipher.Data[k], otherCipher.Data[k]);
+                        }
+                    }
+                }
+            }
+            {
+                SEALContext context = GlobalContext.BGVContext;
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreateGaloisKeys(out GaloisKeys keys);
+                GaloisKeys other = new GaloisKeys();
+
+                Assert.IsNotNull(keys);
+                Assert.AreEqual(24ul, keys.Size);
+
+                using (MemoryStream ms = new MemoryStream())
+                {
+                    keys.Save(ms);
+                    ms.Seek(offset: 0, loc: SeekOrigin.Begin);
+                    other.Load(context, ms);
+                }
+
+                Assert.AreEqual(24ul, other.Size);
+                Assert.IsTrue(ValCheck.IsValidFor(other, context));
+
+                List<IEnumerable<PublicKey>> keysData = new List<IEnumerable<PublicKey>>(keys.Data);
+                List<IEnumerable<PublicKey>> otherData = new List<IEnumerable<PublicKey>>(other.Data);
+
+                Assert.AreEqual(keysData.Count, otherData.Count);
+                for (int i = 0; i < keysData.Count; i++)
+                {
+                    List<PublicKey> keysCiphers = new List<PublicKey>(keysData[i]);
+                    List<PublicKey> otherCiphers = new List<PublicKey>(otherData[i]);
+
+                    Assert.AreEqual(keysCiphers.Count, otherCiphers.Count);
+
+                    for (int j = 0; j < keysCiphers.Count; j++)
+                    {
+                        PublicKey keysCipher = keysCiphers[j];
+                        PublicKey otherCipher = otherCiphers[j];
+
+                        Assert.AreEqual(keysCipher.Data.Size, otherCipher.Data.Size);
+                        Assert.AreEqual(keysCipher.Data.PolyModulusDegree, otherCipher.Data.PolyModulusDegree);
+                        Assert.AreEqual(keysCipher.Data.CoeffModulusSize, otherCipher.Data.CoeffModulusSize);
+
+                        ulong coeffCount = keysCipher.Data.Size * keysCipher.Data.PolyModulusDegree * keysCipher.Data.CoeffModulusSize;
+                        for (ulong k = 0; k < coeffCount; k++)
+                        {
+                            Assert.AreEqual(keysCipher.Data[k], otherCipher.Data[k]);
+                        }
                     }
                 }
             }
@@ -91,147 +155,289 @@ namespace SEALNetTest
         [TestMethod]
         public void SeededKeyTest()
         {
-            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
             {
-                PolyModulusDegree = 8,
-                PlainModulus = new Modulus(257),
-                CoeffModulus = CoeffModulus.Create(8, new int[] { 40, 40 })
-            };
-            SEALContext context = new SEALContext(parms,
-                expandModChain: false,
-                secLevel: SecLevelType.None);
-            KeyGenerator keygen = new KeyGenerator(context);
-            keygen.CreatePublicKey(out PublicKey publicKey);
+                EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
+                {
+                    PolyModulusDegree = 8,
+                    PlainModulus = new Modulus(257),
+                    CoeffModulus = CoeffModulus.Create(8, new int[] { 40, 40 })
+                };
+                SEALContext context = new SEALContext(parms,
+                    expandModChain: false,
+                    secLevel: SecLevelType.None);
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreatePublicKey(out PublicKey publicKey);
 
-            Encryptor encryptor = new Encryptor(context, publicKey);
-            Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
-            Evaluator evaluator = new Evaluator(context);
-            BatchEncoder encoder = new BatchEncoder(context);
+                Encryptor encryptor = new Encryptor(context, publicKey);
+                Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
+                Evaluator evaluator = new Evaluator(context);
+                BatchEncoder encoder = new BatchEncoder(context);
 
-            GaloisKeys galoisKeys = new GaloisKeys();
-            using (MemoryStream stream = new MemoryStream())
-            {
-                keygen.CreateGaloisKeys().Save(stream);
-                stream.Seek(0, SeekOrigin.Begin);
-                galoisKeys.Load(context, stream);
+                GaloisKeys galoisKeys = new GaloisKeys();
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    keygen.CreateGaloisKeys().Save(stream);
+                    stream.Seek(0, SeekOrigin.Begin);
+                    galoisKeys.Load(context, stream);
+                }
+
+                Plaintext plain = new Plaintext();
+                List<ulong> vec = new List<ulong>
+                {
+                    1, 2, 3, 4,
+                    5, 6, 7, 8
+                };
+
+                encoder.Encode(vec, plain);
+
+                Ciphertext encrypted = new Ciphertext();
+                Ciphertext encdest = new Ciphertext();
+                Plaintext plaindest = new Plaintext();
+
+                encryptor.Encrypt(plain, encrypted);
+                evaluator.RotateColumns(encrypted, galoisKeys, encdest);
+                decryptor.Decrypt(encdest, plaindest);
+                encoder.Decode(plaindest, vec);
+
+                Assert.IsTrue(AreCollectionsEqual(vec, new List<ulong>
+                {
+                    5, 6, 7, 8,
+                    1, 2, 3, 4
+                }));
+
+                evaluator.RotateRows(encdest, -1, galoisKeys, encrypted);
+                decryptor.Decrypt(encrypted, plaindest);
+                encoder.Decode(plaindest, vec);
+
+                Assert.IsTrue(AreCollectionsEqual(vec, new List<ulong>
+                {
+                    8, 5, 6, 7,
+                    4, 1, 2, 3
+                }));
+
+                evaluator.RotateRowsInplace(encrypted, 2, galoisKeys);
+                decryptor.Decrypt(encrypted, plaindest);
+                encoder.Decode(plaindest, vec);
+
+                Assert.IsTrue(AreCollectionsEqual(vec, new List<ulong>
+                {
+                    6, 7, 8, 5,
+                    2, 3, 4, 1
+                }));
+
+                evaluator.RotateColumnsInplace(encrypted, galoisKeys);
+                decryptor.Decrypt(encrypted, plaindest);
+                encoder.Decode(plaindest, vec);
+
+                Assert.IsTrue(AreCollectionsEqual(vec, new List<ulong>
+                {
+                    2, 3, 4, 1,
+                    6, 7, 8, 5
+                }));
             }
-
-            Plaintext plain = new Plaintext();
-            List<ulong> vec = new List<ulong>
             {
-                1, 2, 3, 4,
-                5, 6, 7, 8
-            };
+                EncryptionParameters parms = new EncryptionParameters(SchemeType.BGV)
+                {
+                    PolyModulusDegree = 8,
+                    PlainModulus = new Modulus(257),
+                    CoeffModulus = CoeffModulus.Create(8, new int[] { 40, 40 })
+                };
+                SEALContext context = new SEALContext(parms,
+                    expandModChain: false,
+                    secLevel: SecLevelType.None);
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreatePublicKey(out PublicKey publicKey);
 
-            encoder.Encode(vec, plain);
+                Encryptor encryptor = new Encryptor(context, publicKey);
+                Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
+                Evaluator evaluator = new Evaluator(context);
+                BatchEncoder encoder = new BatchEncoder(context);
 
-            Ciphertext encrypted = new Ciphertext();
-            Ciphertext encdest = new Ciphertext();
-            Plaintext plaindest = new Plaintext();
+                GaloisKeys galoisKeys = new GaloisKeys();
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    keygen.CreateGaloisKeys().Save(stream);
+                    stream.Seek(0, SeekOrigin.Begin);
+                    galoisKeys.Load(context, stream);
+                }
 
-            encryptor.Encrypt(plain, encrypted);
-            evaluator.RotateColumns(encrypted, galoisKeys, encdest);
-            decryptor.Decrypt(encdest, plaindest);
-            encoder.Decode(plaindest, vec);
+                Plaintext plain = new Plaintext();
+                List<ulong> vec = new List<ulong>
+                {
+                    1, 2, 3, 4,
+                    5, 6, 7, 8
+                };
 
-            Assert.IsTrue(AreCollectionsEqual(vec, new List<ulong>
-            {
-                5, 6, 7, 8,
-                1, 2, 3, 4
-            }));
+                encoder.Encode(vec, plain);
 
-            evaluator.RotateRows(encdest, -1, galoisKeys, encrypted);
-            decryptor.Decrypt(encrypted, plaindest);
-            encoder.Decode(plaindest, vec);
+                Ciphertext encrypted = new Ciphertext();
+                Ciphertext encdest = new Ciphertext();
+                Plaintext plaindest = new Plaintext();
 
-            Assert.IsTrue(AreCollectionsEqual(vec, new List<ulong>
-            {
-                8, 5, 6, 7,
-                4, 1, 2, 3
-            }));
+                encryptor.Encrypt(plain, encrypted);
+                evaluator.RotateColumns(encrypted, galoisKeys, encdest);
+                decryptor.Decrypt(encdest, plaindest);
+                encoder.Decode(plaindest, vec);
 
-            evaluator.RotateRowsInplace(encrypted, 2, galoisKeys);
-            decryptor.Decrypt(encrypted, plaindest);
-            encoder.Decode(plaindest, vec);
+                Assert.IsTrue(AreCollectionsEqual(vec, new List<ulong>
+                {
+                    5, 6, 7, 8,
+                    1, 2, 3, 4
+                }));
 
-            Assert.IsTrue(AreCollectionsEqual(vec, new List<ulong>
-            {
-                6, 7, 8, 5,
-                2, 3, 4, 1
-            }));
+                evaluator.RotateRows(encdest, -1, galoisKeys, encrypted);
+                decryptor.Decrypt(encrypted, plaindest);
+                encoder.Decode(plaindest, vec);
 
-            evaluator.RotateColumnsInplace(encrypted, galoisKeys);
-            decryptor.Decrypt(encrypted, plaindest);
-            encoder.Decode(plaindest, vec);
+                Assert.IsTrue(AreCollectionsEqual(vec, new List<ulong>
+                {
+                    8, 5, 6, 7,
+                    4, 1, 2, 3
+                }));
 
-            Assert.IsTrue(AreCollectionsEqual(vec, new List<ulong>
-            {
-                2, 3, 4, 1,
-                6, 7, 8, 5
-            }));
+                evaluator.RotateRowsInplace(encrypted, 2, galoisKeys);
+                decryptor.Decrypt(encrypted, plaindest);
+                encoder.Decode(plaindest, vec);
+
+                Assert.IsTrue(AreCollectionsEqual(vec, new List<ulong>
+                {
+                    6, 7, 8, 5,
+                    2, 3, 4, 1
+                }));
+
+                evaluator.RotateColumnsInplace(encrypted, galoisKeys);
+                decryptor.Decrypt(encrypted, plaindest);
+                encoder.Decode(plaindest, vec);
+
+                Assert.IsTrue(AreCollectionsEqual(vec, new List<ulong>
+                {
+                    2, 3, 4, 1,
+                    6, 7, 8, 5
+                }));
+            }
         }
 
         [TestMethod]
         public void SetTest()
         {
-            SEALContext context = GlobalContext.BFVContext;
-            KeyGenerator keygen = new KeyGenerator(context);
-            keygen.CreateGaloisKeys(out GaloisKeys keys);
+            {
+                SEALContext context = GlobalContext.BFVContext;
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreateGaloisKeys(out GaloisKeys keys);
 
-            Assert.IsNotNull(keys);
-            Assert.AreEqual(24ul, keys.Size);
+                Assert.IsNotNull(keys);
+                Assert.AreEqual(24ul, keys.Size);
 
-            GaloisKeys keys2 = new GaloisKeys();
+                GaloisKeys keys2 = new GaloisKeys();
 
-            Assert.IsNotNull(keys2);
-            Assert.AreEqual(0ul, keys2.Size);
+                Assert.IsNotNull(keys2);
+                Assert.AreEqual(0ul, keys2.Size);
 
-            keys2.Set(keys);
+                keys2.Set(keys);
 
-            Assert.AreNotSame(keys, keys2);
-            Assert.AreEqual(24ul, keys2.Size);
+                Assert.AreNotSame(keys, keys2);
+                Assert.AreEqual(24ul, keys2.Size);
+            }
+            {
+                SEALContext context = GlobalContext.BGVContext;
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreateGaloisKeys(out GaloisKeys keys);
+
+                Assert.IsNotNull(keys);
+                Assert.AreEqual(24ul, keys.Size);
+
+                GaloisKeys keys2 = new GaloisKeys();
+
+                Assert.IsNotNull(keys2);
+                Assert.AreEqual(0ul, keys2.Size);
+
+                keys2.Set(keys);
+
+                Assert.AreNotSame(keys, keys2);
+                Assert.AreEqual(24ul, keys2.Size);
+            }
         }
 
         [TestMethod]
         public void KeyTest()
         {
-            SEALContext context = GlobalContext.BFVContext;
-            KeyGenerator keygen = new KeyGenerator(context);
-            keygen.CreateGaloisKeys(out GaloisKeys keys);
-            MemoryPoolHandle handle = keys.Pool;
+            {
+                SEALContext context = GlobalContext.BFVContext;
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreateGaloisKeys(out GaloisKeys keys);
+                MemoryPoolHandle handle = keys.Pool;
 
-            Assert.IsNotNull(keys);
-            Assert.AreEqual(24ul, keys.Size);
+                Assert.IsNotNull(keys);
+                Assert.AreEqual(24ul, keys.Size);
 
-            Assert.IsFalse(keys.HasKey(galoisElt: 1));
-            Assert.IsTrue(keys.HasKey(galoisElt: 3));
-            Assert.IsFalse(keys.HasKey(galoisElt: 5));
-            Assert.IsFalse(keys.HasKey(galoisElt: 7));
-            Assert.IsTrue(keys.HasKey(galoisElt: 9));
-            Assert.IsFalse(keys.HasKey(galoisElt: 11));
+                Assert.IsFalse(keys.HasKey(galoisElt: 1));
+                Assert.IsTrue(keys.HasKey(galoisElt: 3));
+                Assert.IsFalse(keys.HasKey(galoisElt: 5));
+                Assert.IsFalse(keys.HasKey(galoisElt: 7));
+                Assert.IsTrue(keys.HasKey(galoisElt: 9));
+                Assert.IsFalse(keys.HasKey(galoisElt: 11));
 
-            IEnumerable<PublicKey> key = keys.Key(3);
-            Assert.AreEqual(4, key.Count());
+                IEnumerable<PublicKey> key = keys.Key(3);
+                Assert.AreEqual(4, key.Count());
 
-            IEnumerable<PublicKey> key2 = keys.Key(9);
-            Assert.AreEqual(4, key2.Count());
+                IEnumerable<PublicKey> key2 = keys.Key(9);
+                Assert.AreEqual(4, key2.Count());
 
-            Assert.IsTrue(handle.AllocByteCount > 0ul);
+                Assert.IsTrue(handle.AllocByteCount > 0ul);
+            }
+            {
+                SEALContext context = GlobalContext.BGVContext;
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreateGaloisKeys(out GaloisKeys keys);
+                MemoryPoolHandle handle = keys.Pool;
+
+                Assert.IsNotNull(keys);
+                Assert.AreEqual(24ul, keys.Size);
+
+                Assert.IsFalse(keys.HasKey(galoisElt: 1));
+                Assert.IsTrue(keys.HasKey(galoisElt: 3));
+                Assert.IsFalse(keys.HasKey(galoisElt: 5));
+                Assert.IsFalse(keys.HasKey(galoisElt: 7));
+                Assert.IsTrue(keys.HasKey(galoisElt: 9));
+                Assert.IsFalse(keys.HasKey(galoisElt: 11));
+
+                IEnumerable<PublicKey> key = keys.Key(3);
+                Assert.AreEqual(4, key.Count());
+
+                IEnumerable<PublicKey> key2 = keys.Key(9);
+                Assert.AreEqual(4, key2.Count());
+
+                Assert.IsTrue(handle.AllocByteCount > 0ul);
+            }
         }
 
         [TestMethod]
         public void KeyEltTest()
         {
-            SEALContext context = GlobalContext.BFVContext;
-            KeyGenerator keygen = new KeyGenerator(context);
-            keygen.CreateGaloisKeys(galoisElts: new uint[] { 1, 3 }, out GaloisKeys keys);
-            Assert.IsNotNull(keys);
+            {
+                SEALContext context = GlobalContext.BFVContext;
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreateGaloisKeys(galoisElts: new uint[] { 1, 3 }, out GaloisKeys keys);
+                Assert.IsNotNull(keys);
 
-            Assert.AreEqual(2ul, keys.Size);
+                Assert.AreEqual(2ul, keys.Size);
 
-            Assert.IsTrue(keys.HasKey(1));
-            Assert.IsTrue(keys.HasKey(3));
-            Assert.IsFalse(keys.HasKey(5));
+                Assert.IsTrue(keys.HasKey(1));
+                Assert.IsTrue(keys.HasKey(3));
+                Assert.IsFalse(keys.HasKey(5));
+            }
+            {
+                SEALContext context = GlobalContext.BGVContext;
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreateGaloisKeys(galoisElts: new uint[] { 1, 3 }, out GaloisKeys keys);
+                Assert.IsNotNull(keys);
+
+                Assert.AreEqual(2ul, keys.Size);
+
+                Assert.IsTrue(keys.HasKey(1));
+                Assert.IsTrue(keys.HasKey(3));
+                Assert.IsFalse(keys.HasKey(5));
+            }
         }
 
         [TestMethod]
@@ -270,23 +476,44 @@ namespace SEALNetTest
         [TestMethod]
         public void ExceptionsTest()
         {
-            SEALContext context = GlobalContext.BFVContext;
-            GaloisKeys keys = new GaloisKeys();
+            {
+                SEALContext context = GlobalContext.BFVContext;
+                GaloisKeys keys = new GaloisKeys();
 
-            Utilities.AssertThrows<ArgumentNullException>(() => keys = new GaloisKeys(null));
+                Utilities.AssertThrows<ArgumentNullException>(() => keys = new GaloisKeys(null));
 
-            Utilities.AssertThrows<ArgumentNullException>(() => keys.Set(null));
+                Utilities.AssertThrows<ArgumentNullException>(() => keys.Set(null));
 
-            Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsValidFor(keys, null));
+                Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsValidFor(keys, null));
 
-            Utilities.AssertThrows<ArgumentNullException>(() => keys.Save(null));
+                Utilities.AssertThrows<ArgumentNullException>(() => keys.Save(null));
 
-            Utilities.AssertThrows<ArgumentNullException>(() => keys.UnsafeLoad(context, null));
-            Utilities.AssertThrows<EndOfStreamException>(() => keys.UnsafeLoad(context, new MemoryStream()));
-            Utilities.AssertThrows<ArgumentNullException>(() => keys.UnsafeLoad(null, new MemoryStream()));
+                Utilities.AssertThrows<ArgumentNullException>(() => keys.UnsafeLoad(context, null));
+                Utilities.AssertThrows<EndOfStreamException>(() => keys.UnsafeLoad(context, new MemoryStream()));
+                Utilities.AssertThrows<ArgumentNullException>(() => keys.UnsafeLoad(null, new MemoryStream()));
 
-            Utilities.AssertThrows<ArgumentNullException>(() => keys.Load(context, null));
-            Utilities.AssertThrows<ArgumentNullException>(() => keys.Load(null, new MemoryStream()));
+                Utilities.AssertThrows<ArgumentNullException>(() => keys.Load(context, null));
+                Utilities.AssertThrows<ArgumentNullException>(() => keys.Load(null, new MemoryStream()));
+            }
+            {
+                SEALContext context = GlobalContext.BGVContext;
+                GaloisKeys keys = new GaloisKeys();
+
+                Utilities.AssertThrows<ArgumentNullException>(() => keys = new GaloisKeys(null));
+
+                Utilities.AssertThrows<ArgumentNullException>(() => keys.Set(null));
+
+                Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsValidFor(keys, null));
+
+                Utilities.AssertThrows<ArgumentNullException>(() => keys.Save(null));
+
+                Utilities.AssertThrows<ArgumentNullException>(() => keys.UnsafeLoad(context, null));
+                Utilities.AssertThrows<EndOfStreamException>(() => keys.UnsafeLoad(context, new MemoryStream()));
+                Utilities.AssertThrows<ArgumentNullException>(() => keys.UnsafeLoad(null, new MemoryStream()));
+
+                Utilities.AssertThrows<ArgumentNullException>(() => keys.Load(context, null));
+                Utilities.AssertThrows<ArgumentNullException>(() => keys.Load(null, new MemoryStream()));
+            }
         }
 
         /// <summary>

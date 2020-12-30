@@ -200,7 +200,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="destination">The Galois keys to overwrite with the generated
         /// Galois keys</param>
         /// <exception cref="InvalidOperationException">if the encryption parameters
-        /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// do not support batching and scheme is SchemeType.BFV or SchemeType.BGV</exception>
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the Galois elements are not valid</exception>
@@ -250,7 +250,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="galoisElts">The Galois elements for which to generate keys</param>
         /// <exception cref="ArgumentNullException">if galoisElts is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters
-        /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// do not support batching and scheme is SchemeType.BFV or SchemeType.BGV</exception>
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the Galois elements are not valid</exception>
@@ -279,7 +279,7 @@ namespace Microsoft.Research.SEAL
         /// The user needs to give as input a vector of desired Galois rotation step
         /// counts, where negative step counts correspond to rotations to the right
         /// and positive step counts correspond to rotations to the left. A step
-        /// count of zero can be used to indicate a column rotation in the BFV scheme
+        /// count of zero can be used to indicate a column rotation in the BFV/BGV scheme
         /// and complex conjugation in the CKKS scheme.
         /// </para>
         /// </remarks>
@@ -288,7 +288,7 @@ namespace Microsoft.Research.SEAL
         /// Galois keys</param>
         /// <exception cref="ArgumentNullException">if steps is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters
-        /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// do not support batching and scheme is SchemeType.BFV or SchemeType.BGV</exception>
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the step counts are not valid</exception>
@@ -323,14 +323,14 @@ namespace Microsoft.Research.SEAL
         /// The user needs to give as input a vector of desired Galois rotation step
         /// counts, where negative step counts correspond to rotations to the right
         /// and positive step counts correspond to rotations to the left. A step
-        /// count of zero can be used to indicate a column rotation in the BFV scheme
+        /// count of zero can be used to indicate a column rotation in the BFV or BGV scheme
         /// and complex conjugation in the CKKS scheme.
         /// </para>
         /// </remarks>
         /// <param name="steps">The rotation step counts for which to generate keys</param>
         /// <exception cref="ArgumentNullException">if steps is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters
-        /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// do not support batching and scheme is SchemeType.BFV or SchemeType.BGV</exception>
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the step counts are not valid</exception>
@@ -365,7 +365,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="destination">The Galois keys to overwrite with the generated
         /// Galois keys</param>
         /// <exception cref="InvalidOperationException">if the encryption parameters
-        /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// do not support batching and scheme is SchemeType.BFV or SchemeType.BGV</exception>
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
         public void CreateGaloisKeys(out GaloisKeys destination)
@@ -399,7 +399,7 @@ namespace Microsoft.Research.SEAL
         /// </para>
         /// </remarks>
         /// <exception cref="InvalidOperationException">if the encryption parameters
-        /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// do not support batching and scheme is SchemeType.BFV or SchemeType.BGV</exception>
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
         public Serializable<GaloisKeys> CreateGaloisKeys()
