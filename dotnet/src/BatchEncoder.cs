@@ -59,7 +59,7 @@ namespace Microsoft.Research.SEAL
         /// @param[in] context
         /// <exception cref="ArgumentNullException">if context is null.</exception>
         /// <exception cref="ArgumentException">if the encryption parameters are not valid for batching</exception>
-        /// <exception cref="ArgumentException">if scheme is not SchemeType.BFV</exception>
+        /// <exception cref="ArgumentException">if scheme is not SchemeType.BFV or SchemeType.BGV </exception>
         public BatchEncoder(SEALContext context)
         {
             if (null == context)
@@ -68,7 +68,7 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentException("Encryption parameters are not set correctly");
 
             SEALContext.ContextData contextData = context.FirstContextData;
-            if (contextData.Parms.Scheme != SchemeType.BFV)
+            if (contextData.Parms.Scheme != SchemeType.BFV && contextData.Parms.Scheme != SchemeType.BGV)
                 throw new ArgumentException("Unsupported scheme");
             if (!contextData.Qualifiers.UsingBatching)
                 throw new ArgumentException("Encryption parameters are not valid for batching");

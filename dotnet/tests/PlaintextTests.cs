@@ -61,25 +61,48 @@ namespace SEALNetTest
         [TestMethod]
         public void CopyTest()
         {
-            Plaintext plain = new Plaintext("6x^5 + 5x^4 + 3x^2 + 2x^1 + 1");
-            Assert.IsFalse(plain.IsNTTForm);
-            Plaintext plain2 = new Plaintext(plain);
-            Assert.AreEqual(plain, plain2);
-            Assert.IsFalse(plain2.IsNTTForm);
-            Assert.AreEqual(plain.ParmsId, plain2.ParmsId);
+            {
+                Plaintext plain = new Plaintext("6x^5 + 5x^4 + 3x^2 + 2x^1 + 1");
+                Assert.IsFalse(plain.IsNTTForm);
+                Plaintext plain2 = new Plaintext(plain);
+                Assert.AreEqual(plain, plain2);
+                Assert.IsFalse(plain2.IsNTTForm);
+                Assert.AreEqual(plain.ParmsId, plain2.ParmsId);
 
-            SEALContext context = GlobalContext.BFVContext;
-            Evaluator evaluator = new Evaluator(context);
-            evaluator.TransformToNTTInplace(plain, context.FirstParmsId);
-            Assert.IsTrue(plain.IsNTTForm);
-            Assert.IsFalse(plain2.IsNTTForm);
-            Assert.AreNotEqual(plain.ParmsId, plain2.ParmsId);
-            Assert.AreEqual(plain.ParmsId, context.FirstParmsId);
+                SEALContext context = GlobalContext.BFVContext;
+                Evaluator evaluator = new Evaluator(context);
+                evaluator.TransformToNTTInplace(plain, context.FirstParmsId);
+                Assert.IsTrue(plain.IsNTTForm);
+                Assert.IsFalse(plain2.IsNTTForm);
+                Assert.AreNotEqual(plain.ParmsId, plain2.ParmsId);
+                Assert.AreEqual(plain.ParmsId, context.FirstParmsId);
 
-            Plaintext plain3 = new Plaintext(plain);
-            Assert.AreEqual(plain3, plain);
-            Assert.IsTrue(plain3.IsNTTForm);
-            Assert.AreEqual(plain3.ParmsId, context.FirstParmsId);
+                Plaintext plain3 = new Plaintext(plain);
+                Assert.AreEqual(plain3, plain);
+                Assert.IsTrue(plain3.IsNTTForm);
+                Assert.AreEqual(plain3.ParmsId, context.FirstParmsId);
+            }
+            {
+                Plaintext plain = new Plaintext("6x^5 + 5x^4 + 3x^2 + 2x^1 + 1");
+                Assert.IsFalse(plain.IsNTTForm);
+                Plaintext plain2 = new Plaintext(plain);
+                Assert.AreEqual(plain, plain2);
+                Assert.IsFalse(plain2.IsNTTForm);
+                Assert.AreEqual(plain.ParmsId, plain2.ParmsId);
+
+                SEALContext context = GlobalContext.BGVContext;
+                Evaluator evaluator = new Evaluator(context);
+                evaluator.TransformToNTTInplace(plain, context.FirstParmsId);
+                Assert.IsTrue(plain.IsNTTForm);
+                Assert.IsFalse(plain2.IsNTTForm);
+                Assert.AreNotEqual(plain.ParmsId, plain2.ParmsId);
+                Assert.AreEqual(plain.ParmsId, context.FirstParmsId);
+
+                Plaintext plain3 = new Plaintext(plain);
+                Assert.AreEqual(plain3, plain);
+                Assert.IsTrue(plain3.IsNTTForm);
+                Assert.AreEqual(plain3.ParmsId, context.FirstParmsId);
+            }
         }
 
         [TestMethod]
@@ -327,25 +350,48 @@ namespace SEALNetTest
         [TestMethod]
         public void SaveLoadTest()
         {
-            SEALContext context = GlobalContext.BFVContext;
-            Plaintext plain = new Plaintext("6x^5 + 5x^4 + 4x^3 + 3x^2 + 2x^1 + 5");
-            Plaintext other = new Plaintext();
-
-            Assert.AreNotSame(plain, other);
-            Assert.AreNotEqual(plain, other);
-
-            using (MemoryStream stream = new MemoryStream())
             {
-                plain.Save(stream);
+                SEALContext context = GlobalContext.BFVContext;
+                Plaintext plain = new Plaintext("6x^5 + 5x^4 + 4x^3 + 3x^2 + 2x^1 + 5");
+                Plaintext other = new Plaintext();
 
-                stream.Seek(offset: 0, loc: SeekOrigin.Begin);
+                Assert.AreNotSame(plain, other);
+                Assert.AreNotEqual(plain, other);
 
-                other.Load(context, stream);
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    plain.Save(stream);
+
+                    stream.Seek(offset: 0, loc: SeekOrigin.Begin);
+
+                    other.Load(context, stream);
+                }
+
+                Assert.AreNotSame(plain, other);
+                Assert.AreEqual(plain, other);
+                Assert.IsTrue(ValCheck.IsValidFor(other, context));
             }
+            {
+                SEALContext context = GlobalContext.BGVContext;
+                Plaintext plain = new Plaintext("6x^5 + 5x^4 + 4x^3 + 3x^2 + 2x^1 + 5");
+                Plaintext other = new Plaintext();
 
-            Assert.AreNotSame(plain, other);
-            Assert.AreEqual(plain, other);
-            Assert.IsTrue(ValCheck.IsValidFor(other, context));
+                Assert.AreNotSame(plain, other);
+                Assert.AreNotEqual(plain, other);
+
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    plain.Save(stream);
+
+                    stream.Seek(offset: 0, loc: SeekOrigin.Begin);
+
+                    other.Load(context, stream);
+                }
+
+                Assert.AreNotSame(plain, other);
+                Assert.AreEqual(plain, other);
+                Assert.IsTrue(ValCheck.IsValidFor(other, context));
+            }
         }
 
         [TestMethod]
@@ -368,31 +414,60 @@ namespace SEALNetTest
         [TestMethod]
         public void ExceptionsTest()
         {
-            SEALContext context = GlobalContext.BFVContext;
-            Plaintext plain = new Plaintext();
-            MemoryPoolHandle pool = MemoryManager.GetPool(MMProfOpt.ForceGlobal);
-            MemoryPoolHandle pool_uninit = new MemoryPoolHandle();
+            {
+                SEALContext context = GlobalContext.BFVContext;
+                Plaintext plain = new Plaintext();
+                MemoryPoolHandle pool = MemoryManager.GetPool(MMProfOpt.ForceGlobal);
+                MemoryPoolHandle pool_uninit = new MemoryPoolHandle();
 
-            Utilities.AssertThrows<ArgumentException>(() => plain = new Plaintext(pool_uninit));
-            Utilities.AssertThrows<ArgumentNullException>(() => plain = new Plaintext((string)null, pool));
+                Utilities.AssertThrows<ArgumentException>(() => plain = new Plaintext(pool_uninit));
+                Utilities.AssertThrows<ArgumentNullException>(() => plain = new Plaintext((string)null, pool));
 
-            Utilities.AssertThrows<ArgumentNullException>(() => plain.Set((Plaintext)null));
-            Utilities.AssertThrows<ArgumentNullException>(() => plain.Set((string)null));
+                Utilities.AssertThrows<ArgumentNullException>(() => plain.Set((Plaintext)null));
+                Utilities.AssertThrows<ArgumentNullException>(() => plain.Set((string)null));
 
-            Utilities.AssertThrows<ArgumentOutOfRangeException>(() => plain.SetZero(100000));
-            Utilities.AssertThrows<ArgumentOutOfRangeException>(() => plain.SetZero(1, 100000));
-            Utilities.AssertThrows<ArgumentOutOfRangeException>(() => plain.SetZero(100000, 1));
+                Utilities.AssertThrows<ArgumentOutOfRangeException>(() => plain.SetZero(100000));
+                Utilities.AssertThrows<ArgumentOutOfRangeException>(() => plain.SetZero(1, 100000));
+                Utilities.AssertThrows<ArgumentOutOfRangeException>(() => plain.SetZero(100000, 1));
 
-            Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsValidFor(plain, null));
+                Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsValidFor(plain, null));
 
-            Utilities.AssertThrows<ArgumentNullException>(() => plain.Save(null));
+                Utilities.AssertThrows<ArgumentNullException>(() => plain.Save(null));
 
-            Utilities.AssertThrows<ArgumentNullException>(() => plain.UnsafeLoad(null, new MemoryStream()));
-            Utilities.AssertThrows<ArgumentNullException>(() => plain.UnsafeLoad(context, null));
-            Utilities.AssertThrows<EndOfStreamException>(() => plain.UnsafeLoad(context, new MemoryStream()));
+                Utilities.AssertThrows<ArgumentNullException>(() => plain.UnsafeLoad(null, new MemoryStream()));
+                Utilities.AssertThrows<ArgumentNullException>(() => plain.UnsafeLoad(context, null));
+                Utilities.AssertThrows<EndOfStreamException>(() => plain.UnsafeLoad(context, new MemoryStream()));
 
-            Utilities.AssertThrows<ArgumentNullException>(() => plain.Load(context, null));
-            Utilities.AssertThrows<ArgumentNullException>(() => plain.Load(null, new MemoryStream()));
+                Utilities.AssertThrows<ArgumentNullException>(() => plain.Load(context, null));
+                Utilities.AssertThrows<ArgumentNullException>(() => plain.Load(null, new MemoryStream()));
+            }
+            {
+                SEALContext context = GlobalContext.BGVContext;
+                Plaintext plain = new Plaintext();
+                MemoryPoolHandle pool = MemoryManager.GetPool(MMProfOpt.ForceGlobal);
+                MemoryPoolHandle pool_uninit = new MemoryPoolHandle();
+
+                Utilities.AssertThrows<ArgumentException>(() => plain = new Plaintext(pool_uninit));
+                Utilities.AssertThrows<ArgumentNullException>(() => plain = new Plaintext((string)null, pool));
+
+                Utilities.AssertThrows<ArgumentNullException>(() => plain.Set((Plaintext)null));
+                Utilities.AssertThrows<ArgumentNullException>(() => plain.Set((string)null));
+
+                Utilities.AssertThrows<ArgumentOutOfRangeException>(() => plain.SetZero(100000));
+                Utilities.AssertThrows<ArgumentOutOfRangeException>(() => plain.SetZero(1, 100000));
+                Utilities.AssertThrows<ArgumentOutOfRangeException>(() => plain.SetZero(100000, 1));
+
+                Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsValidFor(plain, null));
+
+                Utilities.AssertThrows<ArgumentNullException>(() => plain.Save(null));
+
+                Utilities.AssertThrows<ArgumentNullException>(() => plain.UnsafeLoad(null, new MemoryStream()));
+                Utilities.AssertThrows<ArgumentNullException>(() => plain.UnsafeLoad(context, null));
+                Utilities.AssertThrows<EndOfStreamException>(() => plain.UnsafeLoad(context, new MemoryStream()));
+
+                Utilities.AssertThrows<ArgumentNullException>(() => plain.Load(context, null));
+                Utilities.AssertThrows<ArgumentNullException>(() => plain.Load(null, new MemoryStream()));
+            }
         }
     }
 }

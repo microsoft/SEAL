@@ -32,7 +32,7 @@ namespace Microsoft.Research.SEAL
     /// providing the desired capacity to the constructor as an extra argument, or
     /// by calling the reserve function at any time.
     ///
-    /// When the scheme is SchemeType.BFV each coefficient of a plaintext is
+    /// When the scheme is SchemeType.BFV or SchemeType.BGV, each coefficient of a plaintext is
     /// a 64-bit word, but when the scheme is SchemeType.CKKS the plaintext is
     /// by default stored in an NTT transformed form with respect to each of the
     /// primes in the coefficient modulus. Thus, the size of the allocation that

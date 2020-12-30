@@ -196,7 +196,7 @@ namespace Microsoft.Research.SEAL
             int secLevel,
             ref ulong length,
             [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffArray);
-
+        
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void CoeffModulus_Create(
             ulong polyModulusDegree,

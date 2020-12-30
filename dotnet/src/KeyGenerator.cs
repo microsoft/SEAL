@@ -275,7 +275,7 @@ namespace Microsoft.Research.SEAL
         /// The user needs to give as input a vector of desired Galois rotation step
         /// counts, where negative step counts correspond to rotations to the right
         /// and positive step counts correspond to rotations to the left. A step
-        /// count of zero can be used to indicate a column rotation in the BFV scheme
+        /// count of zero can be used to indicate a column rotation in the BFV/BGV scheme
         /// and complex conjugation in the CKKS scheme.
         /// </para>
         /// </remarks>
@@ -284,7 +284,7 @@ namespace Microsoft.Research.SEAL
         /// Galois keys</param>
         /// <exception cref="ArgumentNullException">if steps is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters
-        /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// do not support batching and scheme is SchemeType.BFV or SchemeType.BGV</exception>
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the step counts are not valid</exception>
@@ -319,14 +319,14 @@ namespace Microsoft.Research.SEAL
         /// The user needs to give as input a vector of desired Galois rotation step
         /// counts, where negative step counts correspond to rotations to the right
         /// and positive step counts correspond to rotations to the left. A step
-        /// count of zero can be used to indicate a column rotation in the BFV scheme
+        /// count of zero can be used to indicate a column rotation in the BFV or BGV scheme
         /// and complex conjugation in the CKKS scheme.
         /// </para>
         /// </remarks>
         /// <param name="steps">The rotation step counts for which to generate keys</param>
         /// <exception cref="ArgumentNullException">if steps is null</exception>
         /// <exception cref="InvalidOperationException">if the encryption parameters
-        /// do not support batching and scheme is SchemeType.BFV</exception>
+        /// do not support batching and scheme is SchemeType.BFV or SchemeType.BGV</exception>
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the step counts are not valid</exception>
