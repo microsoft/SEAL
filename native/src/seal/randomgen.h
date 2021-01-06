@@ -218,7 +218,7 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Save(
                 std::bind(&UniformRandomGeneratorInfo::save_members, this, _1), save_size(compr_mode_type::none),
-                stream, compr_mode);
+                stream, compr_mode, true);
         }
 
         /**
@@ -234,8 +234,8 @@ namespace seal
         {
             using namespace std::placeholders;
             UniformRandomGeneratorInfo new_info;
-            auto in_size =
-                Serialization::Load(std::bind(&UniformRandomGeneratorInfo::load_members, &new_info, _1, _2), stream);
+            auto in_size = Serialization::Load(
+                std::bind(&UniformRandomGeneratorInfo::load_members, &new_info, _1, _2), stream, true);
             std::swap(*this, new_info);
             return in_size;
         }
@@ -259,7 +259,7 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Save(
                 std::bind(&UniformRandomGeneratorInfo::save_members, this, _1), save_size(compr_mode_type::none), out,
-                size, compr_mode);
+                size, compr_mode, true);
         }
 
         /**
@@ -278,8 +278,8 @@ namespace seal
         {
             using namespace std::placeholders;
             UniformRandomGeneratorInfo new_info;
-            auto in_size =
-                Serialization::Load(std::bind(&UniformRandomGeneratorInfo::load_members, &new_info, _1, _2), in, size);
+            auto in_size = Serialization::Load(
+                std::bind(&UniformRandomGeneratorInfo::load_members, &new_info, _1, _2), in, size, true);
             std::swap(*this, new_info);
             return in_size;
         }

@@ -134,7 +134,7 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Save(
                 std::bind(&Plaintext::save_members, &sk_, _1), sk_.save_size(compr_mode_type::none), stream, compr_mode,
-                /* clear_on_destruction */ true);
+                true);
         }
 
         /**
@@ -157,8 +157,7 @@ namespace seal
             // We use a fresh memory pool with `clear_on_destruction' enabled.
             Plaintext new_sk(MemoryManager::GetPool(mm_prof_opt::mm_force_new, true));
             auto in_size = Serialization::Load(
-                std::bind(&Plaintext::load_members, &new_sk, std::move(context), _1, _2), stream,
-                /* clear_on_destruction */ true);
+                std::bind(&Plaintext::load_members, &new_sk, std::move(context), _1, _2), stream, true);
             std::swap(sk_, new_sk);
             return in_size;
         }
@@ -205,7 +204,7 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Save(
                 std::bind(&Plaintext::save_members, &sk_, _1), sk_.save_size(compr_mode_type::none), out, size,
-                compr_mode, /* clear_on_destruction */ true);
+                compr_mode, true);
         }
 
         /**
@@ -230,8 +229,8 @@ namespace seal
 
             // We use a fresh memory pool with `clear_on_destruction' enabled.
             Plaintext new_sk(MemoryManager::GetPool(mm_prof_opt::mm_force_new, true));
-            auto in_size =
-                Serialization::Load(std::bind(&Plaintext::load_members, &new_sk, std::move(context), _1, _2), in, size);
+            auto in_size = Serialization::Load(
+                std::bind(&Plaintext::load_members, &new_sk, std::move(context), _1, _2), in, size, true);
             std::swap(sk_, new_sk);
             return in_size;
         }

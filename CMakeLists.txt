@@ -11,7 +11,7 @@ cmake_minimum_required(VERSION 3.12)
 #   4. SEAL C++ tests                             #
 ###################################################
 
-project(SEAL VERSION 3.6.1 LANGUAGES CXX C)
+project(SEAL VERSION 3.6.2 LANGUAGES CXX C)
 
 ########################
 # Global configuration #

@@ -1,5 +1,9 @@
 # List of Changes
 
+## Version 3.6.2
+
+- Fixed a member variable initialization order bug in [SafeByteBuffer](native/src/seal/util/streambuf.h).
+
 ## Version 3.6.1
 
 - Fixed a bug reported in [(Issue 248)](https://github.com/microsoft/SEAL/issues/248) and [(Issue 249)](https://github.com/microsoft/SEAL/issues/249): in in-place Zstandard compression the input buffer head location was not correctly updated, resulting in huge memory use.

@@ -576,7 +576,8 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&DynArray<T>::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode);
+                std::bind(&DynArray<T>::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode,
+                false);
         }
 
         /**
@@ -597,7 +598,8 @@ namespace seal
         inline std::streamoff load(std::istream &stream, std::size_t in_size_bound = 0)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&DynArray<T>::load_members, this, _1, _2, in_size_bound), stream);
+            return Serialization::Load(
+                std::bind(&DynArray<T>::load_members, this, _1, _2, in_size_bound), stream, false);
         }
 
         /**
@@ -619,7 +621,7 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Save(
                 std::bind(&DynArray<T>::save_members, this, _1), save_size(compr_mode_type::none), out, size,
-                compr_mode);
+                compr_mode, false);
         }
 
         /**
@@ -642,7 +644,8 @@ namespace seal
         inline std::streamoff load(const seal_byte *in, std::size_t size, std::size_t in_size_bound = 0)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&DynArray<T>::load_members, this, _1, _2, in_size_bound), in, size);
+            return Serialization::Load(
+                std::bind(&DynArray<T>::load_members, this, _1, _2, in_size_bound), in, size, false);
         }
 
     private:
