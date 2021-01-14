@@ -5831,88 +5831,119 @@ namespace sealtest
 
     TEST(EvaluatorTest, BGVEncryptModSwitchToNextDecrypt)
     {
-        // The common parameters: the plaintext and the polynomial moduli
-        Modulus plain_modulus(1 << 6);
+        {
+            // The common parameters: the plaintext and the polynomial moduli
+            Modulus plain_modulus(1 << 6);
 
-        // The parameters and the context of the higher level
-        EncryptionParameters parms(scheme_type::bgv);
-        parms.set_poly_modulus_degree(128);
-        parms.set_plain_modulus(plain_modulus);
-        parms.set_coeff_modulus(CoeffModulus::Create(128, { 30, 30, 30, 30 }));
+            // The parameters and the context of the higher level
+            EncryptionParameters parms(scheme_type::bgv);
+            parms.set_poly_modulus_degree(128);
+            parms.set_plain_modulus(plain_modulus);
+            parms.set_coeff_modulus(CoeffModulus::Create(128, { 30, 30, 30, 30 }));
 
-        SEALContext context(parms, true, sec_level_type::none);
-        KeyGenerator keygen(context);
-        SecretKey secret_key = keygen.secret_key();
-        PublicKey pk;
-        keygen.create_public_key(pk);
+            SEALContext context(parms, true, sec_level_type::none);
+            KeyGenerator keygen(context);
+            SecretKey secret_key = keygen.secret_key();
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
-        Encryptor encryptor(context, pk);
-        Evaluator evaluator(context);
-        Decryptor decryptor(context, keygen.secret_key());
-        auto parms_id = context.first_parms_id();
+            Encryptor encryptor(context, pk);
+            Evaluator evaluator(context);
+            Decryptor decryptor(context, keygen.secret_key());
+            auto parms_id = context.first_parms_id();
 
-        Ciphertext encrypted(context);
-        Ciphertext encryptedRes;
-        Plaintext plain;
+            Ciphertext encrypted(context);
+            Ciphertext encryptedRes;
+            Plaintext plain;
 
-        plain = 0;
-        encryptor.encrypt(plain, encrypted);
-        evaluator.mod_switch_to_next(encrypted, encryptedRes);
-        decryptor.decrypt(encryptedRes, plain);
-        parms_id = context.get_context_data(parms_id)->next_context_data()->parms_id();
-        ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
-        ASSERT_TRUE(plain.to_string() == "0");
+            plain = 0;
+            encryptor.encrypt(plain, encrypted);
+            evaluator.mod_switch_to_next(encrypted, encryptedRes);
+            decryptor.decrypt(encryptedRes, plain);
+            parms_id = context.get_context_data(parms_id)->next_context_data()->parms_id();
+            ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
+            ASSERT_TRUE(plain.to_string() == "0");
 
-        evaluator.mod_switch_to_next_inplace(encryptedRes);
-        decryptor.decrypt(encryptedRes, plain);
-        parms_id = context.get_context_data(parms_id)->next_context_data()->parms_id();
-        ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
-        ASSERT_TRUE(plain.to_string() == "0");
+            evaluator.mod_switch_to_next_inplace(encryptedRes);
+            decryptor.decrypt(encryptedRes, plain);
+            parms_id = context.get_context_data(parms_id)->next_context_data()->parms_id();
+            ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
+            ASSERT_TRUE(plain.to_string() == "0");
 
-        parms_id = context.first_parms_id();
-        plain = 1;
-        encryptor.encrypt(plain, encrypted);
-        evaluator.mod_switch_to_next(encrypted, encryptedRes);
-        decryptor.decrypt(encryptedRes, plain);
-        parms_id = context.get_context_data(parms_id)->next_context_data()->parms_id();
-        ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
-        ASSERT_TRUE(plain.to_string() == "1");
+            parms_id = context.first_parms_id();
+            plain = 1;
+            encryptor.encrypt(plain, encrypted);
+            evaluator.mod_switch_to_next(encrypted, encryptedRes);
+            decryptor.decrypt(encryptedRes, plain);
+            parms_id = context.get_context_data(parms_id)->next_context_data()->parms_id();
+            ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
+            ASSERT_TRUE(plain.to_string() == "1");
 
-        evaluator.mod_switch_to_next_inplace(encryptedRes);
-        decryptor.decrypt(encryptedRes, plain);
-        parms_id = context.get_context_data(parms_id)->next_context_data()->parms_id();
-        ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
-        ASSERT_TRUE(plain.to_string() == "1");
+            evaluator.mod_switch_to_next_inplace(encryptedRes);
+            decryptor.decrypt(encryptedRes, plain);
+            parms_id = context.get_context_data(parms_id)->next_context_data()->parms_id();
+            ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
+            ASSERT_TRUE(plain.to_string() == "1");
 
-        parms_id = context.first_parms_id();
-        plain = "1x^127";
-        encryptor.encrypt(plain, encrypted);
-        evaluator.mod_switch_to_next(encrypted, encryptedRes);
-        decryptor.decrypt(encryptedRes, plain);
-        parms_id = context.get_context_data(parms_id)->next_context_data()->parms_id();
-        ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
-        ASSERT_TRUE(plain.to_string() == "1x^127");
+            parms_id = context.first_parms_id();
+            plain = "1x^127";
+            encryptor.encrypt(plain, encrypted);
+            evaluator.mod_switch_to_next(encrypted, encryptedRes);
+            decryptor.decrypt(encryptedRes, plain);
+            parms_id = context.get_context_data(parms_id)->next_context_data()->parms_id();
+            ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
+            ASSERT_TRUE(plain.to_string() == "1x^127");
 
-        evaluator.mod_switch_to_next_inplace(encryptedRes);
-        decryptor.decrypt(encryptedRes, plain);
-        parms_id = context.get_context_data(parms_id)->next_context_data()->parms_id();
-        ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
-        ASSERT_TRUE(plain.to_string() == "1x^127");
+            evaluator.mod_switch_to_next_inplace(encryptedRes);
+            decryptor.decrypt(encryptedRes, plain);
+            parms_id = context.get_context_data(parms_id)->next_context_data()->parms_id();
+            ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
+            ASSERT_TRUE(plain.to_string() == "1x^127");
 
-        parms_id = context.first_parms_id();
-        plain = "5x^64 + Ax^5";
-        encryptor.encrypt(plain, encrypted);
-        evaluator.mod_switch_to_next(encrypted, encryptedRes);
-        decryptor.decrypt(encryptedRes, plain);
-        parms_id = context.get_context_data(parms_id)->next_context_data()->parms_id();
-        ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
-        ASSERT_TRUE(plain.to_string() == "5x^64 + Ax^5");
+            parms_id = context.first_parms_id();
+            plain = "5x^64 + Ax^5";
+            encryptor.encrypt(plain, encrypted);
+            evaluator.mod_switch_to_next(encrypted, encryptedRes);
+            decryptor.decrypt(encryptedRes, plain);
+            parms_id = context.get_context_data(parms_id)->next_context_data()->parms_id();
+            ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
+            ASSERT_TRUE(plain.to_string() == "5x^64 + Ax^5");
 
-        evaluator.mod_switch_to_next_inplace(encryptedRes);
-        decryptor.decrypt(encryptedRes, plain);
-        parms_id = context.get_context_data(parms_id)->next_context_data()->parms_id();
-        ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
-        ASSERT_TRUE(plain.to_string() == "5x^64 + Ax^5");
+            evaluator.mod_switch_to_next_inplace(encryptedRes);
+            decryptor.decrypt(encryptedRes, plain);
+            parms_id = context.get_context_data(parms_id)->next_context_data()->parms_id();
+            ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
+            ASSERT_TRUE(plain.to_string() == "5x^64 + Ax^5");
+        }
+        {
+            //Consider the case of qi mod p != 1
+            Modulus plain_modulus(786433);
+
+            EncryptionParameters parms(scheme_type::bgv); 
+            parms.set_poly_modulus_degree(8192);
+            parms.set_plain_modulus(plain_modulus);
+            parms.set_coeff_modulus(CoeffModulus::BGVDefault(8192));
+            SEALContext context(parms, true, sec_level_type::tc128);
+
+            KeyGenerator keygen(context);
+            SecretKey secret_key = keygen.secret_key();
+            PublicKey pk;
+            keygen.create_public_key(pk);
+
+            Encryptor encryptor(context, pk);
+            Evaluator evaluator(context);
+            Decryptor decryptor(context, keygen.secret_key());
+
+            Ciphertext encrypted(context);
+            Plaintext plain;
+
+            plain = "1";
+            encryptor.encrypt(plain, encrypted);
+            evaluator.mod_switch_to_next_inplace(encrypted);
+            evaluator.mod_switch_to_next_inplace(encrypted);
+            decryptor.decrypt(encrypted, plain);
+            ASSERT_TRUE(plain.to_string() == "1");
+        }
     }
 
     TEST(EvaluatorTest, BGVEncryptModSwitchToDecrypt)
