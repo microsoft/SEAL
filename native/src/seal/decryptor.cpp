@@ -200,6 +200,7 @@ namespace seal
         auto &first_parms = first_context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         auto &first_coeff_modulus = first_parms.coeff_modulus();
+        auto &plain_modulus = parms.plain_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_size = coeff_modulus.size();
 
@@ -213,9 +214,15 @@ namespace seal
         context_data.rns_tool()->decrypt_modt(tmp_dest_modq, destination.data(), pool);
         
         //Fix the plaintext after mod-switch operations.
-        for(size_t i = context_data.chain_index(); i < first_context_data.chain_index(); i++){
-            auto scalar = barrett_reduce_64(first_coeff_modulus[i+1].value(), parms.plain_modulus());
-            multiply_poly_scalar_coeffmod(CoeffIter(destination.data()), coeff_count, scalar, parms.plain_modulus(), CoeffIter(destination.data()));
+        uint64_t fix = 1;
+        for(size_t i = context_data.chain_index(); i < first_context_data.chain_index(); i++)
+        {
+            auto scalar = barrett_reduce_64(first_coeff_modulus[i+1].value(), plain_modulus);
+            fix = multiply_uint_mod(fix, scalar, plain_modulus);
+        }
+        if(fix != 1)
+        {
+            multiply_poly_scalar_coeffmod(CoeffIter(destination.data()), coeff_count, fix, plain_modulus, CoeffIter(destination.data()));
         }
        
         // How many non-zero coefficients do we really have in the result?

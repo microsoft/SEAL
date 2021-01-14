@@ -1575,6 +1575,36 @@ namespace SEALNetTest
                 Assert.AreEqual(1ul, plain.CoeffCount);
                 Assert.AreEqual(1ul, plain[0]);
             }
+            {
+                EncryptionParameters parms = new EncryptionParameters(SchemeType.BGV)
+                {
+                    PolyModulusDegree = 8192,
+                    PlainModulus = new Modulus(786433),
+                    CoeffModulus = CoeffModulus.BGVDefault(8192)
+                };
+                SEALContext context = new SEALContext(parms,
+                    expandModChain: true,
+                    secLevel: SecLevelType.TC128);
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreatePublicKey(out PublicKey publicKey);
+
+                Encryptor encryptor = new Encryptor(context, publicKey);
+                Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
+                Evaluator evaluator = new Evaluator(context);
+
+                Ciphertext encrypted = new Ciphertext(context);
+                Ciphertext encdest_1 = new Ciphertext();
+                Ciphertext encdest_2 = new Ciphertext();
+                Plaintext plain = new Plaintext();
+
+                plain.Set("1");
+                encryptor.Encrypt(plain, encrypted);
+                evaluator.ModSwitchToNext(encrypted, encdest_1);
+                evaluator.ModSwitchToNext(encdest_1, encdest_2);
+                decryptor.Decrypt(encdest_2, plain);
+                Assert.AreEqual(1ul, plain.CoeffCount);
+                Assert.AreEqual(1ul, plain[0]);
+            }
         }
 
         [TestMethod]
