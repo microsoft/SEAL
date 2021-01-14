@@ -80,6 +80,13 @@
         "vector": "cpp",
         "pointers": "cpp",
         "__functional_03": "cpp",
-        "multi_span": "cpp"
+        "multi_span": "cpp",
+        "*.tcc": "cpp",
+        "clocale": "cpp",
+        "compare": "cpp",
+        "concepts": "cpp",
+        "memory_resource": "cpp",
+        "ranges": "cpp",
+        "stop_token": "cpp"
     }
 }
