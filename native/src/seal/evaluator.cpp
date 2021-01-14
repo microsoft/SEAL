@@ -2458,7 +2458,7 @@ namespace seal
                 // qk is the special prime
                 uint64_t qk = key_modulus[key_modulus_size - 1].value();
                 uint64_t qp = plain_modulus.value();
-                uint64_t qk_inv_qp = context_.key_context_data()->rns_tool()->q_last_mod_p();
+                uint64_t qk_inv_qp = context_.key_context_data()->rns_tool()->inv_q_last_mod_p();
 
                 // Lazy reduction; this needs to be then reduced mod qi
                 CoeffIter t_last(get<1>(I)[decomp_modulus_size]);
