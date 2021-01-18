@@ -19,7 +19,11 @@
 
 // Are intrinsics enabled?
 #ifdef SEAL_USE_INTRIN
+#if defined(__aarch64__)
+#include <arm_neon.h>
+#else
 #include <x86intrin.h>
+#endif
 
 #ifdef SEAL_USE___BUILTIN_CLZLL
 #define SEAL_MSB_INDEX_UINT64(result, value)                                 \
