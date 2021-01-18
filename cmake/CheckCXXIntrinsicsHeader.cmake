@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
-# Check for intrin.h or x64intrin.h
+# Check for intrin.h or x86intrin.h
 if(SEAL_USE_INTRIN)
     if(MSVC)
         set(SEAL_INTRIN_HEADER "intrin.h")
@@ -19,7 +19,7 @@ if(SEAL_USE_INTRIN)
         if(SEAL_ARM64)
             set(SEAL_INTRIN_HEADER "arm_neon.h")    
         else()
-            set(SEAL_INTRIN_HEADER "x64intrin.h")
+            set(SEAL_INTRIN_HEADER "x86intrin.h")
         endif()
     endif()
 
