@@ -575,8 +575,7 @@ endif()
 # Configure SEALNet and NuGet package #
 #######################################
 
-# Create SEALNet.csproj, SEALNetExamples.csproj and SEALNetTest.csproj
-# for building dotnet with Visual Studio
+# Create SEALNet.csproj, SEALNetExamples.csproj, and SEALNetTest.csproj
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/src/SEALNet.csproj.in
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/src/SEALNet.csproj
@@ -615,12 +614,6 @@ set(SEAL_MACOS_SEAL_C_PATH "")
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.nuspec.in
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.nuspec
-    @ONLY)
-
-# Create SEALNet.targets from SEALNet.targets.in
-configure_file(
-    ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.targets.in
-    ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.targets
     @ONLY)
 
 # Supporting local building of NuGet package

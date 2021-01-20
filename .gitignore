@@ -18,7 +18,6 @@ dotnet/src/SEALNet.csproj
 dotnet/tests/SEALNetTest.csproj
 !dotnet/examples/SEALNetExamples.csproj.in
 dotnet/examples/SEALNetExamples.csproj
-dotnet/nuget/SEALNet.targets
 CMakeSettings.json
 
 # Build
