@@ -433,7 +433,7 @@ if(SEAL_BUILD_SEAL_C)
     endif()
 
     # Add source files to library and header files to install
-    add_subdirectory(native/src/seal/c)
+    add_subdirectory(${SEAL_INCLUDES_DIR}/seal/c)
     seal_set_version(sealc)
     if(SEAL_BUILD_STATIC_SEAL_C)
         seal_set_version_filename(sealc)
