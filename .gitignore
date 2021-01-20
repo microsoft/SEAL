@@ -20,6 +20,7 @@ dotnet/tests/SEALNetTest.csproj
 dotnet/examples/SEALNetExamples.csproj
 dotnet/nuget/SEALNet.targets
 CMakeSettings.json
+.vscode
 
 # Build
 bin/
