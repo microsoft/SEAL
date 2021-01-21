@@ -37,6 +37,7 @@ set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY OFF)
 
 # [option] CMAKE_BUILD_TYPE (default: "Release")
 # Build in one of the following modes: Release, Debug, MiniSizeRel, or RelWithDebInfo.
+# Most generators recognize these and can set the compiler flags accordingly.
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
     set_property(CACHE CMAKE_BUILD_TYPE PROPERTY
@@ -575,6 +576,16 @@ endif()
 # Configure SEALNet and NuGet package #
 #######################################
 
+# In Windows we will set the SEAL_C library path according to the CMake generator
+set(SEAL_WINDOWS_SEAL_C_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+if(GENERATOR_IS_MULTI_CONFIG)
+    # Is this the Visual Studio generator? If so, the output path will contain the configuration.
+    # We shall use CMAKE_BUILD_TYPE here, which by default will be "Release". The user has the
+    # option of changing this by explicitly specifying CMAKE_BUILD_TYPE, which multi-config
+    # generators otherwise ignore.
+    set(SEAL_WINDOWS_SEAL_C_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE})
+endif()
+
 # Create SEALNet.csproj, SEALNetExamples.csproj, and SEALNetTest.csproj
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/src/SEALNet.csproj.in
@@ -606,7 +617,7 @@ set(NUGET_MACOS_SEAL_C_PATH "")
 
 # Supporting local building of NuGet package
 if(WIN32)
-    set(NUGET_WINDOWS_SEAL_C_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sealc.dll)
+    set(NUGET_WINDOWS_SEAL_C_PATH ${SEAL_WINDOWS_SEAL_C_DIRECTORY}/sealc.dll)
 elseif(UNIX AND NOT APPLE)
     set(NUGET_LINUX_SEAL_C_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsealc.so)
 elseif(APPLE)
