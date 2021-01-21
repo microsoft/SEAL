@@ -594,33 +594,27 @@ configure_file(
 # dynamic library paths need to be specified explicitly in the NuGet
 # command. See dotnet/nuget/SEALNet.nuspec.in.
 
-# First create the multi-platform NuSpec file so disable all platform-specific
-# library paths
-unset(SEAL_WINDOWS_SEAL_C_PATH)
-unset(SEAL_LINUX_SEAL_C_PATH)
-unset(SEAL_MACOS_SEAL_C_PATH)
-
 # Create SEALNet-multi.nuspec for a multi-platform NuGet package
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet-multi.nuspec.in
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet-multi.nuspec
     @ONLY)
 
-set(SEAL_WINDOWS_SEAL_C_PATH "")
-set(SEAL_LINUX_SEAL_C_PATH "")
-set(SEAL_MACOS_SEAL_C_PATH "")
+set(NUGET_WINDOWS_SEAL_C_PATH "")
+set(NUGET_LINUX_SEAL_C_PATH "")
+set(NUGET_MACOS_SEAL_C_PATH "")
+
+# Supporting local building of NuGet package
+if(WIN32)
+    set(NUGET_WINDOWS_SEAL_C_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sealc.dll)
+elseif(UNIX AND NOT APPLE)
+    set(NUGET_LINUX_SEAL_C_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsealc.so)
+elseif(APPLE)
+    set(NUGET_MACOS_SEAL_C_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsealc.dylib)
+endif()
 
 # Create SEALNet.nuspec for a local NuGet pack from SEALNet.nuspec.in
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.nuspec.in
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.nuspec
     @ONLY)
-
-# Supporting local building of NuGet package
-if(WIN32)
-    set(SEAL_WINDOWS_SEAL_C_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sealc.dll)
-elseif(UNIX AND NOT APPLE)
-    set(SEAL_LINUX_SEAL_C_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsealc.so)
-elseif(APPLE)
-    set(SEAL_MACOS_SEAL_C_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsealc.dylib)
-endif()
