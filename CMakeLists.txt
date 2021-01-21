@@ -578,7 +578,8 @@ endif()
 
 # In Windows we will set the SEAL_C library path according to the CMake generator
 set(SEAL_WINDOWS_SEAL_C_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
-if(GENERATOR_IS_MULTI_CONFIG)
+get_property(SEAL_IS_MULTI_CONFIG_GENERATOR GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(SEAL_IS_MULTI_CONFIG_GENERATOR)
     # Is this the Visual Studio generator? If so, the output path will contain the configuration.
     # We shall use CMAKE_BUILD_TYPE here, which by default will be "Release". The user has the
     # option of changing this by explicitly specifying CMAKE_BUILD_TYPE, which multi-config
