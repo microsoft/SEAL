@@ -31,10 +31,10 @@
     <file src="$NUGET_ANDROIDX64_SEAL_C_PATH$" target="runtimes/android-x64/" />
     <file src="$NUGET_IOS64_SEAL_C_PATH$" target="runtimes/ios64/" />
     <file src="$NUGET_IOS64_SEAL_PATH$" target="runtimes/ios64/" />
-    <file src="../../build/bin/dotnet/$configuration$/netstandard2.0/SEALNet.dll" target="lib/netstandard2.0/" />
-    <file src="../../build/bin/dotnet/$configuration$/SEALNet.xml" target="lib/netstandard2.0/" />
-    <file src="../../build/bin/dotnet/ios/$configuration$/netstandard2.0/SEALNet.dll" target="lib/Xamarin.iOS10/" />
-    <file src="../../build/bin/dotnet/ios/$configuration$/SEALNet.xml" target="lib/Xamarin.iOS10/" />
+    <file src="@CMAKE_RUNTIME_OUTPUT_DIRECTORY@/dotnet/$configuration$/netstandard2.0/SEALNet.dll" target="lib/netstandard2.0/" />
+    <file src="@CMAKE_RUNTIME_OUTPUT_DIRECTORY@/dotnet/$configuration$/SEALNet.xml" target="lib/netstandard2.0/" />
+    <file src="@CMAKE_RUNTIME_OUTPUT_DIRECTORY@/dotnet/ios/$configuration$/netstandard2.0/SEALNet.dll" target="lib/Xamarin.iOS10/" />
+    <file src="@CMAKE_RUNTIME_OUTPUT_DIRECTORY@/dotnet/ios/$configuration$/SEALNet.xml" target="lib/Xamarin.iOS10/" />
     <file src="../../LICENSE" target="LICENSE" />
   </files>
 </package>
