@@ -11,6 +11,18 @@ cmake_minimum_required(VERSION 3.12)
 #   4. SEAL C++ tests                             #
 ###################################################
 
+# [option] CMAKE_BUILD_TYPE (default: "Release")
+# Build in one of the following modes: Release, Debug, MiniSizeRel, or RelWithDebInfo.
+# Most generators recognize these and can set the compiler flags accordingly. We set
+# the build type here before creating the project to prevent the CMake generator from
+# overriding our default of "Release".
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY
+        STRINGS "Release" "Debug" "MinSizeRel" "RelWithDebInfo")
+endif()
+message(STATUS "Build type (CMAKE_BUILD_TYPE): ${CMAKE_BUILD_TYPE}")
+
 project(SEAL VERSION 3.6.2 LANGUAGES CXX C)
 
 ########################
@@ -34,16 +46,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Make the install target depend on the all target (required by vcpkg)
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY OFF)
-
-# [option] CMAKE_BUILD_TYPE (default: "Release")
-# Build in one of the following modes: Release, Debug, MiniSizeRel, or RelWithDebInfo.
-# Most generators recognize these and can set the compiler flags accordingly.
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
-    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY
-        STRINGS "Release" "Debug" "MinSizeRel" "RelWithDebInfo")
-endif()
-message(STATUS "Build type (CMAKE_BUILD_TYPE): ${CMAKE_BUILD_TYPE}")
 
 # In Debug mode, define SEAL_DEBUG
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
