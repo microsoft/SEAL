@@ -282,9 +282,9 @@ steps:
   displayName: 'Run BinSkim'
   inputs:
     InputType: Basic
-    AnalyzeTarget: '$(Build.ArtifactStagingDirectory)\native\bin\x64\${{ parameters.configuration }}\*.exe'
+    AnalyzeTarget: '$(Build.ArtifactStagingDirectory)\**\${{ parameters.configuration }}\**\?(*.exe|*.dll)'
     AnalyzeSymPath: '**\bin\**\*.pdb'
-  enabled: false
+  enabled: true
 
 - task: ms.vss-governance-buildtask.governance-build-task-component-detection.ComponentGovernanceComponentDetection@0
   displayName: 'Component Detection'
