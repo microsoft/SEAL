@@ -1,6 +1,6 @@
 # Microsoft SEAL
 
-Microsoft SEAL is an easy-to-use open-source ([MIT licensed](LICENSE)) homomorphic encryption library developed by the Cryptography and Privacy Research group at Microsoft.
+Microsoft SEAL is an easy-to-use open-source ([MIT licensed](LICENSE)) homomorphic encryption library developed by the Cryptography and Privacy Research Group at Microsoft.
 Microsoft SEAL is written in modern standard C++ and is easy to compile and run in many different environments.
 For more information about the Microsoft SEAL project, see [sealcrypto.org](https://www.microsoft.com/en-us/research/project/microsoft-seal).
 
@@ -219,7 +219,7 @@ A global install requires elevated (root or administrator) privileges.
 
 We assume that Microsoft SEAL has been cloned into a directory called `SEAL` and all commands presented below are assumed to be executed in the directory `SEAL`.
 
-You can build Microsoft SEAL library (out-of-source) for your machine by executing the following commands:
+You can build the Microsoft SEAL library (out-of-source) for your machine by executing the following commands:
 
 ```PowerShell
 cmake -S . -B build
@@ -277,7 +277,7 @@ Installing the library in Windows works as well. Instead of using the `sudo` com
 
 Visual Studio 2019 provides support for CMake-based projects. You can select the menu option `File / Open / Folder...` and navigate to the folder where the Microsoft SEAL repository is located. After opening the folder, Visual Studio will detect that this is a CMake-based project and will enable the menu command `Project / CMake settings for SEAL`. This will open the CMake settings editor that provides a user interface where you can create different configurations and set different CMake options.
 
-After the build completes, the output static library `seal.lib` can be found in `build\lib\Release\`.
+After the build completes, the output static library `seal-<version>.lib` can be found in `build\lib\` or `build\lib\Release\`.
 When linking with applications, you need to add `native\src\` (full path) as an include directory to locate the Microsoft SEAL header files, or use CMake as is explained in [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake).
 
 #### Building for Android and iOS
@@ -389,7 +389,7 @@ The SEAL_C library is meant to be used only by the .NET library, not by end-user
 #### Windows, Linux, and macOS
 
 For compiling .NET code you will need to install a [.NET Core SDK (>= 3.1)](https://dotnet.microsoft.com/download).
-Building the SEAL_C library with CMake will generates project files for the .NET wrapper library, examples, and unit tests.
+Building the SEAL_C library with CMake will generate project files for the .NET wrapper library, examples, and unit tests.
 The SEAL_C library must be discoverable when running a .NET application, e.g., be present in the same directory as your executable, which is taken care of by the .NET examples and tests project files.
 Run the following scripts to build each project:
 
