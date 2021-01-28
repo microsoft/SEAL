@@ -130,7 +130,7 @@ namespace seal
         }
 
         /**
-        Constructs a new ciphertext by copying a given one.
+        Creates a new ciphertext by copying a given one.
 
         @param[in] copy The ciphertext to copy from
         */
@@ -144,7 +144,7 @@ namespace seal
         Ciphertext(Ciphertext &&source) = default;
 
         /**
-        Constructs a new ciphertext by copying a given one.
+        Creates a new ciphertext by copying a given one.
 
         @param[in] copy The ciphertext to copy from
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool

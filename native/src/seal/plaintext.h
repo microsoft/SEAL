@@ -164,21 +164,21 @@ namespace seal
         }
 
         /**
-        Constructs a new plaintext by copying a given one.
+        Creates a new plaintext by copying a given one.
 
         @param[in] copy The plaintext to copy from
         */
         Plaintext(const Plaintext &copy) = default;
 
         /**
-        Constructs a new plaintext by moving a given one.
+        Creates a new plaintext by moving a given one.
 
         @param[in] source The plaintext to move from
         */
         Plaintext(Plaintext &&source) = default;
 
         /**
-        Constructs a new plaintext by copying a given one.
+        Creates a new plaintext by copying a given one.
 
         @param[in] copy The plaintext to copy from
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool

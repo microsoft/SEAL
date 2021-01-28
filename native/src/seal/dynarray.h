@@ -206,7 +206,7 @@ namespace seal
         {}
 #endif
         /**
-        Constructs a new DynArray by copying a given one.
+        Creates a new DynArray by copying a given one.
 
         @param[in] copy The DynArray to copy from
         */
@@ -219,7 +219,7 @@ namespace seal
         }
 
         /**
-        Constructs a new DynArray by moving a given one.
+        Creates a new DynArray by moving a given one.
 
         @param[in] source The DynArray to move from
         */
