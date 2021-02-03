@@ -1,9 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include <benchmark/benchmark.h>
-#include <seal/seal.h>
-#include <seal/util/rlwe.h>
+#include "benchmark/benchmark.h"
+#include "seal/seal.h"
+#include "seal/util/rlwe.h"
 
 namespace sealbench
 {

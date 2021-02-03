@@ -2,9 +2,9 @@
 // Licensed under the MIT license.
 
 #include "bench.h"
-#include <benchmark/benchmark.h>
+#include "benchmark/benchmark.h"
 #include <iomanip>
-#include <seal/seal.h>
+#include "seal/seal.h"
 using namespace benchmark;
 using namespace seal;
 using namespace sealbench;
