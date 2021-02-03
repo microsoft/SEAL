@@ -34,7 +34,7 @@ The [EVA compiler for CKKS](https://arxiv.org/abs/1912.11951) is available at [G
     - [Basic CMake Options](#basic-cmake-options)
     - [Advanced CMake Options](#advanced-cmake-options)
     - [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake)
-    - [Examples and Tests](#examples-and-tests)
+    - [Examples, Tests, and Benchmark](#examples-tests-and-benchmark)
   - [Building .NET Components](#building-net-components)
     - [Windows, Linux, and macOS](#windows-linux-and-macos)
     - [Android and iOS](#android-and-ios)
@@ -118,6 +118,7 @@ The optional dependencies and their tested versions (other versions may work as 
 | [ZLIB](https://github.com/madler/zlib)             | 1.2.11         | Compressed serialization                         |
 | [Zstandard](https://github.com/facebook/zstd)      | 1.4.5          | Compressed serialization (much faster than ZLIB) |
 | [GoogleTest](https://github.com/google/googletest) | 1.10.0         | For running tests                                |
+| [GoogleBenchmark](https://github.com/google/benchmark)  | 1.5.2          | For running benchmark                            |
 
 #### Microsoft GSL
 
@@ -176,7 +177,7 @@ The examples are available (and identical) in C++ and C#, and are divided into s
 
 It is recommended to read the comments and the code snippets along with command line printout from running an example.
 For easier navigation, command line printout provides the line number in the associated source file where the associated code snippets start.
-To build the examples, see [Examples and Tests](#examples-and-tests) (C++) and [Building .NET Components](#building-net-components) (C#).
+To build the examples, see [Examples, Tests, and Benchmark](#examples-tests-and-benchmark) (C++) and [Building .NET Components](#building-net-components) (C#).
 
 **Note:** It is impossible to know how to use Microsoft SEAL correctly without studying examples 1&ndash;6.
 They are designed to provide the reader with the necessary conceptual background on homomorphic encryption.
@@ -267,6 +268,7 @@ When using the "Visual Studio 16 2019" generator you can use the **Developer Com
 cmake -S . -B build -G "Visual Studio 16 2019" -A x64
 cmake --build build --config Release
 ```
+
 ```PowerShell
 # Generate and build for x86 in Release mode
 cmake -S . -B build -G "Visual Studio 16 2019" -A Win32
@@ -318,6 +320,7 @@ The following options can be used with CMake to configure the build. The default
 | CMAKE_BUILD_TYPE    | **Release**</br>Debug</br>RelWithDebInfo</br>MinSizeRel</br> | `Debug` and `MinSizeRel` have worse run-time performance. `Debug` inserts additional assertion code. Set to `Release` unless you are developing Microsoft SEAL itself or debugging some complex issue. |
 | SEAL_BUILD_EXAMPLES | ON / **OFF**                                                 | Build the C++ examples in [native/examples](native/examples).                                                                                                                                          |
 | SEAL_BUILD_TESTS    | ON / **OFF**                                                 | Build the tests to check that Microsoft SEAL works correctly.                                                                                                                                          |
+| SEAL_BUILD_BENCH    | ON / **OFF**                                                 | Build benchmark to check Microsoft SEAL's performance. |
 | SEAL_BUILD_DEPS     | **ON** / OFF                                                 | Set to `ON` to automatically download and build [optional dependencies](#optional-dependencies); otherwise CMake will attempt to locate pre-installed dependencies.                                    |
 | SEAL_USE_MSGSL      | **ON** / OFF                                                 | Build with Microsoft GSL support.                                                                                                                                                                      |
 | SEAL_USE_ZLIB       | **ON** / OFF                                                 | Build with ZLIB support.                                                                                                                                                                               |
@@ -329,9 +332,11 @@ The following options can be used with CMake to configure the build. The default
 
 As usual, these options can be passed to CMake with the `-D` flag.
 For example, one could run
+
 ```PowerShell
 cmake -S . -B build -DSEAL_BUILD_EXAMPLES=ON
 ```
+
 to configure a release build of a static Microsoft SEAL library and also build the examples.
 
 #### Advanced CMake Options
@@ -365,10 +370,10 @@ cmake . -DCMAKE_PREFIX_PATH=~/mylibs
 
 If Microsoft SEAL was installed using a package manager like vcpkg or Homebrew, please refer to their documentation for how to link with the installed library. For example, vcpkg requires you to specify the vcpkg CMake toolchain file when configuring your project.
 
-#### Examples and Tests
+#### Examples, Tests, and Benchmark
 
-When building Microsoft SEAL, examples and tests can be built by setting `SEAL_BUILD_EXAMPLES=ON` and `SEAL_BUILD_TESTS=ON`; see [Basic CMake Options](basic-cmake-options).
-Alternatively, both [examples](native/examples/CMakeLists.txt) and [tests](native/tests/CMakeLists.txt) can be built as standalone CMake projects linked with Microsoft SEAL (installed in `~/mylibs`), by following the commands below.
+When building Microsoft SEAL, examples, tests, and benchmark can be built by setting `SEAL_BUILD_EXAMPLES=ON`, `SEAL_BUILD_TESTS=ON`, and `SEAL_BUILD_BENCH=ON`; see [Basic CMake Options](basic-cmake-options).
+Alternatively, [examples](native/examples/CMakeLists.txt), [tests](native/tests/CMakeLists.txt), and [benchmark](native/bench/CMakeLists.txt) can be built as standalone CMake projects linked with Microsoft SEAL (installed in `~/mylibs`), by following the commands below.
 Omit setting `SEAL_ROOT` if the library is installed globally.
 
 ```PowerShell
@@ -376,6 +381,13 @@ cd native/<examples|tests>
 cmake -S . -B build -DSEAL_ROOT=~/mylibs
 cmake --build build
 ```
+
+By default, benchmark runs for a vector of parameters and primitives, which can be overwelmingly informative.
+To execute a subset of benchmark cases, see [Google Benchmark README](https://github.com/google/benchmark/blob/master/README.md#running-a-subset-of-benchmarks).
+For advanced users, the `bm_parms_vec` variable in [native/bench/bench.cpp](native/bench/bench.cpp) can be overwritten with custom paramter sets.
+
+**Note**: Benchmark in Microsoft SEAL is created for experimental purpose only, therefore it allows insecure parameters.
+Do not follow benchmark as examples.
 
 ### Building .NET Components
 

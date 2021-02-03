@@ -1,0 +1,60 @@
+# Copyright (c) Microsoft Corporation. All rights reserved.
+# Licensed under the MIT license.
+
+cmake_minimum_required(VERSION 3.12)
+
+project(SEALBench VERSION 3.6.1 LANGUAGES CXX)
+
+# If not called from root CMakeLists.txt
+if(NOT DEFINED SEAL_BUILD_BENCH)
+    set(SEAL_BUILD_BENCH ON)
+
+    # Import Microsoft SEAL
+    find_package(SEAL 3.6.1 EXACT REQUIRED)
+
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUTLIB_PATH})
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+    set(THIRDPARTY_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/thirdparty)
+else()
+    set(THIRDPARTY_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/../../thirdparty)
+endif()
+
+if(NOT DEFINED SEAL_BUILD_DEPS)
+    # [option] SEAL_BUILD_DEPS (default: ON)
+    # Download and build missing dependencies, throw error if disabled.
+    set(SEAL_BUILD_DEPS_OPTION_STR "Automatically download and build unmet dependencies")
+    option(SEAL_BUILD_DEPS ${SEAL_BUILD_DEPS_OPTION_STR} ON)
+endif()
+
+# if SEAL_BUILD_BENCH is ON, use GoogleBenchmark
+if(SEAL_BUILD_BENCH)
+    if(SEAL_BUILD_DEPS)
+        list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../../cmake)
+        set(SEAL_THIRDPARTY_DIR ${CMAKE_CURRENT_LIST_DIR}/../../thirdparty)
+        seal_fetch_thirdparty_content(ExternalBenchmark)
+    else()
+        find_package(benchmark REQUIRED)
+        if(NOT benchmark_FOUND)
+            message(FATAL_ERROR "GoogleBenchmark: not found")
+        else()
+            message(STATUS "GoogleBenchmark: found")
+        endif()
+    endif()
+
+    add_executable(sealbench)
+    target_sources(sealbench
+        PRIVATE
+            ${CMAKE_CURRENT_LIST_DIR}/bench.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/keygen.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/bfv.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/ckks.cpp
+    )
+
+    if(TARGET SEAL::seal)
+        target_link_libraries(sealbench PRIVATE SEAL::seal benchmark::benchmark)
+    elseif(TARGET SEAL::seal_shared)
+        target_link_libraries(sealbench PRIVATE SEAL::seal_shared benchmark::benchmark)
+    else()
+        message(FATAL_ERROR "Cannot find target SEAL::seal or SEAL::seal_shared")
+    endif()
+endif()
