@@ -222,7 +222,10 @@ namespace sealbench
         */
         void randomize_ct_bfv(seal::Ciphertext &ct)
         {
-            ct.resize(context_, std::size_t(2));
+            if (ct.parms_id() != context_.first_parms_id())
+            {
+                ct.resize(context_, std::size_t(2));
+            }
             auto &parms = context_.first_context_data()->parms();
             for (std::size_t i = 0; i < ct.size(); i++)
             {
@@ -236,7 +239,10 @@ namespace sealbench
         */
         void randomize_ct_ckks(seal::Ciphertext &ct)
         {
-            ct.resize(context_, std::size_t(2));
+            if (ct.parms_id() != context_.first_parms_id())
+            {
+                ct.resize(context_, std::size_t(2));
+            }
             auto &parms = context_.first_context_data()->parms();
             for (std::size_t i = 0; i < ct.size(); i++)
             {

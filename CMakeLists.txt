@@ -571,6 +571,18 @@ if(SEAL_BUILD_TESTS)
     add_subdirectory(native/tests)
 endif()
 
+######################
+# SEAL C++ benchmark #
+######################
+
+# [option] SEAL_BUILD_BENCH
+set(SEAL_BUILD_BENCH_OPTION_STR "Build C++ benchmark for Microsoft SEAL")
+option(SEAL_BUILD_BENCH ${SEAL_BUILD_BENCH_OPTION_STR} OFF)
+
+if(SEAL_BUILD_BENCH)
+    add_subdirectory(native/bench)
+endif()
+
 #######################################
 # Configure SEALNet and NuGet package #
 #######################################
