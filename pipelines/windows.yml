@@ -55,6 +55,7 @@ steps:
     msbuildArchitecture: 'x64'
     platform: 'x64'
     configuration: '${{ parameters.configuration }}'
+    msbuildArguments: '/p:ForceImportBeforeCppTargets=$(Build.SourcesDirectory)\pipelines\build.props'
 
 - task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
   displayName: 'Run Roslyn Analyzers'
@@ -282,7 +283,7 @@ steps:
   displayName: 'Run BinSkim'
   inputs:
     InputType: Basic
-    AnalyzeTarget: '$(Build.ArtifactStagingDirectory)\**\${{ parameters.configuration }}\**\?(*.exe|*.dll)'
+    AnalyzeTarget: '$(Build.ArtifactStagingDirectory)\**\${{ parameters.configuration }}\**\sealc.dll'
     AnalyzeSymPath: '**\bin\**\*.pdb'
   enabled: true
 

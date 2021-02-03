@@ -1,0 +1,10 @@
+<Project>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <ControlFlowGuard>Guard</ControlFlowGuard>
+    </ClCompile>
+    <Link>
+      <AdditionalOptions>%(AdditionalOptions) /guard:cf </AdditionalOptions>
+    </Link>
+  </ItemDefinitionGroup>
+</Project>
