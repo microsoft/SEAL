@@ -448,6 +448,11 @@ if(SEAL_BUILD_SEAL_C)
 
     target_link_libraries(sealc PUBLIC seal)
 
+    # Ensure PDB is generated even in Release mode
+    if(MSVC)
+        target_link_options(sealc PUBLIC /DEBUG)
+    endif()
+
     seal_install_target(sealc SEALTargets)
 endif()
 
