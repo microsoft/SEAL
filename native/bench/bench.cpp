@@ -99,20 +99,16 @@ namespace sealbench
             SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateRelinInplace, bm_ckks_relin_inplace, bm_env_ckks);
             SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateRotate, bm_ckks_rotate, bm_env_ckks);
         }
-        //        SEAL_BENCHMARK_REGISTER(Util, n, log_q, NTTForward, bm_ntt_forward, bm_env_ckks);
-        //        SEAL_BENCHMARK_REGISTER(Util, n, log_q, NTTBackward, bm_ntt_backward, bm_env_ckks);
-        //        SEAL_BENCHMARK_REGISTER(Util, n, log_q, NTTLazyForward, bm_ntt_lazy_forward, bm_env_ckks);
-        //        SEAL_BENCHMARK_REGISTER(Util, n, log_q, NTTLazyBackward, bm_ntt_lazy_backward, bm_env_ckks);
-        //        SEAL_BENCHMARK_REGISTER(Util, n, log_q, FFTForward, bm_fft_forward, bm_env_ckks);
-        //        SEAL_BENCHMARK_REGISTER(Util, n, log_q, FFTBackward, bm_fft_backward, bm_env_ckks);
     }
 
 } // namespace sealbench
 
 int main(int argc, char **argv)
 {
-    vector<pair<size_t, vector<Modulus>>> bm_parms_vec;
+    cout << "Microsoft SEAL version: " << SEAL_VERSION << endl;
+    cout << "SEALBenchmark is performing precomputation ..." << endl;
 
+    vector<pair<size_t, vector<Modulus>>> bm_parms_vec;
     unordered_map<EncryptionParameters, shared_ptr<BMEnv>> bm_env_map;
 
     // Initialize bm_parms_vec with BFV default paramaters with 128-bit security.
@@ -120,10 +116,6 @@ int main(int argc, char **argv)
     // SEAL benchmark allow insecure parameters for experimental purpose.
     // DO NOT USE SEAL BENCHMARK AS EXAMPLE.
     auto default_parms = seal::util::global_variables::GetDefaultCoeffModulus128();
-
-    cout << "Microsoft SEAL version: " << SEAL_VERSION << endl;
-    cout << "SEALBenchmark is performing precomputation ..." << endl;
-
     for (auto &i : default_parms)
     {
         bm_parms_vec.emplace_back(i);
@@ -150,6 +142,7 @@ int main(int argc, char **argv)
         }
     }
 
+    // Now that precomputation have taken place, here is the total memory consumption by SEAL memory pool.
     cout << "[" << setw(7) << right << (seal::MemoryManager::GetPool().alloc_byte_count() >> 20) << " MB] "
          << "Total allocation from the memory pool" << endl;
 
@@ -162,6 +155,8 @@ int main(int argc, char **argv)
     Initialize(&argc, argv);
     RunSpecifiedBenchmarks();
 
+    // After running all benchmark cases, we print again the total memory consumption by SEAL memory pool.
+    // This value should be larger than the previous amount but not by much.
     cout << "[" << setw(7) << right << (seal::MemoryManager::GetPool().alloc_byte_count() >> 20) << " MB] "
          << "Total allocation from the memory pool" << endl;
 }

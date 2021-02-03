@@ -64,6 +64,9 @@ namespace sealbench
             }
         }
 
+        /**
+        Getter methods.
+        */
         SEAL_NODISCARD const seal::EncryptionParameters &parms() const
         {
             return parms_;
@@ -174,11 +177,18 @@ namespace sealbench
             return ct_;
         }
 
+        /**
+        In most cases, the scale is chosen half as large as the second last prime (or the last if there is only one).
+        This avoids "scale out of bound" error in ciphertext/plaintext multiplications.
+        */
         SEAL_NODISCARD double safe_scale()
         {
             return pow(2.0, (context_.first_context_data()->parms().coeff_modulus().end() - 1)->bit_count() / 2 - 1);
         }
 
+        /**
+        Fill a buffer with a number of random values that are uniformly samples from 0 ~ modulus - 1.
+        */
         void randomize_array_mod(std::uint64_t *data, std::size_t count, const seal::Modulus &modulus)
         {
             constexpr std::uint64_t max_random = static_cast<std::uint64_t>(0xFFFFFFFFFFFFFFFFULL);
@@ -193,6 +203,9 @@ namespace sealbench
             });
         }
 
+        /**
+        Sample an RNS polynomial from uniform distribution.
+        */
         void randomize_poly_rns(std::uint64_t *data, const seal::EncryptionParameters &parms)
         {
             std::size_t coeff_count = parms.poly_modulus_degree();
@@ -204,6 +217,9 @@ namespace sealbench
             }
         }
 
+        /**
+        Create a uniform random ciphertext in BFV using the highest-level parameters.
+        */
         void randomize_ct_bfv(seal::Ciphertext &ct)
         {
             ct.resize(context_, std::size_t(2));
@@ -215,6 +231,9 @@ namespace sealbench
             ct.is_ntt_form() = false;
         }
 
+        /**
+        Create a uniform random ciphertext in CKKS using the highest-level parameters.
+        */
         void randomize_ct_ckks(seal::Ciphertext &ct)
         {
             ct.resize(context_, std::size_t(2));
@@ -226,6 +245,9 @@ namespace sealbench
             ct.is_ntt_form() = true;
         }
 
+        /**
+        Create a uniform random plaintext (single modulus) in BFV.
+        */
         void randomize_pt_bfv(seal::Plaintext &pt)
         {
             pt.resize(parms_.poly_modulus_degree());
@@ -233,6 +255,9 @@ namespace sealbench
             randomize_array_mod(pt.data(), parms_.poly_modulus_degree(), parms_.plain_modulus());
         }
 
+        /**
+        Create a uniform random plaintext (RNS poly) in CKKS.
+        */
         void randomize_pt_ckks(seal::Plaintext &pt)
         {
             auto &parms = context_.first_context_data()->parms();
@@ -248,12 +273,18 @@ namespace sealbench
             randomize_poly_rns(pt.data(), parms);
         }
 
+        /**
+        Create a vector of slot_count uniform random integers modulo plain_modululs.
+        */
         void randomize_message_uint64(std::vector<std::uint64_t> &msg)
         {
             msg.resize(batch_encoder_->slot_count());
             randomize_array_mod(msg.data(), batch_encoder_->slot_count(), parms_.plain_modulus());
         }
 
+        /**
+        Create a vector of slot_count uniform random double precision values in [0, 1).
+        */
         void randomize_message_double(std::vector<double> &msg)
         {
             msg.resize(ckks_encoder_->slot_count());
@@ -272,6 +303,11 @@ namespace sealbench
         std::shared_ptr<seal::CKKSEncoder> ckks_encoder_{ nullptr };
         std::shared_ptr<seal::Evaluator> evaluator_{ nullptr };
         std::shared_ptr<seal::UniformRandomGenerator> prng_{ nullptr };
+
+        /**
+        The following data members are created as input/output containers for benchmark cases.
+        This avoids repeated and unnecessary allocation/deallocation in benchmark runs.
+        */
         seal::SecretKey sk_;
         seal::PublicKey pk_;
         seal::RelinKeys rlk_;
@@ -282,14 +318,6 @@ namespace sealbench
         std::vector<seal::Plaintext> pt_;
         std::vector<seal::Ciphertext> ct_;
     }; // namespace BMEnv
-
-    //    void bm_keygen_secret(benchmark::State &state, const seal::EncryptionParameters &parms);
-    //
-    //    void bm_keygen_public(benchmark::State &state, const seal::EncryptionParameters &parms);
-    //
-    //    void bm_keygen_relin(benchmark::State &state, const seal::EncryptionParameters &parms);
-    //
-    //    void bm_keygen_galois(benchmark::State &state, const seal::EncryptionParameters &parms);
 
     // KeyGen benchmark cases
     void bm_keygen_secret(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
