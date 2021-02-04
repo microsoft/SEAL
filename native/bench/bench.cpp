@@ -15,18 +15,10 @@ namespace sealbench
     /**
     Wraps benchmark::RegisterBenchmark to use microsecond and accepts std::string name.
     */
-    template <class Lambda, class... Args>
-    internal::Benchmark *register_bm(string name, Lambda &&fn, Args &&... args)
-    {
-        return RegisterBenchmark(name.c_str(), [=](State &st) { fn(st, args...); })
-            ->Unit(benchmark::kMicrosecond)
-            ->Iterations(10);
-    }
-
 #define SEAL_BENCHMARK_REGISTER(category, n, log_q, name, func, ...)                                                \
-    register_bm(                                                                                                    \
-        string("n=") + to_string(n) + string(" / log_q=") + to_string(log_q) + string(" / " #category " / " #name), \
-        func, __VA_ARGS__)
+    RegisterBenchmark(                                                                                                    \
+        (string("n=") + to_string(n) + string(" / log_q=") + to_string(log_q) + string(" / " #category " / " #name)).c_str(), \
+        [=](State &st) { func(st, __VA_ARGS__); })->Unit(benchmark::kMicrosecond)->Iterations(10);
 
     void register_bm_family(
         const pair<size_t, vector<Modulus>> &parms, unordered_map<EncryptionParameters, shared_ptr<BMEnv>> &bm_env_map)
