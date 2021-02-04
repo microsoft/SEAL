@@ -17,7 +17,8 @@ android {
             cmake {
                 cppFlags ""
                 arguments "-DSEAL_BUILD_SEAL_C=1",
-                          "-DSEAL_USE_INTRIN=0"
+                          "-DSEAL_USE_INTRIN=1",
+                          "-C", "$rootDir/../cmake/intrinsics.arm64.cmake"
             }
         }
         ndk {
@@ -33,7 +34,7 @@ android {
     }
     externalNativeBuild {
         cmake {
-            path "../../CMakeLists.txt"
+            path "$rootDir/../CMakeLists.txt"
             version "3.12.0+"
         }
     }
