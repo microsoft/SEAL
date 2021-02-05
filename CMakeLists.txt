@@ -358,6 +358,14 @@ if(NOT BUILD_SHARED_LIBS)
         endif()
     endif()
 
+    if(MSVC AND SEAL_SECURE_COMPILE_OPTIONS)
+        target_link_options(seal PUBLIC /DEBUG)
+
+        # Control Flow Guard / Spectre
+        target_compile_options(seal PUBLIC /guard:cf)
+        target_compile_options(seal PUBLIC /Qspectre)
+    endif()
+
 # Build only a shared library
 else()
     add_library(seal_shared SHARED ${SEAL_SOURCE_FILES})
@@ -448,9 +456,14 @@ if(SEAL_BUILD_SEAL_C)
 
     target_link_libraries(sealc PUBLIC seal)
 
-    # Ensure PDB is generated even in Release mode
-    if(MSVC)
+    if(MSVC AND SEAL_SECURE_COMPILE_OPTIONS)
         target_link_options(sealc PUBLIC /DEBUG)
+
+        # Control Flow Guard / Spectre
+        target_compile_options(sealc PUBLIC /guard:cf)
+        target_compile_options(sealc PUBLIC /Qspectre)
+        target_link_options(sealc PUBLIC /guard:cf)
+        target_link_options(sealc PUBLIC /DYNAMICBASE)
     endif()
 
     seal_install_target(sealc SEALTargets)
