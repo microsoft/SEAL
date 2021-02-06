@@ -37,6 +37,7 @@ include(CheckCXXSourceCompiles)
 include(CheckCXXSourceRuns)
 include(CheckTypeSize)
 include(CheckSymbolExists)
+
 # Extra modules
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 include(SEALMacros)
@@ -63,6 +64,11 @@ set(SEAL_USE_CXX17_OPTION_STR "Use C++17")
 option(SEAL_USE_CXX17 ${SEAL_USE_CXX17_OPTION_STR} ON)
 # Enable features from C++17 if available, disable features if set to OFF.
 include(EnableCXX17)
+
+# Enable security-related compile options (MSVC only)
+set(SEAL_SECURE_COMPILE_OPTIONS_OPTIONS_STR "Enable Control Flow Guard and Spectre mitigations (MSVC only)")
+option(SEAL_SECURE_COMPILE_OPTIONS ${SEAL_SECURE_COMPILE_OPTIONS_OPTIONS_STR} OFF)
+mark_as_advanced(SEAL_SECURE_COMPILE_OPTIONS)
 
 # Path for outupt
 if(ANDROID_ABI)
@@ -358,12 +364,9 @@ if(NOT BUILD_SHARED_LIBS)
         endif()
     endif()
 
-    if(MSVC AND SEAL_SECURE_COMPILE_OPTIONS)
-        target_link_options(seal PUBLIC /DEBUG)
-
-        # Control Flow Guard / Spectre
-        target_compile_options(seal PUBLIC /guard:cf)
-        target_compile_options(seal PUBLIC /Qspectre)
+    # Set secure compile options if SEAL_SECURE_COMPILE_OPTIONS is ON; only supported on MSVC
+    if(SEAL_SECURE_COMPILE_OPTIONS)
+        seal_set_secure_compile_options(seal PUBLIC)
     endif()
 
 # Build only a shared library
