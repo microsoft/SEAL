@@ -1,7 +1,20 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+#if (SEAL_COMPILER == SEAL_COMPILER_GCC)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wconversion"
+#elif (SEAL_COMPILER == SEAL_COMPILER_CLANG)
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wconversion"
+#endif
 #include "benchmark/benchmark.h"
+#if (SEAL_COMPILER == SEAL_COMPILER_GCC)
+#pragma GCC diagnostic pop
+#elif (SEAL_COMPILER == SEAL_COMPILER_CLANG)
+#pragma clang diagnostic pop
+#endif
+
 #include "seal/seal.h"
 #include "seal/util/rlwe.h"
 
@@ -294,9 +307,7 @@ namespace sealbench
         void randomize_message_double(std::vector<double> &msg)
         {
             msg.resize(ckks_encoder_->slot_count());
-            std::transform(msg.begin(), msg.end(), msg.begin(), [&](std::uint64_t rand) {
-                return static_cast<double>(std::rand()) / RAND_MAX;
-            });
+            std::generate(msg.begin(), msg.end(), []() { return static_cast<double>(std::rand()) / RAND_MAX; });
         }
 
     private:

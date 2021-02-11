@@ -3,7 +3,7 @@
 ## Version 3.6.2
 
 - Fixed a member variable initialization order bug in [SafeByteBuffer](native/src/seal/util/streambuf.h).
-- Added benchmark that depends on Google Benchmark in [benchmark](native/bench).
+- Added benchmarks that depends on Google Benchmark in [native/bench](native/bench).
 
 ## Version 3.6.1
 

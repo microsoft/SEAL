@@ -33,8 +33,18 @@ if(NOT benchmark)
     mark_as_advanced(FETCHCONTENT_SOURCE_DIR_BENCHMARK)
     mark_as_advanced(FETCHCONTENT_UPDATES_DISCONNECTED_BENCHMARK)
 
+    if(NOT WIN32)
+        # Google Benchmark contains unsafe conversions so force -Wno-conversion temporarily
+        set(OLD_CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS})
+        set(CMAKE_CXX_FLAGS "${OLD_CMAKE_CXX_FLAGS} -Wno-conversion")
+    endif()
+
     add_subdirectory(
         ${benchmark_SOURCE_DIR}
         ${THIRDPARTY_BINARY_DIR}/benchmark-src
         EXCLUDE_FROM_ALL)
+
+    if(NOT WIN32)
+        set(CMAKE_CXX_FLAGS ${OLD_CMAKE_CXX_FLAGS})
+    endif()
 endif()

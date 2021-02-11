@@ -112,13 +112,13 @@ Other package managers offer varying amounts of opportunities for configuring th
 
 The optional dependencies and their tested versions (other versions may work as well) are as follows:
 
-| Optional dependency                                | Tested version | Use                                              |
-| -------------------------------------------------- | -------------- | ------------------------------------------------ |
-| [Microsoft GSL](https://github.com/microsoft/GSL)  | 3.1.0          | API extensions                                   |
-| [ZLIB](https://github.com/madler/zlib)             | 1.2.11         | Compressed serialization                         |
-| [Zstandard](https://github.com/facebook/zstd)      | 1.4.5          | Compressed serialization (much faster than ZLIB) |
-| [GoogleTest](https://github.com/google/googletest) | 1.10.0         | For running tests                                |
-| [GoogleBenchmark](https://github.com/google/benchmark)  | 1.5.2          | For running benchmark                            |
+| Optional dependency                                    | Tested version | Use                                              |
+| ------------------------------------------------------ | -------------- | ------------------------------------------------ |
+| [Microsoft GSL](https://github.com/microsoft/GSL)      | 3.1.0          | API extensions                                   |
+| [ZLIB](https://github.com/madler/zlib)                 | 1.2.11         | Compressed serialization                         |
+| [Zstandard](https://github.com/facebook/zstd)          | 1.4.5          | Compressed serialization (much faster than ZLIB) |
+| [GoogleTest](https://github.com/google/googletest)     | 1.10.0         | For running tests                                |
+| [GoogleBenchmark](https://github.com/google/benchmark) | 1.5.2          | For running benchmarks                           |
 
 #### Microsoft GSL
 
@@ -320,7 +320,7 @@ The following options can be used with CMake to configure the build. The default
 | CMAKE_BUILD_TYPE    | **Release**</br>Debug</br>RelWithDebInfo</br>MinSizeRel</br> | `Debug` and `MinSizeRel` have worse run-time performance. `Debug` inserts additional assertion code. Set to `Release` unless you are developing Microsoft SEAL itself or debugging some complex issue. |
 | SEAL_BUILD_EXAMPLES | ON / **OFF**                                                 | Build the C++ examples in [native/examples](native/examples).                                                                                                                                          |
 | SEAL_BUILD_TESTS    | ON / **OFF**                                                 | Build the tests to check that Microsoft SEAL works correctly.                                                                                                                                          |
-| SEAL_BUILD_BENCH    | ON / **OFF**                                                 | Build benchmark to check Microsoft SEAL's performance. |
+| SEAL_BUILD_BENCH    | ON / **OFF**                                                 | Build the performance benchmark.                                                                                                                                                                      |
 | SEAL_BUILD_DEPS     | **ON** / OFF                                                 | Set to `ON` to automatically download and build [optional dependencies](#optional-dependencies); otherwise CMake will attempt to locate pre-installed dependencies.                                    |
 | SEAL_USE_MSGSL      | **ON** / OFF                                                 | Build with Microsoft GSL support.                                                                                                                                                                      |
 | SEAL_USE_ZLIB       | **ON** / OFF                                                 | Build with ZLIB support.                                                                                                                                                                               |
@@ -349,6 +349,7 @@ The following options can be used with CMake to further configure the build. Mos
 | SEAL_BUILD_STATIC_SEAL_C             | ON / **OFF**              | Set to `ON` to build SEAL_C as a static library instead of a shared library.                                                                                                                                                                                                                             |
 | SEAL_DEFAULT_PRNG                    | **Blake2xb**</br>Shake256 | Microsoft SEAL supports both Blake2xb and Shake256 XOFs for generating random bytes. Blake2xb is much faster, but it is not standardized, whereas Shake256 is a FIPS standard.                                                                                                                           |
 | SEAL_USE_GAUSSIAN_NOISE              | ON / **OFF**              | Set to `ON` to use a non-constant time rounded continuous Gaussian for the error distribution; otherwise a centered binomial distribution &ndash; with slightly larger standard deviation &ndash; is used.                                                                                               |
+| SEAL_SECURE_COMPILE_OPTIONS          | ON / **OFF**              | Set to `ON` to compile/link with Control-Flow Guard (`/guard:cf`) and Spectre mitigations (`/Qspectre`). This has an effect only when compiling with MSVC.                                                                                                                                               |
 
 #### Linking with Microsoft SEAL through CMake
 
@@ -370,24 +371,24 @@ cmake . -DCMAKE_PREFIX_PATH=~/mylibs
 
 If Microsoft SEAL was installed using a package manager like vcpkg or Homebrew, please refer to their documentation for how to link with the installed library. For example, vcpkg requires you to specify the vcpkg CMake toolchain file when configuring your project.
 
-#### Examples, Tests, and Benchmark
+#### Examples, Tests, and Benchmarks
 
-When building Microsoft SEAL, examples, tests, and benchmark can be built by setting `SEAL_BUILD_EXAMPLES=ON`, `SEAL_BUILD_TESTS=ON`, and `SEAL_BUILD_BENCH=ON`; see [Basic CMake Options](basic-cmake-options).
+When building Microsoft SEAL, examples, tests, and benchmarks can be built by setting `SEAL_BUILD_EXAMPLES=ON`, `SEAL_BUILD_TESTS=ON`, and `SEAL_BUILD_BENCH=ON`; see [Basic CMake Options](basic-cmake-options).
 Alternatively, [examples](native/examples/CMakeLists.txt), [tests](native/tests/CMakeLists.txt), and [benchmark](native/bench/CMakeLists.txt) can be built as standalone CMake projects linked with Microsoft SEAL (installed in `~/mylibs`), by following the commands below.
 Omit setting `SEAL_ROOT` if the library is installed globally.
 
 ```PowerShell
-cd native/<examples|tests>
+cd native/<examples|tests|bench>
 cmake -S . -B build -DSEAL_ROOT=~/mylibs
 cmake --build build
 ```
 
-By default, benchmark runs for a vector of parameters and primitives, which can be overwelmingly informative.
+By default, benchmarks run for a vector of parameters and primitives, which can be overwelmingly informative.
 To execute a subset of benchmark cases, see [Google Benchmark README](https://github.com/google/benchmark/blob/master/README.md#running-a-subset-of-benchmarks).
 For advanced users, the `bm_parms_vec` variable in [native/bench/bench.cpp](native/bench/bench.cpp) can be overwritten with custom paramter sets.
 
-**Note**: Benchmark in Microsoft SEAL is created for experimental purpose only, therefore it allows insecure parameters.
-Do not follow benchmark as examples.
+**Note**: The benchmark code is strictly for experimental purposes; it allows insecure parameters that must not be used in real applications.
+Do not follow the benchmarks as examples.
 
 ### Building .NET Components
 

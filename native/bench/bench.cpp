@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "bench.h"
-#include "benchmark/benchmark.h"
-#include <iomanip>
 #include "seal/seal.h"
+#include "bench.h"
+#include <iomanip>
+
 using namespace benchmark;
 using namespace seal;
 using namespace sealbench;
@@ -15,10 +15,13 @@ namespace sealbench
     /**
     Wraps benchmark::RegisterBenchmark to use microsecond and accepts std::string name.
     */
-#define SEAL_BENCHMARK_REGISTER(category, n, log_q, name, func, ...)                                                \
-    RegisterBenchmark(                                                                                                    \
-        (string("n=") + to_string(n) + string(" / log_q=") + to_string(log_q) + string(" / " #category " / " #name)).c_str(), \
-        [=](State &st) { func(st, __VA_ARGS__); })->Unit(benchmark::kMicrosecond)->Iterations(10);
+#define SEAL_BENCHMARK_REGISTER(category, n, log_q, name, func, ...)                                                  \
+    RegisterBenchmark(                                                                                                \
+        (string("n=") + to_string(n) + string(" / log(q)=") + to_string(log_q) + string(" / " #category " / " #name)) \
+            .c_str(),                                                                                                 \
+        [=](State &st) { func(st, __VA_ARGS__); })                                                                    \
+        ->Unit(benchmark::kMicrosecond)                                                                               \
+        ->Iterations(10);
 
     void register_bm_family(
         const pair<size_t, vector<Modulus>> &parms, unordered_map<EncryptionParameters, shared_ptr<BMEnv>> &bm_env_map)
@@ -105,8 +108,8 @@ int main(int argc, char **argv)
 
     // Initialize bm_parms_vec with BFV default paramaters with 128-bit security.
     // Advanced users may replace this section with custom parameters.
-    // SEAL benchmark allow insecure parameters for experimental purpose.
-    // DO NOT USE SEAL BENCHMARK AS EXAMPLE.
+    // SEAL benchmarks allow insecure parameters for experimental purposes.
+    // DO NOT USE SEAL BENCHMARKS AS EXAMPLES.
     auto default_parms = seal::util::global_variables::GetDefaultCoeffModulus128();
     for (auto &i : default_parms)
     {

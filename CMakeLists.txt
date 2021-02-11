@@ -459,16 +459,6 @@ if(SEAL_BUILD_SEAL_C)
 
     target_link_libraries(sealc PUBLIC seal)
 
-    if(MSVC AND SEAL_SECURE_COMPILE_OPTIONS)
-        target_link_options(sealc PUBLIC /DEBUG)
-
-        # Control Flow Guard / Spectre
-        target_compile_options(sealc PUBLIC /guard:cf)
-        target_compile_options(sealc PUBLIC /Qspectre)
-        target_link_options(sealc PUBLIC /guard:cf)
-        target_link_options(sealc PUBLIC /DYNAMICBASE)
-    endif()
-
     seal_install_target(sealc SEALTargets)
 endif()
 
@@ -595,12 +585,12 @@ if(SEAL_BUILD_TESTS)
     add_subdirectory(native/tests)
 endif()
 
-######################
-# SEAL C++ benchmark #
-######################
+#######################
+# SEAL C++ benchmarks #
+#######################
 
 # [option] SEAL_BUILD_BENCH
-set(SEAL_BUILD_BENCH_OPTION_STR "Build C++ benchmark for Microsoft SEAL")
+set(SEAL_BUILD_BENCH_OPTION_STR "Build C++ benchmarks for Microsoft SEAL")
 option(SEAL_BUILD_BENCH ${SEAL_BUILD_BENCH_OPTION_STR} OFF)
 
 if(SEAL_BUILD_BENCH)

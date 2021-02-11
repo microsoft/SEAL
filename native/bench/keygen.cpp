@@ -1,10 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-#include "benchmark/benchmark.h"
 #include "seal/seal.h"
 #include "seal/util/rlwe.h"
 #include "bench.h"
+
 using namespace benchmark;
 using namespace sealbench;
 using namespace seal;
@@ -61,15 +61,16 @@ namespace sealbench
         shared_ptr<KeyGenerator> keygen = bm_env->keygen();
         GaloisKeys glk;
         size_t slot_count = bm_env->parms().poly_modulus_degree() >> 1;
+
         auto random_one_step = [&]() {
             vector<int> res;
-            res.emplace_back(rand() & (slot_count - 1));
+            res.emplace_back(rand() & static_cast<int>(slot_count - 1));
             return res;
         };
+
         for (auto _ : state)
         {
             keygen->create_galois_keys({ random_one_step() }, glk);
         }
     }
-
 } // namespace sealbench
