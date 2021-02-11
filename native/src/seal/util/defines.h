@@ -128,6 +128,11 @@ namespace seal
 } // namespace seal
 #endif
 
+// Force inline
+#ifndef SEAL_FORCE_INLINE
+#define SEAL_FORCE_INLINE inline
+#endif
+
 // Use `if constexpr' from C++17
 #ifdef SEAL_USE_IF_CONSTEXPR
 #define SEAL_IF_CONSTEXPR if constexpr

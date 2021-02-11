@@ -23,7 +23,7 @@
 #undef SEAL_USE_SHARED_MUTEX
 
 // Are we compiling with C++17 or newer
-#if (__cplusplus >= 201703L)
+#if (_MSVC_LANG >= 201703L)
 
 // Use `if constexpr'
 #define SEAL_USE_IF_CONSTEXPR
@@ -73,5 +73,8 @@
 #undef SEAL_USE_INTRIN
 
 #endif //_M_X64
+
+// Force inline
+#define SEAL_FORCE_INLINE __forceinline
 
 #endif

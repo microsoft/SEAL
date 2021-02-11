@@ -17,6 +17,8 @@
 #pragma GCC error "g++-6 cannot compile Microsoft SEAL as C++17; set CMake build option `SEAL_USE_CXX17' to OFF"
 #endif
 
+#define SEAL_FORCE_INLINE __always_inline
+
 // Are intrinsics enabled?
 #ifdef SEAL_USE_INTRIN
 #if defined(__aarch64__)
