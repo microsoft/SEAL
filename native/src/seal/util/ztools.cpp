@@ -337,7 +337,7 @@ namespace seal
                         out_stream.exceptions(out_stream_except_mask);
                         return Z_ERRNO;
                     }
-                    if (!(zstream.avail_in = static_cast<decltype(zstream.avail_in)>(in_stream.gcount())))
+                    if (0 == (zstream.avail_in = static_cast<decltype(zstream.avail_in)>(in_stream.gcount())))
                     {
                         break;
                     }

@@ -101,7 +101,7 @@ namespace sealbench
 int main(int argc, char **argv)
 {
     cout << "Microsoft SEAL version: " << SEAL_VERSION << endl;
-    cout << "SEALBenchmark is performing precomputation ..." << endl;
+    cout << "Running precomputations ..." << endl;
 
     vector<pair<size_t, vector<Modulus>>> bm_parms_vec;
     unordered_map<EncryptionParameters, shared_ptr<BMEnv>> bm_env_map;

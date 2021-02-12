@@ -678,7 +678,7 @@ namespace seal
 
         inline bool has_seed_marker() const noexcept
         {
-            return data_.size() && (size_ == 2) ? (data(1)[0] == 0xFFFFFFFFFFFFFFFFULL) : false;
+            return (data_.size() && (size_ == 2)) ? (data(1)[0] == 0xFFFFFFFFFFFFFFFFULL) : false;
         }
 
         parms_id_type parms_id_ = parms_id_zero;
