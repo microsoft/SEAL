@@ -126,8 +126,7 @@ namespace seal
 #endif
             // Sum of operands modulo Modulus can never wrap around 2^64
             operand1 += operand2;
-            return operand1 - (modulus.value() &
-                               static_cast<std::uint64_t>(-static_cast<std::int64_t>(operand1 >= modulus.value())));
+            return SEAL_COND_SELECT(operand1 >= modulus.value(), operand1 - modulus.value(), operand1);
         }
 
         /**
@@ -201,8 +200,7 @@ namespace seal
             tmp3 = input[0] - tmp1 * modulus.value();
 
             // One more subtraction is enough
-            return static_cast<std::uint64_t>(tmp3) -
-                   (modulus.value() & static_cast<std::uint64_t>(-static_cast<std::int64_t>(tmp3 >= modulus.value())));
+            return SEAL_COND_SELECT(tmp3 >= modulus.value(), tmp3 - modulus.value(), tmp3);
         }
 
         /**
@@ -228,9 +226,7 @@ namespace seal
             tmp[0] = input - tmp[1] * modulus.value();
 
             // One more subtraction is enough
-            return static_cast<std::uint64_t>(tmp[0]) -
-                   (modulus.value() &
-                    static_cast<std::uint64_t>(-static_cast<std::int64_t>(tmp[0] >= modulus.value())));
+            return SEAL_COND_SELECT(tmp[0] >= modulus.value(), tmp[0] - modulus.value(), tmp[0]);
         }
 
         /**
@@ -306,7 +302,7 @@ namespace seal
             const std::uint64_t p = modulus.value();
             multiply_uint64_hw64(x, y.quotient, &tmp1);
             tmp2 = y.operand * x - tmp1 * p;
-            return tmp2 - (p & static_cast<std::uint64_t>(-static_cast<std::int64_t>(tmp2 >= p)));
+            return SEAL_COND_SELECT(tmp2 >= p, tmp2 - p, tmp2);
         }
 
         /**

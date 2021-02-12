@@ -84,4 +84,7 @@
 
 #endif //_M_X64
 
+// Force inline
+#define SEAL_FORCE_INLINE __forceinline
+
 #endif
