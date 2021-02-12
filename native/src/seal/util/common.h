@@ -283,7 +283,8 @@ namespace seal
                 // Still need to consider integer-float conversions and all
                 // unsigned to signed conversions
             }
-            else SEAL_IF_CONSTEXPR(std::is_integral<T>::value && std::is_integral<S>::value)
+            
+            SEAL_IF_CONSTEXPR(std::is_integral<T>::value && std::is_integral<S>::value)
             {
                 // Both integer types
                 if (value >= 0)
