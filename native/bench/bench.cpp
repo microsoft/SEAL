@@ -14,6 +14,8 @@ namespace sealbench
 {
     /**
     Wraps benchmark::RegisterBenchmark to use microsecond and accepts std::string name.
+    Each benchmark runs for 10 rather than a dynamically chosen amount of iterations.
+    If more runs are needed for more accurate measurements, either remove line 26, or run benchmarks in repetition.
     */
 #define SEAL_BENCHMARK_REGISTER(category, n, log_q, name, func, ...)                                                  \
     RegisterBenchmark(                                                                                                \

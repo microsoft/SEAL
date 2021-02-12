@@ -390,6 +390,8 @@ else()
 
     if(SEAL_USE_ZLIB)
         target_link_libraries(seal_shared PRIVATE ${zlib})
+        target_include_directories(seal_shared PRIVATE $<BUILD_INTERFACE:${zlib_SOURCE_DIR}>)
+        target_include_directories(seal_shared PRIVATE $<BUILD_INTERFACE:$<TARGET_PROPERTY:${zlib},BINARY_DIR>>)
     endif()
 
     if(SEAL_USE_ZSTD)
