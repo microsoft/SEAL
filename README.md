@@ -275,13 +275,13 @@ cmake -S . -B build -G "Visual Studio 16 2019" -A Win32
 cmake --build build --config Release
 ```
 
-Installing the library in Windows works as well. Instead of using the `sudo` command, however, you need to run `cmake --install build` from a command prompt with Administrator permissions. Files will be installed by default to `C:\Program Files (x86)\SEAL`.
+Installing the library in Windows works as well. Instead of using the `sudo` command, however, you need to run `cmake --install build` from a command prompt with Administrator permissions. Files will be installed by default to `C:\Program Files (x86)\SEAL\`.
 
 Visual Studio 2019 provides support for CMake-based projects. You can select the menu option `File / Open / Folder...` and navigate to the folder where the Microsoft SEAL repository is located. After opening the folder, Visual Studio will detect that this is a CMake-based project and will enable the menu command `Project / CMake settings for SEAL`. This will open the CMake settings editor that provides a user interface where you can create different configurations and set different CMake options.
 
 After the build completes, the output static library `seal-<version>.lib` can be found in `build\lib\` or `build\lib\Release\`.
 When linking with applications, using CMake as is explained in [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake) is highly recommended.
-Alternatively, you need to add `native\src\` (full path) and `build\native\src` as an include directory to locate the Microsoft SEAL header files.
+Alternatively, you need to add `native\src\` (full path) and `build\native\src\` as include directories to locate the Microsoft SEAL header files.
 
 #### Building for Android and iOS
 
