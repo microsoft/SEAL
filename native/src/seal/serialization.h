@@ -90,7 +90,7 @@ namespace seal
             std::uint64_t size = 0;
         };
 
-        static_assert(sizeof(SEALHeader) == seal_header_size);
+        static_assert(sizeof(SEALHeader) == seal_header_size, "");
 
         /**
         Returns true if the given byte corresponds to a supported compression mode.
@@ -255,6 +255,7 @@ namespace seal
         plus the size of SEALHeader
         @param[out] stream The stream to write to
         @param[in] compr_mode The desired compression mode
+        @param[in] clear_buffers Whether internal buffers should be cleared
         @throws std::invalid_argument if save_members is invalid
         @throws std::invalid_argument if raw_size is smaller than SEALHeader size
         @throws std::logic_error if the data to be saved is invalid, if compression
@@ -263,7 +264,7 @@ namespace seal
         */
         static std::streamoff Save(
             std::function<void(std::ostream &)> save_members, std::streamoff raw_size, std::ostream &stream,
-            compr_mode_type compr_mode, bool clear_on_destruction = false);
+            compr_mode_type compr_mode, bool clear_buffers);
 
         /**
         Deserializes data from stream that was serialized by Save. Once stream has
@@ -276,14 +277,14 @@ namespace seal
         a SEALVersion struct as arguments, possibly reading some number of bytes
         from the std::istream, possibly depending on the SEALVersion object
         @param[in] stream The stream to read from
+        @param[in] clear_buffers Whether internal buffers should be cleared
         @throws std::invalid_argument if load_members is invalid
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
         static std::streamoff Load(
-            std::function<void(std::istream &, SEALVersion)> load_members, std::istream &stream,
-            bool clear_on_destruction = false);
+            std::function<void(std::istream &, SEALVersion)> load_members, std::istream &stream, bool clear_buffers);
 
         /**
         Evaluates save_members and compresses the output according to the given
@@ -305,6 +306,7 @@ namespace seal
         @param[out] out The memory location to write to
         @param[in] size The number of bytes available in the given memory location
         @param[in] compr_mode The desired compression mode
+        @param[in] clear_buffers Whether internal buffers should be cleared
         @throws std::invalid_argument if save_members is invalid, if raw_size or
         size is smaller than SEALHeader size, or if out is null
         @throws std::logic_error if the data to be saved is invalid, if compression
@@ -313,7 +315,7 @@ namespace seal
         */
         static std::streamoff Save(
             std::function<void(std::ostream &)> save_members, std::streamoff raw_size, seal_byte *out, std::size_t size,
-            compr_mode_type compr_mode, bool clear_on_destruction = false);
+            compr_mode_type compr_mode, bool clear_buffers);
 
         /**
         Deserializes data from a memory location that was serialized by Save.
@@ -327,6 +329,7 @@ namespace seal
         from the std::istream, possibly depending on the SEALVersion object
         @param[in] in The memory location to read from
         @param[in] size The number of bytes available in the given memory location
+        @param[in] clear_buffers Whether internal buffers should be cleared
         @throws std::invalid_argument if load_members is invalid, if in is null,
         or if size is too small to contain a SEALHeader
         @throws std::logic_error if the data cannot be loaded by this version of
@@ -335,7 +338,7 @@ namespace seal
         */
         static std::streamoff Load(
             std::function<void(std::istream &, SEALVersion)> load_members, const seal_byte *in, std::size_t size,
-            bool clear_on_destruction = false);
+            bool clear_buffers);
 
     private:
         Serialization() = delete;

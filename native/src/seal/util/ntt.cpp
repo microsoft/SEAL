@@ -55,6 +55,7 @@ namespace seal
                 root_powers_[reverse_bits(i, coeff_count_power_)].set(power, modulus_);
                 power = multiply_uint_mod(power, root, modulus_);
             }
+            root_powers_[0].set(static_cast<uint64_t>(1), modulus_);
 
             inv_root_powers_ = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
             root.set(inv_root_, modulus_);
@@ -64,6 +65,7 @@ namespace seal
                 inv_root_powers_[reverse_bits(i - 1, coeff_count_power_) + 1].set(power, modulus_);
                 power = multiply_uint_mod(power, root, modulus_);
             }
+            inv_root_powers_[0].set(static_cast<uint64_t>(1), modulus_);
 
             // Compute n^(-1) modulo q.
             uint64_t degree_uint = static_cast<uint64_t>(coeff_count_);

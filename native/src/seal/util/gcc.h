@@ -17,9 +17,15 @@
 #pragma GCC error "g++-6 cannot compile Microsoft SEAL as C++17; set CMake build option `SEAL_USE_CXX17' to OFF"
 #endif
 
+#define SEAL_FORCE_INLINE __always_inline
+
 // Are intrinsics enabled?
 #ifdef SEAL_USE_INTRIN
+#if defined(__aarch64__)
+#include <arm_neon.h>
+#else
 #include <x86intrin.h>
+#endif
 
 #ifdef SEAL_USE___BUILTIN_CLZLL
 #define SEAL_MSB_INDEX_UINT64(result, value)                                 \
@@ -60,9 +66,10 @@ __extension__ typedef unsigned __int128 uint128_t;
     } while (false)
 #endif
 
-#ifdef SEAL_USE__ADDCARRY_U64
-#define SEAL_ADD_CARRY_UINT64(operand1, operand2, carry, result) _addcarry_u64(carry, operand1, operand2, result)
-#endif
+// GCC intrinsics for _addcarry_u64 is disabled, for it compiles to slower code than add_uint64_generic.
+//#ifdef SEAL_USE__ADDCARRY_U64
+//#define SEAL_ADD_CARRY_UINT64(operand1, operand2, carry, result) _addcarry_u64(carry, operand1, operand2, result)
+//#endif
 
 #ifdef SEAL_USE__SUBBORROW_U64
 #if ((__GNUC__ == 7) && (__GNUC_MINOR__ >= 2)) || (__GNUC__ >= 8)

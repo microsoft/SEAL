@@ -143,8 +143,7 @@ namespace seal
                 tmp3 = z[0] - tmp1 * modulus_value;
 
                 // Claim: One more subtraction is enough
-                get<2>(I) =
-                    tmp3 - (modulus_value & static_cast<uint64_t>(-static_cast<int64_t>(tmp3 >= modulus_value)));
+                get<2>(I) = SEAL_COND_SELECT(tmp3 >= modulus_value, tmp3 - modulus_value, tmp3);
             });
         }
 

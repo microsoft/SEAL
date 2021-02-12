@@ -164,21 +164,21 @@ namespace seal
         }
 
         /**
-        Constructs a new plaintext by copying a given one.
+        Creates a new plaintext by copying a given one.
 
         @param[in] copy The plaintext to copy from
         */
         Plaintext(const Plaintext &copy) = default;
 
         /**
-        Constructs a new plaintext by moving a given one.
+        Creates a new plaintext by moving a given one.
 
         @param[in] source The plaintext to move from
         */
         Plaintext(Plaintext &&source) = default;
 
         /**
-        Constructs a new plaintext by copying a given one.
+        Creates a new plaintext by copying a given one.
 
         @param[in] copy The plaintext to copy from
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
@@ -613,7 +613,8 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&Plaintext::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode);
+                std::bind(&Plaintext::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode,
+                false);
         }
 
         /**
@@ -632,7 +633,7 @@ namespace seal
         inline std::streamoff unsafe_load(const SEALContext &context, std::istream &stream)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Plaintext::load_members, this, context, _1, _2), stream);
+            return Serialization::Load(std::bind(&Plaintext::load_members, this, context, _1, _2), stream, false);
         }
 
         /**
@@ -676,7 +677,8 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&Plaintext::save_members, this, _1), save_size(compr_mode_type::none), out, size, compr_mode);
+                std::bind(&Plaintext::save_members, this, _1), save_size(compr_mode_type::none), out, size, compr_mode,
+                false);
         }
 
         /**
@@ -698,7 +700,7 @@ namespace seal
         inline std::streamoff unsafe_load(const SEALContext &context, const seal_byte *in, std::size_t size)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Plaintext::load_members, this, context, _1, _2), in, size);
+            return Serialization::Load(std::bind(&Plaintext::load_members, this, context, _1, _2), in, size, false);
         }
 
         /**

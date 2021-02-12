@@ -223,7 +223,7 @@ namespace seal
 
     streamoff Serialization::Save(
         function<void(ostream &)> save_members, streamoff raw_size, ostream &stream, compr_mode_type compr_mode,
-        bool clear_on_destruction)
+        bool clear_buffers)
     {
         if (!save_members)
         {
@@ -270,12 +270,12 @@ namespace seal
                 // the start to avoid extra reallocs.
                 SafeByteBuffer safe_buffer(
                     ztools::zlib_deflate_size_bound(raw_size - static_cast<streamoff>(sizeof(SEALHeader))),
-                    clear_on_destruction);
+                    clear_buffers);
                 iostream temp_stream(&safe_buffer);
                 temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
                 save_members(temp_stream);
 
-                auto safe_pool(MemoryManager::GetPool(mm_prof_opt::mm_force_new, true));
+                auto safe_pool(MemoryManager::GetPool(mm_prof_opt::mm_force_new, clear_buffers));
 
                 // Create temporary aliasing DynArray to wrap safe_buffer
                 DynArray<seal_byte> safe_buffer_array(
@@ -296,12 +296,12 @@ namespace seal
                 // the start to avoid extra reallocs.
                 SafeByteBuffer safe_buffer(
                     ztools::zstd_deflate_size_bound(raw_size - static_cast<streamoff>(sizeof(SEALHeader))),
-                    clear_on_destruction);
+                    clear_buffers);
                 iostream temp_stream(&safe_buffer);
                 temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
                 save_members(temp_stream);
 
-                auto safe_pool(MemoryManager::GetPool(mm_prof_opt::mm_force_new, clear_on_destruction));
+                auto safe_pool(MemoryManager::GetPool(mm_prof_opt::mm_force_new, clear_buffers));
 
                 // Create temporary aliasing DynArray to wrap safe_buffer
                 DynArray<seal_byte> safe_buffer_array(
@@ -339,7 +339,7 @@ namespace seal
     }
 
     streamoff Serialization::Load(
-        function<void(istream &, SEALVersion)> load_members, istream &stream, bool clear_on_destruction)
+        function<void(istream &, SEALVersion)> load_members, istream &stream, bool clear_buffers)
     {
         if (!load_members)
         {
@@ -390,15 +390,15 @@ namespace seal
 
                 // We don't know the decompressed size, but use compr_size as
                 // starting point for the buffer.
-                SafeByteBuffer safe_buffer(safe_cast<streamsize>(compr_size));
+                SafeByteBuffer safe_buffer(safe_cast<streamsize>(compr_size), clear_buffers);
 
                 iostream temp_stream(&safe_buffer);
                 temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
 
+                auto safe_pool = MemoryManager::GetPool(mm_prof_opt::mm_force_new, clear_buffers);
+
                 // Throw an exception on non-zero return value
-                if (ztools::zlib_inflate_stream(
-                        stream, safe_cast<streamoff>(compr_size), temp_stream,
-                        MemoryManager::GetPool(mm_prof_opt::mm_force_new, clear_on_destruction)))
+                if (ztools::zlib_inflate_stream(stream, safe_cast<streamoff>(compr_size), temp_stream, safe_pool))
                 {
                     throw logic_error("stream decompression failed");
                 }
@@ -413,15 +413,15 @@ namespace seal
 
                 // We don't know the decompressed size, but use compr_size as
                 // starting point for the buffer.
-                SafeByteBuffer safe_buffer(safe_cast<streamsize>(compr_size), clear_on_destruction);
+                SafeByteBuffer safe_buffer(safe_cast<streamsize>(compr_size), clear_buffers);
 
                 iostream temp_stream(&safe_buffer);
                 temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
 
+                auto safe_pool = MemoryManager::GetPool(mm_prof_opt::mm_force_new, clear_buffers);
+
                 // Throw an exception on non-zero return value
-                if (ztools::zstd_inflate_stream(
-                        stream, safe_cast<streamoff>(compr_size), temp_stream,
-                        MemoryManager::GetPool(mm_prof_opt::mm_force_new, clear_on_destruction)))
+                if (ztools::zstd_inflate_stream(stream, safe_cast<streamoff>(compr_size), temp_stream, safe_pool))
                 {
                     throw logic_error("stream decompression failed");
                 }
@@ -452,7 +452,7 @@ namespace seal
 
     streamoff Serialization::Save(
         function<void(ostream &)> save_members, streamoff raw_size, seal_byte *out, size_t size,
-        compr_mode_type compr_mode, bool clear_on_destruction)
+        compr_mode_type compr_mode, bool clear_buffers)
     {
         if (!out)
         {
@@ -468,12 +468,11 @@ namespace seal
         }
         ArrayPutBuffer apbuf(reinterpret_cast<char *>(out), static_cast<streamsize>(size));
         ostream stream(&apbuf);
-        return Save(save_members, raw_size, stream, compr_mode, clear_on_destruction);
+        return Save(save_members, raw_size, stream, compr_mode, clear_buffers);
     }
 
     streamoff Serialization::Load(
-        function<void(istream &, SEALVersion)> load_members, const seal_byte *in, size_t size,
-        bool clear_on_destruction)
+        function<void(istream &, SEALVersion)> load_members, const seal_byte *in, size_t size, bool clear_buffers)
     {
         if (!in)
         {
@@ -489,6 +488,6 @@ namespace seal
         }
         ArrayGetBuffer agbuf(reinterpret_cast<const char *>(in), static_cast<streamsize>(size));
         istream stream(&agbuf);
-        return Load(load_members, stream, clear_on_destruction);
+        return Load(load_members, stream, clear_buffers);
     }
 } // namespace seal

@@ -104,7 +104,8 @@ namespace sealtest
         stringstream stream;
 
         Modulus mod;
-        mod.save(stream);
+        compr_mode_type compr_mode = compr_mode_type::zlib;
+        mod.save(stream, compr_mode);
 
         Modulus mod2;
         mod2.load(stream);
@@ -117,7 +118,7 @@ namespace sealtest
         ASSERT_EQ(mod2.is_prime(), mod.is_prime());
 
         mod = 3;
-        mod.save(stream);
+        mod.save(stream, compr_mode);
         mod2.load(stream);
         ASSERT_EQ(mod2.value(), mod.value());
         ASSERT_EQ(mod2.bit_count(), mod.bit_count());
@@ -128,7 +129,7 @@ namespace sealtest
         ASSERT_EQ(mod2.is_prime(), mod.is_prime());
 
         mod = 0xF00000F00000F;
-        mod.save(stream);
+        mod.save(stream, compr_mode);
         mod2.load(stream);
         ASSERT_EQ(mod2.value(), mod.value());
         ASSERT_EQ(mod2.bit_count(), mod.bit_count());
@@ -139,7 +140,7 @@ namespace sealtest
         ASSERT_EQ(mod2.is_prime(), mod.is_prime());
 
         mod = 0xF00000F000079;
-        mod.save(stream);
+        mod.save(stream, compr_mode);
         mod2.load(stream);
         ASSERT_EQ(mod2.value(), mod.value());
         ASSERT_EQ(mod2.bit_count(), mod.bit_count());

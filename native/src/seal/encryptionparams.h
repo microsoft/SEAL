@@ -378,7 +378,7 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Save(
                 std::bind(&EncryptionParameters::save_members, this, _1), save_size(compr_mode_type::none), stream,
-                compr_mode);
+                compr_mode, false);
         }
 
         /**
@@ -395,7 +395,7 @@ namespace seal
             using namespace std::placeholders;
             EncryptionParameters new_parms(scheme_type::none);
             auto in_size =
-                Serialization::Load(std::bind(&EncryptionParameters::load_members, &new_parms, _1, _2), stream);
+                Serialization::Load(std::bind(&EncryptionParameters::load_members, &new_parms, _1, _2), stream, false);
             std::swap(*this, new_parms);
             return in_size;
         }
@@ -419,7 +419,7 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Save(
                 std::bind(&EncryptionParameters::save_members, this, _1), save_size(compr_mode_type::none), out, size,
-                compr_mode);
+                compr_mode, false);
         }
 
         /**
@@ -438,8 +438,8 @@ namespace seal
         {
             using namespace std::placeholders;
             EncryptionParameters new_parms(scheme_type::none);
-            auto in_size =
-                Serialization::Load(std::bind(&EncryptionParameters::load_members, &new_parms, _1, _2), in, size);
+            auto in_size = Serialization::Load(
+                std::bind(&EncryptionParameters::load_members, &new_parms, _1, _2), in, size, false);
             std::swap(*this, new_parms);
             return in_size;
         }

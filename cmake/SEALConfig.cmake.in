@@ -4,7 +4,8 @@
 # Exports target SEAL::seal
 #
 # Creates variables:
-#   SEAL_FOUND : If a static Microsoft SEAL library was found
+#   SEAL_FOUND : If either a static or a shared Microsoft SEAL was found
+#   SEAL_STATIC_FOUND : If a static Microsoft SEAL library was found
 #   SEAL_SHARED_FOUND : If a shared Microsoft SEAL library was found
 #   SEAL_C_FOUND : If a Microsoft SEAL C export library was found
 #   SEAL_VERSION : The full version number
@@ -12,6 +13,7 @@
 #   SEAL_VERSION_MINOR : The minor version number
 #   SEAL_VERSION_PATCH : The patch version number
 #   SEAL_DEBUG : Set to non-zero value if library is compiled with extra debugging code (very slow!)
+#   SEAL_BUILD_TYPE : The build type (e.g., "Release" or "Debug")
 #   SEAL_USE_CXX17 : Set to non-zero value if library is compiled as C++17 instead of C++14
 #   SEAL_ENFORCE_HE_STD_SECURITY : Set to non-zero value if library is compiled to enforce at least
 #       a 128-bit security level based on HomomorphicEncryption.org security estimates
@@ -35,6 +37,7 @@ macro(seal_find_dependency dep)
 endmacro()
 
 set(SEAL_FOUND FALSE)
+set(SEAL_STATIC_FOUND FALSE)
 set(SEAL_SHARED_FOUND FALSE)
 set(SEAL_C_FOUND FALSE)
 

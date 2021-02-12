@@ -9,7 +9,7 @@
     <Copyright>Microsoft Corporation 2020</Copyright>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Platform)'=='AnyCPU'">
+  <PropertyGroup>
     <PlatformTarget>x64</PlatformTarget>
     <OutputPath>@CMAKE_RUNTIME_OUTPUT_DIRECTORY@/dotnet/$(Configuration)</OutputPath>
   </PropertyGroup>
@@ -19,7 +19,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Windows))" Include="@CMAKE_RUNTIME_OUTPUT_DIRECTORY@\$(Configuration)\sealc.dll" />
+    <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Windows))" Include="@SEAL_WINDOWS_SEAL_C_DIRECTORY@\sealc.dll" />
     <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(Linux))" Include="@CMAKE_LIBRARY_OUTPUT_DIRECTORY@/libsealc.so.*" />
     <SEALCBinaryFiles Condition="$([MSBuild]::IsOsPlatform(OSX))" Include="@CMAKE_LIBRARY_OUTPUT_DIRECTORY@/libsealc*.dylib" />
   </ItemGroup>

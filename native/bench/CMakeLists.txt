@@ -3,11 +3,11 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-project(SEALTest VERSION 3.6.2 LANGUAGES CXX C)
+project(SEALBench VERSION 3.6.2 LANGUAGES CXX)
 
 # If not called from root CMakeLists.txt
-if(NOT DEFINED SEAL_BUILD_TESTS)
-    set(SEAL_BUILD_TESTS ON)
+if(NOT DEFINED SEAL_BUILD_BENCH)
+    set(SEAL_BUILD_BENCH ON)
 
     # Import Microsoft SEAL
     find_package(SEAL 3.6.2 EXACT REQUIRED)
@@ -26,30 +26,34 @@ if(NOT DEFINED SEAL_BUILD_DEPS)
     option(SEAL_BUILD_DEPS ${SEAL_BUILD_DEPS_OPTION_STR} ON)
 endif()
 
-# if SEAL_BUILD_TESTS is ON, use GoogleTest
-if(SEAL_BUILD_TESTS)
+# if SEAL_BUILD_BENCH is ON, use GoogleBenchmark
+if(SEAL_BUILD_BENCH)
     if(SEAL_BUILD_DEPS)
         list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../../cmake)
         set(SEAL_THIRDPARTY_DIR ${CMAKE_CURRENT_LIST_DIR}/../../thirdparty)
-        seal_fetch_thirdparty_content(ExternalGTest)
-        add_library(GTest::gtest ALIAS gtest)
+        seal_fetch_thirdparty_content(ExternalBenchmark)
     else()
-        find_package(GTest 1.10.0 CONFIG)
-        if(NOT GTest_FOUND)
-            message(FATAL_ERROR "GoogleTest: not found")
+        find_package(benchmark REQUIRED)
+        if(NOT benchmark_FOUND)
+            message(FATAL_ERROR "GoogleBenchmark: not found")
         else()
-            message(STATUS "GoogleTest: found")
+            message(STATUS "GoogleBenchmark: found")
         endif()
     endif()
 
-    add_executable(sealtest "")
-
-    add_subdirectory(seal)
+    add_executable(sealbench)
+    target_sources(sealbench
+        PRIVATE
+            ${CMAKE_CURRENT_LIST_DIR}/bench.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/keygen.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/bfv.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/ckks.cpp
+    )
 
     if(TARGET SEAL::seal)
-        target_link_libraries(sealtest PRIVATE SEAL::seal GTest::gtest)
+        target_link_libraries(sealbench PRIVATE SEAL::seal benchmark::benchmark)
     elseif(TARGET SEAL::seal_shared)
-        target_link_libraries(sealtest PRIVATE SEAL::seal_shared GTest::gtest)
+        target_link_libraries(sealbench PRIVATE SEAL::seal_shared benchmark::benchmark)
     else()
         message(FATAL_ERROR "Cannot find target SEAL::seal or SEAL::seal_shared")
     endif()

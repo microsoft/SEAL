@@ -939,7 +939,7 @@ namespace seal
         }
 
         template <std::size_t Count>
-        inline void multiply_accumulate_uint64(
+        SEAL_FORCE_INLINE void multiply_accumulate_uint64(
             const std::uint64_t *operand1, const std::uint64_t *operand2, unsigned long long *accumulator)
         {
             unsigned long long qword[2];
@@ -949,7 +949,7 @@ namespace seal
         }
 
         template <>
-        inline void multiply_accumulate_uint64<0>(
+        SEAL_FORCE_INLINE void multiply_accumulate_uint64<0>(
             SEAL_MAYBE_UNUSED const std::uint64_t *operand1, SEAL_MAYBE_UNUSED const std::uint64_t *operand2,
             SEAL_MAYBE_UNUSED unsigned long long *accumulator)
         {
