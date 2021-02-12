@@ -17,9 +17,9 @@
 
 namespace seal
 {
-    inline constexpr std::size_t prng_seed_uint64_count = 8;
+    constexpr std::size_t prng_seed_uint64_count = 8;
 
-    inline constexpr std::size_t prng_seed_byte_count = prng_seed_uint64_count * util::bytes_per_uint64;
+    constexpr std::size_t prng_seed_byte_count = prng_seed_uint64_count * util::bytes_per_uint64;
 
     using prng_seed_type = std::array<std::uint64_t, prng_seed_uint64_count>;
 

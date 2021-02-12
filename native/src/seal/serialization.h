@@ -90,7 +90,7 @@ namespace seal
             std::uint64_t size = 0;
         };
 
-        static_assert(sizeof(SEALHeader) == seal_header_size);
+        static_assert(sizeof(SEALHeader) == seal_header_size, "");
 
         /**
         Returns true if the given byte corresponds to a supported compression mode.
