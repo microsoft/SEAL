@@ -97,3 +97,17 @@ macro(seal_combine_archives target dependency)
             WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
     endif()
 endmacro()
+
+# Add secure compile options
+macro(seal_set_secure_compile_options target scope)
+    if(MSVC)
+        # Build debug symbols for static analysis tools
+        target_link_options(${target} ${scope} /DEBUG)
+
+        # Control Flow Guard / Spectre
+        target_compile_options(${target} ${scope} /guard:cf)
+        target_compile_options(${target} ${scope} /Qspectre)
+        target_link_options(${target} ${scope} /guard:cf)
+        target_link_options(${target} ${scope} /DYNAMICBASE)
+    endif()
+endmacro()

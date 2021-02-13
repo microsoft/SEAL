@@ -15,7 +15,9 @@
 
 // Are intrinsics enabled?
 #ifdef SEAL_USE_INTRIN
-#ifdef EMSCRIPTEN
+#if defined(__aarch64__)
+#include <arm_neon.h>
+#elif defined(EMSCRIPTEN)
 #include <wasm_simd128.h>
 #else
 #include <x86intrin.h>

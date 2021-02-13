@@ -59,7 +59,7 @@ namespace seal
 
     public:
         /**
-        Constructs a new serializable object by copying a given one.
+        Creates a new serializable object by copying a given one.
 
         @param[in] copy The serializable object to copy from
         */
