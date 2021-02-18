@@ -102,6 +102,8 @@ namespace sealbench
 
 int main(int argc, char **argv)
 {
+    Initialize(&argc, argv);
+
     cout << "Microsoft SEAL version: " << SEAL_VERSION << endl;
     cout << "Running precomputations ..." << endl;
 
@@ -149,7 +151,6 @@ int main(int argc, char **argv)
         sealbench::register_bm_family(i, bm_env_map);
     }
 
-    Initialize(&argc, argv);
     RunSpecifiedBenchmarks();
 
     // After running all benchmark cases, we print again the total memory consumption by SEAL memory pool.

@@ -1024,7 +1024,7 @@ namespace sealtest
             vector<uint64_t> in(poly_modulus_degree * rns_tool->base_q()->size());
             set_zero_uint(in.size(), in.data());
             RNSIter in_iter(in.data(), poly_modulus_degree);
-            rns_tool->divide_and_round_q_last_inplace(in_iter, pool);
+            rns_tool->divide_and_round_q_last_ntt_inplace(in_iter, ntt, pool);
             ASSERT_EQ(0ULL, in[0]);
             ASSERT_EQ(0ULL, in[1]);
 
