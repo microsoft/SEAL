@@ -708,7 +708,7 @@ namespace seal
         }
 
         /**
-        Multiplies a ciphertext with a plaintext. The plaintext cannot be identially 0. Dynamic memory allocations in
+        Multiplies a ciphertext with a plaintext. The plaintext cannot be identically 0. Dynamic memory allocations in
         the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
 
         @param[in] encrypted The ciphertext to multiply
@@ -725,7 +725,7 @@ namespace seal
 
         /**
         Multiplies a ciphertext with a plaintext. This function multiplies a ciphertext with a plaintext and stores the
-        result in the destination parameter. The plaintext cannot be identially 0. Dynamic memory allocations in the
+        result in the destination parameter. The plaintext cannot be identically 0. Dynamic memory allocations in the
         process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
 
         @param[in] encrypted The ciphertext to multiply
