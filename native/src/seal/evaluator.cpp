@@ -2577,6 +2577,7 @@ namespace seal
                         ntt_negacyclic_harvey_lazy(t_ntt, get<2>(J));
 #if SEAL_USER_MOD_BIT_COUNT_MAX > 60
 <<<<<<< HEAD
+<<<<<<< HEAD
                     // Reduce from [0, 4qi) to [0, 2qi)
                     SEAL_ITERATE(t_ntt, coeff_count, [&](auto &K) { K -= SEAL_COND_SELECT(K >= qi_lazy, qi_lazy, 0); });
 =======
@@ -2585,6 +2586,12 @@ namespace seal
                             K -= (qi_lazy & static_cast<uint64_t>(-static_cast<int64_t>(K >= qi_lazy)));
                         });
 >>>>>>> Add the functions of BGV.
+=======
+                    // Reduce from [0, 4qi) to [0, 2qi)
+                    SEAL_ITERATE(t_ntt, coeff_count, [&](auto &K) {
+                        K -= SEAL_COND_SELECT(K >= qi_lazy, qi_lazy, 0);
+                    });
+>>>>>>> fix evaluator.cpp
 #else
                         // Since SEAL uses at most 60bit moduli, 8*qi < 2^63.
                         qi_lazy = qi << 2;
