@@ -13,9 +13,6 @@
 // Read in config.h
 #include "seal/util/config.h"
 
-// Do not throw when Evaluator produces transparent ciphertexts
-//#undef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
-
 // In Visual Studio redefine std::byte (seal_byte)
 #undef SEAL_USE_STD_BYTE
 
@@ -23,7 +20,7 @@
 #undef SEAL_USE_SHARED_MUTEX
 
 // Are we compiling with C++17 or newer
-#if (__cplusplus >= 201703L)
+#if (_MSVC_LANG >= 201703L)
 
 // Use `if constexpr'
 #define SEAL_USE_IF_CONSTEXPR
@@ -35,9 +32,22 @@
 #define SEAL_USE_NODISCARD
 
 #else
+
+#ifdef SEAL_USE_IF_CONSTEXPR
+#pragma message("Disabling `if constexpr` based on _MSVC_LANG value " SEAL_STRINGIZE(_MSVC_LANG) ": undefining SEAL_USE_IF_CONSTEXPR")
 #undef SEAL_USE_IF_CONSTEXPR
+#endif
+
+#ifdef SEAL_USE_MAYBE_UNUSED
+#pragma message("Disabling `[[maybe_unused]]` based on _MSVC_LANG value " SEAL_STRINGIZE(_MSVC_LANG) ": undefining SEAL_USE_MAYBE_UNUSED")
 #undef SEAL_USE_MAYBE_UNUSED
+#endif
+
+#ifdef SEAL_USE_NODISCARD
+#pragma message("Disabling `[[nodiscard]]` based on _MSVC_LANG value " SEAL_STRINGIZE(_MSVC_LANG) ": undefining SEAL_USE_NODISCARD")
 #undef SEAL_USE_NODISCARD
+#endif
+
 #endif
 
 // X64
@@ -73,5 +83,8 @@
 #undef SEAL_USE_INTRIN
 
 #endif //_M_X64
+
+// Force inline
+#define SEAL_FORCE_INLINE __forceinline
 
 #endif

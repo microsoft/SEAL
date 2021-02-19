@@ -130,7 +130,7 @@ namespace seal
         }
 
         /**
-        Constructs a new ciphertext by copying a given one.
+        Creates a new ciphertext by copying a given one.
 
         @param[in] copy The ciphertext to copy from
         */
@@ -144,7 +144,7 @@ namespace seal
         Ciphertext(Ciphertext &&source) = default;
 
         /**
-        Constructs a new ciphertext by copying a given one.
+        Creates a new ciphertext by copying a given one.
 
         @param[in] copy The ciphertext to copy from
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
@@ -479,7 +479,8 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&Ciphertext::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode);
+                std::bind(&Ciphertext::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode,
+                false);
         }
 
         /**
@@ -498,7 +499,7 @@ namespace seal
         inline std::streamoff unsafe_load(const SEALContext &context, std::istream &stream)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Ciphertext::load_members, this, context, _1, _2), stream);
+            return Serialization::Load(std::bind(&Ciphertext::load_members, this, context, _1, _2), stream, false);
         }
 
         /**
@@ -542,8 +543,8 @@ namespace seal
         {
             using namespace std::placeholders;
             return Serialization::Save(
-                std::bind(&Ciphertext::save_members, this, _1), save_size(compr_mode_type::none), out, size,
-                compr_mode);
+                std::bind(&Ciphertext::save_members, this, _1), save_size(compr_mode_type::none), out, size, compr_mode,
+                false);
         }
 
         /**
@@ -565,7 +566,7 @@ namespace seal
         inline std::streamoff unsafe_load(const SEALContext &context, const seal_byte *in, std::size_t size)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Ciphertext::load_members, this, context, _1, _2), in, size);
+            return Serialization::Load(std::bind(&Ciphertext::load_members, this, context, _1, _2), in, size, false);
         }
 
         /**
@@ -677,7 +678,7 @@ namespace seal
 
         inline bool has_seed_marker() const noexcept
         {
-            return data_.size() && (size_ == 2) ? (data(1)[0] == 0xFFFFFFFFFFFFFFFFULL) : false;
+            return (data_.size() && (size_ == 2)) ? (data(1)[0] == 0xFFFFFFFFFFFFFFFFULL) : false;
         }
 
         parms_id_type parms_id_ = parms_id_zero;

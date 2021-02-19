@@ -30,13 +30,13 @@ namespace sealtest
             auto pool = MemoryManager::GetPool();
             {
                 GaloisTool galois_tool(3, pool);
-                ASSERT_EQ(15, galois_tool.get_elt_from_step(0));
-                ASSERT_EQ(3, galois_tool.get_elt_from_step(1));
-                ASSERT_EQ(3, galois_tool.get_elt_from_step(-3));
-                ASSERT_EQ(9, galois_tool.get_elt_from_step(2));
-                ASSERT_EQ(9, galois_tool.get_elt_from_step(-2));
-                ASSERT_EQ(11, galois_tool.get_elt_from_step(3));
-                ASSERT_EQ(11, galois_tool.get_elt_from_step(-1));
+                ASSERT_EQ(15U, galois_tool.get_elt_from_step(0));
+                ASSERT_EQ(3U, galois_tool.get_elt_from_step(1));
+                ASSERT_EQ(3U, galois_tool.get_elt_from_step(-3));
+                ASSERT_EQ(9U, galois_tool.get_elt_from_step(2));
+                ASSERT_EQ(9U, galois_tool.get_elt_from_step(-2));
+                ASSERT_EQ(11U, galois_tool.get_elt_from_step(3));
+                ASSERT_EQ(11U, galois_tool.get_elt_from_step(-1));
             }
         }
 

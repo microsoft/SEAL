@@ -497,7 +497,7 @@ namespace seal
         {}
 
         /**
-        Constructs a new SEALContext by copying a given one.
+        Creates a new SEALContext by copying a given one.
 
         @param[in] copy The SEALContext to copy from
         */

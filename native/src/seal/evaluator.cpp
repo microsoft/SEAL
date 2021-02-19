@@ -1795,9 +1795,7 @@ namespace seal
             RNSIter temp_iter(temp.get(), coeff_count);
             SEAL_ITERATE(iter(temp_iter, plain_upper_half_increment), coeff_modulus_size, [&](auto I) {
                 SEAL_ITERATE(iter(get<0>(I), plain.data()), plain_coeff_count, [&](auto J) {
-                    get<0>(J) = get<1>(J) +
-                                (get<1>(I) &
-                                 static_cast<uint64_t>(-static_cast<int64_t>(get<1>(J) >= plain_upper_half_threshold)));
+                    get<0>(J) = SEAL_COND_SELECT(get<1>(J) >= plain_upper_half_threshold, get<1>(J) + get<1>(I), get<1>(J));
                 });
             });
         }
@@ -1941,9 +1939,7 @@ namespace seal
 
             SEAL_ITERATE(helper_iter, coeff_modulus_size, [&](auto I) {
                 SEAL_ITERATE(iter(*plain_iter, get<0>(I)), plain_coeff_count, [&](auto J) {
-                    get<1>(J) = get<0>(J) +
-                                (get<1>(I) &
-                                 static_cast<uint64_t>(-static_cast<int64_t>(get<0>(J) >= plain_upper_half_threshold)));
+                    get<1>(J) = SEAL_COND_SELECT(get<0>(J) >= plain_upper_half_threshold, get<0>(J) + get<1>(I), get<0>(J));
                 });
             });
         }
@@ -2526,10 +2522,17 @@ namespace seal
                         // This ntt_negacyclic_harvey_lazy results in [0, 4*qi).
                         ntt_negacyclic_harvey_lazy(t_ntt, get<2>(J));
 #if SEAL_USER_MOD_BIT_COUNT_MAX > 60
+<<<<<<< HEAD
                         // Reduce from [0, 4qi) to [0, 2qi)
                         SEAL_ITERATE(t_ntt, coeff_count, [&](auto &K) {
                             K -= (qi_lazy & static_cast<uint64_t>(-static_cast<int64_t>(K >= qi_lazy)));
                         });
+=======
+                    // Reduce from [0, 4qi) to [0, 2qi)
+                    SEAL_ITERATE(t_ntt, coeff_count, [&](auto &K) {
+                        K -= SEAL_COND_SELECT(K >= qi_lazy, qi_lazy, 0);
+                    });
+>>>>>>> upstream/contrib
 #else
                         // Since SEAL uses at most 60bit moduli, 8*qi < 2^63.
                         qi_lazy = qi << 2;

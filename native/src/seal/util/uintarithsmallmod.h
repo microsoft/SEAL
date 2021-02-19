@@ -126,8 +126,7 @@ namespace seal
 #endif
             // Sum of operands modulo Modulus can never wrap around 2^64
             operand1 += operand2;
-            return operand1 - (modulus.value() &
-                               static_cast<std::uint64_t>(-static_cast<std::int64_t>(operand1 >= modulus.value())));
+            return SEAL_COND_SELECT(operand1 >= modulus.value(), operand1 - modulus.value(), operand1);
         }
 
         /**
@@ -201,8 +200,7 @@ namespace seal
             tmp3 = input[0] - tmp1 * modulus.value();
 
             // One more subtraction is enough
-            return static_cast<std::uint64_t>(tmp3) -
-                   (modulus.value() & static_cast<std::uint64_t>(-static_cast<std::int64_t>(tmp3 >= modulus.value())));
+            return SEAL_COND_SELECT(tmp3 >= modulus.value(), tmp3 - modulus.value(), tmp3);
         }
 
         /**
@@ -228,14 +226,12 @@ namespace seal
             tmp[0] = input - tmp[1] * modulus.value();
 
             // One more subtraction is enough
-            return static_cast<std::uint64_t>(tmp[0]) -
-                   (modulus.value() &
-                    static_cast<std::uint64_t>(-static_cast<std::int64_t>(tmp[0] >= modulus.value())));
+            return SEAL_COND_SELECT(tmp[0] >= modulus.value(), tmp[0] - modulus.value(), tmp[0]);
         }
 
         /**
         Returns (operand1 * operand2) mod modulus.
-        Correctness: Follows the condition of barret_reduce_128.
+        Correctness: Follows the condition of barrett_reduce_128.
         */
         SEAL_NODISCARD inline std::uint64_t multiply_uint_mod(
             std::uint64_t operand1, std::uint64_t operand2, const Modulus &modulus)
@@ -306,7 +302,7 @@ namespace seal
             const std::uint64_t p = modulus.value();
             multiply_uint64_hw64(x, y.quotient, &tmp1);
             tmp2 = y.operand * x - tmp1 * p;
-            return tmp2 - (p & static_cast<std::uint64_t>(-static_cast<std::int64_t>(tmp2 >= p)));
+            return SEAL_COND_SELECT(tmp2 >= p, tmp2 - p, tmp2);
         }
 
         /**
@@ -331,7 +327,7 @@ namespace seal
 
         /**
         Returns value[0] = value mod modulus.
-        Correctness: Follows the condition of barret_reduce_128.
+        Correctness: Follows the condition of barrett_reduce_128.
         */
         inline void modulo_uint_inplace(std::uint64_t *value, std::size_t value_uint64_count, const Modulus &modulus)
         {
@@ -368,7 +364,7 @@ namespace seal
 
         /**
         Returns value mod modulus.
-        Correctness: Follows the condition of barret_reduce_128.
+        Correctness: Follows the condition of barrett_reduce_128.
         */
         SEAL_NODISCARD inline std::uint64_t modulo_uint(
             const std::uint64_t *value, std::size_t value_uint64_count, const Modulus &modulus)
@@ -406,7 +402,7 @@ namespace seal
 
         /**
         Returns (operand1 * operand2) + operand3 mod modulus.
-        Correctness: Follows the condition of barret_reduce_128.
+        Correctness: Follows the condition of barrett_reduce_128.
         */
         inline std::uint64_t multiply_add_uint_mod(
             std::uint64_t operand1, std::uint64_t operand2, std::uint64_t operand3, const Modulus &modulus)
@@ -436,22 +432,22 @@ namespace seal
 
         /**
         Returns operand^exponent mod modulus.
-        Correctness: Follows the condition of barret_reduce_128.
+        Correctness: Follows the condition of barrett_reduce_128.
         */
         SEAL_NODISCARD std::uint64_t exponentiate_uint_mod(
             std::uint64_t operand, std::uint64_t exponent, const Modulus &modulus);
 
         /**
         Computes numerator = numerator mod modulus, quotient = numerator / modulus.
-        Correctness: Follows the condition of barret_reduce_128.
+        Correctness: Follows the condition of barrett_reduce_128.
         */
         void divide_uint_mod_inplace(
             std::uint64_t *numerator, const Modulus &modulus, std::size_t uint64_count, std::uint64_t *quotient,
             MemoryPool &pool);
 
         /**
-        Computes <opearnd1, operand2> mod modulus.
-        Correctness: Follows the condition of barret_reduce_128.
+        Computes <operand1, operand2> mod modulus.
+        Correctness: Follows the condition of barrett_reduce_128.
         */
         SEAL_NODISCARD std::uint64_t dot_product_mod(
             const std::uint64_t *operand1, const std::uint64_t *operand2, std::size_t count, const Modulus &modulus);

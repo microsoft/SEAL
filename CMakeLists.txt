@@ -11,7 +11,19 @@ cmake_minimum_required(VERSION 3.12)
 #   4. SEAL C++ tests                             #
 ###################################################
 
-project(SEAL VERSION 3.6.1 LANGUAGES CXX C)
+# [option] CMAKE_BUILD_TYPE (default: "Release")
+# Build in one of the following modes: Release, Debug, MiniSizeRel, or RelWithDebInfo.
+# Most generators recognize these and can set the compiler flags accordingly. We set
+# the build type here before creating the project to prevent the CMake generator from
+# overriding our default of "Release".
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
+    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY
+        STRINGS "Release" "Debug" "MinSizeRel" "RelWithDebInfo")
+endif()
+message(STATUS "Build type (CMAKE_BUILD_TYPE): ${CMAKE_BUILD_TYPE}")
+
+project(SEAL VERSION 3.6.2 LANGUAGES CXX C)
 
 ########################
 # Global configuration #
@@ -25,6 +37,7 @@ include(CheckCXXSourceCompiles)
 include(CheckCXXSourceRuns)
 include(CheckTypeSize)
 include(CheckSymbolExists)
+
 # Extra modules
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 include(SEALMacros)
@@ -34,15 +47,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Make the install target depend on the all target (required by vcpkg)
 set(CMAKE_SKIP_INSTALL_ALL_DEPENDENCY OFF)
-
-# [option] CMAKE_BUILD_TYPE (default: "Release")
-# Build in one of the following modes: Release, Debug, MiniSizeRel, or RelWithDebInfo.
-if(NOT CMAKE_BUILD_TYPE)
-    set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Build type" FORCE)
-    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY
-        STRINGS "Release" "Debug" "MinSizeRel" "RelWithDebInfo")
-endif()
-message(STATUS "Build type (CMAKE_BUILD_TYPE): ${CMAKE_BUILD_TYPE}")
 
 # In Debug mode, define SEAL_DEBUG
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -60,6 +64,11 @@ set(SEAL_USE_CXX17_OPTION_STR "Use C++17")
 option(SEAL_USE_CXX17 ${SEAL_USE_CXX17_OPTION_STR} ON)
 # Enable features from C++17 if available, disable features if set to OFF.
 include(EnableCXX17)
+
+# Enable security-related compile options (MSVC only)
+set(SEAL_SECURE_COMPILE_OPTIONS_OPTIONS_STR "Enable Control Flow Guard and Spectre mitigations (MSVC only)")
+option(SEAL_SECURE_COMPILE_OPTIONS ${SEAL_SECURE_COMPILE_OPTIONS_OPTIONS_STR} OFF)
+mark_as_advanced(SEAL_SECURE_COMPILE_OPTIONS)
 
 # Path for outupt
 if(ANDROID_ABI)
@@ -355,6 +364,11 @@ if(NOT BUILD_SHARED_LIBS)
         endif()
     endif()
 
+    # Set secure compile options if SEAL_SECURE_COMPILE_OPTIONS is ON; only supported on MSVC
+    if(SEAL_SECURE_COMPILE_OPTIONS)
+        seal_set_secure_compile_options(seal PUBLIC)
+    endif()
+
 # Build only a shared library
 else()
     add_library(seal_shared SHARED ${SEAL_SOURCE_FILES})
@@ -376,6 +390,8 @@ else()
 
     if(SEAL_USE_ZLIB)
         target_link_libraries(seal_shared PRIVATE ${zlib})
+        target_include_directories(seal_shared PRIVATE $<BUILD_INTERFACE:${zlib_SOURCE_DIR}>)
+        target_include_directories(seal_shared PRIVATE $<BUILD_INTERFACE:$<TARGET_PROPERTY:${zlib},BINARY_DIR>>)
     endif()
 
     if(SEAL_USE_ZSTD)
@@ -433,7 +449,7 @@ if(SEAL_BUILD_SEAL_C)
     endif()
 
     # Add source files to library and header files to install
-    add_subdirectory(native/src/seal/c)
+    add_subdirectory(${SEAL_INCLUDES_DIR}/seal/c)
     seal_set_version(sealc)
     if(SEAL_BUILD_STATIC_SEAL_C)
         seal_set_version_filename(sealc)
@@ -571,12 +587,34 @@ if(SEAL_BUILD_TESTS)
     add_subdirectory(native/tests)
 endif()
 
+#######################
+# SEAL C++ benchmarks #
+#######################
+
+# [option] SEAL_BUILD_BENCH
+set(SEAL_BUILD_BENCH_OPTION_STR "Build C++ benchmarks for Microsoft SEAL")
+option(SEAL_BUILD_BENCH ${SEAL_BUILD_BENCH_OPTION_STR} OFF)
+
+if(SEAL_BUILD_BENCH)
+    add_subdirectory(native/bench)
+endif()
+
 #######################################
 # Configure SEALNet and NuGet package #
 #######################################
 
-# Create SEALNet.csproj, SEALNetExamples.csproj and SEALNetTest.csproj
-# for building dotnet with Visual Studio
+# In Windows we will set the SEAL_C library path according to the CMake generator
+set(SEAL_WINDOWS_SEAL_C_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+get_property(SEAL_IS_MULTI_CONFIG_GENERATOR GLOBAL PROPERTY GENERATOR_IS_MULTI_CONFIG)
+if(SEAL_IS_MULTI_CONFIG_GENERATOR)
+    # Is this the Visual Studio generator? If so, the output path will contain the configuration.
+    # We shall use CMAKE_BUILD_TYPE here, which by default will be "Release". The user has the
+    # option of changing this by explicitly specifying CMAKE_BUILD_TYPE, which multi-config
+    # generators otherwise ignore.
+    set(SEAL_WINDOWS_SEAL_C_DIRECTORY ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE})
+endif()
+
+# Create SEALNet.csproj, SEALNetExamples.csproj, and SEALNetTest.csproj
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/src/SEALNet.csproj.in
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/src/SEALNet.csproj
@@ -595,39 +633,27 @@ configure_file(
 # dynamic library paths need to be specified explicitly in the NuGet
 # command. See dotnet/nuget/SEALNet.nuspec.in.
 
-# First create the multi-platform NuSpec file so disable all platform-specific
-# library paths
-unset(SEAL_WINDOWS_SEAL_C_PATH)
-unset(SEAL_LINUX_SEAL_C_PATH)
-unset(SEAL_MACOS_SEAL_C_PATH)
-
 # Create SEALNet-multi.nuspec for a multi-platform NuGet package
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet-multi.nuspec.in
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet-multi.nuspec
     @ONLY)
 
-set(SEAL_WINDOWS_SEAL_C_PATH "")
-set(SEAL_LINUX_SEAL_C_PATH "")
-set(SEAL_MACOS_SEAL_C_PATH "")
+set(NUGET_WINDOWS_SEAL_C_PATH "")
+set(NUGET_LINUX_SEAL_C_PATH "")
+set(NUGET_MACOS_SEAL_C_PATH "")
+
+# Supporting local building of NuGet package
+if(WIN32)
+    set(NUGET_WINDOWS_SEAL_C_PATH ${SEAL_WINDOWS_SEAL_C_DIRECTORY}/sealc.dll)
+elseif(UNIX AND NOT APPLE)
+    set(NUGET_LINUX_SEAL_C_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsealc.so)
+elseif(APPLE)
+    set(NUGET_MACOS_SEAL_C_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsealc.dylib)
+endif()
 
 # Create SEALNet.nuspec for a local NuGet pack from SEALNet.nuspec.in
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.nuspec.in
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.nuspec
     @ONLY)
-
-# Create SEALNet.targets from SEALNet.targets.in
-configure_file(
-    ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.targets.in
-    ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.targets
-    @ONLY)
-
-# Supporting local building of NuGet package
-if(WIN32)
-    set(SEAL_WINDOWS_SEAL_C_PATH ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/sealc.dll)
-elseif(UNIX AND NOT APPLE)
-    set(SEAL_LINUX_SEAL_C_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsealc.so)
-elseif(APPLE)
-    set(SEAL_MACOS_SEAL_C_PATH ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsealc.dylib)
-endif()

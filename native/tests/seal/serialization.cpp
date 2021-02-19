@@ -143,8 +143,8 @@ namespace sealtest
 
         auto out_size = Serialization::Save(
             bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::none), stream,
-            compr_mode_type::none);
-        auto in_size = Serialization::Load(bind(&test_struct::load_members, &st2, _1), stream);
+            compr_mode_type::none, false);
+        auto in_size = Serialization::Load(bind(&test_struct::load_members, &st2, _1), stream, false);
         ASSERT_EQ(out_size, in_size);
         ASSERT_EQ(st.a, st2.a);
         ASSERT_EQ(st.b, st2.b);
@@ -154,8 +154,8 @@ namespace sealtest
             test_struct st3;
             out_size = Serialization::Save(
                 bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::zstd), stream,
-                compr_mode_type::zstd);
-            in_size = Serialization::Load(bind(&test_struct::load_members, &st3, _1), stream);
+                compr_mode_type::zstd, false);
+            in_size = Serialization::Load(bind(&test_struct::load_members, &st3, _1), stream, false);
             ASSERT_EQ(out_size, in_size);
             ASSERT_EQ(st.a, st3.a);
             ASSERT_EQ(st.b, st3.b);
@@ -167,8 +167,8 @@ namespace sealtest
             test_struct st3;
             out_size = Serialization::Save(
                 bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::zlib), stream,
-                compr_mode_type::zlib);
-            in_size = Serialization::Load(bind(&test_struct::load_members, &st3, _1), stream);
+                compr_mode_type::zlib, false);
+            in_size = Serialization::Load(bind(&test_struct::load_members, &st3, _1), stream, false);
             ASSERT_EQ(out_size, in_size);
             ASSERT_EQ(st.a, st3.a);
             ASSERT_EQ(st.b, st3.b);
@@ -188,17 +188,17 @@ namespace sealtest
         stringstream ss;
         auto test_out_size = Serialization::Save(
             bind(&test_struct::save_members, &st, _1), st.save_size(Serialization::compr_mode_default), ss,
-            Serialization::compr_mode_default);
+            Serialization::compr_mode_default, false);
         auto out_size = Serialization::Save(
             bind(&test_struct::save_members, &st, _1), st.save_size(Serialization::compr_mode_default), buffer,
-            arr_size, Serialization::compr_mode_default);
+            arr_size, Serialization::compr_mode_default, false);
         ASSERT_EQ(test_out_size, out_size);
         for (size_t i = static_cast<size_t>(out_size); i < arr_size; i++)
         {
             ASSERT_TRUE(seal_byte{} == buffer[i]);
         }
 
-        auto in_size = Serialization::Load(bind(&test_struct::load_members, &st2, _1), buffer, arr_size);
+        auto in_size = Serialization::Load(bind(&test_struct::load_members, &st2, _1), buffer, arr_size, false);
         ASSERT_EQ(out_size, in_size);
         ASSERT_EQ(st.a, st2.a);
         ASSERT_EQ(st.b, st2.b);
@@ -212,17 +212,17 @@ namespace sealtest
             ss.seekp(0);
             test_out_size = Serialization::Save(
                 bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::zstd), ss,
-                compr_mode_type::zstd);
+                compr_mode_type::zstd, false);
             out_size = Serialization::Save(
                 bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::zstd), buffer, arr_size,
-                compr_mode_type::zstd);
+                compr_mode_type::zstd, false);
             ASSERT_EQ(test_out_size, out_size);
             for (size_t i = static_cast<size_t>(out_size); i < arr_size; i++)
             {
                 ASSERT_EQ(seal_byte{}, buffer[i]);
             }
 
-            in_size = Serialization::Load(bind(&test_struct::load_members, &st3, _1), buffer, arr_size);
+            in_size = Serialization::Load(bind(&test_struct::load_members, &st3, _1), buffer, arr_size, false);
             ASSERT_EQ(out_size, in_size);
             ASSERT_EQ(st.a, st3.a);
             ASSERT_EQ(st.b, st3.b);
@@ -238,17 +238,17 @@ namespace sealtest
             ss.seekp(0);
             test_out_size = Serialization::Save(
                 bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::zlib), ss,
-                compr_mode_type::zlib);
+                compr_mode_type::zlib, false);
             out_size = Serialization::Save(
                 bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::zlib), buffer, arr_size,
-                compr_mode_type::zlib);
+                compr_mode_type::zlib, false);
             ASSERT_EQ(test_out_size, out_size);
             for (size_t i = static_cast<size_t>(out_size); i < arr_size; i++)
             {
                 ASSERT_EQ(seal_byte{}, buffer[i]);
             }
 
-            in_size = Serialization::Load(bind(&test_struct::load_members, &st3, _1), buffer, arr_size);
+            in_size = Serialization::Load(bind(&test_struct::load_members, &st3, _1), buffer, arr_size, false);
             ASSERT_EQ(out_size, in_size);
             ASSERT_EQ(st.a, st3.a);
             ASSERT_EQ(st.b, st3.b);

@@ -248,13 +248,14 @@ namespace seal
             typename = std::enable_if_t<std::is_arithmetic<S>::value>>
         SEAL_NODISCARD inline constexpr bool fits_in(S value SEAL_MAYBE_UNUSED) noexcept
         {
+            bool result = false;
+
             SEAL_IF_CONSTEXPR(std::is_same<T, S>::value)
             {
                 // Same type
-                return true;
+                result = true;
             }
-
-            SEAL_IF_CONSTEXPR(sizeof(S) <= sizeof(T))
+            else SEAL_IF_CONSTEXPR(sizeof(S) <= sizeof(T))
             {
                 // Converting to bigger type
                 SEAL_IF_CONSTEXPR(std::is_integral<T>::value && std::is_integral<S>::value)
@@ -265,24 +266,24 @@ namespace seal
                         (!std::is_unsigned<T>::value && !std::is_unsigned<S>::value))
                     {
                         // Both either signed or unsigned
-                        return true;
+                        result = true;
                     }
                     else SEAL_IF_CONSTEXPR(std::is_unsigned<T>::value && std::is_signed<S>::value)
                     {
                         // Converting from signed to at least equally big unsigned type
-                        return value >= 0;
+                        result = value >= 0;
                     }
                 }
                 else SEAL_IF_CONSTEXPR(std::is_floating_point<T>::value && std::is_floating_point<S>::value)
                 {
                     // Both floating-point
-                    return true;
+                    result = true;
                 }
 
                 // Still need to consider integer-float conversions and all
                 // unsigned to signed conversions
             }
-
+            
             SEAL_IF_CONSTEXPR(std::is_integral<T>::value && std::is_integral<S>::value)
             {
                 // Both integer types
@@ -290,28 +291,30 @@ namespace seal
                 {
                     // Non-negative number; compare as std::uint64_t
                     // Cannot use unsigned_leq with C++14 for lack of `if constexpr'
-                    return static_cast<std::uint64_t>(value) <=
+                    result = static_cast<std::uint64_t>(value) <=
                            static_cast<std::uint64_t>((std::numeric_limits<T>::max)());
                 }
                 else
                 {
                     // Negative number; compare as std::int64_t
-                    return (
-                        static_cast<std::int64_t>(value) >= static_cast<std::int64_t>((std::numeric_limits<T>::min)()));
+                    result =
+                        static_cast<std::int64_t>(value) >= static_cast<std::int64_t>((std::numeric_limits<T>::min)());
                 }
             }
             else SEAL_IF_CONSTEXPR(std::is_floating_point<T>::value)
             {
                 // Converting to floating-point
-                return (static_cast<double>(value) <= static_cast<double>((std::numeric_limits<T>::max)())) &&
+                result = (static_cast<double>(value) <= static_cast<double>((std::numeric_limits<T>::max)())) &&
                        (static_cast<double>(value) >= -static_cast<double>((std::numeric_limits<T>::max)()));
             }
             else
             {
                 // Converting from floating-point
-                return (static_cast<double>(value) <= static_cast<double>((std::numeric_limits<T>::max)())) &&
+                result = (static_cast<double>(value) <= static_cast<double>((std::numeric_limits<T>::max)())) &&
                        (static_cast<double>(value) >= static_cast<double>((std::numeric_limits<T>::min)()));
             }
+
+            return result;
         }
 
         template <typename T, typename... Args, typename = std::enable_if_t<std::is_arithmetic<T>::value>>
