@@ -435,7 +435,8 @@ if(SEAL_BUILD_SEAL_C)
     unset(HAVE_SIZET CACHE)
 
     if(BUILD_SHARED_LIBS)
-        message(FATAL_ERROR "SEAL_C requires `BUILD_SHARED_LIBS=OFF`")
+        message(FATAL_ERROR "SEAL_C (shared or static) requires a static SEAL; set `BUILD_SHARED_LIBS=OFF` and control "
+                            "SEAL_C by setting `SEAL_BUILD_STATIC_SEAL_C` to `OFF` (default) or `ON`")
     endif()
 
     if(NOT SEAL_BUILD_DEPS)

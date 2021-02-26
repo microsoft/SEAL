@@ -1,5 +1,11 @@
 # List of Changes
 
+## Version 3.6.3
+
+### Other
+
+- Improved the error message when attempting to configure with `BUILD_SHARED_LIBS=ON` and `SEAL_BUILD_SEAL_C=ON` [(Issue 284)](https://github.com/microsoft/SEAL/issues/284).
+
 ## Version 3.6.2
 
 ### Hotfix - 2/18/2021
