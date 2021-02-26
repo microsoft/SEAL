@@ -97,7 +97,7 @@ For applications where exact values are necessary, the BFV scheme is the only ch
 
 There are multiple ways of installing Microsoft SEAL and starting to use it.
 The easiest way is to use a package manager to download, build, and install the library.
-For example, [vcpkg](https://github.com/microsoft/vcpkg) works on most platforms and will be up-to-date with the lastest release of Microsoft SEAL.
+For example, [vcpkg](https://github.com/microsoft/vcpkg) works on most platforms and will be up-to-date with the latest release of Microsoft SEAL.
 On macOS you can also use [Homebrew](https://formulae.brew.sh/formula/seal).
 The .NET library is available as a multiplatform [NuGet package](https://www.nuget.org/packages/Microsoft.Research.SEALNet).
 Finally, one can build Microsoft SEAL manually with a multiplatform CMake build system; see [Building Microsoft SEAL Manually](#building-microsoft-seal-manually) for details.
@@ -321,7 +321,7 @@ The following options can be used with CMake to configure the build. The default
 | CMAKE_BUILD_TYPE    | **Release**</br>Debug</br>RelWithDebInfo</br>MinSizeRel</br> | `Debug` and `MinSizeRel` have worse run-time performance. `Debug` inserts additional assertion code. Set to `Release` unless you are developing Microsoft SEAL itself or debugging some complex issue. |
 | SEAL_BUILD_EXAMPLES | ON / **OFF**                                                 | Build the C++ examples in [native/examples](native/examples).                                                                                                                                          |
 | SEAL_BUILD_TESTS    | ON / **OFF**                                                 | Build the tests to check that Microsoft SEAL works correctly.                                                                                                                                          |
-| SEAL_BUILD_BENCH    | ON / **OFF**                                                 | Build the performance benchmark.                                                                                                                                                                      |
+| SEAL_BUILD_BENCH    | ON / **OFF**                                                 | Build the performance benchmarks.                                                                                                                                                                     |
 | SEAL_BUILD_DEPS     | **ON** / OFF                                                 | Set to `ON` to automatically download and build [optional dependencies](#optional-dependencies); otherwise CMake will attempt to locate pre-installed dependencies.                                    |
 | SEAL_USE_MSGSL      | **ON** / OFF                                                 | Build with Microsoft GSL support.                                                                                                                                                                      |
 | SEAL_USE_ZLIB       | **ON** / OFF                                                 | Build with ZLIB support.                                                                                                                                                                               |
