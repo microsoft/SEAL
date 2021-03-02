@@ -70,7 +70,7 @@ set(SEAL_SECURE_COMPILE_OPTIONS_OPTIONS_STR "Enable Control Flow Guard and Spect
 option(SEAL_SECURE_COMPILE_OPTIONS ${SEAL_SECURE_COMPILE_OPTIONS_OPTIONS_STR} OFF)
 mark_as_advanced(SEAL_SECURE_COMPILE_OPTIONS)
 
-# Path for outupt
+# Path for output
 if(ANDROID_ABI)
     # Android compiles several targets at the same time. Need to specify
     # separate directories for separate ABIs.
