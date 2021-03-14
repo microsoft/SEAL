@@ -36,9 +36,19 @@ namespace seal
     };
 
     /**
-    Returns a random 64-bit integer.
+    Fills a buffer with random bytes.
     */
-    SEAL_NODISCARD std::uint64_t random_uint64();
+    void random_bytes(seal_byte *buf, std::size_t count);
+
+    /**
+    Returns a random 64-bit unsigned integer.
+    */
+    SEAL_NODISCARD inline std::uint64_t random_uint64()
+    {
+        std::uint64_t result;
+        random_bytes(reinterpret_cast<seal_byte *>(&result), sizeof(result));
+        return result;
+    }
 
     class UniformRandomGenerator;
 
@@ -429,10 +439,12 @@ namespace seal
         */
         SEAL_NODISCARD auto create() -> std::shared_ptr<UniformRandomGenerator>
         {
-            return use_random_seed_
-                       ? create_impl({ random_uint64(), random_uint64(), random_uint64(), random_uint64(),
-                                       random_uint64(), random_uint64(), random_uint64(), random_uint64() })
-                       : create_impl(default_seed_);
+            return use_random_seed_ ? create_impl([]() {
+                prng_seed_type seed;
+                random_bytes(reinterpret_cast<seal_byte *>(seed.data()), prng_seed_byte_count);
+                return seed;
+            }())
+                                    : create_impl(default_seed_);
         }
 
         /**
