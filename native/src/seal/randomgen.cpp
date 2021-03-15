@@ -38,11 +38,14 @@ namespace seal
             buf += 4;
             count -= 4;
         }
-        uint32_t last = rd();
-        memcpy(buf, &last, count);
+        if (count)
+        {
+            uint32_t last = rd();
+            memcpy(buf, &last, count);
+        }
 #elif SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
         NTSTATUS status = BCryptGenRandom(
-            NULL, reinterpret_cast<unsigned char *>(&result), sizeof(result), BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+            NULL, reinterpret_cast<unsigned char *>(buf), count, BCRYPT_USE_SYSTEM_PREFERRED_RNG);
 
         if (BCRYPT_SUCCESS(status))
         {
@@ -64,7 +67,7 @@ namespace seal
         BOOLEAN genrand_result = FALSE;
         if (RtlGenRandom)
         {
-            genrand_result = RtlGenRandom(&result, bytes_per_uint64);
+            genrand_result = RtlGenRandom(buf, bytes_per_uint64);
         }
 
         DWORD dwError = GetLastError();
@@ -84,8 +87,11 @@ namespace seal
             buf += 4;
             count -= 4;
         }
-        uint32_t last = rd();
-        memcpy(buf, &last, count);
+        if (count)
+        {
+            uint32_t last = rd();
+            memcpy(buf, &last, count);
+        }
 #endif
     }
 
