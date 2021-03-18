@@ -86,6 +86,9 @@ macro(seal_combine_archives target dependency)
             set(DEL_CMD "rm")
             set(DEL_CMD_OPTS "-rf")
         endif()
+        if(EMSCRIPTEN)
+            set(AR_CMD_PATH "emar")
+        endif()
         add_custom_command(TARGET ${target} POST_BUILD
             COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:${target}>
             COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:${dependency}>
