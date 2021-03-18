@@ -937,7 +937,7 @@ namespace Microsoft.Research.SEAL
         /// Multiplies a ciphertext with a plaintext and stores the result in encrypted.
         /// </summary>
         /// <remarks>
-        /// Multiplies a ciphertext with a plaintext. The plaintext cannot be identially 0. Dynamic memory allocations
+        /// Multiplies a ciphertext with a plaintext. The plaintext cannot be identically 0. Dynamic memory allocations
         /// in the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
         /// </remarks>
         /// <param name="encrypted">The ciphertext to multiply</param>
@@ -961,7 +961,7 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <remarks>
         /// This function multiplies a ciphertext with a plaintext and stores the result in the destination parameter.
-        /// The plaintext cannot be identially 0. Dynamic memory allocations in the process are allocated from the
+        /// The plaintext cannot be identically 0. Dynamic memory allocations in the process are allocated from the
         /// memory pool pointed to by the given MemoryPoolHandle.
         /// </remarks>
         /// <param name="encrypted">The ciphertext to multiply</param>
