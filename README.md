@@ -31,6 +31,7 @@ The [EVA compiler for CKKS](https://arxiv.org/abs/1912.11951) is available at [G
     - [Installing Microsoft SEAL](#installing-microsoft-seal)
     - [Building and Installing on Windows](#building-and-installing-on-windows)
     - [Building for Android and iOS](#building-for-android-and-ios)
+    - [Building for WebAssembly](#building-for-webassembly)
     - [Basic CMake Options](#basic-cmake-options)
     - [Advanced CMake Options](#advanced-cmake-options)
     - [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake)
@@ -314,7 +315,7 @@ Specifically, they do not contain any wrappers that can be used from Java (for A
 
 #### Building for WebAssembly
 
-Microsoft SEAL can be compiled for the JavaScript and WebAssembly using [emscripten](https://emscripten.org). Building for the Web means SEAL can be run in any client/server environment such as all the major browsers (e.g. Edge, Chrome, Firefox, Safari) and NodeJS.
+Microsoft SEAL can be compiled for JavaScript and WebAssembly using [emscripten](https://emscripten.org). Building for the Web means SEAL can be run in any client/server environment such as all the major browsers (e.g. Edge, Chrome, Firefox, Safari) and NodeJS.
 
 Building for WebAssembly requires the emscripten toolchain to be installed. The easiest way to configure the toolchain is to clone [emsdk](https://github.com/emscripten-core/emsdk) somewhere on your system and follow the instructions in the README.
 
