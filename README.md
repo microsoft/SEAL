@@ -315,21 +315,24 @@ Specifically, they do not contain any wrappers that can be used from Java (for A
 
 #### Building for WebAssembly
 
-Microsoft SEAL can be compiled for JavaScript and WebAssembly using [emscripten](https://emscripten.org). Building for the Web means SEAL can be run in any client/server environment such as all the major browsers (e.g. Edge, Chrome, Firefox, Safari) and NodeJS.
+Microsoft SEAL can be compiled for JavaScript and WebAssembly using [emscripten](https://emscripten.org) on Windows, Linux, and macOS.
+Building for the Web means SEAL can be run in any client/server environment such as all the major browsers (e.g. Edge, Chrome, Firefox, Safari) and NodeJS.
 
-Building for WebAssembly requires the emscripten toolchain to be installed. The easiest way to configure the toolchain is to clone [emsdk](https://github.com/emscripten-core/emsdk) somewhere on your system and follow the instructions in the README.
+Building for WebAssembly requires the emscripten toolchain to be installed.
+The easiest way to configure the toolchain is to clone [emsdk](https://github.com/emscripten-core/emsdk) and follow the [instructions](https://emscripten.org/docs/getting_started/downloads.html#installation-instructions-using-the-emsdk-recommended) (with system-specific notes). For examples, on Linux and macOS, inside the `emsdk` repo, run the following:
 
-Inside the `emsdk` repo, run the following:
 ```PowerShell
 # Install the latest toolchain
 ./emsdk install latest
 ./emsdk activate latest
-
 # Source the environment
 source ./emsdk_env.sh
 ```
+**On Windows, better run from a developer command prompt for Visual Studio; and replace `./emsdk` and `source ./emsdk_env.sh` with `emsdk` and `emsdk_env.bat`, respectively.**
+In other environments, `cmake` must be added to the path, and either "Ninja" or "MinGW Makefiles" should be specified as generator in the following configuration step.
+`emcmake` does not work with Visual Studio 16 2019 generator.
 
-With the same shell, navigate to the root directory of Microsoft SEAL, run the following commands to build for WebAssembly:
+Within the same shell, navigate to the root directory of Microsoft SEAL, run the following commands to build for WebAssembly:
 
 ```PowerShell
 # Configure CMake. Example flags for a release build
@@ -337,7 +340,7 @@ emcmake cmake \
  -DSEAL_USE_CXX17=ON \
  -DCMAKE_CXX_FLAGS_RELEASE="-DNDEBUG -flto -O3" \
  -DCMAKE_C_FLAGS_RELEASE="-DNDEBUG -flto -O3" \
- -DSEAL_USE_INTRIN=OFF \
+ -DSEAL_USE_INTRIN=ON \
  -DSEAL_USE_ZLIB=ON \
  -DSEAL_USE_MSGSL=OFF \
  -DSEAL_BUILD_EXAMPLES=OFF \
@@ -352,23 +355,23 @@ emmake make -j
 
 # Build the WebAssembly module
 emcc \
--Wall \
--flto \
--O3 \
-lib/libseal-3.6.a \
---bind \
--o "bin/seal_wasm.js" \
--s WASM=1 \
--s ALLOW_MEMORY_GROWTH=1
-
+ -Wall \
+ -flto \
+ -O3 \
+ lib/libseal-3.6.a \
+ --bind \
+ -o "bin/seal_wasm.js" \
+ -s WASM=1 \
+ -s ALLOW_MEMORY_GROWTH=1
 ```
+
 **Note**: There are many flags to consider when building a WebAssembly module. Please refer to the [settings.js](https://github.com/emscripten-core/emscripten/blob/main/src/settings.js) file for advanced build flags.
 
-Building will generate two output files in the top-level `bin/` directory:
-- seal_wasm.js
-- seal_wasm.wasm
-
-Notice the file sizes for the artifacts are very small. This is because the optimization flags performed DCE as there are no JavaScript <-> WebAssembly "bindings". Defining these bindings is **necessary** in order to call into WebAssembly from the JavaScript domain; however, Microsoft SEAL does not include any definitions at this time. The build flag `--bind` expects the bindings to be specified using the [embind](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html) syntax.
+Building will generate two output files, `seal_wasm.js` and `seal_wasm.wasm`, in the top-level `bin/` directory.
+The file sizes for the artifacts are very small.
+This is because that the optimization flags perform dead code elimination (DCE) as there are no bindings generated to JavaScript.
+Defining these bindings is **necessary** in order to call into WebAssembly from the JavaScript domain; however, Microsoft SEAL does not include any definitions at this time.
+The build flag `--bind` expects the bindings to be specified using the [embind](https://emscripten.org/docs/porting/connecting_cpp_and_javascript/embind.html) syntax.
 
 #### Basic CMake Options
 

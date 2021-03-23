@@ -6,6 +6,7 @@
 
 - Improved the error message when attempting to configure with `BUILD_SHARED_LIBS=ON` and `SEAL_BUILD_SEAL_C=ON` [(Issue 284)](https://github.com/microsoft/SEAL/issues/284).
 - Added `seal::random_bytes` function in [randomgen.h](native/src/seal/randomgen.h).
+- Added support to build SEAL out of the box with [emscripten](https://emscripten.org/) [(PR 306)](https://github.com/microsoft/SEAL/pull/306).
 
 ## Version 3.6.2
 

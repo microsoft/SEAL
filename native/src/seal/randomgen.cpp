@@ -44,8 +44,8 @@ namespace seal
             memcpy(buf, &last, count);
         }
 #elif SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
-        NTSTATUS status = BCryptGenRandom(
-            NULL, reinterpret_cast<unsigned char *>(buf), count, BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+        NTSTATUS status =
+            BCryptGenRandom(NULL, reinterpret_cast<unsigned char *>(buf), count, BCRYPT_USE_SYSTEM_PREFERRED_RNG);
 
         if (BCRYPT_SUCCESS(status))
         {
