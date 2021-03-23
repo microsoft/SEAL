@@ -74,7 +74,7 @@ static_assert(sizeof(unsigned long long) == 8, "Require sizeof(unsigned long lon
 
 #if defined(_WIN32)
 #define SEAL_SYSTEM SEAL_SYSTEM_WINDOWS
-#elif defined(__linux__) || defined(__FreeBSD__) || (defined(__APPLE__) && defined(__MACH__))
+#elif defined(__linux__) || defined(__FreeBSD__) || defined(EMSCRIPTEN) || (defined(__APPLE__) && defined(__MACH__))
 #define SEAL_SYSTEM SEAL_SYSTEM_UNIX_LIKE
 #else
 #define SEAL_SYSTEM SEAL_SYSTEM_OTHER
