@@ -336,38 +336,38 @@ Within the same shell, navigate to the root directory of Microsoft SEAL, run the
 
 ```PowerShell
 # Configure CMake. Example flags for a release build
-emcmake cmake \
- -DSEAL_USE_CXX17=ON \
+emcmake cmake -S . -B build \
+ -DBUILD_SHARED_LIBS=OFF \
+ -DCMAKE_BUILD_TYPE=Release \
  -DCMAKE_CXX_FLAGS_RELEASE="-DNDEBUG -flto -O3" \
  -DCMAKE_C_FLAGS_RELEASE="-DNDEBUG -flto -O3" \
- -DSEAL_USE_INTRIN=ON \
- -DSEAL_USE_ZLIB=ON \
- -DSEAL_USE_MSGSL=OFF \
+ -DSEAL_BUILD_BENCH=OFF \ # Benchmark can be built for WASM. Change this to ON.
  -DSEAL_BUILD_EXAMPLES=OFF \
  -DSEAL_BUILD_TESTS=OFF \
- -DBUILD_SHARED_LIBS=OFF \
- -DSEAL_THROW_ON_TRANSPARENT_CIPHERTEXT=ON \
- -DCMAKE_BUILD_TYPE=Release \
- .
+ -DSEAL_USE_CXX17=ON \
+ -DSEAL_USE_INTRIN=ON \
+ -DSEAL_USE_MSGSL=OFF \
+ -DSEAL_USE_ZLIB=ON \
+ -DSEAL_THROW_ON_TRANSPARENT_CIPHERTEXT=ON
 
 # Make the static library (shared libs are not supported with emscripten)
-emmake make -j
+emmake make -C build -j
 
 # Build the WebAssembly module
 emcc \
  -Wall \
  -flto \
  -O3 \
- lib/libseal-3.6.a \
+ build/lib/libseal-3.6.a \
  --bind \
- -o "bin/seal_wasm.js" \
+ -o "build/bin/seal_wasm.js" \
  -s WASM=1 \
  -s ALLOW_MEMORY_GROWTH=1
 ```
 
 **Note**: There are many flags to consider when building a WebAssembly module. Please refer to the [settings.js](https://github.com/emscripten-core/emscripten/blob/main/src/settings.js) file for advanced build flags.
 
-Building will generate two output files, `seal_wasm.js` and `seal_wasm.wasm`, in the top-level `bin/` directory.
+Building will generate two output files, `seal_wasm.js` and `seal_wasm.wasm`, in the `build/bin/` directory.
 The file sizes for the artifacts are very small.
 This is because that the optimization flags perform dead code elimination (DCE) as there are no bindings generated to JavaScript.
 Defining these bindings is **necessary** in order to call into WebAssembly from the JavaScript domain; however, Microsoft SEAL does not include any definitions at this time.
