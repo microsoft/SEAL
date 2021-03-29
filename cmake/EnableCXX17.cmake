@@ -1,6 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
+set(SEAL_USE_ALIGN_64 OFF)
 set(SEAL_USE_STD_BYTE OFF)
 set(SEAL_USE_SHARED_MUTEX OFF)
 set(SEAL_USE_IF_CONSTEXPR OFF)
@@ -9,6 +10,7 @@ set(SEAL_USE_NODISCARD OFF)
 set(SEAL_USE_STD_FOR_EACH_N OFF)
 set(SEAL_LANG_FLAG "-std=c++14")
 if(SEAL_USE_CXX17)
+    set(SEAL_USE_ALIGN_64 ON)
     set(SEAL_USE_STD_BYTE ON)
     set(SEAL_USE_SHARED_MUTEX ON)
     set(SEAL_USE_IF_CONSTEXPR ON)

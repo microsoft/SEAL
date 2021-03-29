@@ -13,6 +13,7 @@
 
 // C++17 features
 #cmakedefine SEAL_USE_STD_BYTE
+#cmakedefine SEAL_USE_ALIGN_64
 #cmakedefine SEAL_USE_SHARED_MUTEX
 #cmakedefine SEAL_USE_IF_CONSTEXPR
 #cmakedefine SEAL_USE_MAYBE_UNUSED
@@ -42,3 +43,4 @@
 #cmakedefine SEAL_USE_MSGSL
 #cmakedefine SEAL_USE_ZLIB
 #cmakedefine SEAL_USE_ZSTD
+#cmakedefine SEAL_USE_INTEL_HEXL
