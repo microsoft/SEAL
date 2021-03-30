@@ -463,7 +463,7 @@ namespace seal
                 return 0;
             }
 
-            unsigned long result;
+            unsigned long result = 0;
             SEAL_MSB_INDEX_UINT64(&result, value);
             return static_cast<int>(result + 1);
         }

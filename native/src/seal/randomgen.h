@@ -334,7 +334,7 @@ namespace seal
 
         SEAL_NODISCARD inline prng_seed_type seed() const noexcept
         {
-            prng_seed_type ret;
+            prng_seed_type ret{};
             std::copy(seed_.cbegin(), seed_.cend(), ret.begin());
             return ret;
         }
