@@ -104,12 +104,25 @@ steps:
     configuration: ${{ parameters.configuration }}
     diagnosticsEnabled: True
 
-- task: PublishSymbols@2
-  displayName: 'Publish symbols path'
-  inputs:
-    searchPattern: '**\bin\**\*.pdb'
-    PublishSymbols: false
-  continueOnError: true
+- ${{ if eq(parameters.configuration, 'Release') }}:
+  - task: Semmle@1
+    displayName: 'Semmle'
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+    inputs:
+      sourceCodeDirectory: '$(Build.SourcesDirectory)'
+      language: 'cpp'
+      querySuite: 'Recommended'
+      timeout: '1800'
+      ram: '16384'
+      addProjectDirToScanningExclusionList: True
+
+  - task: PublishSymbols@2
+    displayName: 'Publish symbols path'
+    inputs:
+      searchPattern: '**\bin\**\*.pdb'
+      PublishSymbols: false
+    continueOnError: true
 
 - ${{ if eq(parameters.configuration, 'Release') }}:
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
@@ -296,8 +309,9 @@ steps:
     areaPathParent: 'SEAL'
   enabled: false
 
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
-  displayName: 'Publish Security Analysis Logs'
+- ${{ if eq(parameters.configuration, 'Release') }}:
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
+    displayName: 'Publish Security Analysis Logs'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: drop'
