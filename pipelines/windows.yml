@@ -115,7 +115,7 @@ steps:
       querySuite: 'Recommended'
       timeout: '1800'
       ram: '16384'
-      addProjectDirToScanningExclusionList: True
+      addProjectDirToScanningExclusionList: true
 
   - task: PublishSymbols@2
     displayName: 'Publish symbols path'

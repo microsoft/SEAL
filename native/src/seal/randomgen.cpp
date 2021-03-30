@@ -3,6 +3,7 @@
 
 #include "seal/randomgen.h"
 #include "seal/util/blake2.h"
+#include "seal/util/common.h"
 #include "seal/util/fips202.h"
 #include <algorithm>
 #include <iostream>
@@ -44,8 +45,8 @@ namespace seal
             memcpy(buf, &last, count);
         }
 #elif SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
-        NTSTATUS status =
-            BCryptGenRandom(NULL, reinterpret_cast<unsigned char *>(buf), count, BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+        NTSTATUS status = BCryptGenRandom(
+            NULL, reinterpret_cast<unsigned char *>(buf), safe_cast<ULONG>(count), BCRYPT_USE_SYSTEM_PREFERRED_RNG);
 
         if (BCRYPT_SUCCESS(status))
         {
