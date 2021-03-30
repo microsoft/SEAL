@@ -105,7 +105,7 @@ steps:
     diagnosticsEnabled: True
 
 - ${{ if eq(parameters.configuration, 'Release') }}:
-  - task: Semmle@1
+  - task: Semmle@0
     displayName: 'Semmle'
     env:
       SYSTEM_ACCESSTOKEN: $(System.AccessToken)
