@@ -13,6 +13,13 @@
 // Read in config.h
 #include "seal/util/config.h"
 
+#ifdef SEAL_USE_ALIGN_64
+#include <cstdlib>
+#define SEAL_ALIGNED_ALLOC(alignment, size) \
+    ((size) % (alignment) == 0) ? aligned_alloc((alignment), (size)) : malloc((size))
+#define SEAL_ALIGNED_FREE(ptr) free(ptr)
+#endif
+
 // Are intrinsics enabled?
 #ifdef SEAL_USE_INTRIN
 #if defined(__aarch64__)

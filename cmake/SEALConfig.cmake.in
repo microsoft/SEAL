@@ -17,6 +17,7 @@
 #   SEAL_USE_CXX17 : Set to non-zero value if library is compiled as C++17 instead of C++14
 #   SEAL_ENFORCE_HE_STD_SECURITY : Set to non-zero value if library is compiled to enforce at least
 #       a 128-bit security level based on HomomorphicEncryption.org security estimates
+#   SEAL_USE_INTEL_HEXL: Set to non-zero value if library is compiled with Intel HEXL support
 #   SEAL_USE_MSGSL : Set to non-zero value if library is compiled with Microsoft GSL support
 #   SEAL_USE_ZLIB : Set to non-zero value if library is compiled with ZLIB support
 #   SEAL_USE_ZSTD : Set to non-zero value if library is compiled with Zstandard support
@@ -51,6 +52,7 @@ set(SEAL_DEBUG @SEAL_DEBUG@)
 set(SEAL_USE_CXX17 @SEAL_USE_CXX17@)
 set(SEAL_ENFORCE_HE_STD_SECURITY @SEAL_ENFORCE_HE_STD_SECURITY@)
 
+set(SEAL_USE_INTEL_HEXL @SEAL_USE_INTEL_HEXL@)
 set(SEAL_USE_MSGSL @SEAL_USE_MSGSL@)
 set(SEAL_USE_ZLIB @SEAL_USE_ZLIB@)
 set(SEAL_USE_ZSTD @SEAL_USE_ZSTD@)

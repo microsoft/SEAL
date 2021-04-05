@@ -19,6 +19,13 @@
 
 #define SEAL_FORCE_INLINE __always_inline
 
+#ifdef SEAL_USE_ALIGN_64
+#include <cstdlib>
+#define SEAL_ALIGNED_ALLOC(alignment, size) \
+    ((size) % (alignment) == 0) ? std::aligned_alloc((alignment), (size)) : malloc((size))
+#define SEAL_ALIGNED_FREE(ptr) free(ptr)
+#endif
+
 // Are intrinsics enabled?
 #ifdef SEAL_USE_INTRIN
 #if defined(__aarch64__)
