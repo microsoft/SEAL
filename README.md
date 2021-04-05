@@ -19,6 +19,7 @@ The [EVA compiler for CKKS](https://arxiv.org/abs/1912.11951) is available at [G
   - [Microsoft SEAL](#microsoft-seal-1)
 - [Getting Started](#getting-started)
   - [Optional Dependencies](#optional-dependencies)
+    - [Intel HEXL](#intel-hexl)
     - [Microsoft GSL](#microsoft-gsl)
     - [ZLIB and Zstandard](#zlib-and-zstandard)
   - [Installing from NuGet Package](#installing-from-nuget-package-windows-linux-macos-android-ios)
@@ -115,11 +116,16 @@ The optional dependencies and their tested versions (other versions may work as 
 
 | Optional dependency                                    | Tested version | Use                                              |
 | ------------------------------------------------------ | -------------- | ------------------------------------------------ |
+| [Intel HEXL](https://github.com/intel/hexl)            | 1.0.1          | Acceleration of low-level kernels                |
 | [Microsoft GSL](https://github.com/microsoft/GSL)      | 3.1.0          | API extensions                                   |
 | [ZLIB](https://github.com/madler/zlib)                 | 1.2.11         | Compressed serialization                         |
 | [Zstandard](https://github.com/facebook/zstd)          | 1.4.5          | Compressed serialization (much faster than ZLIB) |
 | [GoogleTest](https://github.com/google/googletest)     | 1.10.0         | For running tests                                |
 | [GoogleBenchmark](https://github.com/google/benchmark) | 1.5.2          | For running benchmarks                           |
+
+#### Intel HEXL
+
+Intel HEXL is a library providing efficient implementations of cryptographic primitives common in homomorphic encryption. The acceleration is particularly evident on Intel processors with the Intel AVX512-IMA52 instruction set.
 
 #### Microsoft GSL
 
@@ -377,20 +383,21 @@ The build flag `--bind` expects the bindings to be specified using the [embind](
 
 The following options can be used with CMake to configure the build. The default value for each option is denoted with boldface in the **Values** column.
 
-| CMake option        | Values                                                       | Information                                                                                                                                                                                            |
-| ------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| CMAKE_BUILD_TYPE    | **Release**</br>Debug</br>RelWithDebInfo</br>MinSizeRel</br> | `Debug` and `MinSizeRel` have worse run-time performance. `Debug` inserts additional assertion code. Set to `Release` unless you are developing Microsoft SEAL itself or debugging some complex issue. |
-| SEAL_BUILD_EXAMPLES | ON / **OFF**                                                 | Build the C++ examples in [native/examples](native/examples).                                                                                                                                          |
-| SEAL_BUILD_TESTS    | ON / **OFF**                                                 | Build the tests to check that Microsoft SEAL works correctly.                                                                                                                                          |
-| SEAL_BUILD_BENCH    | ON / **OFF**                                                 | Build the performance benchmarks.                                                                                                                                                                     |
-| SEAL_BUILD_DEPS     | **ON** / OFF                                                 | Set to `ON` to automatically download and build [optional dependencies](#optional-dependencies); otherwise CMake will attempt to locate pre-installed dependencies.                                    |
-| SEAL_USE_MSGSL      | **ON** / OFF                                                 | Build with Microsoft GSL support.                                                                                                                                                                      |
-| SEAL_USE_ZLIB       | **ON** / OFF                                                 | Build with ZLIB support.                                                                                                                                                                               |
-| SEAL_USE_ZSTD       | **ON** / OFF                                                 | Build with Zstandard support.                                                                                                                                                                          |
-| BUILD_SHARED_LIBS   | ON / **OFF**                                                 | Set to `ON` to build a shared library instead of a static library. Not supported in Windows.                                                                                                           |
-| SEAL_BUILD_SEAL_C   | ON / **OFF**                                                 | Build the C wrapper library SEAL_C. This is used by the C# wrapper and most users should have no reason to build it.                                                                                   |
-| SEAL_USE_CXX17      | **ON** / OFF                                                 | Set to `ON` to build Microsoft SEAL as C++17 for a positive performance impact.                                                                                                                        |
-| SEAL_USE_INTRIN     | **ON** / OFF                                                 | Set to `ON` to use compiler intrinsics for improved performance. CMake will automatically detect which intrinsics are available and enable them accordingly.                                           |
+| CMake option           | Values                                                       | Information                                                                                                                                                                                            |
+| ---------------------- | ------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| CMAKE_BUILD_TYPE       | **Release**</br>Debug</br>RelWithDebInfo</br>MinSizeRel</br> | `Debug` and `MinSizeRel` have worse run-time performance. `Debug` inserts additional assertion code. Set to `Release` unless you are developing Microsoft SEAL itself or debugging some complex issue. |
+| SEAL_BUILD_EXAMPLES    | ON / **OFF**                                                 | Build the C++ examples in [native/examples](native/examples).                                                                                                                                          |
+| SEAL_BUILD_TESTS       | ON / **OFF**                                                 | Build the tests to check that Microsoft SEAL works correctly.                                                                                                                                          |
+| SEAL_BUILD_BENCH       | ON / **OFF**                                                 | Build the performance benchmark.                                                                                                                                                                       |
+| SEAL_BUILD_DEPS        | **ON** / OFF                                                 | Set to `ON` to automatically download and build [optional dependencies](#optional-dependencies); otherwise CMake will attempt to locate pre-installed dependencies.                                    |
+| SEAL_USE_INTEL_HEXL    | ON / **OFF**                                                 | Set to `ON` to use Intel HEXL for low-level kernels.                                                                                                                                            |
+| SEAL_USE_MSGSL         | **ON** / OFF                                                 | Build with Microsoft GSL support.                                                                                                                                                                      |
+| SEAL_USE_ZLIB          | **ON** / OFF                                                 | Build with ZLIB support.                                                                                                                                                                               |
+| SEAL_USE_ZSTD          | **ON** / OFF                                                 | Build with Zstandard support.                                                                                                                                                                          |
+| BUILD_SHARED_LIBS      | ON / **OFF**                                                 | Set to `ON` to build a shared library instead of a static library. Not supported in Windows.                                                                                                           |
+| SEAL_BUILD_SEAL_C      | ON / **OFF**                                                 | Build the C wrapper library SEAL_C. This is used by the C# wrapper and most users should have no reason to build it.                                                                                   |
+| SEAL_USE_CXX17         | **ON** / OFF                                                 | Set to `ON` to build Microsoft SEAL as C++17 for a positive performance impact.                                                                                                                        |
+| SEAL_USE_INTRIN        | **ON** / OFF                                                 | Set to `ON` to use compiler intrinsics for improved performance. CMake will automatically detect which intrinsics are available and enable them accordingly.                                           |
 
 As usual, these options can be passed to CMake with the `-D` flag.
 For example, one could run
@@ -412,6 +419,7 @@ The following options can be used with CMake to further configure the build. Mos
 | SEAL_DEFAULT_PRNG                    | **Blake2xb**</br>Shake256 | Microsoft SEAL supports both Blake2xb and Shake256 XOFs for generating random bytes. Blake2xb is much faster, but it is not standardized, whereas Shake256 is a FIPS standard.                                                                                                                           |
 | SEAL_USE_GAUSSIAN_NOISE              | ON / **OFF**              | Set to `ON` to use a non-constant time rounded continuous Gaussian for the error distribution; otherwise a centered binomial distribution &ndash; with slightly larger standard deviation &ndash; is used.                                                                                               |
 | SEAL_SECURE_COMPILE_OPTIONS          | ON / **OFF**              | Set to `ON` to compile/link with Control-Flow Guard (`/guard:cf`) and Spectre mitigations (`/Qspectre`). This has an effect only when compiling with MSVC.                                                                                                                                               |
+| SEAL_USE_ALIGN_64                    | **ON** / OFF              | Set to `ON` to use 64-byte aligned memory allocations. This can improve performance of AVX512 primitives when Intel HEXL is enabled.                                                                                                |
 
 #### Linking with Microsoft SEAL through CMake
 

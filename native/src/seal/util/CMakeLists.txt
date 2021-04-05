@@ -45,6 +45,7 @@ install(
         ${CMAKE_CURRENT_LIST_DIR}/globals.h
         ${CMAKE_CURRENT_LIST_DIR}/hash.h
         ${CMAKE_CURRENT_LIST_DIR}/hestdparms.h
+        ${CMAKE_CURRENT_LIST_DIR}/intel_seal_ext.h
         ${CMAKE_CURRENT_LIST_DIR}/iterator.h
         ${CMAKE_CURRENT_LIST_DIR}/locks.h
         ${CMAKE_CURRENT_LIST_DIR}/mempool.h
