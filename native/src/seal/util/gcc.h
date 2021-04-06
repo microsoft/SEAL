@@ -19,7 +19,7 @@
 
 #define SEAL_FORCE_INLINE inline __attribute__((always_inline))
 
-#ifdef SEAL_USE_ALIGN_64
+#ifdef SEAL_USE_ALIGNED_ALLOC
 #include <cstdlib>
 #define SEAL_ALIGNED_ALLOC(alignment, size) \
     ((size) % (alignment) == 0) ? std::aligned_alloc((alignment), (size)) : malloc((size))

@@ -40,7 +40,7 @@ namespace seal
             allocation new_alloc;
             try
             {
-#ifdef SEAL_USE_ALIGN_64
+#ifdef SEAL_USE_ALIGNED_ALLOC
                 new_alloc.data_ptr = static_cast<seal_byte *>(
                     SEAL_ALIGNED_ALLOC(64, mul_safe(MemoryPool::first_alloc_count, item_byte_count_)));
 #else
@@ -88,7 +88,7 @@ namespace seal
                     seal_memzero(alloc.data_ptr, curr_alloc_byte_count);
 
                     // Delete this allocation
-#ifdef SEAL_USE_ALIGN_64
+#ifdef SEAL_USE_ALIGNED_ALLOC
                     SEAL_ALIGNED_FREE(alloc.data_ptr);
 #else
                     delete[] alloc.data_ptr;
@@ -101,7 +101,7 @@ namespace seal
                 for (auto &alloc : allocs_)
                 {
                     // Delete this allocation
-#ifdef SEAL_USE_ALIGN_64
+#ifdef SEAL_USE_ALIGNED_ALLOC
                     SEAL_ALIGNED_FREE(alloc.data_ptr);
 #else
                     delete[] alloc.data_ptr;
@@ -150,7 +150,7 @@ namespace seal
 
                     try
                     {
-#ifdef SEAL_USE_ALIGN_64
+#ifdef SEAL_USE_ALIGNED_ALLOC
                         new_alloc.data_ptr = static_cast<seal_byte *>(SEAL_ALIGNED_ALLOC(64, new_alloc_byte_count));
 #else
                         new_alloc.data_ptr = new seal_byte[new_alloc_byte_count];
@@ -195,7 +195,7 @@ namespace seal
             allocation new_alloc;
             try
             {
-#ifdef SEAL_USE_ALIGN_64
+#ifdef SEAL_USE_ALIGNED_ALLOC
                 new_alloc.data_ptr = static_cast<seal_byte *>(
                     SEAL_ALIGNED_ALLOC(64, mul_safe(MemoryPool::first_alloc_count, item_byte_count_)));
 #else
@@ -237,7 +237,7 @@ namespace seal
                     seal_memzero(alloc.data_ptr, curr_alloc_byte_count);
 
                     // Delete this allocation
-#ifdef SEAL_USE_ALIGN_64
+#ifdef SEAL_USE_ALIGNED_ALLOC
                     SEAL_ALIGNED_FREE(alloc.data_ptr);
 #else
                     delete[] alloc.data_ptr;
@@ -250,7 +250,7 @@ namespace seal
                 for (auto &alloc : allocs_)
                 {
                     // Delete this allocation
-#ifdef SEAL_USE_ALIGN_64
+#ifdef SEAL_USE_ALIGNED_ALLOC
                     SEAL_ALIGNED_FREE(alloc.data_ptr);
 #else
                     delete[] alloc.data_ptr;
@@ -294,7 +294,7 @@ namespace seal
 
                     try
                     {
-#ifdef SEAL_USE_ALIGN_64
+#ifdef SEAL_USE_ALIGNED_ALLOC
                         new_alloc.data_ptr = static_cast<seal_byte *>(SEAL_ALIGNED_ALLOC(64, new_alloc_byte_count));
 #else
                         new_alloc.data_ptr = new seal_byte[new_alloc_byte_count];

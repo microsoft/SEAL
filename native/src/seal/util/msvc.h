@@ -52,7 +52,7 @@
 #endif
 #endif
 
-#ifdef SEAL_USE_ALIGN_64
+#ifdef SEAL_USE_ALIGNED_ALLOC
 #define SEAL_ALIGNED_ALLOC(alignment, size) _aligned_malloc((size), (alignment))
 #define SEAL_ALIGNED_FREE(ptr) _aligned_free(ptr)
 #endif
