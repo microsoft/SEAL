@@ -12,6 +12,7 @@
 - Improved the error message when attempting to configure with `BUILD_SHARED_LIBS=ON` and `SEAL_BUILD_SEAL_C=ON` [(Issue 284)](https://github.com/microsoft/SEAL/issues/284).
 - Added `seal::random_bytes` function in [randomgen.h](native/src/seal/randomgen.h).
 - Removed redundant `is_metadata_valid_for` invocations reported in [(Issue 313)](https://github.com/microsoft/SEAL/issues/313).
+- Minor bug fixes
 
 ### File Changes
 
