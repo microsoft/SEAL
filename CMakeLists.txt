@@ -349,14 +349,14 @@ endif()
 message(STATUS "SEAL_USE_EXPLICIT_MEMSET: ${SEAL_USE_EXPLICIT_MEMSET}")
 
 # [option] SEAL_USE_ALIGNED_ALLOC (default: ON, advanced)
-# Not available if SEAL_USE_CXX17 is OFF.
+# Not available if SEAL_USE_CXX17 is OFF or building for Android.
 # Use 64-byte aligned malloc if available, set of OFF otherwise
 if(MSVC)
     set(SEAL_USE_ALIGNED_ALLOC_OPTION_STR "Use _aligned_malloc")
 else()
-    set(SEAL_USE_ALIGNED_ALLOC_OPTION_STR "Use std:aligned_alloc")
+    set(SEAL_USE_ALIGNED_ALLOC_OPTION_STR "Use ::aligned_alloc")
 endif()
-cmake_dependent_option(SEAL_USE_ALIGNED_ALLOC ${SEAL_USE_ALIGNED_ALLOC_OPTION_STR} ON "SEAL_USE_CXX17" OFF)
+cmake_dependent_option(SEAL_USE_ALIGNED_ALLOC ${SEAL_USE_ALIGNED_ALLOC_OPTION_STR} ON "SEAL_USE_CXX17;NOT ANDROID_ABI" OFF)
 mark_as_advanced(FORCE SEAL_USE_ALIGNED_ALLOC)
 
 # Add source files to library and header files to install
