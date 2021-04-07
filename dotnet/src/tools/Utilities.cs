@@ -15,6 +15,9 @@ namespace Microsoft.Research.SEAL.Tools
 
         public static int ComputeArrayHashCode(ulong[] array)
         {
+            if (null == array)
+                throw new ArgumentNullException(nameof(array));
+
             const int hash_seed = 17;
             const int hash_multiply = 23;
             int hash = hash_seed;

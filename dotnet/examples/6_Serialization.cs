@@ -95,9 +95,9 @@ namespace SEALNetExamples
 
             In this example we use a couple of shared MemoryStreams.
             */
-            MemoryStream parmsStream = new MemoryStream();
-            MemoryStream dataStream = new MemoryStream();
-            MemoryStream skStream = new MemoryStream();
+            using MemoryStream parmsStream = new MemoryStream();
+            using MemoryStream dataStream = new MemoryStream();
+            using MemoryStream skStream = new MemoryStream();
 
             /*
             The server first determines the computation and sets encryption parameters
@@ -188,7 +188,7 @@ namespace SEALNetExamples
                 As an example, we now serialize the encryption parameters to a fixed
                 size buffer.
                 */
-                MemoryStream buffer = new MemoryStream(new byte[parms.SaveSize()]);
+                using MemoryStream buffer = new MemoryStream(new byte[parms.SaveSize()]);
                 parms.Save(buffer);
 
                 /*
@@ -435,7 +435,7 @@ namespace SEALNetExamples
             the compression mode.
             */
             using Plaintext pt = new Plaintext("1x^2 + 3");
-            MemoryStream stream = new MemoryStream();
+            using MemoryStream stream = new MemoryStream();
             long dataSize = pt.Save(stream);
 
             /*
