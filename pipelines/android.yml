@@ -51,13 +51,6 @@ steps:
     testResultsFiles: '**/TEST-*.xml'
     tasks: 'compileReleaseSources'
 
-#- task: CmdLine@2
-#  displayName: Compile Android Native Libraries
-#  inputs:
-#    script: |
-#      gradlew.bat --stacktrace --no-parallel compileReleaseSources
-#    workingDirectory: $(Build.SourcesDirectory)/android
-
 - task: CopyFiles@2
   displayName: Copy files to staging directory
   inputs:
