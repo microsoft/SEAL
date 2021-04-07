@@ -22,7 +22,7 @@
 #ifdef SEAL_USE_ALIGNED_ALLOC
 #include <cstdlib>
 #define SEAL_MALLOC(size) \
-    static_cast<seal_byte *>((((size) & 63) == 0) ? std::aligned_alloc(64, (size)) : std::malloc((size)))
+    static_cast<seal_byte *>((((size) & 63) == 0) ? ::aligned_alloc(64, (size)) : ::malloc((size)))
 #define SEAL_FREE(ptr) std::free(ptr)
 #endif
 

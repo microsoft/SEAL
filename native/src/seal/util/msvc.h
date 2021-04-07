@@ -53,7 +53,7 @@
 #endif
 
 #ifdef SEAL_USE_ALIGNED_ALLOC
-#define SEAL_MALLOC(size) static_cast<seal_byte *>(_aligned_malloc(64, (alignment)))
+#define SEAL_MALLOC(size) static_cast<seal_byte *>(_aligned_malloc((size), 64))
 #define SEAL_FREE(ptr) _aligned_free(ptr)
 #endif
 
