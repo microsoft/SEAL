@@ -172,7 +172,7 @@ namespace seal
 // If SEAL_USE_ALIGNED_ALLOC is defined, use _aligned_free or std::free
 // Use `delete [] ptr` as fallback
 #ifndef SEAL_FREE
-#define SEAL_FREE(ptr) (delete [] ptr)
+#define SEAL_FREE(ptr) (delete[] ptr)
 #endif
 
 // Which random number generator to use by default

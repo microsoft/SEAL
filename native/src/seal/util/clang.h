@@ -16,7 +16,7 @@
 #ifdef SEAL_USE_ALIGNED_ALLOC
 #include <cstdlib>
 #define SEAL_MALLOC(size) \
-    static_cast<seal_byte *>((((size) & 63) == 0) ? ::aligned_alloc(64, (size)) : std::malloc((size)))
+    static_cast<seal_byte *>((((size)&63) == 0) ? ::aligned_alloc(64, (size)) : std::malloc((size)))
 #endif
 
 // Are intrinsics enabled?
