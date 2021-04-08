@@ -13,14 +13,21 @@
 // Read in config.h
 #include "seal/util/config.h"
 
+#ifdef SEAL_USE_ALIGNED_ALLOC
+#include <cstdlib>
+#define SEAL_MALLOC(size) \
+    static_cast<seal_byte *>((((size)&63) == 0) ? ::aligned_alloc(64, (size)) : std::malloc((size)))
+#endif
+
 // Are intrinsics enabled?
 #ifdef SEAL_USE_INTRIN
 #if defined(__aarch64__)
 #include <arm_neon.h>
+#elif defined(EMSCRIPTEN)
+#include <wasm_simd128.h>
 #else
 #include <x86intrin.h>
 #endif
-
 
 #ifdef SEAL_USE___BUILTIN_CLZLL
 #define SEAL_MSB_INDEX_UINT64(result, value)                                 \

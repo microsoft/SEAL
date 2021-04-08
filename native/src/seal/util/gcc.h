@@ -17,12 +17,21 @@
 #pragma GCC error "g++-6 cannot compile Microsoft SEAL as C++17; set CMake build option `SEAL_USE_CXX17' to OFF"
 #endif
 
-#define SEAL_FORCE_INLINE __always_inline
+#define SEAL_FORCE_INLINE inline __attribute__((always_inline))
+
+#ifdef SEAL_USE_ALIGNED_ALLOC
+#include <cstdlib>
+#define SEAL_MALLOC(size) \
+    static_cast<seal_byte *>((((size)&63) == 0) ? ::aligned_alloc(64, (size)) : std::malloc((size)))
+#define SEAL_FREE(ptr) std::free(ptr)
+#endif
 
 // Are intrinsics enabled?
 #ifdef SEAL_USE_INTRIN
 #if defined(__aarch64__)
 #include <arm_neon.h>
+#elif defined(EMSCRIPTEN)
+#include <wasm_simd128.h>
 #else
 #include <x86intrin.h>
 #endif
