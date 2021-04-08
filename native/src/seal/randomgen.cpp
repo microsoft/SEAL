@@ -3,6 +3,7 @@
 
 #include "seal/randomgen.h"
 #include "seal/util/blake2.h"
+#include "seal/util/common.h"
 #include "seal/util/fips202.h"
 #include <algorithm>
 #include <iostream>
@@ -28,19 +29,28 @@ DWORD last_genrandom_error = 0;
 
 namespace seal
 {
-    uint64_t random_uint64()
+    void random_bytes(seal_byte *buf, size_t count)
     {
-        uint64_t result;
 #if SEAL_SYSTEM == SEAL_SYSTEM_UNIX_LIKE
         random_device rd("/dev/urandom");
-        result = (static_cast<uint64_t>(rd()) << 32) + static_cast<uint64_t>(rd());
+        while (count >= 4)
+        {
+            *reinterpret_cast<uint32_t *>(buf) = rd();
+            buf += 4;
+            count -= 4;
+        }
+        if (count)
+        {
+            uint32_t last = rd();
+            memcpy(buf, &last, count);
+        }
 #elif SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS
         NTSTATUS status = BCryptGenRandom(
-            NULL, reinterpret_cast<unsigned char *>(&result), sizeof(result), BCRYPT_USE_SYSTEM_PREFERRED_RNG);
+            NULL, reinterpret_cast<unsigned char *>(buf), safe_cast<ULONG>(count), BCRYPT_USE_SYSTEM_PREFERRED_RNG);
 
         if (BCRYPT_SUCCESS(status))
         {
-            return result;
+            return;
         }
 
         last_bcrypt_error = status;
@@ -49,7 +59,7 @@ namespace seal
         if (!hAdvApi)
         {
             last_genrandom_error = GetLastError();
-            throw runtime_error("Failed to load ADVAPI32.dll");
+            throw runtime_error("Failed to load ADVAPI32.DLL");
         }
 
         BOOLEAN(APIENTRY * RtlGenRandom)
@@ -58,7 +68,7 @@ namespace seal
         BOOLEAN genrand_result = FALSE;
         if (RtlGenRandom)
         {
-            genrand_result = RtlGenRandom(&result, bytes_per_uint64);
+            genrand_result = RtlGenRandom(buf, bytes_per_uint64);
         }
 
         DWORD dwError = GetLastError();
@@ -72,9 +82,18 @@ namespace seal
 #elif SEAL_SYSTEM == SEAL_SYSTEM_OTHER
 #warning "SECURITY WARNING: System detection failed; falling back to a potentially insecure randomness source!"
         random_device rd;
-        result = (static_cast<uint64_t>(rd()) << 32) + static_cast<uint64_t>(rd());
+        while (count >= 4)
+        {
+            *reinterpret_cast<uint32_t *>(buf) = rd();
+            buf += 4;
+            count -= 4;
+        }
+        if (count)
+        {
+            uint32_t last = rd();
+            memcpy(buf, &last, count);
+        }
 #endif
-        return result;
     }
 
     void UniformRandomGeneratorInfo::save_members(ostream &stream) const

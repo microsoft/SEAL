@@ -6,6 +6,10 @@
 #include "seal/util/uintarithsmallmod.h"
 #include <algorithm>
 
+#ifdef SEAL_USE_INTEL_HEXL
+#include "hexl/hexl.hpp"
+#endif
+
 using namespace std;
 
 namespace seal
@@ -173,15 +177,30 @@ namespace seal
 
         void ntt_negacyclic_harvey_lazy(CoeffIter operand, const NTTTables &tables)
         {
+#ifdef SEAL_USE_INTEL_HEXL
+            size_t N = size_t(1) << tables.coeff_count_power();
+            uint64_t p = tables.modulus().value();
+            uint64_t root = tables.get_root();
+
+            intel::seal_ext::compute_forward_ntt(operand, N, p, root, 4, 4);
+#else
             tables.ntt_handler().transform_to_rev(
                 operand.ptr(), tables.coeff_count_power(), tables.get_from_root_powers());
+#endif
         }
 
         void inverse_ntt_negacyclic_harvey_lazy(CoeffIter operand, const NTTTables &tables)
         {
+#ifdef SEAL_USE_INTEL_HEXL
+            size_t N = size_t(1) << tables.coeff_count_power();
+            uint64_t p = tables.modulus().value();
+            uint64_t root = tables.get_root();
+            intel::seal_ext::compute_inverse_ntt(operand, N, p, root, 2, 2);
+#else
             MultiplyUIntModOperand inv_degree_modulo = tables.inv_degree_modulo();
             tables.ntt_handler().transform_from_rev(
                 operand.ptr(), tables.coeff_count_power(), tables.get_from_inv_root_powers(), &inv_degree_modulo);
+#endif
         }
     } // namespace util
 } // namespace seal

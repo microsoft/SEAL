@@ -234,6 +234,9 @@ namespace Microsoft.Research.SEAL
             }
             set
             {
+                if (null == value)
+                    throw new ArgumentNullException(nameof(value));
+
                 NativeMethods.EncParams_SetPlainModulus(NativePtr, value.NativePtr);
             }
         }

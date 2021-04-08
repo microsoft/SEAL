@@ -104,14 +104,42 @@ steps:
     configuration: ${{ parameters.configuration }}
     diagnosticsEnabled: True
 
-- task: PublishSymbols@2
-  displayName: 'Publish symbols path'
-  inputs:
-    searchPattern: '**\bin\**\*.pdb'
-    PublishSymbols: false
-  continueOnError: true
-
 - ${{ if eq(parameters.configuration, 'Release') }}:
+  - task: Semmle@0
+    displayName: 'Semmle SEAL'
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+    inputs:
+      sourceCodeDirectory: '$(Build.SourcesDirectory)'
+      language: 'cpp'
+      querySuite: 'Recommended'
+      timeout: '1800'
+      ram: '16384'
+      addProjectDirToScanningExclusionList: true
+      buildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild $(Build.SourcesDirectory)/build/seal.sln'
+      cleanupBuildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild $(Build.SourcesDirectory)/build/seal.sln /t:Clean'
+
+  - task: Semmle@0
+    displayName: 'Semmle SEALNet'
+    env:
+      SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+    inputs:
+      sourceCodeDirectory: '$(Build.SourcesDirectory)'
+      language: 'csharp'
+      querySuite: 'Recommended'
+      timeout: '1800'
+      ram: '16384'
+      addProjectDirToScanningExclusionList: true
+      buildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild $(Build.SourcesDirectory)/dotnet/SEALNet.sln'
+      cleanupBuildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild $(Build.SourcesDirectory)/dotnet/SEALNet.sln /t:Clean'
+
+  - task: PublishSymbols@2
+    displayName: 'Publish symbols path'
+    inputs:
+      searchPattern: '**\bin\**\*.pdb'
+      PublishSymbols: false
+    continueOnError: true
+
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: 'ESRP Add Strong Name'
     inputs:
@@ -162,7 +190,6 @@ steps:
           }
         ]
 
-- ${{ if eq(parameters.configuration, 'Release') }}:
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: 'ESRP CodeSigning .NET Standard 2.0'
     inputs:
@@ -225,7 +252,6 @@ steps:
           }
         ]
 
-- ${{ if eq(parameters.configuration, 'Release') }}:
   - task: SFP.build-tasks.custom-build-task-1.EsrpCodeSigning@1
     displayName: 'ESRP CodeSigning native'
     inputs:
@@ -296,8 +322,9 @@ steps:
     areaPathParent: 'SEAL'
   enabled: false
 
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
-  displayName: 'Publish Security Analysis Logs'
+- ${{ if eq(parameters.configuration, 'Release') }}:
+  - task: securedevelopmentteam.vss-secure-development-tools.build-task-publishsecurityanalysislogs.PublishSecurityAnalysisLogs@2
+    displayName: 'Publish Security Analysis Logs'
 
 - task: PublishBuildArtifacts@1
   displayName: 'Publish Artifact: drop'

@@ -161,6 +161,20 @@ namespace seal
 #define SEAL_ITERATE std::for_each_n
 #endif
 
+// Allocate "size" bytes in memory and returns a seal_byte pointer
+// If SEAL_USE_ALIGNED_ALLOC is defined, use _aligned_malloc and ::aligned_alloc (or std::malloc)
+// Use `new sealbytes[size]` as fallback
+#ifndef SEAL_MALLOC
+#define SEAL_MALLOC(size) (new seal_byte[size])
+#endif
+
+// Deallocate a pointer in memory
+// If SEAL_USE_ALIGNED_ALLOC is defined, use _aligned_free or std::free
+// Use `delete [] ptr` as fallback
+#ifndef SEAL_FREE
+#define SEAL_FREE(ptr) (delete[] ptr)
+#endif
+
 // Which random number generator to use by default
 #define SEAL_DEFAULT_PRNG_FACTORY SEAL_JOIN(SEAL_DEFAULT_PRNG, PRNGFactory)
 

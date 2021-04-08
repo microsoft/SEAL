@@ -1,5 +1,26 @@
 # List of Changes
 
+## Version 3.6.3
+
+### New Features
+
+- Added support to build Microsoft SEAL out of the box with [emscripten](https://emscripten.org/) [(PR 306)](https://github.com/microsoft/SEAL/pull/306).
+- Added support to build Microsoft SEAL with [Intel HEXL](https://github.com/intel/hexl) as an optional dependency [(PR 312)](https://github.com/microsoft/SEAL/pull/312).
+
+### Other
+
+- Improved the error message when attempting to configure with `BUILD_SHARED_LIBS=ON` and `SEAL_BUILD_SEAL_C=ON` [(Issue 284)](https://github.com/microsoft/SEAL/issues/284).
+- Added `seal::random_bytes` function in [randomgen.h](native/src/seal/randomgen.h).
+- Removed redundant `is_metadata_valid_for` invocations reported in [(Issue 313)](https://github.com/microsoft/SEAL/issues/313).
+- Minor bug fixes
+
+### File Changes
+
+- [cmake/ExternalIntelHEXL.cmake](cmake/ExternalIntelHEXL.cmake)
+- [native/src/seal/util/intel_seal_ext.h](native/src/seal/util/intel_seal_ext.h)
+
+#### New files
+
 ## Version 3.6.2
 
 ### Hotfix - 2/18/2021

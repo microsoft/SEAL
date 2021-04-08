@@ -168,7 +168,7 @@ void bfv_performance_test(SEALContext context)
         batch_encoder.encode(vector<uint64_t>(slot_count, i), plain1);
         encryptor.encrypt(plain1, encrypted1);
         Ciphertext encrypted2(context);
-        batch_encoder.encode(vector<uint64_t>(slot_count, i + 1), plain1);
+        batch_encoder.encode(vector<uint64_t>(slot_count, i + 1), plain2);
         encryptor.encrypt(plain2, encrypted2);
         time_start = chrono::high_resolution_clock::now();
         evaluator.add_inplace(encrypted1, encrypted1);

@@ -107,6 +107,9 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if publicKey is not valid</exception>
         public void SetPublicKey(PublicKey publicKey)
         {
+            if (null == publicKey)
+                throw new ArgumentNullException(nameof(publicKey));
+
             NativeMethods.Encryptor_SetPublicKey(NativePtr, publicKey.NativePtr);
         }
 
@@ -117,6 +120,9 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if secretKey is not valid</exception>
         public void SetSecretKey(SecretKey secretKey)
         {
+            if (null == secretKey)
+                throw new ArgumentNullException(nameof(secretKey));
+
             NativeMethods.Encryptor_SetSecretKey(NativePtr, secretKey.NativePtr);
         }
 
