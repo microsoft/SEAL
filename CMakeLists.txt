@@ -226,6 +226,17 @@ if(SEAL_USE_INTEL_HEXL)
     endif()
 endif()
 
+# [option] SEAL_USE_ADDRESS_SANITIZER (default: OFF)
+option(SEAL_USE_ADDRESS_SANITIZER_OPTION_STR "Compiles and links with Address Sanitizer" OFF)
+option(SEAL_USE_ADDRESS_SANITIZER ${SEAL_USE_ADDRESS_SANITIZER_OPTION_STR} OFF)
+message(STATUS "SEAL_USE_ADDRESS_SANITIZER: ${SEAL_USE_ADDRESS_SANITIZER}")
+
+if(SEAL_USE_ADDRESS_SANITIZER)
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address -fsanitize=leak")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address -fsanitize=leak")
+    set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=address -fsanitize=leak")
+endif()
+
 ####################
 # SEAL C++ library #
 ####################

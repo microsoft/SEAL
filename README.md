@@ -398,6 +398,7 @@ The following options can be used with CMake to configure the build. The default
 | SEAL_BUILD_SEAL_C      | ON / **OFF**                                                 | Build the C wrapper library SEAL_C. This is used by the C# wrapper and most users should have no reason to build it.                                                                                   |
 | SEAL_USE_CXX17         | **ON** / OFF                                                 | Set to `ON` to build Microsoft SEAL as C++17 for a positive performance impact.                                                                                                                        |
 | SEAL_USE_INTRIN        | **ON** / OFF                                                 | Set to `ON` to use compiler intrinsics for improved performance. CMake will automatically detect which intrinsics are available and enable them accordingly.                                           |
+| SEAL_USE_ADDRESS_SANITIZER | ON / *OFF*                                               | Set to `ON` to enable [AddressSanitizer](https://github.com/google/sanitizers) for diagnosing memory corruption issues
 
 As usual, these options can be passed to CMake with the `-D` flag.
 For example, one could run
