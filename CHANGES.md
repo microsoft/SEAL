@@ -1,5 +1,16 @@
 # List of Changes
 
+## Version 3.6.4
+
+### New Features
+
+- Enabled [AddressSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizer) and [LeakSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer) when building Microsoft SEAL in Debug mode on Unix-like systems, based on [(PR 318)](https://github.com/microsoft/SEAL/pull/318).
+
+### Bug Fixes
+
+- Fixed `alloc-dealloc-mismatch` issues resolved by [(PR 318)](https://github.com/microsoft/SEAL/pull/318).
+- Fixed wrong descriptions in [serializable.h](native/src/seal/serializable.h) and [Serializable.cs](dotnet/src/Serializable.cs) reported in [(Issue 316)](https://github.com/microsoft/SEAL/issues/316).
+
 ## Version 3.6.3
 
 ### New Features
