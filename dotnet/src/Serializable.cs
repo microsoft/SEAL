@@ -55,10 +55,10 @@ namespace Microsoft.Research.SEAL
     /// example, Encryptor can be used in symmetric-key mode to create symmetric-key
     /// ciphertexts, where half of the ciphertext data is pseudo-random and can be
     /// generated from a seed, reducing the size of the newly created ciphertext
-    /// object by nearly 50%. However, the compression only has an effect when the
-    /// object is serialized with compression mode ComprModeType.Deflate due to an
-    /// implementation detail. This makes sense when, e.g., the ciphertexts need
-    /// to be communicated from a client to a server for encrypted computation.
+    /// object by nearly 50%. This makes sense when, e.g., the ciphertexts need to
+    /// be communicated from a client to a server for encrypted computation. When
+    /// loading an serializable object, if a seed was used, the seed will be
+    /// automatically expanded.
     /// </para>
     /// <para>
     /// Serializable objects also expose the SaveSize function that behaves just
@@ -69,11 +69,10 @@ namespace Microsoft.Research.SEAL
     /// The following illustrates the use of serializable objects:
     ///
     ///        +--------------------------+
-    ///        | Serializable{GaloisKeys} |  Size 2 MB (example)
+    ///        | Serializable{GaloisKeys} |  Size ~1 MB (example)
     ///        +------------+-------------+
     ///                     |
     ///                     |                Serializable{GaloisKeys}.Save
-    ///                     |                with ComprModeType.Deflate
     ///                     v
     ///             +---------------+
     ///             | Stream/Buffer |        Size ~1 MB (example)
