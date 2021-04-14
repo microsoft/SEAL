@@ -53,13 +53,6 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     set(SEAL_DEBUG ON)
     # In Debug mode, enable extra compiler flags.
     include(EnableCXXCompilerFlags)
-    # In Debug mode, enable address and leak sanitizers on Linux and macOS.
-    if(UNIX)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
-        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
-        set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} -fsanitize=address")
-        message(STATUS "Address and leak sanitizers are enabled")
-    endif()
 else()
     set(SEAL_DEBUG OFF)
 endif()

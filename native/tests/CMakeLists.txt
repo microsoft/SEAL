@@ -53,4 +53,16 @@ if(SEAL_BUILD_TESTS)
     else()
         message(FATAL_ERROR "Cannot find target SEAL::seal or SEAL::seal_shared")
     endif()
+
+    # In Debug mode, enable AddressSanitizer (and LeakSanitizer) on Unix-like platforms.
+    if(SEAL_DEBUG AND UNIX)
+        # On Linux, LeakSanitizer is enabled by default.
+        target_compile_options(sealtest PUBLIC -fsanitize=address)
+        target_link_options(sealtest PUBLIC -fsanitize=address)
+        # On macOS, LeakSanitizer must be specifically enabled.
+        if(APPLE)
+            target_link_options(sealtest PUBLIC ASAN_OPTIONS=detect_leaks=1)
+        endif()
+        message(STATUS "Address and leak sanitizers are enabled")
+    endif()
 endif()

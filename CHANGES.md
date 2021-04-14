@@ -4,7 +4,7 @@
 
 ### New Features
 
-- Enabled [AddressSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizer) and [LeakSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer) when building Microsoft SEAL in Debug mode on Unix-like systems, based on [(PR 318)](https://github.com/microsoft/SEAL/pull/318).
+- Enabled [AddressSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizer) and [LeakSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer) when building Microsoft SEAL [tests](native/tests/CMakeLists.txt) in Debug mode on Unix-like systems, based on [(PR 318)](https://github.com/microsoft/SEAL/pull/318).
 
 ### Bug Fixes
 
