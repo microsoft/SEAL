@@ -163,7 +163,7 @@ namespace seal
 
 // Allocate "size" bytes in memory and returns a seal_byte pointer
 // If SEAL_USE_ALIGNED_ALLOC is defined, use _aligned_malloc and ::aligned_alloc (or std::malloc)
-// Use `new sealbytes[size]` as fallback
+// Use `new seal_byte[size]` as fallback
 #ifndef SEAL_MALLOC
 #define SEAL_MALLOC(size) (new seal_byte[size])
 #endif

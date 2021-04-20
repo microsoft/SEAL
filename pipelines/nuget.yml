@@ -49,6 +49,13 @@ steps:
           TargetFolder: '$(Build.ArtifactStagingDirectory)\windows-drop\'
 
     - task: CopyFiles@2
+      displayName: 'Copy Notice File to: $(Build.ArtifactStagingDirectory)'
+      inputs:
+          SourceFolder: '$(Build.SourcesDirectory)'
+          Contents: 'NOTICE'
+          TargetFolder: '$(Build.ArtifactStagingDirectory)\windows-drop\'
+
+    - task: CopyFiles@2
       displayName: 'Copy Linux Files to: $(Build.ArtifactStagingDirectory)'
       inputs:
           SourceFolder: '$(Build.ArtifactStagingDirectory)\linux-drop\lib\'

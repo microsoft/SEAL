@@ -23,5 +23,5 @@ stages:
     jobs:
     - template: jobs.yml
       parameters:
-        debug: false
+        debug: true
         name: Android
