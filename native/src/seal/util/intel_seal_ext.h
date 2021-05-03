@@ -16,48 +16,47 @@ namespace intel
     {
         // Single threaded SEAL allocator adapter
         template <>
-        struct NTT::allocator_adapter<seal::MemoryPoolHandle>
-            : public allocator_interface<NTT::allocator_adapter<seal::MemoryPoolHandle>>
+        struct NTT::AllocatorAdapter<seal::MemoryPoolHandle>
+            : public AllocatorInterface<NTT::AllocatorAdapter<seal::MemoryPoolHandle>>
         {
-            allocator_adapter(seal::MemoryPoolHandle &&a_) : a(std::move(a_))
+            AllocatorAdapter(seal::MemoryPoolHandle &&handle) : handle_(std::move(handle))
             {}
 
-            ~allocator_adapter()
-            {
-                assert(cache.empty() && "Cachefor singlethread allocator must be empty");
-                cache.clear();
-            }
+            ~AllocatorAdapter()
+            {}
+
             // interface implementations
             void *allocate_impl(std::size_t bytes_count)
             {
-                cache.push_back(static_cast<seal::util::MemoryPool &>(a).get_for_byte_count(bytes_count));
-                return cache.back().get();
+                cache_.push_back(static_cast<seal::util::MemoryPool &>(handle_).get_for_byte_count(bytes_count));
+                return cache_.back().get();
             }
 
             void deallocate_impl(void *p, std::size_t n)
             {
                 (void)n;
                 auto it = std::remove_if(
-                    cache.begin(), cache.end(),
+                    cache_.begin(), cache_.end(),
                     [p](const seal::util::Pointer<seal::seal_byte> &seal_pointer) { return p == seal_pointer.get(); });
 
-                assert(it != cache.end() && "Inconsistent singlethread allocator cache");
-                if (it == cache.end())
+#ifdef SEAL_DEBUG
+                if (it == cache_.end())
                 {
-                    std::abort();
+                    throw std::logic_error("Inconsistent single-threaded allocator cache");
                 }
-                cache.erase(it, cache.end());
+#endif
+                cache_.erase(it, cache_.end());
             }
 
-            seal::MemoryPoolHandle a;
-
-            std::vector<seal::util::Pointer<seal::seal_byte>> cache;
+        private:
+            seal::MemoryPoolHandle handle_;
+            std::vector<seal::util::Pointer<seal::seal_byte>> cache_;
         };
 
         // Thread safe policy
         struct SimpleThreadSafePolicy
         {
-            SimpleThreadSafePolicy() : m_ptr(new std::mutex)
+            SimpleThreadSafePolicy() : m_ptr(std::make_unique<std::mutex>())
             {}
 
             std::unique_lock<std::mutex> locker()
@@ -71,51 +70,51 @@ namespace intel
 
         // Multithreaded SEAL allocator adapter
         template <>
-        struct NTT::allocator_adapter<seal::MemoryPoolHandle, SimpleThreadSafePolicy>
-            : public allocator_interface<NTT::allocator_adapter<seal::MemoryPoolHandle, SimpleThreadSafePolicy>>
+        struct NTT::AllocatorAdapter<seal::MemoryPoolHandle, SimpleThreadSafePolicy>
+            : public AllocatorInterface<NTT::AllocatorAdapter<seal::MemoryPoolHandle, SimpleThreadSafePolicy>>
         {
-            allocator_adapter(seal::MemoryPoolHandle &&a_, SimpleThreadSafePolicy &&p)
-                : a(std::move(a_)), policy(std::move(p))
+            AllocatorAdapter(seal::MemoryPoolHandle &&handle, SimpleThreadSafePolicy &&policy)
+                : handle_(std::move(handle)), policy_(std::move(policy))
             {}
 
-            ~allocator_adapter()
-            {
-                assert(cache.empty() && "Cache for multithreaded allocator must be empty");
-                cache.clear();
-            }
+            ~AllocatorAdapter()
+            {}
             // interface implementations
             void *allocate_impl(std::size_t bytes_count)
             {
-                { // to prevent inline optimization with deadlock
-                    auto accessor = policy.locker();
-                    cache.push_back(static_cast<seal::util::MemoryPool &>(a).get_for_byte_count(bytes_count));
-                    return cache.back().get();
+                {
+                    // to prevent inline optimization with deadlock
+                    auto accessor = policy_.locker();
+                    cache_.push_back(static_cast<seal::util::MemoryPool &>(handle_).get_for_byte_count(bytes_count));
+                    return cache_.back().get();
                 }
             }
 
             void deallocate_impl(void *p, std::size_t n)
             {
                 (void)n;
-                { // to prevent inline optimization with deadlock
-                    auto accessor = policy.locker();
+                {
+                    // to prevent inline optimization with deadlock
+                    auto accessor = policy_.locker();
                     auto it = std::remove_if(
-                        cache.begin(), cache.end(), [p](const seal::util::Pointer<seal::seal_byte> &seal_pointer) {
+                        cache_.begin(), cache_.end(), [p](const seal::util::Pointer<seal::seal_byte> &seal_pointer) {
                             return p == seal_pointer.get();
                         });
 
-                    assert(it != cache.end() && "Inconsistent multithreaded allocator cache");
-                    if (it == cache.end())
+#ifdef SEAL_DEBUG
+                    if (it == cache_.end())
                     {
-                        std::abort();
+                        throw std::logic_error("Inconsistent multi-threaded allocator cache");
                     }
-                    cache.erase(it, cache.end());
+#endif
+                    cache_.erase(it, cache_.end());
                 }
             }
 
-            seal::MemoryPoolHandle a;
-
-            SimpleThreadSafePolicy policy;
-            std::vector<seal::util::Pointer<seal::seal_byte>> cache;
+        private:
+            seal::MemoryPoolHandle handle_;
+            SimpleThreadSafePolicy policy_;
+            std::vector<seal::util::Pointer<seal::seal_byte>> cache_;
         };
     } // namespace hexl
 
@@ -170,12 +169,9 @@ namespace intel
             auto ntt_it = ntt_cache_.find(key);
             if (ntt_it == ntt_cache_.end())
             {
-                ntt_it = ntt_cache_
-                             .emplace(
-                                 std::move(key), intel::hexl::NTT(
-                                                     N, modulus, root, seal::MemoryManager::GetPool(),
-                                                     intel::hexl::SimpleThreadSafePolicy{}))
-                             .first;
+                intel::hexl::NTT ntt(
+                    N, modulus, root, seal::MemoryManager::GetPool(), intel::hexl::SimpleThreadSafePolicy{});
+                ntt_it = ntt_cache_.emplace(std::move(key), std::move(ntt)).first;
             }
             return ntt_it->second;
         }
