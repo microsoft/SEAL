@@ -929,7 +929,7 @@ namespace seal
         memory pool pointed to by the given MemoryPoolHandle.
 
         @param[in] encrypted The ciphertext to rotate
-        @param[in] steps The number of steps to rotate (negative left, positive right)
+        @param[in] steps The number of steps to rotate (positive left, negative right)
         @param[in] galois_keys The Galois keys
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::logic_error if scheme is not scheme_type::bfv
@@ -965,7 +965,7 @@ namespace seal
         allocations in the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
 
         @param[in] encrypted The ciphertext to rotate
-        @param[in] steps The number of steps to rotate (negative left, positive right)
+        @param[in] steps The number of steps to rotate (positive left, negative right)
         @param[in] galois_keys The Galois keys
         @param[out] destination The ciphertext to overwrite with the rotated result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
@@ -1064,7 +1064,7 @@ namespace seal
         the given MemoryPoolHandle.
 
         @param[in] encrypted The ciphertext to rotate
-        @param[in] steps The number of steps to rotate (negative left, positive right)
+        @param[in] steps The number of steps to rotate (positive left, negative right)
         @param[in] galois_keys The Galois keys
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::logic_error if scheme is not scheme_type::ckks
@@ -1099,7 +1099,7 @@ namespace seal
         are allocated from the memory pool pointed to by the given MemoryPoolHandle.
 
         @param[in] encrypted The ciphertext to rotate
-        @param[in] steps The number of steps to rotate (negative left, positive right)
+        @param[in] steps The number of steps to rotate (positive left, negative right)
         @param[in] galois_keys The Galois keys
         @param[out] destination The ciphertext to overwrite with the rotated result
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
