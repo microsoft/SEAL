@@ -585,7 +585,7 @@ endif()
 # Install Intel HEXL header files if SEAL_BUILD_DEPS is ON
 if(SEAL_USE_INTEL_HEXL AND SEAL_BUILD_DEPS)
     install(
-        DIRECTORY ${hexl_SOURCE_DIR}/hexl/include/intel-hexl
+        DIRECTORY ${hexl_SOURCE_DIR}/hexl/include/hexl
         DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
 endif()
 
