@@ -1,5 +1,8 @@
 # List of Changes
 
+## Version 3.6.5
+
+- Fixed typos in comments [(PR 328)](https://github.com/microsoft/SEAL/pull/328).
 ## Version 3.6.4
 
 ### New Features

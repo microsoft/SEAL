@@ -3,14 +3,14 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-project(SEALBench VERSION 3.6.4 LANGUAGES CXX)
+project(SEALBench VERSION 3.6.5 LANGUAGES CXX)
 
 # If not called from root CMakeLists.txt
 if(NOT DEFINED SEAL_BUILD_BENCH)
     set(SEAL_BUILD_BENCH ON)
 
     # Import Microsoft SEAL
-    find_package(SEAL 3.6.4 EXACT REQUIRED)
+    find_package(SEAL 3.6.5 EXACT REQUIRED)
 
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUTLIB_PATH})
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
