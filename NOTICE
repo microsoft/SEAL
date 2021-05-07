@@ -1,8 +1,8 @@
 THIRD-PARTY SOFTWARE NOTICES AND INFORMATION
 
 This software incorporates components from the projects listed below. The original copyright notices
-and the licenses under which Microsoft received such components are set forth below and are provided for
-informational purposes only. Microsoft reserves all rights not expressly granted herein, whether by
+and the licenses under which Microsoft received such components are set forth below and are provided for 
+informational purposes only. Microsoft reserves all rights not expressly granted herein, whether by 
 implication, estoppel or otherwise.
 
 This software includes parts of the BLAKE2 library (https://github.com/BLAKE2/BLAKE2).

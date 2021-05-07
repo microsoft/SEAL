@@ -6,7 +6,6 @@
 #ifdef SEAL_USE_INTEL_HEXL
 #include "seal/memorymanager.h"
 #include "seal/util/locks.h"
-#include <cassert>
 #include <unordered_map>
 #include "hexl/hexl.hpp"
 
