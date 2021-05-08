@@ -278,7 +278,7 @@ namespace seal
                     y = x + gap;
                     if (gap < 4)
                     {
-                        for (std::size_t j = 0; j < gap; j += 4)
+                        for (std::size_t j = 0; j < gap; j++)
                         {
                             u = arithmetic_.guard(*x);
                             v = *y;
@@ -319,7 +319,7 @@ namespace seal
                     y = x + gap;
                     if (gap < 4)
                     {
-                        for (std::size_t j = 0; j < gap; j += 4)
+                        for (std::size_t j = 0; j < gap; j++)
                         {
                             u = *x;
                             v = *y;
