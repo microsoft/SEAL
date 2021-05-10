@@ -461,12 +461,12 @@ else()
     endif()
 
     if(SEAL_USE_INTEL_HEXL)
-        target_link_libraries(seal_shared PRIVATE HEXL::hexl)
-         get_target_property(
+        get_target_property(
             HEXL_INCLUDE_DIR
             HEXL::hexl
             INTERFACE_INCLUDE_DIRECTORIES)
         target_include_directories(seal_shared PUBLIC ${HEXL_INCLUDE_DIR})
+        target_link_libraries(seal_shared PRIVATE HEXL::hexl)
     endif()
 endif()
 
