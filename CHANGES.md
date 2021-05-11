@@ -14,6 +14,8 @@
 - Fixed a bug in `DWTHandler` [(Issue 330)](https://github.com/microsoft/SEAL/issues/330).
 - Fixed failing tests when `SEAL_USE_ZLIB=OFF` and `SEAL_USE_ZTD=OFF` [(PR 332)](https://github.com/microsoft/SEAL/pull/332).
 - Fixed shared library build when `SEAL_USE_HEXL=ON` [(PR 332)](https://github.com/microsoft/SEAL/pull/332).
+- Added missing `const` qualifiers to several members of `BatchEncoder` and `Evaluator` [(PR 334)](https://github.com/microsoft/SEAL/pull/334).
+
 ## Version 3.6.4
 
 ### New Features
