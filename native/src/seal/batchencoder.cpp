@@ -107,7 +107,7 @@ namespace seal
         }
     }
 
-    void BatchEncoder::encode(const vector<uint64_t> &values_matrix, Plaintext &destination)
+    void BatchEncoder::encode(const vector<uint64_t> &values_matrix, Plaintext &destination) const
     {
         auto &context_data = *context_.first_context_data();
 
@@ -148,7 +148,7 @@ namespace seal
         inverse_ntt_negacyclic_harvey(destination.data(), *context_data.plain_ntt_tables());
     }
 
-    void BatchEncoder::encode(const vector<int64_t> &values_matrix, Plaintext &destination)
+    void BatchEncoder::encode(const vector<int64_t> &values_matrix, Plaintext &destination) const
     {
         auto &context_data = *context_.first_context_data();
         uint64_t modulus = context_data.parms().plain_modulus().value();
@@ -192,7 +192,7 @@ namespace seal
         inverse_ntt_negacyclic_harvey(destination.data(), *context_data.plain_ntt_tables());
     }
 #ifdef SEAL_USE_MSGSL
-    void BatchEncoder::encode(gsl::span<const uint64_t> values_matrix, Plaintext &destination)
+    void BatchEncoder::encode(gsl::span<const uint64_t> values_matrix, Plaintext &destination) const
     {
         auto &context_data = *context_.first_context_data();
 
@@ -232,7 +232,7 @@ namespace seal
         inverse_ntt_negacyclic_harvey(destination.data(), *context_data.plain_ntt_tables());
     }
 
-    void BatchEncoder::encode(gsl::span<const int64_t> values_matrix, Plaintext &destination)
+    void BatchEncoder::encode(gsl::span<const int64_t> values_matrix, Plaintext &destination) const
     {
         auto &context_data = *context_.first_context_data();
         uint64_t modulus = context_data.parms().plain_modulus().value();
@@ -275,7 +275,7 @@ namespace seal
         inverse_ntt_negacyclic_harvey(destination.data(), *context_data.plain_ntt_tables());
     }
 #endif
-    void BatchEncoder::decode(const Plaintext &plain, vector<uint64_t> &destination, MemoryPoolHandle pool)
+    void BatchEncoder::decode(const Plaintext &plain, vector<uint64_t> &destination, MemoryPoolHandle pool) const
     {
         if (!is_valid_for(plain, context_))
         {
@@ -314,7 +314,7 @@ namespace seal
         }
     }
 
-    void BatchEncoder::decode(const Plaintext &plain, vector<int64_t> &destination, MemoryPoolHandle pool)
+    void BatchEncoder::decode(const Plaintext &plain, vector<int64_t> &destination, MemoryPoolHandle pool) const
     {
         if (!is_valid_for(plain, context_))
         {
@@ -358,7 +358,7 @@ namespace seal
         }
     }
 #ifdef SEAL_USE_MSGSL
-    void BatchEncoder::decode(const Plaintext &plain, gsl::span<uint64_t> destination, MemoryPoolHandle pool)
+    void BatchEncoder::decode(const Plaintext &plain, gsl::span<uint64_t> destination, MemoryPoolHandle pool) const
     {
         if (!is_valid_for(plain, context_))
         {
@@ -399,7 +399,7 @@ namespace seal
         }
     }
 
-    void BatchEncoder::decode(const Plaintext &plain, gsl::span<int64_t> destination, MemoryPoolHandle pool)
+    void BatchEncoder::decode(const Plaintext &plain, gsl::span<int64_t> destination, MemoryPoolHandle pool) const
     {
         if (!is_valid_for(plain, context_))
         {

@@ -75,7 +75,7 @@ namespace seal
         }
     }
 
-    void Evaluator::negate_inplace(Ciphertext &encrypted)
+    void Evaluator::negate_inplace(Ciphertext &encrypted) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -100,7 +100,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::add_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2)
+    void Evaluator::add_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted1, context_) || !is_buffer_valid(encrypted1))
@@ -163,7 +163,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::add_many(const vector<Ciphertext> &encrypteds, Ciphertext &destination)
+    void Evaluator::add_many(const vector<Ciphertext> &encrypteds, Ciphertext &destination) const
     {
         if (encrypteds.empty())
         {
@@ -184,7 +184,7 @@ namespace seal
         }
     }
 
-    void Evaluator::sub_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2)
+    void Evaluator::sub_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted1, context_) || !is_buffer_valid(encrypted1))
@@ -245,7 +245,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::multiply_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool)
+    void Evaluator::multiply_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted1, context_) || !is_buffer_valid(encrypted1))
@@ -284,7 +284,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::bfv_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool)
+    void Evaluator::bfv_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool)  const
     {
         if (encrypted1.is_ntt_form() || encrypted2.is_ntt_form())
         {
@@ -469,7 +469,7 @@ namespace seal
         encrypted1.scale() = new_scale;
     }
 
-    void Evaluator::ckks_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool)
+    void Evaluator::ckks_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool) const
     {
         if (!(encrypted1.is_ntt_form() && encrypted2.is_ntt_form()))
         {
@@ -549,7 +549,7 @@ namespace seal
         encrypted1.scale() = new_scale;
     }
 
-    void Evaluator::square_inplace(Ciphertext &encrypted, MemoryPoolHandle pool)
+    void Evaluator::square_inplace(Ciphertext &encrypted, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -580,7 +580,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::bfv_square(Ciphertext &encrypted, MemoryPoolHandle pool)
+    void Evaluator::bfv_square(Ciphertext &encrypted, MemoryPoolHandle pool) const
     {
         if (encrypted.is_ntt_form())
         {
@@ -733,7 +733,7 @@ namespace seal
         encrypted.scale() = new_scale;
     }
 
-    void Evaluator::ckks_square(Ciphertext &encrypted, MemoryPoolHandle pool)
+    void Evaluator::ckks_square(Ciphertext &encrypted, MemoryPoolHandle pool) const
     {
         if (!encrypted.is_ntt_form())
         {
@@ -800,7 +800,7 @@ namespace seal
     }
 
     void Evaluator::relinearize_internal(
-        Ciphertext &encrypted, const RelinKeys &relin_keys, size_t destination_size, MemoryPoolHandle pool)
+        Ciphertext &encrypted, const RelinKeys &relin_keys, size_t destination_size, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         auto context_data_ptr = context_.get_context_data(encrypted.parms_id());
@@ -857,7 +857,7 @@ namespace seal
     }
 
     void Evaluator::mod_switch_scale_to_next(
-        const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool)
+        const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool) const
     {
         // Assuming at this point encrypted is already validated.
         auto context_data_ptr = context_.get_context_data(encrypted.parms_id());
@@ -921,7 +921,7 @@ namespace seal
         }
     }
 
-    void Evaluator::mod_switch_drop_to_next(const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool)
+    void Evaluator::mod_switch_drop_to_next(const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool) const
     {
         // Assuming at this point encrypted is already validated.
         auto context_data_ptr = context_.get_context_data(encrypted.parms_id());
@@ -985,7 +985,7 @@ namespace seal
         }
     }
 
-    void Evaluator::mod_switch_drop_to_next(Plaintext &plain)
+    void Evaluator::mod_switch_drop_to_next(Plaintext &plain) const
     {
         // Assuming at this point plain is already validated.
         auto context_data_ptr = context_.get_context_data(plain.parms_id());
@@ -1020,7 +1020,7 @@ namespace seal
         plain.parms_id() = next_context_data.parms_id();
     }
 
-    void Evaluator::mod_switch_to_next(const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool)
+    void Evaluator::mod_switch_to_next(const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -1062,7 +1062,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::mod_switch_to_inplace(Ciphertext &encrypted, parms_id_type parms_id, MemoryPoolHandle pool)
+    void Evaluator::mod_switch_to_inplace(Ciphertext &encrypted, parms_id_type parms_id, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         auto context_data_ptr = context_.get_context_data(encrypted.parms_id());
@@ -1086,7 +1086,7 @@ namespace seal
         }
     }
 
-    void Evaluator::mod_switch_to_inplace(Plaintext &plain, parms_id_type parms_id)
+    void Evaluator::mod_switch_to_inplace(Plaintext &plain, parms_id_type parms_id) const
     {
         // Verify parameters.
         auto context_data_ptr = context_.get_context_data(plain.parms_id());
@@ -1114,7 +1114,7 @@ namespace seal
         }
     }
 
-    void Evaluator::rescale_to_next(const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool)
+    void Evaluator::rescale_to_next(const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -1152,7 +1152,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::rescale_to_inplace(Ciphertext &encrypted, parms_id_type parms_id, MemoryPoolHandle pool)
+    void Evaluator::rescale_to_inplace(Ciphertext &encrypted, parms_id_type parms_id, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -1206,7 +1206,7 @@ namespace seal
 
     void Evaluator::multiply_many(
         const vector<Ciphertext> &encrypteds, const RelinKeys &relin_keys, Ciphertext &destination,
-        MemoryPoolHandle pool)
+        MemoryPoolHandle pool) const
     {
         // Verify parameters.
         if (encrypteds.size() == 0)
@@ -1282,7 +1282,7 @@ namespace seal
     }
 
     void Evaluator::exponentiate_inplace(
-        Ciphertext &encrypted, uint64_t exponent, const RelinKeys &relin_keys, MemoryPoolHandle pool)
+        Ciphertext &encrypted, uint64_t exponent, const RelinKeys &relin_keys, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         auto context_data_ptr = context_.get_context_data(encrypted.parms_id());
@@ -1314,7 +1314,7 @@ namespace seal
         multiply_many(exp_vector, relin_keys, encrypted, move(pool));
     }
 
-    void Evaluator::add_plain_inplace(Ciphertext &encrypted, const Plaintext &plain)
+    void Evaluator::add_plain_inplace(Ciphertext &encrypted, const Plaintext &plain) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -1388,7 +1388,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::sub_plain_inplace(Ciphertext &encrypted, const Plaintext &plain)
+    void Evaluator::sub_plain_inplace(Ciphertext &encrypted, const Plaintext &plain) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -1462,7 +1462,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::multiply_plain_inplace(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool)
+    void Evaluator::multiply_plain_inplace(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -1499,7 +1499,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::multiply_plain_normal(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool)
+    void Evaluator::multiply_plain_normal(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool) const
     {
         // Extract encryption parameters.
         auto &context_data = *context_.get_context_data(encrypted.parms_id());
@@ -1627,7 +1627,7 @@ namespace seal
         encrypted.scale() = new_scale;
     }
 
-    void Evaluator::multiply_plain_ntt(Ciphertext &encrypted_ntt, const Plaintext &plain_ntt)
+    void Evaluator::multiply_plain_ntt(Ciphertext &encrypted_ntt, const Plaintext &plain_ntt)  const
     {
         // Verify parameters.
         if (!plain_ntt.is_ntt_form())
@@ -1668,7 +1668,7 @@ namespace seal
         encrypted_ntt.scale() = new_scale;
     }
 
-    void Evaluator::transform_to_ntt_inplace(Plaintext &plain, parms_id_type parms_id, MemoryPoolHandle pool)
+    void Evaluator::transform_to_ntt_inplace(Plaintext &plain, parms_id_type parms_id, MemoryPoolHandle pool)  const
     {
         // Verify parameters.
         if (!is_valid_for(plain, context_))
@@ -1761,7 +1761,7 @@ namespace seal
         plain.parms_id() = parms_id;
     }
 
-    void Evaluator::transform_to_ntt_inplace(Ciphertext &encrypted)
+    void Evaluator::transform_to_ntt_inplace(Ciphertext &encrypted)  const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -1809,7 +1809,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::transform_from_ntt_inplace(Ciphertext &encrypted_ntt)
+    void Evaluator::transform_from_ntt_inplace(Ciphertext &encrypted_ntt)  const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted_ntt, context_) || !is_buffer_valid(encrypted_ntt))
@@ -1857,7 +1857,7 @@ namespace seal
     }
 
     void Evaluator::apply_galois_inplace(
-        Ciphertext &encrypted, uint32_t galois_elt, const GaloisKeys &galois_keys, MemoryPoolHandle pool)
+        Ciphertext &encrypted, uint32_t galois_elt, const GaloisKeys &galois_keys, MemoryPoolHandle pool)  const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -1961,7 +1961,7 @@ namespace seal
     }
 
     void Evaluator::rotate_internal(
-        Ciphertext &encrypted, int steps, const GaloisKeys &galois_keys, MemoryPoolHandle pool)
+        Ciphertext &encrypted, int steps, const GaloisKeys &galois_keys, MemoryPoolHandle pool)  const
     {
         auto context_data_ptr = context_.get_context_data(encrypted.parms_id());
         if (!context_data_ptr)
@@ -2019,7 +2019,7 @@ namespace seal
 
     void Evaluator::switch_key_inplace(
         Ciphertext &encrypted, ConstRNSIter target_iter, const KSwitchKeys &kswitch_keys, size_t kswitch_keys_index,
-        MemoryPoolHandle pool)
+        MemoryPoolHandle pool)  const
     {
         auto parms_id = encrypted.parms_id();
         auto &context_data = *context_.get_context_data(parms_id);
