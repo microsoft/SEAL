@@ -3,6 +3,7 @@
 ## Version 3.6.5
 
 - Fixed typos in comments [(PR 328)](https://github.com/microsoft/SEAL/pull/328).
+- Fixed a bug in `DWTHandler` caught by [(Issue 330)](https://github.com/microsoft/SEAL/issues/330).
 ## Version 3.6.4
 
 ### New Features
