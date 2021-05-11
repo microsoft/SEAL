@@ -18,7 +18,7 @@ namespace intel
         struct NTT::AllocatorAdapter<seal::MemoryPoolHandle>
             : public AllocatorInterface<NTT::AllocatorAdapter<seal::MemoryPoolHandle>>
         {
-            AllocatorAdapter(seal::MemoryPoolHandle &&handle) : handle_(std::move(handle))
+            AllocatorAdapter(seal::MemoryPoolHandle handle) : handle_(std::move(handle))
             {}
 
             ~AllocatorAdapter()
@@ -72,7 +72,7 @@ namespace intel
         struct NTT::AllocatorAdapter<seal::MemoryPoolHandle, SimpleThreadSafePolicy>
             : public AllocatorInterface<NTT::AllocatorAdapter<seal::MemoryPoolHandle, SimpleThreadSafePolicy>>
         {
-            AllocatorAdapter(seal::MemoryPoolHandle &&handle, SimpleThreadSafePolicy &&policy)
+            AllocatorAdapter(seal::MemoryPoolHandle handle, SimpleThreadSafePolicy &&policy)
                 : handle_(std::move(handle)), policy_(std::move(policy))
             {}
 
