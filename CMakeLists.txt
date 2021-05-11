@@ -219,7 +219,7 @@ if(SEAL_USE_INTEL_HEXL)
         message(STATUS "Intel HEXL: download ...")
         seal_fetch_thirdparty_content(ExternalIntelHEXL)
     else()
-        find_package(HEXL 1.0.1)
+        find_package(HEXL 1.1.0)
         if (NOT TARGET HEXL::hexl)
             FATAL_ERROR("Intel HEXL: not found")
         endif()
@@ -461,8 +461,12 @@ else()
     endif()
 
     if(SEAL_USE_INTEL_HEXL)
-        target_include_directories(seal_shared PRIVATE $<BUILD_INTERFACE:${hexl_SOURCE_DIR}/hexl/include>)
-        target_link_libraries(seal_shared PRIVATE hexl)
+        get_target_property(
+            HEXL_INCLUDE_DIR
+            HEXL::hexl
+            INTERFACE_INCLUDE_DIRECTORIES)
+        target_include_directories(seal_shared PUBLIC ${HEXL_INCLUDE_DIR})
+        target_link_libraries(seal_shared PRIVATE HEXL::hexl)
     endif()
 endif()
 

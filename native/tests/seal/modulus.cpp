@@ -104,7 +104,13 @@ namespace sealtest
         stringstream stream;
 
         Modulus mod;
+#ifdef SEAL_USE_ZLIB
         compr_mode_type compr_mode = compr_mode_type::zlib;
+#elif defined(SEAL_USE_ZSTD)
+        compr_mode_type compr_mode = compr_mode_type::zstd;
+#else
+        compr_mode_type compr_mode = compr_mode_type::none;
+#endif
         mod.save(stream, compr_mode);
 
         Modulus mod2;

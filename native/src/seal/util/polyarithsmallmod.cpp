@@ -37,10 +37,14 @@ namespace seal
             }
 #endif
 
+#ifdef SEAL_USE_INTEL_HEXL
+            intel::hexl::EltwiseAddMod(result, poly, scalar, coeff_count, modulus.value());
+#else
             SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
                 const uint64_t x = get<0>(I);
                 get<1>(I) = add_uint_mod(x, scalar, modulus);
             });
+#endif
         }
 
         void sub_poly_scalar_coeffmod(
@@ -65,10 +69,14 @@ namespace seal
             }
 #endif
 
+#ifdef SEAL_USE_INTEL_HEXL
+            intel::hexl::EltwiseSubMod(result, poly, scalar, coeff_count, modulus.value());
+#else
             SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
                 const uint64_t x = get<0>(I);
                 get<1>(I) = sub_uint_mod(x, scalar, modulus);
             });
+#endif
         }
 
         void multiply_poly_scalar_coeffmod(
