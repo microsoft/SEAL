@@ -60,6 +60,10 @@ namespace intel
 
             std::unique_lock<std::mutex> locker()
             {
+                if (!m_ptr)
+                {
+                    throw std::logic_error("accessing a moved object");
+                }
                 return std::unique_lock<std::mutex>{ *m_ptr };
             };
 
