@@ -77,7 +77,7 @@ namespace seal
         @param[out] destination The plaintext polynomial to overwrite with the result
         @throws std::invalid_argument if values is too large
         */
-        void encode(const std::vector<std::uint64_t> &values, Plaintext &destination);
+        void encode(const std::vector<std::uint64_t> &values, Plaintext &destination) const;
 
         /**
         Creates a plaintext from a given matrix. This function "batches" a given matrix
@@ -95,7 +95,7 @@ namespace seal
         @param[out] destination The plaintext polynomial to overwrite with the result
         @throws std::invalid_argument if values is too large
         */
-        void encode(const std::vector<std::int64_t> &values, Plaintext &destination);
+        void encode(const std::vector<std::int64_t> &values, Plaintext &destination) const;
 #ifdef SEAL_USE_MSGSL
         /**
         Creates a plaintext from a given matrix. This function "batches" a given matrix
@@ -113,7 +113,7 @@ namespace seal
         @param[out] destination The plaintext polynomial to overwrite with the result
         @throws std::invalid_argument if values is too large
         */
-        void encode(gsl::span<const std::uint64_t> values, Plaintext &destination);
+        void encode(gsl::span<const std::uint64_t> values, Plaintext &destination) const;
 
         /**
         Creates a plaintext from a given matrix. This function "batches" a given matrix
@@ -131,7 +131,7 @@ namespace seal
         @param[out] destination The plaintext polynomial to overwrite with the result
         @throws std::invalid_argument if values is too large
         */
-        void encode(gsl::span<const std::int64_t> values, Plaintext &destination);
+        void encode(gsl::span<const std::int64_t> values, Plaintext &destination) const;
 #endif
         /**
         Inverse of encode. This function "unbatches" a given plaintext into a matrix
@@ -150,7 +150,7 @@ namespace seal
         */
         void decode(
             const Plaintext &plain, std::vector<std::uint64_t> &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool());
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
         /**
         Inverse of encode. This function "unbatches" a given plaintext into a matrix
@@ -169,7 +169,7 @@ namespace seal
         */
         void decode(
             const Plaintext &plain, std::vector<std::int64_t> &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool());
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 #ifdef SEAL_USE_MSGSL
         /**
         Inverse of encode. This function "unbatches" a given plaintext into a matrix
@@ -189,7 +189,7 @@ namespace seal
         */
         void decode(
             const Plaintext &plain, gsl::span<std::uint64_t> destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool());
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
         /**
         Inverse of encode. This function "unbatches" a given plaintext into a matrix
@@ -209,7 +209,7 @@ namespace seal
         */
         void decode(
             const Plaintext &plain, gsl::span<std::int64_t> destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool());
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 #endif
         /**
         Returns the number of slots.
