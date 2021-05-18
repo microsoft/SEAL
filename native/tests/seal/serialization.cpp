@@ -58,7 +58,7 @@ namespace sealtest
 #endif
 
 #ifdef SEAL_USE_ZSTD
-        compr_mode_type compr_mode = compr_mode_type::zstd;
+        header.compr_mode = compr_mode_type::zstd;
         ASSERT_TRUE(Serialization::IsValidHeader(header));
 #endif
 
