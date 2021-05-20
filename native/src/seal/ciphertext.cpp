@@ -126,7 +126,11 @@ namespace seal
             throw logic_error("unsupported prng_type");
         }
 
-        if (version.major == 3 && (version.minor == 4 || version.minor == 5))
+        if (version.major == 3 && version.minor == 4)
+        {
+            sample_poly_uniform_seal_3_4(prng, context_data_ptr->parms(), data(1));
+        }
+        else if (version.major == 3 && version.minor == 5)
         {
             sample_poly_uniform_seal_3_5(prng, context_data_ptr->parms(), data(1));
         }

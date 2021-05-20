@@ -1,5 +1,11 @@
 # List of Changes
 
+## Version 3.6.6
+
+### Bug Fixes
+
+- Fixed an error when loading seeded ciphertexts serialized by v3.4.x from v3.5.0+.
+
 ## Version 3.6.5
 
 ### New Features
