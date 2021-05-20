@@ -140,6 +140,7 @@ namespace seal
         }
         else
         {
+            // prior to v3.4, AES-128 was used, which is not compatible with later versions
             throw logic_error("incompatible version");
         }
     }
@@ -316,7 +317,7 @@ namespace seal
                 {
                     prng_info.load(stream);
                 }
-                else if (version.major == 3 && version.minor <= 5)
+                else if (version.major == 3 && version.minor >= 4)
                 {
                     // We only need to load the hash value; only Blake2xb is supported
                     prng_info.type() = prng_type::blake2xb;
@@ -324,6 +325,7 @@ namespace seal
                 }
                 else
                 {
+                    // seeded ciphertexts were not implemented before 3.4
                     throw logic_error("incompatible version");
                 }
 
