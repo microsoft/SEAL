@@ -508,7 +508,11 @@ namespace seal
 
         if (dest_size == 3)
         {
-            // Must divide coeff_count, i.e. be a power of two
+            // We want to keep six polynomials in the L1 cache: x[0], x[1], x[2], y[0], y[1], temp.
+            // For a 32KiB cache, which can store 32768 / 8 = 4096 coefficients, = 682.67 coefficients per polynomial,
+            // we should keep the tile size at 682 or below. The tile size must divide coeff_count, i.e. be a power of
+            // two. Some testing shows similar performance with tile size 256 and 512, and worse performance on smaller
+            // tiles. We pick the smaller of the two to prevent L1 cache misses on processors with < 32 KiB L1 cache.
             size_t tile_size = min<size_t>(coeff_count, size_t(256));
             size_t num_tiles = coeff_count / tile_size;
 #ifdef SEAL_DEBUG
