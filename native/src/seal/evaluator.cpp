@@ -533,7 +533,7 @@ namespace seal
             SEAL_ALLOCATE_GET_COEFF_ITER(temp, tile_size, pool);
 
             // Computes the output tile_size coefficients at a time
-            // Given input pairs of polynomials x = (x[0], x[1], x[2]), y = (y[0], y[1]), computes
+            // Given input tuples of polynomials x = (x[0], x[1], x[2]), y = (y[0], y[1]), computes
             // x = (x[0] * y[0], x[0] * y[1] + x[1] * y[0], x[1] * y[1])
             // with appropriate modular reduction
             SEAL_ITERATE(coeff_modulus, coeff_modulus_size, [&](auto I) {
