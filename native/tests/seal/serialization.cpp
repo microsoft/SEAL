@@ -52,11 +52,15 @@ namespace sealtest
         Serialization::SEALHeader header;
         ASSERT_TRUE(Serialization::IsValidHeader(header));
 
-        header.compr_mode = (compr_mode_type)0x01;
+#ifdef SEAL_USE_ZLIB
+        header.compr_mode = compr_mode_type::zlib;
         ASSERT_TRUE(Serialization::IsValidHeader(header));
+#endif
 
-        header.compr_mode = (compr_mode_type)0x02;
+#ifdef SEAL_USE_ZSTD
+        header.compr_mode = compr_mode_type::zstd;
         ASSERT_TRUE(Serialization::IsValidHeader(header));
+#endif
 
         Serialization::SEALHeader invalid_header;
         invalid_header.magic = 0x1212;

@@ -12,6 +12,7 @@ Description: An easy-to-use homomorphic encryption library
 Requires: @SEAL_PKGCONFIG_MSGSL_REQUIRES_STRING@
 Requires: @SEAL_PKGCONFIG_ZLIB_REQUIRES_STRING@
 Requires: @SEAL_PKGCONFIG_ZSTD_REQUIRES_STRING@
+Requires: @SEAL_PKGCONFIG_INTEL_HEXL_REQUIRES_STRING@
 
 Libs: -L${libdir} -lseal
 Cflags: @SEAL_LANG_FLAG@ -I${includedir}
