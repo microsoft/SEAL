@@ -540,15 +540,15 @@ EMSCRIPTEN_BINDINGS(SEAL) {
             return self.Evaluator::exponentiate(encrypted, exponent_uint64, relin_keys, destination, pool);
         }))
         .function("relinearize", &Evaluator::relinearize)
-        .function("cipherModSwitchToNext", select_overload<void(const Ciphertext &, Ciphertext &, MemoryPoolHandle)>(&Evaluator::mod_switch_to_next))
-        .function("cipherModSwitchTo", select_overload<void(const Ciphertext &, parms_id_type, Ciphertext &, MemoryPoolHandle)>(&Evaluator::mod_switch_to))
-        .function("plainModSwitchToNext", select_overload<void(const Plaintext &, Plaintext &)>(&Evaluator::mod_switch_to_next))
-        .function("plainModSwitchTo", select_overload<void(const Plaintext &, parms_id_type, Plaintext &)>(&Evaluator::mod_switch_to))
+        .function("cipherModSwitchToNext", select_overload<void(const Ciphertext &, Ciphertext &, MemoryPoolHandle) const>(&Evaluator::mod_switch_to_next))
+        .function("cipherModSwitchTo", select_overload<void(const Ciphertext &, parms_id_type, Ciphertext &, MemoryPoolHandle) const>(&Evaluator::mod_switch_to))
+        .function("plainModSwitchToNext", select_overload<void(const Plaintext &, Plaintext &) const>(&Evaluator::mod_switch_to_next))
+        .function("plainModSwitchTo", select_overload<void(const Plaintext &, parms_id_type, Plaintext &) const>(&Evaluator::mod_switch_to))
         .function("rescaleToNext", &Evaluator::rescale_to_next)
         .function("rescaleTo", &Evaluator::rescale_to)
-        .function("plainTransformToNtt", select_overload<void(const Plaintext &, parms_id_type, Plaintext &, MemoryPoolHandle)>(&Evaluator::transform_to_ntt))
-        .function("cipherTransformToNtt", select_overload<void(const Ciphertext &, Ciphertext &)>(&Evaluator::transform_to_ntt))
-        .function("cipherTransformFromNtt", select_overload<void(const Ciphertext &, Ciphertext &)>(&Evaluator::transform_from_ntt))
+        .function("plainTransformToNtt", select_overload<void(const Plaintext &, parms_id_type, Plaintext &, MemoryPoolHandle) const>(&Evaluator::transform_to_ntt))
+        .function("cipherTransformToNtt", select_overload<void(const Ciphertext &, Ciphertext &) const>(&Evaluator::transform_to_ntt))
+        .function("cipherTransformFromNtt", select_overload<void(const Ciphertext &, Ciphertext &) const>(&Evaluator::transform_from_ntt))
         .function("applyGalois", optional_override([](Evaluator &self, const Ciphertext &encrypted,
              const std::uint32_t g_elt, const GaloisKeys &gal_keys, Ciphertext &destination,
              MemoryPoolHandle pool = MemoryManager::GetPool()) {
