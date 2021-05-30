@@ -39,8 +39,13 @@ namespace seal
                 throw std::invalid_argument("modulus");
             }
 #endif
+
+#ifdef SEAL_USE_INTEL_HEXL
+            intel::hexl::EltwiseReduceMod(result, poly, coeff_count, modulus.value(), 0, 1);
+#else
             SEAL_ITERATE(
                 iter(poly, result), coeff_count, [&](auto I) { get<1>(I) = barrett_reduce_64(get<0>(I), modulus); });
+#endif
         }
 
         inline void modulo_poly_coeffs(
@@ -314,7 +319,11 @@ namespace seal
                 throw std::invalid_argument("result");
             }
 #endif
+
             const uint64_t modulus_value = modulus.value();
+#ifdef SEAL_USE_INTEL_HEXL
+            intel::hexl::EltwiseSubMod(result, operand1, operand2, coeff_count, modulus_value);
+#else
             SEAL_ITERATE(iter(operand1, operand2, result), coeff_count, [&](auto I) {
 #ifdef SEAL_DEBUG
                 if (get<0>(I) >= modulus_value)
@@ -330,6 +339,7 @@ namespace seal
                 std::int64_t borrow = sub_uint64(get<0>(I), get<1>(I), &temp_result);
                 get<2>(I) = temp_result + (modulus_value & static_cast<std::uint64_t>(-borrow));
             });
+#endif
         }
 
         inline void sub_poly_coeffmod(

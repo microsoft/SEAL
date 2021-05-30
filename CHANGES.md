@@ -1,5 +1,21 @@
 # List of Changes
 
+## Version 3.6.5
+
+### New Features
+
+- Updated the dependency Intel HEXL to v1.1.0 [(PR 332)](https://github.com/microsoft/SEAL/pull/332).
+- Integrated more optimizations from Intel HEXL to Microsoft SEAL.
+- Intel HEXL now uses Microsoft SEAL's memory pool, so that memory allocation reported by Microsoft SEAL is more accurate.
+
+### Bug Fixes
+
+- Fixed typos in comments [(PR 328)](https://github.com/microsoft/SEAL/pull/328).
+- Fixed a bug in `DWTHandler` [(Issue 330)](https://github.com/microsoft/SEAL/issues/330).
+- Fixed failing tests when `SEAL_USE_ZLIB=OFF` and `SEAL_USE_ZTD=OFF` [(PR 332)](https://github.com/microsoft/SEAL/pull/332).
+- Fixed shared library build when `SEAL_USE_HEXL=ON` [(PR 332)](https://github.com/microsoft/SEAL/pull/332).
+- Added missing `const` qualifiers to several members of `BatchEncoder` and `Evaluator` [(PR 334)](https://github.com/microsoft/SEAL/pull/334).
+
 ## Version 3.6.4
 
 ### New Features

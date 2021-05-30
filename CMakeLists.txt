@@ -23,7 +23,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Build type (CMAKE_BUILD_TYPE): ${CMAKE_BUILD_TYPE}")
 
-project(SEAL VERSION 3.6.4 LANGUAGES CXX C)
+project(SEAL VERSION 3.6.5 LANGUAGES CXX C)
 
 ########################
 # Global configuration #
@@ -219,7 +219,7 @@ if(SEAL_USE_INTEL_HEXL)
         message(STATUS "Intel HEXL: download ...")
         seal_fetch_thirdparty_content(ExternalIntelHEXL)
     else()
-        find_package(HEXL 1.0.1)
+        find_package(HEXL 1.1.0)
         if (NOT TARGET HEXL::hexl)
             FATAL_ERROR("Intel HEXL: not found")
         endif()
@@ -461,8 +461,12 @@ else()
     endif()
 
     if(SEAL_USE_INTEL_HEXL)
-        target_include_directories(seal_shared PRIVATE $<BUILD_INTERFACE:${hexl_SOURCE_DIR}/hexl/include>)
-        target_link_libraries(seal_shared PRIVATE hexl)
+        get_target_property(
+            HEXL_INCLUDE_DIR
+            HEXL::hexl
+            INTERFACE_INCLUDE_DIRECTORIES)
+        target_include_directories(seal_shared PUBLIC ${HEXL_INCLUDE_DIR})
+        target_link_libraries(seal_shared PRIVATE HEXL::hexl)
     endif()
 endif()
 
@@ -575,18 +579,20 @@ export(
     NAMESPACE SEAL::
     FILE ${SEAL_TARGETS_FILENAME})
 
-# Install MSGSL header files if SEAL_BUILD_DEPS is ON
-if(SEAL_USE_MSGSL AND SEAL_BUILD_DEPS)
-    install(
-        DIRECTORY ${msgsl_SOURCE_DIR}/include/gsl
-        DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
-endif()
-
-# Install Intel HEXL header files if SEAL_BUILD_DEPS is ON
-if(SEAL_USE_INTEL_HEXL AND SEAL_BUILD_DEPS)
-    install(
-        DIRECTORY ${hexl_SOURCE_DIR}/hexl/include/intel-hexl
-        DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
+# Install header files of dependencies if SEAL_BUILD_DEPS is ON
+if(SEAL_BUILD_DEPS)
+    # MSGSL
+    if(SEAL_USE_MSGSL)
+        install(
+            DIRECTORY ${msgsl_SOURCE_DIR}/include/gsl
+            DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
+    endif()
+    # Intel HEXL
+    if(SEAL_USE_INTEL_HEXL)
+        install(
+            DIRECTORY ${hexl_SOURCE_DIR}/hexl/include/hexl
+            DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
+    endif()
 endif()
 
 ##############
@@ -594,24 +600,30 @@ endif()
 ##############
 
 if(UNIX OR APPLE)
-    # Set the requirements according to the current configuration
-    if(SEAL_USE_MSGSL AND NOT SEAL_BUILD_DEPS)
-        # Extract the include directories from Microsoft.GSL::GSL
-        get_target_property(
-            SEAL_PKGCONFIG_MSGSL_INCLUDE_DIR
-            Microsoft.GSL::GSL
-            INTERFACE_INCLUDE_DIRECTORIES)
+    # Set the requirements according to the current configuration if SEAL_BUILD_DEPS=OFF
+    if(NOT SEAL_BUILD_DEPS)
+        if(SEAL_USE_MSGSL)
+            # Extract the include directories from Microsoft.GSL::GSL
+            get_target_property(
+                SEAL_PKGCONFIG_MSGSL_INCLUDE_DIR
+                Microsoft.GSL::GSL
+                INTERFACE_INCLUDE_DIRECTORIES)
 
-        # Create the Microsoft GSL pkg-config file
-        configure_file(${SEAL_PKGCONFIG_MSGSL_IN_FILENAME} ${SEAL_PKGCONFIG_MSGSL_FILENAME} @ONLY)
+            # Create the Microsoft GSL pkg-config file
+            configure_file(${SEAL_PKGCONFIG_MSGSL_IN_FILENAME} ${SEAL_PKGCONFIG_MSGSL_FILENAME} @ONLY)
 
-        set(SEAL_PKGCONFIG_MSGSL_REQUIRES_STRING "seal_msgsl >= ${Microsoft.GSL_VERSION_MAJOR}")
-    endif()
-    if(SEAL_USE_ZLIB AND NOT SEAL_BUILD_DEPS)
-        set(SEAL_PKGCONFIG_ZLIB_REQUIRES_STRING "zlib = ${ZLIB_VERSION_STRING}")
-    endif()
-    if(SEAL_USE_ZSTD AND NOT SEAL_BUILD_DEPS)
-        set(SEAL_PKGCONFIG_ZSTD_REQUIRES_STRING "libzstd >= ${zstd_VERSION_MAJOR}")
+            set(SEAL_PKGCONFIG_MSGSL_REQUIRES_STRING "seal_msgsl >= ${Microsoft.GSL_VERSION_MAJOR}")
+        endif()
+        if(SEAL_USE_ZLIB)
+            set(SEAL_PKGCONFIG_ZLIB_REQUIRES_STRING "zlib = ${ZLIB_VERSION_STRING}")
+        endif()
+        if(SEAL_USE_ZSTD)
+            set(SEAL_PKGCONFIG_ZSTD_REQUIRES_STRING "libzstd >= ${zstd_VERSION_MAJOR}")
+        endif()
+        if(SEAL_USE_INTEL_HEXL)
+            set(SEAL_PKGCONFIG_INTEL_HEXL_REQUIRES_STRING "HEXL >= ${HEXL_VERSION_MAJOR}")
+            message(STATUS "Intel HEXL does not have a pkg-config file")
+        endif()
     endif()
 
     # Create the pkg-config file
