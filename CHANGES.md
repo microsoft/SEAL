@@ -5,6 +5,11 @@
 ### Bug Fixes
 
 - Fixed an error when loading seeded ciphertexts serialized by v3.4.x from v3.5.0+.
+- Fixed failed tests on ARM64 architecture [(Issue 347)](https://github.com/microsoft/SEAL/issues/347).
+
+### Other
+
+- Improved CKKS ciphertext multiplication [(PR 346)](https://github.com/microsoft/SEAL/pull/346).
 
 ## Version 3.6.5
 
