@@ -5,11 +5,15 @@
 
 #if defined(SEAL_USE_ZLIB) || defined(SEAL_USE_ZSTD)
 
+#include "seal/dynarray.h"
+#include "seal/memorymanager.h"
 #include "seal/serialization.h"
 #include "seal/util/pointer.h"
 #include "seal/util/ztools.h"
 #include <cstddef>
 #include <cstring>
+#include <ios>
+#include <iostream>
 #include <limits>
 #include <sstream>
 #include <unordered_map>

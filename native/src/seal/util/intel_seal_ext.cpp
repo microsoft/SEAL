@@ -1,9 +1,10 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+#include "seal/util/defines.h"
+
 #ifdef SEAL_USE_INTEL_HEXL
 #include "seal/memorymanager.h"
-#include "seal/util/defines.h"
 #include "seal/util/intel_seal_ext.h"
 #include "seal/util/locks.h"
 #include <unordered_map>
