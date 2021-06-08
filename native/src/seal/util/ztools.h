@@ -73,7 +73,7 @@ namespace seal
                     (in_size < (SizeT(128) << 10)) ? (((SizeT(128) << 10) - in_size) >> 11) : SizeT(0));
             }
         } // namespace ztools
-    }     // namespace util
+    } // namespace util
 } // namespace seal
 
 #endif

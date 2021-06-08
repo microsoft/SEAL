@@ -56,8 +56,8 @@ namespace seal
                     unordered_map<void *, Pointer<seal_byte>> ptr_storage_;
                 };
             } // namespace
-        }     // namespace ztools
-    }         // namespace util
+        } // namespace ztools
+    } // namespace util
 } // namespace seal
 
 #endif
@@ -424,7 +424,7 @@ namespace seal
                 out_stream.exceptions(old_except_mask);
             }
         } // namespace ztools
-    }     // namespace util
+    } // namespace util
 } // namespace seal
 
 #endif
@@ -785,7 +785,7 @@ namespace seal
                 out_stream.exceptions(old_except_mask);
             }
         } // namespace ztools
-    }     // namespace util
+    } // namespace util
 } // namespace seal
 
 #endif
