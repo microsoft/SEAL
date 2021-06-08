@@ -506,6 +506,10 @@ namespace seal
         // Prepare destination
         encrypted1.resize(context_, context_data.parms_id(), dest_size);
 
+        // Set up iterators for input ciphertexts
+        PolyIter encrypted1_iter = iter(encrypted1);
+        ConstPolyIter encrypted2_iter = iter(encrypted2);
+
         if (dest_size == 3)
         {
             // We want to keep six polynomials in the L1 cache: x[0], x[1], x[2], y[0], y[1], temp.
@@ -521,10 +525,6 @@ namespace seal
                 throw invalid_argument("tile_size does not divide coeff_count");
             }
 #endif
-
-            // Set up iterators for input ciphertexts
-            PolyIter encrypted1_iter = iter(encrypted1);
-            ConstPolyIter encrypted2_iter = iter(encrypted2);
 
             // Semantic misuse of RNSIter; each is really pointing to the data for each RNS factor in sequence
             ConstRNSIter encrypted2_0_iter(*encrypted2_iter[0], tile_size);
@@ -562,56 +562,51 @@ namespace seal
                         encrypted1_0_iter[0], encrypted2_0_iter[0], tile_size, I, encrypted1_0_iter[0]);
 
                     // Manually increment iterators
-                    ++encrypted1_0_iter;
-                    ++encrypted1_1_iter;
-                    ++encrypted1_2_iter;
-                    ++encrypted2_0_iter;
-                    ++encrypted2_1_iter;
+                    encrypted1_0_iter++;
+                    encrypted1_1_iter++;
+                    encrypted1_2_iter++;
+                    encrypted2_0_iter++;
+                    encrypted2_1_iter++;
                 });
             });
-
-            encrypted1.scale() = new_scale;
-            return;
         }
+        else
+        {
+            // Allocate temporary space for the result
+            SEAL_ALLOCATE_ZERO_GET_POLY_ITER(temp, dest_size, coeff_count, coeff_modulus_size, pool);
 
-        // Set up iterators for input ciphertexts
-        auto encrypted1_iter = iter(encrypted1);
-        auto encrypted2_iter = iter(encrypted2);
+            SEAL_ITERATE(iter(size_t(0)), dest_size, [&](auto I) {
+                // We iterate over relevant components of encrypted1 and encrypted2 in increasing order for
+                // encrypted1 and reversed (decreasing) order for encrypted2. The bounds for the indices of
+                // the relevant terms are obtained as follows.
+                size_t curr_encrypted1_last = min<size_t>(I, encrypted1_size - 1);
+                size_t curr_encrypted2_first = min<size_t>(I, encrypted2_size - 1);
+                size_t curr_encrypted1_first = I - curr_encrypted2_first;
+                // size_t curr_encrypted2_last = secret_power_index - curr_encrypted1_last;
 
-        // Allocate temporary space for the result
-        SEAL_ALLOCATE_ZERO_GET_POLY_ITER(temp, dest_size, coeff_count, coeff_modulus_size, pool);
+                // The total number of dyadic products is now easy to compute
+                size_t steps = curr_encrypted1_last - curr_encrypted1_first + 1;
 
-        SEAL_ITERATE(iter(size_t(0)), dest_size, [&](auto I) {
-            // We iterate over relevant components of encrypted1 and encrypted2 in increasing order for
-            // encrypted1 and reversed (decreasing) order for encrypted2. The bounds for the indices of
-            // the relevant terms are obtained as follows.
-            size_t curr_encrypted1_last = min<size_t>(I, encrypted1_size - 1);
-            size_t curr_encrypted2_first = min<size_t>(I, encrypted2_size - 1);
-            size_t curr_encrypted1_first = I - curr_encrypted2_first;
-            // size_t curr_encrypted2_last = secret_power_index - curr_encrypted1_last;
+                // Create a shifted iterator for the first input
+                auto shifted_encrypted1_iter = encrypted1_iter + curr_encrypted1_first;
 
-            // The total number of dyadic products is now easy to compute
-            size_t steps = curr_encrypted1_last - curr_encrypted1_first + 1;
+                // Create a shifted reverse iterator for the second input
+                auto shifted_reversed_encrypted2_iter = reverse_iter(encrypted2_iter + curr_encrypted2_first);
 
-            // Create a shifted iterator for the first input
-            auto shifted_encrypted1_iter = encrypted1_iter + curr_encrypted1_first;
-
-            // Create a shifted reverse iterator for the second input
-            auto shifted_reversed_encrypted2_iter = reverse_iter(encrypted2_iter + curr_encrypted2_first);
-
-            SEAL_ITERATE(iter(shifted_encrypted1_iter, shifted_reversed_encrypted2_iter), steps, [&](auto J) {
-                // Extra care needed here:
-                // temp_iter must be dereferenced once to produce an appropriate RNSIter
-                SEAL_ITERATE(iter(J, coeff_modulus, temp[I]), coeff_modulus_size, [&](auto K) {
-                    SEAL_ALLOCATE_GET_COEFF_ITER(prod, coeff_count, pool);
-                    dyadic_product_coeffmod(get<0, 0>(K), get<0, 1>(K), coeff_count, get<1>(K), prod);
-                    add_poly_coeffmod(prod, get<2>(K), coeff_count, get<1>(K), get<2>(K));
+                SEAL_ITERATE(iter(shifted_encrypted1_iter, shifted_reversed_encrypted2_iter), steps, [&](auto J) {
+                    // Extra care needed here:
+                    // temp_iter must be dereferenced once to produce an appropriate RNSIter
+                    SEAL_ITERATE(iter(J, coeff_modulus, temp[I]), coeff_modulus_size, [&](auto K) {
+                        SEAL_ALLOCATE_GET_COEFF_ITER(prod, coeff_count, pool);
+                        dyadic_product_coeffmod(get<0, 0>(K), get<0, 1>(K), coeff_count, get<1>(K), prod);
+                        add_poly_coeffmod(prod, get<2>(K), coeff_count, get<1>(K), get<2>(K));
+                    });
                 });
             });
-        });
 
-        // Set the final result
-        set_poly_array(temp, dest_size, coeff_count, coeff_modulus_size, encrypted1.data());
+            // Set the final result
+            set_poly_array(temp, dest_size, coeff_count, coeff_modulus_size, encrypted1.data());
+        }
 
         // Set the scale
         encrypted1.scale() = new_scale;
