@@ -130,14 +130,14 @@ namespace intel
         struct HashPair
         {
             template <class T1, class T2>
-            size_t operator()(const std::pair<T1, T2> &p) const
+            std::size_t operator()(const std::pair<T1, T2> &p) const
             {
                 auto hash1 = std::hash<T1>{}(std::get<0>(p));
                 auto hash2 = std::hash<T2>{}(std::get<1>(p));
                 return hash_combine(hash1, hash2);
             }
 
-            static size_t hash_combine(size_t lhs, size_t rhs)
+            static std::size_t hash_combine(std::size_t lhs, std::size_t rhs)
             {
                 lhs ^= rhs + 0x9e3779b9 + (lhs << 6) + (lhs >> 2);
                 return lhs;
@@ -151,7 +151,7 @@ namespace intel
         @param[in] modulus The modulus
         @param[in] root The root of unity
         */
-        intel::hexl::NTT get_ntt(size_t N, uint64_t modulus, uint64_t root);
+        hexl::NTT get_ntt(std::size_t N, std::uint64_t modulus, std::uint64_t root);
 
         /**
         Computes the forward negacyclic NTT from the given parameters.
@@ -164,8 +164,8 @@ namespace intel
         @param[in] output_mod_factor Bounds the output data to the range [0, output_mod_factor * modulus)
         */
         inline void compute_forward_ntt(
-            seal::util::CoeffIter operand, size_t N, uint64_t modulus, uint64_t root, uint64_t input_mod_factor,
-            uint64_t output_mod_factor)
+            seal::util::CoeffIter operand, std::size_t N, std::uint64_t modulus, std::uint64_t root,
+            std::uint64_t input_mod_factor, std::uint64_t output_mod_factor)
         {
             get_ntt(N, modulus, root).ComputeForward(operand, operand, input_mod_factor, output_mod_factor);
         }
@@ -181,8 +181,8 @@ namespace intel
         @param[in] output_mod_factor Bounds the output data to the range [0, output_mod_factor * modulus)
         */
         inline void compute_inverse_ntt(
-            seal::util::CoeffIter operand, size_t N, uint64_t modulus, uint64_t root, uint64_t input_mod_factor,
-            uint64_t output_mod_factor)
+            seal::util::CoeffIter operand, std::size_t N, std::uint64_t modulus, std::uint64_t root,
+            std::uint64_t input_mod_factor, std::uint64_t output_mod_factor)
         {
             get_ntt(N, modulus, root).ComputeInverse(operand, operand, input_mod_factor, output_mod_factor);
         }
