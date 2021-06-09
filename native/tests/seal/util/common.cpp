@@ -52,10 +52,11 @@ namespace sealtest
             ASSERT_TRUE(unsigned_eq(pos_uc, pos_c));
             ASSERT_TRUE(unsigned_geq(pos_uc, pos_c));
             ASSERT_TRUE(unsigned_leq(pos_uc, pos_c));
-            ASSERT_TRUE(unsigned_lt(pos_uc_max, neg_c));
 #if defined(__aarch64__) || defined(_M_ARM64)
+            ASSERT_TRUE(unsigned_eq(pos_uc_max, neg_c));
             ASSERT_TRUE(unsigned_eq(neg_c, pos_ull_neg_c));
 #else
+            ASSERT_TRUE(unsigned_lt(pos_uc_max, neg_c));
             ASSERT_TRUE(unsigned_eq(neg_c, pos_ull_max));
 #endif
             ASSERT_TRUE(unsigned_eq(neg_ull, pos_ull_max));
