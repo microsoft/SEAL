@@ -9,6 +9,7 @@
 
 ### Other
 
+- Improved HEXL NTT integration [(PR 349)](https://github.com/microsoft/SEAL/pull/349).
 - Improved CKKS ciphertext multiplication [(PR 346)](https://github.com/microsoft/SEAL/pull/346).
 
 ## Version 3.6.5
