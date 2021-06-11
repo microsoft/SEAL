@@ -847,21 +847,16 @@ namespace seal
         // Set up iterators for input ciphertext
         auto encrypted_iter = iter(encrypted);
 
-        // Allocate temporary space for the result
-        SEAL_ALLOCATE_ZERO_GET_POLY_ITER(temp, dest_size, coeff_count, coeff_modulus_size, pool);
-
-        // Compute c0^2
-        dyadic_product_coeffmod(encrypted_iter[0], encrypted_iter[0], coeff_modulus_size, coeff_modulus, temp[0]);
+        // Compute c1^2
+        dyadic_product_coeffmod(
+            encrypted_iter[1], encrypted_iter[1], coeff_modulus_size, coeff_modulus, encrypted_iter[2]);
 
         // Compute 2*c0*c1
-        dyadic_product_coeffmod(encrypted_iter[0], encrypted_iter[1], coeff_modulus_size, coeff_modulus, temp[1]);
-        add_poly_coeffmod(temp[1], temp[1], coeff_modulus_size, coeff_modulus, temp[1]);
+        dyadic_product_coeffmod(encrypted_iter[0], encrypted_iter[1], coeff_modulus_size, coeff_modulus, encrypted_iter[1]);
+        add_poly_coeffmod(encrypted_iter[1], encrypted_iter[1], coeff_modulus_size, coeff_modulus, encrypted_iter[1]);
 
-        // Compute c1^2
-        dyadic_product_coeffmod(encrypted_iter[1], encrypted_iter[1], coeff_modulus_size, coeff_modulus, temp[2]);
-
-        // Set the final result
-        set_poly_array(temp, dest_size, coeff_count, coeff_modulus_size, encrypted.data());
+       // Compute c0^2
+        dyadic_product_coeffmod(encrypted_iter[0], encrypted_iter[0], coeff_modulus_size, coeff_modulus, encrypted_iter[0]);
 
         // Set the scale
         encrypted.scale() = new_scale;
