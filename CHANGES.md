@@ -1,5 +1,19 @@
 # List of Changes
 
+## Version 3.6.6
+
+### Bug Fixes
+
+- Fixed an error when loading seeded ciphertexts serialized by v3.4.x from v3.5.0+.
+- Fixed failed tests on ARM64 architecture [(Issue 347)](https://github.com/microsoft/SEAL/issues/347).
+
+### Other
+
+- Improved HEXL NTT integration [(PR 349)](https://github.com/microsoft/SEAL/pull/349).
+- Improved CKKS ciphertext multiplication [(PR 346)](https://github.com/microsoft/SEAL/pull/346).
+- Improved CKKS ciphertext square [(PR 353)](https://github.com/microsoft/SEAL/pull/353), except that with GNU G++ compiler and `1024` degree there is a huge penalty in execution time.
+Users should switch from GNU G++ in this specific parameter setting if CKKS square is used.
+
 ## Version 3.6.5
 
 ### New Features

@@ -3,9 +3,11 @@
 
 #pragma once
 
+#include "seal/util/defines.h"
+
+#if defined(SEAL_USE_ZLIB) || defined(SEAL_USE_ZSTD)
 #include "seal/dynarray.h"
 #include "seal/memorymanager.h"
-#include "seal/util/defines.h"
 #include <ios>
 #include <iostream>
 
@@ -71,5 +73,7 @@ namespace seal
                     (in_size < (SizeT(128) << 10)) ? (((SizeT(128) << 10) - in_size) >> 11) : SizeT(0));
             }
         } // namespace ztools
-    }     // namespace util
+    } // namespace util
 } // namespace seal
+
+#endif

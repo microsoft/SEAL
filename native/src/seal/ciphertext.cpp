@@ -126,13 +126,22 @@ namespace seal
             throw logic_error("unsupported prng_type");
         }
 
-        if (version.major == 3 && (version.minor == 4 || version.minor == 5))
+        if (version.major == 3 && version.minor >= 6)
+        {
+            sample_poly_uniform(prng, context_data_ptr->parms(), data(1));
+        }
+        else if (version.major == 3 && version.minor == 4)
+        {
+            sample_poly_uniform_seal_3_4(prng, context_data_ptr->parms(), data(1));
+        }
+        else if (version.major == 3 && version.minor == 5)
         {
             sample_poly_uniform_seal_3_5(prng, context_data_ptr->parms(), data(1));
         }
         else
         {
-            sample_poly_uniform(prng, context_data_ptr->parms(), data(1));
+            // prior to v3.4, AES-128 was used, which is not compatible with later versions
+            throw logic_error("incompatible version");
         }
     }
 
@@ -308,7 +317,7 @@ namespace seal
                 {
                     prng_info.load(stream);
                 }
-                else if (version.major == 3 && version.minor <= 5)
+                else if (version.major == 3 && version.minor >= 4)
                 {
                     // We only need to load the hash value; only Blake2xb is supported
                     prng_info.type() = prng_type::blake2xb;
@@ -316,6 +325,7 @@ namespace seal
                 }
                 else
                 {
+                    // seeded ciphertexts were not implemented before 3.4
                     throw logic_error("incompatible version");
                 }
 
