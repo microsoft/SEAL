@@ -49,6 +49,11 @@ namespace seal
                 throw invalid_argument("invalid modulus");
             }
 
+#ifdef SEAL_USE_INTEL_HEXL
+            // Pre-compute HEXL NTT object
+            intel::seal_ext::get_ntt(coeff_count_, modulus.value(), root_);
+#endif
+
             // Populate tables with powers of root in specific orders.
             root_powers_ = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
             MultiplyUIntModOperand root;

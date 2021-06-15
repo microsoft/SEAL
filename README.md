@@ -125,7 +125,7 @@ The optional dependencies and their tested versions (other versions may work as 
 
 #### Intel HEXL
 
-Intel HEXL is a library providing efficient implementations of cryptographic primitives common in homomorphic encryption. The acceleration is particularly evident on Intel processors with the Intel AVX512-IMA52 instruction set.
+Intel HEXL is a library providing efficient implementations of cryptographic primitives common in homomorphic encryption. The acceleration is particularly evident on Intel processors with the Intel AVX512-IFMA52 instruction set.
 
 #### Microsoft GSL
 
