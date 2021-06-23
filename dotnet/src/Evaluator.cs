@@ -1239,7 +1239,7 @@ namespace Microsoft.Research.SEAL
         /// pointed to by the given MemoryPoolHandle.
         /// </remarks>
         /// <param name="encrypted">The ciphertext to rotate</param>
-        /// <param name="steps">The number of steps to rotate (negative left, positive right)</param>
+        /// <param name="steps">The number of steps to rotate (positive left, negative right)</param>
         /// <param name="galoisKeys">The Galois keys</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if encrypted or galoisKeys is null</exception>
@@ -1273,7 +1273,7 @@ namespace Microsoft.Research.SEAL
         /// allocations in the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
         /// </remarks>
         /// <param name="encrypted">The ciphertext to rotate</param>
-        /// <param name="steps">The number of steps to rotate (negative left, positive right)</param>
+        /// <param name="steps">The number of steps to rotate (positive left, negative right)</param>
         /// <param name="galoisKeys">The Galois keys</param>
         /// <param name="destination">The ciphertext to overwrite with the rotated result</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
@@ -1395,7 +1395,7 @@ namespace Microsoft.Research.SEAL
         /// MemoryPoolHandle.
         /// </remarks>
         /// <param name="encrypted">The ciphertext to rotate</param>
-        /// <param name="steps">The number of steps to rotate (negative left, positive right)</param>
+        /// <param name="steps">The number of steps to rotate (positive left, negative right)</param>
         /// <param name="galoisKeys">The Galois keys</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
         /// <exception cref="ArgumentNullException">if encrypted or galoisKeys is null</exception>
@@ -1429,7 +1429,7 @@ namespace Microsoft.Research.SEAL
         /// allocated from the memory pool pointed to by the given MemoryPoolHandle.
         /// </remarks>
         /// <param name="encrypted">The ciphertext to rotate</param>
-        /// <param name="steps">The number of steps to rotate (negative left, positive right)</param>
+        /// <param name="steps">The number of steps to rotate (positive left, negative right)</param>
         /// <param name="galoisKeys">The Galois keys</param>
         /// <param name="destination">The ciphertext to overwrite with the rotated result</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>

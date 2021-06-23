@@ -40,7 +40,7 @@ namespace seal
             allocation new_alloc;
             try
             {
-                new_alloc.data_ptr = new seal_byte[mul_safe(MemoryPool::first_alloc_count, item_byte_count_)];
+                new_alloc.data_ptr = SEAL_MALLOC(mul_safe(MemoryPool::first_alloc_count, item_byte_count_));
             }
             catch (const bad_alloc &)
             {
@@ -83,7 +83,7 @@ namespace seal
                     seal_memzero(alloc.data_ptr, curr_alloc_byte_count);
 
                     // Delete this allocation
-                    delete[] alloc.data_ptr;
+                    SEAL_FREE(alloc.data_ptr);
                 }
             }
             else
@@ -92,7 +92,7 @@ namespace seal
                 for (auto &alloc : allocs_)
                 {
                     // Delete this allocation
-                    delete[] alloc.data_ptr;
+                    SEAL_FREE(alloc.data_ptr);
                 }
             }
 
@@ -137,7 +137,7 @@ namespace seal
 
                     try
                     {
-                        new_alloc.data_ptr = new seal_byte[new_alloc_byte_count];
+                        new_alloc.data_ptr = SEAL_MALLOC(new_alloc_byte_count);
                     }
                     catch (const bad_alloc &)
                     {
@@ -178,7 +178,7 @@ namespace seal
             allocation new_alloc;
             try
             {
-                new_alloc.data_ptr = new seal_byte[mul_safe(MemoryPool::first_alloc_count, item_byte_count_)];
+                new_alloc.data_ptr = SEAL_MALLOC(mul_safe(MemoryPool::first_alloc_count, item_byte_count_));
             }
             catch (const bad_alloc &)
             {
@@ -215,7 +215,7 @@ namespace seal
                     seal_memzero(alloc.data_ptr, curr_alloc_byte_count);
 
                     // Delete this allocation
-                    delete[] alloc.data_ptr;
+                    SEAL_FREE(alloc.data_ptr);
                 }
             }
             else
@@ -224,7 +224,7 @@ namespace seal
                 for (auto &alloc : allocs_)
                 {
                     // Delete this allocation
-                    delete[] alloc.data_ptr;
+                    SEAL_FREE(alloc.data_ptr);
                 }
             }
 
@@ -264,7 +264,7 @@ namespace seal
 
                     try
                     {
-                        new_alloc.data_ptr = new seal_byte[new_alloc_byte_count];
+                        new_alloc.data_ptr = SEAL_MALLOC(new_alloc_byte_count);
                     }
                     catch (const bad_alloc &)
                     {

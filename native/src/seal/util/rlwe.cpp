@@ -197,6 +197,34 @@ namespace seal
             }
         }
 
+        void sample_poly_uniform_seal_3_4(
+            shared_ptr<UniformRandomGenerator> prng, const EncryptionParameters &parms, uint64_t *destination)
+        {
+            // Extract encryption parameters
+            auto coeff_modulus = parms.coeff_modulus();
+            size_t coeff_modulus_size = coeff_modulus.size();
+            size_t coeff_count = parms.poly_modulus_degree();
+
+            RandomToStandardAdapter engine(prng);
+
+            constexpr uint64_t max_random = static_cast<uint64_t>(0x7FFFFFFFFFFFFFFFULL);
+            for (size_t j = 0; j < coeff_modulus_size; j++)
+            {
+                auto &modulus = coeff_modulus[j];
+                uint64_t max_multiple = max_random - barrett_reduce_64(max_random, modulus) - 1;
+                for (size_t i = 0; i < coeff_count; i++)
+                {
+                    // This ensures uniform distribution
+                    uint64_t rand;
+                    do
+                    {
+                        rand = (static_cast<uint64_t>(engine()) << 31) | (static_cast<uint64_t>(engine()) >> 1);
+                    } while (rand >= max_multiple);
+                    destination[i + j * coeff_count] = barrett_reduce_64(rand, modulus);
+                }
+            }
+        }
+
         void sample_poly_uniform_seal_3_5(
             shared_ptr<UniformRandomGenerator> prng, const EncryptionParameters &parms, uint64_t *destination)
         {

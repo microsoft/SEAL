@@ -74,7 +74,7 @@ static_assert(sizeof(unsigned long long) == 8, "Require sizeof(unsigned long lon
 
 #if defined(_WIN32)
 #define SEAL_SYSTEM SEAL_SYSTEM_WINDOWS
-#elif defined(__linux__) || defined(__FreeBSD__) || (defined(__APPLE__) && defined(__MACH__))
+#elif defined(__linux__) || defined(__FreeBSD__) || defined(EMSCRIPTEN) || (defined(__APPLE__) && defined(__MACH__))
 #define SEAL_SYSTEM SEAL_SYSTEM_UNIX_LIKE
 #else
 #define SEAL_SYSTEM SEAL_SYSTEM_OTHER
@@ -159,6 +159,20 @@ namespace seal
 #define SEAL_ITERATE seal::util::seal_for_each_n
 #else
 #define SEAL_ITERATE std::for_each_n
+#endif
+
+// Allocate "size" bytes in memory and returns a seal_byte pointer
+// If SEAL_USE_ALIGNED_ALLOC is defined, use _aligned_malloc and ::aligned_alloc (or std::malloc)
+// Use `new seal_byte[size]` as fallback
+#ifndef SEAL_MALLOC
+#define SEAL_MALLOC(size) (new seal_byte[size])
+#endif
+
+// Deallocate a pointer in memory
+// If SEAL_USE_ALIGNED_ALLOC is defined, use _aligned_free or std::free
+// Use `delete [] ptr` as fallback
+#ifndef SEAL_FREE
+#define SEAL_FREE(ptr) (delete[] ptr)
 #endif
 
 // Which random number generator to use by default

@@ -5,11 +5,15 @@
 
 #if defined(SEAL_USE_ZLIB) || defined(SEAL_USE_ZSTD)
 
+#include "seal/dynarray.h"
+#include "seal/memorymanager.h"
 #include "seal/serialization.h"
 #include "seal/util/pointer.h"
 #include "seal/util/ztools.h"
 #include <cstddef>
 #include <cstring>
+#include <ios>
+#include <iostream>
 #include <limits>
 #include <sstream>
 #include <unordered_map>
@@ -52,8 +56,8 @@ namespace seal
                     unordered_map<void *, Pointer<seal_byte>> ptr_storage_;
                 };
             } // namespace
-        }     // namespace ztools
-    }         // namespace util
+        } // namespace ztools
+    } // namespace util
 } // namespace seal
 
 #endif
@@ -420,7 +424,7 @@ namespace seal
                 out_stream.exceptions(old_except_mask);
             }
         } // namespace ztools
-    }     // namespace util
+    } // namespace util
 } // namespace seal
 
 #endif
@@ -781,7 +785,7 @@ namespace seal
                 out_stream.exceptions(old_except_mask);
             }
         } // namespace ztools
-    }     // namespace util
+    } // namespace util
 } // namespace seal
 
 #endif

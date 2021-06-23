@@ -6,6 +6,7 @@
 #include "seal/util/defines.h"
 
 #ifdef SEAL_USE_SHARED_MUTEX
+#include <mutex>
 #include <shared_mutex>
 
 namespace seal

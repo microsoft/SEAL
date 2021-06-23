@@ -18,7 +18,7 @@ namespace seal
 #else
 #pragma message("WARNING: Thread-local memory pools disabled to support /clr")
 #endif
-            const std::map<std::size_t, std::vector<Modulus>> &GetDefaultCoeffModulus128()
+            const map<size_t, vector<Modulus>> &GetDefaultCoeffModulus128()
             {
                 static const map<size_t, vector<Modulus>> default_coeff_modulus_128{
                     /*

@@ -23,7 +23,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Build type (CMAKE_BUILD_TYPE): ${CMAKE_BUILD_TYPE}")
 
-project(SEAL VERSION 3.6.2 LANGUAGES CXX C)
+project(SEAL VERSION 3.6.6 LANGUAGES CXX C)
 
 ########################
 # Global configuration #
@@ -62,6 +62,8 @@ message(STATUS "Microsoft SEAL debug mode: ${SEAL_DEBUG}")
 # Use C++17, use C++14 otherwise.
 set(SEAL_USE_CXX17_OPTION_STR "Use C++17")
 option(SEAL_USE_CXX17 ${SEAL_USE_CXX17_OPTION_STR} ON)
+message(STATUS "SEAL_USE_CXX17: ${SEAL_USE_CXX17}")
+
 # Enable features from C++17 if available, disable features if set to OFF.
 include(EnableCXX17)
 
@@ -70,7 +72,7 @@ set(SEAL_SECURE_COMPILE_OPTIONS_OPTIONS_STR "Enable Control Flow Guard and Spect
 option(SEAL_SECURE_COMPILE_OPTIONS ${SEAL_SECURE_COMPILE_OPTIONS_OPTIONS_STR} OFF)
 mark_as_advanced(SEAL_SECURE_COMPILE_OPTIONS)
 
-# Path for outupt
+# Path for output
 if(ANDROID_ABI)
     # Android compiles several targets at the same time. Need to specify
     # separate directories for separate ABIs.
@@ -123,6 +125,7 @@ include(CleanArtifacts)
 # Download and build missing dependencies, throw error if disabled.
 set(SEAL_BUILD_DEPS_OPTION_STR "Automatically download and build unmet dependencies")
 option(SEAL_BUILD_DEPS ${SEAL_BUILD_DEPS_OPTION_STR} ON)
+message(STATUS "SEAL_BUILD_DEPS: ${SEAL_BUILD_DEPS}")
 
 if(SEAL_BUILD_DEPS)
     include(FetchContent)
@@ -135,6 +138,8 @@ endif()
 # [option] SEAL_USE_MSGSL (default: ON)
 set(SEAL_USE_MSGSL_OPTION_STR "Use Microsoft GSL")
 option(SEAL_USE_MSGSL ${SEAL_USE_MSGSL_OPTION_STR} ON)
+message(STATUS "SEAL_USE_MSGSL: ${SEAL_USE_MSGSL}")
+
 if(SEAL_USE_MSGSL)
     if(SEAL_BUILD_DEPS)
         message(STATUS "Microsoft GSL: download ...")
@@ -152,6 +157,8 @@ endif()
 # [option] SEAL_USE_ZLIB (default: ON)
 set(SEAL_USE_ZLIB_OPTION_STR "Use ZLIB for compressed serialization")
 option(SEAL_USE_ZLIB ${SEAL_USE_ZLIB_OPTION_STR} ON)
+message(STATUS "SEAL_USE_ZLIB: ${SEAL_USE_ZLIB}")
+
 if(SEAL_USE_ZLIB)
     if(SEAL_BUILD_DEPS)
         message(STATUS "ZLIB: download ...")
@@ -171,6 +178,8 @@ endif()
 # [option] SEAL_USE_ZSTD (default: ON)
 set(SEAL_USE_ZSTD_OPTION_STR "Use Zstandard for compressed serialization")
 option(SEAL_USE_ZSTD ${SEAL_USE_ZSTD_OPTION_STR} ON)
+message(STATUS "SEAL_USE_ZSTD: ${SEAL_USE_ZSTD}")
+
 if(SEAL_USE_ZSTD)
     if(SEAL_BUILD_DEPS)
         message(STATUS "Zstandard: download ...")
@@ -200,6 +209,23 @@ if(SEAL_USE_ZSTD)
     endif()
 endif()
 
+# [option] SEAL_USE_INTEL_HEXL (default: OFF)
+set(SEAL_USE_INTEL_HEXL_OPTION_STR "Use Intel HEXL library")
+option(SEAL_USE_INTEL_HEXL ${SEAL_USE_INTEL_HEXL_OPTION_STR} OFF)
+message(STATUS "SEAL_USE_INTEL_HEXL: ${SEAL_USE_INTEL_HEXL}")
+
+if(SEAL_USE_INTEL_HEXL)
+    if(SEAL_BUILD_DEPS)
+        message(STATUS "Intel HEXL: download ...")
+        seal_fetch_thirdparty_content(ExternalIntelHEXL)
+    else()
+        find_package(HEXL 1.1.0)
+        if (NOT TARGET HEXL::hexl)
+            FATAL_ERROR("Intel HEXL: not found")
+        endif()
+    endif()
+endif()
+
 ####################
 # SEAL C++ library #
 ####################
@@ -208,6 +234,7 @@ endif()
 # Build a shared library if set to ON. Build a static library regardlessly.
 set(BUILD_SHARED_LIBS_STR "Build shared library")
 option(BUILD_SHARED_LIBS ${BUILD_SHARED_LIBS_STR} OFF)
+message(STATUS "BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
 if(WIN32 AND BUILD_SHARED_LIBS)
     message(FATAL_ERROR "On Windows only static build is supported; set `BUILD_SHARED_LIBS=OFF`")
 endif()
@@ -215,18 +242,21 @@ endif()
 # [option] SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT (default: ON)
 set(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR "Throw an exception when Evaluator outputs a transparent ciphertext")
 option(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT ${SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT_STR} ON)
+message(STATUS "SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT: ${SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT}")
 mark_as_advanced(FORCE SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT)
 
 # [option] SEAL_USE_GAUSSIAN_NOISE (default: OFF)
 # Use Gaussian distribution for noise sampling if set to ON, use centered binomial otherwise.
 set(SEAL_USE_GAUSSIAN_NOISE_STR "Use a rounded Gaussian distribution for noise sampling instead of a Centered Binomial Distribution")
 option(SEAL_USE_GAUSSIAN_NOISE ${SEAL_USE_GAUSSIAN_NOISE_STR} OFF)
+message(STATUS "SEAL_USE_GAUSSIAN_NOISE: ${SEAL_USE_GAUSSIAN_NOISE}")
 mark_as_advanced(FORCE SEAL_USE_GAUSSIAN_NOISE)
 
 # [option] SEAL_DEFAULT_PRNG (default: Blake2xb)
 # Choose either Blake2xb or Shake256 to be the default PRNG.
 set(SEAL_DEFAULT_PRNG_STR "Choose the default PRNG")
 set(SEAL_DEFAULT_PRNG "Blake2xb" CACHE STRING ${SEAL_DEFAULT_PRNG_STR} FORCE)
+message(STATUS "SEAL_DEFAULT_PRNG: ${SEAL_DEFAULT_PRNG}")
 set_property(CACHE SEAL_DEFAULT_PRNG PROPERTY
     STRINGS "Blake2xb" "Shake256")
 mark_as_advanced(FORCE SEAL_DEFAULT_PRNG)
@@ -239,6 +269,7 @@ include(CheckCXXIntrinsicsHeader)
 if(NOT SEAL_INTRIN_HEADER_FOUND)
     set(SEAL_USE_INTRIN OFF CACHE BOOL ${SEAL_USE_INTRIN_OPTION_STR} FORCE)
 endif()
+message(STATUS "SEAL_USE_INTRIN: ${SEAL_USE_INTRIN}")
 
 # [option] SEAL_USE_${A_SPECIFIC_INTRIN} (default: ON, advanced)
 # Not available if SEAL_USE_INTRIN is OFF.
@@ -299,6 +330,7 @@ mark_as_advanced(FORCE SEAL_USE_MEMSET_S)
 if(NOT SEAL_MEMSET_S_FOUND)
     set(SEAL_USE_MEMSET_S OFF CACHE BOOL ${SEAL_USE_MEMSET_S_OPTION_STR} FORCE)
 endif()
+message(STATUS "SEAL_USE_MEMSET_S: ${SEAL_USE_MEMSET_S}")
 
 set(SEAL_USE_EXPLICIT_BZERO_OPTION_STR "Use explicit_bzero")
 option(SEAL_USE_EXPLICIT_BZERO ${SEAL_USE_EXPLICIT_BZERO_OPTION_STR} ON)
@@ -306,6 +338,7 @@ mark_as_advanced(FORCE SEAL_USE_EXPLICIT_BZERO)
 if(NOT SEAL_EXPLICIT_BZERO_FOUND)
     set(SEAL_USE_EXPLICIT_BZERO OFF CACHE BOOL ${SEAL_USE_EXPLICIT_BZERO_OPTION_STR} FORCE)
 endif()
+message(STATUS "SEAL_USE_EXPLICIT_BZERO: ${SEAL_USE_EXPLICIT_BZERO}")
 
 set(SEAL_USE_EXPLICIT_MEMSET_OPTION_STR "Use explicit_memset")
 option(SEAL_USE_EXPLICIT_MEMSET ${SEAL_USE_EXPLICIT_MEMSET_OPTION_STR} ON)
@@ -313,6 +346,18 @@ mark_as_advanced(FORCE SEAL_USE_EXPLICIT_MEMSET)
 if(NOT SEAL_EXPLICIT_MEMSET_FOUND)
     set(SEAL_USE_EXPLICIT_MEMSET OFF CACHE BOOL ${SEAL_USE_EXPLICIT_MEMSET_OPTION_STR} FORCE)
 endif()
+message(STATUS "SEAL_USE_EXPLICIT_MEMSET: ${SEAL_USE_EXPLICIT_MEMSET}")
+
+# [option] SEAL_USE_ALIGNED_ALLOC (default: ON, advanced)
+# Not available if SEAL_USE_CXX17 is OFF or building for Android.
+# Use 64-byte aligned malloc if available, set of OFF otherwise
+if(MSVC)
+    set(SEAL_USE_ALIGNED_ALLOC_OPTION_STR "Use _aligned_malloc")
+else()
+    set(SEAL_USE_ALIGNED_ALLOC_OPTION_STR "Use ::aligned_alloc")
+endif()
+cmake_dependent_option(SEAL_USE_ALIGNED_ALLOC ${SEAL_USE_ALIGNED_ALLOC_OPTION_STR} ON "SEAL_USE_CXX17;NOT ANDROID_ABI" OFF)
+mark_as_advanced(FORCE SEAL_USE_ALIGNED_ALLOC)
 
 # Add source files to library and header files to install
 set(SEAL_SOURCE_FILES "")
@@ -364,6 +409,21 @@ if(NOT BUILD_SHARED_LIBS)
         endif()
     endif()
 
+    if(SEAL_USE_INTEL_HEXL)
+        if(SEAL_BUILD_DEPS)
+            add_dependencies(seal HEXL::hexl)
+            target_include_directories(seal PUBLIC $<BUILD_INTERFACE:${hexl_SOURCE_DIR}/hexl/include>)
+            seal_combine_archives(seal HEXL::hexl)
+        else()
+            target_link_libraries(seal PRIVATE HEXL::hexl)
+            get_target_property(
+                HEXL_INCLUDE_DIR
+                HEXL::hexl
+                INTERFACE_INCLUDE_DIRECTORIES)
+            target_include_directories(seal PUBLIC ${HEXL_INCLUDE_DIR})
+        endif()
+    endif()
+
     # Set secure compile options if SEAL_SECURE_COMPILE_OPTIONS is ON; only supported on MSVC
     if(SEAL_SECURE_COMPILE_OPTIONS)
         seal_set_secure_compile_options(seal PUBLIC)
@@ -399,6 +459,15 @@ else()
         target_include_directories(seal_shared PRIVATE $<BUILD_INTERFACE:${zstd_SOURCE_DIR}/lib/common>)
         target_link_libraries(seal_shared PRIVATE ${zstd_static})
     endif()
+
+    if(SEAL_USE_INTEL_HEXL)
+        get_target_property(
+            HEXL_INCLUDE_DIR
+            HEXL::hexl
+            INTERFACE_INCLUDE_DIRECTORIES)
+        target_include_directories(seal_shared PUBLIC ${HEXL_INCLUDE_DIR})
+        target_link_libraries(seal_shared PRIVATE HEXL::hexl)
+    endif()
 endif()
 
 # Add standard alias targets for SEAL::seal and SEAL::seal_shared
@@ -416,6 +485,7 @@ endif()
 # [option] SEAL_BUILD_SEAL_C (default: OFF)
 set(SEAL_BUILD_SEAL_C_OPTION_STR "Build C export library for Microsoft SEAL")
 option(SEAL_BUILD_SEAL_C ${SEAL_BUILD_SEAL_C_OPTION_STR} OFF)
+message(STATUS "SEAL_BUILD_SEAL_C: ${SEAL_BUILD_SEAL_C}")
 
 set(SEAL_BUILD_STATIC_SEAL_C_OPTION_STR "Build static C library for Microsoft SEAL")
 cmake_dependent_option(SEAL_BUILD_STATIC_SEAL_C ${SEAL_BUILD_STATIC_SEAL_C_OPTION_STR} OFF "SEAL_BUILD_SEAL_C" OFF)
@@ -435,7 +505,8 @@ if(SEAL_BUILD_SEAL_C)
     unset(HAVE_SIZET CACHE)
 
     if(BUILD_SHARED_LIBS)
-        message(FATAL_ERROR "SEAL_C requires `BUILD_SHARED_LIBS=OFF`")
+        message(FATAL_ERROR "SEAL_C (shared or static) requires a static SEAL; set `BUILD_SHARED_LIBS=OFF` and control "
+                            "SEAL_C by setting `SEAL_BUILD_STATIC_SEAL_C` to `OFF` (default) or `ON`")
     endif()
 
     if(NOT SEAL_BUILD_DEPS)
@@ -458,6 +529,9 @@ if(SEAL_BUILD_SEAL_C)
     endif()
     seal_set_language(sealc)
     seal_set_include_directories(sealc)
+    if (SEAL_USE_INTEL_HEXL)
+        target_include_directories(sealc PRIVATE $<BUILD_INTERFACE:${hexl_SOURCE_DIR}/hexl/include>)
+    endif()
 
     target_link_libraries(sealc PUBLIC seal)
 
@@ -505,11 +579,20 @@ export(
     NAMESPACE SEAL::
     FILE ${SEAL_TARGETS_FILENAME})
 
-# Install MSGSL header files if SEAL_BUILD_DEPS is ON
-if(SEAL_USE_MSGSL AND SEAL_BUILD_DEPS)
-    install(
-        DIRECTORY ${msgsl_SOURCE_DIR}/include/gsl
-        DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
+# Install header files of dependencies if SEAL_BUILD_DEPS is ON
+if(SEAL_BUILD_DEPS)
+    # MSGSL
+    if(SEAL_USE_MSGSL)
+        install(
+            DIRECTORY ${msgsl_SOURCE_DIR}/include/gsl
+            DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
+    endif()
+    # Intel HEXL
+    if(SEAL_USE_INTEL_HEXL)
+        install(
+            DIRECTORY ${hexl_SOURCE_DIR}/hexl/include/hexl
+            DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
+    endif()
 endif()
 
 ##############
@@ -517,24 +600,30 @@ endif()
 ##############
 
 if(UNIX OR APPLE)
-    # Set the requirements according to the current configuration
-    if(SEAL_USE_MSGSL AND NOT SEAL_BUILD_DEPS)
-        # Extract the include directories from Microsoft.GSL::GSL
-        get_target_property(
-            SEAL_PKGCONFIG_MSGSL_INCLUDE_DIR
-            Microsoft.GSL::GSL
-            INTERFACE_INCLUDE_DIRECTORIES)
+    # Set the requirements according to the current configuration if SEAL_BUILD_DEPS=OFF
+    if(NOT SEAL_BUILD_DEPS)
+        if(SEAL_USE_MSGSL)
+            # Extract the include directories from Microsoft.GSL::GSL
+            get_target_property(
+                SEAL_PKGCONFIG_MSGSL_INCLUDE_DIR
+                Microsoft.GSL::GSL
+                INTERFACE_INCLUDE_DIRECTORIES)
 
-        # Create the Microsoft GSL pkg-config file
-        configure_file(${SEAL_PKGCONFIG_MSGSL_IN_FILENAME} ${SEAL_PKGCONFIG_MSGSL_FILENAME} @ONLY)
+            # Create the Microsoft GSL pkg-config file
+            configure_file(${SEAL_PKGCONFIG_MSGSL_IN_FILENAME} ${SEAL_PKGCONFIG_MSGSL_FILENAME} @ONLY)
 
-        set(SEAL_PKGCONFIG_MSGSL_REQUIRES_STRING "seal_msgsl >= ${Microsoft.GSL_VERSION_MAJOR}")
-    endif()
-    if(SEAL_USE_ZLIB AND NOT SEAL_BUILD_DEPS)
-        set(SEAL_PKGCONFIG_ZLIB_REQUIRES_STRING "zlib = ${ZLIB_VERSION_STRING}")
-    endif()
-    if(SEAL_USE_ZSTD AND NOT SEAL_BUILD_DEPS)
-        set(SEAL_PKGCONFIG_ZSTD_REQUIRES_STRING "libzstd >= ${zstd_VERSION_MAJOR}")
+            set(SEAL_PKGCONFIG_MSGSL_REQUIRES_STRING "seal_msgsl >= ${Microsoft.GSL_VERSION_MAJOR}")
+        endif()
+        if(SEAL_USE_ZLIB)
+            set(SEAL_PKGCONFIG_ZLIB_REQUIRES_STRING "zlib = ${ZLIB_VERSION_STRING}")
+        endif()
+        if(SEAL_USE_ZSTD)
+            set(SEAL_PKGCONFIG_ZSTD_REQUIRES_STRING "libzstd >= ${zstd_VERSION_MAJOR}")
+        endif()
+        if(SEAL_USE_INTEL_HEXL)
+            set(SEAL_PKGCONFIG_INTEL_HEXL_REQUIRES_STRING "HEXL >= ${HEXL_VERSION_MAJOR}")
+            message(STATUS "Intel HEXL does not have a pkg-config file")
+        endif()
     endif()
 
     # Create the pkg-config file
@@ -570,6 +659,7 @@ endif()
 # [option] SEAL_BUILD_EXAMPLES
 set(SEAL_BUILD_EXAMPLES_OPTION_STR "Build C++ examples for Microsoft SEAL")
 option(SEAL_BUILD_EXAMPLES ${SEAL_BUILD_EXAMPLES_OPTION_STR} OFF)
+message(STATUS "SEAL_BUILD_EXAMPLES: ${SEAL_BUILD_EXAMPLES}")
 
 if(SEAL_BUILD_EXAMPLES)
     add_subdirectory(native/examples)
@@ -582,6 +672,7 @@ endif()
 # [option] SEAL_BUILD_TESTS
 set(SEAL_BUILD_TESTS_OPTION_STR "Build C++ tests for Microsoft SEAL")
 option(SEAL_BUILD_TESTS ${SEAL_BUILD_TESTS_OPTION_STR} OFF)
+message(STATUS "SEAL_BUILD_TESTS: ${SEAL_BUILD_TESTS}")
 
 if(SEAL_BUILD_TESTS)
     add_subdirectory(native/tests)
@@ -594,6 +685,7 @@ endif()
 # [option] SEAL_BUILD_BENCH
 set(SEAL_BUILD_BENCH_OPTION_STR "Build C++ benchmarks for Microsoft SEAL")
 option(SEAL_BUILD_BENCH ${SEAL_BUILD_BENCH_OPTION_STR} OFF)
+message(STATUS "SEAL_BUILD_BENCH: ${SEAL_BUILD_BENCH}")
 
 if(SEAL_BUILD_BENCH)
     add_subdirectory(native/bench)

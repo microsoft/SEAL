@@ -21,6 +21,10 @@ dotnet/examples/SEALNetExamples.csproj
 CMakeSettings.json
 .vscode
 
+# WebAssembly Output
+seal_wasm.js
+seal_wasm.wasm
+
 # Build
 bin/
 lib/
@@ -260,13 +264,14 @@ gradle-app.setting
 .gradletasknamecache
 # # Work around https://youtrack.jetbrains.com/issue/IDEA-116898
 # gradle/wrapper/gradle-wrapper.properties
+android/.idea/
 
 #### Visual Studio Code ####
 .vscode/*
-!.vscode/settings.json
-!.vscode/tasks.json
-!.vscode/launch.json
-!.vscode/extensions.json
+#!.vscode/settings.json
+#!.vscode/tasks.json
+#!.vscode/launch.json
+#!.vscode/extensions.json
 *.code-workspace
 # Local History for Visual Studio Code
 .history/

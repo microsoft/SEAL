@@ -36,5 +36,6 @@
     <file src="../../build/bin/dotnet/ios/$configuration$/netstandard2.0/SEALNet.dll" target="lib/Xamarin.iOS10/" />
     <file src="../../build/bin/dotnet/ios/$configuration$/SEALNet.xml" target="lib/Xamarin.iOS10/" />
     <file src="../../LICENSE" target="LICENSE" />
+    <file src="../../NOTICE" target="/ThirdPartyNotices" />
   </files>
 </package>

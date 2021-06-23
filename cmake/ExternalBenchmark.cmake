@@ -4,7 +4,7 @@
 FetchContent_Declare(
     benchmark
     GIT_REPOSITORY https://github.com/google/benchmark.git
-    GIT_TAG        73d4d5e8d6d449fc8663765a42aa8aeeee844489 # 1.5.2
+    GIT_TAG        c05843a9f622db08ad59804c190f98879b76beba # 1.5.3
 )
 FetchContent_GetProperties(benchmark)
 

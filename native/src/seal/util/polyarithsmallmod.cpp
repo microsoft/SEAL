@@ -5,6 +5,10 @@
 #include "seal/util/uintarith.h"
 #include "seal/util/uintcore.h"
 
+#ifdef SEAL_USE_INTEL_HEXL
+#include "hexl/hexl.hpp"
+#endif
+
 using namespace std;
 
 namespace seal
@@ -33,10 +37,14 @@ namespace seal
             }
 #endif
 
+#ifdef SEAL_USE_INTEL_HEXL
+            intel::hexl::EltwiseAddMod(result, poly, scalar, coeff_count, modulus.value());
+#else
             SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
                 const uint64_t x = get<0>(I);
                 get<1>(I) = add_uint_mod(x, scalar, modulus);
             });
+#endif
         }
 
         void sub_poly_scalar_coeffmod(
@@ -61,10 +69,14 @@ namespace seal
             }
 #endif
 
+#ifdef SEAL_USE_INTEL_HEXL
+            intel::hexl::EltwiseSubMod(result, poly, scalar, coeff_count, modulus.value());
+#else
             SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
                 const uint64_t x = get<0>(I);
                 get<1>(I) = sub_uint_mod(x, scalar, modulus);
             });
+#endif
         }
 
         void multiply_poly_scalar_coeffmod(
@@ -85,10 +97,15 @@ namespace seal
                 throw invalid_argument("modulus");
             }
 #endif
+
+#ifdef SEAL_USE_INTEL_HEXL
+            intel::hexl::EltwiseFMAMod(&result[0], &poly[0], scalar.operand, nullptr, coeff_count, modulus.value(), 8);
+#else
             SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
                 const uint64_t x = get<0>(I);
                 get<1>(I) = multiply_uint_mod(x, scalar, modulus);
             });
+#endif
         }
 
         void dyadic_product_coeffmod(
@@ -117,6 +134,9 @@ namespace seal
                 throw invalid_argument("modulus");
             }
 #endif
+#ifdef SEAL_USE_INTEL_HEXL
+            intel::hexl::EltwiseMultMod(&result[0], &operand1[0], &operand2[0], coeff_count, modulus.value(), 4);
+#else
             const uint64_t modulus_value = modulus.value();
             const uint64_t const_ratio_0 = modulus.const_ratio()[0];
             const uint64_t const_ratio_1 = modulus.const_ratio()[1];
@@ -145,6 +165,7 @@ namespace seal
                 // Claim: One more subtraction is enough
                 get<2>(I) = SEAL_COND_SELECT(tmp3 >= modulus_value, tmp3 - modulus_value, tmp3);
             });
+#endif
         }
 
         uint64_t poly_infty_norm_coeffmod(ConstCoeffIter operand, size_t coeff_count, const Modulus &modulus)

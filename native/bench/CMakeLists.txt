@@ -3,18 +3,27 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-project(SEALBench VERSION 3.6.2 LANGUAGES CXX)
+project(SEALBench VERSION 3.6.6 LANGUAGES CXX)
 
 # If not called from root CMakeLists.txt
 if(NOT DEFINED SEAL_BUILD_BENCH)
     set(SEAL_BUILD_BENCH ON)
 
     # Import Microsoft SEAL
-    find_package(SEAL 3.6.2 EXACT REQUIRED)
+    find_package(SEAL 3.6.6 EXACT REQUIRED)
 
+    # Must define these variables and include macros
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUTLIB_PATH})
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+    set(SEAL_THIRDPARTY_DIR ${CMAKE_CURRENT_LIST_DIR}/../../thirdparty)
     set(THIRDPARTY_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/thirdparty)
+    include(FetchContent)
+    mark_as_advanced(FETCHCONTENT_BASE_DIR)
+    mark_as_advanced(FETCHCONTENT_FULLY_DISCONNECTED)
+    mark_as_advanced(FETCHCONTENT_UPDATES_DISCONNECTED)
+    mark_as_advanced(FETCHCONTENT_QUIET)
+    list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../../cmake)
+    include(SEALMacros)
 else()
     set(THIRDPARTY_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR}/../../thirdparty)
 endif()
@@ -29,8 +38,6 @@ endif()
 # if SEAL_BUILD_BENCH is ON, use GoogleBenchmark
 if(SEAL_BUILD_BENCH)
     if(SEAL_BUILD_DEPS)
-        list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/../../cmake)
-        set(SEAL_THIRDPARTY_DIR ${CMAKE_CURRENT_LIST_DIR}/../../thirdparty)
         seal_fetch_thirdparty_content(ExternalBenchmark)
     else()
         find_package(benchmark REQUIRED)
@@ -42,6 +49,10 @@ if(SEAL_BUILD_BENCH)
     endif()
 
     add_executable(sealbench)
+    # If we're targeting WASM, add the appropriate link flags
+    if(EMSCRIPTEN)
+        set_target_properties(sealbench PROPERTIES LINK_FLAGS "-flto -O3 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s MAXIMUM_MEMORY=4GB")
+    endif()
     target_sources(sealbench
         PRIVATE
             ${CMAKE_CURRENT_LIST_DIR}/bench.cpp

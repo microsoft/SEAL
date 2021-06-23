@@ -1,5 +1,67 @@
 # List of Changes
 
+## Version 3.6.6
+
+### Bug Fixes
+
+- Fixed an error when loading seeded ciphertexts serialized by v3.4.x from v3.5.0+.
+- Fixed failed tests on ARM64 architecture [(Issue 347)](https://github.com/microsoft/SEAL/issues/347).
+
+### Other
+
+- Improved HEXL NTT integration [(PR 349)](https://github.com/microsoft/SEAL/pull/349).
+- Improved CKKS ciphertext multiplication [(PR 346)](https://github.com/microsoft/SEAL/pull/346).
+- Improved CKKS ciphertext square [(PR 353)](https://github.com/microsoft/SEAL/pull/353), except that with GNU G++ compiler and `1024` degree there is a huge penalty in execution time.
+Users should switch from GNU G++ in this specific parameter setting if CKKS square is used.
+
+## Version 3.6.5
+
+### New Features
+
+- Updated the dependency Intel HEXL to v1.1.0 [(PR 332)](https://github.com/microsoft/SEAL/pull/332).
+- Integrated more optimizations from Intel HEXL to Microsoft SEAL.
+- Intel HEXL now uses Microsoft SEAL's memory pool, so that memory allocation reported by Microsoft SEAL is more accurate.
+
+### Bug Fixes
+
+- Fixed typos in comments [(PR 328)](https://github.com/microsoft/SEAL/pull/328).
+- Fixed a bug in `DWTHandler` [(Issue 330)](https://github.com/microsoft/SEAL/issues/330).
+- Fixed failing tests when `SEAL_USE_ZLIB=OFF` and `SEAL_USE_ZTD=OFF` [(PR 332)](https://github.com/microsoft/SEAL/pull/332).
+- Fixed shared library build when `SEAL_USE_HEXL=ON` [(PR 332)](https://github.com/microsoft/SEAL/pull/332).
+- Added missing `const` qualifiers to several members of `BatchEncoder` and `Evaluator` [(PR 334)](https://github.com/microsoft/SEAL/pull/334).
+
+## Version 3.6.4
+
+### New Features
+
+- Enabled [AddressSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizer) and [LeakSanitizer](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer) when building Microsoft SEAL [tests](native/tests/CMakeLists.txt) in Debug mode on Unix-like systems, based on [(PR 318)](https://github.com/microsoft/SEAL/pull/318).
+
+### Bug Fixes
+
+- Fixed `alloc-dealloc-mismatch` issues resolved by [(PR 318)](https://github.com/microsoft/SEAL/pull/318).
+- Fixed wrong descriptions in [serializable.h](native/src/seal/serializable.h) and [Serializable.cs](dotnet/src/Serializable.cs) reported in [(Issue 316)](https://github.com/microsoft/SEAL/issues/316).
+
+## Version 3.6.3
+
+### New Features
+
+- Added support to build Microsoft SEAL out of the box with [emscripten](https://emscripten.org/) [(PR 306)](https://github.com/microsoft/SEAL/pull/306).
+- Added support to build Microsoft SEAL with [Intel HEXL](https://github.com/intel/hexl) as an optional dependency [(PR 312)](https://github.com/microsoft/SEAL/pull/312).
+
+### Other
+
+- Improved the error message when attempting to configure with `BUILD_SHARED_LIBS=ON` and `SEAL_BUILD_SEAL_C=ON` [(Issue 284)](https://github.com/microsoft/SEAL/issues/284).
+- Added `seal::random_bytes` function in [randomgen.h](native/src/seal/randomgen.h).
+- Removed redundant `is_metadata_valid_for` invocations reported in [(Issue 313)](https://github.com/microsoft/SEAL/issues/313).
+- Minor bug fixes
+
+### File Changes
+
+- [cmake/ExternalIntelHEXL.cmake](cmake/ExternalIntelHEXL.cmake)
+- [native/src/seal/util/intel_seal_ext.h](native/src/seal/util/intel_seal_ext.h)
+
+#### New files
+
 ## Version 3.6.2
 
 ### Hotfix - 2/18/2021

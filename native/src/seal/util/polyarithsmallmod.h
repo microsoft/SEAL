@@ -14,6 +14,10 @@
 #include <cstdint>
 #include <stdexcept>
 
+#ifdef SEAL_USE_INTEL_HEXL
+#include "hexl/hexl.hpp"
+#endif
+
 namespace seal
 {
     namespace util
@@ -35,8 +39,13 @@ namespace seal
                 throw std::invalid_argument("modulus");
             }
 #endif
+
+#ifdef SEAL_USE_INTEL_HEXL
+            intel::hexl::EltwiseReduceMod(result, poly, coeff_count, modulus.value(), 0, 1);
+#else
             SEAL_ITERATE(
                 iter(poly, result), coeff_count, [&](auto I) { get<1>(I) = barrett_reduce_64(get<0>(I), modulus); });
+#endif
         }
 
         inline void modulo_poly_coeffs(
@@ -201,6 +210,11 @@ namespace seal
             }
 #endif
             const uint64_t modulus_value = modulus.value();
+
+#ifdef SEAL_USE_INTEL_HEXL
+            intel::hexl::EltwiseAddMod(&result[0], &operand1[0], &operand2[0], coeff_count, modulus_value);
+#else
+
             SEAL_ITERATE(iter(operand1, operand2, result), coeff_count, [&](auto I) {
 #ifdef SEAL_DEBUG
                 if (get<0>(I) >= modulus_value)
@@ -215,6 +229,7 @@ namespace seal
                 std::uint64_t sum = get<0>(I) + get<1>(I);
                 get<2>(I) = SEAL_COND_SELECT(sum >= modulus_value, sum - modulus_value, sum);
             });
+#endif
         }
 
         inline void add_poly_coeffmod(
@@ -304,7 +319,11 @@ namespace seal
                 throw std::invalid_argument("result");
             }
 #endif
+
             const uint64_t modulus_value = modulus.value();
+#ifdef SEAL_USE_INTEL_HEXL
+            intel::hexl::EltwiseSubMod(result, operand1, operand2, coeff_count, modulus_value);
+#else
             SEAL_ITERATE(iter(operand1, operand2, result), coeff_count, [&](auto I) {
 #ifdef SEAL_DEBUG
                 if (get<0>(I) >= modulus_value)
@@ -320,6 +339,7 @@ namespace seal
                 std::int64_t borrow = sub_uint64(get<0>(I), get<1>(I), &temp_result);
                 get<2>(I) = temp_result + (modulus_value & static_cast<std::uint64_t>(-borrow));
             });
+#endif
         }
 
         inline void sub_poly_coeffmod(

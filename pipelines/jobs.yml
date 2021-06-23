@@ -8,6 +8,8 @@ jobs:
 - ${{ if eq(parameters.name, 'Windows') }}:
   - job: ${{ parameters.name }}
     displayName: ${{ parameters.name }}
+    ${{ if eq(parameters.debug, 'false') }}:
+      timeoutInMinutes: 0
     pool:
       vmImage: 'windows-latest'
     steps:
@@ -25,16 +27,6 @@ jobs:
     pool:
       vmImage: 'ubuntu-latest'
     steps:
-    - script: |
-        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-        sudo apt-get update
-        sudo apt-get install clang-9
-        sudo update-alternatives --install /usr/bin/cc cc /usr/bin/clang-9 50
-        sudo update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++-9 50
-        clang-9 --version
-        clang++-9 --version
-        which clang-9
-        which clang++-9
     - template: nix.yml
       parameters:
         artifactName: linux-drop

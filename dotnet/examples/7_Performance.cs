@@ -276,7 +276,7 @@ namespace SEALNetExamples
                 /*
                 [Serialize Ciphertext]
                 */
-                MemoryStream stream = new MemoryStream();
+                using MemoryStream stream = new MemoryStream();
                 timeSerializeSum.Start();
                 encrypted.Save(stream, ComprModeType.None);
                 timeSerializeSum.Stop();
@@ -587,7 +587,7 @@ namespace SEALNetExamples
                 /*
                 [Serialize Ciphertext]
                 */
-                MemoryStream stream = new MemoryStream();
+                using MemoryStream stream = new MemoryStream();
                 timeSerializeSum.Start();
                 encrypted.Save(stream, ComprModeType.None);
                 timeSerializeSum.Stop();

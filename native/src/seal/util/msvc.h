@@ -34,20 +34,27 @@
 #else
 
 #ifdef SEAL_USE_IF_CONSTEXPR
-#pragma message("Disabling `if constexpr` based on _MSVC_LANG value " SEAL_STRINGIZE(_MSVC_LANG) ": undefining SEAL_USE_IF_CONSTEXPR")
+#pragma message("Disabling `if constexpr` based on _MSVC_LANG value " SEAL_STRINGIZE( \
+    _MSVC_LANG) ": undefining SEAL_USE_IF_CONSTEXPR")
 #undef SEAL_USE_IF_CONSTEXPR
 #endif
 
 #ifdef SEAL_USE_MAYBE_UNUSED
-#pragma message("Disabling `[[maybe_unused]]` based on _MSVC_LANG value " SEAL_STRINGIZE(_MSVC_LANG) ": undefining SEAL_USE_MAYBE_UNUSED")
+#pragma message("Disabling `[[maybe_unused]]` based on _MSVC_LANG value " SEAL_STRINGIZE( \
+    _MSVC_LANG) ": undefining SEAL_USE_MAYBE_UNUSED")
 #undef SEAL_USE_MAYBE_UNUSED
 #endif
 
 #ifdef SEAL_USE_NODISCARD
-#pragma message("Disabling `[[nodiscard]]` based on _MSVC_LANG value " SEAL_STRINGIZE(_MSVC_LANG) ": undefining SEAL_USE_NODISCARD")
+#pragma message("Disabling `[[nodiscard]]` based on _MSVC_LANG value " SEAL_STRINGIZE( \
+    _MSVC_LANG) ": undefining SEAL_USE_NODISCARD")
 #undef SEAL_USE_NODISCARD
 #endif
+#endif
 
+#ifdef SEAL_USE_ALIGNED_ALLOC
+#define SEAL_MALLOC(size) static_cast<seal_byte *>(_aligned_malloc((size), 64))
+#define SEAL_FREE(ptr) _aligned_free(ptr)
 #endif
 
 // X64

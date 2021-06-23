@@ -283,7 +283,7 @@ namespace seal
                 // Still need to consider integer-float conversions and all
                 // unsigned to signed conversions
             }
-            
+
             SEAL_IF_CONSTEXPR(std::is_integral<T>::value && std::is_integral<S>::value)
             {
                 // Both integer types
@@ -292,7 +292,7 @@ namespace seal
                     // Non-negative number; compare as std::uint64_t
                     // Cannot use unsigned_leq with C++14 for lack of `if constexpr'
                     result = static_cast<std::uint64_t>(value) <=
-                           static_cast<std::uint64_t>((std::numeric_limits<T>::max)());
+                             static_cast<std::uint64_t>((std::numeric_limits<T>::max)());
                 }
                 else
                 {
@@ -305,13 +305,13 @@ namespace seal
             {
                 // Converting to floating-point
                 result = (static_cast<double>(value) <= static_cast<double>((std::numeric_limits<T>::max)())) &&
-                       (static_cast<double>(value) >= -static_cast<double>((std::numeric_limits<T>::max)()));
+                         (static_cast<double>(value) >= -static_cast<double>((std::numeric_limits<T>::max)()));
             }
             else
             {
                 // Converting from floating-point
                 result = (static_cast<double>(value) <= static_cast<double>((std::numeric_limits<T>::max)())) &&
-                       (static_cast<double>(value) >= static_cast<double>((std::numeric_limits<T>::min)()));
+                         (static_cast<double>(value) >= static_cast<double>((std::numeric_limits<T>::min)()));
             }
 
             return result;
@@ -463,7 +463,7 @@ namespace seal
                 return 0;
             }
 
-            unsigned long result;
+            unsigned long result = 0;
             SEAL_MSB_INDEX_UINT64(&result, value);
             return static_cast<int>(result + 1);
         }

@@ -76,7 +76,7 @@ namespace seal
         }
     }
 
-    void Evaluator::negate_inplace(Ciphertext &encrypted)
+    void Evaluator::negate_inplace(Ciphertext &encrypted) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -101,7 +101,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::add_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2)
+    void Evaluator::add_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted1, context_) || !is_buffer_valid(encrypted1))
@@ -164,7 +164,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::add_many(const vector<Ciphertext> &encrypteds, Ciphertext &destination)
+    void Evaluator::add_many(const vector<Ciphertext> &encrypteds, Ciphertext &destination) const
     {
         if (encrypteds.empty())
         {
@@ -185,7 +185,7 @@ namespace seal
         }
     }
 
-    void Evaluator::sub_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2)
+    void Evaluator::sub_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted1, context_) || !is_buffer_valid(encrypted1))
@@ -246,7 +246,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::multiply_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool)
+    void Evaluator::multiply_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted1, context_) || !is_buffer_valid(encrypted1))
@@ -289,7 +289,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::bfv_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool)
+    void Evaluator::bfv_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool) const
     {
         if (encrypted1.is_ntt_form() || encrypted2.is_ntt_form())
         {
@@ -474,7 +474,7 @@ namespace seal
         encrypted1.scale() = new_scale;
     }
 
-    void Evaluator::ckks_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool)
+    void Evaluator::ckks_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool) const
     {
         if (!(encrypted1.is_ntt_form() && encrypted2.is_ntt_form()))
         {
@@ -512,43 +512,106 @@ namespace seal
         encrypted1.resize(context_, context_data.parms_id(), dest_size);
 
         // Set up iterators for input ciphertexts
-        auto encrypted1_iter = iter(encrypted1);
-        auto encrypted2_iter = iter(encrypted2);
+        PolyIter encrypted1_iter = iter(encrypted1);
+        ConstPolyIter encrypted2_iter = iter(encrypted2);
 
-        // Allocate temporary space for the result
-        SEAL_ALLOCATE_ZERO_GET_POLY_ITER(temp, dest_size, coeff_count, coeff_modulus_size, pool);
+        if (dest_size == 3)
+        {
+            // We want to keep six polynomials in the L1 cache: x[0], x[1], x[2], y[0], y[1], temp.
+            // For a 32KiB cache, which can store 32768 / 8 = 4096 coefficients, = 682.67 coefficients per polynomial,
+            // we should keep the tile size at 682 or below. The tile size must divide coeff_count, i.e. be a power of
+            // two. Some testing shows similar performance with tile size 256 and 512, and worse performance on smaller
+            // tiles. We pick the smaller of the two to prevent L1 cache misses on processors with < 32 KiB L1 cache.
+            size_t tile_size = min<size_t>(coeff_count, size_t(256));
+            size_t num_tiles = coeff_count / tile_size;
+#ifdef SEAL_DEBUG
+            if (coeff_count % tile_size != 0)
+            {
+                throw invalid_argument("tile_size does not divide coeff_count");
+            }
+#endif
 
-        SEAL_ITERATE(iter(size_t(0)), dest_size, [&](auto I) {
-            // We iterate over relevant components of encrypted1 and encrypted2 in increasing order for
-            // encrypted1 and reversed (decreasing) order for encrypted2. The bounds for the indices of
-            // the relevant terms are obtained as follows.
-            size_t curr_encrypted1_last = min<size_t>(I, encrypted1_size - 1);
-            size_t curr_encrypted2_first = min<size_t>(I, encrypted2_size - 1);
-            size_t curr_encrypted1_first = I - curr_encrypted2_first;
-            // size_t curr_encrypted2_last = secret_power_index - curr_encrypted1_last;
+            // Semantic misuse of RNSIter; each is really pointing to the data for each RNS factor in sequence
+            ConstRNSIter encrypted2_0_iter(*encrypted2_iter[0], tile_size);
+            ConstRNSIter encrypted2_1_iter(*encrypted2_iter[1], tile_size);
+            RNSIter encrypted1_0_iter(*encrypted1_iter[0], tile_size);
+            RNSIter encrypted1_1_iter(*encrypted1_iter[1], tile_size);
+            RNSIter encrypted1_2_iter(*encrypted1_iter[2], tile_size);
 
-            // The total number of dyadic products is now easy to compute
-            size_t steps = curr_encrypted1_last - curr_encrypted1_first + 1;
+            // Temporary buffer to store intermediate results
+            SEAL_ALLOCATE_GET_COEFF_ITER(temp, tile_size, pool);
 
-            // Create a shifted iterator for the first input
-            auto shifted_encrypted1_iter = encrypted1_iter + curr_encrypted1_first;
+            // Computes the output tile_size coefficients at a time
+            // Given input tuples of polynomials x = (x[0], x[1], x[2]), y = (y[0], y[1]), computes
+            // x = (x[0] * y[0], x[0] * y[1] + x[1] * y[0], x[1] * y[1])
+            // with appropriate modular reduction
+            SEAL_ITERATE(coeff_modulus, coeff_modulus_size, [&](auto I) {
+                SEAL_ITERATE(iter(size_t(0)), num_tiles, [&](auto J) {
+                    // Compute third output polynomial, overwriting input
+                    // x[2] = x[1] * y[1]
+                    dyadic_product_coeffmod(
+                        encrypted1_1_iter[0], encrypted2_1_iter[0], tile_size, I, encrypted1_2_iter[0]);
 
-            // Create a shifted reverse iterator for the second input
-            auto shifted_reversed_encrypted2_iter = reverse_iter(encrypted2_iter + curr_encrypted2_first);
+                    // Compute second output polynomial, overwriting input
+                    // temp = x[1] * y[0]
+                    dyadic_product_coeffmod(encrypted1_1_iter[0], encrypted2_0_iter[0], tile_size, I, temp);
+                    // x[1] = x[0] * y[1]
+                    dyadic_product_coeffmod(
+                        encrypted1_0_iter[0], encrypted2_1_iter[0], tile_size, I, encrypted1_1_iter[0]);
+                    // x[1] += temp
+                    add_poly_coeffmod(encrypted1_1_iter[0], temp, tile_size, I, encrypted1_1_iter[0]);
 
-            SEAL_ITERATE(iter(shifted_encrypted1_iter, shifted_reversed_encrypted2_iter), steps, [&](auto J) {
-                // Extra care needed here:
-                // temp_iter must be dereferenced once to produce an appropriate RNSIter
-                SEAL_ITERATE(iter(J, coeff_modulus, temp[I]), coeff_modulus_size, [&](auto K) {
-                    SEAL_ALLOCATE_GET_COEFF_ITER(prod, coeff_count, pool);
-                    dyadic_product_coeffmod(get<0, 0>(K), get<0, 1>(K), coeff_count, get<1>(K), prod);
-                    add_poly_coeffmod(prod, get<2>(K), coeff_count, get<1>(K), get<2>(K));
+                    // Compute first output polynomial, overwriting input
+                    // x[0] = x[0] * y[0]
+                    dyadic_product_coeffmod(
+                        encrypted1_0_iter[0], encrypted2_0_iter[0], tile_size, I, encrypted1_0_iter[0]);
+
+                    // Manually increment iterators
+                    encrypted1_0_iter++;
+                    encrypted1_1_iter++;
+                    encrypted1_2_iter++;
+                    encrypted2_0_iter++;
+                    encrypted2_1_iter++;
                 });
             });
-        });
+        }
+        else
+        {
+            // Allocate temporary space for the result
+            SEAL_ALLOCATE_ZERO_GET_POLY_ITER(temp, dest_size, coeff_count, coeff_modulus_size, pool);
 
-        // Set the final result
-        set_poly_array(temp, dest_size, coeff_count, coeff_modulus_size, encrypted1.data());
+            SEAL_ITERATE(iter(size_t(0)), dest_size, [&](auto I) {
+                // We iterate over relevant components of encrypted1 and encrypted2 in increasing order for
+                // encrypted1 and reversed (decreasing) order for encrypted2. The bounds for the indices of
+                // the relevant terms are obtained as follows.
+                size_t curr_encrypted1_last = min<size_t>(I, encrypted1_size - 1);
+                size_t curr_encrypted2_first = min<size_t>(I, encrypted2_size - 1);
+                size_t curr_encrypted1_first = I - curr_encrypted2_first;
+                // size_t curr_encrypted2_last = secret_power_index - curr_encrypted1_last;
+
+                // The total number of dyadic products is now easy to compute
+                size_t steps = curr_encrypted1_last - curr_encrypted1_first + 1;
+
+                // Create a shifted iterator for the first input
+                auto shifted_encrypted1_iter = encrypted1_iter + curr_encrypted1_first;
+
+                // Create a shifted reverse iterator for the second input
+                auto shifted_reversed_encrypted2_iter = reverse_iter(encrypted2_iter + curr_encrypted2_first);
+
+                SEAL_ITERATE(iter(shifted_encrypted1_iter, shifted_reversed_encrypted2_iter), steps, [&](auto J) {
+                    // Extra care needed here:
+                    // temp_iter must be dereferenced once to produce an appropriate RNSIter
+                    SEAL_ITERATE(iter(J, coeff_modulus, temp[I]), coeff_modulus_size, [&](auto K) {
+                        SEAL_ALLOCATE_GET_COEFF_ITER(prod, coeff_count, pool);
+                        dyadic_product_coeffmod(get<0, 0>(K), get<0, 1>(K), coeff_count, get<1>(K), prod);
+                        add_poly_coeffmod(prod, get<2>(K), coeff_count, get<1>(K), get<2>(K));
+                    });
+                });
+            });
+
+            // Set the final result
+            set_poly_array(temp, dest_size, coeff_count, coeff_modulus_size, encrypted1.data());
+        }
 
         // Set the scale
         encrypted1.scale() = new_scale;
@@ -634,7 +697,7 @@ namespace seal
         }
     }
 
-    void Evaluator::square_inplace(Ciphertext &encrypted, MemoryPoolHandle pool)
+    void Evaluator::square_inplace(Ciphertext &encrypted, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -669,7 +732,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::bfv_square(Ciphertext &encrypted, MemoryPoolHandle pool)
+    void Evaluator::bfv_square(Ciphertext &encrypted, MemoryPoolHandle pool) const
     {
         if (encrypted.is_ntt_form())
         {
@@ -822,7 +885,7 @@ namespace seal
         encrypted.scale() = new_scale;
     }
 
-    void Evaluator::ckks_square(Ciphertext &encrypted, MemoryPoolHandle pool)
+    void Evaluator::ckks_square(Ciphertext &encrypted, MemoryPoolHandle pool) const
     {
         if (!encrypted.is_ntt_form())
         {
@@ -868,27 +931,22 @@ namespace seal
         // Set up iterators for input ciphertext
         auto encrypted_iter = iter(encrypted);
 
-        // Allocate temporary space for the result
-        SEAL_ALLOCATE_ZERO_GET_POLY_ITER(temp, dest_size, coeff_count, coeff_modulus_size, pool);
-
-        // Compute c0^2
-        dyadic_product_coeffmod(encrypted_iter[0], encrypted_iter[0], coeff_modulus_size, coeff_modulus, temp[0]);
+        // Compute c1^2
+        dyadic_product_coeffmod(
+            encrypted_iter[1], encrypted_iter[1], coeff_modulus_size, coeff_modulus, encrypted_iter[2]);
 
         // Compute 2*c0*c1
-        dyadic_product_coeffmod(encrypted_iter[0], encrypted_iter[1], coeff_modulus_size, coeff_modulus, temp[1]);
-        add_poly_coeffmod(temp[1], temp[1], coeff_modulus_size, coeff_modulus, temp[1]);
+        dyadic_product_coeffmod(encrypted_iter[0], encrypted_iter[1], coeff_modulus_size, coeff_modulus, encrypted_iter[1]);
+        add_poly_coeffmod(encrypted_iter[1], encrypted_iter[1], coeff_modulus_size, coeff_modulus, encrypted_iter[1]);
 
-        // Compute c1^2
-        dyadic_product_coeffmod(encrypted_iter[1], encrypted_iter[1], coeff_modulus_size, coeff_modulus, temp[2]);
-
-        // Set the final result
-        set_poly_array(temp, dest_size, coeff_count, coeff_modulus_size, encrypted.data());
+       // Compute c0^2
+        dyadic_product_coeffmod(encrypted_iter[0], encrypted_iter[0], coeff_modulus_size, coeff_modulus, encrypted_iter[0]);
 
         // Set the scale
         encrypted.scale() = new_scale;
     }
 
-    void Evaluator::bgv_square(Ciphertext &encrypted, MemoryPoolHandle pool)
+    void Evaluator::bgv_square(Ciphertext &encrypted, MemoryPoolHandle pool) const
     {
         if (encrypted.is_ntt_form())
         {
@@ -953,7 +1011,7 @@ namespace seal
     }
 
     void Evaluator::relinearize_internal(
-        Ciphertext &encrypted, const RelinKeys &relin_keys, size_t destination_size, MemoryPoolHandle pool)
+        Ciphertext &encrypted, const RelinKeys &relin_keys, size_t destination_size, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         auto context_data_ptr = context_.get_context_data(encrypted.parms_id());
@@ -1010,7 +1068,7 @@ namespace seal
     }
 
     void Evaluator::mod_switch_scale_to_next(
-        const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool)
+        const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool) const
     {
         // Assuming at this point encrypted is already validated.
         auto context_data_ptr = context_.get_context_data(encrypted.parms_id());
@@ -1084,7 +1142,8 @@ namespace seal
         }
     }
 
-    void Evaluator::mod_switch_drop_to_next(const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool)
+    void Evaluator::mod_switch_drop_to_next(
+        const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool) const
     {
         // Assuming at this point encrypted is already validated.
         auto context_data_ptr = context_.get_context_data(encrypted.parms_id());
@@ -1148,7 +1207,7 @@ namespace seal
         }
     }
 
-    void Evaluator::mod_switch_drop_to_next(Plaintext &plain)
+    void Evaluator::mod_switch_drop_to_next(Plaintext &plain) const
     {
         // Assuming at this point plain is already validated.
         auto context_data_ptr = context_.get_context_data(plain.parms_id());
@@ -1183,7 +1242,8 @@ namespace seal
         plain.parms_id() = next_context_data.parms_id();
     }
 
-    void Evaluator::mod_switch_to_next(const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool)
+    void Evaluator::mod_switch_to_next(
+        const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -1229,7 +1289,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::mod_switch_to_inplace(Ciphertext &encrypted, parms_id_type parms_id, MemoryPoolHandle pool)
+    void Evaluator::mod_switch_to_inplace(Ciphertext &encrypted, parms_id_type parms_id, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         auto context_data_ptr = context_.get_context_data(encrypted.parms_id());
@@ -1253,7 +1313,7 @@ namespace seal
         }
     }
 
-    void Evaluator::mod_switch_to_inplace(Plaintext &plain, parms_id_type parms_id)
+    void Evaluator::mod_switch_to_inplace(Plaintext &plain, parms_id_type parms_id) const
     {
         // Verify parameters.
         auto context_data_ptr = context_.get_context_data(plain.parms_id());
@@ -1281,7 +1341,7 @@ namespace seal
         }
     }
 
-    void Evaluator::rescale_to_next(const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool)
+    void Evaluator::rescale_to_next(const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -1321,7 +1381,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::rescale_to_inplace(Ciphertext &encrypted, parms_id_type parms_id, MemoryPoolHandle pool)
+    void Evaluator::rescale_to_inplace(Ciphertext &encrypted, parms_id_type parms_id, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -1377,7 +1437,7 @@ namespace seal
 
     void Evaluator::multiply_many(
         const vector<Ciphertext> &encrypteds, const RelinKeys &relin_keys, Ciphertext &destination,
-        MemoryPoolHandle pool)
+        MemoryPoolHandle pool) const
     {
         // Verify parameters.
         if (encrypteds.size() == 0)
@@ -1453,7 +1513,7 @@ namespace seal
     }
 
     void Evaluator::exponentiate_inplace(
-        Ciphertext &encrypted, uint64_t exponent, const RelinKeys &relin_keys, MemoryPoolHandle pool)
+        Ciphertext &encrypted, uint64_t exponent, const RelinKeys &relin_keys, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         auto context_data_ptr = context_.get_context_data(encrypted.parms_id());
@@ -1485,7 +1545,7 @@ namespace seal
         multiply_many(exp_vector, relin_keys, encrypted, move(pool));
     }
 
-    void Evaluator::add_plain_inplace(Ciphertext &encrypted, const Plaintext &plain)
+    void Evaluator::add_plain_inplace(Ciphertext &encrypted, const Plaintext &plain) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -1569,7 +1629,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::sub_plain_inplace(Ciphertext &encrypted, const Plaintext &plain)
+    void Evaluator::sub_plain_inplace(Ciphertext &encrypted, const Plaintext &plain) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -1653,7 +1713,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::multiply_plain_inplace(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool)
+    void Evaluator::multiply_plain_inplace(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -1690,7 +1750,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::multiply_plain_normal(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool)
+    void Evaluator::multiply_plain_normal(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool) const
     {
         // Extract encryption parameters.
         auto &context_data = *context_.get_context_data(encrypted.parms_id());
@@ -1795,7 +1855,8 @@ namespace seal
             RNSIter temp_iter(temp.get(), coeff_count);
             SEAL_ITERATE(iter(temp_iter, plain_upper_half_increment), coeff_modulus_size, [&](auto I) {
                 SEAL_ITERATE(iter(get<0>(I), plain.data()), plain_coeff_count, [&](auto J) {
-                    get<0>(J) = SEAL_COND_SELECT(get<1>(J) >= plain_upper_half_threshold, get<1>(J) + get<1>(I), get<1>(J));
+                    get<0>(J) =
+                        SEAL_COND_SELECT(get<1>(J) >= plain_upper_half_threshold, get<1>(J) + get<1>(I), get<1>(J));
                 });
             });
         }
@@ -1817,7 +1878,7 @@ namespace seal
         encrypted.scale() = new_scale;
     }
 
-    void Evaluator::multiply_plain_ntt(Ciphertext &encrypted_ntt, const Plaintext &plain_ntt)
+    void Evaluator::multiply_plain_ntt(Ciphertext &encrypted_ntt, const Plaintext &plain_ntt) const
     {
         // Verify parameters.
         if (!plain_ntt.is_ntt_form())
@@ -1858,7 +1919,7 @@ namespace seal
         encrypted_ntt.scale() = new_scale;
     }
 
-    void Evaluator::transform_to_ntt_inplace(Plaintext &plain, parms_id_type parms_id, MemoryPoolHandle pool)
+    void Evaluator::transform_to_ntt_inplace(Plaintext &plain, parms_id_type parms_id, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         if (!is_valid_for(plain, context_))
@@ -1939,7 +2000,8 @@ namespace seal
 
             SEAL_ITERATE(helper_iter, coeff_modulus_size, [&](auto I) {
                 SEAL_ITERATE(iter(*plain_iter, get<0>(I)), plain_coeff_count, [&](auto J) {
-                    get<1>(J) = SEAL_COND_SELECT(get<0>(J) >= plain_upper_half_threshold, get<0>(J) + get<1>(I), get<0>(J));
+                    get<1>(J) =
+                        SEAL_COND_SELECT(get<0>(J) >= plain_upper_half_threshold, get<0>(J) + get<1>(I), get<0>(J));
                 });
             });
         }
@@ -1950,7 +2012,7 @@ namespace seal
         plain.parms_id() = parms_id;
     }
 
-    void Evaluator::transform_to_ntt_inplace(Ciphertext &encrypted)
+    void Evaluator::transform_to_ntt_inplace(Ciphertext &encrypted) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -1998,7 +2060,7 @@ namespace seal
 #endif
     }
 
-    void Evaluator::transform_from_ntt_inplace(Ciphertext &encrypted_ntt)
+    void Evaluator::transform_from_ntt_inplace(Ciphertext &encrypted_ntt) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted_ntt, context_) || !is_buffer_valid(encrypted_ntt))
@@ -2046,7 +2108,7 @@ namespace seal
     }
 
     void Evaluator::apply_galois_inplace(
-        Ciphertext &encrypted, uint32_t galois_elt, const GaloisKeys &galois_keys, MemoryPoolHandle pool)
+        Ciphertext &encrypted, uint32_t galois_elt, const GaloisKeys &galois_keys, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -2150,7 +2212,7 @@ namespace seal
     }
 
     void Evaluator::rotate_internal(
-        Ciphertext &encrypted, int steps, const GaloisKeys &galois_keys, MemoryPoolHandle pool)
+        Ciphertext &encrypted, int steps, const GaloisKeys &galois_keys, MemoryPoolHandle pool) const
     {
         auto context_data_ptr = context_.get_context_data(encrypted.parms_id());
         if (!context_data_ptr)
@@ -2208,7 +2270,7 @@ namespace seal
 
     void Evaluator::switch_key_inplace(
         Ciphertext &encrypted, ConstRNSIter target_iter, const KSwitchKeys &kswitch_keys, size_t kswitch_keys_index,
-        MemoryPoolHandle pool)
+        MemoryPoolHandle pool) const
     {
         auto parms_id = encrypted.parms_id();
         auto &context_data = *context_.get_context_data(parms_id);
@@ -2523,9 +2585,7 @@ namespace seal
                         ntt_negacyclic_harvey_lazy(t_ntt, get<2>(J));
 #if SEAL_USER_MOD_BIT_COUNT_MAX > 60
                     // Reduce from [0, 4qi) to [0, 2qi)
-                    SEAL_ITERATE(t_ntt, coeff_count, [&](auto &K) {
-                        K -= SEAL_COND_SELECT(K >= qi_lazy, qi_lazy, 0);
-                    });
+                    SEAL_ITERATE(t_ntt, coeff_count, [&](auto &K) { K -= SEAL_COND_SELECT(K >= qi_lazy, qi_lazy, 0); });
 #else
                         // Since SEAL uses at most 60bit moduli, 8*qi < 2^63.
                         qi_lazy = qi << 2;

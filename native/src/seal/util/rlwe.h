@@ -83,6 +83,18 @@ namespace seal
 
         /**
         Generate a uniformly random polynomial and store in RNS representation.
+        This implementation corresponds to Microsoft SEAL 3.4 and earlier.
+
+        @param[in] prng A uniform random generator
+        @param[in] parms EncryptionParameters used to parameterize an RNS polynomial
+        @param[out] destination Allocated space to store a random polynomial
+        */
+        void sample_poly_uniform_seal_3_4(
+            std::shared_ptr<UniformRandomGenerator> prng, const EncryptionParameters &parms,
+            std::uint64_t *destination);
+
+        /**
+        Generate a uniformly random polynomial and store in RNS representation.
         This implementation corresponds to Microsoft SEAL 3.5 and earlier.
 
         @param[in] prng A uniform random generator
