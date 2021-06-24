@@ -1,5 +1,11 @@
 # List of Changes
 
+## Version 4.0.0
+
+### Bug Fixes
+
+- Fixed failed tests on ARM64 architecture [(Issue 360)](https://github.com/microsoft/SEAL/issues/360).
+
 ## Version 3.6.6
 
 ### Bug Fixes
