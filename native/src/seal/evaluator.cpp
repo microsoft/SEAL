@@ -617,7 +617,7 @@ namespace seal
         encrypted1.scale() = new_scale;
     }
 
-    void Evaluator::bgv_multiply(Ciphertext &encrypted1, Ciphertext &encrypted2, MemoryPoolHandle pool)
+    void Evaluator::bgv_multiply(Ciphertext &encrypted1, Ciphertext &encrypted2, MemoryPoolHandle pool) const
     {
         if (encrypted1.is_ntt_form() || encrypted2.is_ntt_form())
         {
