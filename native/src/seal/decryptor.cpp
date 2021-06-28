@@ -314,39 +314,99 @@ namespace seal
         // Make sure we have enough secret key powers computed
         compute_secret_key_array(encrypted_size - 1);
 
-        // put < (c_1 , c_2, ... , c_{count-1}) , (s,s^2,...,s^{count-1}) > mod q in destination
-        // Now do the dot product of encrypted_copy and the secret key array using NTT.
-        // The secret key powers are already NTT transformed.
-
-        SEAL_ALLOCATE_GET_POLY_ITER(encrypted_copy, encrypted_size - 1, coeff_count, coeff_modulus_size, pool);
-        set_poly_array(encrypted.data(1), encrypted_size - 1, coeff_count, coeff_modulus_size, encrypted_copy);
-
-        // Transform c_1, c_2, ... to NTT form unless they already are
-        if (!is_ntt_form)
+        if (encrypted_size == 2)
         {
-            ntt_negacyclic_harvey_lazy(encrypted_copy, encrypted_size - 1, ntt_tables);
+            if (is_ntt_form)
+            {
+                // We want to keep four polynomials in the L1 cache: c_0, c_1, secret_key, and destination
+                // For a 32KiB cache, which can store 32768 / 8 = 4096 coefficients = 1024 coefficients per
+                // polynomial, we should keep the tile size at 1024 or below. The tile size must divide
+                // coeff_count, i.e. be a power of two. Some testing shows better performance on tile size 1024 than
+                // 512.
+                size_t tile_size = min<size_t>(coeff_count, size_t(1024));
+                size_t num_tiles = coeff_count / tile_size;
+#ifdef SEAL_DEBUG
+                if (coeff_count % tile_size != 0)
+                {
+                    throw invalid_argument("tile_size does not divide coeff_count");
+                }
+#endif
+
+                // Semantic misuse of RNSIter; each is really pointing to the data for each RNS factor in
+                // sequence
+                ConstRNSIter c0_tile(encrypted.data(0), tile_size);
+                ConstRNSIter c1_tile(encrypted.data(1), tile_size);
+                ConstRNSIter sk_tile(secret_key_array_.get(), tile_size);
+                RNSIter dest_tile(destination, tile_size);
+                SEAL_ITERATE(iter(coeff_modulus, ntt_tables), coeff_modulus_size, [&](auto I) {
+                    SEAL_ITERATE(iter(size_t(0)), num_tiles, [&](SEAL_MAYBE_UNUSED auto J) {
+                        // put < c_1 * s > mod q in destination
+                        dyadic_product_coeffmod(c1_tile[0], sk_tile[0], tile_size, get<0>(I), dest_tile[0]);
+                        // Add c_0 to the result
+                        add_poly_coeffmod(dest_tile[0], c0_tile[0], tile_size, get<0>(I), dest_tile[0]);
+
+                        // Manually increment iterators
+                        ++c0_tile;
+                        ++c1_tile;
+                        ++sk_tile;
+                        ++dest_tile;
+                    });
+                });
+            }
+            else
+            {
+                // No tiling, since the NTT isn't easily tiled
+                ConstRNSIter secret_key_array(secret_key_array_.get(), coeff_count);
+                ConstRNSIter c0(encrypted.data(0), coeff_count);
+                ConstRNSIter c1(encrypted.data(1), coeff_count);
+                SEAL_ITERATE(
+                    iter(c0, c1, secret_key_array, coeff_modulus, ntt_tables, destination), coeff_modulus_size,
+                    [&](auto I) {
+                        set_uint(get<1>(I), coeff_count, get<5>(I));
+                        // Transform c_1 to NTT form
+                        ntt_negacyclic_harvey_lazy(get<5>(I), get<4>(I));
+                        // put < c_1 * s > mod q in destination
+                        dyadic_product_coeffmod(get<5>(I), get<2>(I), coeff_count, get<3>(I), get<5>(I));
+                        // Transform back
+                        inverse_ntt_negacyclic_harvey(get<5>(I), get<4>(I));
+                        // add c_0 to the result; note that destination should be in the same (NTT) form as encrypted
+                        add_poly_coeffmod(get<5>(I), get<0>(I), coeff_count, get<3>(I), get<5>(I));
+                    });
+            }
+        } else {
+            // put < (c_1 , c_2, ... , c_{count-1}) , (s,s^2,...,s^{count-1}) > mod q in destination
+            // Now do the dot product of encrypted_copy and the secret key array using NTT.
+            // The secret key powers are already NTT transformed.
+            SEAL_ALLOCATE_GET_POLY_ITER(encrypted_copy, encrypted_size - 1, coeff_count, coeff_modulus_size, pool);
+            set_poly_array(encrypted.data(1), encrypted_size - 1, coeff_count, coeff_modulus_size, encrypted_copy);
+
+            // Transform c_1, c_2, ... to NTT form unless they already are
+            if (!is_ntt_form)
+            {
+                ntt_negacyclic_harvey_lazy(encrypted_copy, encrypted_size - 1, ntt_tables);
+            }
+
+            // Compute dyadic product with secret power array
+            auto secret_key_array = PolyIter(secret_key_array_.get(), coeff_count, key_coeff_modulus_size);
+            SEAL_ITERATE(iter(encrypted_copy, secret_key_array), encrypted_size - 1, [&](auto I) {
+                dyadic_product_coeffmod(get<0>(I), get<1>(I), coeff_modulus_size, coeff_modulus, get<0>(I));
+            });
+
+            // Aggregate all polynomials together to complete the dot product
+            set_zero_poly(coeff_count, coeff_modulus_size, destination);
+            SEAL_ITERATE(encrypted_copy, encrypted_size - 1, [&](auto I) {
+                add_poly_coeffmod(destination, I, coeff_modulus_size, coeff_modulus, destination);
+            });
+
+            if (!is_ntt_form)
+            {
+                // If the input was not in NTT form, need to transform back
+                inverse_ntt_negacyclic_harvey(destination, coeff_modulus_size, ntt_tables);
+            }
+
+            // Finally add c_0 to the result; note that destination should be in the same (NTT) form as encrypted
+            add_poly_coeffmod(destination, *iter(encrypted), coeff_modulus_size, coeff_modulus, destination);
         }
-
-        // Compute dyadic product with secret power array
-        auto secret_key_array = PolyIter(secret_key_array_.get(), coeff_count, key_coeff_modulus_size);
-        SEAL_ITERATE(iter(encrypted_copy, secret_key_array), encrypted_size - 1, [&](auto I) {
-            dyadic_product_coeffmod(get<0>(I), get<1>(I), coeff_modulus_size, coeff_modulus, get<0>(I));
-        });
-
-        // Aggregate all polynomials together to complete the dot product
-        set_zero_poly(coeff_count, coeff_modulus_size, destination);
-        SEAL_ITERATE(encrypted_copy, encrypted_size - 1, [&](auto I) {
-            add_poly_coeffmod(destination, I, coeff_modulus_size, coeff_modulus, destination);
-        });
-
-        if (!is_ntt_form)
-        {
-            // If the input was not in NTT form, need to transform back
-            inverse_ntt_negacyclic_harvey(destination, coeff_modulus_size, ntt_tables);
-        }
-
-        // Finally add c_0 to the result; note that destination should be in the same (NTT) form as encrypted
-        add_poly_coeffmod(destination, *iter(encrypted), coeff_modulus_size, coeff_modulus, destination);
     }
 
     int Decryptor::invariant_noise_budget(const Ciphertext &encrypted)
