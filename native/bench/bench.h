@@ -49,7 +49,7 @@ namespace sealbench
 
             encryptor_ = std::make_shared<seal::Encryptor>(context_, pk_, sk_);
             decryptor_ = std::make_shared<seal::Decryptor>(context_, sk_);
-            if (parms_.scheme() == seal::scheme_type::bfv)
+            if (parms_.scheme() == seal::scheme_type::bfv || parms_.scheme() == seal::scheme_type::bgv)
             {
                 batch_encoder_ = std::make_shared<seal::BatchEncoder>(context_);
             }
@@ -236,6 +236,14 @@ namespace sealbench
         }
 
         /**
+        Create a uniform random ciphertext in BGV using the highest-level parameters.
+        */
+        void randomize_ct_bgv(seal::Ciphertext &ct)
+        {
+            randomize_ct_bfv(ct);
+        }
+
+        /**
         Create a uniform random ciphertext in CKKS using the highest-level parameters.
         */
         void randomize_ct_ckks(seal::Ciphertext &ct)
@@ -260,6 +268,14 @@ namespace sealbench
             pt.resize(parms_.poly_modulus_degree());
             pt.parms_id() = seal::parms_id_zero;
             randomize_array_mod(pt.data(), parms_.poly_modulus_degree(), parms_.plain_modulus());
+        }
+
+        /**
+        Create a uniform random plaintext (single modulus) in BGV.
+        */
+        void randomize_pt_bgv(seal::Plaintext &pt)
+        {
+            randomize_pt_bfv(pt);
         }
 
         /**
@@ -355,6 +371,22 @@ namespace sealbench
     void bm_bfv_relin_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bfv_rotate_rows(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bfv_rotate_cols(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+
+    // BGV-specific benchmark cases
+    void bm_bgv_encrypt_secret(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_encrypt_public(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_decrypt(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_encode_batch(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_decode_batch(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_add_ct(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_add_pt(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_mul_ct(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_mul_pt(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_square(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_modswitch_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_relin_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_rotate_rows(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_rotate_cols(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
 
     // CKKS-specific benchmark cases
     void bm_ckks_encrypt_secret(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
