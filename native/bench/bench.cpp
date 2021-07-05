@@ -94,11 +94,18 @@ namespace sealbench
         SEAL_BENCHMARK_REGISTER(BGV, n, log_q, Decrypt, bm_bgv_decrypt, bm_env_bgv);
         SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EncodeBatch, bm_bgv_encode_batch, bm_env_bgv);
         SEAL_BENCHMARK_REGISTER(BGV, n, log_q, DecodeBatch, bm_bgv_decode_batch, bm_env_bgv);
+        SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateNegate, bm_bgv_negate, bm_env_bgv);
+        SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateNegateInplace, bm_bgv_negate_inplace, bm_env_bgv);
         SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateAddCt, bm_bgv_add_ct, bm_env_bgv);
+        SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateAddCtInplace, bm_bgv_add_ct_inplace, bm_env_bgv);
         SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateAddPt, bm_bgv_add_pt, bm_env_bgv);
+        SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateAddPtInplace, bm_bgv_add_pt_inplace, bm_env_bgv);
         SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateMulCt, bm_bgv_mul_ct, bm_env_bgv);
+        SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateMulCtInplace, bm_bgv_mul_ct_inplace, bm_env_bgv);
         SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateMulPt, bm_bgv_mul_pt, bm_env_bgv);
+        SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateMulPtInplace, bm_bgv_mul_pt_inplace, bm_env_bgv);
         SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateSquare, bm_bgv_square, bm_env_bgv);
+        SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateSquareInplace, bm_bgv_square_inplace, bm_env_bgv);
         if (bm_env_bgv->context().first_context_data()->parms().coeff_modulus().size() > 1)
         {
             SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateModSwitchInplace, bm_bgv_modswitch_inplace, bm_env_bgv);
@@ -107,8 +114,12 @@ namespace sealbench
         {
             SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateRelinInplace, bm_bgv_relin_inplace, bm_env_bgv);
             SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateRotateRows, bm_bgv_rotate_rows, bm_env_bgv);
+            SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateRotateRowsInplace, bm_bgv_rotate_rows_inplace, bm_env_bgv);
             SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateRotateCols, bm_bgv_rotate_cols, bm_env_bgv);
+            SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateRotateColsInplace, bm_bgv_rotate_cols_inplace, bm_env_bgv);
         }
+        SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateToNTTInplace, bm_bgv_to_ntt_inplace, bm_env_bgv);
+        SEAL_BENCHMARK_REGISTER(BGV, n, log_q, EvaluateFromNTTInplace, bm_bgv_from_ntt_inplace, bm_env_bgv);
 
         SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EncryptSecret, bm_ckks_encrypt_secret, bm_env_ckks);
         SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EncryptPublic, bm_ckks_encrypt_public, bm_env_ckks);

@@ -86,6 +86,31 @@ namespace sealbench
         }
     }
 
+    void bm_bgv_negate(State &state, shared_ptr<BMEnv> bm_env)
+    {
+        vector<Ciphertext> &ct = bm_env->ct();
+        for (auto _ : state)
+        {
+            state.PauseTiming();
+            bm_env->randomize_ct_bgv(ct[0]);
+            state.ResumeTiming();
+            Ciphertext res;
+            bm_env->evaluator()->negate(ct[0], res);
+        }
+    }
+
+    void bm_bgv_negate_inplace(State &state, shared_ptr<BMEnv> bm_env)
+    {
+        vector<Ciphertext> &ct = bm_env->ct();
+        for (auto _ : state)
+        {
+            state.PauseTiming();
+            bm_env->randomize_ct_bgv(ct[0]);
+            state.ResumeTiming();
+            bm_env->evaluator()->negate_inplace(ct[0]);
+        }
+    }
+
     void bm_bgv_add_ct(State &state, shared_ptr<BMEnv> bm_env)
     {
         vector<Ciphertext> &ct = bm_env->ct();
@@ -97,6 +122,19 @@ namespace sealbench
             state.ResumeTiming();
             Ciphertext res;
             bm_env->evaluator()->add(ct[0], ct[1], res);
+        }
+    }
+
+    void bm_bgv_add_ct_inplace(State &state, shared_ptr<BMEnv> bm_env)
+    {
+        vector<Ciphertext> &ct = bm_env->ct();
+        for (auto _ : state)
+        {
+            state.PauseTiming();
+            bm_env->randomize_ct_bgv(ct[0]);
+            bm_env->randomize_ct_bgv(ct[1]);
+            state.ResumeTiming();
+            bm_env->evaluator()->add_inplace(ct[0], ct[1]);
         }
     }
 
@@ -115,6 +153,21 @@ namespace sealbench
         }
     }
 
+    void bm_bgv_add_pt_inplace(State &state, shared_ptr<BMEnv> bm_env)
+    {
+        vector<Ciphertext> &ct = bm_env->ct();
+        Plaintext &pt = bm_env->pt()[0];
+        for (auto _ : state)
+        {
+            state.PauseTiming();
+            bm_env->randomize_ct_bgv(ct[0]);
+            bm_env->randomize_pt_bgv(pt);
+
+            state.ResumeTiming();
+            bm_env->evaluator()->add_plain_inplace(ct[0], pt);
+        }
+    }
+
     void bm_bgv_mul_ct(State &state, shared_ptr<BMEnv> bm_env)
     {
         vector<Ciphertext> &ct = bm_env->ct();
@@ -126,6 +179,21 @@ namespace sealbench
 
             state.ResumeTiming();
             bm_env->evaluator()->multiply(ct[0], ct[1], ct[2]);
+        }
+    }
+
+    void bm_bgv_mul_ct_inplace(State &state, shared_ptr<BMEnv> bm_env)
+    {
+        vector<Ciphertext> &ct = bm_env->ct();
+        for (auto _ : state)
+        {
+            state.PauseTiming();
+            ct[2].resize(2); // other multiplications could have set it to 3 ...
+            bm_env->randomize_ct_bgv(ct[2]);
+            bm_env->randomize_ct_bgv(ct[1]);
+
+            state.ResumeTiming();
+            bm_env->evaluator()->multiply_inplace(ct[2], ct[1]);
         }
     }
 
@@ -144,6 +212,21 @@ namespace sealbench
         }
     }
 
+    void bm_bgv_mul_pt_inplace(State &state, shared_ptr<BMEnv> bm_env)
+    {
+        vector<Ciphertext> &ct = bm_env->ct();
+        Plaintext &pt = bm_env->pt()[0];
+        for (auto _ : state)
+        {
+            state.PauseTiming();
+            bm_env->randomize_ct_bgv(ct[0]);
+            bm_env->randomize_pt_bgv(pt);
+
+            state.ResumeTiming();
+            bm_env->evaluator()->multiply_plain_inplace(ct[0], pt);
+        }
+    }
+
     void bm_bgv_square(State &state, shared_ptr<BMEnv> bm_env)
     {
         vector<Ciphertext> &ct = bm_env->ct();
@@ -155,6 +238,20 @@ namespace sealbench
 
             state.ResumeTiming();
             bm_env->evaluator()->square(ct[0], ct[2]);
+        }
+    }
+
+    void bm_bgv_square_inplace(State &state, shared_ptr<BMEnv> bm_env)
+    {
+        vector<Ciphertext> &ct = bm_env->ct();
+        for (auto _ : state)
+        {
+            state.PauseTiming();
+            ct[2].resize(2); // other multiplications could have set it to 3 ...
+            bm_env->randomize_ct_bgv(ct[2]);
+
+            state.ResumeTiming();
+            bm_env->evaluator()->square_inplace(ct[2]);
         }
     }
 
@@ -198,6 +295,19 @@ namespace sealbench
         }
     }
 
+    void bm_bgv_rotate_rows_inplace(State &state, shared_ptr<BMEnv> bm_env)
+    {
+        vector<Ciphertext> &ct = bm_env->ct();
+        for (auto _ : state)
+        {
+            state.PauseTiming();
+            bm_env->randomize_ct_bgv(ct[0]);
+
+            state.ResumeTiming();
+            bm_env->evaluator()->rotate_rows_inplace(ct[0], 1, bm_env->glk());
+        }
+    }
+
     void bm_bgv_rotate_cols(State &state, shared_ptr<BMEnv> bm_env)
     {
         vector<Ciphertext> &ct = bm_env->ct();
@@ -208,6 +318,46 @@ namespace sealbench
 
             state.ResumeTiming();
             bm_env->evaluator()->rotate_columns(ct[0], bm_env->glk(), ct[2]);
+        }
+    }
+
+    void bm_bgv_rotate_cols_inplace(State &state, shared_ptr<BMEnv> bm_env)
+    {
+        vector<Ciphertext> &ct = bm_env->ct();
+        for (auto _ : state)
+        {
+            state.PauseTiming();
+            bm_env->randomize_ct_bgv(ct[0]);
+
+            state.ResumeTiming();
+            bm_env->evaluator()->rotate_columns_inplace(ct[0], bm_env->glk());
+        }
+    }
+
+    void bm_bgv_to_ntt_inplace(State &state, shared_ptr<BMEnv> bm_env)
+    {
+        vector<Ciphertext> &ct = bm_env->ct();
+        for (auto _ : state)
+        {
+            state.PauseTiming();
+            bm_env->randomize_ct_bgv(ct[0]);
+
+            state.ResumeTiming();
+            bm_env->evaluator()->transform_to_ntt_inplace(ct[0]);
+        }
+    }
+
+    void bm_bgv_from_ntt_inplace(State &state, shared_ptr<BMEnv> bm_env)
+    {
+        vector<Ciphertext> &ct = bm_env->ct();
+        for (auto _ : state)
+        {
+            state.PauseTiming();
+            bm_env->randomize_ct_bgv(ct[0]);
+            bm_env->evaluator()->transform_to_ntt_inplace(ct[0]);
+
+            state.ResumeTiming();
+            bm_env->evaluator()->transform_from_ntt_inplace(ct[0]);
         }
     }
 } // namespace sealbench

@@ -378,15 +378,27 @@ namespace sealbench
     void bm_bgv_decrypt(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bgv_encode_batch(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bgv_decode_batch(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_negate(benchmark::State &state, std::shared_ptr<BMEnv>);
+    void bm_bgv_negate_inplace(benchmark::State &state, std::shared_ptr<BMEnv>);
     void bm_bgv_add_ct(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_add_ct_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bgv_add_pt(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_add_pt_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bgv_mul_ct(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_mul_ct_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bgv_mul_pt(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_mul_pt_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bgv_square(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_square_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bgv_modswitch_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bgv_relin_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bgv_rotate_rows(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_rotate_rows_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bgv_rotate_cols(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_rotate_cols_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_to_ntt_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bgv_from_ntt_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+
 
     // CKKS-specific benchmark cases
     void bm_ckks_encrypt_secret(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
