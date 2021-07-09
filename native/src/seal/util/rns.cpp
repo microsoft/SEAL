@@ -1200,7 +1200,6 @@ namespace seal
             size_t modulus_size = base_q_->size();
             const Modulus *curr_modulus = base_q_->base();
             const Modulus plain_modulus = t_;
-            const Modulus last_modulus = curr_modulus[modulus_size - 1];
             uint64_t last_modulus_value = curr_modulus[modulus_size - 1].value();
             uint64_t plain_modulus_value = plain_modulus.value();
             CoeffIter last = input[modulus_size - 1];

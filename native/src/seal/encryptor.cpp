@@ -247,7 +247,6 @@ namespace seal
             auto context_data_ptr = context_.first_context_data();
             auto &parms = context_data_ptr->parms();
             size_t coeff_count = parms.poly_modulus_degree();
-            size_t coeff_modulus_size = parms.coeff_modulus().size();
             // c_{0} = pk_{0}*u + p*e_{0} + M
             add_plain_without_scaling_variant(plain, *context_data_ptr, RNSIter(destination.data(0), coeff_count));
         }
