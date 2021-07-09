@@ -164,7 +164,7 @@ namespace seal
 
             void fast_convert_array(ConstRNSIter in, RNSIter out, MemoryPoolHandle pool) const;
 
-            //The exact base convertion function, only supports obase size of 1.
+            // The exact base convertion function, only supports obase size of 1.
             void exact_convert_array(ConstRNSIter in, CoeffIter out, MemoryPoolHandle) const;
 
         private:
@@ -240,7 +240,7 @@ namespace seal
             /**
             Compute mod t
             */
-           void decrypt_modt(RNSIter phase, CoeffIter destination, MemoryPoolHandle pool) const;
+            void decrypt_modt(RNSIter phase, CoeffIter destination, MemoryPoolHandle pool) const;
 
             SEAL_NODISCARD inline auto inv_q_last_mod_q() const noexcept
             {

@@ -14,7 +14,7 @@ namespace sealtest
 {
     TEST(SecretKeyTest, SaveLoadSecretKey)
     {
-        auto save_load_secret_key = [](scheme_type scheme){
+        auto save_load_secret_key = [](scheme_type scheme) {
             stringstream stream;
             {
                 EncryptionParameters parms(scheme);

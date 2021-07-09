@@ -449,7 +449,7 @@ namespace sealtest
 
     TEST(KeyGeneratorTest, Constructors)
     {
-        auto constructors = [](scheme_type scheme){
+        auto constructors = [](scheme_type scheme) {
             EncryptionParameters parms(scheme);
             parms.set_poly_modulus_degree(128);
             parms.set_plain_modulus(65537);

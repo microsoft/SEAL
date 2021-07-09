@@ -17,7 +17,7 @@ namespace sealtest
 {
     TEST(RelinKeysTest, RelinKeysSaveLoad)
     {
-        auto relin_keys_save_load = [](scheme_type scheme){
+        auto relin_keys_save_load = [](scheme_type scheme) {
             stringstream stream;
             {
                 EncryptionParameters parms(scheme);
@@ -85,13 +85,14 @@ namespace sealtest
     }
     TEST(RelinKeysTest, RelinKeysSeededSaveLoad)
     {
-        auto relin_keys_seeded_save_load = [](scheme_type scheme){
+        auto relin_keys_seeded_save_load = [](scheme_type scheme) {
             // Returns true if a, b contains the same error.
             auto compare_kswitchkeys = [](const KSwitchKeys &a, const KSwitchKeys &b, const SecretKey &sk,
-                                        const SEALContext &context) {
+                                          const SEALContext &context) {
                 auto compare_error = [](const Ciphertext &a_ct, const Ciphertext &b_ct, const SecretKey &sk1,
                                         const SEALContext &context1) {
-                    auto get_error = [](const Ciphertext &encrypted, const SecretKey &sk2, const SEALContext &context2) {
+                    auto get_error = [](const Ciphertext &encrypted, const SecretKey &sk2,
+                                        const SEALContext &context2) {
                         auto pool = MemoryManager::GetPool();
                         auto &context_data = *context2.get_context_data(encrypted.parms_id());
                         auto &parms = context_data.parms();
@@ -115,7 +116,8 @@ namespace sealtest
                             util::set_uint(encrypted_ptr, coeff_count, copy_operand1.get());
                             // compute c_{j+1} * s^{j+1}
                             util::dyadic_product_coeffmod(
-                                copy_operand1.get(), secret_key_ptr, coeff_count, coeff_modulus[i], copy_operand1.get());
+                                copy_operand1.get(), secret_key_ptr, coeff_count, coeff_modulus[i],
+                                copy_operand1.get());
                             // add c_{j+1} * s^{j+1} to destination
                             util::add_poly_coeffmod(
                                 destination_ptr, copy_operand1.get(), coeff_count, coeff_modulus[i], destination_ptr);

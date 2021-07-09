@@ -178,5 +178,5 @@ namespace seal
                 return default_coeff_modulus_256;
             }
         } // namespace global_variables
-    }     // namespace util
+    } // namespace util
 } // namespace seal

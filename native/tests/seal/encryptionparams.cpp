@@ -63,7 +63,7 @@ namespace sealtest
 
     TEST(EncryptionParametersTest, EncryptionParametersCompare)
     {
-        auto encryption_parameters_compare = [](scheme_type scheme){
+        auto encryption_parameters_compare = [](scheme_type scheme) {
             EncryptionParameters parms1(scheme);
             parms1.set_coeff_modulus(CoeffModulus::Create(64, { 30 }));
             if (scheme == scheme_type::bfv || scheme == scheme_type::bgv)
@@ -118,7 +118,7 @@ namespace sealtest
 
     TEST(EncryptionParametersTest, EncryptionParametersSaveLoad)
     {
-        auto encryption_parameters_save_load = [](scheme_type scheme){
+        auto encryption_parameters_save_load = [](scheme_type scheme) {
             stringstream stream;
             EncryptionParameters parms(scheme);
             EncryptionParameters parms2(scheme);

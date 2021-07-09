@@ -18,10 +18,9 @@ namespace sealtest
 {
     TEST(GaloisKeysTest, GaloisKeysSaveLoad)
     {
-        auto galoiskey_save_load = [](scheme_type scheme){
+        auto galoiskey_save_load = [](scheme_type scheme) {
             stringstream stream;
             {
-            
                 EncryptionParameters parms(scheme);
                 parms.set_poly_modulus_degree(64);
                 parms.set_plain_modulus(65537);
@@ -48,7 +47,8 @@ namespace sealtest
                     {
                         ASSERT_EQ(keys.data()[j][i].data().size(), test_keys.data()[j][i].data().size());
                         ASSERT_EQ(
-                            keys.data()[j][i].data().dyn_array().size(), test_keys.data()[j][i].data().dyn_array().size());
+                            keys.data()[j][i].data().dyn_array().size(),
+                            test_keys.data()[j][i].data().dyn_array().size());
                         ASSERT_TRUE(is_equal_uint(
                             keys.data()[j][i].data().data(), test_keys.data()[j][i].data().data(),
                             keys.data()[j][i].data().dyn_array().size()));
@@ -84,7 +84,8 @@ namespace sealtest
                     {
                         ASSERT_EQ(keys.data()[j][i].data().size(), test_keys.data()[j][i].data().size());
                         ASSERT_EQ(
-                            keys.data()[j][i].data().dyn_array().size(), test_keys.data()[j][i].data().dyn_array().size());
+                            keys.data()[j][i].data().dyn_array().size(),
+                            test_keys.data()[j][i].data().dyn_array().size());
                         ASSERT_TRUE(is_equal_uint(
                             keys.data()[j][i].data().data(), test_keys.data()[j][i].data().data(),
                             keys.data()[j][i].data().dyn_array().size()));
@@ -96,13 +97,13 @@ namespace sealtest
         galoiskey_save_load(scheme_type::bfv);
         galoiskey_save_load(scheme_type::bgv);
     }
-    
+
     TEST(GaloisKeysTest, GaloisKeysSeededSaveLoad)
     {
-        auto galoiskey_seeded_save_load = [](scheme_type scheme){
+        auto galoiskey_seeded_save_load = [](scheme_type scheme) {
             // Returns true if a, b contains the same error.
             auto compare_kswitchkeys = [](const KSwitchKeys &a, const KSwitchKeys &b, const SecretKey &sk,
-                                        const SEALContext &context) {
+                                          const SEALContext &context) {
                 auto compare_error = [](const Ciphertext &a_ct, const Ciphertext &b_ct, const SecretKey &sk1,
                                         const SEALContext &ctx) {
                     auto get_error = [](const Ciphertext &encrypted, const SecretKey &sk2, const SEALContext &ctx2) {
@@ -129,7 +130,8 @@ namespace sealtest
                             util::set_uint(encrypted_ptr, coeff_count, copy_operand1.get());
                             // compute c_{j+1} * s^{j+1}
                             util::dyadic_product_coeffmod(
-                                copy_operand1.get(), secret_key_ptr, coeff_count, coeff_modulus[i], copy_operand1.get());
+                                copy_operand1.get(), secret_key_ptr, coeff_count, coeff_modulus[i],
+                                copy_operand1.get());
                             // add c_{j+1} * s^{j+1} to destination
                             util::add_poly_coeffmod(
                                 destination_ptr, copy_operand1.get(), coeff_count, coeff_modulus[i], destination_ptr);

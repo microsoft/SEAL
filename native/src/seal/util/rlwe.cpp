@@ -63,34 +63,6 @@ namespace seal
             });
         }
 
-        void sample_poly_normal_t(
-            shared_ptr<UniformRandomGenerator> prng, const EncryptionParameters &parms, uint64_t *destination)
-        {
-            auto coeff_modulus = parms.coeff_modulus();
-            size_t coeff_modulus_size = coeff_modulus.size();
-            size_t coeff_count = parms.poly_modulus_degree();
-            uint64_t plain_modulus = parms.plain_modulus().value();
-
-            if (are_close(global_variables::noise_max_deviation, 0.0))
-            {
-                set_zero_poly(coeff_count, coeff_modulus_size, destination);
-                return;
-            }
-
-            RandomToStandardAdapter engine(prng);
-            ClippedNormalDistribution dist(
-                0, global_variables::noise_standard_deviation, global_variables::noise_max_deviation);
-
-            SEAL_ITERATE(iter(destination), coeff_count, [&](auto &I) {
-                int64_t noise = static_cast<int64_t>(dist(engine));
-                uint64_t flag = static_cast<uint64_t>(-static_cast<int64_t>(noise < 0));
-                SEAL_ITERATE(
-                    iter(StrideIter<uint64_t *>(&I, coeff_count), coeff_modulus), coeff_modulus_size, [&](auto J) {
-                        *get<0>(J) = static_cast<uint64_t>(noise) * plain_modulus + (flag & get<1>(J).value());
-                    });
-            });
-        }
-
         void sample_poly_cbd(
             shared_ptr<UniformRandomGenerator> prng, const EncryptionParameters &parms, uint64_t *destination)
         {
@@ -125,45 +97,6 @@ namespace seal
                 SEAL_ITERATE(
                     iter(StrideIter<uint64_t *>(&I, coeff_count), coeff_modulus), coeff_modulus_size,
                     [&](auto J) { *get<0>(J) = static_cast<uint64_t>(noise) + (flag & get<1>(J).value()); });
-            });
-        }
-
-        void sample_poly_cbd_t(
-            shared_ptr<UniformRandomGenerator> prng, const EncryptionParameters &parms, uint64_t *destination)
-        {
-            auto coeff_modulus = parms.coeff_modulus();
-            size_t coeff_modulus_size = coeff_modulus.size();
-            size_t coeff_count = parms.poly_modulus_degree();
-            uint64_t plain_modulus = parms.plain_modulus().value();
-
-            if (are_close(global_variables::noise_max_deviation, 0.0))
-            {
-                set_zero_poly(coeff_count, coeff_modulus_size, destination);
-                return;
-            }
-
-            if (!are_close(global_variables::noise_standard_deviation, 3.2))
-            {
-                throw logic_error("centered binomial distribution only supports standard deviation 3.2; use rounded "
-                                  "Gaussian instead");
-            }
-
-            auto cbd = [&]() {
-                unsigned char x[6];
-                prng->generate(6, reinterpret_cast<seal_byte *>(x));
-                x[2] &= 0x1F;
-                x[5] &= 0x1F;
-                return hamming_weight(x[0]) + hamming_weight(x[1]) + hamming_weight(x[2]) - hamming_weight(x[3]) -
-                       hamming_weight(x[4]) - hamming_weight(x[5]);
-            };
-
-            SEAL_ITERATE(iter(destination), coeff_count, [&](auto &I) {
-                int32_t noise = cbd();
-                uint64_t flag = static_cast<uint64_t>(-static_cast<int64_t>(noise < 0));
-                SEAL_ITERATE(
-                    iter(StrideIter<uint64_t *>(&I, coeff_count), coeff_modulus), coeff_modulus_size, [&](auto J) {
-                        *get<0>(J) = static_cast<uint64_t>(noise) * plain_modulus + (flag & get<1>(J).value());
-                    });
             });
         }
 
@@ -282,7 +215,8 @@ namespace seal
             destination.is_ntt_form() = is_ntt_form;
             destination.scale() = 1.0;
 
-            // c[j] = public_key[j] * u + e[j] where e[j] <-- chi, u <-- R_3
+            // c[j] = public_key[j] * u + e[j] in BFV/CKKS = public_key[j] * u + p * e[j] in BGV
+            // where e[j] <-- chi, u <-- R_3
 
             // Create a PRNG; u and the noise/error share the same PRNG
             auto prng = parms.random_generator()->create();
@@ -310,59 +244,31 @@ namespace seal
             }
 
             // Generate e_j <-- chi
-            // c[j] = public_key[j] * u + e[j]
+            // c[j] = public_key[j] * u + e[j] in BFV/CKKS, = public_key[j] * u + p * e[j] in BGV,
             for (size_t j = 0; j < encrypted_size; j++)
             {
+                SEAL_NOISE_SAMPLER(prng, parms, u.get());
+                RNSIter gaussian_iter(u.get(), coeff_count);
+
                 // In BGV, p * e is used
                 if (type == scheme_type::bgv)
                 {
-                    const int min_bit_size =
-                        std::min_element(coeff_modulus.cbegin(), coeff_modulus.cend(), [](auto a, auto b) {
-                            return a.bit_count() < b.bit_count();
-                        })->bit_count();
-
-                    // e * p may exceed the limit of modulus, +5 as noise_max_deviation ~ 19.2
-                    if (plain_modulus.bit_count() + 5 < min_bit_size)
+                    if (is_ntt_form)
                     {
-                        // Optimzation: we sample scaled Gaussian noise with SEAL_NOISE_SAMPLER_T
-                        SEAL_NOISE_SAMPLER_T(prng, parms, u.get());
-                        RNSIter gaussian_iter(u.get(), coeff_count);
-                        if (is_ntt_form)
-                        {
-                            ntt_negacyclic_harvey(gaussian_iter, coeff_modulus_size, ntt_tables);
-                        }
-                        RNSIter dst_iter(destination.data(j), coeff_count);
-                        add_poly_coeffmod(gaussian_iter, dst_iter, coeff_modulus_size, coeff_modulus, dst_iter);
+                        ntt_negacyclic_harvey_lazy(gaussian_iter, coeff_modulus_size, ntt_tables);
                     }
-                    else
-                    {
-                        SEAL_NOISE_SAMPLER(prng, parms, u.get());
-                        RNSIter gaussian_iter(u.get(), coeff_count);
-                        if (is_ntt_form)
-                        {
-                            ntt_negacyclic_harvey_lazy(gaussian_iter, coeff_modulus_size, ntt_tables);
-                        }
-                        RNSIter dst_iter(destination.data(j), coeff_count);
-                        multiply_poly_scalar_coeffmod(
-                            gaussian_iter, coeff_modulus_size, plain_modulus.value(), coeff_modulus, gaussian_iter);
-                        add_poly_coeffmod(gaussian_iter, dst_iter, coeff_modulus_size, coeff_modulus, dst_iter);
-                    }
+                    multiply_poly_scalar_coeffmod(
+                        gaussian_iter, coeff_modulus_size, plain_modulus.value(), coeff_modulus, gaussian_iter);
                 }
                 else
                 {
-                    SEAL_NOISE_SAMPLER(prng, parms, u.get());
-                    for (size_t i = 0; i < coeff_modulus_size; i++)
+                    if (is_ntt_form)
                     {
-                        // Addition with e_0, e_1 is in NTT form
-                        if (is_ntt_form)
-                        {
-                            ntt_negacyclic_harvey(u.get() + i * coeff_count, ntt_tables[i]);
-                        }
-                        add_poly_coeffmod(
-                            u.get() + i * coeff_count, destination.data(j) + i * coeff_count, coeff_count,
-                            coeff_modulus[i], destination.data(j) + i * coeff_count);
+                        ntt_negacyclic_harvey(gaussian_iter, coeff_modulus_size, ntt_tables);
                     }
                 }
+                RNSIter dst_iter(destination.data(j), coeff_count);
+                add_poly_coeffmod(gaussian_iter, dst_iter, coeff_modulus_size, coeff_modulus, dst_iter);
             }
         }
 
@@ -419,7 +325,8 @@ namespace seal
             // Set up a new default PRNG for expanding u from the seed sampled above
             auto ciphertext_prng = UniformRandomGeneratorFactory::DefaultFactory()->create(public_prng_seed);
 
-            // Generate ciphertext: (c[0], c[1]) = ([-(as+e)]_q, a)
+            // Generate ciphertext: (c[0], c[1]) = ([-(as+ e)]_q, a) in BFV/CKKS
+            // Generate ciphertext: (c[0], c[1]) = ([-(as+pe)]_q, a) in BGV
             uint64_t *c0 = destination.data();
             uint64_t *c1 = destination.data(1);
 
@@ -444,7 +351,8 @@ namespace seal
             auto noise(allocate_poly(coeff_count, coeff_modulus_size, pool));
             SEAL_NOISE_SAMPLER(bootstrap_prng, parms, noise.get());
 
-            // Calculate -(a*s + e) (mod q) and store in c[0]
+            // Calculate -(as+ e) (mod q) and store in c[0] in BFV/CKKS
+            // Calculate -(as+pe) (mod q) and store in c[0] in BGV
             for (size_t i = 0; i < coeff_modulus_size; i++)
             {
                 dyadic_product_coeffmod(
@@ -459,27 +367,21 @@ namespace seal
                 {
                     inverse_ntt_negacyclic_harvey(c0 + i * coeff_count, ntt_tables[i]);
                 }
-                // bgv: (c0,c1) = ((as+pe), -a)
+
                 if (type == scheme_type::bgv)
                 {
-                    // noise = pe
+                    // noise = pe instead of e in BGV
                     multiply_poly_scalar_coeffmod(
                         noise.get() + i * coeff_count, coeff_count, plain_modulus.value(), coeff_modulus[i],
                         noise.get() + i * coeff_count);
-                    // c0 = as + pe
-                    add_poly_coeffmod(
-                        noise.get() + i * coeff_count, c0 + i * coeff_count, coeff_count, coeff_modulus[i],
-                        c0 + i * coeff_count);
-                    // (as + pe, a) -> (as + pe, -a),
-                    negate_poly_coeffmod(c1 + i * coeff_count, coeff_count, coeff_modulus[i], c1 + i * coeff_count);
                 }
-                else
-                {
-                    add_poly_coeffmod(
-                        noise.get() + i * coeff_count, c0 + i * coeff_count, coeff_count, coeff_modulus[i],
-                        c0 + i * coeff_count);
-                    negate_poly_coeffmod(c0 + i * coeff_count, coeff_count, coeff_modulus[i], c0 + i * coeff_count);
-                }
+
+                // c0 = as + noise
+                add_poly_coeffmod(
+                    noise.get() + i * coeff_count, c0 + i * coeff_count, coeff_count, coeff_modulus[i],
+                    c0 + i * coeff_count);
+                // (as + noise, a) -> (-(as + noise), a),
+                negate_poly_coeffmod(c0 + i * coeff_count, coeff_count, coeff_modulus[i], c0 + i * coeff_count);
             }
 
             if (!is_ntt_form && !save_seed)

@@ -140,7 +140,7 @@ namespace seal
         }
     }
 
-    vector<Modulus> CoeffModulus::BGVDefault(size_t poly_modulus_degree, sec_level_type sec_level) 
+    vector<Modulus> CoeffModulus::BGVDefault(size_t poly_modulus_degree, sec_level_type sec_level)
     {
         return BFVDefault(poly_modulus_degree, sec_level);
     }

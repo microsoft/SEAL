@@ -14,7 +14,7 @@ namespace sealtest
 {
     TEST(PublicKeyTest, SaveLoadPublicKey)
     {
-        auto save_load_public_key = [](scheme_type scheme){
+        auto save_load_public_key = [](scheme_type scheme) {
             stringstream stream;
             {
                 EncryptionParameters parms(scheme);

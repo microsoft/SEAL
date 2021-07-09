@@ -501,7 +501,7 @@ namespace sealtest
             }
         }
     }
-    
+
     TEST(EvaluatorTest, CKKSEncryptAddPlainDecrypt)
     {
         EncryptionParameters parms(scheme_type::ckks);
@@ -3682,7 +3682,7 @@ namespace sealtest
             }
         }
     }
-    
+
     TEST(EvaluatorTest, CKKSEncryptModSwitchDecrypt)
     {
         EncryptionParameters parms(scheme_type::ckks);
@@ -3906,7 +3906,7 @@ namespace sealtest
             }
         }
     }
-    
+
     TEST(EvaluatorTest, CKKSEncryptMultiplyRelinRescaleModSwitchAddDecrypt)
     {
         EncryptionParameters parms(scheme_type::ckks);
@@ -4077,7 +4077,7 @@ namespace sealtest
             }
         }
     }
-    
+
     TEST(EvaluatorTest, CKKSEncryptRotateDecrypt)
     {
         EncryptionParameters parms(scheme_type::ckks);
@@ -5070,7 +5070,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, TransformPlainToNTT)
     {
-        auto evaluator_transform_plain_to_ntt = [](scheme_type scheme){
+        auto evaluator_transform_plain_to_ntt = [](scheme_type scheme) {
             EncryptionParameters parms(scheme);
             Modulus plain_modulus(1 << 6);
             parms.set_poly_modulus_degree(128);
@@ -5139,12 +5139,12 @@ namespace sealtest
             ASSERT_TRUE(plain.parms_id() == next_parms_id);
         };
         evaluator_transform_plain_to_ntt(scheme_type::bfv);
-        evaluator_transform_plain_to_ntt(scheme_type::bgv);  
+        evaluator_transform_plain_to_ntt(scheme_type::bgv);
     }
 
     TEST(EvaluatorTest, TransformEncryptedToFromNTT)
     {
-         auto evaluator_transform_encrypted_to_from_ntt = [](scheme_type scheme){
+        auto evaluator_transform_encrypted_to_from_ntt = [](scheme_type scheme) {
             EncryptionParameters parms(scheme);
             Modulus plain_modulus(1 << 6);
             parms.set_poly_modulus_degree(128);
@@ -5183,7 +5183,8 @@ namespace sealtest
             evaluator.transform_to_ntt_inplace(encrypted);
             evaluator.transform_from_ntt_inplace(encrypted);
             decryptor.decrypt(encrypted, plain);
-            ASSERT_TRUE(plain.to_string() == "Fx^10 + Ex^9 + Dx^8 + Cx^7 + Bx^6 + Ax^5 + 1x^4 + 2x^3 + 3x^2 + 4x^1 + 5");
+            ASSERT_TRUE(
+                plain.to_string() == "Fx^10 + Ex^9 + Dx^8 + Cx^7 + Bx^6 + Ax^5 + 1x^4 + 2x^3 + 3x^2 + 4x^1 + 5");
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
         };
         evaluator_transform_encrypted_to_from_ntt(scheme_type::bfv);
@@ -5393,7 +5394,7 @@ namespace sealtest
         batch_encoder.decode(plain, plain_vec);
         ASSERT_TRUE((plain_vec == vector<uint64_t>{ 2, 3, 4, 1, 6, 7, 8, 5 }));
     }
-    
+
     TEST(EvaluatorTest, BFVEncryptModSwitchToNextDecrypt)
     {
         // The common parameters: the plaintext and the polynomial moduli
@@ -5916,10 +5917,10 @@ namespace sealtest
             ASSERT_TRUE(plain.to_string() == "5x^64 + Ax^5");
         }
         {
-            //Consider the case of qi mod p != 1
+            // Consider the case of qi mod p != 1
             Modulus plain_modulus(786433);
 
-            EncryptionParameters parms(scheme_type::bgv); 
+            EncryptionParameters parms(scheme_type::bgv);
             parms.set_poly_modulus_degree(8192);
             parms.set_plain_modulus(plain_modulus);
             parms.set_coeff_modulus(CoeffModulus::BGVDefault(8192));

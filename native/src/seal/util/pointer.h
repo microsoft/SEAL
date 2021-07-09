@@ -243,7 +243,7 @@ namespace seal
 
             // Move when T is not seal_byte
             template <typename... Args>
-            Pointer(Pointer<seal_byte> &&source, Args &&... args)
+            Pointer(Pointer<seal_byte> &&source, Args &&...args)
             {
                 // Cannot acquire a non-pool pointer of different type
                 if (!source.head_ && source.data_)
@@ -482,7 +482,7 @@ namespace seal
             }
 
             template <typename... Args>
-            Pointer(class MemoryPoolHead *head, Args &&... args)
+            Pointer(class MemoryPoolHead *head, Args &&...args)
             {
 #ifdef SEAL_DEBUG
                 if (!head)
@@ -778,7 +778,7 @@ namespace seal
 
             // Move when T is not seal_byte
             template <typename... Args>
-            ConstPointer(Pointer<seal_byte> &&source, Args &&... args)
+            ConstPointer(Pointer<seal_byte> &&source, Args &&...args)
             {
                 // Cannot acquire a non-pool pointer of different type
                 if (!source.head_ && source.data_)
@@ -874,7 +874,7 @@ namespace seal
 
             // Move when T is not seal_byte
             template <typename... Args>
-            ConstPointer(ConstPointer<seal_byte> &&source, Args &&... args)
+            ConstPointer(ConstPointer<seal_byte> &&source, Args &&...args)
             {
                 // Cannot acquire a non-pool pointer of different type
                 if (!source.head_ && source.data_)
@@ -1170,7 +1170,7 @@ namespace seal
             }
 
             template <typename... Args>
-            ConstPointer(class MemoryPoolHead *head, Args &&... args)
+            ConstPointer(class MemoryPoolHead *head, Args &&...args)
             {
 #ifdef SEAL_DEBUG
                 if (!head)
@@ -1218,7 +1218,7 @@ namespace seal
             typename T_, typename... Args,
             typename = std::enable_if_t<std::is_standard_layout<
                 typename std::remove_cv<typename std::remove_reference<T_>::type>::type>::value>>
-        SEAL_NODISCARD inline auto allocate(MemoryPool &pool, Args &&... args)
+        SEAL_NODISCARD inline auto allocate(MemoryPool &pool, Args &&...args)
         {
             using T = typename std::remove_cv<typename std::remove_reference<T_>::type>::type;
             return Pointer<T>(pool.get_for_byte_count(sizeof(T)), std::forward<Args>(args)...);
@@ -1229,7 +1229,7 @@ namespace seal
             typename T_, typename... Args,
             typename = std::enable_if_t<std::is_standard_layout<
                 typename std::remove_cv<typename std::remove_reference<T_>::type>::type>::value>>
-        SEAL_NODISCARD inline auto allocate(std::size_t count, MemoryPool &pool, Args &&... args)
+        SEAL_NODISCARD inline auto allocate(std::size_t count, MemoryPool &pool, Args &&...args)
         {
             using T = typename std::remove_cv<typename std::remove_reference<T_>::type>::type;
             return Pointer<T>(pool.get_for_byte_count(mul_safe(count, sizeof(T))), std::forward<Args>(args)...);

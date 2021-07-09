@@ -134,7 +134,7 @@ namespace sealtest
         parms.set_poly_modulus_degree(2);
         parms.set_coeff_modulus(CoeffModulus::Create(2, { 30 }));
         parms.set_plain_modulus(2);
-        //auto context = SEALContext::Create(parms, false, sec_level_type::none);
+        // auto context = SEALContext::Create(parms, false, sec_level_type::none);
         SEALContext context(parms, false, sec_level_type::none);
 
         Ciphertext ctxt(context);

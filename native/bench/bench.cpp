@@ -173,7 +173,8 @@ int main(int argc, char **argv)
         bm_parms_vec.emplace_back(i);
     }
 
-    // Initialize bm_env_map with bm_parms_vec each of which creates EncryptionParameters for BFV, BGV and CKKS, respectively.
+    // Initialize bm_env_map with bm_parms_vec each of which creates EncryptionParameters for BFV, BGV and CKKS,
+    // respectively.
     for (auto &i : default_parms)
     {
         EncryptionParameters parms_bfv(scheme_type::bfv);
