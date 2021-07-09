@@ -1211,7 +1211,7 @@ namespace seal
 
         void ckks_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool) const;
 
-        void bgv_multiply(Ciphertext &encrypted1, Ciphertext &encrypted2, MemoryPoolHandle pool) const;
+        void bgv_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool) const;
 
         void bfv_square(Ciphertext &encrypted, MemoryPoolHandle pool) const;
 

@@ -17,26 +17,24 @@ namespace seal
         {
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
-            auto &plain_modulus = parms.plain_modulus();
-            const size_t coeff_count = plain.coeff_count();
+            const size_t plain_coeff_count = plain.coeff_count();
             const size_t coeff_modulus_size = coeff_modulus.size();
-            if (coeff_count > parms.poly_modulus_degree())
+#ifdef SEAL_DEBUG
+            if (plain_coeff_count > parms.poly_modulus_degree())
             {
-                throw std::invalid_argument("add_plain_without_scaling_variant: invalid plaintext");
+                throw std::invalid_argument("invalid plaintext");
             }
-
             if (destination.poly_modulus_degree() != parms.poly_modulus_degree())
             {
-                throw std::invalid_argument("add_plain_without_scaling_variant: invalid destination iter");
+                throw std::invalid_argument("destination is not valid for encryption parameters");
             }
-
+#endif
             SEAL_ITERATE(iter(destination, coeff_modulus), coeff_modulus_size, [&](auto I) {
-                const Modulus &cipher_modulus = get<1>(I);
                 std::transform(
-                    plain.data(), plain.data() + coeff_count, get<0>(I), get<0>(I),
+                    plain.data(), plain.data() + plain_coeff_count, get<0>(I), get<0>(I),
                     [&](uint64_t m, uint64_t c) -> uint64_t {
-                        m = barrett_reduce_64(m, plain_modulus);
-                        return add_uint_mod(c, m, cipher_modulus);
+                        m = barrett_reduce_64(m, get<1>(I));
+                        return add_uint_mod(c, m, get<1>(I));
                     });
             });
         }
@@ -46,27 +44,24 @@ namespace seal
         {
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
-            auto &plain_modulus = parms.plain_modulus();
-            const size_t coeff_count = plain.coeff_count();
+            const size_t plain_coeff_count = plain.coeff_count();
             const size_t coeff_modulus_size = coeff_modulus.size();
-
-            if (coeff_count > parms.poly_modulus_degree())
+#ifdef SEAL_DEBUG
+            if (plain_coeff_count > parms.poly_modulus_degree())
             {
-                throw std::invalid_argument("sub_plain_without_scaling_variant: invalid plaintext");
+                throw std::invalid_argument("invalid plaintext");
             }
-
             if (destination.poly_modulus_degree() != parms.poly_modulus_degree())
             {
-                throw std::invalid_argument("sub_plain_without_scaling_variant: invalid destination iter");
+                throw std::invalid_argument("destination is not valid for encryption parameters");
             }
-
+#endif
             SEAL_ITERATE(iter(destination, coeff_modulus), coeff_modulus_size, [&](auto I) {
-                const Modulus &cipher_modulus = get<1>(I);
                 std::transform(
-                    plain.data(), plain.data() + coeff_count, get<0>(I), get<0>(I),
+                    plain.data(), plain.data() + plain_coeff_count, get<0>(I), get<0>(I),
                     [&](uint64_t m, uint64_t c) -> uint64_t {
-                        m = barrett_reduce_64(m, plain_modulus);
-                        return sub_uint_mod(c, m, cipher_modulus);
+                        m = barrett_reduce_64(m, get<1>(I));
+                        return sub_uint_mod(c, m, get<1>(I));
                     });
             });
         }
@@ -83,7 +78,10 @@ namespace seal
             uint64_t plain_upper_half_threshold = context_data.plain_upper_half_threshold();
             uint64_t q_mod_t = context_data.coeff_modulus_mod_plain_modulus();
 #ifdef SEAL_DEBUG
-            // Verify parameters.
+            if (plain_coeff_count > parms.poly_modulus_degree())
+            {
+                throw std::invalid_argument("invalid plaintext");
+            }
             if (destination.poly_modulus_degree() != parms.poly_modulus_degree())
             {
                 throw invalid_argument("destination is not valid for encryption parameters");
@@ -126,7 +124,10 @@ namespace seal
             uint64_t plain_upper_half_threshold = context_data.plain_upper_half_threshold();
             uint64_t q_mod_t = context_data.coeff_modulus_mod_plain_modulus();
 #ifdef SEAL_DEBUG
-            // Verify parameters.
+            if (plain_coeff_count > parms.poly_modulus_degree())
+            {
+                throw std::invalid_argument("invalid plaintext");
+            }
             if (destination.poly_modulus_degree() != parms.poly_modulus_degree())
             {
                 throw invalid_argument("destination is not valid for encryption parameters");
