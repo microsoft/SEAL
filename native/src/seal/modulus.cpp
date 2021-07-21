@@ -156,12 +156,10 @@ namespace seal
         {
             throw invalid_argument("bit_sizes is invalid");
         }
-        if (accumulate(
-                bit_sizes.cbegin(), bit_sizes.cend(), SEAL_USER_MOD_BIT_COUNT_MIN,
-                [](int a, int b) { return max(a, b); }) > SEAL_USER_MOD_BIT_COUNT_MAX ||
-            accumulate(bit_sizes.cbegin(), bit_sizes.cend(), SEAL_USER_MOD_BIT_COUNT_MAX, [](int a, int b) {
-                return min(a, b);
-            }) < SEAL_USER_MOD_BIT_COUNT_MIN)
+        if (accumulate(bit_sizes.cbegin(), bit_sizes.cend(), SEAL_USER_MOD_BIT_COUNT_MIN,
+            [](int a, int b) { return max(a, b); }) > SEAL_USER_MOD_BIT_COUNT_MAX ||
+            accumulate(bit_sizes.cbegin(), bit_sizes.cend(), SEAL_USER_MOD_BIT_COUNT_MAX,
+            [](int a, int b) { return min(a, b); }) < SEAL_USER_MOD_BIT_COUNT_MIN)
         {
             throw invalid_argument("bit_sizes is invalid");
         }
@@ -172,9 +170,53 @@ namespace seal
         {
             ++count_table[size];
         }
+
+        uint64_t factor = mul_safe(uint64_t(2), safe_cast<uint64_t>(poly_modulus_degree));
         for (const auto &table_elt : count_table)
         {
-            prime_table[table_elt.first] = get_primes(poly_modulus_degree, table_elt.first, table_elt.second);
+            prime_table[table_elt.first] = get_primes(factor, table_elt.first, table_elt.second);
+        }
+
+        vector<Modulus> result;
+        for (int size : bit_sizes)
+        {
+            result.emplace_back(prime_table[size].back());
+            prime_table[size].pop_back();
+        }
+        return result;
+    }
+
+    vector<Modulus> CoeffModulus::Create(size_t poly_modulus_degree, const Modulus &plain_modulus, vector<int> bit_sizes)
+    {
+        if (poly_modulus_degree > SEAL_POLY_MOD_DEGREE_MAX || poly_modulus_degree < SEAL_POLY_MOD_DEGREE_MIN ||
+            get_power_of_two(static_cast<uint64_t>(poly_modulus_degree)) < 0)
+        {
+            throw invalid_argument("poly_modulus_degree is invalid");
+        }
+        if (bit_sizes.size() > SEAL_COEFF_MOD_COUNT_MAX)
+        {
+            throw invalid_argument("bit_sizes is invalid");
+        }
+        if (accumulate(bit_sizes.cbegin(), bit_sizes.cend(), SEAL_USER_MOD_BIT_COUNT_MIN,
+            [](int a, int b) { return max(a, b); }) > SEAL_USER_MOD_BIT_COUNT_MAX ||
+            accumulate(bit_sizes.cbegin(), bit_sizes.cend(), SEAL_USER_MOD_BIT_COUNT_MAX,
+            [](int a, int b) { return min(a, b); }) < SEAL_USER_MOD_BIT_COUNT_MIN)
+        {
+            throw invalid_argument("bit_sizes is invalid");
+        }
+
+        unordered_map<int, size_t> count_table;
+        unordered_map<int, vector<Modulus>> prime_table;
+        for (int size : bit_sizes)
+        {
+            ++count_table[size];
+        }
+
+        uint64_t factor = mul_safe(uint64_t(2), safe_cast<uint64_t>(poly_modulus_degree));
+        factor = mul_safe(factor, plain_modulus.value() / gcd(plain_modulus.value(), factor));
+        for (const auto &table_elt : count_table)
+        {
+            prime_table[table_elt.first] = get_primes(factor, table_elt.first, table_elt.second);
         }
 
         vector<Modulus> result;

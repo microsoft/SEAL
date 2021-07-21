@@ -355,7 +355,7 @@ namespace sealtest
             ASSERT_EQ(32 % mod.value(), dot_product_mod(arr1, arr2, 32, mod));
             ASSERT_EQ(64 % mod.value(), dot_product_mod(arr1, arr2, 64, mod));
 
-            mod = get_prime(1024, SEAL_MOD_BIT_COUNT_MAX);
+            mod = get_prime(1024 * 2, SEAL_MOD_BIT_COUNT_MAX);
             for (size_t i = 0; i < 64; i++)
             {
                 arr1[i] = mod.value() - 1;

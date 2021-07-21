@@ -23,19 +23,19 @@ namespace sealtest
             MemoryPoolHandle pool = MemoryPoolHandle::Global();
             Pointer<NTTTables> tables;
             int coeff_count_power = 1;
-            Modulus modulus(get_prime(uint64_t(1) << coeff_count_power, 60));
+            Modulus modulus(get_prime(uint64_t(2) << coeff_count_power, 60));
             ASSERT_NO_THROW(tables = allocate<NTTTables>(pool, coeff_count_power, modulus, pool));
             ASSERT_EQ(2ULL, tables->coeff_count());
             ASSERT_EQ(1, tables->coeff_count_power());
 
             coeff_count_power = 2;
-            modulus = get_prime(uint64_t(1) << coeff_count_power, 50);
+            modulus = get_prime(uint64_t(2) << coeff_count_power, 50);
             ASSERT_NO_THROW(tables = allocate<NTTTables>(pool, coeff_count_power, modulus, pool));
             ASSERT_EQ(4ULL, tables->coeff_count());
             ASSERT_EQ(2, tables->coeff_count_power());
 
             coeff_count_power = 10;
-            modulus = get_prime(uint64_t(1) << coeff_count_power, 40);
+            modulus = get_prime(uint64_t(2) << coeff_count_power, 40);
             ASSERT_NO_THROW(tables = allocate<NTTTables>(pool, coeff_count_power, modulus, pool));
             ASSERT_EQ(1024ULL, tables->coeff_count());
             ASSERT_EQ(10, tables->coeff_count_power());

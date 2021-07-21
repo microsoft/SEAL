@@ -200,6 +200,29 @@ namespace sealtest
         ASSERT_THROW(auto modulus = CoeffModulus::Create(2, { 2 }), logic_error);
         ASSERT_THROW(auto modulus = CoeffModulus::Create(2, { 3, 3, 3 }), logic_error);
         ASSERT_THROW(auto modulus = CoeffModulus::Create(1024, { 8 }), logic_error);
+
+        // Too small poly_modulus_degree
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(1, Modulus(2), { 2 }), invalid_argument);
+
+        // Too large poly_modulus_degree
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(262144, Modulus(2), { 30 }), invalid_argument);
+
+        // Invalid poly_modulus_degree
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(1023, Modulus(2), { 20 }), invalid_argument);
+
+        // Invalid bit-size
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(2048, Modulus(2), { 0 }), invalid_argument);
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(2048, Modulus(2), { -30 }), invalid_argument);
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(2048, Modulus(2), { 30, -30 }), invalid_argument);
+
+        // Too large LCM(2 * poly_modulus_degree, plain_modulus)
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(2048, Modulus(uint64_t(1) << 53), { 20 }), logic_error);
+
+        // Too small primes requested
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(2, Modulus(2), { 2 }), logic_error);
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(2, Modulus(30), { 6, 6 }), logic_error);
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(1024, Modulus(257), { 20 }), logic_error);
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(1024, Modulus(255), { 22, 22, 22 }), logic_error);
     }
 
     TEST(CoeffModTest, CustomTest)
@@ -235,5 +258,44 @@ namespace sealtest
         ASSERT_EQ(1ULL, cm[2].value() % 64);
         ASSERT_EQ(1ULL, cm[3].value() % 64);
         ASSERT_EQ(1ULL, cm[4].value() % 64);
+
+        cm = CoeffModulus::Create(2, Modulus(4), {});
+        ASSERT_EQ(0, cm.size());
+
+        cm = CoeffModulus::Create(2, Modulus(4), { 3 });
+        ASSERT_EQ(1, cm.size());
+        ASSERT_EQ(uint64_t(5), cm[0].value());
+
+        cm = CoeffModulus::Create(2, Modulus(4), { 3, 4 });
+        ASSERT_EQ(2, cm.size());
+        ASSERT_EQ(uint64_t(5), cm[0].value());
+        ASSERT_EQ(uint64_t(13), cm[1].value());
+
+        cm = CoeffModulus::Create(2, Modulus(4), { 3, 5, 4, 5 });
+        ASSERT_EQ(4, cm.size());
+        ASSERT_EQ(uint64_t(5), cm[0].value());
+        ASSERT_EQ(uint64_t(17), cm[1].value());
+        ASSERT_EQ(uint64_t(13), cm[2].value());
+        ASSERT_EQ(uint64_t(29), cm[3].value());
+
+        cm = CoeffModulus::Create(32, Modulus(64), { 30, 40, 30, 30, 40 });
+        ASSERT_EQ(5, cm.size());
+        ASSERT_EQ(30, get_significant_bit_count(cm[0].value()));
+        ASSERT_EQ(40, get_significant_bit_count(cm[1].value()));
+        ASSERT_EQ(30, get_significant_bit_count(cm[2].value()));
+        ASSERT_EQ(30, get_significant_bit_count(cm[3].value()));
+        ASSERT_EQ(40, get_significant_bit_count(cm[4].value()));
+        ASSERT_EQ(1ULL, cm[0].value() % 64);
+        ASSERT_EQ(1ULL, cm[1].value() % 64);
+        ASSERT_EQ(1ULL, cm[2].value() % 64);
+        ASSERT_EQ(1ULL, cm[3].value() % 64);
+        ASSERT_EQ(1ULL, cm[4].value() % 64);
+
+        cm = CoeffModulus::Create(1024, Modulus(255), { 22, 22 });
+        ASSERT_EQ(2, cm.size());
+        ASSERT_EQ(22, get_significant_bit_count(cm[0].value()));
+        ASSERT_EQ(22, get_significant_bit_count(cm[1].value()));
+        ASSERT_EQ(3133441ULL, cm[0].value());
+        ASSERT_EQ(3655681ULL, cm[1].value());
     }
 } // namespace sealtest

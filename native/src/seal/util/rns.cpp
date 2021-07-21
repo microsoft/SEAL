@@ -623,7 +623,7 @@ namespace seal
             }
 
             // Sample primes for B and two more primes: m_sk and gamma
-            auto baseconv_primes = get_primes(coeff_count_, SEAL_INTERNAL_MOD_BIT_COUNT, base_Bsk_m_tilde_size);
+            auto baseconv_primes = get_primes(mul_safe(uint64_t(2), coeff_count_), SEAL_INTERNAL_MOD_BIT_COUNT, base_Bsk_m_tilde_size);
             auto baseconv_primes_iter = baseconv_primes.cbegin();
             m_sk_ = *baseconv_primes_iter++;
             gamma_ = *baseconv_primes_iter++;
