@@ -289,7 +289,7 @@ SEAL_C_FUNC CoeffModulus_BFVDefault(uint64_t poly_modulus_degree, int sec_level,
     return S_OK;
 }
 
-SEAL_C_FUNC CoeffModulus_Create(uint64_t poly_modulus_degree, uint64_t length, int *bit_sizes, void **coeffs)
+SEAL_C_FUNC CoeffModulus_Create1(uint64_t poly_modulus_degree, uint64_t length, int *bit_sizes, void **coeffs)
 {
     IfNullRet(bit_sizes, E_POINTER);
     IfNullRet(coeffs, E_POINTER);
@@ -301,6 +301,34 @@ SEAL_C_FUNC CoeffModulus_Create(uint64_t poly_modulus_degree, uint64_t length, i
     try
     {
         result = CoeffModulus::Create(poly_modulus_degree, bit_sizes_vec);
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
+    }
+    catch (const logic_error &)
+    {
+        return COR_E_INVALIDOPERATION;
+    }
+
+    BuildModulusPointers(result, &length, coeffs);
+    return S_OK;
+}
+
+SEAL_C_FUNC CoeffModulus_Create2(
+    uint64_t poly_modulus_degree, uint64_t length, int *bit_sizes, void *plain_modulus, void **coeffs)
+{
+    IfNullRet(bit_sizes, E_POINTER);
+    IfNullRet(coeffs, E_POINTER);
+
+    vector<int> bit_sizes_vec;
+    copy_n(bit_sizes, length, back_inserter(bit_sizes_vec));
+    vector<Modulus> result;
+    Modulus *modulus = FromVoid<Modulus>(plain_modulus);
+    IfNullRet(modulus, E_POINTER);
+    try
+    {
+        result = CoeffModulus::Create(poly_modulus_degree, *modulus, bit_sizes_vec);
     }
     catch (const invalid_argument &)
     {

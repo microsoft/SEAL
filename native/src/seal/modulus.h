@@ -517,8 +517,8 @@ namespace seal
         1) have bit-lengths as given in the bit_sizes parameter (at most 60 bits) and
         2) are congruent to 1 modulo LCM(2*poly_modulus_degree, plain_modulus).
 
-        @param[in] poly_modulus_degree The value of the poly_modulus_degree
-        encryption parameter
+        @param[in] poly_modulus_degree The value of the poly_modulus_degree encryption parameter
+        @param[in] plain_modulus The value of the plain_modulus encryption parameter
         @param[in] bit_sizes The bit-lengths of the primes to be generated
         @throws std::invalid_argument if poly_modulus_degree is not a power-of-two
         or is too large
@@ -527,7 +527,8 @@ namespace seal
         @throws std::logic_error if LCM(2*poly_modulus_degree, plain_modulus) is more than 64-bit
         @throws std::logic_error if not enough suitable primes could be found
         */
-        SEAL_NODISCARD static std::vector<Modulus> Create(std::size_t poly_modulus_degree, const Modulus &plain_modulus, std::vector<int> bit_sizes);
+        SEAL_NODISCARD static std::vector<Modulus> Create(
+            std::size_t poly_modulus_degree, const Modulus &plain_modulus, std::vector<int> bit_sizes);
     };
 
     /**

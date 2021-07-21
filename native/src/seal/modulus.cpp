@@ -156,10 +156,12 @@ namespace seal
         {
             throw invalid_argument("bit_sizes is invalid");
         }
-        if (accumulate(bit_sizes.cbegin(), bit_sizes.cend(), SEAL_USER_MOD_BIT_COUNT_MIN,
-            [](int a, int b) { return max(a, b); }) > SEAL_USER_MOD_BIT_COUNT_MAX ||
-            accumulate(bit_sizes.cbegin(), bit_sizes.cend(), SEAL_USER_MOD_BIT_COUNT_MAX,
-            [](int a, int b) { return min(a, b); }) < SEAL_USER_MOD_BIT_COUNT_MIN)
+        if (accumulate(
+                bit_sizes.cbegin(), bit_sizes.cend(), SEAL_USER_MOD_BIT_COUNT_MIN,
+                [](int a, int b) { return max(a, b); }) > SEAL_USER_MOD_BIT_COUNT_MAX ||
+            accumulate(bit_sizes.cbegin(), bit_sizes.cend(), SEAL_USER_MOD_BIT_COUNT_MAX, [](int a, int b) {
+                return min(a, b);
+            }) < SEAL_USER_MOD_BIT_COUNT_MIN)
         {
             throw invalid_argument("bit_sizes is invalid");
         }
@@ -186,7 +188,8 @@ namespace seal
         return result;
     }
 
-    vector<Modulus> CoeffModulus::Create(size_t poly_modulus_degree, const Modulus &plain_modulus, vector<int> bit_sizes)
+    vector<Modulus> CoeffModulus::Create(
+        size_t poly_modulus_degree, const Modulus &plain_modulus, vector<int> bit_sizes)
     {
         if (poly_modulus_degree > SEAL_POLY_MOD_DEGREE_MAX || poly_modulus_degree < SEAL_POLY_MOD_DEGREE_MIN ||
             get_power_of_two(static_cast<uint64_t>(poly_modulus_degree)) < 0)
@@ -197,10 +200,12 @@ namespace seal
         {
             throw invalid_argument("bit_sizes is invalid");
         }
-        if (accumulate(bit_sizes.cbegin(), bit_sizes.cend(), SEAL_USER_MOD_BIT_COUNT_MIN,
-            [](int a, int b) { return max(a, b); }) > SEAL_USER_MOD_BIT_COUNT_MAX ||
-            accumulate(bit_sizes.cbegin(), bit_sizes.cend(), SEAL_USER_MOD_BIT_COUNT_MAX,
-            [](int a, int b) { return min(a, b); }) < SEAL_USER_MOD_BIT_COUNT_MIN)
+        if (accumulate(
+                bit_sizes.cbegin(), bit_sizes.cend(), SEAL_USER_MOD_BIT_COUNT_MIN,
+                [](int a, int b) { return max(a, b); }) > SEAL_USER_MOD_BIT_COUNT_MAX ||
+            accumulate(bit_sizes.cbegin(), bit_sizes.cend(), SEAL_USER_MOD_BIT_COUNT_MAX, [](int a, int b) {
+                return min(a, b);
+            }) < SEAL_USER_MOD_BIT_COUNT_MIN)
         {
             throw invalid_argument("bit_sizes is invalid");
         }

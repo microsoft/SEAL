@@ -514,7 +514,6 @@ namespace Microsoft.Research.SEAL
             return result;
         }
 
-
         /// <summary>
         /// Returns a custom coefficient modulus suitable for use with the specified
         /// PolyModulusDegree.
@@ -526,8 +525,7 @@ namespace Microsoft.Research.SEAL
         /// as given in the bitSizes parameter. The bit sizes of the prime numbers
         /// can be at most 60 bits.
         /// </remarks>
-        /// <param name="polyModulusDegree">The value of the PolyModulusDegree
-        /// encryption parameter</param>
+        /// <param name="polyModulusDegree">The value of the PolyModulusDegree encryption parameter</param>
         /// <param name="bitSizes">The bit-lengths of the primes to be generated</param>
         /// <exception cref="ArgumentException">if polyModulusDegree is not
         /// a power-of-two or is too large</exception>
@@ -548,6 +546,52 @@ namespace Microsoft.Research.SEAL
             IntPtr[] coeffArray = new IntPtr[length];
 
             NativeMethods.CoeffModulus_Create(polyModulusDegree, (ulong)length, bitSizesArr, coeffArray);
+
+            result = new List<Modulus>(length);
+            foreach (IntPtr sm in coeffArray)
+            {
+                result.Add(new Modulus(sm));
+            }
+
+            return result;
+        }
+
+        /// <summary>
+        /// Returns a custom coefficient modulus suitable for use with the specified
+        /// PolyModulusDegree.
+        /// </summary>
+        /// <remarks>
+        /// Returns a custom coefficient modulus suitable for use with the specified
+        /// PolyModulusDegree.The return value will be a vector consisting of
+        /// Modulus elements representing distinct prime numbers of bit-lengths
+        /// as given in the bitSizes parameter. The bit sizes of the prime numbers
+        /// can be at most 60 bits.
+        /// </remarks>
+        /// <param name="polyModulusDegree">The value of the PolyModulusDegree encryption parameter</param>
+        /// <param name="plainModulus">The value of the PlainModulus encryption parameter</param>
+        /// <param name="bitSizes">The bit-lengths of the primes to be generated</param>
+        /// <exception cref="ArgumentException">if polyModulusDegree is not
+        /// a power-of-two or is too large</exception>
+        /// <exception cref="ArgumentException">if bitSizes is too large or if its
+        /// elements are out of bounds</exception>
+        /// <exception cref="InvalidOperationException">if LCM(2*polyModulusDegree, PlainModulus) is
+        /// more than 64-bit </exception>
+        /// <exception cref="InvalidOperationException">if not enough suitable primes could be found</exception>
+        static public IEnumerable<Modulus> Create(
+            ulong polyModulusDegree, Modulus plainModulus, IEnumerable<int> bitSizes)
+        {
+            if (null == bitSizes)
+                throw new ArgumentNullException(nameof(bitSizes));
+
+            List<Modulus> result = null;
+
+            int[] bitSizesArr = bitSizes.ToArray();
+            int length = bitSizesArr.Length;
+
+            IntPtr[] coeffArray = new IntPtr[length];
+
+            NativeMethods.CoeffModulus_Create(polyModulusDegree, (ulong)length, bitSizesArr, plainModulus.NativePtr,
+                coeffArray);
 
             result = new List<Modulus>(length);
             foreach (IntPtr sm in coeffArray)
