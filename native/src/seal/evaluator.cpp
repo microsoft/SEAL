@@ -54,25 +54,6 @@ namespace seal
         {
             throw invalid_argument("encryption parameters are not set correctly");
         }
-
-        // Calculate map from Zmstar to generator representation
-        populate_Zmstar_to_generator();
-    }
-
-    void Evaluator::populate_Zmstar_to_generator()
-    {
-        uint64_t n = static_cast<uint64_t>(context_.first_context_data()->parms().poly_modulus_degree());
-        uint64_t m = n << 1;
-
-        for (uint64_t i = 0; i < n / 2; i++)
-        {
-            uint64_t galois_elt = exponentiate_uint(3, i) & (m - 1);
-            pair<uint64_t, uint64_t> temp_pair1{ i, 0 };
-            Zmstar_to_generator_.emplace(galois_elt, temp_pair1);
-            galois_elt = (exponentiate_uint(3, i) * (m - 1)) & (m - 1);
-            pair<uint64_t, uint64_t> temp_pair2{ i, 1 };
-            Zmstar_to_generator_.emplace(galois_elt, temp_pair2);
-        }
     }
 
     void Evaluator::negate_inplace(Ciphertext &encrypted) const
@@ -847,11 +828,13 @@ namespace seal
             encrypted_iter[1], encrypted_iter[1], coeff_modulus_size, coeff_modulus, encrypted_iter[2]);
 
         // Compute 2*c0*c1
-        dyadic_product_coeffmod(encrypted_iter[0], encrypted_iter[1], coeff_modulus_size, coeff_modulus, encrypted_iter[1]);
+        dyadic_product_coeffmod(
+            encrypted_iter[0], encrypted_iter[1], coeff_modulus_size, coeff_modulus, encrypted_iter[1]);
         add_poly_coeffmod(encrypted_iter[1], encrypted_iter[1], coeff_modulus_size, coeff_modulus, encrypted_iter[1]);
 
-       // Compute c0^2
-        dyadic_product_coeffmod(encrypted_iter[0], encrypted_iter[0], coeff_modulus_size, coeff_modulus, encrypted_iter[0]);
+        // Compute c0^2
+        dyadic_product_coeffmod(
+            encrypted_iter[0], encrypted_iter[0], coeff_modulus_size, coeff_modulus, encrypted_iter[0]);
 
         // Set the scale
         encrypted.scale() = new_scale;
