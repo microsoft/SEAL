@@ -16,7 +16,7 @@ namespace intel
 {
     namespace seal_ext
     {
-        hexl::NTT get_ntt(size_t N, uint64_t modulus, uint64_t root)
+        intel::hexl::NTT &get_ntt(size_t N, uint64_t modulus, uint64_t root)
         {
             static unordered_map<pair<uint64_t, uint64_t>, hexl::NTT, HashPair> ntt_cache_;
 

@@ -1017,7 +1017,7 @@ namespace seal
         */
         inline void rotate_columns_inplace(
             Ciphertext &encrypted, const GaloisKeys &galois_keys, MemoryPoolHandle pool = MemoryManager::GetPool()) const
-        {   
+        {
             auto scheme = context_.key_context_data()->parms().scheme();
             if (scheme != scheme_type::bfv && scheme != scheme_type::bgv)
             {
@@ -1204,7 +1204,7 @@ namespace seal
 
         void ckks_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool)  const;
 
-        void bgv_multiply(Ciphertext &encrypted1, Ciphertext &encrypted2, MemoryPoolHandle pool);
+        void bgv_multiply(Ciphertext &encrypted1, Ciphertext &encrypted2, MemoryPoolHandle pool) const;
 
         void bfv_square(Ciphertext &encrypted, MemoryPoolHandle pool) const;
 

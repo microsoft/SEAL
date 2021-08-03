@@ -546,7 +546,7 @@ namespace seal
             // x = (x[0] * y[0], x[0] * y[1] + x[1] * y[0], x[1] * y[1])
             // with appropriate modular reduction
             SEAL_ITERATE(coeff_modulus, coeff_modulus_size, [&](auto I) {
-                SEAL_ITERATE(iter(size_t(0)), num_tiles, [&](auto J) {
+                SEAL_ITERATE(iter(size_t(0)), num_tiles, [&](SEAL_MAYBE_UNUSED auto J) {
                     // Compute third output polynomial, overwriting input
                     // x[2] = x[1] * y[1]
                     dyadic_product_coeffmod(
@@ -617,7 +617,7 @@ namespace seal
         encrypted1.scale() = new_scale;
     }
 
-    void Evaluator::bgv_multiply(Ciphertext &encrypted1, Ciphertext &encrypted2, MemoryPoolHandle pool)
+    void Evaluator::bgv_multiply(Ciphertext &encrypted1, Ciphertext &encrypted2, MemoryPoolHandle pool) const
     {
         if (encrypted1.is_ntt_form() || encrypted2.is_ntt_form())
         {
@@ -939,7 +939,7 @@ namespace seal
         dyadic_product_coeffmod(encrypted_iter[0], encrypted_iter[1], coeff_modulus_size, coeff_modulus, encrypted_iter[1]);
         add_poly_coeffmod(encrypted_iter[1], encrypted_iter[1], coeff_modulus_size, coeff_modulus, encrypted_iter[1]);
 
-       // Compute c0^2
+        // Compute c0^2
         dyadic_product_coeffmod(encrypted_iter[0], encrypted_iter[0], coeff_modulus_size, coeff_modulus, encrypted_iter[0]);
 
         // Set the scale
@@ -2596,7 +2596,7 @@ namespace seal
                         inverse_ntt_negacyclic_harvey_lazy(get<0, 1>(J), get<2>(J));
                     }
 
-                    // ((ct mod qi) - (ct mod qk)) mod qi
+                    // ((ct mod qi) - (ct mod qk)) mod qi with output in [0, 2 * qi_lazy)
                     SEAL_ITERATE(
                         iter(get<0, 1>(J), t_ntt), coeff_count, [&](auto K) { get<0>(K) += qi_lazy - get<1>(K); });
 
