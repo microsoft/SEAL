@@ -101,7 +101,7 @@ namespace seal
         case scheme_type::ckks:
             ckks_decrypt(encrypted, destination, pool_);
             return;
-        
+
         case scheme_type::bgv:
             bgv_decrypt(encrypted, destination, pool_);
             return;
@@ -109,7 +109,7 @@ namespace seal
         default:
             throw invalid_argument("unsupported scheme");
         }
-       
+
     }
 
     void Decryptor::bfv_decrypt(const Ciphertext &encrypted, Plaintext &destination, MemoryPoolHandle pool)
@@ -212,7 +212,7 @@ namespace seal
         destination.resize(coeff_count);
 
         context_data.rns_tool()->decrypt_modt(tmp_dest_modq, destination.data(), pool);
-        
+
         //Fix the plaintext after mod-switch operations.
         uint64_t fix = 1;
         for(size_t i = context_data.chain_index(); i < first_context_data.chain_index(); i++)
@@ -224,10 +224,10 @@ namespace seal
         {
             multiply_poly_scalar_coeffmod(CoeffIter(destination.data()), coeff_count, fix, plain_modulus, CoeffIter(destination.data()));
         }
-       
+
         // How many non-zero coefficients do we really have in the result?
         size_t plain_coeff_count = get_significant_uint64_count_uint(destination.data(), coeff_count);
-       
+
         // Resize destination to appropriate size
         destination.resize(max(plain_coeff_count, size_t(1)));
     }
@@ -316,49 +316,22 @@ namespace seal
 
         if (encrypted_size == 2)
         {
+            ConstRNSIter secret_key_array(secret_key_array_.get(), coeff_count);
+            ConstRNSIter c0(encrypted.data(0), coeff_count);
+            ConstRNSIter c1(encrypted.data(1), coeff_count);
             if (is_ntt_form)
             {
-                // We want to keep four polynomials in the L1 cache: c_0, c_1, secret_key, and destination
-                // For a 32KiB cache, which can store 32768 / 8 = 4096 coefficients = 1024 coefficients per
-                // polynomial, we should keep the tile size at 1024 or below. The tile size must divide
-                // coeff_count, i.e. be a power of two. Some testing shows better performance on tile size 1024 than
-                // 512.
-                size_t tile_size = min<size_t>(coeff_count, size_t(1024));
-                size_t num_tiles = coeff_count / tile_size;
-#ifdef SEAL_DEBUG
-                if (coeff_count % tile_size != 0)
-                {
-                    throw invalid_argument("tile_size does not divide coeff_count");
-                }
-#endif
-
-                // Semantic misuse of RNSIter; each is really pointing to the data for each RNS factor in
-                // sequence
-                ConstRNSIter c0_tile(encrypted.data(0), tile_size);
-                ConstRNSIter c1_tile(encrypted.data(1), tile_size);
-                ConstRNSIter sk_tile(secret_key_array_.get(), tile_size);
-                RNSIter dest_tile(destination, tile_size);
-                SEAL_ITERATE(iter(coeff_modulus, ntt_tables), coeff_modulus_size, [&](auto I) {
-                    SEAL_ITERATE(iter(size_t(0)), num_tiles, [&](SEAL_MAYBE_UNUSED auto J) {
+                SEAL_ITERATE(
+                    iter(c0, c1, secret_key_array, coeff_modulus, destination), coeff_modulus_size,
+                    [&](auto I) {
                         // put < c_1 * s > mod q in destination
-                        dyadic_product_coeffmod(c1_tile[0], sk_tile[0], tile_size, get<0>(I), dest_tile[0]);
-                        // Add c_0 to the result
-                        add_poly_coeffmod(dest_tile[0], c0_tile[0], tile_size, get<0>(I), dest_tile[0]);
-
-                        // Manually increment iterators
-                        ++c0_tile;
-                        ++c1_tile;
-                        ++sk_tile;
-                        ++dest_tile;
+                        dyadic_product_coeffmod(get<1>(I), get<2>(I), coeff_count, get<3>(I), get<4>(I));
+                        // add c_0 to the result; note that destination should be in the same (NTT) form as encrypted
+                        add_poly_coeffmod(get<4>(I), get<0>(I), coeff_count, get<3>(I), get<4>(I));
                     });
-                });
             }
             else
             {
-                // No tiling, since the NTT isn't easily tiled
-                ConstRNSIter secret_key_array(secret_key_array_.get(), coeff_count);
-                ConstRNSIter c0(encrypted.data(0), coeff_count);
-                ConstRNSIter c1(encrypted.data(1), coeff_count);
                 SEAL_ITERATE(
                     iter(c0, c1, secret_key_array, coeff_modulus, ntt_tables, destination), coeff_modulus_size,
                     [&](auto I) {
