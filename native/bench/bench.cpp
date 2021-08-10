@@ -63,6 +63,9 @@ namespace sealbench
         SEAL_BENCHMARK_REGISTER(BFV, n, log_q, DecodeBatch, bm_bfv_decode_batch, bm_env_bfv);
         SEAL_BENCHMARK_REGISTER(BFV, n, log_q, EvaluateAddCt, bm_bfv_add_ct, bm_env_bfv);
         SEAL_BENCHMARK_REGISTER(BFV, n, log_q, EvaluateAddPt, bm_bfv_add_pt, bm_env_bfv);
+        SEAL_BENCHMARK_REGISTER(BFV, n, log_q, EvaluateNegate, bm_bfv_negate, bm_env_bfv);
+        SEAL_BENCHMARK_REGISTER(BFV, n, log_q, EvaluateSubCt, bm_bfv_sub_ct, bm_env_bfv);
+        SEAL_BENCHMARK_REGISTER(BFV, n, log_q, EvaluateSubPt, bm_bfv_sub_pt, bm_env_bfv);
         SEAL_BENCHMARK_REGISTER(BFV, n, log_q, EvaluateMulCt, bm_bfv_mul_ct, bm_env_bfv);
         SEAL_BENCHMARK_REGISTER(BFV, n, log_q, EvaluateMulPt, bm_bfv_mul_pt, bm_env_bfv);
         SEAL_BENCHMARK_REGISTER(BFV, n, log_q, EvaluateSquare, bm_bfv_square, bm_env_bfv);
@@ -84,6 +87,9 @@ namespace sealbench
         SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, DecodeDouble, bm_ckks_decode_double, bm_env_ckks);
         SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateAddCt, bm_ckks_add_ct, bm_env_ckks);
         SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateAddPt, bm_ckks_add_pt, bm_env_ckks);
+        SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateNegate, bm_ckks_negate, bm_env_ckks);
+        SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateSubCt, bm_ckks_sub_ct, bm_env_ckks);
+        SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateSubPt, bm_ckks_sub_pt, bm_env_ckks);
         SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateMulCt, bm_ckks_mul_ct, bm_env_ckks);
         SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateMulPt, bm_ckks_mul_pt, bm_env_ckks);
         SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateSquare, bm_ckks_square, bm_env_ckks);
@@ -96,6 +102,12 @@ namespace sealbench
             SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateRelinInplace, bm_ckks_relin_inplace, bm_env_ckks);
             SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateRotate, bm_ckks_rotate, bm_env_ckks);
         }
+        SEAL_BENCHMARK_REGISTER(NTT, n, log_q, ForwardNTT, bm_forward_ntt, bm_env_bfv);
+        SEAL_BENCHMARK_REGISTER(NTT, n, log_q, InverseNTT, bm_inverse_ntt, bm_env_bfv);
+        SEAL_BENCHMARK_REGISTER(NTT, n, log_q, ForwardNTTLowLevel, bm_forward_ntt_low_level, bm_env_bfv);
+        SEAL_BENCHMARK_REGISTER(NTT, n, log_q, InverseNTTLowLevel, bm_inverse_ntt_low_level, bm_env_bfv);
+        SEAL_BENCHMARK_REGISTER(NTT, n, log_q, ForwardNTTLowLevelLazy, bm_forward_ntt_low_level_lazy, bm_env_bfv);
+        SEAL_BENCHMARK_REGISTER(NTT, n, log_q, InverseNTTLowLevelLazy, bm_inverse_ntt_low_level_lazy, bm_env_bfv);
     }
 
 } // namespace sealbench
