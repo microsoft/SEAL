@@ -350,6 +350,9 @@ namespace sealbench
     void bm_bfv_decode_batch(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bfv_add_ct(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bfv_add_pt(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bfv_negate(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bfv_sub_ct(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bfv_sub_pt(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bfv_mul_ct(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bfv_mul_pt(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bfv_square(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
@@ -366,6 +369,9 @@ namespace sealbench
     void bm_ckks_decode_double(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_ckks_add_ct(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_ckks_add_pt(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_ckks_negate(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_ckks_sub_ct(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_ckks_sub_pt(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_ckks_mul_ct(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_ckks_mul_pt(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_ckks_square(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);

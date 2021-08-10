@@ -123,6 +123,56 @@ namespace sealbench
         }
     }
 
+    void bm_ckks_negate(State &state, shared_ptr<BMEnv> bm_env)
+    {
+        vector<Ciphertext> &ct = bm_env->ct();
+        double scale = bm_env->safe_scale();
+        for (auto _ : state)
+        {
+            state.PauseTiming();
+            bm_env->randomize_ct_ckks(ct[0]);
+            ct[0].scale() = scale;
+
+            state.ResumeTiming();
+            bm_env->evaluator()->negate(ct[0], ct[2]);
+        }
+    }
+
+    void bm_ckks_sub_ct(State &state, shared_ptr<BMEnv> bm_env)
+    {
+        vector<Ciphertext> &ct = bm_env->ct();
+        double scale = bm_env->safe_scale();
+        for (auto _ : state)
+        {
+            state.PauseTiming();
+            bm_env->randomize_ct_ckks(ct[0]);
+            ct[0].scale() = scale;
+            bm_env->randomize_ct_ckks(ct[1]);
+            ct[1].scale() = scale;
+
+            state.ResumeTiming();
+            bm_env->evaluator()->sub(ct[0], ct[1], ct[2]);
+        }
+    }
+
+    void bm_ckks_sub_pt(State &state, shared_ptr<BMEnv> bm_env)
+    {
+        vector<Ciphertext> &ct = bm_env->ct();
+        Plaintext &pt = bm_env->pt()[0];
+        double scale = bm_env->safe_scale();
+        for (auto _ : state)
+        {
+            state.PauseTiming();
+            bm_env->randomize_ct_ckks(ct[0]);
+            ct[0].scale() = scale;
+            bm_env->randomize_pt_ckks(pt);
+            pt.scale() = scale;
+
+            state.ResumeTiming();
+            bm_env->evaluator()->sub_plain(ct[0], pt, ct[2]);
+        }
+    }
+
     void bm_ckks_mul_ct(State &state, shared_ptr<BMEnv> bm_env)
     {
         vector<Ciphertext> &ct = bm_env->ct();
