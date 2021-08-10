@@ -336,6 +336,12 @@ namespace sealbench
         std::vector<seal::Ciphertext> ct_;
     }; // namespace BMEnv
 
+    // NTT benchmark cases
+    void bm_forward_ntt(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_inverse_ntt(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_forward_ntt_low_level(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_inverse_ntt_low_level(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+
     // KeyGen benchmark cases
     void bm_keygen_secret(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_keygen_public(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);

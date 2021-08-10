@@ -102,6 +102,10 @@ namespace sealbench
             SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateRelinInplace, bm_ckks_relin_inplace, bm_env_ckks);
             SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateRotate, bm_ckks_rotate, bm_env_ckks);
         }
+        SEAL_BENCHMARK_REGISTER(NTT, n, log_q, ForwardNTT, bm_forward_ntt, bm_env_bfv);
+        SEAL_BENCHMARK_REGISTER(NTT, n, log_q, InverseNTT, bm_inverse_ntt, bm_env_bfv);
+        SEAL_BENCHMARK_REGISTER(NTT, n, log_q, ForwardNTTLowLevel, bm_forward_ntt_low_level, bm_env_bfv);
+        SEAL_BENCHMARK_REGISTER(NTT, n, log_q, InverseNTTLowLevel, bm_inverse_ntt_low_level, bm_env_bfv);
     }
 
 } // namespace sealbench
