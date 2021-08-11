@@ -74,4 +74,36 @@ namespace sealbench
             inverse_ntt_negacyclic_harvey(ct[0].data(), small_ntt_tables[0]);
         }
     }
+
+    void bm_forward_ntt_low_level_lazy(State &state, shared_ptr<BMEnv> bm_env)
+    {
+        parms_id_type parms_id = bm_env->context().first_parms_id();
+        auto context_data = bm_env->context().get_context_data(parms_id);
+        const auto &small_ntt_tables = context_data->small_ntt_tables();
+        vector<Ciphertext> &ct = bm_env->ct();
+        for (auto _ : state)
+        {
+            state.PauseTiming();
+            bm_env->randomize_ct_bfv(ct[0]);
+
+            state.ResumeTiming();
+            ntt_negacyclic_harvey_lazy(ct[0].data(), small_ntt_tables[0]);
+        }
+    }
+
+    void bm_inverse_ntt_low_level_lazy(State &state, shared_ptr<BMEnv> bm_env)
+    {
+        parms_id_type parms_id = bm_env->context().first_parms_id();
+        auto context_data = bm_env->context().get_context_data(parms_id);
+        const auto &small_ntt_tables = context_data->small_ntt_tables();
+        vector<Ciphertext> &ct = bm_env->ct();
+        for (auto _ : state)
+        {
+            state.PauseTiming();
+            bm_env->randomize_ct_bfv(ct[0]);
+
+            state.ResumeTiming();
+            inverse_ntt_negacyclic_harvey_lazy(ct[0].data(), small_ntt_tables[0]);
+        }
+    }
 } // namespace sealbench

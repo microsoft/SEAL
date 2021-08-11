@@ -106,6 +106,8 @@ namespace sealbench
         SEAL_BENCHMARK_REGISTER(NTT, n, log_q, InverseNTT, bm_inverse_ntt, bm_env_bfv);
         SEAL_BENCHMARK_REGISTER(NTT, n, log_q, ForwardNTTLowLevel, bm_forward_ntt_low_level, bm_env_bfv);
         SEAL_BENCHMARK_REGISTER(NTT, n, log_q, InverseNTTLowLevel, bm_inverse_ntt_low_level, bm_env_bfv);
+        SEAL_BENCHMARK_REGISTER(NTT, n, log_q, ForwardNTTLowLevelLazy, bm_forward_ntt_low_level_lazy, bm_env_bfv);
+        SEAL_BENCHMARK_REGISTER(NTT, n, log_q, InverseNTTLowLevelLazy, bm_inverse_ntt_low_level_lazy, bm_env_bfv);
     }
 
 } // namespace sealbench
