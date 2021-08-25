@@ -22,8 +22,7 @@ namespace sealbench
         (string("n=") + to_string(n) + string(" / log(q)=") + to_string(log_q) + string(" / " #category " / " #name)) \
             .c_str(),                                                                                                 \
         [=](State &st) { func(st, __VA_ARGS__); })                                                                    \
-        ->Unit(benchmark::kMicrosecond)                                                                               \
-        ->Iterations(10);
+        ->Unit(benchmark::kMicrosecond)
 
     void register_bm_family(
         const pair<size_t, vector<Modulus>> &parms, unordered_map<EncryptionParameters, shared_ptr<BMEnv>> &bm_env_map)
@@ -68,11 +67,11 @@ namespace sealbench
         SEAL_BENCHMARK_REGISTER(BFV, n, log_q, EvaluateSquare, bm_bfv_square, bm_env_bfv);
         if (bm_env_bfv->context().first_context_data()->parms().coeff_modulus().size() > 1)
         {
-            SEAL_BENCHMARK_REGISTER(BFV, n, log_q, EvaluateModSwitchInplace, bm_bfv_modswitch_inplace, bm_env_bfv);
+            SEAL_BENCHMARK_REGISTER(BFV, n, log_q, EvaluateModSwitch, bm_bfv_modswitch, bm_env_bfv);
         }
         if (bm_env_bfv->context().using_keyswitching())
         {
-            SEAL_BENCHMARK_REGISTER(BFV, n, log_q, EvaluateRelinInplace, bm_bfv_relin_inplace, bm_env_bfv);
+            SEAL_BENCHMARK_REGISTER(BFV, n, log_q, EvaluateRelin, bm_bfv_relin, bm_env_bfv);
             SEAL_BENCHMARK_REGISTER(BFV, n, log_q, EvaluateRotateRows, bm_bfv_rotate_rows, bm_env_bfv);
             SEAL_BENCHMARK_REGISTER(BFV, n, log_q, EvaluateRotateCols, bm_bfv_rotate_cols, bm_env_bfv);
         }
@@ -89,11 +88,11 @@ namespace sealbench
         SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateSquare, bm_ckks_square, bm_env_ckks);
         if (bm_env_bfv->context().first_context_data()->parms().coeff_modulus().size() > 1)
         {
-            SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateRescaleInplace, bm_ckks_rescale_inplace, bm_env_ckks);
+            SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateRescale, bm_ckks_rescale, bm_env_ckks);
         }
         if (bm_env_bfv->context().using_keyswitching())
         {
-            SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateRelinInplace, bm_ckks_relin_inplace, bm_env_ckks);
+            SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateRelin, bm_ckks_relin, bm_env_ckks);
             SEAL_BENCHMARK_REGISTER(CKKS, n, log_q, EvaluateRotate, bm_ckks_rotate, bm_env_ckks);
         }
     }

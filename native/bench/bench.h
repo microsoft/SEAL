@@ -353,8 +353,8 @@ namespace sealbench
     void bm_bfv_mul_ct(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bfv_mul_pt(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bfv_square(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
-    void bm_bfv_modswitch_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
-    void bm_bfv_relin_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bfv_modswitch(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_bfv_relin(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bfv_rotate_rows(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_bfv_rotate_cols(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
 
@@ -369,7 +369,7 @@ namespace sealbench
     void bm_ckks_mul_ct(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_ckks_mul_pt(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_ckks_square(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
-    void bm_ckks_rescale_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
-    void bm_ckks_relin_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_ckks_rescale(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_ckks_relin(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_ckks_rotate(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
 } // namespace sealbench
