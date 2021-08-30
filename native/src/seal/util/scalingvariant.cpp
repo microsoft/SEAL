@@ -36,6 +36,10 @@ namespace seal
                     plain.data(), plain.data() + coeff_count, get<0>(I), get<0>(I),
                     [&](uint64_t m, uint64_t c) -> uint64_t {
                         m = barrett_reduce_64(m, plain_modulus);
+                        if (plain_modulus > cipher_modulus)
+                        {
+                            m = barrett_reduce_64(m, cipher_modulus);
+                        }
                         return add_uint_mod(c, m, cipher_modulus);
                     });
             });
@@ -66,6 +70,10 @@ namespace seal
                     plain.data(), plain.data() + coeff_count, get<0>(I), get<0>(I),
                     [&](uint64_t m, uint64_t c) -> uint64_t {
                         m = barrett_reduce_64(m, plain_modulus);
+                        if (plain_modulus > cipher_modulus)
+                        {
+                            m = barrett_reduce_64(m, cipher_modulus);
+                        }
                         return sub_uint_mod(c, m, cipher_modulus);
                     });
             });
