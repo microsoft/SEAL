@@ -116,7 +116,7 @@ The optional dependencies and their tested versions (other versions may work as 
 
 | Optional dependency                                    | Tested version | Use                                              |
 | ------------------------------------------------------ | -------------- | ------------------------------------------------ |
-| [Intel HEXL](https://github.com/intel/hexl)            | 1.2.0          | Acceleration of low-level kernels                |
+| [Intel HEXL](https://github.com/intel/hexl)            | 1.2.1          | Acceleration of low-level kernels                |
 | [Microsoft GSL](https://github.com/microsoft/GSL)      | 3.1.0          | API extensions                                   |
 | [ZLIB](https://github.com/madler/zlib)                 | 1.2.11         | Compressed serialization                         |
 | [Zstandard](https://github.com/facebook/zstd)          | 1.4.5          | Compressed serialization (much faster than ZLIB) |
