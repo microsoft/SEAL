@@ -8,6 +8,18 @@ using namespace seal;
 
 int main()
 {
+    for (size_t n = 1024; n <= 32768; n *= 2)
+    {
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(n);
+        parms.set_coeff_modulus(CoeffModulus::BFVDefault(n));
+        parms.set_plain_modulus(PlainModulus::Batching(n, { 25 }));
+        SEALContext context(parms);
+        cout << n << "\t" << context.first_context_data()->parms().coeff_modulus().size() << "\t";
+        cout << context.first_context_data()->rns_tool()->base_B()->size() << endl;
+    }
+    return 0;
+
     cout << "Microsoft SEAL version: " << SEAL_VERSION << endl;
     while (true)
     {
