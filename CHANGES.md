@@ -1,10 +1,18 @@
 # List of Changes
 
-## Version 4.0.0
+## Version 3.7.0
+
+### Features
+
+- Small improvement to the performance of `Evaluator::multiply`, `Evaluator::multiply_inplace`, and `Evaluator::square` in the BFV scheme, for default parameters with degree `4096` or higher.
+
+### Minor API Changes
+
+- `const` methods in `SEALContext` and `SEALContext::ContextData` classes that used to return a pointer or reference now have a preceeding `const` qualifier.
 
 ### Bug Fixes
 
-- Fixed failed tests on ARM64 architecture [(Issue 360)](https://github.com/microsoft/SEAL/issues/360).
+- Fixed failed tests on PowerPC architecture [(Issue 360)](https://github.com/microsoft/SEAL/issues/360).
 
 ## Version 3.6.6
 
