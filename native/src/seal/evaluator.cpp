@@ -522,7 +522,7 @@ namespace seal
             // x = (x[0] * y[0], x[0] * y[1] + x[1] * y[0], x[1] * y[1])
             // with appropriate modular reduction
             SEAL_ITERATE(coeff_modulus, coeff_modulus_size, [&](auto I) {
-                SEAL_ITERATE(iter(size_t(0)), num_tiles, [&](auto J) {
+                SEAL_ITERATE(iter(size_t(0)), num_tiles, [&](SEAL_MAYBE_UNUSED auto J) {
                     // Compute third output polynomial, overwriting input
                     // x[2] = x[1] * y[1]
                     dyadic_product_coeffmod(
