@@ -337,12 +337,12 @@ namespace sealbench
     }; // namespace BMEnv
 
     // NTT benchmark cases
-    void bm_forward_ntt(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
-    void bm_inverse_ntt(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
-    void bm_forward_ntt_low_level(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
-    void bm_inverse_ntt_low_level(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
-    void bm_forward_ntt_low_level_lazy(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
-    void bm_inverse_ntt_low_level_lazy(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_util_ntt_forward(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_util_ntt_inverse(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_util_ntt_forward_low_level(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_util_ntt_inverse_low_level(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_util_ntt_forward_low_level_lazy(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+    void bm_util_ntt_inverse_low_level_lazy(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
 
     // KeyGen benchmark cases
     void bm_keygen_secret(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);

@@ -16,7 +16,7 @@ This file defines benchmarks for NTT-related HE primitives.
 
 namespace sealbench
 {
-    void bm_forward_ntt(State &state, shared_ptr<BMEnv> bm_env)
+    void bm_util_ntt_forward(State &state, shared_ptr<BMEnv> bm_env)
     {
         vector<Ciphertext> &ct = bm_env->ct();
         for (auto _ : state)
@@ -29,7 +29,7 @@ namespace sealbench
         }
     }
 
-    void bm_inverse_ntt(State &state, shared_ptr<BMEnv> bm_env)
+    void bm_util_ntt_inverse(State &state, shared_ptr<BMEnv> bm_env)
     {
         vector<Ciphertext> &ct = bm_env->ct();
         for (auto _ : state)
@@ -43,7 +43,7 @@ namespace sealbench
         }
     }
 
-    void bm_forward_ntt_low_level(State &state, shared_ptr<BMEnv> bm_env)
+    void bm_util_ntt_forward_low_level(State &state, shared_ptr<BMEnv> bm_env)
     {
         parms_id_type parms_id = bm_env->context().first_parms_id();
         auto context_data = bm_env->context().get_context_data(parms_id);
@@ -59,7 +59,7 @@ namespace sealbench
         }
     }
 
-    void bm_inverse_ntt_low_level(State &state, shared_ptr<BMEnv> bm_env)
+    void bm_util_ntt_inverse_low_level(State &state, shared_ptr<BMEnv> bm_env)
     {
         parms_id_type parms_id = bm_env->context().first_parms_id();
         auto context_data = bm_env->context().get_context_data(parms_id);
@@ -75,7 +75,7 @@ namespace sealbench
         }
     }
 
-    void bm_forward_ntt_low_level_lazy(State &state, shared_ptr<BMEnv> bm_env)
+    void bm_util_ntt_forward_low_level_lazy(State &state, shared_ptr<BMEnv> bm_env)
     {
         parms_id_type parms_id = bm_env->context().first_parms_id();
         auto context_data = bm_env->context().get_context_data(parms_id);
@@ -91,7 +91,7 @@ namespace sealbench
         }
     }
 
-    void bm_inverse_ntt_low_level_lazy(State &state, shared_ptr<BMEnv> bm_env)
+    void bm_util_ntt_inverse_low_level_lazy(State &state, shared_ptr<BMEnv> bm_env)
     {
         parms_id_type parms_id = bm_env->context().first_parms_id();
         auto context_data = bm_env->context().get_context_data(parms_id);

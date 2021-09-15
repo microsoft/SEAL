@@ -7,6 +7,7 @@
 - Improved the performance of `Evaluator::multiply`, `Evaluator::multiply_inplace`, and `Evaluator::square` in the BFV scheme for default parameters with degree `4096` or higher.
 - Improved the performance of decryption [(PR 363)](https://github.com/microsoft/SEAL/pull/363).
 - Updated to HEXL version 1.2.1 [(PR 375)](https://github.com/microsoft/SEAL/pull/375).
+- Added more benchmark cases [(PR 379)](https://github.com/microsoft/SEAL/pull/379).
 
 ### Minor API Changes
 
