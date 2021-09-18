@@ -216,3 +216,11 @@ inline void print_line(int line_number)
 {
     std::cout << "Line " << std::setw(3) << line_number << " --> ";
 }
+
+/*
+Helper function: Convert a value into a hexadecimal string, e.g., uint64_t(17) --> "11".
+*/
+inline std::string uint64_to_hex_string(std::uint64_t value)
+{
+    return seal::util::uint_to_hex_string(&value, std::size_t(1));
+}

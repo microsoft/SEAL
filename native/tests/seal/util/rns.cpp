@@ -875,6 +875,8 @@ namespace sealtest
             }
 
             // The size of Bsk is 2. Both values here are multiples of 35 (i.e., q).
+            // Skip tests exceeding input bound when using HEXL in DEBUG mode
+#if !defined(SEAL_DEBUG) || !defined(SEAL_USE_INTEL_HEXL)
             in[0] = 35;
             in[1] = 70;
             in[2] = 35;
@@ -896,6 +898,7 @@ namespace sealtest
             rns_tool->decrypt_scale_and_round(in_iter, out_iter, pool);
             ASSERT_EQ(2ULL, out[0]);
             ASSERT_EQ(0ULL, out[1]);
+#endif
         }
 
         TEST(RNSToolTest, DivideAndRoundQLastInplace)

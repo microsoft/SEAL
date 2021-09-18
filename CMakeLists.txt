@@ -23,7 +23,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Build type (CMAKE_BUILD_TYPE): ${CMAKE_BUILD_TYPE}")
 
-project(SEAL VERSION 3.6.6 LANGUAGES CXX C)
+project(SEAL VERSION 3.7.0 LANGUAGES CXX C)
 
 ########################
 # Global configuration #
@@ -83,6 +83,10 @@ endif()
 
 # Required files and directories
 include(GNUInstallDirs)
+
+# Runtime path setup
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_LIBDIR}")
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # Source Tree
 set(SEAL_INCLUDES_DIR ${CMAKE_CURRENT_LIST_DIR}/native/src)
@@ -219,9 +223,9 @@ if(SEAL_USE_INTEL_HEXL)
         message(STATUS "Intel HEXL: download ...")
         seal_fetch_thirdparty_content(ExternalIntelHEXL)
     else()
-        find_package(HEXL 1.1.0)
+        find_package(HEXL 1.2.1)
         if (NOT TARGET HEXL::hexl)
-            FATAL_ERROR("Intel HEXL: not found")
+            message(FATAL_ERROR "Intel HEXL: not found")
         endif()
     endif()
 endif()
@@ -412,15 +416,13 @@ if(NOT BUILD_SHARED_LIBS)
     if(SEAL_USE_INTEL_HEXL)
         if(SEAL_BUILD_DEPS)
             add_dependencies(seal HEXL::hexl)
-            target_include_directories(seal PUBLIC $<BUILD_INTERFACE:${hexl_SOURCE_DIR}/hexl/include>)
+            target_include_directories(seal PRIVATE
+                $<BUILD_INTERFACE:$<TARGET_PROPERTY:HEXL::hexl,INTERFACE_INCLUDE_DIRECTORIES>>)
             seal_combine_archives(seal HEXL::hexl)
+            target_compile_options(seal PRIVATE $<TARGET_PROPERTY:HEXL::hexl,INTERFACE_COMPILE_OPTIONS>)
+            target_link_options(seal PRIVATE $<TARGET_PROPERTY:HEXL::hexl,INTERFACE_LINK_OPTIONS>)
         else()
-            target_link_libraries(seal PRIVATE HEXL::hexl)
-            get_target_property(
-                HEXL_INCLUDE_DIR
-                HEXL::hexl
-                INTERFACE_INCLUDE_DIRECTORIES)
-            target_include_directories(seal PUBLIC ${HEXL_INCLUDE_DIR})
+            target_link_libraries(seal PUBLIC HEXL::hexl)
         endif()
     endif()
 
@@ -461,12 +463,12 @@ else()
     endif()
 
     if(SEAL_USE_INTEL_HEXL)
-        get_target_property(
-            HEXL_INCLUDE_DIR
-            HEXL::hexl
-            INTERFACE_INCLUDE_DIRECTORIES)
-        target_include_directories(seal_shared PUBLIC ${HEXL_INCLUDE_DIR})
-        target_link_libraries(seal_shared PRIVATE HEXL::hexl)
+        target_link_libraries(seal_shared PUBLIC HEXL::hexl)
+        # Install shared HEXL library to installation directory
+        install(DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+            DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_LIBRARY_PREFIX}
+            FILES_MATCHING PATTERN "*hexl*"
+            )
     endif()
 endif()
 
@@ -621,7 +623,7 @@ if(UNIX OR APPLE)
             set(SEAL_PKGCONFIG_ZSTD_REQUIRES_STRING "libzstd >= ${zstd_VERSION_MAJOR}")
         endif()
         if(SEAL_USE_INTEL_HEXL)
-            set(SEAL_PKGCONFIG_INTEL_HEXL_REQUIRES_STRING "HEXL >= ${HEXL_VERSION_MAJOR}")
+            set(SEAL_PKGCONFIG_INTEL_HEXL_REQUIRES_STRING "hexl >= ${HEXL_VERSION_MAJOR}")
             message(STATUS "Intel HEXL does not have a pkg-config file")
         endif()
     endif()

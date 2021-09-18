@@ -1,5 +1,22 @@
 # List of Changes
 
+## Version 3.7.0
+
+### Features
+
+- Improved the performance of `Evaluator::multiply`, `Evaluator::multiply_inplace`, and `Evaluator::square` in the BFV scheme for default parameters with degree `4096` or higher.
+- Improved the performance of decryption [(PR 363)](https://github.com/microsoft/SEAL/pull/363).
+- Updated to HEXL version 1.2.1 [(PR 375)](https://github.com/microsoft/SEAL/pull/375).
+- Added more benchmark cases [(PR 379)](https://github.com/microsoft/SEAL/pull/379).
+
+### Minor API Changes
+
+- `const` methods in `SEALContext` and `SEALContext::ContextData` classes that used to return a pointer or reference now have a preceeding `const` qualifier.
+
+### Bug Fixes
+
+- Fixed failed tests on PowerPC architecture [(Issue 360)](https://github.com/microsoft/SEAL/issues/360).
+
 ## Version 3.6.6
 
 ### Bug Fixes

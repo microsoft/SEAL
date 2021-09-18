@@ -5,23 +5,19 @@ FetchContent_Declare(
     hexl
     PREFIX hexl
     GIT_REPOSITORY https://github.com/intel/hexl
-    GIT_TAG 2dc1db # v1.1.0
+    GIT_TAG df6c26f # 1.2.1
 )
 FetchContent_GetProperties(hexl)
 
 if(NOT hexl_POPULATED)
     FetchContent_Populate(hexl)
-    set(HEXL_DEBUG OFF) # Set to ON/OFF to toggle debugging
-
     set(CMAKE_C_COMPILER ${CMAKE_C_COMPILER} CACHE STRING "" FORCE)
     set(CMAKE_CXX_COMPILER ${CMAKE_CXX_COMPILER} CACHE STRING "" FORCE)
     set(CMAKE_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX} CACHE STRING "" FORCE)
-    set(HEXL_DEBUG ${HEXL_DEBUG} CACHE BOOL "" FORCE)
     set(HEXL_BENCHMARK OFF CACHE BOOL "" FORCE)
-    set(HEXL_EXPORT OFF CACHE BOOL "" FORCE)
     set(HEXL_COVERAGE OFF CACHE BOOL "" FORCE)
     set(HEXL_TESTING OFF CACHE BOOL "" FORCE)
-    set(HEXL_SHARED_LIB OFF CACHE BOOL "" FORCE)
+    set(HEXL_SHARED_LIB ${BUILD_SHARED_LIBS} CACHE BOOL "" FORCE)
     set(EXCLUDE_FROM_ALL TRUE)
 
     mark_as_advanced(BUILD_HEXL)

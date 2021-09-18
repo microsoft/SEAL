@@ -28,12 +28,13 @@ namespace seal
     itself is not meant to be modified directly by the user, but is instead
     operated on by functions in the Evaluator class. The size of the backing
     array of a ciphertext depends on the encryption parameters and the size
-    of the ciphertext (at least 2). If the poly_modulus_degree encryption
-    parameter is N, and the number of primes in the coeff_modulus encryption
-    parameter is K, then the ciphertext backing array requires precisely
-    8*N*K*size bytes of memory. A ciphertext also carries with it the
-    parms_id of its associated encryption parameters, which is used to check
-    the validity of the ciphertext for homomorphic operations and decryption.
+    of the ciphertext (at least 2). If the size of the ciphertext is T,
+    the poly_modulus_degree encryption parameter is N, and the number of
+    primes in the coeff_modulus encryption parameter is K, then the
+    ciphertext backing array requires precisely 8*N*K*T bytes of memory.
+    A ciphertext also carries with it the parms_id of its associated
+    encryption parameters, which is used to check the validity of the
+    ciphertext for homomorphic operations and decryption.
 
     @par Memory Management
     The size of a ciphertext refers to the number of polynomials it contains,
