@@ -52,8 +52,11 @@ static_assert(sizeof(unsigned long long) == 8, "Require sizeof(unsigned long lon
 #define SEAL_POLY_MOD_DEGREE_MAX 131072
 #define SEAL_POLY_MOD_DEGREE_MIN 2
 
-// Upper bound on the size of a ciphertext (no hard requirement)
+// Upper bound on the size of a ciphertext (cannot exceed 2^32 / poly_modulus_degree)
 #define SEAL_CIPHERTEXT_SIZE_MAX 16
+#if SEAL_CIPHERTEXT_SIZE_MAX > 0x100000000ULL / SEAL_POLY_MOD_DEGREE_MAX
+#error "SEAL_CIPHERTEXT_SIZE_MAX is too large"
+#endif
 #define SEAL_CIPHERTEXT_SIZE_MIN 2
 
 // How many pairs of modular integers can we multiply and accumulate in a 128-bit data type

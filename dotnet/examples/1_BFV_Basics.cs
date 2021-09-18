@@ -222,8 +222,8 @@ namespace SEALNetExamples
             a string with coefficients represented as hexadecimal numbers.
             */
             Utilities.PrintLine();
-            int x = 6;
-            using Plaintext xPlain = new Plaintext(x.ToString());
+            ulong x = 6;
+            using Plaintext xPlain = new Plaintext(Utilities.ULongToString(x));
             Console.WriteLine($"Express x = {x} as a plaintext polynomial 0x{xPlain}.");
 
             /*

@@ -89,7 +89,7 @@ namespace seal
         @throws std::invalid_argument if encrypted is not valid for the encryption
         parameters
         */
-        void negate_inplace(Ciphertext &encrypted)  const;
+        void negate_inplace(Ciphertext &encrypted) const;
 
         /**
         Negates a ciphertext and stores the result in the destination parameter.
@@ -99,7 +99,7 @@ namespace seal
         @throws std::invalid_argument if encrypted is not valid for the encryption parameters
         @throws std::logic_error if result ciphertext is transparent
         */
-        inline void negate(const Ciphertext &encrypted, Ciphertext &destination)  const
+        inline void negate(const Ciphertext &encrypted, Ciphertext &destination) const
         {
             destination = encrypted;
             negate_inplace(destination);
@@ -115,7 +115,7 @@ namespace seal
         @throws std::invalid_argument if encrypted1 and encrypted2 are at different level or scale
         @throws std::logic_error if result ciphertext is transparent
         */
-        void add_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2)  const;
+        void add_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2) const;
 
         /**
         Adds two ciphertexts. This function adds together encrypted1 and encrypted2 and stores the result in the
@@ -212,7 +212,8 @@ namespace seal
         @throws std::logic_error if result ciphertext is transparent
         */
         void multiply_inplace(
-            Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool = MemoryManager::GetPool()) const;
+            Ciphertext &encrypted1, const Ciphertext &encrypted2,
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
         /**
         Multiplies two ciphertexts. This functions computes the product of encrypted1 and encrypted2 and stores the
@@ -274,7 +275,8 @@ namespace seal
         @throws std::logic_error if result ciphertext is transparent
         */
         inline void square(
-            const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
+            const Ciphertext &encrypted, Ciphertext &destination,
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             destination = encrypted;
             square_inplace(destination, std::move(pool));
@@ -344,7 +346,8 @@ namespace seal
         @throws std::logic_error if result ciphertext is transparent
         */
         void mod_switch_to_next(
-            const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const;
+            const Ciphertext &encrypted, Ciphertext &destination,
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
         /**
         Given a ciphertext encrypted modulo q_1...q_k, this function switches the modulus down to q_1...q_{k-1}. Dynamic
@@ -359,7 +362,8 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         @throws std::logic_error if result ciphertext is transparent
         */
-        inline void mod_switch_to_next_inplace(Ciphertext &encrypted, MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        inline void mod_switch_to_next_inplace(
+            Ciphertext &encrypted, MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             mod_switch_to_next(encrypted, encrypted, std::move(pool));
         }
@@ -499,7 +503,8 @@ namespace seal
         @throws std::logic_error if result ciphertext is transparent
         */
         void rescale_to_next(
-            const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const;
+            const Ciphertext &encrypted, Ciphertext &destination,
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
         /**
         Given a ciphertext encrypted modulo q_1...q_k, this function switches the modulus down to q_1...q_{k-1} and
@@ -515,7 +520,8 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         @throws std::logic_error if result ciphertext is transparent
         */
-        inline void rescale_to_next_inplace(Ciphertext &encrypted, MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        inline void rescale_to_next_inplace(
+            Ciphertext &encrypted, MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             rescale_to_next(encrypted, encrypted, std::move(pool));
         }
@@ -1015,7 +1021,8 @@ namespace seal
         @throws std::logic_error if result ciphertext is transparent
         */
         inline void rotate_columns_inplace(
-            Ciphertext &encrypted, const GaloisKeys &galois_keys, MemoryPoolHandle pool = MemoryManager::GetPool()) const
+            Ciphertext &encrypted, const GaloisKeys &galois_keys,
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             if (context_.key_context_data()->parms().scheme() != scheme_type::bfv)
             {
@@ -1146,7 +1153,8 @@ namespace seal
         @throws std::logic_error if result ciphertext is transparent
         */
         inline void complex_conjugate_inplace(
-            Ciphertext &encrypted, const GaloisKeys &galois_keys, MemoryPoolHandle pool = MemoryManager::GetPool()) const
+            Ciphertext &encrypted, const GaloisKeys &galois_keys,
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             if (context_.key_context_data()->parms().scheme() != scheme_type::ckks)
             {
@@ -1198,26 +1206,30 @@ namespace seal
 
         Evaluator &operator=(Evaluator &&assign) = delete;
 
-        void bfv_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool)  const;
+        void bfv_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool) const;
 
-        void ckks_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool)  const;
+        void ckks_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool) const;
 
         void bfv_square(Ciphertext &encrypted, MemoryPoolHandle pool) const;
 
         void ckks_square(Ciphertext &encrypted, MemoryPoolHandle pool) const;
 
         void relinearize_internal(
-            Ciphertext &encrypted, const RelinKeys &relin_keys, std::size_t destination_size, MemoryPoolHandle pool) const;
+            Ciphertext &encrypted, const RelinKeys &relin_keys, std::size_t destination_size,
+            MemoryPoolHandle pool) const;
 
-        void mod_switch_scale_to_next(const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool) const;
+        void mod_switch_scale_to_next(
+            const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool) const;
 
         void mod_switch_drop_to_next(const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool) const;
 
         void mod_switch_drop_to_next(Plaintext &plain) const;
 
-        void rotate_internal(Ciphertext &encrypted, int steps, const GaloisKeys &galois_keys, MemoryPoolHandle pool) const;
+        void rotate_internal(
+            Ciphertext &encrypted, int steps, const GaloisKeys &galois_keys, MemoryPoolHandle pool) const;
 
-        inline void conjugate_internal(Ciphertext &encrypted, const GaloisKeys &galois_keys, MemoryPoolHandle pool) const
+        inline void conjugate_internal(
+            Ciphertext &encrypted, const GaloisKeys &galois_keys, MemoryPoolHandle pool) const
         {
             // Verify parameters.
             auto context_data_ptr = context_.get_context_data(encrypted.parms_id());
@@ -1241,16 +1253,12 @@ namespace seal
 
         void switch_key_inplace(
             Ciphertext &encrypted, util::ConstRNSIter target_iter, const KSwitchKeys &kswitch_keys,
-            std::size_t key_index, MemoryPoolHandle pool = MemoryManager::GetPool())  const;
+            std::size_t key_index, MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
         void multiply_plain_normal(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool) const;
 
         void multiply_plain_ntt(Ciphertext &encrypted_ntt, const Plaintext &plain_ntt) const;
 
-        void populate_Zmstar_to_generator();
-
         SEALContext context_;
-
-        std::map<std::uint64_t, std::pair<std::uint64_t, std::uint64_t>> Zmstar_to_generator_{};
     };
 } // namespace seal

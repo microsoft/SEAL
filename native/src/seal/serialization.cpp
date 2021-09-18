@@ -223,7 +223,7 @@ namespace seal
 
     streamoff Serialization::Save(
         function<void(ostream &)> save_members, streamoff raw_size, ostream &stream, compr_mode_type compr_mode,
-        bool clear_buffers)
+        SEAL_MAYBE_UNUSED bool clear_buffers)
     {
         if (!save_members)
         {
@@ -339,7 +339,7 @@ namespace seal
     }
 
     streamoff Serialization::Load(
-        function<void(istream &, SEALVersion)> load_members, istream &stream, bool clear_buffers)
+        function<void(istream &, SEALVersion)> load_members, istream &stream, SEAL_MAYBE_UNUSED bool clear_buffers)
     {
         if (!load_members)
         {

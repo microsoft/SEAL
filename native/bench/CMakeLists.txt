@@ -3,14 +3,14 @@
 
 cmake_minimum_required(VERSION 3.12)
 
-project(SEALBench VERSION 3.6.6 LANGUAGES CXX)
+project(SEALBench VERSION 3.7.0 LANGUAGES CXX)
 
 # If not called from root CMakeLists.txt
 if(NOT DEFINED SEAL_BUILD_BENCH)
     set(SEAL_BUILD_BENCH ON)
 
     # Import Microsoft SEAL
-    find_package(SEAL 3.6.6 EXACT REQUIRED)
+    find_package(SEAL 3.7.0 EXACT REQUIRED)
 
     # Must define these variables and include macros
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUTLIB_PATH})
@@ -63,6 +63,7 @@ if(SEAL_BUILD_BENCH)
         PRIVATE
             ${CMAKE_CURRENT_LIST_DIR}/bench.cpp
             ${CMAKE_CURRENT_LIST_DIR}/keygen.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/ntt.cpp
             ${CMAKE_CURRENT_LIST_DIR}/bfv.cpp
             ${CMAKE_CURRENT_LIST_DIR}/ckks.cpp
     )

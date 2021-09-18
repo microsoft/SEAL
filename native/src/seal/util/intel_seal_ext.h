@@ -35,9 +35,8 @@ namespace intel
                 return cache_.back().get();
             }
 
-            void deallocate_impl(void *p, std::size_t n)
+            void deallocate_impl(void *p, SEAL_MAYBE_UNUSED std::size_t n)
             {
-                (void)n;
                 auto it = std::remove_if(
                     cache_.begin(), cache_.end(),
                     [p](const seal::util::Pointer<seal::seal_byte> &seal_pointer) { return p == seal_pointer.get(); });
@@ -97,9 +96,8 @@ namespace intel
                 }
             }
 
-            void deallocate_impl(void *p, std::size_t n)
+            void deallocate_impl(void *p, SEAL_MAYBE_UNUSED std::size_t n)
             {
-                (void)n;
                 {
                     // to prevent inline optimization with deadlock
                     auto accessor = policy_.locker();
@@ -151,7 +149,7 @@ namespace intel
         @param[in] modulus The modulus
         @param[in] root The root of unity
         */
-        hexl::NTT get_ntt(std::size_t N, std::uint64_t modulus, std::uint64_t root);
+        intel::hexl::NTT &get_ntt(size_t N, uint64_t modulus, uint64_t root);
 
         /**
         Computes the forward negacyclic NTT from the given parameters.

@@ -269,7 +269,7 @@ namespace seal
             /**
             Returns a const reference to the underlying encryption parameters.
             */
-            SEAL_NODISCARD inline auto &parms() const noexcept
+            SEAL_NODISCARD inline const EncryptionParameters &parms() const noexcept
             {
                 return parms_;
             }
@@ -277,7 +277,7 @@ namespace seal
             /**
             Returns the parms_id of the current parameters.
             */
-            SEAL_NODISCARD inline auto &parms_id() const noexcept
+            SEAL_NODISCARD inline const parms_id_type &parms_id() const noexcept
             {
                 return parms_.parms_id();
             }
@@ -288,7 +288,7 @@ namespace seal
             necessary to create a new instance of SEALContext once appropriate changes
             to the encryption parameters have been made.
             */
-            SEAL_NODISCARD inline auto qualifiers() const noexcept
+            SEAL_NODISCARD inline EncryptionParameterQualifiers qualifiers() const noexcept
             {
                 return qualifiers_;
             }
@@ -298,7 +298,7 @@ namespace seal
             modulus. The security of the encryption parameters largely depends on the
             bit-length of this product, and on the degree of the polynomial modulus.
             */
-            SEAL_NODISCARD inline auto total_coeff_modulus() const noexcept
+            SEAL_NODISCARD inline const std::uint64_t *total_coeff_modulus() const noexcept
             {
                 return total_coeff_modulus_.get();
             }
@@ -314,7 +314,7 @@ namespace seal
             /**
             Returns a constant pointer to the RNSTool.
             */
-            SEAL_NODISCARD inline auto rns_tool() const noexcept
+            SEAL_NODISCARD inline const util::RNSTool *rns_tool() const noexcept
             {
                 return rns_tool_.get();
             }
@@ -322,7 +322,7 @@ namespace seal
             /**
             Returns a constant pointer to the NTT tables.
             */
-            SEAL_NODISCARD inline auto small_ntt_tables() const noexcept
+            SEAL_NODISCARD inline const util::NTTTables *small_ntt_tables() const noexcept
             {
                 return small_ntt_tables_.get();
             }
@@ -330,7 +330,7 @@ namespace seal
             /**
             Returns a constant pointer to the NTT tables.
             */
-            SEAL_NODISCARD inline auto plain_ntt_tables() const noexcept
+            SEAL_NODISCARD inline const util::NTTTables *plain_ntt_tables() const noexcept
             {
                 return plain_ntt_tables_.get();
             }
@@ -338,7 +338,7 @@ namespace seal
             /**
             Returns a constant pointer to the GaloisTool.
             */
-            SEAL_NODISCARD inline auto galois_tool() const noexcept
+            SEAL_NODISCARD inline const util::GaloisTool *galois_tool() const noexcept
             {
                 return galois_tool_.get();
             }
@@ -347,7 +347,7 @@ namespace seal
             Return a pointer to BFV "Delta", i.e. coefficient modulus divided by
             plaintext modulus.
             */
-            SEAL_NODISCARD inline auto coeff_div_plain_modulus() const noexcept
+            SEAL_NODISCARD inline const util::MultiplyUIntModOperand *coeff_div_plain_modulus() const noexcept
             {
                 return coeff_div_plain_modulus_.get();
             }
@@ -356,7 +356,7 @@ namespace seal
             Return the threshold for the upper half of integers modulo plain_modulus.
             This is simply (plain_modulus + 1) / 2.
             */
-            SEAL_NODISCARD inline auto plain_upper_half_threshold() const noexcept
+            SEAL_NODISCARD inline std::uint64_t plain_upper_half_threshold() const noexcept
             {
                 return plain_upper_half_threshold_;
             }
@@ -367,7 +367,7 @@ namespace seal
             for the full product coeff_modulus if using_fast_plain_lift is false and is
             otherwise represented modulo each of the coeff_modulus primes in order.
             */
-            SEAL_NODISCARD inline auto plain_upper_half_increment() const noexcept
+            SEAL_NODISCARD inline const std::uint64_t *plain_upper_half_increment() const noexcept
             {
                 return plain_upper_half_increment_.get();
             }
@@ -376,7 +376,7 @@ namespace seal
             Return a pointer to the upper half threshold with respect to the total
             coefficient modulus. This is needed in CKKS decryption.
             */
-            SEAL_NODISCARD inline auto upper_half_threshold() const noexcept
+            SEAL_NODISCARD inline const std::uint64_t *upper_half_threshold() const noexcept
             {
                 return upper_half_threshold_.get();
             }
@@ -392,7 +392,7 @@ namespace seal
             this operation is only done for negative message coefficients, i.e. those
             that exceed plain_upper_half_threshold.
             */
-            SEAL_NODISCARD inline auto upper_half_increment() const noexcept
+            SEAL_NODISCARD inline const std::uint64_t *upper_half_increment() const noexcept
             {
                 return upper_half_increment_.get();
             }
@@ -400,7 +400,7 @@ namespace seal
             /**
             Return the non-RNS form of upper_half_increment which is q mod t.
             */
-            SEAL_NODISCARD inline auto coeff_modulus_mod_plain_modulus() const noexcept -> std::uint64_t
+            SEAL_NODISCARD inline std::uint64_t coeff_modulus_mod_plain_modulus() const noexcept
             {
                 return coeff_modulus_mod_plain_modulus_;
             }
@@ -410,7 +410,7 @@ namespace seal
             in the modulus switching chain. If the current data is the first one in the
             chain, then the result is nullptr.
             */
-            SEAL_NODISCARD inline auto prev_context_data() const noexcept
+            SEAL_NODISCARD inline const auto prev_context_data() const noexcept
             {
                 return prev_context_data_.lock();
             }
@@ -420,7 +420,7 @@ namespace seal
             in the modulus switching chain. If the current data is the last one in the
             chain, then the result is nullptr.
             */
-            SEAL_NODISCARD inline auto next_context_data() const noexcept
+            SEAL_NODISCARD inline const auto next_context_data() const noexcept
             {
                 return next_context_data_;
             }

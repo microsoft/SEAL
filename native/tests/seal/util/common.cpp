@@ -35,7 +35,7 @@ namespace sealtest
             unsigned char pos_uc_max = 0xFF;
             unsigned long long pos_ull = 1;
             unsigned long long pos_ull_max = 0xFFFFFFFFFFFFFFFF;
-#if defined(__aarch64__) || defined(_M_ARM64)
+#if defined(__aarch64__) || defined(_M_ARM64) || defined(__powerpc__) || defined(_M_PPC)
             unsigned long long pos_ull_neg_c = 0xFF;
 #endif
             long long neg_ull = -1;
@@ -52,7 +52,7 @@ namespace sealtest
             ASSERT_TRUE(unsigned_eq(pos_uc, pos_c));
             ASSERT_TRUE(unsigned_geq(pos_uc, pos_c));
             ASSERT_TRUE(unsigned_leq(pos_uc, pos_c));
-#if defined(__aarch64__) || defined(_M_ARM64)
+#if defined(__aarch64__) || defined(_M_ARM64) || defined(__powerpc__) || defined(_M_PPC)
             ASSERT_TRUE(unsigned_eq(pos_uc_max, neg_c));
             ASSERT_TRUE(unsigned_eq(neg_c, pos_ull_neg_c));
 #else
@@ -114,7 +114,7 @@ namespace sealtest
             ASSERT_TRUE(fits_in<unsigned>(pos_s));
             ASSERT_TRUE(fits_in<char>(pos_uc));
             ASSERT_FALSE(fits_in<unsigned>(neg_i));
-#if defined(__aarch64__) || defined(_M_ARM64)
+#if defined(__aarch64__) || defined(_M_ARM64) || defined(__powerpc__) || defined(_M_PPC)
             ASSERT_TRUE(fits_in<char>(pos_uc_max));
 #else
             ASSERT_FALSE(fits_in<char>(pos_uc_max));
