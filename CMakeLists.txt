@@ -466,7 +466,13 @@ else()
     endif()
 
     if(SEAL_USE_INTEL_HEXL)
-        target_link_libraries(seal_shared PUBLIC HEXL::hexl)
+        target_link_libraries(seal_shared PRIVATE HEXL::hexl)
+        target_compile_options(seal_shared PRIVATE $<TARGET_PROPERTY:HEXL::hexl,INTERFACE_COMPILE_OPTIONS>)
+        get_target_property(HEXL_INTERFACE_LINK_OPTIONS HEXL::hexl INTERFACE_LINK_OPTIONS)
+        if (NOT "${HEXL_INTERFACE_LINK_OPTIONS}" STREQUAL "HEXL_INTERFACE_LINK_OPTIONS-NOTFOUND")
+            target_link_libraries(seal_shared INTERFACE ${HEXL_INTERFACE_LINK_OPTIONS})
+        endif()
+
         # Install shared HEXL library to installation directory
         install(DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
             DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_LIBRARY_PREFIX}
