@@ -410,7 +410,7 @@ namespace seal
             in the modulus switching chain. If the current data is the first one in the
             chain, then the result is nullptr.
             */
-            SEAL_NODISCARD inline const auto prev_context_data() const noexcept
+            SEAL_NODISCARD inline std::shared_ptr<const ContextData> prev_context_data() const noexcept
             {
                 return prev_context_data_.lock();
             }
@@ -420,7 +420,7 @@ namespace seal
             in the modulus switching chain. If the current data is the last one in the
             chain, then the result is nullptr.
             */
-            SEAL_NODISCARD inline const auto next_context_data() const noexcept
+            SEAL_NODISCARD inline std::shared_ptr<const ContextData> next_context_data() const noexcept
             {
                 return next_context_data_;
             }
@@ -531,7 +531,7 @@ namespace seal
 
         @param[in] parms_id The parms_id of the encryption parameters
         */
-        SEAL_NODISCARD inline auto get_context_data(parms_id_type parms_id) const
+        SEAL_NODISCARD inline std::shared_ptr<const ContextData> get_context_data(parms_id_type parms_id) const
         {
             auto data = context_data_map_.find(parms_id);
             return (data != context_data_map_.end()) ? data->second : std::shared_ptr<ContextData>{ nullptr };
@@ -541,7 +541,7 @@ namespace seal
         Returns the ContextData corresponding to encryption parameters that are
         used for keys.
         */
-        SEAL_NODISCARD inline auto key_context_data() const
+        SEAL_NODISCARD inline std::shared_ptr<const ContextData> key_context_data() const
         {
             auto data = context_data_map_.find(key_parms_id_);
             return (data != context_data_map_.end()) ? data->second : std::shared_ptr<ContextData>{ nullptr };
@@ -551,7 +551,7 @@ namespace seal
         Returns the ContextData corresponding to the first encryption parameters
         that are used for data.
         */
-        SEAL_NODISCARD inline auto first_context_data() const
+        SEAL_NODISCARD inline std::shared_ptr<const ContextData> first_context_data() const
         {
             auto data = context_data_map_.find(first_parms_id_);
             return (data != context_data_map_.end()) ? data->second : std::shared_ptr<ContextData>{ nullptr };
@@ -561,7 +561,7 @@ namespace seal
         Returns the ContextData corresponding to the last encryption parameters
         that are used for data.
         */
-        SEAL_NODISCARD inline auto last_context_data() const
+        SEAL_NODISCARD inline std::shared_ptr<const ContextData> last_context_data() const
         {
             auto data = context_data_map_.find(last_parms_id_);
             return (data != context_data_map_.end()) ? data->second : std::shared_ptr<ContextData>{ nullptr };
@@ -570,7 +570,7 @@ namespace seal
         /**
         Returns whether the first_context_data's encryption parameters are valid.
         */
-        SEAL_NODISCARD inline auto parameters_set() const
+        SEAL_NODISCARD inline bool parameters_set() const
         {
             return first_context_data() ? first_context_data()->qualifiers_.parameters_set() : false;
         }
@@ -597,7 +597,7 @@ namespace seal
         Returns a parms_id_type corresponding to the set of encryption parameters
         that are used for keys.
         */
-        SEAL_NODISCARD inline auto &key_parms_id() const noexcept
+        SEAL_NODISCARD inline const parms_id_type &key_parms_id() const noexcept
         {
             return key_parms_id_;
         }
@@ -606,7 +606,7 @@ namespace seal
         Returns a parms_id_type corresponding to the first encryption parameters
         that are used for data.
         */
-        SEAL_NODISCARD inline auto &first_parms_id() const noexcept
+        SEAL_NODISCARD inline const parms_id_type &first_parms_id() const noexcept
         {
             return first_parms_id_;
         }
@@ -615,7 +615,7 @@ namespace seal
         Returns a parms_id_type corresponding to the last encryption parameters
         that are used for data.
         */
-        SEAL_NODISCARD inline auto &last_parms_id() const noexcept
+        SEAL_NODISCARD inline const parms_id_type &last_parms_id() const noexcept
         {
             return last_parms_id_;
         }
