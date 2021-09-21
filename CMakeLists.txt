@@ -418,9 +418,10 @@ if(NOT BUILD_SHARED_LIBS)
             add_dependencies(seal HEXL::hexl)
             target_include_directories(seal PRIVATE
                 $<BUILD_INTERFACE:$<TARGET_PROPERTY:HEXL::hexl,INTERFACE_INCLUDE_DIRECTORIES>>)
-            seal_combine_archives(seal HEXL::hexl)
             target_compile_options(seal PRIVATE $<TARGET_PROPERTY:HEXL::hexl,INTERFACE_COMPILE_OPTIONS>)
-            target_link_options(seal PRIVATE $<TARGET_PROPERTY:HEXL::hexl,INTERFACE_LINK_OPTIONS>)
+            get_target_property(HEXL_INTERFACE_LINK_OPTIONS HEXL::hexl INTERFACE_LINK_OPTIONS)
+            target_link_libraries(seal INTERFACE ${HEXL_INTERFACE_LINK_OPTIONS})
+            seal_combine_archives(seal HEXL::hexl)
         else()
             target_link_libraries(seal PUBLIC HEXL::hexl)
         endif()
@@ -587,12 +588,6 @@ if(SEAL_BUILD_DEPS)
     if(SEAL_USE_MSGSL)
         install(
             DIRECTORY ${msgsl_SOURCE_DIR}/include/gsl
-            DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
-    endif()
-    # Intel HEXL
-    if(SEAL_USE_INTEL_HEXL)
-        install(
-            DIRECTORY ${hexl_SOURCE_DIR}/hexl/include/hexl
             DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
     endif()
 endif()

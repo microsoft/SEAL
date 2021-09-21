@@ -14,39 +14,11 @@
 #include <cstdint>
 #include <stdexcept>
 
-#ifdef SEAL_USE_INTEL_HEXL
-#include "hexl/hexl.hpp"
-#endif
-
 namespace seal
 {
     namespace util
     {
-        inline void modulo_poly_coeffs(
-            ConstCoeffIter poly, std::size_t coeff_count, const Modulus &modulus, CoeffIter result)
-        {
-#ifdef SEAL_DEBUG
-            if (!poly && coeff_count > 0)
-            {
-                throw std::invalid_argument("poly");
-            }
-            if (!result && coeff_count > 0)
-            {
-                throw std::invalid_argument("result");
-            }
-            if (modulus.is_zero())
-            {
-                throw std::invalid_argument("modulus");
-            }
-#endif
-
-#ifdef SEAL_USE_INTEL_HEXL
-            intel::hexl::EltwiseReduceMod(result, poly, coeff_count, modulus.value(), 0, 1);
-#else
-            SEAL_ITERATE(
-                iter(poly, result), coeff_count, [&](auto I) { get<1>(I) = barrett_reduce_64(get<0>(I), modulus); });
-#endif
-        }
+        void modulo_poly_coeffs(ConstCoeffIter poly, std::size_t coeff_count, const Modulus &modulus, CoeffIter result);
 
         inline void modulo_poly_coeffs(
             ConstRNSIter poly, std::size_t coeff_modulus_size, ConstModulusIter modulus, RNSIter result)
@@ -187,50 +159,9 @@ namespace seal
             });
         }
 
-        inline void add_poly_coeffmod(
+        void add_poly_coeffmod(
             ConstCoeffIter operand1, ConstCoeffIter operand2, std::size_t coeff_count, const Modulus &modulus,
-            CoeffIter result)
-        {
-#ifdef SEAL_DEBUG
-            if (!operand1 && coeff_count > 0)
-            {
-                throw std::invalid_argument("operand1");
-            }
-            if (!operand2 && coeff_count > 0)
-            {
-                throw std::invalid_argument("operand2");
-            }
-            if (modulus.is_zero())
-            {
-                throw std::invalid_argument("modulus");
-            }
-            if (!result && coeff_count > 0)
-            {
-                throw std::invalid_argument("result");
-            }
-#endif
-            const uint64_t modulus_value = modulus.value();
-
-#ifdef SEAL_USE_INTEL_HEXL
-            intel::hexl::EltwiseAddMod(&result[0], &operand1[0], &operand2[0], coeff_count, modulus_value);
-#else
-
-            SEAL_ITERATE(iter(operand1, operand2, result), coeff_count, [&](auto I) {
-#ifdef SEAL_DEBUG
-                if (get<0>(I) >= modulus_value)
-                {
-                    throw std::invalid_argument("operand1");
-                }
-                if (get<1>(I) >= modulus_value)
-                {
-                    throw std::invalid_argument("operand2");
-                }
-#endif
-                std::uint64_t sum = get<0>(I) + get<1>(I);
-                get<2>(I) = SEAL_COND_SELECT(sum >= modulus_value, sum - modulus_value, sum);
-            });
-#endif
-        }
+            CoeffIter result);
 
         inline void add_poly_coeffmod(
             ConstRNSIter operand1, ConstRNSIter operand2, std::size_t coeff_modulus_size, ConstModulusIter modulus,
@@ -297,50 +228,9 @@ namespace seal
             });
         }
 
-        inline void sub_poly_coeffmod(
+        void sub_poly_coeffmod(
             ConstCoeffIter operand1, ConstCoeffIter operand2, std::size_t coeff_count, const Modulus &modulus,
-            CoeffIter result)
-        {
-#ifdef SEAL_DEBUG
-            if (!operand1 && coeff_count > 0)
-            {
-                throw std::invalid_argument("operand1");
-            }
-            if (!operand2 && coeff_count > 0)
-            {
-                throw std::invalid_argument("operand2");
-            }
-            if (modulus.is_zero())
-            {
-                throw std::invalid_argument("modulus");
-            }
-            if (!result && coeff_count > 0)
-            {
-                throw std::invalid_argument("result");
-            }
-#endif
-
-            const uint64_t modulus_value = modulus.value();
-#ifdef SEAL_USE_INTEL_HEXL
-            intel::hexl::EltwiseSubMod(result, operand1, operand2, coeff_count, modulus_value);
-#else
-            SEAL_ITERATE(iter(operand1, operand2, result), coeff_count, [&](auto I) {
-#ifdef SEAL_DEBUG
-                if (get<0>(I) >= modulus_value)
-                {
-                    throw std::invalid_argument("operand1");
-                }
-                if (get<1>(I) >= modulus_value)
-                {
-                    throw std::invalid_argument("operand2");
-                }
-#endif
-                unsigned long long temp_result;
-                std::int64_t borrow = sub_uint64(get<0>(I), get<1>(I), &temp_result);
-                get<2>(I) = temp_result + (modulus_value & static_cast<std::uint64_t>(-borrow));
-            });
-#endif
-        }
+            CoeffIter result);
 
         inline void sub_poly_coeffmod(
             ConstRNSIter operand1, ConstRNSIter operand2, std::size_t coeff_modulus_size, ConstModulusIter modulus,
