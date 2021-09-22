@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 
 ###################################################
 # Project SEAL includes the following components: #
@@ -23,7 +23,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Build type (CMAKE_BUILD_TYPE): ${CMAKE_BUILD_TYPE}")
 
-project(SEAL VERSION 3.7.0 LANGUAGES CXX C)
+project(SEAL VERSION 3.7.1 LANGUAGES CXX C)
 
 ########################
 # Global configuration #

@@ -5,6 +5,7 @@
 ### Bug Fixes
 
 - Fixed compiler and linker errors in downstream projects when Microsoft SEAL is built with `SEAL_BUILD_DEPS=ON` and `SEAL_USE_INTEL_HEXL=ON`.
+- Updated CMake minimum requirement to 3.13.
 
 ### File Changes
 
