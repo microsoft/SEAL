@@ -624,19 +624,22 @@ namespace seal
         // Prepare destination
         encrypted1.resize(context_, context_data.parms_id(), dest_size);
 
-        // convert c0 and c1 to ntt
-        Ciphertext &encrypted2_tmp = const_cast<Ciphertext &>(encrypted2);
-        ntt_negacyclic_harvey(encrypted1, encrypted1_size, ntt_table);
-        if (&encrypted1 != &encrypted2)
-        {
-            Ciphertext encrypted2_cpy = Ciphertext(encrypted2);
-            ntt_negacyclic_harvey(encrypted2_cpy, encrypted2_size, ntt_table);
-            encrypted2_tmp = const_cast<Ciphertext &>(encrypted2_cpy);
-        }
-
+        // Convert c0 and c1 to ntt
         // Set up iterators for input ciphertexts
-        auto encrypted1_iter = iter(encrypted1);
-        auto encrypted2_iter = iter(encrypted2_tmp);
+        PolyIter encrypted1_iter = iter(encrypted1);
+        ntt_negacyclic_harvey(encrypted1, encrypted1_size, ntt_table);
+        PolyIter encrypted2_iter;
+        Ciphertext encrypted2_cpy;
+        if (&encrypted1 == &encrypted2)
+        {
+            encrypted2_iter = iter(encrypted1);
+        }
+        else
+        {
+            encrypted2_cpy = encrypted2;
+            ntt_negacyclic_harvey(encrypted2_cpy, encrypted2_size, ntt_table);
+            encrypted2_iter = iter(encrypted2_cpy);
+        }
 
         // Allocate temporary space for the result
         SEAL_ALLOCATE_ZERO_GET_POLY_ITER(temp, dest_size, coeff_count, coeff_modulus_size, pool);
