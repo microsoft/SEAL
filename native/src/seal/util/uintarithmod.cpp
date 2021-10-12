@@ -180,7 +180,7 @@ namespace seal
                 invert_next_positive = !invert_curr_positive;
                 if (invert_prior_positive == invert_next_positive)
                 {
-                    // If both sides of add have same sign, then simple add and
+                    // If both sides of add have same sign, then simply add and
                     // do not need to worry about overflow due to known limits
                     // on the coefficients proved in the euclidean algorithm.
                     add_uint(invert_prior, invert_next, uint64_count, invert_next);

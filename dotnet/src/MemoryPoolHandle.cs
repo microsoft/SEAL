@@ -38,7 +38,7 @@ namespace Microsoft.Research.SEAL
     /// Initialized and Uninitialized Handles
     /// A MemoryPoolHandle has to be set to point either to the global memory pool,
     /// or to a new memory pool. If this is not done, the MemoryPoolHandle is
-    /// said to be uninitialized, and cannot be used. Initialization simple means
+    /// said to be uninitialized, and cannot be used. Initialization simply means
     /// assigning MemoryPoolHandle::Global() or MemoryPoolHandle::New() to it.
     /// </para>
     /// <para>

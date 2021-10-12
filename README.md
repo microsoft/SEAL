@@ -217,8 +217,8 @@ A global install requires elevated (root or administrator) privileges.
 | System | Toolchain |
 |---|---|
 | Windows | Visual Studio 2019 with C++ CMake Tools for Windows |
-| Linux | Clang++ (>= 5.0) or GNU G++ (>= 6.0), CMake (>= 3.12) |
-| macOS/iOS | Xcode toolchain (>= 9.3), CMake (>= 3.12) |
+| Linux | Clang++ (>= 5.0) or GNU G++ (>= 6.0), CMake (>= 3.13) |
+| macOS/iOS | Xcode toolchain (>= 9.3), CMake (>= 3.13) |
 | Android | Android Studio |
 
 **Note:** Microsoft SEAL compiled with Clang++ has much better runtime performance than one compiled with GNU G++.
@@ -510,6 +510,19 @@ For contributing to Microsoft SEAL, please see [CONTRIBUTING.md](CONTRIBUTING.md
 ## Citing Microsoft SEAL
 
 To cite Microsoft SEAL in academic papers, please use the following BibTeX entries.
+
+### Version 3.7
+
+```tex
+    @misc{sealcrypto,
+        title = {{M}icrosoft {SEAL} (release 3.7)},
+        howpublished = {\url{https://github.com/Microsoft/SEAL}},
+        month = sep,
+        year = 2021,
+        note = {Microsoft Research, Redmond, WA.},
+        key = {SEAL}
+    }
+```
 
 ### Version 3.6
 

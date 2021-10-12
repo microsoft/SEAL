@@ -51,7 +51,7 @@ namespace seal
     @par Initialized and Uninitialized Handles
     A MemoryPoolHandle has to be set to point either to the global memory pool,
     or to a new memory pool. If this is not done, the MemoryPoolHandle is
-    said to be uninitialized, and cannot be used. Initialization simple means
+    said to be uninitialized, and cannot be used. Initialization simply means
     assigning MemoryPoolHandle::Global() or MemoryPoolHandle::New() to it.
 
     @par Managing Lifetime
@@ -483,7 +483,7 @@ namespace seal
         instructions to the memory manager profile for internal logic.
         */
         template <typename... Args>
-        SEAL_NODISCARD static inline MemoryPoolHandle GetPool(mm_prof_opt_t prof_opt, Args &&... args)
+        SEAL_NODISCARD static inline MemoryPoolHandle GetPool(mm_prof_opt_t prof_opt, Args &&...args)
         {
             switch (prof_opt)
             {
