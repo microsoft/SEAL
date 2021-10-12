@@ -511,6 +511,19 @@ For contributing to Microsoft SEAL, please see [CONTRIBUTING.md](CONTRIBUTING.md
 
 To cite Microsoft SEAL in academic papers, please use the following BibTeX entries.
 
+### Version 3.7
+
+```tex
+    @misc{sealcrypto,
+        title = {{M}icrosoft {SEAL} (release 3.7)},
+        howpublished = {\url{https://github.com/Microsoft/SEAL}},
+        month = sep,
+        year = 2021,
+        note = {Microsoft Research, Redmond, WA.},
+        key = {SEAL}
+    }
+```
+
 ### Version 3.6
 
 ```tex
