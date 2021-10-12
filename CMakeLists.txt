@@ -1,7 +1,7 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
-cmake_minimum_required(VERSION 3.12)
+cmake_minimum_required(VERSION 3.13)
 
 ###################################################
 # Project SEAL includes the following components: #
@@ -23,7 +23,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Build type (CMAKE_BUILD_TYPE): ${CMAKE_BUILD_TYPE}")
 
-project(SEAL VERSION 3.7.0 LANGUAGES CXX C)
+project(SEAL VERSION 3.7.1 LANGUAGES CXX C)
 
 ########################
 # Global configuration #
@@ -418,9 +418,12 @@ if(NOT BUILD_SHARED_LIBS)
             add_dependencies(seal HEXL::hexl)
             target_include_directories(seal PRIVATE
                 $<BUILD_INTERFACE:$<TARGET_PROPERTY:HEXL::hexl,INTERFACE_INCLUDE_DIRECTORIES>>)
-            seal_combine_archives(seal HEXL::hexl)
             target_compile_options(seal PRIVATE $<TARGET_PROPERTY:HEXL::hexl,INTERFACE_COMPILE_OPTIONS>)
-            target_link_options(seal PRIVATE $<TARGET_PROPERTY:HEXL::hexl,INTERFACE_LINK_OPTIONS>)
+            get_target_property(HEXL_INTERFACE_LINK_OPTIONS HEXL::hexl INTERFACE_LINK_OPTIONS)
+            if (NOT "${HEXL_INTERFACE_LINK_OPTIONS}" STREQUAL "HEXL_INTERFACE_LINK_OPTIONS-NOTFOUND")
+                target_link_libraries(seal INTERFACE ${HEXL_INTERFACE_LINK_OPTIONS})
+            endif()
+            seal_combine_archives(seal HEXL::hexl)
         else()
             target_link_libraries(seal PUBLIC HEXL::hexl)
         endif()
@@ -463,7 +466,13 @@ else()
     endif()
 
     if(SEAL_USE_INTEL_HEXL)
-        target_link_libraries(seal_shared PUBLIC HEXL::hexl)
+        target_link_libraries(seal_shared PRIVATE HEXL::hexl)
+        target_compile_options(seal_shared PRIVATE $<TARGET_PROPERTY:HEXL::hexl,INTERFACE_COMPILE_OPTIONS>)
+        get_target_property(HEXL_INTERFACE_LINK_OPTIONS HEXL::hexl INTERFACE_LINK_OPTIONS)
+        if (NOT "${HEXL_INTERFACE_LINK_OPTIONS}" STREQUAL "HEXL_INTERFACE_LINK_OPTIONS-NOTFOUND")
+            target_link_libraries(seal_shared INTERFACE ${HEXL_INTERFACE_LINK_OPTIONS})
+        endif()
+
         # Install shared HEXL library to installation directory
         install(DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
             DESTINATION ${CMAKE_INSTALL_PREFIX}/${CMAKE_LIBRARY_PREFIX}
@@ -587,12 +596,6 @@ if(SEAL_BUILD_DEPS)
     if(SEAL_USE_MSGSL)
         install(
             DIRECTORY ${msgsl_SOURCE_DIR}/include/gsl
-            DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
-    endif()
-    # Intel HEXL
-    if(SEAL_USE_INTEL_HEXL)
-        install(
-            DIRECTORY ${hexl_SOURCE_DIR}/hexl/include/hexl
             DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
     endif()
 endif()

@@ -13,10 +13,6 @@
 #include "seal/util/uintcore.h"
 #include <stdexcept>
 
-#ifdef SEAL_USE_INTEL_HEXL
-#include "seal/util/intel_seal_ext.h"
-#endif
-
 namespace seal
 {
     namespace util
@@ -232,36 +228,7 @@ namespace seal
                 operand, size, [&](auto I) { ntt_negacyclic_harvey_lazy(I, operand.coeff_modulus_size(), tables); });
         }
 
-        inline void ntt_negacyclic_harvey(CoeffIter operand, const NTTTables &tables)
-        {
-#ifdef SEAL_USE_INTEL_HEXL
-            size_t N = size_t(1) << tables.coeff_count_power();
-            uint64_t p = tables.modulus().value();
-            uint64_t root = tables.get_root();
-
-            intel::seal_ext::compute_forward_ntt(operand, N, p, root, 4, 1);
-#else
-            ntt_negacyclic_harvey_lazy(operand, tables);
-            // Finally maybe we need to reduce every coefficient modulo q, but we
-            // know that they are in the range [0, 4q).
-            // Since word size is controlled this is fast.
-            std::uint64_t modulus = tables.modulus().value();
-            std::uint64_t two_times_modulus = modulus * 2;
-            std::size_t n = std::size_t(1) << tables.coeff_count_power();
-
-            SEAL_ITERATE(operand, n, [&](auto &I) {
-                // Note: I must be passed to the lambda by reference.
-                if (I >= two_times_modulus)
-                {
-                    I -= two_times_modulus;
-                }
-                if (I >= modulus)
-                {
-                    I -= modulus;
-                }
-            });
-#endif
-        }
+        void ntt_negacyclic_harvey(CoeffIter operand, const NTTTables &tables);
 
         inline void ntt_negacyclic_harvey(RNSIter operand, std::size_t coeff_modulus_size, ConstNTTTablesIter tables)
         {
@@ -333,29 +300,7 @@ namespace seal
             });
         }
 
-        inline void inverse_ntt_negacyclic_harvey(CoeffIter operand, const NTTTables &tables)
-        {
-#ifdef SEAL_USE_INTEL_HEXL
-            size_t N = size_t(1) << tables.coeff_count_power();
-            uint64_t p = tables.modulus().value();
-            uint64_t root = tables.get_root();
-            intel::seal_ext::compute_inverse_ntt(operand, N, p, root, 2, 1);
-#else
-            inverse_ntt_negacyclic_harvey_lazy(operand, tables);
-            std::uint64_t modulus = tables.modulus().value();
-            std::size_t n = std::size_t(1) << tables.coeff_count_power();
-
-            // Final adjustments; compute a[j] = a[j] * n^{-1} mod q.
-            // We incorporated the final adjustment in the butterfly. Only need to reduce here.
-            SEAL_ITERATE(operand, n, [&](auto &I) {
-                // Note: I must be passed to the lambda by reference.
-                if (I >= modulus)
-                {
-                    I -= modulus;
-                }
-            });
-#endif
-        }
+        void inverse_ntt_negacyclic_harvey(CoeffIter operand, const NTTTables &tables);
 
         inline void inverse_ntt_negacyclic_harvey(
             RNSIter operand, std::size_t coeff_modulus_size, ConstNTTTablesIter tables)

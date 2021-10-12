@@ -1,5 +1,17 @@
 # List of Changes
 
+## Version 3.7.1
+
+### Bug Fixes
+
+- Fixed compiler and linker errors in downstream projects when Microsoft SEAL is built with `SEAL_BUILD_DEPS=ON` and `SEAL_USE_INTEL_HEXL=ON`.
+- Updated CMake minimum requirement to 3.13.
+
+### File Changes
+
+- `native/src/seal/util/intel_seal_ext.h` is removed.
+- `native/src/seal/util/intel_seal_ext.cpp` is removed.
+
 ## Version 3.7.0
 
 ### Features
