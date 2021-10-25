@@ -33,7 +33,7 @@ namespace seal
 #endif
 
 #ifdef SEAL_USE_INTEL_HEXL
-            intel::hexl::EltwiseReduceMod(result, poly, coeff_count, modulus.value(), modulus.value(), 1);
+            intel::hexl::EltwiseReduceMod(result, poly, coeff_count, modulus.value(), 0, 1);
 #else
             SEAL_ITERATE(
                 iter(poly, result), coeff_count, [&](auto I) { get<1>(I) = barrett_reduce_64(get<0>(I), modulus); });
