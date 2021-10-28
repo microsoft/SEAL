@@ -1,0 +1,79 @@
+name: Build and Test
+on:
+  # By default this will run when the activity type is "opened", "synchronize",
+  # or "reopened".
+  pull_request:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+.[0-9]+" # Run on release branch, e.g. 1.2.0
+  # Run when protected branches are pushed to, e.g. via merge
+  push:
+    branches:
+      - main
+      - "[0-9]+.[0-9]+.[0-9]+" # Run on release branch, e.g. 1.2.0
+
+  # Manually run this workflow on any specified branch.
+  workflow_dispatch:
+
+
+###################
+# Define env vars #
+###################
+env:
+  HEXL_VER: 1.2.2
+  SEAL_VER: 3.7
+
+jobs:
+  find-scripts:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - id: set-matrix
+        run: |
+          matrix=$(python3 -c 'import os, json; print(json.dumps(os.listdir(".github/config-tests")))')
+          echo $matrix
+          echo "::set-output name=matrix::$matrix"
+  config:
+    needs: find-scripts
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      matrix:
+        os: [windows-latest] # [ubuntu-20.04, macos-10.15, windows-2019]
+        script: ${{ fromJson(needs.find-scripts.outputs.matrix) }}
+        exclude:
+          # Windows only supports static builds, don't build w/ shared
+          - os: windows-latest
+            script: config_2.sh
+          - os: windows-latest
+            script: config_6.sh
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Set run environment
+        run: |
+          which clang
+          clang --version
+
+      - name: Checkout hexl
+        uses: actions/checkout@v2
+        with:
+          repository: intel/hexl
+          fetch-depth: 1
+          path: hexl
+
+      - name: Run Config
+        run: ./.github/config-tests/${{ matrix.script }}
+
+      # - name: Archive results
+      #   uses: actions/upload-artifact@v2
+      #   with:
+      #     name: test_detail_${{ matrix.script }}_${{ github.sha }}.xml
+      #     path: test_detail.xml
+      #     retention-days: 30 # Maximum for free version
