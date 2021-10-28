@@ -284,7 +284,7 @@ namespace seal
         /**
         Returns a const reference to the currently set coefficient modulus parameter.
         */
-        SEAL_NODISCARD inline auto coeff_modulus() const noexcept -> const std::vector<Modulus> &
+        SEAL_NODISCARD inline const std::vector<Modulus> &coeff_modulus() const noexcept
         {
             return coeff_modulus_;
         }
@@ -300,9 +300,17 @@ namespace seal
         /**
         Returns a pointer to the random number generator factory to use for encryption.
         */
-        SEAL_NODISCARD inline auto random_generator() const noexcept -> std::shared_ptr<UniformRandomGeneratorFactory>
+        SEAL_NODISCARD inline std::shared_ptr<UniformRandomGeneratorFactory> random_generator() const noexcept
         {
             return random_generator_;
+        }
+
+        /**
+        Returns a const reference to the parms_id of the current parameters.
+        */
+        SEAL_NODISCARD inline const parms_id_type &parms_id() const noexcept
+        {
+            return parms_id_;
         }
 
         /**
@@ -469,15 +477,6 @@ namespace seal
                 return true;
             }
             return false;
-        }
-
-        /**
-        Returns the parms_id of the current parameters. This function is intended
-        for internal use.
-        */
-        SEAL_NODISCARD inline auto &parms_id() const noexcept
-        {
-            return parms_id_;
         }
 
         void compute_parms_id();
