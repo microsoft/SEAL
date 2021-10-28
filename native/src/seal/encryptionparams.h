@@ -82,8 +82,6 @@ namespace seal
     */
     class EncryptionParameters
     {
-        friend class SEALContext;
-
         friend struct std::hash<EncryptionParameters>;
 
     public:
