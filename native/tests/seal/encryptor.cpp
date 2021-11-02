@@ -858,7 +858,7 @@ namespace sealtest
         parms.set_plain_modulus(plain_modulus);
         {
             parms.set_poly_modulus_degree(64);
-            parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60 }));
             SEALContext context(parms, false, sec_level_type::none);
             KeyGenerator keygen(context);
             PublicKey pk;
@@ -945,7 +945,7 @@ namespace sealtest
         Modulus plain_modulus(1 << 6);
         parms.set_plain_modulus(plain_modulus);
         parms.set_poly_modulus_degree(64);
-        parms.set_coeff_modulus(CoeffModulus::Create(64, { 40, 40, 40 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60, 60 }));
         SEALContext context(parms, true, sec_level_type::none);
         KeyGenerator keygen(context);
         PublicKey pk;
