@@ -2582,7 +2582,7 @@ namespace seal
                         inverse_ntt_negacyclic_harvey_lazy(get<0, 1>(J), get<2>(J));
                     }
 
-                    // ((ct mod qi) - (ct mod qk)) mod qi
+                    // ((ct mod qi) - (ct mod qk)) mod qi with output in [0, 2 * qi_lazy)
                     SEAL_ITERATE(
                         iter(get<0, 1>(J), t_ntt), coeff_count, [&](auto K) { get<0>(K) += qi_lazy - get<1>(K); });
 
