@@ -159,7 +159,7 @@ namespace seal
             });
         }
 
-        inline void add_poly_coeffmod(
+        void add_poly_coeffmod(
             ConstCoeffIter operand1, ConstCoeffIter operand2, std::size_t coeff_count, const Modulus &modulus,
             CoeffIter result);
 

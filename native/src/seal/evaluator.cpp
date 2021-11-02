@@ -680,7 +680,7 @@ namespace seal
         inverse_ntt_negacyclic_harvey(encrypted1, encrypted1.size(), ntt_table);
     }
 
-    void Evaluator::square_inplace(Ciphertext &encrypted, MemoryPoolHandle pool)
+    void Evaluator::square_inplace(Ciphertext &encrypted, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -931,7 +931,7 @@ namespace seal
         encrypted.scale() = new_scale;
     }
 
-    void Evaluator::bgv_square(Ciphertext &encrypted, MemoryPoolHandle pool)
+    void Evaluator::bgv_square(Ciphertext &encrypted, MemoryPoolHandle pool) const
     {
         if (encrypted.is_ntt_form())
         {
