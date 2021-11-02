@@ -1202,65 +1202,37 @@ namespace seal
             const Modulus *curr_modulus = base_q_->base();
             const Modulus plain_modulus = t_;
             uint64_t last_modulus_value = curr_modulus[modulus_size - 1].value();
-            uint64_t plain_modulus_value = plain_modulus.value();
-            CoeffIter last = input[modulus_size - 1];
 
-            SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(delta, coeff_count_, pool);
-
-            // last_q^(-1) mod t = 1, k mod t = -c mod t.
-            if (inv_q_last_mod_p_ == 1)
+            SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(neg_c_last_mod_t, coeff_count_, pool);
+            // neg_c_last_mod_t = - c_last (mod t)
+            modulo_poly_coeffs(CoeffIter(input[modulus_size - 1]), coeff_count_, plain_modulus, neg_c_last_mod_t);
+            negate_poly_coeffmod(neg_c_last_mod_t, coeff_count_, plain_modulus, neg_c_last_mod_t);
+            if (inv_q_last_mod_p_ != 1)
             {
-                SEAL_ITERATE(iter(last, delta), coeff_count_, [&](auto I) {
-                    uint64_t coeff = barrett_reduce_64(get<0>(I), plain_modulus);
-                    int64_t non_zero = (coeff != 0);
-                    coeff = (plain_modulus_value - coeff) & static_cast<std::uint64_t>(-non_zero);
-                    get<1>(I) = get<0>(I) + last_modulus_value * coeff;
-                });
-
-                SEAL_ITERATE(iter(input, curr_modulus, inv_q_last_mod_q_), modulus_size - 1, [&](auto I) {
-                    SEAL_ITERATE(iter(get<0>(I), delta), coeff_count_, [&](auto J) {
-                        // \delta mod the other modulus
-                        uint64_t delta_mod = barrett_reduce_64(get<1>(J), get<1>(I));
-                        // c = c - \delta
-                        get<0>(J) = sub_uint_mod(get<0>(J), delta_mod, get<1>(I));
-                    });
-
-                    // c = c/q_t
-                    multiply_poly_scalar_coeffmod(get<0>(I), coeff_count_, get<2>(I), get<1>(I), get<0>(I));
-                });
+                // neg_c_last_mod_t *= q_last^(-1) (mod t)
+                multiply_poly_scalar_coeffmod(
+                    neg_c_last_mod_t, coeff_count_, inv_q_last_mod_p_, plain_modulus, neg_c_last_mod_t);
             }
-            else // last_q^(-1) mod t != 1, k mod t = -c * last_q^(-1) mod t.
-            {
-                // delta = -c mod t
-                modulo_poly_coeffs(CoeffIter(input[modulus_size - 1]), coeff_count_, plain_modulus, delta);
-                negate_poly_coeffmod(delta, coeff_count_, plain_modulus, delta);
-                // delta = (-c mod t) * last_q^(-1) mod t, which is k mod t
-                multiply_poly_scalar_coeffmod(delta, coeff_count_, inv_q_last_mod_p_, plain_modulus, delta);
 
-                // RNS format as delta may be larger than 64 bytes.
-                SEAL_ALLOCATE_ZERO_GET_RNS_ITER(delta_rns, coeff_count_, modulus_size - 1, pool);
+            SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(delta_mod_q_i, coeff_count_, pool);
 
-                SEAL_ITERATE(iter(input, delta_rns, curr_modulus, inv_q_last_mod_q_), modulus_size - 1, [&](auto I) {
-                    // delta_rns is (k mod t) mod q_{i}
-                    modulo_poly_coeffs(delta, coeff_count_, get<2>(I), get<1>(I));
-                    // delta_rns = (k mod t) * last_q mod q_{i}
-                    multiply_poly_scalar_coeffmod(get<1>(I), coeff_count_, last_modulus_value, get<2>(I), get<1>(I));
-                    // 2 * qi
-                    const uint64_t Lqi = get<2>(I).value() << 1;
-                    // delta_rns = (c mod q_i + k * last_q mod q_i) mod q_i
-                    SEAL_ITERATE(iter(get<0>(I), get<1>(I), input[modulus_size - 1]), coeff_count_, [&](auto J) {
-                        // c mod q_i
-                        auto last_mod_q_i = barrett_reduce_64(get<2>(J), get<2>(I));
-                        // k * last_q mod q_i
-                        auto k_last_q = barrett_reduce_64(get<1>(J), get<2>(I));
-                        // c = c - delta_rns
-                        get<0>(J) = get<0>(J) + Lqi - (last_mod_q_i + k_last_q);
-                    });
+            SEAL_ITERATE(iter(input, curr_modulus, inv_q_last_mod_q_), modulus_size - 1, [&](auto I) {
+                // delta_mod_q_i = neg_c_last_mod_t (mod q_i)
+                modulo_poly_coeffs(neg_c_last_mod_t, coeff_count_, get<1>(I), delta_mod_q_i);
 
-                    // c = c/q_t
-                    multiply_poly_scalar_coeffmod(get<0>(I), coeff_count_, get<3>(I), get<2>(I), get<0>(I));
+                // delta_mod_q_i *= q_last (mod q_i)
+                multiply_poly_scalar_coeffmod(
+                    delta_mod_q_i, coeff_count_, last_modulus_value, get<1>(I), delta_mod_q_i);
+
+                // c_i = c_i - c_last - neg_c_last_mod_t * q_last (mod 2q_i)
+                const uint64_t two_times_q_i = get<1>(I).value() << 1;
+                SEAL_ITERATE(iter(get<0>(I), delta_mod_q_i, input[modulus_size - 1]), coeff_count_, [&](auto J) {
+                    get<0>(J) += two_times_q_i - barrett_reduce_64(get<2>(J), get<1>(I)) - get<1>(J);
                 });
-            }
+
+                // c_i = c_i * inv_q_last_mod_q_i (mod q_i)
+                multiply_poly_scalar_coeffmod(get<0>(I), coeff_count_, get<2>(I), get<1>(I), get<0>(I));
+            });
         }
 
         void RNSTool::decrypt_modt(RNSIter phase, CoeffIter destination, MemoryPoolHandle pool) const
