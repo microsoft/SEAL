@@ -191,8 +191,8 @@ namespace seal
             }
         }
 
-        // Verify that plain is valid.
-        if (!is_metadata_valid_for(plain, context_) || !is_buffer_valid(plain))
+        // Verify that plain is valid
+        if (!is_valid_for(plain, context_))
         {
             throw invalid_argument("plain is not valid for encryption parameters");
         }
