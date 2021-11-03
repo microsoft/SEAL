@@ -2450,86 +2450,42 @@ namespace seal
                 const Modulus &plain_modulus = parms.plain_modulus();
                 // qk is the special prime
                 uint64_t qk = key_modulus[key_modulus_size - 1].value();
-                uint64_t qp = plain_modulus.value();
                 uint64_t qk_inv_qp = context_.key_context_data()->rns_tool()->inv_q_last_mod_p();
 
                 // Lazy reduction; this needs to be then reduced mod qi
                 CoeffIter t_last(get<1>(I)[decomp_modulus_size]);
                 inverse_ntt_negacyclic_harvey(t_last, key_ntt_tables[key_modulus_size - 1]);
 
-                // if q_k mod q_p == 1, we can use k = -c mod p
-                if (qk_inv_qp == 1)
+                SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(k, coeff_count, pool);
+                modulo_poly_coeffs(t_last, coeff_count, plain_modulus, k);
+                negate_poly_coeffmod(k, coeff_count, plain_modulus, k);
+                if (qk_inv_qp != 1)
                 {
-                    // ct mod qi + qk * (t - ct mod qi mod t)
-                    SEAL_ITERATE(t_last, coeff_count, [&](auto &J) {
-                        uint64_t c = barrett_reduce_64(J, plain_modulus);
-                        J += qk * (qp - c);
+                    multiply_poly_scalar_coeffmod(k, coeff_count, qk_inv_qp, plain_modulus, k);
+                }
+
+                SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(delta, coeff_count, pool);
+                SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(c_mod_qi, coeff_count, pool);
+                SEAL_ITERATE(iter(I, key_modulus, modswitch_factors, key_ntt_tables), decomp_modulus_size, [&](auto J) {
+                    inverse_ntt_negacyclic_harvey(get<0, 1>(J), get<3>(J));
+                    // delta = k mod q_i
+                    modulo_poly_coeffs(k, coeff_count, get<1>(J), delta);
+                    // delta = k * q_k mod q_i
+                    multiply_poly_scalar_coeffmod(delta, coeff_count, qk, get<1>(J), delta);
+
+                    // c mod q_i
+                    modulo_poly_coeffs(t_last, coeff_count, get<1>(J), c_mod_qi);
+                    // delta = c + k * q_k mod q_i
+                    // c_{i} = c_{i} - delta mod q_i
+                    const uint64_t Lqi = get<1>(J).value() * 2;
+                    SEAL_ITERATE(iter(delta, c_mod_qi, get<0, 1>(J)), coeff_count, [Lqi](auto K) {
+                        get<2>(K) = get<2>(K) + Lqi - (get<0>(K) + get<1>(K));
                     });
 
-                    SEAL_ITERATE(
-                        iter(I, key_modulus, modswitch_factors, key_ntt_tables), decomp_modulus_size, [&](auto J) {
-                            auto barrett_reduce_64_lazy = [](uint64_t input, const Modulus &modulus) {
-                                // Reduces input using base 2^64 Barrett reduction
-                                // floor(2^64 / mod) == floor( floor(2^128 / mod) )
-                                unsigned long long tmp[2];
-                                const uint64_t *const_ratio = modulus.const_ratio().data();
-                                multiply_uint64_hw64(input, const_ratio[1], tmp + 1);
+                    multiply_poly_scalar_coeffmod(get<0, 1>(J), coeff_count, get<2>(J), get<1>(J), get<0, 1>(J));
 
-                                // Barrett subtraction
-                                return static_cast<uint64_t>(input - tmp[1] * modulus.value());
-                            };
-
-                            const Modulus &modulus = get<1>(J);
-                            /// result at [0, 2qi)
-                            inverse_ntt_negacyclic_harvey_lazy(get<0, 1>(J), get<3>(J));
-
-                            const uint64_t Lqi = modulus.value() << 2;
-                            std::transform(
-                                get<0, 1>(J), get<0, 1>(J) + coeff_count, t_last, get<0, 1>(J),
-                                [&](uint64_t u, uint64_t v) {
-                                    /// lazy substraction, barrett_reduce_64_lazy result at [0, 2qi)
-                                    /// so that we use Lqi = 4*qi here
-                                    return u + Lqi - barrett_reduce_64_lazy(v, modulus);
-                                });
-
-                            multiply_poly_scalar_coeffmod(
-                                get<0, 1>(J), coeff_count, get<2>(J), get<1>(J), get<0, 1>(J));
-                            add_poly_coeffmod(get<0, 1>(J), get<0, 0>(J), coeff_count, get<1>(J), get<0, 0>(J));
-                        });
-                    // when q_k mod q_p != 1, k = -c * q_k mod p
-                }
-                else
-                {
-                    SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(k, coeff_count, pool);
-                    modulo_poly_coeffs(t_last, coeff_count, plain_modulus, k);
-                    negate_poly_coeffmod(k, coeff_count, plain_modulus, k);
-                    multiply_poly_scalar_coeffmod(k, coeff_count, qk_inv_qp, plain_modulus, k);
-
-                    SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(delta, coeff_count, pool);
-                    SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(c_mod_qi, coeff_count, pool);
-                    SEAL_ITERATE(
-                        iter(I, key_modulus, modswitch_factors, key_ntt_tables), decomp_modulus_size, [&](auto J) {
-                            inverse_ntt_negacyclic_harvey(get<0, 1>(J), get<3>(J));
-                            // delta = k mod q_i
-                            modulo_poly_coeffs(k, coeff_count, get<1>(J), delta);
-                            // delta = k * q_k mod q_i
-                            multiply_poly_scalar_coeffmod(delta, coeff_count, qk, get<1>(J), delta);
-
-                            // c mod q_i
-                            modulo_poly_coeffs(t_last, coeff_count, get<1>(J), c_mod_qi);
-                            // delta = c + k * q_k mod q_i
-                            // c_{i} = c_{i} - delta mod q_i
-                            const uint64_t Lqi = get<1>(J).value() * 2;
-                            SEAL_ITERATE(iter(delta, c_mod_qi, get<0, 1>(J)), coeff_count, [Lqi](auto K) {
-                                get<2>(K) = get<2>(K) + Lqi - (get<0>(K) + get<1>(K));
-                            });
-
-                            multiply_poly_scalar_coeffmod(
-                                get<0, 1>(J), coeff_count, get<2>(J), get<1>(J), get<0, 1>(J));
-
-                            add_poly_coeffmod(get<0, 1>(J), get<0, 0>(J), coeff_count, get<1>(J), get<0, 0>(J));
-                        });
-                }
+                    add_poly_coeffmod(get<0, 1>(J), get<0, 0>(J), coeff_count, get<1>(J), get<0, 0>(J));
+                });
             }
             else
             {
