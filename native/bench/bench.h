@@ -194,13 +194,14 @@ namespace sealbench
         */
         void randomize_array_mod(std::uint64_t *data, std::size_t count, const seal::Modulus &modulus)
         {
-          // Avoid using seal::UniformRandomGenerator, as it's slow enough to
-          // degrade performance with HEXL on some systems, due to AVX512 transitions.
-          // See https://travisdowns.github.io/blog/2020/01/17/avxfreq1.html#voltage-only-transitions.
-          std::random_device rd;
-          std::mt19937_64 generator(rd());
-          std::uniform_int_distribution<std::uint64_t> dist(0, modulus.value() - 1);
-          std::generate(data, data + count, [&]() { return dist(generator); });
+            // For the purpose of benchmark, avoid using seal::UniformRandomGenerator, as it degrades
+            // performance with HEXL on some systems, due to AVX512 transitions.
+            // See https://travisdowns.github.io/blog/2020/01/17/avxfreq1.html#voltage-only-transitions.
+            // This method is not used for random number generation in Microsoft SEAL.
+            std::random_device rd;
+            std::mt19937_64 generator(rd());
+            std::uniform_int_distribution<std::uint64_t> dist(0, modulus.value() - 1);
+            std::generate(data, data + count, [&]() { return dist(generator); });
         }
 
         /**
