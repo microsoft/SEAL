@@ -59,11 +59,6 @@ namespace sealbench
             }
             evaluator_ = std::make_shared<seal::Evaluator>(context_);
 
-            seal::prng_seed_type seed{};
-            context_.key_context_data()->parms().random_generator()->create()->generate(
-                seal::prng_seed_byte_count, reinterpret_cast<seal::seal_byte *>(seed.data()));
-            prng_ = seal::UniformRandomGeneratorFactory::DefaultFactory()->create(seed);
-
             pt_.resize(std::size_t(2));
             for (std::size_t i = 0; i < 2; i++)
             {
@@ -118,11 +113,6 @@ namespace sealbench
         SEAL_NODISCARD std::shared_ptr<seal::Evaluator> evaluator()
         {
             return evaluator_;
-        }
-
-        SEAL_NODISCARD std::shared_ptr<seal::UniformRandomGenerator> prng()
-        {
-            return prng_;
         }
 
         SEAL_NODISCARD seal::SecretKey &sk()
@@ -204,16 +194,13 @@ namespace sealbench
         */
         void randomize_array_mod(std::uint64_t *data, std::size_t count, const seal::Modulus &modulus)
         {
-            constexpr std::uint64_t max_random = static_cast<std::uint64_t>(0xFFFFFFFFFFFFFFFFULL);
-            prng_->generate(count * sizeof(std::uint64_t), reinterpret_cast<seal::seal_byte *>(data));
-            std::uint64_t max_multiple = max_random - seal::util::barrett_reduce_64(max_random, modulus) - 1;
-            std::transform(data, data + count, data, [&](std::uint64_t rand) {
-                while (rand >= max_multiple)
-                {
-                    prng_->generate(sizeof(std::uint64_t), reinterpret_cast<seal::seal_byte *>(&rand));
-                }
-                return seal::util::barrett_reduce_64(rand, modulus);
-            });
+          // Avoid using seal::UniformRandomGenerator, as it's slow enough to
+          // degrade performance with HEXL on some systems, due to AVX512 transitions.
+          // See https://travisdowns.github.io/blog/2020/01/17/avxfreq1.html#voltage-only-transitions.
+          std::random_device rd;
+          std::mt19937_64 generator(rd());
+          std::uniform_int_distribution<std::uint64_t> dist(0, modulus.value() - 1);
+          std::generate(data, data + count, [&]() { return dist(generator); });
         }
 
         /**
@@ -319,7 +306,6 @@ namespace sealbench
         std::shared_ptr<seal::BatchEncoder> batch_encoder_{ nullptr };
         std::shared_ptr<seal::CKKSEncoder> ckks_encoder_{ nullptr };
         std::shared_ptr<seal::Evaluator> evaluator_{ nullptr };
-        std::shared_ptr<seal::UniformRandomGenerator> prng_{ nullptr };
 
         /**
         The following data members are created as input/output containers for benchmark cases.
