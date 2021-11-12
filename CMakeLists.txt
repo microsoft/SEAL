@@ -524,6 +524,11 @@ if(SEAL_BUILD_SEAL_C)
         message(FATAL_ERROR "SEAL_C requires `SEAL_BUILD_DEPS=ON`")
     endif()
 
+    if(NOT SEAL_BUILD_STATIC_SEAL_C AND SEAL_USE_INTEL_HEXL AND CMAKE_BUILD_TYPE STREQUAL "Debug" AND UNIX)
+        message(WARNING "SEAL_C (shared) cannot find Address Sanitizer (libasan) enabled by Intel HEXL in Debug mode "
+                        "on Unix-like systems. SEALNet does not work. Preload libasan for downstream applications.")
+    endif()
+
     if(SEAL_BUILD_STATIC_SEAL_C)
         add_library(sealc STATIC)
     else()
