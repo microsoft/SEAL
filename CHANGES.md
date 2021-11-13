@@ -1,5 +1,12 @@
 # List of Changes
 
+## Version 3.7.2
+
+### Bug Fixes
+
+- Fixed a bug when Intel HEXL is used [(Issue 411)](https://github.com/microsoft/SEAL/issues/411) [(PR414)](https://github.com/microsoft/SEAL/pull/414).
+- Fixed an abnormal benchmark case due to AVX512 transitions when Intel HEXL is used [(PR 416)](https://github.com/microsoft/SEAL/pull/416).
+
 ## Version 3.7.1
 
 ### Bug Fixes
