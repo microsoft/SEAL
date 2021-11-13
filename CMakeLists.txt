@@ -23,7 +23,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Build type (CMAKE_BUILD_TYPE): ${CMAKE_BUILD_TYPE}")
 
-project(SEAL VERSION 3.7.1 LANGUAGES CXX C)
+project(SEAL VERSION 3.7.2 LANGUAGES CXX C)
 
 ########################
 # Global configuration #
@@ -223,7 +223,7 @@ if(SEAL_USE_INTEL_HEXL)
         message(STATUS "Intel HEXL: download ...")
         seal_fetch_thirdparty_content(ExternalIntelHEXL)
     else()
-        find_package(HEXL 1.2.1)
+        find_package(HEXL 1.2.3)
         if (NOT TARGET HEXL::hexl)
             message(FATAL_ERROR "Intel HEXL: not found")
         endif()
@@ -522,6 +522,11 @@ if(SEAL_BUILD_SEAL_C)
 
     if(NOT SEAL_BUILD_DEPS)
         message(FATAL_ERROR "SEAL_C requires `SEAL_BUILD_DEPS=ON`")
+    endif()
+
+    if(NOT SEAL_BUILD_STATIC_SEAL_C AND SEAL_USE_INTEL_HEXL AND CMAKE_BUILD_TYPE STREQUAL "Debug" AND UNIX)
+        message(WARNING "SEAL_C (shared) cannot find Address Sanitizer (libasan) enabled by Intel HEXL in Debug mode "
+                        "on Unix-like systems. SEALNet does not work. Preload libasan for downstream applications.")
     endif()
 
     if(SEAL_BUILD_STATIC_SEAL_C)

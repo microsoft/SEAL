@@ -4,12 +4,22 @@ Microsoft SEAL is an easy-to-use open-source ([MIT licensed](LICENSE)) homomorph
 Microsoft SEAL is written in modern standard C++ and is easy to compile and run in many different environments.
 For more information about the Microsoft SEAL project, see [sealcrypto.org](https://www.microsoft.com/en-us/research/project/microsoft-seal).
 
-This document pertains to Microsoft SEAL version 3.6.
+This document pertains to Microsoft SEAL version 3.7.
 Users of previous versions of the library should look at the [list of changes](CHANGES.md).
 
 ## News
 
+Starting from version 3.7.2, Microsoft SEAL will push new changes to the `main`, `master`, and `contrib` branches without creating a new version.
+We adopt this approach to merge community contribution and resolve issues in a timely manner.
+These branches will stay ahead of the latest version branch/tag.
+New versions will be created when there are important bug fixes or new features.
+
+
 The [EVA compiler for CKKS](https://arxiv.org/abs/1912.11951) is available at [GitHub.com/Microsoft/EVA](https://GitHub.com/Microsoft/EVA). See [CKKS Programming with EVA](#ckks-programming-with-eva) below for more information.
+
+The [SEAL-Embedded for CKKS Encryption](https://tches.iacr.org/index.php/TCHES/article/view/8991) is available at [Github.com/Microsoft/SEAL-Embedded](https://github.com/microsoft/SEAL-Embedded).
+
+The [APSI library for Asymmetric PSI](https://eprint.iacr.org/2021/1116) is available at [Github.com/Microsoft/APSI](https://github.com/microsoft/APSI).
 
 ## Contents
 
@@ -116,7 +126,7 @@ The optional dependencies and their tested versions (other versions may work as 
 
 | Optional dependency                                    | Tested version | Use                                              |
 | ------------------------------------------------------ | -------------- | ------------------------------------------------ |
-| [Intel HEXL](https://github.com/intel/hexl)            | 1.2.1          | Acceleration of low-level kernels                |
+| [Intel HEXL](https://github.com/intel/hexl)            | 1.2.3          | Acceleration of low-level kernels                |
 | [Microsoft GSL](https://github.com/microsoft/GSL)      | 3.1.0          | API extensions                                   |
 | [ZLIB](https://github.com/madler/zlib)                 | 1.2.11         | Compressed serialization                         |
 | [Zstandard](https://github.com/facebook/zstd)          | 1.4.5          | Compressed serialization (much faster than ZLIB) |
@@ -364,7 +374,7 @@ emcc \
  -Wall \
  -flto \
  -O3 \
- build/lib/libseal-3.6.a \
+ build/lib/libseal-3.7.a \
  --bind \
  -o "build/bin/seal_wasm.js" \
  -s WASM=1 \
@@ -427,7 +437,7 @@ It is very easy to link your own applications and libraries with Microsoft SEAL 
 Simply add the following to your `CMakeLists.txt`:
 
 ```PowerShell
-find_package(SEAL 3.6 REQUIRED)
+find_package(SEAL 3.7 REQUIRED)
 target_link_libraries(<your target> SEAL::seal)
 ```
 

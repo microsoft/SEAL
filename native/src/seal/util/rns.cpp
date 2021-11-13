@@ -1098,7 +1098,7 @@ namespace seal
                     get<2>(I) = sub_uint_mod(get<0>(I), barrett_reduce_64(get<1>(I), t_), t_);
                 }
 
-                // If this coefficient was non-zero, multiply by t^(-1)
+                // If this coefficient was non-zero, multiply by gamma^(-1)
                 if (0 != get<2>(I))
                 {
                     // Perform final multiplication by gamma inverse mod t
