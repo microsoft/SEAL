@@ -157,7 +157,7 @@ namespace seal
         size_t values_matrix_size = values_matrix.size();
         if (values_matrix_size > slots_)
         {
-            throw logic_error("values_matrix size is too large");
+            throw invalid_argument("values_matrix size is too large");
         }
 #ifdef SEAL_DEBUG
         uint64_t plain_modulus_div_two = modulus >> 1;
@@ -200,7 +200,7 @@ namespace seal
         size_t values_matrix_size = static_cast<size_t>(values_matrix.size());
         if (values_matrix_size > slots_)
         {
-            throw logic_error("values_matrix size is too large");
+            throw invalid_argument("values_matrix size is too large");
         }
 #ifdef SEAL_DEBUG
         uint64_t modulus = context_data.parms().plain_modulus().value();
@@ -241,7 +241,7 @@ namespace seal
         size_t values_matrix_size = static_cast<size_t>(values_matrix.size());
         if (values_matrix_size > slots_)
         {
-            throw logic_error("values_matrix size is too large");
+            throw invalid_argument("values_matrix size is too large");
         }
 #ifdef SEAL_DEBUG
         uint64_t plain_modulus_div_two = modulus >> 1;
