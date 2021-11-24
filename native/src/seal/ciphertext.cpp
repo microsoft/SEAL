@@ -25,6 +25,7 @@ namespace seal
         parms_id_ = assign.parms_id_;
         is_ntt_form_ = assign.is_ntt_form_;
         scale_ = assign.scale_;
+        correction_factor_ = assign.correction_factor_;
 
         // Then resize
         resize_internal(assign.size_, assign.poly_modulus_degree_, assign.coeff_modulus_size_);
@@ -169,12 +170,14 @@ namespace seal
 
         size_t members_size = Serialization::ComprSizeEstimate(
             add_safe(
-                sizeof(parms_id_),
+                sizeof(parms_id_type), // parms_id_
                 sizeof(seal_byte), // is_ntt_form_
                 sizeof(uint64_t), // size_
                 sizeof(uint64_t), // poly_modulus_degree_
                 sizeof(uint64_t), // coeff_modulus_size_
-                sizeof(scale_), data_size),
+                sizeof(double), // scale_
+                sizeof(uint64_t), // correction_factor_
+                data_size),
             compr_mode);
 
         return safe_cast<streamoff>(add_safe(sizeof(Serialization::SEALHeader), members_size));
@@ -198,6 +201,7 @@ namespace seal
             uint64_t coeff_modulus_size64 = safe_cast<uint64_t>(coeff_modulus_size_);
             stream.write(reinterpret_cast<const char *>(&coeff_modulus_size64), sizeof(uint64_t));
             stream.write(reinterpret_cast<const char *>(&scale_), sizeof(double));
+            stream.write(reinterpret_cast<const char *>(&correction_factor_), sizeof(uint64_t));
 
             if (has_seed_marker())
             {
@@ -266,6 +270,8 @@ namespace seal
             stream.read(reinterpret_cast<char *>(&coeff_modulus_size64), sizeof(uint64_t));
             double scale = 0;
             stream.read(reinterpret_cast<char *>(&scale), sizeof(double));
+            uint64_t correction_factor = 1;
+            stream.read(reinterpret_cast<char *>(&correction_factor), sizeof(uint64_t));
 
             // Set values already at this point for the metadata validity check
             new_data.parms_id_ = parms_id;
@@ -274,6 +280,7 @@ namespace seal
             new_data.poly_modulus_degree_ = safe_cast<size_t>(poly_modulus_degree64);
             new_data.coeff_modulus_size_ = safe_cast<size_t>(coeff_modulus_size64);
             new_data.scale_ = scale;
+            new_data.correction_factor_ = correction_factor;
 
             // Checking the validity of loaded metadata
             // Note: We allow pure key levels here! This is to allow load_members

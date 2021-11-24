@@ -126,6 +126,8 @@ namespace seal
         // Prepare destination
         encrypted1.resize(context_, context_data.parms_id(), max_count);
 
+        // CORRECTION FACTOR TODO: check correction factors and multiply by scalars before addition
+
         // Add ciphertexts
         add_poly_coeffmod(encrypted1, encrypted2, min_count, coeff_modulus, encrypted1);
 
@@ -209,6 +211,8 @@ namespace seal
         // Prepare destination
         encrypted1.resize(context_, context_data.parms_id(), max_count);
 
+        // CORRECTION FACTOR TODO: check correction factors and multiply by scalars before addition
+
         // Subtract polynomials
         sub_poly_coeffmod(encrypted1, encrypted2, min_count, coeff_modulus, encrypted1);
 
@@ -285,14 +289,6 @@ namespace seal
         size_t encrypted1_size = encrypted1.size();
         size_t encrypted2_size = encrypted2.size();
         uint64_t plain_modulus = parms.plain_modulus().value();
-
-        double new_scale = encrypted1.scale() * encrypted2.scale();
-
-        // Check that scale is positive and not too large
-        if (new_scale <= 0 || (static_cast<int>(log2(new_scale)) >= parms.plain_modulus().bit_count()))
-        {
-            throw invalid_argument("scale out of bounds");
-        }
 
         auto rns_tool = context_data.rns_tool();
         size_t base_Bsk_size = rns_tool->base_Bsk()->size();
@@ -450,9 +446,6 @@ namespace seal
             // Step (8): use Shenoy-Kumaresan method to convert the result to base q and write to encrypted1
             rns_tool->fastbconv_sk(temp_Bsk, get<2>(I), pool);
         });
-
-        // Set the scale
-        encrypted1.scale() = new_scale;
     }
 
     void Evaluator::ckks_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool) const
@@ -469,12 +462,6 @@ namespace seal
         size_t coeff_modulus_size = parms.coeff_modulus().size();
         size_t encrypted1_size = encrypted1.size();
         size_t encrypted2_size = encrypted2.size();
-
-        double new_scale = encrypted1.scale() * encrypted2.scale();
-        if (!is_scale_within_bounds(new_scale, context_data))
-        {
-            throw invalid_argument("scale out of bounds");
-        }
 
         // Determine destination.size()
         // Default is 3 (c_0, c_1, c_2)
@@ -595,7 +582,11 @@ namespace seal
         }
 
         // Set the scale
-        encrypted1.scale() = new_scale;
+        encrypted1.scale() *= encrypted2.scale();
+        if (!is_scale_within_bounds(encrypted1.scale(), context_data))
+        {
+            throw invalid_argument("scale out of bounds");
+        }
     }
 
     void Evaluator::bgv_multiply(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool) const
@@ -613,6 +604,9 @@ namespace seal
         size_t encrypted1_size = encrypted1.size();
         size_t encrypted2_size = encrypted2.size();
         auto ntt_table = context_data.small_ntt_tables();
+
+        uint64_t new_correction_factor =
+            multiply_uint_mod(encrypted1.correction_factor(), encrypted2.correction_factor(), parms.plain_modulus());
 
         // Determine destination.size()
         // Default is 3 (c_0, c_1, c_2)
@@ -678,6 +672,9 @@ namespace seal
 
         // Convert the result (and the original ciphertext) back to non-NTT
         inverse_ntt_negacyclic_harvey(encrypted1, encrypted1.size(), ntt_table);
+
+        // Set the correction factor
+        encrypted1.correction_factor() = new_correction_factor;
     }
 
     void Evaluator::square_inplace(Ciphertext &encrypted, MemoryPoolHandle pool) const
@@ -729,12 +726,6 @@ namespace seal
         size_t base_q_size = parms.coeff_modulus().size();
         size_t encrypted_size = encrypted.size();
         uint64_t plain_modulus = parms.plain_modulus().value();
-
-        double new_scale = encrypted.scale();
-        if (!is_scale_within_bounds(new_scale, context_data))
-        {
-            throw invalid_argument("scale out of bounds");
-        }
 
         auto rns_tool = context_data.rns_tool();
         size_t base_Bsk_size = rns_tool->base_Bsk()->size();
@@ -863,9 +854,6 @@ namespace seal
             // Step (8): use Shenoy-Kumaresan method to convert the result to base q and write to encrypted1
             rns_tool->fastbconv_sk(temp_Bsk, get<2>(I), pool);
         });
-
-        // Set the scale
-        encrypted.scale() = new_scale;
     }
 
     void Evaluator::ckks_square(Ciphertext &encrypted, MemoryPoolHandle pool) const
@@ -887,12 +875,6 @@ namespace seal
         {
             ckks_multiply(encrypted, encrypted, move(pool));
             return;
-        }
-
-        double new_scale = encrypted.scale() * encrypted.scale();
-        if (!is_scale_within_bounds(new_scale, context_data))
-        {
-            throw invalid_argument("scale out of bounds");
         }
 
         // Determine destination.size()
@@ -928,7 +910,11 @@ namespace seal
             encrypted_iter[0], encrypted_iter[0], coeff_modulus_size, coeff_modulus, encrypted_iter[0]);
 
         // Set the scale
-        encrypted.scale() = new_scale;
+        encrypted.scale() *= encrypted.scale();
+        if (!is_scale_within_bounds(encrypted.scale(), context_data))
+        {
+            throw invalid_argument("scale out of bounds");
+        }
     }
 
     void Evaluator::bgv_square(Ciphertext &encrypted, MemoryPoolHandle pool) const
@@ -945,6 +931,9 @@ namespace seal
         size_t coeff_modulus_size = parms.coeff_modulus().size();
         size_t encrypted_size = encrypted.size();
         auto ntt_table = context_data.small_ntt_tables();
+
+        uint64_t new_correction_factor =
+            multiply_uint_mod(encrypted.correction_factor(), encrypted.correction_factor(), parms.plain_modulus());
 
         // Optimization implemented currently only for size 2 ciphertexts
         if (encrypted_size != 2)
@@ -993,6 +982,9 @@ namespace seal
 
         // Convert the final output to Non-NTT form
         inverse_ntt_negacyclic_harvey(encrypted, dest_size, ntt_table);
+
+        // Set the correction factor
+        encrypted.correction_factor() = new_correction_factor;
     }
 
     void Evaluator::relinearize_internal(
@@ -1125,6 +1117,12 @@ namespace seal
             destination.scale() =
                 encrypted.scale() / static_cast<double>(context_data.parms().coeff_modulus().back().value());
         }
+        else if (next_parms.scheme() == scheme_type::bgv)
+        {
+            // Change the correction factor when using BGV
+            destination.correction_factor() = 1;
+            // multiply_uint_mod(encrypted.correction_factor(), rns_tool->q_last_mod_t(), next_parms.plain_modulus());
+        }
     }
 
     void Evaluator::mod_switch_drop_to_next(
@@ -1174,22 +1172,22 @@ namespace seal
 
             // Resize destination before writing
             destination.resize(context_, next_context_data.parms_id(), encrypted_size);
-            destination.is_ntt_form() = true;
-            destination.scale() = encrypted.scale();
 
             // Copy data to destination
             set_poly_array(temp, encrypted_size, coeff_count, next_coeff_modulus_size, destination.data());
+            // TODO: avoid copying and temporary space allocation
         }
         else
         {
             // Resize destination before writing
             destination.resize(context_, next_context_data.parms_id(), encrypted_size);
-            destination.is_ntt_form() = true;
-            destination.scale() = encrypted.scale();
 
             // Copy data over to destination; only copy the RNS components relevant after modulus drop
             drop_modulus_and_copy(encrypted, destination);
         }
+        destination.is_ntt_form() = true;
+        destination.scale() = encrypted.scale();
+        destination.correction_factor() = encrypted.correction_factor();
     }
 
     void Evaluator::mod_switch_drop_to_next(Plaintext &plain) const
@@ -1598,6 +1596,7 @@ namespace seal
 
         case scheme_type::bgv:
         {
+            // CORRECTION FACTOR TODO: multiply plain with encrypted.correction_factor()
             add_plain_without_scaling_variant(plain, context_data, *iter(encrypted));
             break;
         }
@@ -1682,6 +1681,7 @@ namespace seal
 
         case scheme_type::bgv:
         {
+            // CORRECTION FACTOR TODO: multiply plain with encrypted.correction_factor()
             sub_plain_without_scaling_variant(plain, context_data, *iter(encrypted));
             break;
         }
@@ -1758,12 +1758,6 @@ namespace seal
             throw logic_error("invalid parameters");
         }
 
-        double new_scale = encrypted.scale() * plain.scale();
-        if (!is_scale_within_bounds(new_scale, context_data))
-        {
-            throw invalid_argument("scale out of bounds");
-        }
-
         /*
         Optimizations for constant / monomial multiplication can lead to the presence of a timing side-channel in
         use-cases where the plaintext data should also be kept private.
@@ -1806,7 +1800,14 @@ namespace seal
             }
 
             // Set the scale
-            encrypted.scale() = new_scale;
+            if (parms.scheme() == scheme_type::ckks)
+            {
+                encrypted.scale() *= plain.scale();
+                if (!is_scale_within_bounds(encrypted.scale(), context_data))
+                {
+                    throw invalid_argument("scale out of bounds");
+                }
+            }
 
             return;
         }
@@ -1860,7 +1861,14 @@ namespace seal
         });
 
         // Set the scale
-        encrypted.scale() = new_scale;
+        if (parms.scheme() == scheme_type::ckks)
+        {
+            encrypted.scale() *= plain.scale();
+            if (!is_scale_within_bounds(encrypted.scale(), context_data))
+            {
+                throw invalid_argument("scale out of bounds");
+            }
+        }
     }
 
     void Evaluator::multiply_plain_ntt(Ciphertext &encrypted_ntt, const Plaintext &plain_ntt) const
@@ -1889,19 +1897,17 @@ namespace seal
             throw logic_error("invalid parameters");
         }
 
-        double new_scale = encrypted_ntt.scale() * plain_ntt.scale();
-        if (!is_scale_within_bounds(new_scale, context_data))
-        {
-            throw invalid_argument("scale out of bounds");
-        }
-
         ConstRNSIter plain_ntt_iter(plain_ntt.data(), coeff_count);
         SEAL_ITERATE(iter(encrypted_ntt), encrypted_ntt_size, [&](auto I) {
             dyadic_product_coeffmod(I, plain_ntt_iter, coeff_modulus_size, coeff_modulus, I);
         });
 
         // Set the scale
-        encrypted_ntt.scale() = new_scale;
+        encrypted_ntt.scale() *= plain_ntt.scale();
+        if (!is_scale_within_bounds(encrypted_ntt.scale(), context_data))
+        {
+            throw invalid_argument("scale out of bounds");
+        }
     }
 
     void Evaluator::transform_to_ntt_inplace(Plaintext &plain, parms_id_type parms_id, MemoryPoolHandle pool) const

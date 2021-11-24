@@ -196,7 +196,7 @@ namespace Microsoft.Research.SEAL
             int secLevel,
             ref ulong length,
             [MarshalAs(UnmanagedType.LPArray)] IntPtr[] coeffArray);
-        
+
         [DllImport(sealc, EntryPoint = "CoeffModulus_Create1", PreserveSig = false)]
         internal static extern void CoeffModulus_Create(
             ulong polyModulusDegree,
@@ -477,6 +477,12 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Ciphertext_SetScale(IntPtr thisptr, double scale);
+
+        [DllImport(sealc, PreserveSig = false)]
+        internal static extern void Ciphertext_CorrectionFactor(IntPtr thisptr, out ulong correctionFactor);
+
+        [DllImport(sealc, PreserveSig = false)]
+        internal static extern void Ciphertext_SetCorrectionFactor(IntPtr thisptr, ulong correctionFactor);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Ciphertext_Release(IntPtr thisptr);

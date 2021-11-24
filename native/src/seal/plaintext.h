@@ -738,42 +738,39 @@ namespace seal
         }
 
         /**
-        Returns a reference to parms_id. The parms_id must remain zero unless the
-        plaintext polynomial is in NTT form.
+        Returns a reference to parms_id. The parms_id must remain zero unless the plaintext polynomial is in NTT form.
 
         @see EncryptionParameters for more information about parms_id.
         */
-        SEAL_NODISCARD inline auto &parms_id() noexcept
+        SEAL_NODISCARD inline parms_id_type &parms_id() noexcept
         {
             return parms_id_;
         }
 
         /**
-        Returns a const reference to parms_id. The parms_id must remain zero unless
-        the plaintext polynomial is in NTT form.
+        Returns a const reference to parms_id. The parms_id must remain zero unless the plaintext polynomial is in NTT
+        form.
 
         @see EncryptionParameters for more information about parms_id.
         */
-        SEAL_NODISCARD inline auto &parms_id() const noexcept
+        SEAL_NODISCARD inline const parms_id_type &parms_id() const noexcept
         {
             return parms_id_;
         }
 
         /**
-        Returns a reference to the scale. This is only needed when using the CKKS
-        encryption scheme. The user should have little or no reason to ever change
-        the scale by hand.
+        Returns a reference to the scale. This is only needed when using the CKKS encryption scheme. The user should
+        have little or no reason to ever change the scale by hand.
         */
-        SEAL_NODISCARD inline auto &scale() noexcept
+        SEAL_NODISCARD inline double &scale() noexcept
         {
             return scale_;
         }
 
         /**
-        Returns a constant reference to the scale. This is only needed when using
-        the CKKS encryption scheme.
+        Returns a constant reference to the scale. This is only needed when using the CKKS encryption scheme.
         */
-        SEAL_NODISCARD inline auto &scale() const noexcept
+        SEAL_NODISCARD inline const double &scale() const noexcept
         {
             return scale_;
         }

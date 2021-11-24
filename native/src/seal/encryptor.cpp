@@ -154,9 +154,10 @@ namespace seal
                     set_poly(get<0>(I), coeff_count, coeff_modulus_size, get<1>(I));
                 });
 
+                destination.parms_id() = parms_id;
                 destination.is_ntt_form() = is_ntt_form;
                 destination.scale() = temp.scale();
-                destination.parms_id() = parms_id;
+                destination.correction_factor() = temp.correction_factor();
             }
             else
             {

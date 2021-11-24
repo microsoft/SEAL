@@ -351,6 +351,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             decryptor.decrypt(ct, pt);
             ASSERT_TRUE(pt.is_zero());
 
@@ -358,6 +359,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             ASSERT_EQ(ct.parms_id(), next_parms);
             decryptor.decrypt(ct, pt);
             ASSERT_TRUE(pt.is_zero());
@@ -369,6 +371,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             decryptor.decrypt(ct, pt);
             ASSERT_TRUE(pt.is_zero());
 
@@ -377,6 +380,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             ASSERT_EQ(ct.parms_id(), next_parms);
             decryptor.decrypt(ct, pt);
             ASSERT_TRUE(pt.is_zero());
@@ -386,6 +390,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             decryptor.decrypt(ct, pt);
             ASSERT_TRUE(pt.is_zero());
 
@@ -393,6 +398,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             ASSERT_EQ(ct.parms_id(), next_parms);
             decryptor.decrypt(ct, pt);
             ASSERT_TRUE(pt.is_zero());
@@ -404,6 +410,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             decryptor.decrypt(ct, pt);
             ASSERT_TRUE(pt.is_zero());
 
@@ -412,6 +419,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             ASSERT_EQ(ct.parms_id(), next_parms);
             decryptor.decrypt(ct, pt);
             ASSERT_TRUE(pt.is_zero());
@@ -442,6 +450,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             ct.scale() = pow(2.0, 20);
             decryptor.decrypt(ct, pt);
             encoder.decode(pt, res);
@@ -455,6 +464,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             ct.scale() = pow(2.0, 20);
             ASSERT_EQ(ct.parms_id(), next_parms);
             decryptor.decrypt(ct, pt);
@@ -473,6 +483,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             ct.scale() = pow(2.0, 20);
             decryptor.decrypt(ct, pt);
             encoder.decode(pt, res);
@@ -487,6 +498,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             ct.scale() = pow(2.0, 20);
             ASSERT_EQ(ct.parms_id(), next_parms);
             decryptor.decrypt(ct, pt);
@@ -503,6 +515,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             ct.scale() = pow(2.0, 20);
             decryptor.decrypt(ct, pt);
             encoder.decode(pt, res);
@@ -516,6 +529,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             ct.scale() = pow(2.0, 20);
             ASSERT_EQ(ct.parms_id(), next_parms);
             decryptor.decrypt(ct, pt);
@@ -534,6 +548,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             ct.scale() = pow(2.0, 20);
             decryptor.decrypt(ct, pt);
             encoder.decode(pt, res);
@@ -548,6 +563,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             ct.scale() = pow(2.0, 20);
             ASSERT_EQ(ct.parms_id(), next_parms);
             decryptor.decrypt(ct, pt);
@@ -962,6 +978,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             decryptor.decrypt(ct, pt);
             ASSERT_TRUE(pt.is_zero());
 
@@ -969,6 +986,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             ASSERT_EQ(ct.parms_id(), next_parms);
             decryptor.decrypt(ct, pt);
             ASSERT_TRUE(pt.is_zero());
@@ -980,6 +998,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             decryptor.decrypt(ct, pt);
             ASSERT_TRUE(pt.is_zero());
 
@@ -988,6 +1007,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             ASSERT_EQ(ct.parms_id(), next_parms);
             decryptor.decrypt(ct, pt);
             ASSERT_TRUE(pt.is_zero());
@@ -997,6 +1017,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             decryptor.decrypt(ct, pt);
             ASSERT_TRUE(pt.is_zero());
 
@@ -1004,6 +1025,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             ASSERT_EQ(ct.parms_id(), next_parms);
             decryptor.decrypt(ct, pt);
             ASSERT_TRUE(pt.is_zero());
@@ -1015,6 +1037,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             decryptor.decrypt(ct, pt);
             ASSERT_TRUE(pt.is_zero());
 
@@ -1023,6 +1046,7 @@ namespace sealtest
             ASSERT_FALSE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
+            ASSERT_EQ(ct.correction_factor(), uint64_t(1));
             ASSERT_EQ(ct.parms_id(), next_parms);
             decryptor.decrypt(ct, pt);
             ASSERT_TRUE(pt.is_zero());

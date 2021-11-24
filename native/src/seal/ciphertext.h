@@ -281,6 +281,7 @@ namespace seal
             poly_modulus_degree_ = 0;
             coeff_modulus_size_ = 0;
             scale_ = 1.0;
+            correction_factor_ = 1;
             data_.release();
         }
 
@@ -618,7 +619,7 @@ namespace seal
 
         @see EncryptionParameters for more information about parms_id.
         */
-        SEAL_NODISCARD inline auto &parms_id() noexcept
+        SEAL_NODISCARD inline parms_id_type &parms_id() noexcept
         {
             return parms_id_;
         }
@@ -628,28 +629,43 @@ namespace seal
 
         @see EncryptionParameters for more information about parms_id.
         */
-        SEAL_NODISCARD inline auto &parms_id() const noexcept
+        SEAL_NODISCARD inline const parms_id_type &parms_id() const noexcept
         {
             return parms_id_;
         }
 
         /**
-        Returns a reference to the scale. This is only needed when using the
-        CKKS encryption scheme. The user should have little or no reason to ever
-        change the scale by hand.
+        Returns a reference to the scale. This is only needed when using the CKKS encryption scheme. The user should
+        have little or no reason to ever change the scale by hand.
         */
-        SEAL_NODISCARD inline auto &scale() noexcept
+        SEAL_NODISCARD inline double &scale() noexcept
         {
             return scale_;
         }
 
         /**
-        Returns a constant reference to the scale. This is only needed when
-        using the CKKS encryption scheme.
+        Returns a constant reference to the scale. This is only needed when using the CKKS encryption scheme.
         */
-        SEAL_NODISCARD inline auto &scale() const noexcept
+        SEAL_NODISCARD inline const double &scale() const noexcept
         {
             return scale_;
+        }
+
+        /**
+        Returns a reference to the correction factor. This is only needed when using the BGV encryption scheme. The user
+        should have little or no reason to ever change the scale by hand.
+        */
+        SEAL_NODISCARD inline std::uint64_t &correction_factor() noexcept
+        {
+            return correction_factor_;
+        }
+
+        /**
+        Returns a constant reference to the correction factor. This is only needed when using the BGV encryption scheme.
+        */
+        SEAL_NODISCARD inline const std::uint64_t &correction_factor() const noexcept
+        {
+            return correction_factor_;
         }
 
         /**
@@ -693,6 +709,8 @@ namespace seal
         std::size_t coeff_modulus_size_ = 0;
 
         double scale_ = 1.0;
+
+        std::uint64_t correction_factor_ = 1;
 
         DynArray<ct_coeff_type> data_;
     };

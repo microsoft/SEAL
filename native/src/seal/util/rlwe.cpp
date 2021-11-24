@@ -214,6 +214,7 @@ namespace seal
             destination.resize(context, parms_id, encrypted_size);
             destination.is_ntt_form() = is_ntt_form;
             destination.scale() = 1.0;
+            destination.correction_factor() = 1;
 
             // c[j] = public_key[j] * u + e[j] in BFV/CKKS = public_key[j] * u + p * e[j] in BGV
             // where e[j] <-- chi, u <-- R_3
@@ -312,6 +313,7 @@ namespace seal
             destination.resize(context, parms_id, encrypted_size);
             destination.is_ntt_form() = is_ntt_form;
             destination.scale() = 1.0;
+            destination.correction_factor() = 1;
 
             // Create an instance of a random number generator. We use this for sampling
             // a seed for a second PRNG used for sampling u (the seed can be public

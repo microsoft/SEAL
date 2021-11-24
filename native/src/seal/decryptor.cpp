@@ -230,6 +230,11 @@ namespace seal
 
         // Resize destination to appropriate size
         destination.resize(max(plain_coeff_count, size_t(1)));
+
+        if (encrypted.correction_factor() != 1)
+        {
+            // CORRECTION FACTOR TODO: multiply encrypted.correction_factor() which is already an inverse
+        }
     }
 
     void Decryptor::compute_secret_key_array(size_t max_power)
