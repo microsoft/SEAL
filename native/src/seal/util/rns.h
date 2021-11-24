@@ -297,9 +297,14 @@ namespace seal
                 return gamma_;
             }
 
-            SEAL_NODISCARD inline auto &inv_q_last_mod_p() const noexcept
+            SEAL_NODISCARD inline auto &inv_q_last_mod_t() const noexcept
             {
-                return inv_q_last_mod_p_;
+                return inv_q_last_mod_t_;
+            }
+
+            SEAL_NODISCARD inline const uint64_t &q_last_mod_t() const noexcept
+            {
+                return q_last_mod_t_;
             }
 
         private:
@@ -389,7 +394,9 @@ namespace seal
 
             Modulus gamma_;
 
-            uint64_t inv_q_last_mod_p_;
+            std::uint64_t inv_q_last_mod_t_ = 1;
+
+            std::uint64_t q_last_mod_t_ = 1;
         };
     } // namespace util
 } // namespace seal

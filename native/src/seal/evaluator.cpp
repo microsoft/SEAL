@@ -46,6 +46,76 @@ namespace seal
 
             return !(scale <= 0 || (static_cast<int>(log2(scale)) >= scale_bit_count_bound));
         }
+
+        /**
+        Returns (f, e1, e2) such that
+        (1) e1 * factor1 = e2 * factor2 = f mod p;
+        (2) gcd(e1, p) = 1 and gcd(e2, p) = 1;
+        (3) abs(e1_bal) + abs(e2_bal) is minimal, where e1_bal and e2_bal represent e1 and e2 in (-p/2, p/2].
+        */
+        SEAL_NODISCARD inline auto balance_correction_factors(
+            uint64_t factor1, uint64_t factor2, const Modulus &plain_modulus) -> tuple<uint64_t, uint64_t, uint64_t>
+        {
+            uint64_t t = plain_modulus.value();
+            uint64_t half_t = t / 2;
+
+            auto sum_abs = [&](uint64_t x, uint64_t y) {
+                int64_t x_bal = static_cast<int64_t>(x > half_t ? x - t : x);
+                int64_t y_bal = static_cast<int64_t>(y > half_t ? y - t : y);
+                return abs(x_bal) + abs(y_bal);
+            };
+
+            // ratio = f2 / f1 mod p
+            uint64_t ratio = 1;
+            if (!try_invert_uint_mod(factor1, plain_modulus, ratio))
+            {
+                throw logic_error("invalid correction factor1");
+            }
+            ratio = multiply_uint_mod(ratio, factor2, plain_modulus);
+            uint64_t e1 = ratio;
+            uint64_t e2 = 1;
+            int64_t sum = sum_abs(e1, e2);
+
+            // Extended Euclidean
+            int64_t prev_a = static_cast<int64_t>(plain_modulus.value());
+            int64_t prev_b = static_cast<int64_t>(0);
+            int64_t a = static_cast<int64_t>(ratio);
+            int64_t b = 1;
+
+            while (a != 0)
+            {
+                int64_t q = prev_a / a;
+                int64_t temp = prev_a % a;
+                prev_a = a;
+                a = temp;
+
+                temp = sub_safe(prev_b, mul_safe(b, q));
+                prev_b = b;
+                b = temp;
+
+                uint64_t a_mod = barrett_reduce_64(static_cast<uint64_t>(abs(a)), plain_modulus);
+                if (a < 0)
+                {
+                    a_mod = negate_uint_mod(a_mod, plain_modulus);
+                }
+                uint64_t b_mod = barrett_reduce_64(static_cast<uint64_t>(abs(b)), plain_modulus);
+                if (b < 0)
+                {
+                    b_mod = negate_uint_mod(b_mod, plain_modulus);
+                }
+                if (a_mod != 0 && gcd(a_mod, t) == 1) // which also implies gcd(b_mod, t) == 1
+                {
+                    int64_t new_sum = sum_abs(a_mod, b_mod);
+                    if (new_sum < sum)
+                    {
+                        sum = new_sum;
+                        e1 = a_mod;
+                        e2 = b_mod;
+                    }
+                }
+            }
+            return make_tuple(multiply_uint_mod(e1, factor1, plain_modulus), e1, e2);
+        }
     } // namespace
 
     Evaluator::Evaluator(const SEALContext &context) : context_(context)
@@ -110,6 +180,7 @@ namespace seal
         auto &context_data = *context_.get_context_data(encrypted1.parms_id());
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
+        auto &plain_modulus = parms.plain_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_size = coeff_modulus.size();
         size_t encrypted1_size = encrypted1.size();
@@ -126,10 +197,31 @@ namespace seal
         // Prepare destination
         encrypted1.resize(context_, context_data.parms_id(), max_count);
 
-        // CORRECTION FACTOR TODO: check correction factors and multiply by scalars before addition
+        if (encrypted1.correction_factor() != encrypted2.correction_factor())
+        {
+            // Balance correction factors and multiply by scalars before addition in BGV
+            auto factors = balance_correction_factors(
+                encrypted1.correction_factor(), encrypted2.correction_factor(), plain_modulus);
 
-        // Add ciphertexts
-        add_poly_coeffmod(encrypted1, encrypted2, min_count, coeff_modulus, encrypted1);
+            multiply_poly_scalar_coeffmod(
+                ConstPolyIter(encrypted1.data(), coeff_count, coeff_modulus_size), encrypted1.size(), get<1>(factors),
+                coeff_modulus, PolyIter(encrypted1.data(), coeff_count, coeff_modulus_size));
+            Ciphertext encrypted2_copy = encrypted2;
+            multiply_poly_scalar_coeffmod(
+                ConstPolyIter(encrypted2.data(), coeff_count, coeff_modulus_size), encrypted2.size(), get<2>(factors),
+                coeff_modulus, PolyIter(encrypted2_copy.data(), coeff_count, coeff_modulus_size));
+
+            // Set new correction factor
+            encrypted1.correction_factor() = get<0>(factors);
+
+            // Add ciphertexts
+            add_poly_coeffmod(encrypted1, encrypted2_copy, min_count, coeff_modulus, encrypted1);
+        }
+        else
+        {
+            // Add ciphertexts
+            add_poly_coeffmod(encrypted1, encrypted2, min_count, coeff_modulus, encrypted1);
+        }
 
         // Copy the remainding polys of the array with larger count into encrypted1
         if (encrypted1_size < encrypted2_size)
@@ -196,7 +288,9 @@ namespace seal
         auto &context_data = *context_.get_context_data(encrypted1.parms_id());
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
+        auto &plain_modulus = parms.plain_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
+        size_t coeff_modulus_size = coeff_modulus.size();
         size_t encrypted1_size = encrypted1.size();
         size_t encrypted2_size = encrypted2.size();
         size_t max_count = max(encrypted1_size, encrypted2_size);
@@ -211,10 +305,31 @@ namespace seal
         // Prepare destination
         encrypted1.resize(context_, context_data.parms_id(), max_count);
 
-        // CORRECTION FACTOR TODO: check correction factors and multiply by scalars before addition
+        if (encrypted1.correction_factor() != encrypted2.correction_factor())
+        {
+            // Balance correction factors and multiply by scalars before subtraction in BGV
+            auto factors = balance_correction_factors(
+                encrypted1.correction_factor(), encrypted2.correction_factor(), plain_modulus);
 
-        // Subtract polynomials
-        sub_poly_coeffmod(encrypted1, encrypted2, min_count, coeff_modulus, encrypted1);
+            multiply_poly_scalar_coeffmod(
+                ConstPolyIter(encrypted1.data(), coeff_count, coeff_modulus_size), encrypted1.size(), get<1>(factors),
+                coeff_modulus, PolyIter(encrypted1.data(), coeff_count, coeff_modulus_size));
+            Ciphertext encrypted2_copy = encrypted2;
+            multiply_poly_scalar_coeffmod(
+                ConstPolyIter(encrypted2.data(), coeff_count, coeff_modulus_size), encrypted2.size(), get<2>(factors),
+                coeff_modulus, PolyIter(encrypted2_copy.data(), coeff_count, coeff_modulus_size));
+
+            // Set new correction factor
+            encrypted1.correction_factor() = get<0>(factors);
+
+            // Subtract ciphertexts
+            sub_poly_coeffmod(encrypted1, encrypted2_copy, min_count, coeff_modulus, encrypted1);
+        }
+        else
+        {
+            // Subtract ciphertexts
+            sub_poly_coeffmod(encrypted1, encrypted2, min_count, coeff_modulus, encrypted1);
+        }
 
         // If encrypted2 has larger count, negate remaining entries
         if (encrypted1_size < encrypted2_size)
@@ -605,9 +720,6 @@ namespace seal
         size_t encrypted2_size = encrypted2.size();
         auto ntt_table = context_data.small_ntt_tables();
 
-        uint64_t new_correction_factor =
-            multiply_uint_mod(encrypted1.correction_factor(), encrypted2.correction_factor(), parms.plain_modulus());
-
         // Determine destination.size()
         // Default is 3 (c_0, c_1, c_2)
         size_t dest_size = sub_safe(add_safe(encrypted1_size, encrypted2_size), size_t(1));
@@ -674,7 +786,8 @@ namespace seal
         inverse_ntt_negacyclic_harvey(encrypted1, encrypted1.size(), ntt_table);
 
         // Set the correction factor
-        encrypted1.correction_factor() = new_correction_factor;
+        encrypted1.correction_factor() =
+            multiply_uint_mod(encrypted1.correction_factor(), encrypted2.correction_factor(), parms.plain_modulus());
     }
 
     void Evaluator::square_inplace(Ciphertext &encrypted, MemoryPoolHandle pool) const
@@ -932,9 +1045,6 @@ namespace seal
         size_t encrypted_size = encrypted.size();
         auto ntt_table = context_data.small_ntt_tables();
 
-        uint64_t new_correction_factor =
-            multiply_uint_mod(encrypted.correction_factor(), encrypted.correction_factor(), parms.plain_modulus());
-
         // Optimization implemented currently only for size 2 ciphertexts
         if (encrypted_size != 2)
         {
@@ -984,7 +1094,8 @@ namespace seal
         inverse_ntt_negacyclic_harvey(encrypted, dest_size, ntt_table);
 
         // Set the correction factor
-        encrypted.correction_factor() = new_correction_factor;
+        encrypted.correction_factor() =
+            multiply_uint_mod(encrypted.correction_factor(), encrypted.correction_factor(), parms.plain_modulus());
     }
 
     void Evaluator::relinearize_internal(
@@ -1120,8 +1231,8 @@ namespace seal
         else if (next_parms.scheme() == scheme_type::bgv)
         {
             // Change the correction factor when using BGV
-            destination.correction_factor() = 1;
-            // multiply_uint_mod(encrypted.correction_factor(), rns_tool->q_last_mod_t(), next_parms.plain_modulus());
+            destination.correction_factor() = multiply_uint_mod(
+                encrypted.correction_factor(), rns_tool->inv_q_last_mod_t(), next_parms.plain_modulus());
         }
     }
 
@@ -1596,8 +1707,11 @@ namespace seal
 
         case scheme_type::bgv:
         {
-            // CORRECTION FACTOR TODO: multiply plain with encrypted.correction_factor()
-            add_plain_without_scaling_variant(plain, context_data, *iter(encrypted));
+            Plaintext plain_copy = plain;
+            multiply_poly_scalar_coeffmod(
+                plain.data(), plain.coeff_count(), encrypted.correction_factor(), parms.plain_modulus(),
+                plain_copy.data());
+            add_plain_without_scaling_variant(plain_copy, context_data, *iter(encrypted));
             break;
         }
 
@@ -1681,8 +1795,11 @@ namespace seal
 
         case scheme_type::bgv:
         {
-            // CORRECTION FACTOR TODO: multiply plain with encrypted.correction_factor()
-            sub_plain_without_scaling_variant(plain, context_data, *iter(encrypted));
+            Plaintext plain_copy = plain;
+            multiply_poly_scalar_coeffmod(
+                plain.data(), plain.coeff_count(), encrypted.correction_factor(), parms.plain_modulus(),
+                plain_copy.data());
+            sub_plain_without_scaling_variant(plain_copy, context_data, *iter(encrypted));
             break;
         }
 
@@ -2456,7 +2573,7 @@ namespace seal
                 const Modulus &plain_modulus = parms.plain_modulus();
                 // qk is the special prime
                 uint64_t qk = key_modulus[key_modulus_size - 1].value();
-                uint64_t qk_inv_qp = context_.key_context_data()->rns_tool()->inv_q_last_mod_p();
+                uint64_t qk_inv_qp = context_.key_context_data()->rns_tool()->inv_q_last_mod_t();
 
                 // Lazy reduction; this needs to be then reduced mod qi
                 CoeffIter t_last(get<1>(I)[decomp_modulus_size]);

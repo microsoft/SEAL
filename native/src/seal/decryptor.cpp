@@ -194,11 +194,8 @@ namespace seal
         }
 
         auto &context_data = *context_.get_context_data(encrypted.parms_id());
-        auto &first_context_data = *context_.first_context_data();
         auto &parms = context_data.parms();
-        auto &first_parms = first_context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
-        auto &first_coeff_modulus = first_parms.coeff_modulus();
         auto &plain_modulus = parms.plain_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_size = coeff_modulus.size();
@@ -212,15 +209,13 @@ namespace seal
 
         context_data.rns_tool()->decrypt_modt(tmp_dest_modq, destination.data(), pool);
 
-        // Fix the plaintext after mod-switch operations.
-        uint64_t fix = 1;
-        for (size_t i = context_data.chain_index(); i < first_context_data.chain_index(); i++)
+        if (encrypted.correction_factor() != 1)
         {
-            auto scalar = barrett_reduce_64(first_coeff_modulus[i + 1].value(), plain_modulus);
-            fix = multiply_uint_mod(fix, scalar, plain_modulus);
-        }
-        if (fix != 1)
-        {
+            uint64_t fix = 1;
+            if (!try_invert_uint_mod(encrypted.correction_factor(), plain_modulus, fix))
+            {
+                throw logic_error("invalid correction factor");
+            }
             multiply_poly_scalar_coeffmod(
                 CoeffIter(destination.data()), coeff_count, fix, plain_modulus, CoeffIter(destination.data()));
         }
@@ -230,11 +225,6 @@ namespace seal
 
         // Resize destination to appropriate size
         destination.resize(max(plain_coeff_count, size_t(1)));
-
-        if (encrypted.correction_factor() != 1)
-        {
-            // CORRECTION FACTOR TODO: multiply encrypted.correction_factor() which is already an inverse
-        }
     }
 
     void Decryptor::compute_secret_key_array(size_t max_power)

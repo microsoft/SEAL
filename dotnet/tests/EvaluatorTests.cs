@@ -75,7 +75,7 @@ namespace SEALNetTest
                 EncryptionParameters parms = new EncryptionParameters(SchemeType.BGV)
                 {
                     PolyModulusDegree = 64,
-                    PlainModulus = new Modulus(1 << 6),
+                    PlainModulus = new Modulus(65),
                     CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
                 };
                 SEALContext context = new SEALContext(parms,
@@ -97,21 +97,21 @@ namespace SEALNetTest
                 evaluator.Negate(encrypted, encdestination);
                 decryptor.Decrypt(encdestination, plaindest);
 
-                // coefficients are negated (modulo 64)
-                Assert.AreEqual(0x3Ful, plaindest[0]);
-                Assert.AreEqual(0x3Eul, plaindest[1]);
-                Assert.AreEqual(0x3Dul, plaindest[2]);
+                // coefficients are negated (modulo 65)
+                Assert.AreEqual(0x40ul, plaindest[0]);
+                Assert.AreEqual(0x3Ful, plaindest[1]);
+                Assert.AreEqual(0x3Eul, plaindest[2]);
 
                 plain = new Plaintext("6x^3 + 7x^2 + 8x^1 + 9");
                 encryptor.Encrypt(plain, encrypted);
                 evaluator.NegateInplace(encrypted);
                 decryptor.Decrypt(encrypted, plain);
 
-                // coefficients are negated (modulo 64)
-                Assert.AreEqual(0x37ul, plain[0]);
-                Assert.AreEqual(0x38ul, plain[1]);
-                Assert.AreEqual(0x39ul, plain[2]);
-                Assert.AreEqual(0x3Aul, plain[3]);
+                // coefficients are negated (modulo 65)
+                Assert.AreEqual(0x38ul, plain[0]);
+                Assert.AreEqual(0x39ul, plain[1]);
+                Assert.AreEqual(0x3Aul, plain[2]);
+                Assert.AreEqual(0x3Bul, plain[3]);
             }
         }
 
@@ -174,7 +174,7 @@ namespace SEALNetTest
                 EncryptionParameters parms = new EncryptionParameters(SchemeType.BGV)
                 {
                     PolyModulusDegree = 64,
-                    PlainModulus = new Modulus(1 << 6),
+                    PlainModulus = new Modulus(65),
                     CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
                 };
                 SEALContext context = new SEALContext(parms,
@@ -214,6 +214,21 @@ namespace SEALNetTest
 
                 encryptor.Encrypt(plain1, encrypted1);
                 encryptor.Encrypt(plain2, encrypted2);
+                evaluator.AddInplace(encrypted1, encrypted2);
+                decryptor.Decrypt(encrypted1, plaindest);
+
+                Assert.AreEqual(5ul, plaindest[0]);
+                Assert.AreEqual(4ul, plaindest[1]);
+                Assert.AreEqual(3ul, plaindest[2]);
+                Assert.AreEqual(2ul, plaindest[3]);
+
+                plain1 = new Plaintext("2x^2 + 4x^1 + 6");
+                plain2 = new Plaintext("3Fx^3 + 3Fx^2 + 3Fx^1 + 3F");
+
+                encryptor.Encrypt(plain1, encrypted1);
+                encrypted1.CorrectionFactor = 2;
+                encryptor.Encrypt(plain2, encrypted2);
+                encrypted2.CorrectionFactor = 64;
                 evaluator.AddInplace(encrypted1, encrypted2);
                 decryptor.Decrypt(encrypted1, plaindest);
 
@@ -272,7 +287,7 @@ namespace SEALNetTest
                 EncryptionParameters parms = new EncryptionParameters(SchemeType.BGV)
                 {
                     PolyModulusDegree = 64,
-                    PlainModulus = new Modulus(1 << 6),
+                    PlainModulus = new Modulus(65),
                     CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
                 };
                 SEALContext context = new SEALContext(parms,
@@ -300,6 +315,18 @@ namespace SEALNetTest
 
                 plain.Set("1x^2 + 1x^1 + 1");
                 encryptor.Encrypt(new Plaintext("2x^3 + 2x^2 + 2x^1 + 2"), encrypted);
+                evaluator.AddPlainInplace(encrypted, plain);
+                decryptor.Decrypt(encrypted, plaindest);
+
+                Assert.AreEqual(4ul, plaindest.CoeffCount);
+                Assert.AreEqual(3ul, plaindest[0]);
+                Assert.AreEqual(3ul, plaindest[1]);
+                Assert.AreEqual(3ul, plaindest[2]);
+                Assert.AreEqual(2ul, plaindest[3]);
+
+                plain.Set("1x^2 + 1x^1 + 1");
+                encryptor.Encrypt(new Plaintext("4x^3 + 4x^2 + 4x^1 + 4"), encrypted);
+                encrypted.CorrectionFactor = 2;
                 evaluator.AddPlainInplace(encrypted, plain);
                 decryptor.Decrypt(encrypted, plaindest);
 
@@ -351,7 +378,7 @@ namespace SEALNetTest
                 EncryptionParameters parms = new EncryptionParameters(SchemeType.BGV)
                 {
                     PolyModulusDegree = 64,
-                    PlainModulus = new Modulus(1 << 6),
+                    PlainModulus = new Modulus(65),
                     CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
                 };
                 SEALContext context = new SEALContext(parms,
@@ -436,7 +463,7 @@ namespace SEALNetTest
                 EncryptionParameters parms = new EncryptionParameters(SchemeType.BGV)
                 {
                     PolyModulusDegree = 64,
-                    PlainModulus = new Modulus(1 << 6),
+                    PlainModulus = new Modulus(65),
                     CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
                 };
                 SEALContext context = new SEALContext(parms,
@@ -464,13 +491,28 @@ namespace SEALNetTest
                 Assert.AreEqual(7ul, plaindest[0]);
                 Assert.AreEqual(6ul, plaindest[1]);
                 Assert.AreEqual(5ul, plaindest[2]);
-                Assert.AreEqual(0x3Bul, plaindest[3]);
+                Assert.AreEqual(0x3Cul, plaindest[3]);
 
                 plain1.Set("Ax^3 + Bx^2 + Cx^1 + D");
                 plain2.Set("5x^2 + 5x^1 + 5");
 
                 encryptor.Encrypt(plain1, encrypted1);
                 encryptor.Encrypt(plain2, encrypted2);
+                evaluator.SubInplace(encrypted1, encrypted2);
+                decryptor.Decrypt(encrypted1, plaindest);
+
+                Assert.AreEqual(8ul, plaindest[0]);
+                Assert.AreEqual(7ul, plaindest[1]);
+                Assert.AreEqual(6ul, plaindest[2]);
+                Assert.AreEqual(10ul, plaindest[3]);
+
+                plain1.Set("14x^3 + 16x^2 + 18x^1 + 1A");
+                plain2.Set("3Cx^2 + 3Cx^1 + 3C");
+
+                encryptor.Encrypt(plain1, encrypted1);
+                encrypted1.CorrectionFactor = 2;
+                encryptor.Encrypt(plain2, encrypted2);
+                encrypted2.CorrectionFactor = 64;
                 evaluator.SubInplace(encrypted1, encrypted2);
                 decryptor.Decrypt(encrypted1, plaindest);
 
@@ -530,7 +572,7 @@ namespace SEALNetTest
                 EncryptionParameters parms = new EncryptionParameters(SchemeType.BGV)
                 {
                     PolyModulusDegree = 64,
-                    PlainModulus = new Modulus(1 << 6),
+                    PlainModulus = new Modulus(65),
                     CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
                 };
                 SEALContext context = new SEALContext(parms,
@@ -554,8 +596,8 @@ namespace SEALNetTest
 
                 Assert.AreEqual(3ul, plaindest.CoeffCount);
                 Assert.AreEqual(1ul, plaindest[0]);
-                Assert.AreEqual(0x3Ful, plaindest[1]); // -1
-                Assert.AreEqual(0x3Bul, plaindest[2]); // -5
+                Assert.AreEqual(0x40ul, plaindest[1]); // -1
+                Assert.AreEqual(0x3Cul, plaindest[2]); // -5
 
                 plain.Set("6x^3 + 1x^2 + 7x^1 + 2");
                 encryptor.Encrypt(new Plaintext("Ax^2 + Bx^1 + C"), encrypted);
@@ -566,7 +608,19 @@ namespace SEALNetTest
                 Assert.AreEqual(10ul, plaindest[0]);
                 Assert.AreEqual(4ul, plaindest[1]);
                 Assert.AreEqual(9ul, plaindest[2]);
-                Assert.AreEqual(0x3Aul, plaindest[3]); // -6
+                Assert.AreEqual(0x3Bul, plaindest[3]); // -6
+
+                plain.Set("6x^3 + 1x^2 + 7x^1 + 2");
+                encryptor.Encrypt(new Plaintext("14x^2 + 16x^1 + 18"), encrypted);
+                encrypted.CorrectionFactor = 2;
+                evaluator.SubPlainInplace(encrypted, plain);
+                decryptor.Decrypt(encrypted, plaindest);
+
+                Assert.AreEqual(4ul, plaindest.CoeffCount);
+                Assert.AreEqual(10ul, plaindest[0]);
+                Assert.AreEqual(4ul, plaindest[1]);
+                Assert.AreEqual(9ul, plaindest[2]);
+                Assert.AreEqual(0x3Bul, plaindest[3]); // -6
             }
         }
 
@@ -626,7 +680,7 @@ namespace SEALNetTest
                 EncryptionParameters parms = new EncryptionParameters(SchemeType.BGV)
                 {
                     PolyModulusDegree = 64,
-                    PlainModulus = new Modulus(1 << 6),
+                    PlainModulus = new Modulus(65),
                     CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
                 };
                 SEALContext context = new SEALContext(parms,
@@ -721,7 +775,7 @@ namespace SEALNetTest
                 EncryptionParameters parms = new EncryptionParameters(SchemeType.BGV)
                 {
                     PolyModulusDegree = 128,
-                    PlainModulus = new Modulus(1 << 6),
+                    PlainModulus = new Modulus(65),
                     CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40, 40 })
                 };
                 SEALContext context = new SEALContext(parms,
@@ -837,7 +891,7 @@ namespace SEALNetTest
                 EncryptionParameters parms = new EncryptionParameters(SchemeType.BGV)
                 {
                     PolyModulusDegree = 128,
-                    PlainModulus = new Modulus(1 << 6),
+                    PlainModulus = new Modulus(65),
                     CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40 })
                 };
                 SEALContext context = new SEALContext(parms,
@@ -902,7 +956,7 @@ namespace SEALNetTest
                     MemoryPoolHandle pool = new MemoryPoolHandle();
                     evaluator.MultiplyPlain(encrypted, plain, encdest, pool);
                 });
-            }       
+            }
         }
 
         [TestMethod]
@@ -956,7 +1010,7 @@ namespace SEALNetTest
                 EncryptionParameters parms = new EncryptionParameters(SchemeType.BGV)
                 {
                     PolyModulusDegree = 128,
-                    PlainModulus = new Modulus(1 << 6),
+                    PlainModulus = new Modulus(65),
                     CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40 })
                 };
                 SEALContext context = new SEALContext(parms,
@@ -1061,7 +1115,7 @@ namespace SEALNetTest
                 EncryptionParameters parms = new EncryptionParameters(SchemeType.BGV)
                 {
                     PolyModulusDegree = 128,
-                    PlainModulus = new Modulus(1 << 6),
+                    PlainModulus = new Modulus(65),
                     CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40, 40 })
                 };
                 SEALContext context = new SEALContext(parms,
@@ -1102,16 +1156,16 @@ namespace SEALNetTest
                 Assert.AreEqual(16ul, plain[0]);
                 Assert.AreEqual(0ul, plain[1]);
                 Assert.AreEqual(0ul, plain[2]);
-                Assert.AreEqual(32ul, plain[3]);
+                Assert.AreEqual(31ul, plain[3]);
                 Assert.AreEqual(0ul, plain[4]);
                 Assert.AreEqual(0ul, plain[5]);
-                Assert.AreEqual(24ul, plain[6]);
+                Assert.AreEqual(21ul, plain[6]);
                 Assert.AreEqual(0ul, plain[7]);
                 Assert.AreEqual(0ul, plain[8]);
-                Assert.AreEqual(24ul, plain[9]);
+                Assert.AreEqual(21ul, plain[9]);
                 Assert.AreEqual(0ul, plain[10]);
                 Assert.AreEqual(0ul, plain[11]);
-                Assert.AreEqual(17ul, plain[12]);
+                Assert.AreEqual(16ul, plain[12]);
             }
         }
 
@@ -1361,7 +1415,7 @@ namespace SEALNetTest
                 EncryptionParameters parms = new EncryptionParameters(SchemeType.BGV)
                 {
                     PolyModulusDegree = 128,
-                    PlainModulus = new Modulus(1 << 6),
+                    PlainModulus = new Modulus(65),
                     CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40, 40 })
                 };
                 SEALContext context = new SEALContext(parms,
@@ -1449,7 +1503,7 @@ namespace SEALNetTest
                 EncryptionParameters parms = new EncryptionParameters(SchemeType.BGV)
                 {
                     PolyModulusDegree = 128,
-                    PlainModulus = new Modulus(1 << 6),
+                    PlainModulus = new Modulus(65),
                     CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40 })
                 };
                 SEALContext context = new SEALContext(parms,
@@ -1542,7 +1596,7 @@ namespace SEALNetTest
                 EncryptionParameters parms = new EncryptionParameters(SchemeType.BGV)
                 {
                     PolyModulusDegree = 128,
-                    PlainModulus = new Modulus(1 << 6),
+                    PlainModulus = new Modulus(65),
                     CoeffModulus = CoeffModulus.Create(128, new int[] { 30, 30, 30 })
                 };
                 SEALContext context = new SEALContext(parms,
@@ -1674,7 +1728,7 @@ namespace SEALNetTest
                 EncryptionParameters parms = new EncryptionParameters(SchemeType.BGV)
                 {
                     PolyModulusDegree = 128,
-                    PlainModulus = new Modulus(1 << 6),
+                    PlainModulus = new Modulus(65),
                     CoeffModulus = CoeffModulus.Create(128, new int[] { 30, 30, 30, 30 })
                 };
                 SEALContext context = new SEALContext(parms,
@@ -2013,7 +2067,7 @@ namespace SEALNetTest
                 EncryptionParameters parms = new EncryptionParameters(SchemeType.BGV)
                 {
                     PolyModulusDegree = 128,
-                    PlainModulus = new Modulus(1 << 6),
+                    PlainModulus = new Modulus(65),
                     CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40, 40 })
                 };
                 SEALContext context = new SEALContext(parms,
@@ -2056,7 +2110,7 @@ namespace SEALNetTest
                 Assert.AreEqual(24ul, plain2[20]);
                 Assert.AreEqual(8ul,  plain2[30]);
                 Assert.AreEqual(1ul,  plain2[40]);
-            }       
+            }
         }
 
         [TestMethod]

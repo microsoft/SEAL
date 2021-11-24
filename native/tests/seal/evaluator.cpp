@@ -182,7 +182,7 @@ namespace sealtest
     TEST(EvaluatorTest, BGVEncryptNegateDecrypt)
     {
         EncryptionParameters parms(scheme_type::bgv);
-        Modulus plain_modulus(1 << 6);
+        Modulus plain_modulus(65);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -204,8 +204,8 @@ namespace sealtest
         evaluator.negate_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
         ASSERT_EQ(
-            plain.to_string(), "3Fx^28 + 3Fx^25 + 3Fx^21 + 3Fx^20 + 3Fx^18 + 3Fx^14 + 3Fx^12 + 3Fx^10 + 3Fx^9 + 3Fx^6 "
-                               "+ 3Fx^5 + 3Fx^4 + 3Fx^3");
+            plain.to_string(), "40x^28 + 40x^25 + 40x^21 + 40x^20 + 40x^18 + 40x^14 + 40x^12 + 40x^10 + 40x^9 + 40x^6 "
+                               "+ 40x^5 + 40x^4 + 40x^3");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
         plain = "0";
@@ -219,10 +219,10 @@ namespace sealtest
         encryptor.encrypt(plain, encrypted);
         evaluator.negate_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_EQ(plain.to_string(), "3F");
+        ASSERT_EQ(plain.to_string(), "40");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-        plain = "3F";
+        plain = "40";
         encryptor.encrypt(plain, encrypted);
         evaluator.negate_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
@@ -233,10 +233,10 @@ namespace sealtest
         encryptor.encrypt(plain, encrypted);
         evaluator.negate_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_EQ(plain.to_string(), "3Fx^1");
+        ASSERT_EQ(plain.to_string(), "40x^1");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-        plain = "3Fx^2 + 3F";
+        plain = "40x^2 + 40";
         encryptor.encrypt(plain, encrypted);
         evaluator.negate_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
@@ -247,7 +247,7 @@ namespace sealtest
     TEST(EvaluatorTest, BGVEncryptAddDecrypt)
     {
         EncryptionParameters parms(scheme_type::bgv);
-        Modulus plain_modulus(1 << 6);
+        Modulus plain_modulus(65);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -277,6 +277,21 @@ namespace sealtest
         ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
+        // Test correction factor
+        plain1 = "2x^28 + 2x^25 + 2x^21 + 2x^20 + 2x^18 + 2x^14 + 2x^12 + 2x^10 + 2x^9 + 2x^6 + 2x^5 + 2x^4 + 2x^3";
+        plain2 = "40x^18 + 40x^16 + 40x^14 + 40x^9 + 40x^8 + 40x^5 + 40";
+        encryptor.encrypt(plain1, encrypted1);
+        encrypted1.correction_factor() = 2;
+        encryptor.encrypt(plain2, encrypted2);
+        encrypted2.correction_factor() = 64;
+        evaluator.add_inplace(encrypted1, encrypted2);
+        decryptor.decrypt(encrypted1, plain);
+        ASSERT_EQ(
+            plain.to_string(), "1x^28 + 1x^25 + 1x^21 + 1x^20 + 2x^18 + 1x^16 + 2x^14 + 1x^12 + 1x^10 + 2x^9 + 1x^8 + "
+                               "1x^6 + 2x^5 + 1x^4 + 1x^3 + 1");
+        ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
+        ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
+
         plain1 = "0";
         plain2 = "0";
         encryptor.encrypt(plain1, encrypted1);
@@ -298,22 +313,22 @@ namespace sealtest
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
         plain1 = "1x^2 + 1";
-        plain2 = "3Fx^1 + 3F";
+        plain2 = "40x^1 + 40";
         encryptor.encrypt(plain1, encrypted1);
         encryptor.encrypt(plain2, encrypted2);
         evaluator.add_inplace(encrypted1, encrypted2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(plain.to_string(), "1x^2 + 3Fx^1");
+        ASSERT_EQ(plain.to_string(), "1x^2 + 40x^1");
         ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        plain1 = "3Fx^2 + 3Fx^1 + 3F";
+        plain1 = "40x^2 + 40x^1 + 40";
         plain2 = "1x^1";
         encryptor.encrypt(plain1, encrypted1);
         encryptor.encrypt(plain2, encrypted2);
         evaluator.add_inplace(encrypted1, encrypted2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(plain.to_string(), "3Fx^2 + 3F");
+        ASSERT_EQ(plain.to_string(), "40x^2 + 40");
         ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
@@ -1626,7 +1641,7 @@ namespace sealtest
     TEST(EvaluatorTest, BGVEncryptSubDecrypt)
     {
         EncryptionParameters parms(scheme_type::bgv);
-        Modulus plain_modulus(1 << 6);
+        Modulus plain_modulus(65);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -1652,7 +1667,22 @@ namespace sealtest
         decryptor.decrypt(encrypted1, plain);
         ASSERT_EQ(
             plain.to_string(),
-            "1x^28 + 1x^25 + 1x^21 + 1x^20 + 3Fx^16 + 1x^12 + 1x^10 + 3Fx^8 + 1x^6 + 1x^4 + 1x^3 + 3F");
+            "1x^28 + 1x^25 + 1x^21 + 1x^20 + 40x^16 + 1x^12 + 1x^10 + 40x^8 + 1x^6 + 1x^4 + 1x^3 + 40");
+        ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
+        ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
+
+        // Test correction factor
+        plain1 = "2x^28 + 2x^25 + 2x^21 + 2x^20 + 2x^18 + 2x^14 + 2x^12 + 2x^10 + 2x^9 + 2x^6 + 2x^5 + 2x^4 + 2x^3";
+        plain2 = "40x^18 + 40x^16 + 40x^14 + 40x^9 + 40x^8 + 40x^5 + 40";
+        encryptor.encrypt(plain1, encrypted1);
+        encrypted1.correction_factor() = 2;
+        encryptor.encrypt(plain2, encrypted2);
+        encrypted2.correction_factor() = 64;
+        evaluator.sub_inplace(encrypted1, encrypted2);
+        decryptor.decrypt(encrypted1, plain);
+        ASSERT_EQ(
+            plain.to_string(),
+            "1x^28 + 1x^25 + 1x^21 + 1x^20 + 40x^16 + 1x^12 + 1x^10 + 40x^8 + 1x^6 + 1x^4 + 1x^3 + 40");
         ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
@@ -1672,12 +1702,12 @@ namespace sealtest
         encryptor.encrypt(plain2, encrypted2);
         evaluator.sub_inplace(encrypted1, encrypted2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(plain.to_string(), "3Fx^2 + 3F");
+        ASSERT_EQ(plain.to_string(), "40x^2 + 40");
         ASSERT_TRUE(encrypted2.parms_id() == encrypted1.parms_id());
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
         plain1 = "1x^2 + 1";
-        plain2 = "3Fx^1 + 3F";
+        plain2 = "40x^1 + 40";
         encryptor.encrypt(plain1, encrypted1);
         encryptor.encrypt(plain2, encrypted2);
         evaluator.sub_inplace(encrypted1, encrypted2);
@@ -1699,72 +1729,88 @@ namespace sealtest
 
     TEST(EvaluatorTest, BGVEncryptAddPlainDecrypt)
     {
-        EncryptionParameters parms(scheme_type::bgv);
-        Modulus plain_modulus(1 << 6);
-        parms.set_poly_modulus_degree(64);
-        parms.set_plain_modulus(plain_modulus);
-        parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
+        {
+            EncryptionParameters parms(scheme_type::bgv);
+            Modulus plain_modulus(65);
+            parms.set_poly_modulus_degree(64);
+            parms.set_plain_modulus(plain_modulus);
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
 
-        SEALContext context(parms, false, sec_level_type::none);
-        KeyGenerator keygen(context);
-        PublicKey pk;
-        keygen.create_public_key(pk);
+            SEALContext context(parms, false, sec_level_type::none);
+            KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
 
-        Encryptor encryptor(context, pk);
-        Evaluator evaluator(context);
-        Decryptor decryptor(context, keygen.secret_key());
+            Encryptor encryptor(context, pk);
+            Evaluator evaluator(context);
+            Decryptor decryptor(context, keygen.secret_key());
 
-        Ciphertext encrypted1;
-        Ciphertext encrypted2;
-        Plaintext plain, plain1, plain2;
+            Ciphertext encrypted1;
+            Ciphertext encrypted2;
+            Plaintext plain, plain1, plain2;
 
-        plain1 = "1x^28 + 1x^25 + 1x^21 + 1x^20 + 1x^18 + 1x^14 + 1x^12 + 1x^10 + 1x^9 + 1x^6 + 1x^5 + 1x^4 + 1x^3";
-        plain2 = "1x^18 + 1x^16 + 1x^14 + 1x^9 + 1x^8 + 1x^5 + 1";
-        encryptor.encrypt(plain1, encrypted1);
-        evaluator.add_plain_inplace(encrypted1, plain2);
-        decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(
-            plain.to_string(), "1x^28 + 1x^25 + 1x^21 + 1x^20 + 2x^18 + 1x^16 + 2x^14 + 1x^12 + 1x^10 + 2x^9 + 1x^8 + "
-                               "1x^6 + 2x^5 + 1x^4 + 1x^3 + 1");
-        ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
+            plain1 = "1x^28 + 1x^25 + 1x^21 + 1x^20 + 1x^18 + 1x^14 + 1x^12 + 1x^10 + 1x^9 + 1x^6 + 1x^5 + 1x^4 + 1x^3";
+            plain2 = "1x^18 + 1x^16 + 1x^14 + 1x^9 + 1x^8 + 1x^5 + 1";
+            encryptor.encrypt(plain1, encrypted1);
+            evaluator.add_plain_inplace(encrypted1, plain2);
+            decryptor.decrypt(encrypted1, plain);
+            ASSERT_EQ(
+                plain.to_string(),
+                "1x^28 + 1x^25 + 1x^21 + 1x^20 + 2x^18 + 1x^16 + 2x^14 + 1x^12 + 1x^10 + 2x^9 + 1x^8 + "
+                "1x^6 + 2x^5 + 1x^4 + 1x^3 + 1");
+            ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        plain1 = "0";
-        plain2 = "0";
-        encryptor.encrypt(plain1, encrypted1);
-        evaluator.add_plain_inplace(encrypted1, plain2);
-        decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(plain.to_string(), "0");
-        ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
+            // Test correction factor
+            plain1 = "2x^28 + 2x^25 + 2x^21 + 2x^20 + 2x^18 + 2x^14 + 2x^12 + 2x^10 + 2x^9 + 2x^6 + 2x^5 + 2x^4 + 2x^3";
+            plain2 = "1x^18 + 1x^16 + 1x^14 + 1x^9 + 1x^8 + 1x^5 + 1";
+            encryptor.encrypt(plain1, encrypted1);
+            encrypted1.correction_factor() = 2;
+            evaluator.add_plain_inplace(encrypted1, plain2);
+            decryptor.decrypt(encrypted1, plain);
+            ASSERT_EQ(
+                plain.to_string(),
+                "1x^28 + 1x^25 + 1x^21 + 1x^20 + 2x^18 + 1x^16 + 2x^14 + 1x^12 + 1x^10 + 2x^9 + 1x^8 + "
+                "1x^6 + 2x^5 + 1x^4 + 1x^3 + 1");
+            ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        plain1 = "0";
-        plain2 = "1x^2 + 1";
-        encryptor.encrypt(plain1, encrypted1);
-        evaluator.add_plain_inplace(encrypted1, plain2);
-        decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(plain.to_string(), "1x^2 + 1");
-        ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
+            plain1 = "0";
+            plain2 = "0";
+            encryptor.encrypt(plain1, encrypted1);
+            evaluator.add_plain_inplace(encrypted1, plain2);
+            decryptor.decrypt(encrypted1, plain);
+            ASSERT_EQ(plain.to_string(), "0");
+            ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        plain1 = "1x^2 + 1";
-        plain2 = "3Fx^1 + 3F";
-        encryptor.encrypt(plain1, encrypted1);
-        evaluator.add_plain_inplace(encrypted1, plain2);
-        decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(plain.to_string(), "1x^2 + 3Fx^1");
-        ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
+            plain1 = "0";
+            plain2 = "1x^2 + 1";
+            encryptor.encrypt(plain1, encrypted1);
+            evaluator.add_plain_inplace(encrypted1, plain2);
+            decryptor.decrypt(encrypted1, plain);
+            ASSERT_EQ(plain.to_string(), "1x^2 + 1");
+            ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
-        plain1 = "3Fx^2 + 3Fx^1 + 3F";
-        plain2 = "1x^2 + 1x^1 + 1";
-        encryptor.encrypt(plain1, encrypted1);
-        evaluator.add_plain_inplace(encrypted1, plain2);
-        decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(plain.to_string(), "0");
-        ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
+            plain1 = "1x^2 + 1";
+            plain2 = "40x^1 + 40";
+            encryptor.encrypt(plain1, encrypted1);
+            evaluator.add_plain_inplace(encrypted1, plain2);
+            decryptor.decrypt(encrypted1, plain);
+            ASSERT_EQ(plain.to_string(), "1x^2 + 40x^1");
+            ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
+
+            plain1 = "40x^2 + 40x^1 + 40";
+            plain2 = "1x^2 + 1x^1 + 1";
+            encryptor.encrypt(plain1, encrypted1);
+            evaluator.add_plain_inplace(encrypted1, plain2);
+            decryptor.decrypt(encrypted1, plain);
+            ASSERT_EQ(plain.to_string(), "0");
+            ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
+        }
     }
 
     TEST(EvaluatorTest, BGVEncryptSubPlainDecrypt)
     {
         EncryptionParameters parms(scheme_type::bgv);
-        Modulus plain_modulus(1 << 6);
+        Modulus plain_modulus(65);
         parms.set_poly_modulus_degree(64);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -1788,7 +1834,19 @@ namespace sealtest
         decryptor.decrypt(encrypted1, plain);
         ASSERT_EQ(
             plain.to_string(),
-            "1x^28 + 1x^25 + 1x^21 + 1x^20 + 3Fx^16 + 1x^12 + 1x^10 + 3Fx^8 + 1x^6 + 1x^4 + 1x^3 + 3F");
+            "1x^28 + 1x^25 + 1x^21 + 1x^20 + 40x^16 + 1x^12 + 1x^10 + 40x^8 + 1x^6 + 1x^4 + 1x^3 + 40");
+        ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
+
+        // Test correction factor
+        plain1 = "2x^28 + 2x^25 + 2x^21 + 2x^20 + 2x^18 + 2x^14 + 2x^12 + 2x^10 + 2x^9 + 2x^6 + 2x^5 + 2x^4 + 2x^3";
+        plain2 = "1x^18 + 1x^16 + 1x^14 + 1x^9 + 1x^8 + 1x^5 + 1";
+        encryptor.encrypt(plain1, encrypted1);
+        encrypted1.correction_factor() = 2;
+        evaluator.sub_plain_inplace(encrypted1, plain2);
+        decryptor.decrypt(encrypted1, plain);
+        ASSERT_EQ(
+            plain.to_string(),
+            "1x^28 + 1x^25 + 1x^21 + 1x^20 + 40x^16 + 1x^12 + 1x^10 + 40x^8 + 1x^6 + 1x^4 + 1x^3 + 40");
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
         plain1 = "0";
@@ -1804,11 +1862,11 @@ namespace sealtest
         encryptor.encrypt(plain1, encrypted1);
         evaluator.sub_plain_inplace(encrypted1, plain2);
         decryptor.decrypt(encrypted1, plain);
-        ASSERT_EQ(plain.to_string(), "3Fx^2 + 3F");
+        ASSERT_EQ(plain.to_string(), "40x^2 + 40");
         ASSERT_TRUE(encrypted1.parms_id() == context.first_parms_id());
 
         plain1 = "1x^2 + 1";
-        plain2 = "3Fx^1 + 3F";
+        plain2 = "40x^1 + 40";
         encryptor.encrypt(plain1, encrypted1);
         evaluator.sub_plain_inplace(encrypted1, plain2);
         decryptor.decrypt(encrypted1, plain);
@@ -1828,7 +1886,7 @@ namespace sealtest
     {
         {
             EncryptionParameters parms(scheme_type::bgv);
-            Modulus plain_modulus(1 << 6);
+            Modulus plain_modulus(65);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -2083,7 +2141,7 @@ namespace sealtest
     {
         {
             EncryptionParameters parms(scheme_type::bgv);
-            Modulus plain_modulus(1 << 6);
+            Modulus plain_modulus(65);
             parms.set_poly_modulus_degree(64);
             parms.set_plain_modulus(plain_modulus);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 40 }));
@@ -2445,7 +2503,7 @@ namespace sealtest
     TEST(EvaluatorTest, BGVRelinearize)
     {
         EncryptionParameters parms(scheme_type::bgv);
-        Modulus plain_modulus(1 << 6);
+        Modulus plain_modulus(65);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 60, 60, 60, 60 }));
@@ -4734,7 +4792,7 @@ namespace sealtest
     TEST(EvaluatorTest, BGVEncryptSquareDecrypt)
     {
         EncryptionParameters parms(scheme_type::bgv);
-        Modulus plain_modulus(1 << 8);
+        Modulus plain_modulus(257);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
@@ -4765,14 +4823,14 @@ namespace sealtest
         ASSERT_EQ(plain.to_string(), "0");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-        plain = "FFx^2 + FF";
+        plain = "100x^2 + 100";
         encryptor.encrypt(plain, encrypted);
         evaluator.square_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
         ASSERT_EQ(plain.to_string(), "1x^4 + 2x^2 + 1");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-        plain = "FF";
+        plain = "100";
         encryptor.encrypt(plain, encrypted);
         evaluator.square_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
@@ -4810,7 +4868,7 @@ namespace sealtest
     TEST(EvaluatorTest, BGVEncryptMultiplyManyDecrypt)
     {
         EncryptionParameters parms(scheme_type::bgv);
-        Modulus plain_modulus(1 << 6);
+        Modulus plain_modulus(65);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
@@ -4845,8 +4903,8 @@ namespace sealtest
         ASSERT_TRUE(encrypted3.parms_id() == product.parms_id());
         ASSERT_TRUE(product.parms_id() == context.first_parms_id());
 
-        plain1 = "3Fx^3 + 3F";
-        plain2 = "3Fx^4 + 3F";
+        plain1 = "40x^3 + 40";
+        plain2 = "40x^4 + 40";
         encryptor.encrypt(plain1, encrypted1);
         encryptor.encrypt(plain2, encrypted2);
         encrypteds = { encrypted1, encrypted2 };
@@ -4859,7 +4917,7 @@ namespace sealtest
         ASSERT_TRUE(product.parms_id() == context.first_parms_id());
 
         plain1 = "1x^1";
-        plain2 = "3Fx^4 + 3Fx^3 + 3Fx^2 + 3Fx^1 + 3F";
+        plain2 = "40x^4 + 40x^3 + 40x^2 + 40x^1 + 40";
         plain3 = "1x^2 + 1x^1 + 1";
         encryptor.encrypt(plain1, encrypted1);
         encryptor.encrypt(plain2, encrypted2);
@@ -4868,16 +4926,16 @@ namespace sealtest
         evaluator.multiply_many(encrypteds, rlk, product);
         ASSERT_EQ(3, encrypteds.size());
         decryptor.decrypt(product, plain);
-        ASSERT_EQ(plain.to_string(), "3Fx^7 + 3Ex^6 + 3Dx^5 + 3Dx^4 + 3Dx^3 + 3Ex^2 + 3Fx^1");
+        ASSERT_EQ(plain.to_string(), "40x^7 + 3Fx^6 + 3Ex^5 + 3Ex^4 + 3Ex^3 + 3Fx^2 + 40x^1");
         ASSERT_TRUE(encrypted1.parms_id() == product.parms_id());
         ASSERT_TRUE(encrypted2.parms_id() == product.parms_id());
         ASSERT_TRUE(encrypted3.parms_id() == product.parms_id());
         ASSERT_TRUE(product.parms_id() == context.first_parms_id());
 
         plain1 = "1";
-        plain2 = "3F";
+        plain2 = "40";
         plain3 = "1";
-        plain4 = "3F";
+        plain4 = "40";
         encryptor.encrypt(plain1, encrypted1);
         encryptor.encrypt(plain2, encrypted2);
         encryptor.encrypt(plain3, encrypted3);
@@ -4916,7 +4974,7 @@ namespace sealtest
     TEST(EvaluatorTest, BGVEncryptExponentiateDecrypt)
     {
         EncryptionParameters parms(scheme_type::bgv);
-        Modulus plain_modulus(1 << 6);
+        Modulus plain_modulus(65);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
@@ -4949,11 +5007,11 @@ namespace sealtest
         ASSERT_EQ(plain.to_string(), "1x^4 + 2x^3 + 3x^2 + 2x^1 + 1");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
-        plain = "3Fx^2 + 3Fx^1 + 3F";
+        plain = "40x^2 + 40x^1 + 40";
         encryptor.encrypt(plain, encrypted);
         evaluator.exponentiate_inplace(encrypted, 3, rlk);
         decryptor.decrypt(encrypted, plain);
-        ASSERT_EQ(plain.to_string(), "3Fx^6 + 3Dx^5 + 3Ax^4 + 39x^3 + 3Ax^2 + 3Dx^1 + 3F");
+        ASSERT_EQ(plain.to_string(), "40x^6 + 3Ex^5 + 3Bx^4 + 3Ax^3 + 3Bx^2 + 3Ex^1 + 40");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
         plain = "1x^8";
@@ -4967,7 +5025,7 @@ namespace sealtest
     TEST(EvaluatorTest, BGVEncryptAddManyDecrypt)
     {
         EncryptionParameters parms(scheme_type::bgv);
-        Modulus plain_modulus(1 << 6);
+        Modulus plain_modulus(65);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40 }));
@@ -4999,8 +5057,8 @@ namespace sealtest
         ASSERT_TRUE(encrypted3.parms_id() == sum.parms_id());
         ASSERT_TRUE(sum.parms_id() == context.first_parms_id());
 
-        plain1 = "3Fx^3 + 3F";
-        plain2 = "3Fx^4 + 3F";
+        plain1 = "40x^3 + 40";
+        plain2 = "40x^4 + 40";
         encryptor.encrypt(plain1, encrypted1);
         encryptor.encrypt(plain2, encrypted2);
         encrypteds = {
@@ -5009,13 +5067,13 @@ namespace sealtest
         };
         evaluator.add_many(encrypteds, sum);
         decryptor.decrypt(sum, plain);
-        ASSERT_EQ(plain.to_string(), "3Fx^4 + 3Fx^3 + 3E");
+        ASSERT_EQ(plain.to_string(), "40x^4 + 40x^3 + 3F");
         ASSERT_TRUE(encrypted1.parms_id() == sum.parms_id());
         ASSERT_TRUE(encrypted2.parms_id() == sum.parms_id());
         ASSERT_TRUE(sum.parms_id() == context.first_parms_id());
 
         plain1 = "1x^1";
-        plain2 = "3Fx^4 + 3Fx^3 + 3Fx^2 + 3Fx^1 + 3F";
+        plain2 = "40x^4 + 40x^3 + 40x^2 + 40x^1 + 40";
         plain3 = "1x^2 + 1x^1 + 1";
         encryptor.encrypt(plain1, encrypted1);
         encryptor.encrypt(plain2, encrypted2);
@@ -5023,16 +5081,16 @@ namespace sealtest
         encrypteds = { encrypted1, encrypted2, encrypted3 };
         evaluator.add_many(encrypteds, sum);
         decryptor.decrypt(sum, plain);
-        ASSERT_EQ(plain.to_string(), "3Fx^4 + 3Fx^3 + 1x^1");
+        ASSERT_EQ(plain.to_string(), "40x^4 + 40x^3 + 1x^1");
         ASSERT_TRUE(encrypted1.parms_id() == sum.parms_id());
         ASSERT_TRUE(encrypted2.parms_id() == sum.parms_id());
         ASSERT_TRUE(encrypted3.parms_id() == sum.parms_id());
         ASSERT_TRUE(sum.parms_id() == context.first_parms_id());
 
         plain1 = "1";
-        plain2 = "3F";
+        plain2 = "40";
         plain3 = "1";
-        plain4 = "3F";
+        plain4 = "40";
         encryptor.encrypt(plain1, encrypted1);
         encryptor.encrypt(plain2, encrypted2);
         encryptor.encrypt(plain3, encrypted3);
@@ -5629,7 +5687,7 @@ namespace sealtest
     TEST(EvaluatorTest, BGVEncryptMultiplyPlainNTTDecrypt)
     {
         EncryptionParameters parms(scheme_type::bgv);
-        Modulus plain_modulus(1 << 6);
+        Modulus plain_modulus(65);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(plain_modulus);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40 }));
@@ -5834,7 +5892,7 @@ namespace sealtest
     {
         {
             // The common parameters: the plaintext and the polynomial moduli
-            Modulus plain_modulus(1 << 6);
+            Modulus plain_modulus(65);
 
             // The parameters and the context of the higher level
             EncryptionParameters parms(scheme_type::bgv);
@@ -5950,7 +6008,7 @@ namespace sealtest
     TEST(EvaluatorTest, BGVEncryptModSwitchToDecrypt)
     {
         // The common parameters: the plaintext and the polynomial moduli
-        Modulus plain_modulus(1 << 6);
+        Modulus plain_modulus(65);
 
         // The parameters and the context of the higher level
         EncryptionParameters parms(scheme_type::bgv);

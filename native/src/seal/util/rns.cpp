@@ -775,10 +775,14 @@ namespace seal
                 get<0>(I).set(temp, get<1>(I));
             });
 
-            inv_q_last_mod_p_ = 1;
             if (t_.value() != 0)
             {
-                try_invert_uint_mod(base_q_->base()[base_q_size - 1].value(), t_, inv_q_last_mod_p_);
+                if (!try_invert_uint_mod(base_q_->base()[base_q_size - 1].value(), t_, inv_q_last_mod_t_))
+                {
+                    throw logic_error("invalid rns bases");
+                }
+
+                q_last_mod_t_ = barrett_reduce_64(base_q_->base()[base_q_size - 1].value(), t_);
             }
         }
 
@@ -1207,11 +1211,11 @@ namespace seal
             // neg_c_last_mod_t = - c_last (mod t)
             modulo_poly_coeffs(CoeffIter(input[modulus_size - 1]), coeff_count_, plain_modulus, neg_c_last_mod_t);
             negate_poly_coeffmod(neg_c_last_mod_t, coeff_count_, plain_modulus, neg_c_last_mod_t);
-            if (inv_q_last_mod_p_ != 1)
+            if (inv_q_last_mod_t_ != 1)
             {
                 // neg_c_last_mod_t *= q_last^(-1) (mod t)
                 multiply_poly_scalar_coeffmod(
-                    neg_c_last_mod_t, coeff_count_, inv_q_last_mod_p_, plain_modulus, neg_c_last_mod_t);
+                    neg_c_last_mod_t, coeff_count_, inv_q_last_mod_t_, plain_modulus, neg_c_last_mod_t);
             }
 
             SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(delta_mod_q_i, coeff_count_, pool);
