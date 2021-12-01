@@ -139,8 +139,6 @@ namespace seal
         @param[out] destination The Galois keys to overwrite with the generated
         Galois keys
         @throws std::logic_error if the encryption parameters do not support
-        batching and scheme is scheme_type::BFV
-        @throws std::logic_error if the encryption parameters do not support
         keyswitching
         @throws std::invalid_argument if the Galois elements are not valid
         */
@@ -174,8 +172,6 @@ namespace seal
 
         @param[in] galois_elts The Galois elements for which to generate keys
         @throws std::logic_error if the encryption parameters do not support
-        batching and scheme is scheme_type::BFV
-        @throws std::logic_error if the encryption parameters do not support
         keyswitching
         @throws std::invalid_argument if the Galois elements are not valid
         */
@@ -205,6 +201,10 @@ namespace seal
         */
         inline void create_galois_keys(const std::vector<int> &steps, GaloisKeys &destination)
         {
+            if (!context_.key_context_data()->qualifiers().using_batching)
+            {
+                throw std::logic_error("encryption parameters do not support batching");
+            }
             create_galois_keys(context_.key_context_data()->galois_tool()->get_elts_from_steps(steps), destination);
         }
 
@@ -232,6 +232,10 @@ namespace seal
         */
         SEAL_NODISCARD inline Serializable<GaloisKeys> create_galois_keys(const std::vector<int> &steps)
         {
+            if (!context_.key_context_data()->qualifiers().using_batching)
+            {
+                throw std::logic_error("encryption parameters do not support batching");
+            }
             return create_galois_keys(context_.key_context_data()->galois_tool()->get_elts_from_steps(steps));
         }
 
@@ -241,13 +245,16 @@ namespace seal
 
         This function creates logarithmically many (in degree of the polynomial
         modulus) Galois keys that is sufficient to apply any Galois automorphism
-        (e.g. rotations) on encrypted data. Most users will want to use this
+        (e.g., rotations) on encrypted data. Most users will want to use this
         overload of the function.
+
+        Precisely it generates 2*log(n)-1 number of Galois keys where n is the
+        degree of the polynomial modulus. When used with batching, these keys
+        support direct left and right rotations of power-of-2 steps of rows in BFV
+        or vectors in CKKS and rotation of columns in BFV or conjugation in CKKS.
 
         @param[out] destination The Galois keys to overwrite with the generated
         Galois keys
-        @throws std::logic_error if the encryption parameters do not support
-        batching and scheme is scheme_type::BFV
         @throws std::logic_error if the encryption parameters do not support
         keyswitching
         */
@@ -267,11 +274,14 @@ namespace seal
 
         This function creates logarithmically many (in degree of the polynomial
         modulus) Galois keys that is sufficient to apply any Galois automorphism
-        (e.g. rotations) on encrypted data. Most users will want to use this
+        (e.g., rotations) on encrypted data. Most users will want to use this
         overload of the function.
 
-        @throws std::logic_error if the encryption parameters do not support
-        batching and scheme is scheme_type::BFV
+        Precisely it generates 2*log(n)-1 number of Galois keys where n is the
+        degree of the polynomial modulus. When used with batching, these keys
+        support direct left and right rotations of power-of-2 steps of rows in BFV
+        or vectors in CKKS and rotation of columns in BFV or conjugation in CKKS.
+
         @throws std::logic_error if the encryption parameters do not support
         keyswitching
         */
