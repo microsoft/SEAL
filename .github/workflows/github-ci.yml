@@ -71,9 +71,3 @@ jobs:
       - name: Run Config
         run: ./.github/config-tests/${{ matrix.script }}
 
-      # - name: Archive results
-      #   uses: actions/upload-artifact@v2
-      #   with:
-      #     name: test_detail_${{ matrix.script }}_${{ github.sha }}.xml
-      #     path: test_detail.xml
-      #     retention-days: 30 # Maximum for free version
