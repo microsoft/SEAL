@@ -90,7 +90,6 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # Source Tree
 set(SEAL_INCLUDES_DIR ${CMAKE_CURRENT_LIST_DIR}/native/src)
-set(SEAL_THIRDPARTY_DIR ${CMAKE_CURRENT_LIST_DIR}/thirdparty)
 set(SEAL_CONFIG_IN_FILENAME ${CMAKE_CURRENT_LIST_DIR}/cmake/SEALConfig.cmake.in)
 set(SEAL_CONFIG_H_IN_FILENAME ${SEAL_INCLUDES_DIR}/seal/util/config.h.in)
 
@@ -102,6 +101,19 @@ set(SEAL_TARGETS_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/cmake/SEALTargets.cmake)
 set(SEAL_CONFIG_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/cmake/SEALConfig.cmake)
 set(SEAL_CONFIG_VERSION_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/cmake/SEALConfigVersion.cmake)
 set(SEAL_CONFIG_H_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/native/src/seal/util/config.h)
+
+# [option] SEAL_PURE_SOURCETREE (default: OFF)
+set(SEAL_PURE_SOURCETREE_OPTION_STR "When set, the SEAL build will not write any files outside the build directory, including thirdparty dependencies sources.")
+option(SEAL_PURE_SOURCETREE ${SEAL_PURE_SOURCETREE_OPTION_STR} OFF)
+message(STATUS "SEAL_PURE_SOURCETREE: ${SEAL_PURE_SOURCETREE}")
+
+# Build or source tree depending on configuration
+if(${SEAL_PURE_SOURCETREE} )
+    set(SEAL_THIRDPARTY_DIR ${CMAKE_CURRENT_BINARY_DIR}/thirdparty)
+else()
+    set(SEAL_THIRDPARTY_DIR ${CMAKE_CURRENT_LIST_DIR}/thirdparty)
+endif()
+
 
 # Install
 set(SEAL_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
