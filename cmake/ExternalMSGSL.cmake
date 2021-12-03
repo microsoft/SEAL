@@ -20,5 +20,6 @@ if(NOT msgsl_POPULATED)
 
     add_subdirectory(
         ${msgsl_SOURCE_DIR}
+        ${msgsl_SOURCE_DIR}/../msgsl-build
         EXCLUDE_FROM_ALL)
 endif()

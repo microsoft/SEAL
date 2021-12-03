@@ -411,6 +411,9 @@ The following options can be used with CMake to configure the build. The default
 | SEAL_USE_CXX17         | **ON** / OFF                                                 | Set to `ON` to build Microsoft SEAL as C++17 for a positive performance impact.                                                                                                                        |
 | SEAL_USE_INTRIN        | **ON** / OFF                                                 | Set to `ON` to use compiler intrinsics for improved performance. CMake will automatically detect which intrinsics are available and enable them accordingly.                                           |
 
+| SEAL_PURE_SOURCETREE   | ON / **OFF**
+| When enabled, the SEAL build will only emit files into the cmake build directory. This includes third-party dependencies (both sources and binaries). This flag can improve compatibility with other build systems and enables concurrently building multiple instances of the SEAL library with different `cmake -B` options.
+
 As usual, these options can be passed to CMake with the `-D` flag.
 For example, one could run
 

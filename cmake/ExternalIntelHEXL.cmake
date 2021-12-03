@@ -27,6 +27,7 @@ if(NOT hexl_POPULATED)
 
     add_subdirectory(
         ${hexl_SOURCE_DIR}
+        ${hexl_SOURCE_DIR}/../hexl-build
         EXCLUDE_FROM_ALL
     )
 endif()
