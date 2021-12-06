@@ -101,19 +101,7 @@ set(SEAL_TARGETS_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/cmake/SEALTargets.cmake)
 set(SEAL_CONFIG_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/cmake/SEALConfig.cmake)
 set(SEAL_CONFIG_VERSION_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/cmake/SEALConfigVersion.cmake)
 set(SEAL_CONFIG_H_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/native/src/seal/util/config.h)
-
-# [option] SEAL_PURE_SOURCETREE (default: OFF)
-set(SEAL_PURE_SOURCETREE_OPTION_STR "When set, the SEAL build will not write any files outside the build directory, including thirdparty dependencies sources.")
-option(SEAL_PURE_SOURCETREE ${SEAL_PURE_SOURCETREE_OPTION_STR} OFF)
-message(STATUS "SEAL_PURE_SOURCETREE: ${SEAL_PURE_SOURCETREE}")
-
-# Build or source tree depending on configuration
-if(${SEAL_PURE_SOURCETREE} )
-    set(SEAL_THIRDPARTY_DIR ${CMAKE_CURRENT_BINARY_DIR}/thirdparty)
-else()
-    set(SEAL_THIRDPARTY_DIR ${CMAKE_CURRENT_LIST_DIR}/thirdparty)
-endif()
-
+set(SEAL_THIRDPARTY_DIR ${CMAKE_CURRENT_BINARY_DIR}/thirdparty)
 
 # Install
 set(SEAL_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
@@ -731,15 +719,15 @@ endif()
 # Create SEALNet.csproj, SEALNetExamples.csproj, and SEALNetTest.csproj
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/src/SEALNet.csproj.in
-    ${CMAKE_CURRENT_LIST_DIR}/dotnet/src/SEALNet.csproj
+    ${CMAKE_CURRENT_BINARY_DIR}/dotnet/src/SEALNet.csproj
     @ONLY)
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/tests/SEALNetTest.csproj.in
-    ${CMAKE_CURRENT_LIST_DIR}/dotnet/tests/SEALNetTest.csproj
+    ${CMAKE_CURRENT_BINARY_DIR}/dotnet/tests/SEALNetTest.csproj
     @ONLY)
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/examples/SEALNetExamples.csproj.in
-    ${CMAKE_CURRENT_LIST_DIR}/dotnet/examples/SEALNetExamples.csproj
+    ${CMAKE_CURRENT_BINARY_DIR}/dotnet/examples/SEALNetExamples.csproj
     @ONLY)
 
 # Set the sealc dynamic library file names to be included in creating
@@ -750,7 +738,7 @@ configure_file(
 # Create SEALNet-multi.nuspec for a multi-platform NuGet package
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet-multi.nuspec.in
-    ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet-multi.nuspec
+    ${CMAKE_CURRENT_BINARY_DIR}/dotnet/nuget/SEALNet-multi.nuspec
     @ONLY)
 
 set(NUGET_WINDOWS_SEAL_C_PATH "")
@@ -769,5 +757,5 @@ endif()
 # Create SEALNet.nuspec for a local NuGet pack from SEALNet.nuspec.in
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.nuspec.in
-    ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.nuspec
+    ${CMAKE_CURRENT_BINARY_DIR}/dotnet/nuget/SEALNet.nuspec
     @ONLY)
