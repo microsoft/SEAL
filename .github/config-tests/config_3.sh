@@ -13,6 +13,8 @@ COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Debug
 cmake -B build ${COMPILER_FLAGS}
 cmake --build build -j --config Debug
 cmake --build build -j --target install --config Debug
+ls build
+ls build/bin
 build/bin/sealtest --gtest_output=xml
 
 # Build examples using pre-built SEAL
