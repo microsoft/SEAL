@@ -60,6 +60,19 @@ jobs:
         run: |
           which clang
           clang --version
+          which clang++
+          which gcc
+        continue-on-error: true
+      
+      - if: matrix.os == 'windows-latest'
+        run: |
+          export CXX=clang++
+          export C=clang
+      
+      - name: Check Env
+        run: |
+          echo "$CXX"
+          echo "$C"
 
       - name: Checkout hexl
         uses: actions/checkout@v2
