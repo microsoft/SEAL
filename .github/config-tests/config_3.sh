@@ -1,6 +1,7 @@
 # Build in debug mode, with prebuilt SEAL, and with no HEXL. Finally, run seal examples.
 set -x
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Debug
+                -CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=./build/bin
                 -DCMAKE_CXX_COMPILER=g++
                 -DCMAKE_C_COMPILER=gcc
                 -DSEAL_BUILD_TESTS=ON
@@ -15,10 +16,7 @@ COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Debug
 cmake -B build ${COMPILER_FLAGS}
 cmake --build build -j --config Debug
 cmake --build build -j --target install --config Debug
-# ls -la build
-# ls -la build/bin
-# find . -name "sealtest"
-build/bin/Debug/sealtest --gtest_output=xml
+build/bin/sealtest --gtest_output=xml
 
 # Build examples using pre-built SEAL
 export SEAL_DIR=$(pwd)/lib/cmake/SEAL-$SEAL_VER/

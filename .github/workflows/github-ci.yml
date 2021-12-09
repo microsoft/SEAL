@@ -43,7 +43,7 @@ jobs:
         shell: bash
     strategy:
       matrix:
-        os: [windows-latest] # [ubuntu-20.04, macos-10.15, windows-2019]
+        os: [windows-latest, ubuntu-20.04] # [ubuntu-20.04, macos-10.15, windows-2019]
         script: ${{ fromJson(needs.find-scripts.outputs.matrix) }}
         exclude:
           # Windows only supports static builds, don't build w/ shared
