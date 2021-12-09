@@ -1,6 +1,7 @@
 # Build examples with HEXL
 set -x
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Debug
+                -DMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=build/bin/Debug
                 -DCMAKE_CXX_COMPILER=g++
                 -DCMAKE_C_COMPILER=gcc
                 -DSEAL_BUILD_TESTS=ON
