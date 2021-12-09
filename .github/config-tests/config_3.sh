@@ -1,7 +1,7 @@
 # Build in debug mode, with prebuilt SEAL, and with no HEXL. Finally, run seal examples.
 set -x
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Debug
-                -CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=build/bin
+                -DMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=build/bin
                 -DCMAKE_CXX_COMPILER=g++
                 -DCMAKE_C_COMPILER=gcc
                 -DSEAL_BUILD_TESTS=ON
