@@ -18,6 +18,9 @@ cmake --build build -j --config Debug
 cmake --build build -j --target install --config Debug
 build/bin/sealtest --gtest_output=xml
 
+ls -la build/bin
+ls -la buil/bin/Debug
+find . -name "sealtest"
 # Build examples using pre-built SEAL
 export SEAL_DIR=$(pwd)/lib/cmake/SEAL-$SEAL_VER/
 ls ${SEAL_DIR}
