@@ -1,6 +1,6 @@
 # Config 1 is the only one to run benchmarks, so it should have Release mode and enable HEXL
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Release
-                -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=./build/bin/Release
+                -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE=build/bin/Release
                 -DCMAKE_CXX_COMPILER=clang++
                 -DCMAKE_C_COMPILER=clang
                 -DSEAL_BUILD_TESTS=ON
