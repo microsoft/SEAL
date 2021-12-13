@@ -18,6 +18,7 @@ cmake --build build -j --config Release
 cmake --build build -j --target install --config Release
 
 echo "HELLO"
+ls -la build
 ls -la build/bin
 echo "HELLO END"
 
