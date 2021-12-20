@@ -1,7 +1,5 @@
 # Build shared lib
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Release
-                -DCMAKE_CXX_COMPILER=clang++
-                -DCMAKE_C_COMPILER=clang
                 -DSEAL_BUILD_TESTS=ON
                 -DSEAL_BUILD_BENCH=ON
                 -DSEAL_BUILD_EXAMPLES=ON

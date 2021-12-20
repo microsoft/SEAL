@@ -2,8 +2,6 @@
 set -x
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Debug
                 -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=build/bin/Debug
-                -DCMAKE_CXX_COMPILER=g++
-                -DCMAKE_C_COMPILER=gcc
                 -DSEAL_BUILD_TESTS=ON
                 -DSEAL_BUILD_BENCH=ON
                 -DSEAL_BUILD_EXAMPLES=ON
@@ -17,5 +15,7 @@ COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Debug
 cmake -B build ${COMPILER_FLAGS}
 cmake --build build -j --config Debug
 cmake --build build -j --target install --config Debug
-build/bin/Debug/sealtest --gtest_output=xml
+
+sealtest=$(find . -name "sealtest")
+$sealtest --gtest_output=xml
 exit $?
