@@ -50,6 +50,8 @@ jobs:
           - os: windows-2019
             script: config_2.sh
           - os: windows-2019
+            script: config_4.sh
+          - os: windows-2019
             script: config_6.sh
     runs-on: ${{ matrix.os }}
 
