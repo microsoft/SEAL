@@ -13,5 +13,7 @@ COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Release
 cmake -B build ${COMPILER_FLAGS}
 cmake --build build -j
 cmake --build build -j --target install 
-build/bin/sealtest --gtest_output=xml
+
+sealtest=$(find . -name "sealtest")
+$sealtest --gtest_output=xml
 exit $?

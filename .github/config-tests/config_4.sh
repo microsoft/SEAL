@@ -1,7 +1,6 @@
 # Build examples with HEXL
 set -x
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Debug
-                -DCMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG=build/bin/Debug
                 -DSEAL_BUILD_TESTS=ON
                 -DSEAL_BUILD_BENCH=ON
                 -DSEAL_BUILD_EXAMPLES=ON
