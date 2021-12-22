@@ -20,7 +20,7 @@ on:
 # Define env vars #
 ###################
 env:
-  HEXL_VER: 1.2.2
+  HEXL_VER: 1.2.3
   SEAL_VER: 3.7
 
 jobs:
@@ -43,26 +43,10 @@ jobs:
         shell: bash
     strategy:
       matrix:
-        os: [windows-2019, ubuntu-20.04] # [ubuntu-20.04, macos-10.15, windows-2019]
+        os: [ubuntu-20.04, macos-10.15, windows-2019]
         script: ${{ fromJson(needs.find-scripts.outputs.matrix) }}
         exclude:
           # Windows only supports static builds, don't build w/ shared
-          # TODO: Remove from here
-          - os: windows-2019
-            script: config_1.sh
-          - os: windows-2019
-            script: config_5.sh
-          - os: ubuntu-20.04
-            script: config_1.sh
-          - os: ubuntu-20.04
-            script: config_2.sh
-          - os: ubuntu-20.04
-            script: config_4.sh
-          - os: ubuntu-20.04
-            script: config_5.sh
-          - os: ubuntu-20.04
-            script: config_6.sh
-          # TODO: Remove till here
           - os: windows-2019
             script: config_2.sh
           - os: windows-2019
