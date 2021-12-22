@@ -1,5 +1,5 @@
 # Config 1 is the only one to run benchmarks, so it should have Release mode and enable HEXL
-set -xeuo pipefail
+set -x
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Release
                 -DSEAL_BUILD_TESTS=ON
                 -DSEAL_BUILD_BENCH=ON

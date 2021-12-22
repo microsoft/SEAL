@@ -1,5 +1,5 @@
 # Build with pre-built HEXL
-set -xeuo pipefail
+set -x
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Release
                 -DCMAKE_CXX_COMPILER=clang++
                 -DCMAKE_C_COMPILER=clang
