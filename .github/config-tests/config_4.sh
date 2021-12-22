@@ -15,6 +15,11 @@ cmake -B build ${COMPILER_FLAGS}
 cmake --build build -j --config Debug
 cmake --build build -j --target install --config Debug
 
+echo "hello"
+pwd
+ls -la build
+find . -name "*seal*"
+echo "hello"
 sealtest=$(find . -name "sealtest")
 $sealtest --gtest_output=xml
 exit $?
