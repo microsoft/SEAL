@@ -43,7 +43,7 @@ jobs:
         shell: bash
     strategy:
       matrix:
-        os: [windows-2019] # [ubuntu-20.04, macos-10.15, windows-2019]
+        os: [windows-2019, ubuntu-20.04] # [ubuntu-20.04, macos-10.15, windows-2019]
         script: ${{ fromJson(needs.find-scripts.outputs.matrix) }}
         exclude:
           # Windows only supports static builds, don't build w/ shared
@@ -51,9 +51,17 @@ jobs:
           - os: windows-2019
             script: config_1.sh
           - os: windows-2019
-            script: config_3.sh
-          - os: windows-2019
             script: config_5.sh
+          - os: ubuntu-20.04
+            script: config_1.sh
+          - os: ubuntu-20.04
+            script: config_2.sh
+          - os: ubuntu-20.04
+            script: config_4.sh
+          - os: ubuntu-20.04
+            script: config_5.sh
+          - os: ubuntu-20.04
+            script: config_6.sh
           # TODO: Remove till here
           - os: windows-2019
             script: config_2.sh
@@ -63,15 +71,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
-      - name: Check Run Environment
-        run: |
-          which clang
-          clang --version
-          which clang++
-          which gcc
-          gcc --version
-        continue-on-error: true
 
       - name: Checkout hexl
         uses: actions/checkout@v2

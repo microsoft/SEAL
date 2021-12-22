@@ -17,8 +17,8 @@ cmake --build build -j --target install --config Debug
 
 echo "hello"
 pwd
-ls -la build
-find . -name "*seal*"
+ls -la build/bin
+find . -name "*sealtest*"
 echo "hello"
 sealtest=$(find . -name "sealtest")
 $sealtest --gtest_output=xml

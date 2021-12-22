@@ -14,6 +14,9 @@ cmake -B build ${COMPILER_FLAGS}
 cmake --build build -j
 cmake --build build -j --target install 
 
+echo "hello"
+find . -name "*sealtest*"
+echo "hello"
 sealtest=$(find . -name "sealtest")
 $sealtest --gtest_output=xml
 exit $?
