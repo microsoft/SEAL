@@ -1,8 +1,6 @@
 # Build with pre-built HEXL and shared lib
-set -xe
+set -x
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Debug
-                -DCMAKE_CXX_COMPILER=clang++
-                -DCMAKE_C_COMPILER=clang
                 -DSEAL_BUILD_TESTS=OFF
                 -DSEAL_BUILD_BENCH=OFF
                 -DSEAL_BUILD_EXAMPLES=ON

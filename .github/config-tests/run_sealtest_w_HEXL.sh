@@ -1,5 +1,5 @@
 # Build examples with HEXL
-set -xe
+set -x
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Debug
                 -DSEAL_BUILD_TESTS=ON
                 -DSEAL_BUILD_BENCH=ON
@@ -18,7 +18,7 @@ cmake --build build -j --target install --config Debug
 # TODO: Remove this
 cat this_file_should_not_exist.txt
 
-# File location for sealexamples differs for each platform
+# File location for sealtest differs for each platform
 sealtest=$(find . -name "sealtest" -o -name "sealtest.exe")
 $sealtest --gtest_output=xml
 #exit $?
