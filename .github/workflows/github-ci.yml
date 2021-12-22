@@ -72,4 +72,5 @@ jobs:
         with:
           name: test_detail_${{ matrix.os }}_${{ matrix.script }}_${{ github.sha }}.xml
           path: test_detail.xml
+          if-no-files-found: ignore
           retention-days: 30 # Maximum for free version
