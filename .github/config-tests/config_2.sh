@@ -16,8 +16,8 @@ cmake --build build -j
 cmake --build build -j --target install
 
 echo "hello"
-find . -name "*sealtest*"
+find . \( -name "sealtest" -o -name "sealtest.exe" \)
 echo "hello"
-sealtest=$(find . -name "sealtest")
+sealtest=$(find . \( -name "sealtest" -o -name "sealtest.exe" \))
 $sealtest --gtest_output=xml
 exit $?

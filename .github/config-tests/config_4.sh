@@ -16,10 +16,8 @@ cmake --build build -j --config Debug
 cmake --build build -j --target install --config Debug
 
 echo "hello"
-pwd
-ls -la build/bin
-find . -name "*sealtest*"
+find . \( -name "sealtest" -o -name "sealtest.exe" \)
 echo "hello"
-sealtest=$(find . -name "sealtest*")
+sealtest=$(find . \( -name "sealtest" -o -name "sealtest.exe" \))
 $sealtest --gtest_output=xml
 exit $?
