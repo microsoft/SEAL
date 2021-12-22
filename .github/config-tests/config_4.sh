@@ -20,6 +20,6 @@ pwd
 ls -la build/bin
 find . -name "*sealtest*"
 echo "hello"
-sealtest=$(find . -name "sealtest")
+sealtest=$(find . -name "sealtest*")
 $sealtest --gtest_output=xml
 exit $?

@@ -13,7 +13,7 @@ COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Release
 
 cmake -B build ${COMPILER_FLAGS}
 cmake --build build -j
-cmake --build build -j --target install 
+cmake --build build -j --target install
 
 echo "hello"
 find . -name "*sealtest*"
