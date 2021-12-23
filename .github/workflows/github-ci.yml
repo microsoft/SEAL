@@ -48,9 +48,9 @@ jobs:
         exclude:
           # Windows only supports static builds, don't build w/ shared
           - os: windows-2019
-            script: config_2.sh
+            script: shared_lib_w_HEXL.sh
           - os: windows-2019
-            script: config_6.sh
+            script: shared_lib_w_prebuilt_HEXL.sh
     runs-on: ${{ matrix.os }}
 
     steps:

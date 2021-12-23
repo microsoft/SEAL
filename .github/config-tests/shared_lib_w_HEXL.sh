@@ -1,4 +1,4 @@
-# Build shared lib
+# Config 2: Build shared lib
 set -x
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Release
                 -DSEAL_BUILD_TESTS=ON
@@ -15,6 +15,7 @@ cmake -B build ${COMPILER_FLAGS}
 cmake --build build -j
 cmake --build build -j --target install
 
+# File location for sealtest differs for each platform
 sealtest=$(find . -name "sealtest")
 $sealtest --gtest_output=xml
 exit $?
