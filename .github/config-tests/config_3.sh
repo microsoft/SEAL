@@ -22,8 +22,7 @@ cd native/examples/
 cmake -B build -DSEAL_DIR=${SEAL_DIR} -DCMAKE_MODULE_PATH=${SEAL_DIR}
 cmake --build build -j
 
-# File location for sealexamples differs for each platform
 sealexamples=$(find . -name "sealexamples" -o -name "sealexamples.exe")
 # Run examples 1, 2, 3, 4, 5, and 6 before exiting (0)
-echo {1..6} 0 | $sealexamples
-#exit $?
+echo 1 2 3 4 5 6 0 | $sealexamples
+exit $?

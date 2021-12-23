@@ -15,7 +15,6 @@ cmake -B build ${COMPILER_FLAGS}
 cmake --build build -j
 cmake --build build -j --target install
 
-# File location for sealtest differs for each platform
 sealtest=$(find . -name "sealtest")
 $sealtest --gtest_output=xml
-#exit $?
+exit $?

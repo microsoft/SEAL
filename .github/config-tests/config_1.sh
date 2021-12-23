@@ -15,9 +15,8 @@ cmake -B build ${COMPILER_FLAGS}
 cmake --build build -j --config Release
 cmake --build build -j --target install --config Release
 
-# File location for sealtest and sealbench differs for each platform
 sealtest=$(find . -name "sealtest")
 sealbench=$(find . -name "sealbench")
 $sealtest --gtest_output=xml
 $sealbench
-#exit $?
+exit $?
