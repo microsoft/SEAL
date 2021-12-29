@@ -1,5 +1,5 @@
-# Config 4: Build with HEXL
-set -x
+# Build with HEXL
+set -xeuo pipefail
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Debug
                 -DSEAL_BUILD_TESTS=ON
                 -DSEAL_BUILD_BENCH=ON

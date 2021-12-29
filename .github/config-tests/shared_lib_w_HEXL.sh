@@ -1,5 +1,5 @@
-# Config 2: Build shared lib
-set -x
+# Build shared lib
+set -xeuo pipefail
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Release
                 -DSEAL_BUILD_TESTS=ON
                 -DSEAL_BUILD_BENCH=ON
