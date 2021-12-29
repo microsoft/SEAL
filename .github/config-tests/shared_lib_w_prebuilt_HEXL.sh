@@ -1,5 +1,5 @@
 # Build with pre-built HEXL and shared lib
-set -xeuo pipefail
+set -xeu
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Debug
                 -DSEAL_BUILD_TESTS=OFF
                 -DSEAL_BUILD_BENCH=OFF
@@ -26,4 +26,3 @@ ls ${HEXL_DIR}
 cmake -B build ${COMPILER_FLAGS} -DCMAKE_MODULE_PATH=${HEXL_DIR} -DHEXL_DIR=${HEXL_DIR}
 cmake --build build -j
 cmake --build build -j --target install
-exit $?

@@ -1,5 +1,5 @@
 # Run benchmarks, so it should have Release mode and enable HEXL
-set -xeuo pipefail
+set -xeu
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Release
                 -DSEAL_BUILD_TESTS=ON
                 -DSEAL_BUILD_BENCH=ON
@@ -20,4 +20,3 @@ sealtest=$(find . -name "sealtest" -o -name "sealtest.exe")
 sealbench=$(find . -name "sealbench" -o -name "sealbench.exe")
 $sealtest --gtest_output=xml
 $sealbench
-exit $?

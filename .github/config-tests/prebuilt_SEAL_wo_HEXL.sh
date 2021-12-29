@@ -1,5 +1,5 @@
 # Build in debug mode, with prebuilt SEAL, and with no HEXL. Finally, run seal examples.
-set -xeuo pipefail
+set -xeu
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Debug
                 -DSEAL_BUILD_TESTS=ON
                 -DSEAL_BUILD_BENCH=ON
@@ -28,4 +28,3 @@ cmake --build build -j
 sealexamples=$(find . -name "sealexamples" -o -name "sealexamples.exe")
 # Run examples 1, 2, 3, 4, 5, and 6 before exiting (0)
 echo 1 2 3 4 5 6 0 | $sealexamples
-exit $?

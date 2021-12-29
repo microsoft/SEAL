@@ -1,5 +1,5 @@
 # Build shared lib
-set -xeuo pipefail
+set -xeu
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Release
                 -DSEAL_BUILD_TESTS=ON
                 -DSEAL_BUILD_BENCH=ON
@@ -18,4 +18,3 @@ cmake --build build -j --target install
 # File location for sealtest differs for each platform
 sealtest=$(find . -name "sealtest")
 $sealtest --gtest_output=xml
-exit $?
