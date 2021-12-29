@@ -1,5 +1,5 @@
 # Build with pre-built HEXL and shared lib
-set -xeo pipefail
+set -xe
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Debug
                 -DSEAL_BUILD_TESTS=OFF
                 -DSEAL_BUILD_BENCH=OFF
