@@ -1,5 +1,5 @@
 # Build in debug mode, with prebuilt SEAL, and with no HEXL. Finally, run seal examples.
-set -xeu
+set -xeo pipefail
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Debug
                 -DSEAL_BUILD_TESTS=ON
                 -DSEAL_BUILD_BENCH=ON
