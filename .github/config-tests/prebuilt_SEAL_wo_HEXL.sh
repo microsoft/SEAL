@@ -13,7 +13,7 @@ COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Debug
 cmake -B build ${COMPILER_FLAGS}
 cmake --build build -j --config Debug
 cmake --build build -j --target install --config Debug
-# File location for sealexamples differs for each platform
+# File location for sealtest differs for each platform
 sealtest=$(find . -name "sealtest" -o -name "sealtest.exe")
 $sealtest --gtest_output=xml
 

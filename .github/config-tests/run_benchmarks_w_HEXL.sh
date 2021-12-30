@@ -1,4 +1,4 @@
-# Run benchmarks, so it should have Release mode and enable HEXL
+# Run benchmarks with Release mode and HEXL
 set -xe
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Release
                 -DSEAL_BUILD_TESTS=ON
