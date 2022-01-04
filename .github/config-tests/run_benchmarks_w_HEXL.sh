@@ -1,5 +1,5 @@
-# Run benchmarks with Release mode and HEXL
-set -xe
+# Config 1: Run benchmarks, so it should have Release mode and enable HEXL
+set -x
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Release
                 -DSEAL_BUILD_TESTS=ON
                 -DSEAL_BUILD_BENCH=ON
@@ -14,6 +14,12 @@ COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Release
 cmake -B build ${COMPILER_FLAGS}
 cmake --build build -j --config Release
 cmake --build build -j --target install --config Release
+
+# TODO: Remove me later
+echo "HELLO"
+find . -name "sealtest" -o -name "sealtest.exe"
+find . -name "sealbench" -o -name "sealbench.exe"
+echo "HELLO"
 
 # File location for sealtest and sealbench differs for each platform
 sealtest=$(find . -name "sealtest" -o -name "sealtest.exe")
