@@ -1,4 +1,4 @@
-# Config 6: Build with pre-built HEXL and shared lib
+# Build with pre-built HEXL and shared lib
 set -x
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Debug
                 -DSEAL_BUILD_TESTS=OFF
@@ -6,7 +6,7 @@ COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Debug
                 -DSEAL_BUILD_EXAMPLES=ON
                 -DSEAL_USE_INTEL_HEXL=ON
                 -DSEAL_BUILD_DEPS=OFF
-                -DSEAL_BUILD_SEAL_C=OFF
+                -DSEALg_BUILD_SEAL_C=OFF
                 -DSEAL_USE_MSGSL=OFF
                 -DSEAL_USE_ZLIB=OFF
                 -DSEAL_USE_ZSTD=OFF

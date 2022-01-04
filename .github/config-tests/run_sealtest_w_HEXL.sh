@@ -1,4 +1,4 @@
-# Config 4: Build with HEXL
+# Build with HEXL
 set -x
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Debug
                 -DSEAL_BUILD_TESTS=ON

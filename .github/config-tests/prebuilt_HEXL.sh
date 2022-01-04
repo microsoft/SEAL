@@ -1,4 +1,4 @@
-# Config 5: Build with pre-built HEXL
+# Build with pre-built HEXL
 set -x
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Release
                 -DSEAL_BUILD_TESTS=OFF

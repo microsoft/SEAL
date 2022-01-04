@@ -1,4 +1,4 @@
-# Config 2: Build shared lib
+# Build shared lib
 set -x
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Release
                 -DSEAL_BUILD_TESTS=ON
