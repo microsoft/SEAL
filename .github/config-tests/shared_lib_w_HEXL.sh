@@ -1,5 +1,5 @@
 # Build shared lib
-set -xe
+set -x
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Release
                 -DSEAL_BUILD_TESTS=ON
                 -DSEAL_BUILD_BENCH=ON

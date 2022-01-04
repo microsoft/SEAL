@@ -1,5 +1,5 @@
 # Build with pre-built HEXL
-set -xe
+set -x
 COMPILER_FLAGS="-DCMAKE_BUILD_TYPE=Release
                 -DSEAL_BUILD_TESTS=OFF
                 -DSEAL_BUILD_BENCH=OFF
