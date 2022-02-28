@@ -19,11 +19,15 @@ static_assert(sizeof(std::size_t) == 8, "Require sizeof(std::size_t) == 8");
 static_assert(false, "Require architecture == x64");
 #endif
 
+#ifdef SEAL_BUILD_STATIC_SEAL_C
+#define SEAL_C_DECOR extern "C"
+#else // SEAL_BUILD_STATIC_SEAL_C
 #if defined(SEAL_C_EXPORTS) || defined(seal_c_EXPORTS) || defined(sealc_EXPORTS)
 #define SEAL_C_DECOR extern "C" __declspec(dllexport)
 #else
 #define SEAL_C_DECOR extern "C" __declspec(dllimport)
 #endif
+#endif // SEAL_BUILD_STATIC_SEAL_C
 
 #define SEAL_C_CALL __cdecl
 
