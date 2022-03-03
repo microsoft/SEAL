@@ -51,7 +51,13 @@ if(SEAL_BUILD_BENCH)
     add_executable(sealbench)
     # If we're targeting WASM, add the appropriate link flags
     if(EMSCRIPTEN)
-        set_target_properties(sealbench PROPERTIES LINK_FLAGS "-flto -O3 -s WASM=1 -s ALLOW_MEMORY_GROWTH=1 -s MAXIMUM_MEMORY=4GB")
+        set_target_properties(sealbench PROPERTIES LINK_FLAGS "-flto \
+                                                                -O3 \
+                                                                -s WASM=1 \
+                                                                -s ALLOW_MEMORY_GROWTH=1 \
+                                                                -s SINGLE_FILE=1 \
+                                                                -s MAXIMUM_MEMORY=4GB \
+                                                                --closure 1")
     endif()
     target_sources(sealbench
         PRIVATE
