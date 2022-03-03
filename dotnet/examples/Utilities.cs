@@ -135,6 +135,10 @@ namespace SEALNetExamples
         public static string ULongToString(ulong value)
         {
             byte[] bytes = BitConverter.GetBytes(value);
+            if (BitConverter.IsLittleEndian)
+            {
+                Array.Reverse(bytes);
+            }
             return BitConverter.ToString(bytes).Replace("-", "");
         }
 

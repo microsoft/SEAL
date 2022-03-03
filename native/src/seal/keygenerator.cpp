@@ -169,11 +169,6 @@ namespace seal
 
         // Extract encryption parameters.
         auto &context_data = *context_.key_context_data();
-        if (!context_data.qualifiers().using_batching)
-        {
-            throw logic_error("encryption parameters do not support batching");
-        }
-
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         auto galois_tool = context_data.galois_tool();

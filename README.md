@@ -111,6 +111,7 @@ There are multiple ways of installing Microsoft SEAL and starting to use it.
 The easiest way is to use a package manager to download, build, and install the library.
 For example, [vcpkg](https://github.com/microsoft/vcpkg) works on most platforms and will be up-to-date with the latest release of Microsoft SEAL (C++17 only).
 On macOS you can also use [Homebrew](https://formulae.brew.sh/formula/seal).
+On FreeBSD you can use `pkg install seal` to install [security/seal](https://www.freshports.org/security/seal/).
 The .NET library is available as a multiplatform [NuGet package](https://www.nuget.org/packages/Microsoft.Research.SEALNet).
 Finally, one can build Microsoft SEAL manually with a multiplatform CMake build system; see [Building Microsoft SEAL Manually](#building-microsoft-seal-manually) for details.
 
@@ -230,6 +231,7 @@ A global install requires elevated (root or administrator) privileges.
 | Linux | Clang++ (>= 5.0) or GNU G++ (>= 6.0), CMake (>= 3.13) |
 | macOS/iOS | Xcode toolchain (>= 9.3), CMake (>= 3.13) |
 | Android | Android Studio |
+| FreeBSD | CMake (>= 3.13) |
 
 **Note:** Microsoft SEAL compiled with Clang++ has much better runtime performance than one compiled with GNU G++.
 
