@@ -199,8 +199,6 @@ namespace Microsoft.Research.SEAL
         /// <param name="galoisElts">The Galois elements for which to generate keys</param>
         /// <param name="destination">The Galois keys to overwrite with the generated
         /// Galois keys</param>
-        /// <exception cref="InvalidOperationException">if the encryption parameters
-        /// do not support batching and scheme is SchemeType.BFV</exception>
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the Galois elements are not valid</exception>
@@ -249,8 +247,6 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="galoisElts">The Galois elements for which to generate keys</param>
         /// <exception cref="ArgumentNullException">if galoisElts is null</exception>
-        /// <exception cref="InvalidOperationException">if the encryption parameters
-        /// do not support batching and scheme is SchemeType.BFV</exception>
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
         /// <exception cref="ArgumentException">if the Galois elements are not valid</exception>
@@ -358,14 +354,18 @@ namespace Microsoft.Research.SEAL
         /// <para>
         /// This function creates logarithmically many (in degree of the polynomial
         /// modulus) Galois keys that is sufficient to apply any Galois automorphism
-        /// (e.g. rotations) on encrypted data. Most users will want to use this
+        /// (e.g., rotations) on encrypted data. Most users will want to use this
         /// overload of the function.
+        /// </para>
+        /// <para>
+        /// Precisely it generates 2*log(n)-1 number of Galois keys where n is the
+        /// degree of the polynomial modulus. When used with batching, these keys
+        /// support direct left and right rotations of power-of-2 steps of rows in BFV
+        /// or vectors in CKKS and rotation of columns in BFV or conjugation in CKKS.
         /// </para>
         /// </remarks>
         /// <param name="destination">The Galois keys to overwrite with the generated
         /// Galois keys</param>
-        /// <exception cref="InvalidOperationException">if the encryption parameters
-        /// do not support batching and scheme is SchemeType.BFV</exception>
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
         public void CreateGaloisKeys(out GaloisKeys destination)
@@ -394,12 +394,16 @@ namespace Microsoft.Research.SEAL
         /// <para>
         /// This function creates logarithmically many (in degree of the polynomial
         /// modulus) Galois keys that is sufficient to apply any Galois automorphism
-        /// (e.g. rotations) on encrypted data. Most users will want to use this
+        /// (e.g., rotations) on encrypted data. Most users will want to use this
         /// overload of the function.
         /// </para>
+        /// <para>
+        /// Precisely it generates 2*log(n)-1 number of Galois keys where n is the
+        /// degree of the polynomial modulus. When used with batching, these keys
+        /// support direct left and right rotations of power-of-2 steps of rows in BFV
+        /// or vectors in CKKS and rotation of columns in BFV or conjugation in CKKS.
+        /// </para>
         /// </remarks>
-        /// <exception cref="InvalidOperationException">if the encryption parameters
-        /// do not support batching and scheme is SchemeType.BFV</exception>
         /// <exception cref="InvalidOperationException">if the encryption
         /// parameters do not support keyswitching</exception>
         public Serializable<GaloisKeys> CreateGaloisKeys()
