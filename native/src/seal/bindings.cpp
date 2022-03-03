@@ -730,12 +730,10 @@ EMSCRIPTEN_BINDINGS(SEAL) {
         .constructor<>()
         .constructor<GaloisKeys &&>() // Move via constructor overload
         .function("getIndex", optional_override([](GaloisKeys &self, const std::uint32_t &g_elt) {
-                std::uint64_t galois_elt = (uint64_t) g_elt;
-                return self.get_index(galois_elt);
+                return self.get_index(g_elt);
             }))
         .function("hasKey", optional_override([](GaloisKeys &self, const std::uint32_t &g_elt) {
-                std::uint64_t galois_elt = (uint64_t) g_elt;
-                return self.has_key(galois_elt);
+                return self.has_key(g_elt);
             }))
 //        .function("key", optional_override([](GaloisKeys &self, const std::uint32_t &g_elt) {
 //                std::uint64_t galois_elt = (uint64_t) g_elt;
