@@ -21,7 +21,8 @@ namespace seal
             }
 #endif
             vector<uint64_t> classes{};
-            for (uint64_t i = 0; i < modulus; i++)
+            classes.push_back(0);
+            for (uint64_t i = 1; i < modulus; i++)
             {
                 if (gcd(i, modulus) > 1)
                 {
