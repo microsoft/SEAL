@@ -19,7 +19,7 @@ namespace SEALNetTest
         /// <summary>
         /// Assert that an exception of the given type is thrown.
         ///
-        /// This is a workaround for a unit testing issue in VS 2019.
+        /// This is a workaround for a unit testing issue in VS 2022.
         /// When running unit tests a couple of them fail because of a FileNotFoundException being thrown instead
         /// of the expected exception. The FileNotFoundException is thrown in the boundary between a .Net call
         /// and a native method, so there is not really much we can do to fix it. As a workaround this method
@@ -38,7 +38,7 @@ namespace SEALNetTest
         /// <summary>
         /// Assert that an exception of the given type is thrown.
         ///
-        /// This is a workaround for a unit testing issue in VS 2019.
+        /// This is a workaround for a unit testing issue in VS 2022.
         /// When running unit tests a couple of them fail because of a FileNotFoundException being thrown instead
         /// of the expected exception. The FileNotFoundException is thrown in the boundary between a .Net call
         /// and a native method, so there is not really much we can do to fix it. As a workaround this method

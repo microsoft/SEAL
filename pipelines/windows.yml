@@ -17,18 +17,11 @@ steps:
     outputFormat: sarif
     debugMode: false
 
-- ${{ if eq(parameters.configuration, 'Release') }}:
-  - task: UseDotNet@2
-    displayName: 'Get .NET Core 2.1 SDK'
-    inputs:
-      packageType: 'sdk'
-      version: '2.1.x'
-
 - task: UseDotNet@2
-  displayName: 'Get .NET Core 3.1 SDK'
+  displayName: 'Get .NET Core 6.0 SDK'
   inputs:
     packageType: 'sdk'
-    version: '3.1.302'
+    version: '6.0.x'
 
 - ${{ if eq(parameters.configuration, 'Release') }}:
   - task: PowerShell@2
@@ -116,8 +109,8 @@ steps:
       timeout: '1800'
       ram: '16384'
       addProjectDirToScanningExclusionList: true
-      buildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild $(Build.SourcesDirectory)/build/seal.sln'
-      cleanupBuildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild $(Build.SourcesDirectory)/build/seal.sln /t:Clean'
+      buildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild $(Build.SourcesDirectory)/build/seal.sln'
+      cleanupBuildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild $(Build.SourcesDirectory)/build/seal.sln /t:Clean'
 
   - task: Semmle@0
     displayName: 'Semmle SEALNet'
@@ -130,8 +123,8 @@ steps:
       timeout: '1800'
       ram: '16384'
       addProjectDirToScanningExclusionList: true
-      buildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild $(Build.SourcesDirectory)/dotnet/SEALNet.sln'
-      cleanupBuildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2019\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild $(Build.SourcesDirectory)/dotnet/SEALNet.sln /t:Clean'
+      buildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild $(Build.SourcesDirectory)/dotnet/SEALNet.sln'
+      cleanupBuildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild $(Build.SourcesDirectory)/dotnet/SEALNet.sln /t:Clean'
 
   - task: PublishSymbols@2
     displayName: 'Publish symbols path'

@@ -730,6 +730,12 @@ configure_file(
     ${CMAKE_CURRENT_BINARY_DIR}/dotnet/examples/SEALNetExamples.csproj
     @ONLY)
 
+# Create SEALNet.sln for Visual Studio to build all dotnet projects
+configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/dotnet/SEALNet.sln.in
+    ${CMAKE_CURRENT_BINARY_DIR}/dotnet/SEALNet.sln
+    @ONLY)
+
 # Set the sealc dynamic library file names to be included in creating
 # the NuGet package. When building a multi-platform NuGet package, the
 # dynamic library paths need to be specified explicitly in the NuGet

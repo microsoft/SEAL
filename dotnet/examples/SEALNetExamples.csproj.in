@@ -2,11 +2,11 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net6.0</TargetFramework>
     <Authors>Microsoft Research</Authors>
     <Company>Microsoft Corporation</Company>
     <Description>.NET wrapper examples for Microsoft SEAL</Description>
-    <Copyright>Microsoft Corporation 2020</Copyright>
+    <Copyright>Microsoft Corporation 2022</Copyright>
   </PropertyGroup>
 
   <PropertyGroup>

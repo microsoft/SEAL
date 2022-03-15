@@ -16,10 +16,10 @@ steps:
   displayName: 'Run unit tests'
 
 - task: UseDotNet@2
-  displayName: 'Get .NET Core 3.1 SDK'
+  displayName: 'Get .NET Core 6.0 SDK'
   inputs:
     packageType: 'sdk'
-    version: '3.1.x'
+    version: '6.0.x'
 
 - task: DotNetCoreCLI@2
   displayName: 'Run dotnet unit tests'
