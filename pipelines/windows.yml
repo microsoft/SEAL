@@ -1,4 +1,28 @@
 steps:
+- task: NuGetToolInstaller@1
+  displayName: 'Use NuGet'
+  inputs:
+    versionSpec: ${{ parameters.nuget_version }}
+
+- task: NuGetCommand@2
+  displayName: 'NuGet restore Configuration Packages'
+  inputs:
+    restoreSolution: tools/config/packages.config
+    restoreDirectory: ConfigPackages
+
+- task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
+  displayName: 'Run CredScan'
+  inputs:
+    toolMajorVersion: 'V2'
+    outputFormat: sarif
+    debugMode: false
+
+- task: UseDotNet@2
+  displayName: 'Get .NET Core 6.0 SDK'
+  inputs:
+    packageType: 'sdk'
+    version: '6.0.x'
+
 - task: CMake@1
   displayName: 'Configure SEAL'
   inputs:
@@ -14,6 +38,9 @@ steps:
     configuration: '${{ parameters.configuration }}'
     msbuildVersion: 'latest'
 
+- task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
+  displayName: 'Run Roslyn Analyzers'
+
 - task: VSTest@2
   displayName: 'VsTest - native tests'
   inputs:
@@ -24,33 +51,6 @@ steps:
     platform: 'x64'
     configuration: ${{ parameters.configuration }}
     diagnosticsEnabled: True
-
-- task: NuGetToolInstaller@1
-  displayName: 'Use NuGet'
-  inputs:
-    versionSpec: ${{ parameters.nuget_version }}
-
-- task: NuGetCommand@2
-  displayName: 'NuGet restore Configuration Packages'
-  inputs:
-    restoreSolution: tools/config/packages.config
-    restoreDirectory: ConfigPackages
-
-- task: UseDotNet@2
-  displayName: 'Get .NET Core 6.0 SDK'
-  inputs:
-    packageType: 'sdk'
-    version: '6.0.x'
-
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
-  displayName: 'Run CredScan'
-  inputs:
-    toolMajorVersion: 'V2'
-    outputFormat: sarif
-    debugMode: false
-
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
-  displayName: 'Run Roslyn Analyzers'
 
 - ${{ if eq(parameters.configuration, 'Release') }}:
   - task: PowerShell@2
