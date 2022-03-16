@@ -127,7 +127,11 @@ namespace seal
             throw logic_error("unsupported prng_type");
         }
 
-        if (version.major == 3 && version.minor >= 6)
+        if (version.major == 4)
+        {
+            sample_poly_uniform(prng, context_data_ptr->parms(), data(1));
+        }
+        else if (version.major == 3 && version.minor >= 6)
         {
             sample_poly_uniform(prng, context_data_ptr->parms(), data(1));
         }
@@ -320,7 +324,11 @@ namespace seal
                 // ciphertext case. Next load the UniformRandomGeneratorInfo.
                 UniformRandomGeneratorInfo prng_info;
 
-                if (version.major == 3 && version.minor >= 6)
+                if (version.major == 4)
+                {
+                    prng_info.load(stream);
+                }
+                else if (version.major == 3 && version.minor >= 6)
                 {
                     prng_info.load(stream);
                 }

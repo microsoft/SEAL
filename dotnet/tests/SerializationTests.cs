@@ -56,7 +56,7 @@ namespace SEALNetTest
                 Assert.AreEqual(loaded.Size, header.Size);
             }
         }
-
+/*
         [TestMethod]
         public void SEALHeaderUpgrade()
         {
@@ -86,7 +86,7 @@ namespace SEALNetTest
                 mem.Seek(offset: 0, loc: SeekOrigin.Begin);
             }
         }
-
+*/
         [TestMethod]
         public void ExceptionsTest()
         {

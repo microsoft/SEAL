@@ -113,32 +113,32 @@ namespace sealtest
             ASSERT_EQ(256, loaded_header.size);
         }
     }
-
-    TEST(SerializationTest, SEALHeaderUpgrade)
-    {
-        legacy_headers::SEALHeader_3_4 header_3_4;
-        header_3_4.compr_mode = Serialization::compr_mode_default;
-        header_3_4.size = 0xF3F3;
-
+    /*
+        TEST(SerializationTest, SEALHeaderUpgrade)
         {
-            Serialization::SEALHeader header;
-            Serialization::LoadHeader(
-                reinterpret_cast<const seal_byte *>(&header_3_4), sizeof(legacy_headers::SEALHeader_3_4), header);
-            ASSERT_TRUE(Serialization::IsValidHeader(header));
-            ASSERT_EQ(header_3_4.compr_mode, header.compr_mode);
-            ASSERT_EQ(header_3_4.size, header.size);
-        }
-        {
-            Serialization::SEALHeader header;
-            Serialization::LoadHeader(
-                reinterpret_cast<const seal_byte *>(&header_3_4), sizeof(legacy_headers::SEALHeader_3_4), header,
-                false);
+            legacy_headers::SEALHeader_3_4 header_3_4;
+            header_3_4.compr_mode = Serialization::compr_mode_default;
+            header_3_4.size = 0xF3F3;
 
-            // No upgrade requested
-            ASSERT_FALSE(Serialization::IsValidHeader(header));
-        }
-    }
+            {
+                Serialization::SEALHeader header;
+                Serialization::LoadHeader(
+                    reinterpret_cast<const seal_byte *>(&header_3_4), sizeof(legacy_headers::SEALHeader_3_4), header);
+                ASSERT_TRUE(Serialization::IsValidHeader(header));
+                ASSERT_EQ(header_3_4.compr_mode, header.compr_mode);
+                ASSERT_EQ(header_3_4.size, header.size);
+            }
+            {
+                Serialization::SEALHeader header;
+                Serialization::LoadHeader(
+                    reinterpret_cast<const seal_byte *>(&header_3_4), sizeof(legacy_headers::SEALHeader_3_4), header,
+                    false);
 
+                // No upgrade requested
+                ASSERT_FALSE(Serialization::IsValidHeader(header));
+            }
+        }
+    */
     TEST(SerializationTest, SaveLoadToStream)
     {
         test_struct st{ 3, ~0, 3.14159 }, st2;
