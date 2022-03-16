@@ -1,5 +1,15 @@
 # List of Changes
 
+## Version 4.0.0
+
+### Features
+
+- Added BGV scheme [(PR 283)](https://github.com/microsoft/SEAL/pull/283). Thanks, [Alibaba Gemini Lab](https://alibaba-gemini-lab.github.io/)!
+
+### File Changes
+
+- `native/bench/bgv.cpp` is added.
+
 ## Version 3.7.3
 
 ### Features
