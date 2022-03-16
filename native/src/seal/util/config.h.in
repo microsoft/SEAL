@@ -24,6 +24,7 @@
 #cmakedefine SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
 #cmakedefine SEAL_USE_GAUSSIAN_NOISE
 #cmakedefine SEAL_DEFAULT_PRNG @SEAL_DEFAULT_PRNG@
+#cmakedefine SEAL_AVOID_BRANCHING
 
 // Intrinsics
 #cmakedefine SEAL_USE_INTRIN

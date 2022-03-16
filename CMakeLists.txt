@@ -265,6 +265,13 @@ set_property(CACHE SEAL_DEFAULT_PRNG PROPERTY
     STRINGS "Blake2xb" "Shake256")
 mark_as_advanced(FORCE SEAL_DEFAULT_PRNG)
 
+# [option] SEAL_AVOID_BRANCHING (default: OFF)
+# Avoid branching in conditional move operations if set to ON, use faster method if set to OFF.
+set(SEAL_AVOID_BRANCHING_STR "Use an always branching-free conditional move")
+option(SEAL_AVOID_BRANCHING ${SEAL_AVOID_BRANCHING_STR} OFF)
+message(STATUS "SEAL_AVOID_BRANCHING: ${SEAL_AVOID_BRANCHING}")
+mark_as_advanced(FORCE SEAL_AVOID_BRANCHING)
+
 # [option] SEAL_USE_INTRIN (default: ON)
 set(SEAL_USE_INTRIN_OPTION_STR "Use intrinsics")
 option(SEAL_USE_INTRIN ${SEAL_USE_INTRIN_OPTION_STR} ON)
