@@ -23,7 +23,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Build type (CMAKE_BUILD_TYPE): ${CMAKE_BUILD_TYPE}")
 
-project(SEAL VERSION 3.7.2 LANGUAGES CXX C)
+project(SEAL VERSION 3.7.3 LANGUAGES CXX C)
 
 ########################
 # Global configuration #
@@ -266,7 +266,7 @@ set_property(CACHE SEAL_DEFAULT_PRNG PROPERTY
 mark_as_advanced(FORCE SEAL_DEFAULT_PRNG)
 
 # [option] SEAL_AVOID_BRANCHING (default: OFF)
-# Avoid branching in conditional move operations if set to ON, use faster method if set to OFF.
+# Avoid branching in critical conditional move operations if set to ON, use faster method if set to OFF.
 set(SEAL_AVOID_BRANCHING_STR "Use an always branching-free conditional move")
 option(SEAL_AVOID_BRANCHING ${SEAL_AVOID_BRANCHING_STR} OFF)
 message(STATUS "SEAL_AVOID_BRANCHING: ${SEAL_AVOID_BRANCHING}")

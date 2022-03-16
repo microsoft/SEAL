@@ -7,12 +7,13 @@
 - All output files including downloaded thirdparty dependencies and Visual Studio project and solution files will be created in the build directory [(PR 427)](https://github.com/microsoft/SEAL/pull/427).
 - Reduced `util::try_minimal_primitive_root` search iterations by half [(PR 430)](https://github.com/microsoft/SEAL/pull/430). Thanks, [zirconium-n](https://github.com/zirconium-n)!
 - Updated .Net SDK version to 6.0.x and supported Visual Studio version to 17 2022.
+- Added `SEAL_AVOID_BRANCHING` option to eleminate branching in critical functions when Microsoft SEAL is built with maliciously inserted compiler flags.
 
-## Bug Fixes
+### Bug Fixes
 
 - Removed exceptions in `KeyGenerator::CreateGaloisKeys` when inputs do not include steps so that even when `EncryptionParameterQualifiers::using_batching` is false Galois automorphisms are still available.
 
-## File Changes
+### File Changes
 
 - `dotnet/SEALNet.sln` is removed.
 - `dotnet/SEALNet.sln.in` is added.

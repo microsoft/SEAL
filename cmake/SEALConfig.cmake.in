@@ -27,6 +27,7 @@
 #       validation code (little impact on performance)
 #   SEAL_USE_GAUSSIAN_NOISE : Set to non-zero value if library is compiled to sample noise from a rounded Gaussian
 #       distribution (slower) instead of a centered binomial distribution (faster)
+#   SEAL_AVOID_BRANCHING : Set to non-zero value if library is compiled to eliminate branching in critical conditional move operations.
 #   SEAL_DEFAULT_PRNG : The default choice of PRNG (e.g., "Blake2xb" or "Shake256")
 #
 #   SEAL_USE_MSGSL : Set to non-zero value if library is compiled with Microsoft GSL support
@@ -70,6 +71,7 @@ set(SEAL_USE_NODISCARD @SEAL_USE_NODISCARD@)
 
 set(SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT @SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT@)
 set(SEAL_USE_GAUSSIAN_NOISE @SEAL_USE_GAUSSIAN_NOISE@)
+set(SEAL_AVOID_BRANCHING @SEAL_AVOID_BRANCHING@)
 set(SEAL_DEFAULT_PRNG @SEAL_DEFAULT_PRNG@)
 
 set(SEAL_USE_MSGSL @SEAL_USE_MSGSL@)

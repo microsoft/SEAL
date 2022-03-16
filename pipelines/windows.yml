@@ -1,40 +1,4 @@
 steps:
-- task: NuGetToolInstaller@1
-  displayName: 'Use NuGet'
-  inputs:
-    versionSpec: ${{ parameters.nuget_version }}
-
-- task: NuGetCommand@2
-  displayName: 'NuGet restore Configuration Packages'
-  inputs:
-    restoreSolution: tools/config/packages.config
-    restoreDirectory: ConfigPackages
-
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
-  displayName: 'Run CredScan'
-  inputs:
-    toolMajorVersion: 'V2'
-    outputFormat: sarif
-    debugMode: false
-
-- task: UseDotNet@2
-  displayName: 'Get .NET Core 6.0 SDK'
-  inputs:
-    packageType: 'sdk'
-    version: '6.0.x'
-
-- ${{ if eq(parameters.configuration, 'Release') }}:
-  - task: PowerShell@2
-    displayName: 'Download Strong Name certificate'
-    inputs:
-      targetType: 'inline'
-      script: |
-          # Get signing certificate
-          $CertOutFile = Join-Path -Path $env:BUILD_SOURCESDIRECTORY -ChildPath dotnet\src\SEALNetCert.snk
-          if (Test-Path env:SEALNetSigningCertificate) {
-              Invoke-WebRequest -Uri "$env:SEALNetSigningCertificate" -OutFile $CertOutFile
-          }
-
 - task: CMake@1
   displayName: 'Configure SEAL'
   inputs:
@@ -48,9 +12,7 @@ steps:
     msbuildArchitecture: 'x64'
     platform: 'x64'
     configuration: '${{ parameters.configuration }}'
-
-- task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
-  displayName: 'Run Roslyn Analyzers'
+    msbuildVersion: 'latest'
 
 - task: VSTest@2
   displayName: 'VsTest - native tests'
@@ -63,30 +25,60 @@ steps:
     configuration: ${{ parameters.configuration }}
     diagnosticsEnabled: True
 
+- task: NuGetToolInstaller@1
+  displayName: 'Use NuGet'
+  inputs:
+    versionSpec: ${{ parameters.nuget_version }}
+
+- task: NuGetCommand@2
+  displayName: 'NuGet restore Configuration Packages'
+  inputs:
+    restoreSolution: tools/config/packages.config
+    restoreDirectory: ConfigPackages
+
+- task: UseDotNet@2
+  displayName: 'Get .NET Core 6.0 SDK'
+  inputs:
+    packageType: 'sdk'
+    version: '6.0.x'
+
+- task: securedevelopmentteam.vss-secure-development-tools.build-task-credscan.CredScan@2
+  displayName: 'Run CredScan'
+  inputs:
+    toolMajorVersion: 'V2'
+    outputFormat: sarif
+    debugMode: false
+
+- task: securedevelopmentteam.vss-secure-development-tools.build-task-roslynanalyzers.RoslynAnalyzers@2
+  displayName: 'Run Roslyn Analyzers'
+
+- ${{ if eq(parameters.configuration, 'Release') }}:
+  - task: PowerShell@2
+    displayName: 'Download Strong Name certificate'
+    inputs:
+      targetType: 'inline'
+      script: |
+          # Get signing certificate
+          $CertOutFile = Join-Path -Path $env:BUILD_SOURCESDIRECTORY -ChildPath build\dotnet\src\SEALNetCert.snk
+          if (Test-Path env:SEALNetSigningCertificate) {
+              Invoke-WebRequest -Uri "$env:SEALNetSigningCertificate" -OutFile $CertOutFile
+          }
+
 - task: NuGetCommand@2
   displayName: 'NuGet restore from Solution'
   inputs:
     command: 'restore'
-    restoreSolution: 'dotnet/SEALNet.sln'
+    restoreSolution: '$(Build.SourcesDirectory)/build/dotnet/SEALNet.sln'
     feedsToUse: 'select'
 
 - task: MSBuild@1
   displayName: 'Build SEALNet'
   inputs:
-    solution: '$(Build.SourcesDirectory)/dotnet/SEALNet.sln'
+    solution: '$(Build.SourcesDirectory)/build/dotnet/SEALNet.sln'
     msbuildArchitecture: 'x64'
     platform: 'x64'
     configuration: '${{ parameters.configuration }}'
-
-- ${{ if eq(parameters.configuration, 'Release') }}:
-  - task: MSBuild@1
-    displayName: 'Build SEALNet for iOS'
-    inputs:
-      solution: '$(Build.SourcesDirectory)/dotnet/src/SEALNet.csproj'
-      msbuildArchitecture: 'x64'
-      platform: 'x64'
-      msbuildArguments: '/p:BuildIOS=1'
-      configuration: '${{ parameters.configuration }}'
+    msbuildVersion: 'latest'
 
 - task: VSTest@2
   displayName: 'VsTest - dotnet tests'
@@ -94,11 +86,12 @@ steps:
     testAssemblyVer2: |
         **\${{ parameters.configuration }}\**\sealnettest.dll
         !**\obj\**
+        !**\ref\**
     configuration: ${{ parameters.configuration }}
     diagnosticsEnabled: True
 
 - ${{ if eq(parameters.configuration, 'Release') }}:
-  - task: Semmle@0
+  - task: Semmle@1
     displayName: 'Semmle SEAL'
     env:
       SYSTEM_ACCESSTOKEN: $(System.AccessToken)
@@ -112,7 +105,7 @@ steps:
       buildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild $(Build.SourcesDirectory)/build/seal.sln'
       cleanupBuildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild $(Build.SourcesDirectory)/build/seal.sln /t:Clean'
 
-  - task: Semmle@0
+  - task: Semmle@1
     displayName: 'Semmle SEALNet'
     env:
       SYSTEM_ACCESSTOKEN: $(System.AccessToken)
@@ -123,8 +116,18 @@ steps:
       timeout: '1800'
       ram: '16384'
       addProjectDirToScanningExclusionList: true
-      buildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild $(Build.SourcesDirectory)/dotnet/SEALNet.sln'
-      cleanupBuildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild $(Build.SourcesDirectory)/dotnet/SEALNet.sln /t:Clean'
+      buildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild $(Build.SourcesDirectory)/build/dotnet/SEALNet.sln'
+      cleanupBuildCommands: '"%ProgramFiles(x86)%\Microsoft Visual Studio\2022\Enterprise\Common7\Tools\VsMSBuildCmd.bat" && msbuild $(Build.SourcesDirectory)/build/dotnet/SEALNet.sln /t:Clean'
+
+  - task: MSBuild@1
+    displayName: 'Build SEALNet for iOS'
+    inputs:
+      solution: '$(Build.SourcesDirectory)/build/dotnet/src/SEALNet.csproj'
+      msbuildArchitecture: 'x64'
+      platform: 'x64'
+      msbuildArguments: '/p:BuildIOS=1'
+      configuration: '${{ parameters.configuration }}'
+      msbuildVersion: 'latest'
 
   - task: PublishSymbols@2
     displayName: 'Publish symbols path'
@@ -286,7 +289,7 @@ steps:
 - task: CopyFiles@2
   displayName: 'Copy NuSpec File to: $(Build.ArtifactStagingDirectory)'
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)\dotnet\nuget\'
+    SourceFolder: '$(Build.SourcesDirectory)\build\dotnet\nuget\'
     Contents: 'SEALNet-multi.nuspec'
     TargetFolder: '$(Build.ArtifactStagingDirectory)\dotnet\nuget\'
 
