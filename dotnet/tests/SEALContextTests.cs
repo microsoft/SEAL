@@ -260,7 +260,7 @@ namespace SEALNetTest
                 EncryptionParameters parms = new EncryptionParameters(SchemeType.BGV)
                 {
                     PolyModulusDegree = 4096,
-                    CoeffModulus = CoeffModulus.BGVDefault(polyModulusDegree: 4096),
+                    CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree: 4096),
                     PlainModulus = new Modulus(1 << 20)
                 };
 

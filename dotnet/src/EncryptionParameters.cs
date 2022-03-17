@@ -355,7 +355,7 @@ namespace Microsoft.Research.SEAL
         /// Returns the ParmsId of the current parameters. This function is intended
         /// for internal use.
         /// </summary>
-        internal ParmsId ParmsId
+        public ParmsId ParmsId
         {
             get
             {

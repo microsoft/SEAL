@@ -5981,7 +5981,7 @@ namespace sealtest
             EncryptionParameters parms(scheme_type::bgv);
             parms.set_poly_modulus_degree(8192);
             parms.set_plain_modulus(plain_modulus);
-            parms.set_coeff_modulus(CoeffModulus::BGVDefault(8192));
+            parms.set_coeff_modulus(CoeffModulus::BFVDefault(8192));
             SEALContext context(parms, true, sec_level_type::tc128);
 
             KeyGenerator keygen(context);

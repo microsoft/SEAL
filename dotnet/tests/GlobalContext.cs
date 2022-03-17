@@ -32,7 +32,7 @@ namespace SEALNetTest
             encParams = new EncryptionParameters(SchemeType.BGV)
             {
                 PolyModulusDegree = 8192,
-                CoeffModulus = CoeffModulus.BGVDefault(polyModulusDegree: 8192)
+                CoeffModulus = CoeffModulus.BFVDefault(polyModulusDegree: 8192)
             };
             encParams.SetPlainModulus(65537ul);
             BGVContext = new SEALContext(encParams);

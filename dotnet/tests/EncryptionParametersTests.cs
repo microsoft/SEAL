@@ -112,7 +112,7 @@ namespace SEALNetTest
             Assert.IsNotNull(coeffs);
             Assert.AreEqual(0, coeffs.Count);
 
-            encParams.CoeffModulus = CoeffModulus.BGVDefault(4096);
+            encParams.CoeffModulus = CoeffModulus.BFVDefault(4096);
 
             List<Modulus> newCoeffs = new List<Modulus>(encParams.CoeffModulus);
             Assert.IsNotNull(newCoeffs);

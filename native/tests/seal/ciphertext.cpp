@@ -222,7 +222,7 @@ namespace sealtest
         ASSERT_FALSE(ctxt2.is_ntt_form());
 
         parms.set_poly_modulus_degree(1024);
-        parms.set_coeff_modulus(CoeffModulus::BGVDefault(1024));
+        parms.set_coeff_modulus(CoeffModulus::BFVDefault(1024));
         parms.set_plain_modulus(0xF0F0);
         context = SEALContext(parms, false);
         KeyGenerator keygen(context);

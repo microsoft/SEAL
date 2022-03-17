@@ -1634,7 +1634,7 @@ namespace SEALNetTest
                 {
                     PolyModulusDegree = 8192,
                     PlainModulus = new Modulus(786433),
-                    CoeffModulus = CoeffModulus.BGVDefault(8192)
+                    CoeffModulus = CoeffModulus.BFVDefault(8192)
                 };
                 SEALContext context = new SEALContext(parms,
                     expandModChain: true,
