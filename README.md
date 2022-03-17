@@ -9,7 +9,9 @@ Users of previous versions of the library should look at the [list of changes](C
 
 ## News
 
-The [BGV scheme](https://eprint.iacr.org/2011/277) is now available in Microsoft SEAL. Implementation details are described in [this paper](https://eprint.iacr.org/2020/1481.pdf). We truly appreciate [Alibaba Gemini Lab](https://alibaba-gemini-lab.github.io/) for making massive efforts to develop the BGV scheme and integrate it in Microsoft SEAL.
+The [BGV scheme](https://eprint.iacr.org/2011/277) is now available in Microsoft SEAL.
+Implementation details are described in [this paper](https://eprint.iacr.org/2020/1481.pdf).
+We truly appreciate [Alibaba Gemini Lab](https://alibaba-gemini-lab.github.io/) for making massive efforts to develop the BGV scheme and integrate it in Microsoft SEAL. And we would like to thank Privacy Technologies Research, Intel Labs, for continous testing and reporting issues.
 
 Starting from version 3.7.2, Microsoft SEAL will push new changes to the `main`, `master`, and `contrib` branches without creating a new version.
 We adopt this approach to merge community contribution and resolve issues in a timely manner.
@@ -132,8 +134,8 @@ The optional dependencies and their tested versions (other versions may work as 
 | [Microsoft GSL](https://github.com/microsoft/GSL)      | 3.1.0          | API extensions                                   |
 | [ZLIB](https://github.com/madler/zlib)                 | 1.2.11         | Compressed serialization                         |
 | [Zstandard](https://github.com/facebook/zstd)          | 1.4.5          | Compressed serialization (much faster than ZLIB) |
-| [GoogleTest](https://github.com/google/googletest)     | 1.10.0         | For running tests                                |
-| [GoogleBenchmark](https://github.com/google/benchmark) | 1.5.2          | For running benchmarks                           |
+| [GoogleTest](https://github.com/google/googletest)     | 1.11.0         | For running tests                                |
+| [GoogleBenchmark](https://github.com/google/benchmark) | 1.6.0          | For running benchmarks                           |
 
 #### Intel HEXL
 
@@ -189,10 +191,11 @@ The examples are available (and identical) in C++ and C#, and are divided into s
 | `1_bfv_basics.cpp`    | `1_BFV_Basics.cs`    | Encrypted modular arithmetic using the BFV scheme                            |
 | `2_encoders.cpp`      | `2_Encoders.cs`      | Encoding more complex data into Microsoft SEAL plaintext objects             |
 | `3_levels.cpp`        | `3_Levels.cs`        | Introduces the concept of levels; prerequisite for using the CKKS scheme     |
-| `4_ckks_basics.cpp`   | `4_CKKS_Basics.cs`   | Encrypted real number arithmetic using the CKKS scheme                       |
-| `5_rotation.cpp`      | `5_Rotation.cs`      | Performing cyclic rotations on encrypted vectors in the BFV and CKKS schemes |
-| `6_serialization.cpp` | `6_Serialization.cs` | Serializing objects in Microsoft SEAL                                        |
-| `7_performance.cpp`   | `7_Performance.cs`   | Performance tests                                                            |
+| `4_bgv_basics.cpp`    | `4_BGV_Basics.cs`    | Encrypted modular arithmetic using the BGV scheme                            |
+| `5_ckks_basics.cpp`   | `5_CKKS_Basics.cs`   | Encrypted real number arithmetic using the CKKS scheme                       |
+| `6_rotation.cpp`      | `6_Rotation.cs`      | Performing cyclic rotations on encrypted vectors in the BFV and CKKS schemes |
+| `7_serialization.cpp` | `7_Serialization.cs` | Serializing objects in Microsoft SEAL                                        |
+| `8_performance.cpp`   | `8_Performance.cs`   | Performance tests                                                            |
 
 It is recommended to read the comments and the code snippets along with command line printout from running an example.
 For easier navigation, command line printout provides the line number in the associated source file where the associated code snippets start.
