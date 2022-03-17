@@ -150,16 +150,16 @@ namespace seal
             }
 
             // Different major versions not supported
-            if (header.version_major != SEAL_VERSION_MAJOR)
+            if (header.version_major != SEAL_VERSION_MAJOR && header.version_major != 3)
             {
                 return false;
             }
 
-            //            // Support Microsoft SEAL 3.4 and above
-            //            if (header.version_major == 3 && header.version_minor >= 4)
-            //            {
-            //                return true;
-            //            }
+            // Support Microsoft SEAL 3.4 and above
+            if (header.version_major == 3 && header.version_minor >= 4)
+            {
+                return true;
+            }
 
             return false;
         }

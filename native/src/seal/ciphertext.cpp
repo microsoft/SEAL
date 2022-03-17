@@ -275,7 +275,10 @@ namespace seal
             double scale = 0;
             stream.read(reinterpret_cast<char *>(&scale), sizeof(double));
             uint64_t correction_factor = 1;
-            stream.read(reinterpret_cast<char *>(&correction_factor), sizeof(uint64_t));
+            if (version.major == 4)
+            {
+                stream.read(reinterpret_cast<char *>(&correction_factor), sizeof(uint64_t));
+            }
 
             // Set values already at this point for the metadata validity check
             new_data.parms_id_ = parms_id;
