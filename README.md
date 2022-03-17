@@ -103,10 +103,10 @@ Microsoft SEAL itself has a steep learning curve and requires the user to unders
 Even if a user is able to program and run a specific computation using Microsoft SEAL, the difference between efficient and inefficient implementations can be several orders of magnitude, and it can be hard for new users to know how to improve the performance of their computation.
 
 Microsoft SEAL comes with two different homomorphic encryption schemes with very different properties.
-The BFV scheme allows modular arithmetic to be performed on encrypted integers.
+The BFV and BGV schemes allow modular arithmetic to be performed on encrypted integers.
 The CKKS scheme allows additions and multiplications on encrypted real or complex numbers, but yields only approximate results.
 In applications such as summing up encrypted real numbers, evaluating machine learning models on encrypted data, or computing distances of encrypted locations CKKS is going to be by far the best choice.
-For applications where exact values are necessary, the BFV scheme is the only choice.
+For applications where exact values are necessary, the BFV and BGV schemes are more suitable.
 
 ## Getting Started
 
@@ -216,7 +216,7 @@ EVA allows programmers to express desired encrypted computations in Python. It o
 EVA is available at [GitHub.com/Microsoft/EVA](https://GitHub.com/Microsoft/EVA).
 Try it out, and let us know what you think!
 
-**Note:** EVA only supports the CKKS scheme. There are no immediate plans to support the BFV scheme.
+**Note:** EVA only supports the CKKS scheme. There are no immediate plans to support the BFV or BGV scheme.
 
 ## Building Microsoft SEAL Manually
 

@@ -194,18 +194,15 @@ namespace seal
             throw logic_error("invalid parameters");
         }
 
-        // Prepare destination
-        encrypted1.resize(context_, context_data.parms_id(), max_count);
-
         if (encrypted1.correction_factor() != encrypted2.correction_factor())
         {
             // Balance correction factors and multiply by scalars before addition in BGV
             auto factors = balance_correction_factors(
                 encrypted1.correction_factor(), encrypted2.correction_factor(), plain_modulus);
-
             multiply_poly_scalar_coeffmod(
                 ConstPolyIter(encrypted1.data(), coeff_count, coeff_modulus_size), encrypted1.size(), get<1>(factors),
                 coeff_modulus, PolyIter(encrypted1.data(), coeff_count, coeff_modulus_size));
+
             Ciphertext encrypted2_copy = encrypted2;
             multiply_poly_scalar_coeffmod(
                 ConstPolyIter(encrypted2.data(), coeff_count, coeff_modulus_size), encrypted2.size(), get<2>(factors),
@@ -213,23 +210,26 @@ namespace seal
 
             // Set new correction factor
             encrypted1.correction_factor() = get<0>(factors);
+            encrypted2_copy.correction_factor() = get<0>(factors);
 
-            // Add ciphertexts
-            add_poly_coeffmod(encrypted1, encrypted2_copy, min_count, coeff_modulus, encrypted1);
+            add_inplace(encrypted1, encrypted2_copy);
         }
         else
         {
+            // Prepare destination
+            encrypted1.resize(context_, context_data.parms_id(), max_count);
             // Add ciphertexts
             add_poly_coeffmod(encrypted1, encrypted2, min_count, coeff_modulus, encrypted1);
+
+            // Copy the remainding polys of the array with larger count into encrypted1
+            if (encrypted1_size < encrypted2_size)
+            {
+                set_poly_array(
+                    encrypted2.data(min_count), encrypted2_size - encrypted1_size, coeff_count, coeff_modulus_size,
+                    encrypted1.data(encrypted1_size));
+            }
         }
 
-        // Copy the remainding polys of the array with larger count into encrypted1
-        if (encrypted1_size < encrypted2_size)
-        {
-            set_poly_array(
-                encrypted2.data(min_count), encrypted2_size - encrypted1_size, coeff_count, coeff_modulus_size,
-                encrypted1.data(encrypted1_size));
-        }
 #ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted1.is_transparent())
@@ -302,9 +302,6 @@ namespace seal
             throw logic_error("invalid parameters");
         }
 
-        // Prepare destination
-        encrypted1.resize(context_, context_data.parms_id(), max_count);
-
         if (encrypted1.correction_factor() != encrypted2.correction_factor())
         {
             // Balance correction factors and multiply by scalars before subtraction in BGV
@@ -314,6 +311,7 @@ namespace seal
             multiply_poly_scalar_coeffmod(
                 ConstPolyIter(encrypted1.data(), coeff_count, coeff_modulus_size), encrypted1.size(), get<1>(factors),
                 coeff_modulus, PolyIter(encrypted1.data(), coeff_count, coeff_modulus_size));
+
             Ciphertext encrypted2_copy = encrypted2;
             multiply_poly_scalar_coeffmod(
                 ConstPolyIter(encrypted2.data(), coeff_count, coeff_modulus_size), encrypted2.size(), get<2>(factors),
@@ -321,22 +319,27 @@ namespace seal
 
             // Set new correction factor
             encrypted1.correction_factor() = get<0>(factors);
+            encrypted2_copy.correction_factor() = get<0>(factors);
 
-            // Subtract ciphertexts
-            sub_poly_coeffmod(encrypted1, encrypted2_copy, min_count, coeff_modulus, encrypted1);
+            sub_inplace(encrypted1, encrypted2_copy);
         }
         else
         {
+            // Prepare destination
+            encrypted1.resize(context_, context_data.parms_id(), max_count);
+
             // Subtract ciphertexts
             sub_poly_coeffmod(encrypted1, encrypted2, min_count, coeff_modulus, encrypted1);
+
+            // If encrypted2 has larger count, negate remaining entries
+            if (encrypted1_size < encrypted2_size)
+            {
+                negate_poly_coeffmod(
+                    iter(encrypted2) + min_count, encrypted2_size - min_count, coeff_modulus,
+                    iter(encrypted1) + min_count);
+            }
         }
 
-        // If encrypted2 has larger count, negate remaining entries
-        if (encrypted1_size < encrypted2_size)
-        {
-            negate_poly_coeffmod(
-                iter(encrypted2) + min_count, encrypted2_size - min_count, coeff_modulus, iter(encrypted1) + min_count);
-        }
 #ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted1.is_transparent())
