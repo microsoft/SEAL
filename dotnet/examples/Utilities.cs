@@ -55,6 +55,9 @@ namespace SEALNetExamples
                 case SchemeType.CKKS:
                     schemeName = "CKKS";
                     break;
+                case SchemeType.BGV:
+                    schemeName = "BGV";
+                    break;
                 default:
                     throw new ArgumentException("unsupported scheme");
             }

@@ -191,7 +191,7 @@ void example_bgv_basics()
     print_matrix(pod_result, row_size);
 
     /*
-    Last we compute x^8. We run out of noise budget.
+    Last we compute x^8. We still have budget left.
     */
     print_line(__LINE__);
     cout << "Compute and relinearize x_8th (x^8)," << endl;

@@ -1117,7 +1117,7 @@ void example_ckks_performance_custom()
 
 void example_bgv_performance_default()
 {
-    print_example_banner("BFV Performance Test with Degrees: 4096, 8192, and 16384");
+    print_example_banner("BGV Performance Test with Degrees: 4096, 8192, and 16384");
 
     EncryptionParameters parms(scheme_type::bgv);
     size_t poly_modulus_degree = 4096;
@@ -1148,7 +1148,7 @@ void example_bgv_performance_default()
     // parms.set_poly_modulus_degree(poly_modulus_degree);
     // parms.set_coeff_modulus(CoeffModulus::BFVDefault(poly_modulus_degree));
     // parms.set_plain_modulus(786433);
-    // bfv_performance_test(parms);
+    // bgv_performance_test(parms);
 }
 
 void example_bgv_performance_custom()
@@ -1169,7 +1169,7 @@ void example_bgv_performance_custom()
         return;
     }
 
-    string banner = "BFV Performance Test with Degree: ";
+    string banner = "BGV Performance Test with Degree: ";
     print_example_banner(banner + to_string(poly_modulus_degree));
 
     EncryptionParameters parms(scheme_type::bgv);
