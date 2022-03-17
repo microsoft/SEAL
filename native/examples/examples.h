@@ -26,6 +26,8 @@ void example_encoders();
 
 void example_levels();
 
+void example_bgv_basics();
+
 void example_ckks_basics();
 
 void example_rotation();
@@ -68,6 +70,9 @@ inline void print_parameters(const seal::SEALContext &context)
         break;
     case seal::scheme_type::ckks:
         scheme_name = "CKKS";
+        break;
+    case seal::scheme_type::bgv:
+        scheme_name = "BGV";
         break;
     default:
         throw std::invalid_argument("unsupported scheme");
