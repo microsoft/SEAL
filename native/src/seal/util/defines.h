@@ -285,4 +285,9 @@ namespace seal
 
 // Conditionally select the former if true and the latter if false
 // This is a temporary solution that generates constant-time code with all compilers on all platforms.
+#ifndef SEAL_AVOID_BRANCHING
 #define SEAL_COND_SELECT(cond, if_true, if_false) (cond ? if_true : if_false)
+#else
+#define SEAL_COND_SELECT(cond, if_true, if_false) \
+    ((if_false) ^ ((~static_cast<uint64_t>(cond) + 1) & ((if_true) ^ (if_false))))
+#endif

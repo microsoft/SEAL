@@ -11,11 +11,11 @@ jobs:
     ${{ if eq(parameters.debug, 'false') }}:
       timeoutInMinutes: 0
     pool:
-      vmImage: 'windows-latest'
+      vmImage: 'windows-2022'
     steps:
     - template: windows.yml
       parameters:
-        nuget_version: '5.4.0'
+        nuget_version: '6.1.0'
         ${{ if eq(parameters.debug, 'true') }}:
           configuration: 'Debug'
         ${{ if eq(parameters.debug, 'false') }}:
@@ -67,7 +67,7 @@ jobs:
   - job: ${{ parameters.name }}
     displayName: ${{ parameters.name }}
     pool:
-      vmImage: 'windows-latest'
+      vmImage: 'windows-2022'
     steps:
     - template: android.yml
       parameters:
@@ -82,8 +82,8 @@ jobs:
     displayName: ${{ parameters.name }}
     dependsOn: [Windows, Linux, macOS, Android]
     pool:
-      vmImage: 'windows-latest'
+      vmImage: 'windows-2022'
     steps:
     - template: nuget.yml
       parameters:
-        nuget_version: '5.4.0'
+        nuget_version: '6.1.0'

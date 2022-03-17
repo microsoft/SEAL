@@ -227,7 +227,7 @@ A global install requires elevated (root or administrator) privileges.
 
 | System | Toolchain |
 |---|---|
-| Windows | Visual Studio 2019 with C++ CMake Tools for Windows |
+| Windows | Visual Studio 2022 with C++ CMake Tools for Windows |
 | Linux | Clang++ (>= 5.0) or GNU G++ (>= 6.0), CMake (>= 3.13) |
 | macOS/iOS | Xcode toolchain (>= 9.3), CMake (>= 3.13) |
 | Android | Android Studio |
@@ -271,32 +271,32 @@ sudo cmake --install build
 
 #### Building and Installing on Windows
 
-On Windows the same scripts above work in a developer command prompt for Visual Studio using either the Ninja or "Visual Studio 16 2019" generators.
+On Windows the same scripts above work in a developer command prompt for Visual Studio using either the Ninja or "Visual Studio 17 2022" generators.
 
-When using the Ninja generator, please use the appropriate command prompt depending on the platform you want to build for. If you want to build for x64, please use the **x64 Native Tools Command Prompt for Visual Studio 2019** command prompt to configure and build the library. If you want to build for x86, please use the **x86 Native Tools Command Prompt for Visual Studio 2019** command prompt to configure and build the library. To build using Ninja, type
+When using the Ninja generator, please use the appropriate command prompt depending on the platform you want to build for. If you want to build for x64, please use the **x64 Native Tools Command Prompt for Visual Studio 2022** command prompt to configure and build the library. If you want to build for x86, please use the **x86 Native Tools Command Prompt for Visual Studio 2022** command prompt to configure and build the library. To build using Ninja, type
 
 ```PowerShell
 cmake -S . -B build -G Ninja
 cmake --build build
 ```
 
-When using the "Visual Studio 16 2019" generator you can use the **Developer Command Prompt for VS 2019** command prompt to configure and build the library. By default the generated platform will be x64. You can specify the desired platform using the architecture flag `-A <x64|Win32>` and the desired configuration using `--config <Debug|Release>`.
+When using the "Visual Studio 17 2022" generator you can use the **Developer Command Prompt for VS 2022** command prompt to configure and build the library. By default the generated platform will be x64. You can specify the desired platform using the architecture flag `-A <x64|Win32>` and the desired configuration using `--config <Debug|Release>`.
 
 ```PowerShell
 # Generate and build for x64 in Release mode
-cmake -S . -B build -G "Visual Studio 16 2019" -A x64
+cmake -S . -B build -G "Visual Studio 17 2022" -A x64
 cmake --build build --config Release
 ```
 
 ```PowerShell
 # Generate and build for x86 in Release mode
-cmake -S . -B build -G "Visual Studio 16 2019" -A Win32
+cmake -S . -B build -G "Visual Studio 17 2022" -A Win32
 cmake --build build --config Release
 ```
 
 Installing the library in Windows works as well. Instead of using the `sudo` command, however, you need to run `cmake --install build` from a command prompt with Administrator permissions. Files will be installed by default to `C:\Program Files (x86)\SEAL\`.
 
-Visual Studio 2019 provides support for CMake-based projects. You can select the menu option `File / Open / Folder...` and navigate to the folder where the Microsoft SEAL repository is located. After opening the folder, Visual Studio will detect that this is a CMake-based project and will enable the menu command `Project / CMake settings for SEAL`. This will open the CMake settings editor that provides a user interface where you can create different configurations and set different CMake options.
+Visual Studio 2022 provides support for CMake-based projects. You can select the menu option `File / Open / Folder...` and navigate to the folder where the Microsoft SEAL repository is located. After opening the folder, Visual Studio will detect that this is a CMake-based project and will enable the menu command `Project / CMake settings for SEAL`. This will open the CMake settings editor that provides a user interface where you can create different configurations and set different CMake options.
 
 After the build completes, the output static library `seal-<version>.lib` can be found in `build\lib\` or `build\lib\Release\`.
 When linking with applications, using CMake as is explained in [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake) is highly recommended.
@@ -348,7 +348,7 @@ source ./emsdk_env.sh
 ```
 **On Windows, better run from a developer command prompt for Visual Studio; and replace `./emsdk` and `source ./emsdk_env.sh` with `emsdk` and `emsdk_env.bat`, respectively.**
 In other environments, `cmake` must be added to the path, and either "Ninja" or "MinGW Makefiles" should be specified as generator in the following configuration step.
-`emcmake` does not work with Visual Studio 16 2019 generator.
+`emcmake` does not work with Visual Studio 17 2022 generator.
 
 Within the same shell, navigate to the root directory of Microsoft SEAL, run the following commands to build for WebAssembly:
 
@@ -430,6 +430,7 @@ The following options can be used with CMake to further configure the build. Mos
 | SEAL_BUILD_STATIC_SEAL_C             | ON / **OFF**              | Set to `ON` to build SEAL_C as a static library instead of a shared library.                                                                                                                                                                                                                             |
 | SEAL_DEFAULT_PRNG                    | **Blake2xb**</br>Shake256 | Microsoft SEAL supports both Blake2xb and Shake256 XOFs for generating random bytes. Blake2xb is much faster, but it is not standardized, whereas Shake256 is a FIPS standard.                                                                                                                           |
 | SEAL_USE_GAUSSIAN_NOISE              | ON / **OFF**              | Set to `ON` to use a non-constant time rounded continuous Gaussian for the error distribution; otherwise a centered binomial distribution &ndash; with slightly larger standard deviation &ndash; is used.                                                                                               |
+| SEAL_AVOID_BRANCHING                 | ON / **OFF**              | Set to `ON` to eliminate branching in critical conditional move operations when compiler has maliciously inserted flags; otherwise assume `cmov` is used.                                                                                               |
 | SEAL_SECURE_COMPILE_OPTIONS          | ON / **OFF**              | Set to `ON` to compile/link with Control-Flow Guard (`/guard:cf`) and Spectre mitigations (`/Qspectre`). This has an effect only when compiling with MSVC.                                                                                                                                               |
 | SEAL_USE_ALIGNED_ALLOC                    | **ON** / OFF              | Set to `ON` to use 64-byte aligned memory allocations. This can improve performance of AVX512 primitives when Intel HEXL is enabled. This depends on C++17 and is disabled on Android.                                                                                               |
 
@@ -483,21 +484,21 @@ The SEAL_C library is meant to be used only by the .NET library, not by end-user
 
 #### Windows, Linux, and macOS
 
-For compiling .NET code you will need to install a [.NET Core SDK (>= 3.1)](https://dotnet.microsoft.com/download).
+For compiling .NET code you will need to install a [.NET SDK (>= 6.0)](https://dotnet.microsoft.com/download).
 Building the SEAL_C library with CMake will generate project files for the .NET wrapper library, examples, and unit tests.
 The SEAL_C library must be discoverable when running a .NET application, e.g., be present in the same directory as your executable, which is taken care of by the .NET examples and tests project files.
 Run the following scripts to build each project:
 
 ```PowerShell
-dotnet build dotnet/src --configuration <Debug|Release> # Build .NET wrapper library
-dotnet test dotnet/tests # Build and run .NET unit tests
-dotnet run -p dotnet/examples # Build and run .NET examples
+dotnet build build/dotnet/src --configuration <Debug|Release> # Build .NET wrapper library
+dotnet test build/dotnet/tests # Build and run .NET unit tests
+dotnet run -p build/dotnet/examples # Build and run .NET examples
 ```
 
 You can use `--configuration <Debug|Release>` to run `Debug` or `Release` examples and unit tests.
 You can use `--verbosity detailed` to print the list of unit tests that are being run.
 
-On Windows, you can also use the Microsoft Visual Studio 2019 solution file `dotnet/SEALNet.sln` to build all three projects.
+On Windows, you can also use the Microsoft Visual Studio 2022 solution file, for example, `out/build/x64-Debug/dotnet/SEALNet.sln` to build all three projects.
 
 #### Android and iOS
 

@@ -1,10 +1,28 @@
 # List of Changes
 
+## Version 3.7.3
+
+### Features
+
+- All output files including downloaded thirdparty dependencies and Visual Studio project and solution files will be created in the build directory [(PR 427)](https://github.com/microsoft/SEAL/pull/427).
+- Reduced `util::try_minimal_primitive_root` search iterations by half [(PR 430)](https://github.com/microsoft/SEAL/pull/430). Thanks, [zirconium-n](https://github.com/zirconium-n)!
+- Updated .Net SDK version to 6.0.x and supported Visual Studio version to 17 2022.
+- Added `SEAL_AVOID_BRANCHING` option to eleminate branching in critical functions when Microsoft SEAL is built with maliciously inserted compiler flags.
+
+### Bug Fixes
+
+- Removed exceptions in `KeyGenerator::CreateGaloisKeys` when inputs do not include steps so that even when `EncryptionParameterQualifiers::using_batching` is false Galois automorphisms are still available.
+
+### File Changes
+
+- `dotnet/SEALNet.sln` is removed.
+- `dotnet/SEALNet.sln.in` is added.
+
 ## Version 3.7.2
 
 ### Bug Fixes
 
-- Fixed a bug when Intel HEXL is used [(Issue 411)](https://github.com/microsoft/SEAL/issues/411) [(PR414)](https://github.com/microsoft/SEAL/pull/414).
+- Fixed a bug when Intel HEXL is used [(Issue 411)](https://github.com/microsoft/SEAL/issues/411) [(PR 414)](https://github.com/microsoft/SEAL/pull/414).
 - Fixed an abnormal benchmark case due to AVX512 transitions when Intel HEXL is used [(PR 416)](https://github.com/microsoft/SEAL/pull/416).
 
 ## Version 3.7.1
@@ -343,7 +361,7 @@ Instead, the outer lambda function parameter should be wrapped inside another ca
 ### Other
 
 - Added note in [README.md](README.md) about known performance issues when compiling with GNU G++ compared to Clang++ [(Issue 173)](https://github.com/microsoft/SEAL/issues/173).
-- Merged pull requests that improve the performance of keyswitching [(PR #177)](https://github.com/microsoft/SEAL/pull/177) and rescale [(PR #176)](https://github.com/microsoft/SEAL/pull/176) in CKKS.
+- Merged pull requests that improve the performance of keyswitching [(PR 177)](https://github.com/microsoft/SEAL/pull/177) and rescale [(PR 176)](https://github.com/microsoft/SEAL/pull/176) in CKKS.
 
 ## Version 3.5.1
 

@@ -30,5 +30,6 @@ if(NOT zlib_POPULATED)
     set(CMAKE_SUPPRESS_DEVELOPER_WARNINGS TRUE CACHE INTERNAL "Suppress CMP0048 warning" FORCE)
     add_subdirectory(
         ${zlib_SOURCE_DIR}
+        ${zlib_SOURCE_DIR}/../zlib-build
         EXCLUDE_FROM_ALL)
 endif()

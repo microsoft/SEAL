@@ -406,7 +406,7 @@ namespace seal
             uint64_t current_generator = root;
 
             // destination is going to always contain the smallest generator found
-            for (size_t i = 0; i < degree; i++)
+            for (size_t i = 0; i < degree; i += 2)
             {
                 // If our current generator is strictly smaller than destination,
                 // update

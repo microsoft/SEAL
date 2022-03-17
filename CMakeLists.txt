@@ -23,7 +23,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Build type (CMAKE_BUILD_TYPE): ${CMAKE_BUILD_TYPE}")
 
-project(SEAL VERSION 3.7.2 LANGUAGES CXX C)
+project(SEAL VERSION 3.7.3 LANGUAGES CXX C)
 
 ########################
 # Global configuration #
@@ -90,7 +90,6 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # Source Tree
 set(SEAL_INCLUDES_DIR ${CMAKE_CURRENT_LIST_DIR}/native/src)
-set(SEAL_THIRDPARTY_DIR ${CMAKE_CURRENT_LIST_DIR}/thirdparty)
 set(SEAL_CONFIG_IN_FILENAME ${CMAKE_CURRENT_LIST_DIR}/cmake/SEALConfig.cmake.in)
 set(SEAL_CONFIG_H_IN_FILENAME ${SEAL_INCLUDES_DIR}/seal/util/config.h.in)
 
@@ -102,6 +101,7 @@ set(SEAL_TARGETS_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/cmake/SEALTargets.cmake)
 set(SEAL_CONFIG_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/cmake/SEALConfig.cmake)
 set(SEAL_CONFIG_VERSION_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/cmake/SEALConfigVersion.cmake)
 set(SEAL_CONFIG_H_FILENAME ${CMAKE_CURRENT_BINARY_DIR}/native/src/seal/util/config.h)
+set(SEAL_THIRDPARTY_DIR ${CMAKE_CURRENT_BINARY_DIR}/thirdparty)
 
 # Install
 set(SEAL_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
@@ -264,6 +264,13 @@ message(STATUS "SEAL_DEFAULT_PRNG: ${SEAL_DEFAULT_PRNG}")
 set_property(CACHE SEAL_DEFAULT_PRNG PROPERTY
     STRINGS "Blake2xb" "Shake256")
 mark_as_advanced(FORCE SEAL_DEFAULT_PRNG)
+
+# [option] SEAL_AVOID_BRANCHING (default: OFF)
+# Avoid branching in critical conditional move operations if set to ON, use faster method if set to OFF.
+set(SEAL_AVOID_BRANCHING_STR "Use an always branching-free conditional move")
+option(SEAL_AVOID_BRANCHING ${SEAL_AVOID_BRANCHING_STR} OFF)
+message(STATUS "SEAL_AVOID_BRANCHING: ${SEAL_AVOID_BRANCHING}")
+mark_as_advanced(FORCE SEAL_AVOID_BRANCHING)
 
 # [option] SEAL_USE_INTRIN (default: ON)
 set(SEAL_USE_INTRIN_OPTION_STR "Use intrinsics")
@@ -719,15 +726,21 @@ endif()
 # Create SEALNet.csproj, SEALNetExamples.csproj, and SEALNetTest.csproj
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/src/SEALNet.csproj.in
-    ${CMAKE_CURRENT_LIST_DIR}/dotnet/src/SEALNet.csproj
+    ${CMAKE_CURRENT_BINARY_DIR}/dotnet/src/SEALNet.csproj
     @ONLY)
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/tests/SEALNetTest.csproj.in
-    ${CMAKE_CURRENT_LIST_DIR}/dotnet/tests/SEALNetTest.csproj
+    ${CMAKE_CURRENT_BINARY_DIR}/dotnet/tests/SEALNetTest.csproj
     @ONLY)
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/examples/SEALNetExamples.csproj.in
-    ${CMAKE_CURRENT_LIST_DIR}/dotnet/examples/SEALNetExamples.csproj
+    ${CMAKE_CURRENT_BINARY_DIR}/dotnet/examples/SEALNetExamples.csproj
+    @ONLY)
+
+# Create SEALNet.sln for Visual Studio to build all dotnet projects
+configure_file(
+    ${CMAKE_CURRENT_LIST_DIR}/dotnet/SEALNet.sln.in
+    ${CMAKE_CURRENT_BINARY_DIR}/dotnet/SEALNet.sln
     @ONLY)
 
 # Set the sealc dynamic library file names to be included in creating
@@ -738,7 +751,7 @@ configure_file(
 # Create SEALNet-multi.nuspec for a multi-platform NuGet package
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet-multi.nuspec.in
-    ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet-multi.nuspec
+    ${CMAKE_CURRENT_BINARY_DIR}/dotnet/nuget/SEALNet-multi.nuspec
     @ONLY)
 
 set(NUGET_WINDOWS_SEAL_C_PATH "")
@@ -757,5 +770,5 @@ endif()
 # Create SEALNet.nuspec for a local NuGet pack from SEALNet.nuspec.in
 configure_file(
     ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.nuspec.in
-    ${CMAKE_CURRENT_LIST_DIR}/dotnet/nuget/SEALNet.nuspec
+    ${CMAKE_CURRENT_BINARY_DIR}/dotnet/nuget/SEALNet.nuspec
     @ONLY)
