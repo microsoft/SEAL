@@ -5,6 +5,7 @@
 ### Features
 
 - Added BGV scheme [(PR 283)](https://github.com/microsoft/SEAL/pull/283). Thanks, [Alibaba Gemini Lab](https://alibaba-gemini-lab.github.io/)!
+- Added a new example "BGV basics" to native and dotnet.
 - Loading objects serialized by Microsoft SEAL v3.4+ are supported.
 
 ### Major API Changes
@@ -17,6 +18,7 @@
 ### File Changes
 
 - `native/bench/bgv.cpp` is added.
+- Examples are renamed and extended.
 
 ## Version 3.7.3
 
