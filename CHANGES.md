@@ -7,6 +7,11 @@
 - Added BGV scheme [(PR 283)](https://github.com/microsoft/SEAL/pull/283). Thanks, [Alibaba Gemini Lab](https://alibaba-gemini-lab.github.io/)!
 - Added a new example "BGV basics" to native and dotnet.
 - Loading objects serialized by Microsoft SEAL v3.4+ are supported.
+- Updated versions of dependencies: GoogleTest from 1.10.0 to 1.11.0 and GoogleBenchmark from 1.5.2 to 1.6.0.
+
+### Other Fixes
+
+- Fixed an ambiguous comment [(PR 375)](https://github.com/microsoft/SEAL/pull/375).
 
 ### Major API Changes
 
@@ -14,6 +19,7 @@
 - Added a new public method `parms_id()` (native) to the class `EncryptionParameters`.
 - Added a new public method `Create(...)` (native and dotnet) with three inputs in the class `CoeffModulus`.
 - Added a new public method `correction_factor()` (native) or `CorrectionFactor()` (dotnet) to the class `Ciphertext`.
+- Removed the friendship of the class `EncryptionParameters` to the class `SEALContext`.
 
 ### File Changes
 
