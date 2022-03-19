@@ -182,7 +182,8 @@ std::string printContext(const SEALContext &context)
     /*
     For the 'bfv'' scheme print the plain_modulus parameter.
     */
-    if (context_data->parms().scheme() == seal::scheme_type::bfv)
+    if (context_data->parms().scheme() == seal::scheme_type::bfv ||
+        context_data->parms().scheme() == seal::scheme_type::bgv)
     {
         oss << "|   plain_modulus: " << context_data->parms().plain_modulus().value() << std::endl;
     }
@@ -616,7 +617,7 @@ EMSCRIPTEN_BINDINGS(SEAL)
                     return;
                 }
 
-                if (scheme == scheme_type::bfv)
+                if (scheme == scheme_type::bfv || scheme == scheme_type::bgv)
                 {
                     // define recursive lambda
                     auto sum_elements = make_y_combinator([](auto &&sum_elements, Evaluator &self, Ciphertext &a,
