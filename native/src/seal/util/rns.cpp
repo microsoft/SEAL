@@ -462,6 +462,82 @@ namespace seal
             });
         }
 
+        // See "An Improved RNS Variant of the BFV Homomorphic Encryption Scheme" (CT-RSA 2019) for details
+        void BaseConverter::exact_convert_array(ConstRNSIter in, CoeffIter out, MemoryPoolHandle pool) const
+        {
+            size_t ibase_size = ibase_.size();
+            size_t obase_size = obase_.size();
+            size_t count = in.poly_modulus_degree();
+
+            if (obase_size != 1)
+            {
+                throw invalid_argument("out base in exact_convert_array must be one.");
+            }
+
+            // Note that the stride size is ibase_size
+            SEAL_ALLOCATE_GET_STRIDE_ITER(temp, uint64_t, count, ibase_size, pool);
+
+            // The iterator storing v
+            SEAL_ALLOCATE_GET_STRIDE_ITER(v, double_t, count, ibase_size, pool);
+
+            // Aggregated rounded v
+            SEAL_ALLOCATE_GET_PTR_ITER(aggregated_rounded_v, uint64_t, count, pool);
+
+            // Calculate [x_{i} * \hat{q_{i}}]_{q_{i}}
+            SEAL_ITERATE(
+                iter(in, ibase_.inv_punctured_prod_mod_base_array(), ibase_.base(), size_t(0)), ibase_size,
+                [&](auto I) {
+                    // The current ibase index
+                    size_t ibase_index = get<3>(I);
+                    double_t divisor = static_cast<double_t>(get<2>(I).value());
+
+                    if (get<1>(I).operand == 1)
+                    {
+                        // No multiplication needed
+                        SEAL_ITERATE(iter(get<0>(I), temp, v), count, [&](auto J) {
+                            // Reduce modulo ibase element
+                            get<1>(J)[ibase_index] = barrett_reduce_64(get<0>(J), get<2>(I));
+                            double_t dividend = static_cast<double_t>(get<1>(J)[ibase_index]);
+                            get<2>(J)[ibase_index] = dividend / divisor;
+                        });
+                    }
+                    else
+                    {
+                        // Multiplication needed
+                        SEAL_ITERATE(iter(get<0>(I), temp, v), count, [&](auto J) {
+                            // Multiply coefficient of in with ibase_.inv_punctured_prod_mod_base_array_ element
+                            get<1>(J)[ibase_index] = multiply_uint_mod(get<0>(J), get<1>(I), get<2>(I));
+                            double_t dividend = static_cast<double_t>(get<1>(J)[ibase_index]);
+                            get<2>(J)[ibase_index] = dividend / divisor;
+                        });
+                    }
+                });
+
+            // Aggrate v and rounding
+            SEAL_ITERATE(iter(v, aggregated_rounded_v), count, [&](auto I) {
+                // Otherwise a memory space of the last execution will be used.
+                double_t aggregated_v = 0.0;
+                for (size_t i = 0; i < ibase_size; ++i)
+                {
+                    aggregated_v += get<0>(I)[i];
+                }
+                aggregated_v += 0.5;
+                get<1>(I) = static_cast<uint64_t>(aggregated_v);
+            });
+
+            auto p = obase_.base()[0];
+            auto q_mod_p = modulo_uint(ibase_.base_prod(), ibase_size, p);
+            auto base_change_matrix_first = base_change_matrix_[0].get();
+            // Final multiplication
+            SEAL_ITERATE(iter(out, temp, aggregated_rounded_v), count, [&](auto J) {
+                // Compute the base conversion sum modulo obase element
+                auto sum_mod_obase = dot_product_mod(get<1>(J), base_change_matrix_first, ibase_size, p);
+                // Minus v*[q]_{p} mod p
+                auto v_q_mod_p = multiply_uint_mod(get<2>(J), q_mod_p, p);
+                get<0>(J) = sub_uint_mod(sum_mod_obase, v_q_mod_p, p);
+            });
+        }
+
         void BaseConverter::initialize()
         {
             // Verify that the size is not too large
@@ -547,7 +623,8 @@ namespace seal
             }
 
             // Sample primes for B and two more primes: m_sk and gamma
-            auto baseconv_primes = get_primes(coeff_count_, SEAL_INTERNAL_MOD_BIT_COUNT, base_Bsk_m_tilde_size);
+            auto baseconv_primes =
+                get_primes(mul_safe(size_t(2), coeff_count_), SEAL_INTERNAL_MOD_BIT_COUNT, base_Bsk_m_tilde_size);
             auto baseconv_primes_iter = baseconv_primes.cbegin();
             m_sk_ = *baseconv_primes_iter++;
             gamma_ = *baseconv_primes_iter++;
@@ -580,6 +657,12 @@ namespace seal
             catch (const logic_error &)
             {
                 throw logic_error("invalid rns bases");
+            }
+
+            if (!t_.is_zero())
+            {
+                // Set up BaseConvTool for q --> {t}
+                base_q_to_t_conv_ = allocate<BaseConverter>(pool_, *base_q_, RNSBase({ t_ }, pool_), pool_);
             }
 
             // Set up BaseConverter for q --> Bsk
@@ -691,6 +774,16 @@ namespace seal
                 }
                 get<0>(I).set(temp, get<1>(I));
             });
+
+            if (t_.value() != 0)
+            {
+                if (!try_invert_uint_mod(base_q_->base()[base_q_size - 1].value(), t_, inv_q_last_mod_t_))
+                {
+                    throw logic_error("invalid rns bases");
+                }
+
+                q_last_mod_t_ = barrett_reduce_64(base_q_->base()[base_q_size - 1].value(), t_);
+            }
         }
 
         void RNSTool::divide_and_round_q_last_inplace(RNSIter input, MemoryPoolHandle pool) const
@@ -1105,6 +1198,51 @@ namespace seal
                     get<2>(I) = multiply_uint_mod(get<2>(I), inv_gamma_mod_t_, t_);
                 }
             });
+        }
+
+        void RNSTool::mod_t_and_divide_q_last_inplace(RNSIter input, MemoryPoolHandle pool) const
+        {
+            size_t modulus_size = base_q_->size();
+            const Modulus *curr_modulus = base_q_->base();
+            const Modulus plain_modulus = t_;
+            uint64_t last_modulus_value = curr_modulus[modulus_size - 1].value();
+
+            SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(neg_c_last_mod_t, coeff_count_, pool);
+            // neg_c_last_mod_t = - c_last (mod t)
+            modulo_poly_coeffs(CoeffIter(input[modulus_size - 1]), coeff_count_, plain_modulus, neg_c_last_mod_t);
+            negate_poly_coeffmod(neg_c_last_mod_t, coeff_count_, plain_modulus, neg_c_last_mod_t);
+            if (inv_q_last_mod_t_ != 1)
+            {
+                // neg_c_last_mod_t *= q_last^(-1) (mod t)
+                multiply_poly_scalar_coeffmod(
+                    neg_c_last_mod_t, coeff_count_, inv_q_last_mod_t_, plain_modulus, neg_c_last_mod_t);
+            }
+
+            SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(delta_mod_q_i, coeff_count_, pool);
+
+            SEAL_ITERATE(iter(input, curr_modulus, inv_q_last_mod_q_), modulus_size - 1, [&](auto I) {
+                // delta_mod_q_i = neg_c_last_mod_t (mod q_i)
+                modulo_poly_coeffs(neg_c_last_mod_t, coeff_count_, get<1>(I), delta_mod_q_i);
+
+                // delta_mod_q_i *= q_last (mod q_i)
+                multiply_poly_scalar_coeffmod(
+                    delta_mod_q_i, coeff_count_, last_modulus_value, get<1>(I), delta_mod_q_i);
+
+                // c_i = c_i - c_last - neg_c_last_mod_t * q_last (mod 2q_i)
+                const uint64_t two_times_q_i = get<1>(I).value() << 1;
+                SEAL_ITERATE(iter(get<0>(I), delta_mod_q_i, input[modulus_size - 1]), coeff_count_, [&](auto J) {
+                    get<0>(J) += two_times_q_i - barrett_reduce_64(get<2>(J), get<1>(I)) - get<1>(J);
+                });
+
+                // c_i = c_i * inv_q_last_mod_q_i (mod q_i)
+                multiply_poly_scalar_coeffmod(get<0>(I), coeff_count_, get<2>(I), get<1>(I), get<0>(I));
+            });
+        }
+
+        void RNSTool::decrypt_modt(RNSIter phase, CoeffIter destination, MemoryPoolHandle pool) const
+        {
+            // Use exact base convension rather than convert the base through the compose API
+            base_q_to_t_conv_->exact_convert_array(phase, destination, pool);
         }
     } // namespace util
 } // namespace seal

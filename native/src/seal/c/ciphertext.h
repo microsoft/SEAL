@@ -67,6 +67,10 @@ SEAL_C_FUNC Ciphertext_Scale(void *thisptr, double *scale);
 
 SEAL_C_FUNC Ciphertext_SetScale(void *thisptr, double scale);
 
+SEAL_C_FUNC Ciphertext_CorrectionFactor(void *thisptr, uint64_t *correction_factor);
+
+SEAL_C_FUNC Ciphertext_SetCorrectionFactor(void *thisptr, uint64_t correction_factor);
+
 SEAL_C_FUNC Ciphertext_Release(void *thisptr);
 
 SEAL_C_FUNC Ciphertext_IsTransparent(void *thisptr, bool *result);

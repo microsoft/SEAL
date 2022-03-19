@@ -178,7 +178,7 @@ namespace seal
         }
 
         template <typename T, typename... Args, typename = std::enable_if_t<std::is_integral<T>::value>>
-        SEAL_NODISCARD inline constexpr T mul_safe(T in1, T in2, Args &&... args)
+        SEAL_NODISCARD inline constexpr T mul_safe(T in1, T in2, Args &&...args)
         {
             return mul_safe(mul_safe(in1, in2), mul_safe(std::forward<Args>(args)...));
         }
@@ -214,7 +214,7 @@ namespace seal
         }
 
         template <typename T, typename... Args, typename = std::enable_if_t<std::is_arithmetic<T>::value>>
-        SEAL_NODISCARD inline constexpr T add_safe(T in1, T in2, Args &&... args)
+        SEAL_NODISCARD inline constexpr T add_safe(T in1, T in2, Args &&...args)
         {
             return add_safe(add_safe(in1, in2), add_safe(std::forward<Args>(args)...));
         }
@@ -318,25 +318,25 @@ namespace seal
         }
 
         template <typename T, typename... Args, typename = std::enable_if_t<std::is_arithmetic<T>::value>>
-        SEAL_NODISCARD inline constexpr bool sum_fits_in(Args &&... args)
+        SEAL_NODISCARD inline constexpr bool sum_fits_in(Args &&...args)
         {
             return fits_in<T>(add_safe(std::forward<Args>(args)...));
         }
 
         template <typename T, typename... Args, typename = std::enable_if_t<std::is_arithmetic<T>::value>>
-        SEAL_NODISCARD inline constexpr bool sum_fits_in(T in1, Args &&... args)
+        SEAL_NODISCARD inline constexpr bool sum_fits_in(T in1, Args &&...args)
         {
             return fits_in<T>(add_safe(in1, std::forward<Args>(args)...));
         }
 
         template <typename T, typename... Args, typename = std::enable_if_t<std::is_arithmetic<T>::value>>
-        SEAL_NODISCARD inline constexpr bool product_fits_in(Args &&... args)
+        SEAL_NODISCARD inline constexpr bool product_fits_in(Args &&...args)
         {
             return fits_in<T>(mul_safe(std::forward<Args>(args)...));
         }
 
         template <typename T, typename... Args, typename = std::enable_if_t<std::is_arithmetic<T>::value>>
-        SEAL_NODISCARD inline constexpr bool product_fits_in(T in1, Args &&... args)
+        SEAL_NODISCARD inline constexpr bool product_fits_in(T in1, Args &&...args)
         {
             return fits_in<T>(mul_safe(in1, std::forward<Args>(args)...));
         }

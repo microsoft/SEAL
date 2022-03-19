@@ -20,10 +20,11 @@ int main()
         cout << "| 1. BFV Basics              | 1_bfv_basics.cpp           |" << endl;
         cout << "| 2. Encoders                | 2_encoders.cpp             |" << endl;
         cout << "| 3. Levels                  | 3_levels.cpp               |" << endl;
-        cout << "| 4. CKKS Basics             | 4_ckks_basics.cpp          |" << endl;
-        cout << "| 5. Rotation                | 5_rotation.cpp             |" << endl;
-        cout << "| 6. Serialization           | 6_serialization.cpp        |" << endl;
-        cout << "| 7. Performance Test        | 7_performance.cpp          |" << endl;
+        cout << "| 4. BGV Basics              | 4_bgv_basics.cpp           |" << endl;
+        cout << "| 5. CKKS Basics             | 5_ckks_basics.cpp          |" << endl;
+        cout << "| 6. Rotation                | 6_rotation.cpp             |" << endl;
+        cout << "| 7. Serialization           | 7_serialization.cpp        |" << endl;
+        cout << "| 8. Performance Test        | 8_performance.cpp          |" << endl;
         cout << "+----------------------------+----------------------------+" << endl;
 
         /*
@@ -40,12 +41,12 @@ int main()
         bool valid = true;
         do
         {
-            cout << endl << "> Run example (1 ~ 7) or exit (0): ";
+            cout << endl << "> Run example (1 ~ 8) or exit (0): ";
             if (!(cin >> selection))
             {
                 valid = false;
             }
-            else if (selection < 0 || selection > 7)
+            else if (selection < 0 || selection > 8)
             {
                 valid = false;
             }
@@ -55,7 +56,7 @@ int main()
             }
             if (!valid)
             {
-                cout << "  [Beep~~] valid option: type 0 ~ 7" << endl;
+                cout << "  [Beep~~] valid option: type 0 ~ 8" << endl;
                 cin.clear();
                 cin.ignore(numeric_limits<streamsize>::max(), '\n');
             }
@@ -76,18 +77,22 @@ int main()
             break;
 
         case 4:
-            example_ckks_basics();
+            example_bgv_basics();
             break;
 
         case 5:
-            example_rotation();
+            example_ckks_basics();
             break;
 
         case 6:
-            example_serialization();
+            example_rotation();
             break;
 
         case 7:
+            example_serialization();
+            break;
+
+        case 8:
             example_performance_test();
             break;
 

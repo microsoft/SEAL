@@ -62,9 +62,77 @@ namespace SEALNetTest
         }
 
         [TestMethod]
-        public void ResizeTest()
+        public void Create4Test()
+        {
+            SEALContext context = GlobalContext.BGVContext;
+            ParmsId parms = context.FirstParmsId;
+
+            Assert.AreNotEqual(0ul, parms.Block[0]);
+            Assert.AreNotEqual(0ul, parms.Block[1]);
+            Assert.AreNotEqual(0ul, parms.Block[2]);
+            Assert.AreNotEqual(0ul, parms.Block[3]);
+
+            Ciphertext cipher = new Ciphertext(context, parms);
+
+            Assert.AreEqual(parms, cipher.ParmsId);
+        }
+
+        [TestMethod]
+        public void Create5Test()
+        {
+            SEALContext context = GlobalContext.BGVContext;
+            ParmsId parms = context.FirstParmsId;
+
+            Assert.AreNotEqual(0ul, parms.Block[0]);
+            Assert.AreNotEqual(0ul, parms.Block[1]);
+            Assert.AreNotEqual(0ul, parms.Block[2]);
+            Assert.AreNotEqual(0ul, parms.Block[3]);
+
+            Ciphertext cipher = new Ciphertext(context, parms, sizeCapacity: 5);
+
+            Assert.AreEqual(5ul, cipher.SizeCapacity);
+        }
+
+        [TestMethod]
+        public void BFVResizeTest()
         {
             SEALContext context = GlobalContext.BFVContext;
+            ParmsId parms = context.FirstParmsId;
+
+            Ciphertext cipher = new Ciphertext(context, parms);
+
+            Assert.AreEqual(2ul, cipher.SizeCapacity);
+
+            cipher.Reserve(context, parms, sizeCapacity: 10);
+            Assert.AreEqual(10ul, cipher.SizeCapacity);
+
+            Ciphertext cipher2 = new Ciphertext();
+
+            Assert.AreEqual(0ul, cipher2.SizeCapacity);
+
+            cipher2.Reserve(context, 5);
+            Assert.AreEqual(5ul, cipher2.SizeCapacity);
+
+            Ciphertext cipher3 = new Ciphertext();
+
+            Assert.AreEqual(0ul, cipher3.SizeCapacity);
+
+            cipher3.Reserve(4);
+            Assert.AreEqual(0ul, cipher3.SizeCapacity);
+
+            Ciphertext cipher4 = new Ciphertext(context);
+            cipher4.Resize(context, context.GetContextData(context.FirstParmsId).NextContextData.ParmsId, 4);
+            Assert.AreEqual(10ul, cipher.SizeCapacity);
+
+            Ciphertext cipher5 = new Ciphertext(context);
+            cipher5.Resize(context, 6ul);
+            Assert.AreEqual(6ul, cipher5.SizeCapacity);
+        }
+
+        [TestMethod]
+        public void BGVResizeTest()
+        {
+            SEALContext context = GlobalContext.BGVContext;
             ParmsId parms = context.FirstParmsId;
 
             Ciphertext cipher = new Ciphertext(context, parms);
@@ -110,7 +178,7 @@ namespace SEALNetTest
         }
 
         [TestMethod]
-        public void SaveLoadTest()
+        public void BFVSaveLoadTest()
         {
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
@@ -154,7 +222,51 @@ namespace SEALNetTest
         }
 
         [TestMethod]
-        public void IndexTest()
+        public void BGVSaveLoadTest()
+        {
+            SEALContext context = GlobalContext.BGVContext;
+            KeyGenerator keygen = new KeyGenerator(context);
+            keygen.CreatePublicKey(out PublicKey publicKey);
+
+            Encryptor encryptor = new Encryptor(context, publicKey);
+            Plaintext plain = new Plaintext("2x^3 + 4x^2 + 5x^1 + 6");
+            Ciphertext cipher = new Ciphertext();
+
+            encryptor.Encrypt(plain, cipher);
+
+            Assert.AreEqual(2ul, cipher.Size);
+            Assert.AreEqual(8192ul, cipher.PolyModulusDegree);
+            Assert.AreEqual(4ul, cipher.CoeffModulusSize);
+
+            Ciphertext loaded = new Ciphertext();
+
+            Assert.AreEqual(0ul, loaded.Size);
+            Assert.AreEqual(0ul, loaded.PolyModulusDegree);
+            Assert.AreEqual(0ul, loaded.CoeffModulusSize);
+
+            using (MemoryStream mem = new MemoryStream())
+            {
+                cipher.Save(mem);
+
+                mem.Seek(offset: 0, loc: SeekOrigin.Begin);
+
+                loaded.Load(context, mem);
+            }
+
+            Assert.AreEqual(2ul, loaded.Size);
+            Assert.AreEqual(8192ul, loaded.PolyModulusDegree);
+            Assert.AreEqual(4ul, loaded.CoeffModulusSize);
+            Assert.IsTrue(ValCheck.IsValidFor(loaded, context));
+
+            ulong ulongCount = cipher.Size * cipher.PolyModulusDegree * cipher.CoeffModulusSize;
+            for (ulong i = 0; i < ulongCount; i++)
+            {
+                Assert.AreEqual(cipher[i], loaded[i]);
+            }
+        }
+
+        [TestMethod]
+        public void BFVIndexTest()
         {
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
@@ -176,7 +288,29 @@ namespace SEALNetTest
         }
 
         [TestMethod]
-        public void IndexRangeFail1Test()
+        public void BGVIndexTest()
+        {
+            SEALContext context = GlobalContext.BGVContext;
+            KeyGenerator keygen = new KeyGenerator(context);
+            keygen.CreatePublicKey(out PublicKey publicKey);
+
+            Encryptor encryptor = new Encryptor(context, publicKey);
+            Plaintext plain = new Plaintext("1");
+            Ciphertext cipher = new Ciphertext();
+
+            encryptor.Encrypt(plain, cipher);
+
+            Assert.AreEqual(2ul, cipher.Size);
+            Assert.AreNotEqual(0ul, cipher[0, 0]);
+            Assert.AreNotEqual(0ul, cipher[0, 1]);
+            Assert.AreNotEqual(0ul, cipher[0, 2]);
+            Assert.AreNotEqual(0ul, cipher[1, 0]);
+            Assert.AreNotEqual(0ul, cipher[1, 1]);
+            Assert.AreNotEqual(0ul, cipher[1, 2]);
+        }
+
+        [TestMethod]
+        public void BFVIndexRangeFail1Test()
         {
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
@@ -196,7 +330,27 @@ namespace SEALNetTest
         }
 
         [TestMethod]
-        public void IndexRangeFail2Test()
+        public void BGVIndexRangeFail1Test()
+        {
+            SEALContext context = GlobalContext.BGVContext;
+            KeyGenerator keygen = new KeyGenerator(context);
+            keygen.CreatePublicKey(out PublicKey publicKey);
+
+            Encryptor encryptor = new Encryptor(context, publicKey);
+            Plaintext plain = new Plaintext("1");
+            Ciphertext cipher = new Ciphertext(context);
+
+            encryptor.Encrypt(plain, cipher);
+
+            Utilities.AssertThrows<IndexOutOfRangeException>(() =>
+            {
+                // We only have 2 polynomials
+                ulong data = cipher[2, 0];
+            });
+        }
+
+        [TestMethod]
+        public void BFVIndexRangeFail2Test()
         {
             SEALContext context = GlobalContext.BFVContext;
             KeyGenerator keygen = new KeyGenerator(context);
@@ -221,9 +375,52 @@ namespace SEALNetTest
         }
 
         [TestMethod]
-        public void IndexRangeFail3Test()
+        public void BGVIndexRangeFail2Test()
+        {
+            SEALContext context = GlobalContext.BGVContext;
+            KeyGenerator keygen = new KeyGenerator(context);
+            keygen.CreatePublicKey(out PublicKey publicKey);
+
+            Encryptor encryptor = new Encryptor(context, publicKey);
+            Plaintext plain = new Plaintext("1");
+            Ciphertext cipher = new Ciphertext();
+
+            encryptor.Encrypt(plain, cipher);
+
+            // We only have 2 polynomials
+            ulong data = cipher[1, 0];
+
+            // We should have 8192 coefficients
+            data = cipher[0, 32767]; // This will succeed
+
+            Utilities.AssertThrows<IndexOutOfRangeException>(() =>
+            {
+                data = cipher[0, 32768]; // This will fail
+            });
+        }
+
+        [TestMethod]
+        public void BFVIndexRangeFail3Test()
         {
             SEALContext context = GlobalContext.BFVContext;
+            KeyGenerator keygen = new KeyGenerator(context);
+            keygen.CreatePublicKey(out PublicKey publicKey);
+
+            Encryptor encryptor = new Encryptor(context, publicKey);
+            Plaintext plain = new Plaintext("1");
+            Ciphertext cipher = new Ciphertext();
+
+            encryptor.Encrypt(plain, cipher);
+            ulong data = 0;
+
+            Utilities.AssertThrows<IndexOutOfRangeException>(() => data = cipher[65536]);
+            Utilities.AssertThrows<IndexOutOfRangeException>(() => cipher[65536] = 10ul);
+        }
+
+        [TestMethod]
+        public void BGVIndexRangeFail3Test()
+        {
+            SEALContext context = GlobalContext.BGVContext;
             KeyGenerator keygen = new KeyGenerator(context);
             keygen.CreatePublicKey(out PublicKey publicKey);
 
@@ -295,9 +492,57 @@ namespace SEALNetTest
         }
 
         [TestMethod]
-        public void ExceptionsTest()
+        public void BFVExceptionsTest()
         {
             SEALContext context = GlobalContext.BFVContext;
+            MemoryPoolHandle pool = MemoryManager.GetPool(MMProfOpt.ForceGlobal);
+            MemoryPoolHandle poolu = new MemoryPoolHandle();
+            Ciphertext cipher = new Ciphertext();
+            Ciphertext copy = null;
+
+            Utilities.AssertThrows<ArgumentNullException>(() => copy = new Ciphertext((Ciphertext)null));
+
+            Utilities.AssertThrows<ArgumentNullException>(() => cipher = new Ciphertext(context, null, pool));
+            Utilities.AssertThrows<ArgumentNullException>(() => cipher = new Ciphertext(null, context.FirstParmsId, pool));
+            Utilities.AssertThrows<ArgumentException>(() => cipher = new Ciphertext(context, ParmsId.Zero, pool));
+
+            Utilities.AssertThrows<ArgumentNullException>(() => cipher = new Ciphertext((SEALContext)null, poolu));
+            Utilities.AssertThrows<ArgumentException>(() => cipher = new Ciphertext(context, poolu));
+
+            Utilities.AssertThrows<ArgumentNullException>(() => cipher = new Ciphertext(context, null, 6ul));
+            Utilities.AssertThrows<ArgumentNullException>(() => cipher = new Ciphertext(null, context.FirstParmsId, 6ul, poolu));
+            Utilities.AssertThrows<ArgumentException>(() => cipher = new Ciphertext(context, ParmsId.Zero, 6ul, poolu));
+
+            Utilities.AssertThrows<ArgumentNullException>(() => cipher.Reserve(context, null, 10ul));
+            Utilities.AssertThrows<ArgumentNullException>(() => cipher.Reserve(null, ParmsId.Zero, 10ul));
+            Utilities.AssertThrows<ArgumentException>(() => cipher.Reserve(context, ParmsId.Zero, 10ul));
+
+            Utilities.AssertThrows<ArgumentNullException>(() => cipher.Reserve(null, 10ul));
+
+            Utilities.AssertThrows<ArgumentNullException>(() => cipher.Resize(context, null, 10ul));
+            Utilities.AssertThrows<ArgumentNullException>(() => cipher.Resize(null, ParmsId.Zero, 10ul));
+            Utilities.AssertThrows<ArgumentException>(() => cipher.Resize(context, ParmsId.Zero, 10ul));
+
+            Utilities.AssertThrows<ArgumentNullException>(() => cipher.Resize(null, 10ul));
+
+            Utilities.AssertThrows<ArgumentNullException>(() => cipher.Set(null));
+
+            Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsValidFor(cipher, null));
+
+            Utilities.AssertThrows<ArgumentNullException>(() => cipher.Save(null));
+
+            Utilities.AssertThrows<ArgumentNullException>(() => cipher.UnsafeLoad(context, null));
+            Utilities.AssertThrows<ArgumentNullException>(() => cipher.UnsafeLoad(null, new MemoryStream()));
+            Utilities.AssertThrows<EndOfStreamException>(() => cipher.UnsafeLoad(context, new MemoryStream()));
+
+            Utilities.AssertThrows<ArgumentNullException>(() => cipher.Load(null, new MemoryStream()));
+            Utilities.AssertThrows<ArgumentNullException>(() => cipher.Load(context, null));
+        }
+
+        [TestMethod]
+        public void BGVExceptionsTest()
+        {
+            SEALContext context = GlobalContext.BGVContext;
             MemoryPoolHandle pool = MemoryManager.GetPool(MMProfOpt.ForceGlobal);
             MemoryPoolHandle poolu = new MemoryPoolHandle();
             Ciphertext cipher = new Ciphertext();

@@ -32,11 +32,22 @@ namespace SEALNetTest
             Assert.IsNotNull(encParams3);
             Assert.AreEqual(SchemeType.CKKS, encParams3.Scheme);
 
+            EncryptionParameters encParams4 = new EncryptionParameters(SchemeType.BGV);
+
+            Assert.IsNotNull(encParams4);
+            Assert.AreEqual(SchemeType.BGV, encParams4.Scheme);
+
             EncryptionParameters copy = new EncryptionParameters(encParams);
 
             Assert.AreEqual(SchemeType.BFV, copy.Scheme);
             Assert.AreEqual(encParams, copy);
             Assert.AreEqual(encParams.GetHashCode(), copy.GetHashCode());
+
+            EncryptionParameters copy4 = new EncryptionParameters(encParams4);
+
+            Assert.AreEqual(SchemeType.BGV, copy4.Scheme);
+            Assert.AreEqual(encParams4, copy4);
+            Assert.AreEqual(encParams4.GetHashCode(), copy4.GetHashCode());
 
             EncryptionParameters third = new EncryptionParameters(SchemeType.CKKS);
             third.Set(copy);
@@ -44,6 +55,13 @@ namespace SEALNetTest
             Assert.AreEqual(SchemeType.BFV, third.Scheme);
             Assert.AreEqual(encParams, third);
             Assert.AreEqual(encParams.GetHashCode(), third.GetHashCode());
+
+            EncryptionParameters forth = new EncryptionParameters(SchemeType.CKKS);
+            forth.Set(copy4);
+
+            Assert.AreEqual(SchemeType.BGV, forth.Scheme);
+            Assert.AreEqual(encParams4, forth);
+            Assert.AreEqual(encParams4.GetHashCode(), forth.GetHashCode());
         }
 
         [TestMethod]
@@ -63,9 +81,30 @@ namespace SEALNetTest
         }
 
         [TestMethod]
-        public void CoeffModulusTest()
+        public void BFVCoeffModulusTest()
         {
             EncryptionParameters encParams = new EncryptionParameters(SchemeType.BFV);
+
+            Assert.IsNotNull(encParams);
+
+            List<Modulus> coeffs = new List<Modulus>(encParams.CoeffModulus);
+            Assert.IsNotNull(coeffs);
+            Assert.AreEqual(0, coeffs.Count);
+
+            encParams.CoeffModulus = CoeffModulus.BFVDefault(4096);
+
+            List<Modulus> newCoeffs = new List<Modulus>(encParams.CoeffModulus);
+            Assert.IsNotNull(newCoeffs);
+            Assert.AreEqual(3, newCoeffs.Count);
+            Assert.AreEqual(0xffffee001ul, newCoeffs[0].Value);
+            Assert.AreEqual(0xffffc4001ul, newCoeffs[1].Value);
+            Assert.AreEqual(0x1ffffe0001ul, newCoeffs[2].Value);
+        }
+
+        [TestMethod]
+        public void BGVCoeffModulusTest()
+        {
+            EncryptionParameters encParams = new EncryptionParameters(SchemeType.BGV);
 
             Assert.IsNotNull(encParams);
 
@@ -121,6 +160,7 @@ namespace SEALNetTest
                 Assert.AreEqual(coeffModulus[1], loadedCoeffModulus[1]);
             };
             save_load_test(SchemeType.BFV);
+            save_load_test(SchemeType.BGV);
             save_load_test(SchemeType.CKKS);
         }
 
@@ -136,7 +176,16 @@ namespace SEALNetTest
 
             EncryptionParameters parms2 = new EncryptionParameters(SchemeType.CKKS);
 
+            EncryptionParameters parms3 = new EncryptionParameters(SchemeType.BGV)
+            {
+                PolyModulusDegree = 8,
+                PlainModulus = new Modulus(257),
+                CoeffModulus = CoeffModulus.Create(8, new int[] { 40, 40 })
+            };
+
             Assert.AreNotEqual(parms, parms2);
+            Assert.AreNotEqual(parms, parms3);
+            Assert.AreNotEqual(parms2, parms3);
             Assert.IsFalse(parms.Equals(null));
         }
 
@@ -150,6 +199,14 @@ namespace SEALNetTest
             Utilities.AssertThrows<ArgumentNullException>(() => parms.Save(null));
             Utilities.AssertThrows<ArgumentNullException>(() => parms.Load(null));
             Utilities.AssertThrows<EndOfStreamException>(() => parms.Load(new MemoryStream()));
+
+            EncryptionParameters parms2 = new EncryptionParameters(SchemeType.BGV);
+            Utilities.AssertThrows<ArgumentNullException>(() => parms2 = new EncryptionParameters(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => parms2.Set(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => parms2.CoeffModulus = null);
+            Utilities.AssertThrows<ArgumentNullException>(() => parms2.Save(null));
+            Utilities.AssertThrows<ArgumentNullException>(() => parms2.Load(null));
+            Utilities.AssertThrows<EndOfStreamException>(() => parms2.Load(new MemoryStream()));
         }
     }
 }

@@ -323,7 +323,7 @@ void example_levels()
     cout << " End of chain reached" << endl << endl;
 
     /*
-    It is very important to understand how this example works since in the CKKS
+    It is very important to understand how this example works since in the BGV
     scheme modulus switching has a much more fundamental purpose and the next
     examples will be difficult to understand unless these basic properties are
     totally clear.

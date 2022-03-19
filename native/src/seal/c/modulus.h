@@ -51,4 +51,7 @@ SEAL_C_FUNC CoeffModulus_MaxBitCount(uint64_t poly_modulus_degree, int sec_level
 
 SEAL_C_FUNC CoeffModulus_BFVDefault(uint64_t poly_modulus_degree, int sec_level, uint64_t *length, void **coeffs);
 
-SEAL_C_FUNC CoeffModulus_Create(uint64_t poly_modulus_degree, uint64_t length, int *bit_sizes, void **coeffs);
+SEAL_C_FUNC CoeffModulus_Create1(uint64_t poly_modulus_degree, uint64_t length, int *bit_sizes, void **coeffs);
+
+SEAL_C_FUNC CoeffModulus_Create2(
+    uint64_t poly_modulus_degree, uint64_t length, int *bit_sizes, void *plain_modulus, void **coeffs);

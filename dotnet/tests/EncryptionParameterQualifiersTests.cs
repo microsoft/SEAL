@@ -50,10 +50,21 @@ namespace SEALNetTest
             Assert.AreEqual(SecLevelType.TC128, qualifiers.SecLevel);
             Assert.IsTrue(qualifiers.UsingDescendingModulusChain);
             Assert.IsTrue(qualifiers.UsingNTT);
+
+            SEALContext context3 = GlobalContext.BGVContext;
+
+            Assert.IsTrue(context.FirstContextData.Qualifiers.ParametersSet);
+            Assert.IsTrue(context.FirstContextData.Qualifiers.UsingBatching);
+            Assert.IsTrue(context.FirstContextData.Qualifiers.UsingFastPlainLift);
+            Assert.IsTrue(context.FirstContextData.Qualifiers.UsingFFT);
+            Assert.AreEqual(SecLevelType.TC128, context.FirstContextData.Qualifiers.SecLevel);
+            Assert.IsFalse(context.FirstContextData.Qualifiers.UsingDescendingModulusChain);
+            Assert.IsTrue(context.FirstContextData.Qualifiers.UsingNTT);
+            Assert.IsTrue(context.UsingKeyswitching);
         }
 
         [TestMethod]
-        public void ParameterErrorTest()
+        public void BFVParameterErrorTest()
         {
             SEALContext context = GlobalContext.BFVContext;
             EncryptionParameterQualifiers qualifiers = context.FirstContextData.Qualifiers;
@@ -74,9 +85,39 @@ namespace SEALNetTest
         }
 
         [TestMethod]
-        public void ExceptionsTest()
+        public void BGVParameterErrorTest()
+        {
+            SEALContext context = GlobalContext.BGVContext;
+            EncryptionParameterQualifiers qualifiers = context.FirstContextData.Qualifiers;
+
+            Assert.AreEqual(qualifiers.ParametersErrorName(), "success");
+            Assert.AreEqual(qualifiers.ParametersErrorMessage(), "valid");
+
+            EncryptionParameters encParam = new EncryptionParameters(SchemeType.BGV)
+            {
+                PolyModulusDegree = 127,
+                PlainModulus = new Modulus(1 << 6),
+                CoeffModulus = CoeffModulus.Create(128, new int[] { 30, 30, 30 })
+            };
+            context = new SEALContext(encParam, expandModChain: true, secLevel: SecLevelType.None);
+            qualifiers = context.FirstContextData.Qualifiers;
+            Assert.AreEqual(qualifiers.ParametersErrorName(), "invalid_poly_modulus_degree_non_power_of_two");
+            Assert.AreEqual(qualifiers.ParametersErrorMessage(), "poly_modulus_degree is not a power of two");
+        }
+
+        [TestMethod]
+        public void BFVExceptionsTest()
         {
             EncryptionParameterQualifiers epq1 = GlobalContext.BFVContext.FirstContextData.Qualifiers;
+            EncryptionParameterQualifiers epq2 = null;
+
+            Utilities.AssertThrows<ArgumentNullException>(() => epq2 = new EncryptionParameterQualifiers(null));
+        }
+
+        [TestMethod]
+        public void BGVExceptionsTest()
+        {
+            EncryptionParameterQualifiers epq1 = GlobalContext.BGVContext.FirstContextData.Qualifiers;
             EncryptionParameterQualifiers epq2 = null;
 
             Utilities.AssertThrows<ArgumentNullException>(() => epq2 = new EncryptionParameterQualifiers(null));

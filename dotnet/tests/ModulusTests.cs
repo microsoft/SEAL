@@ -241,7 +241,7 @@ namespace SEALNetTest
         [TestMethod]
         public void CreateTest()
         {
-            List<Modulus> cm = (List<Modulus>)CoeffModulus.Create(2, new int[]{ });
+            List<Modulus> cm = (List<Modulus>)CoeffModulus.Create(2, new int[] { });
             Assert.AreEqual(0, cm.Count);
 
             cm = (List<Modulus>)CoeffModulus.Create(2, new int[] { 3 });
@@ -272,6 +272,50 @@ namespace SEALNetTest
             Assert.AreEqual(1ul, cm[2].Value % 64);
             Assert.AreEqual(1ul, cm[3].Value % 64);
             Assert.AreEqual(1ul, cm[4].Value % 64);
+
+            Modulus sm = new Modulus();
+            sm.Set(4ul);
+
+            cm = (List<Modulus>)CoeffModulus.Create(2, sm, new int[] {});
+            Assert.AreEqual(0, cm.Count);
+
+            cm = (List<Modulus>)CoeffModulus.Create(2, sm, new int[] { 3 });
+            Assert.AreEqual(1, cm.Count);
+            Assert.AreEqual(5ul, cm[0].Value);
+
+            cm = (List<Modulus>)CoeffModulus.Create(2, sm, new int[] { 3, 4 });
+            Assert.AreEqual(2, cm.Count);
+            Assert.AreEqual(5ul, cm[0].Value);
+            Assert.AreEqual(13ul, cm[1].Value);
+
+            cm = (List<Modulus>)CoeffModulus.Create(2, sm, new int[] { 3, 5, 4, 5 });
+            Assert.AreEqual(4, cm.Count);
+            Assert.AreEqual(5ul, cm[0].Value);
+            Assert.AreEqual(17ul, cm[1].Value);
+            Assert.AreEqual(13ul, cm[2].Value);
+            Assert.AreEqual(29ul, cm[3].Value);
+
+            sm.Set(64ul);
+            cm = (List<Modulus>)CoeffModulus.Create(32, sm, new int[] { 30, 40, 30, 30, 40 });
+            Assert.AreEqual(5, cm.Count);
+            Assert.AreEqual(30, (int)(Math.Log(cm[0].Value, 2)) + 1);
+            Assert.AreEqual(40, (int)(Math.Log(cm[1].Value, 2)) + 1);
+            Assert.AreEqual(30, (int)(Math.Log(cm[2].Value, 2)) + 1);
+            Assert.AreEqual(30, (int)(Math.Log(cm[3].Value, 2)) + 1);
+            Assert.AreEqual(40, (int)(Math.Log(cm[4].Value, 2)) + 1);
+            Assert.AreEqual(1ul, cm[0].Value % 64);
+            Assert.AreEqual(1ul, cm[1].Value % 64);
+            Assert.AreEqual(1ul, cm[2].Value % 64);
+            Assert.AreEqual(1ul, cm[3].Value % 64);
+            Assert.AreEqual(1ul, cm[4].Value % 64);
+
+            sm.Set(255ul);
+            cm = (List<Modulus>)CoeffModulus.Create(1024, sm, new int[] { 22, 22 });
+            Assert.AreEqual(2, cm.Count);
+            Assert.AreEqual(22, (int)(Math.Log(cm[0].Value, 2)) + 1);
+            Assert.AreEqual(22, (int)(Math.Log(cm[1].Value, 2)) + 1);
+            Assert.AreEqual(3133441ul, cm[0].Value);
+            Assert.AreEqual(3655681ul, cm[1].Value);
         }
 
         [TestMethod]
@@ -303,6 +347,36 @@ namespace SEALNetTest
             Utilities.AssertThrows<InvalidOperationException>(() => CoeffModulus.Create(2, new int[] { 2 }));
             Utilities.AssertThrows<InvalidOperationException>(() => CoeffModulus.Create(2, new int[] { 3, 3, 3 }));
             Utilities.AssertThrows<InvalidOperationException>(() => CoeffModulus.Create(1024, new int[] { 8 }));
+
+            sm.Set(2ul);
+
+            // Too small poly_modulus_degree
+            Utilities.AssertThrows<ArgumentException>(() => CoeffModulus.Create(1, sm, new int[] { 2 }));
+
+            // Too large poly_modulus_degree
+            Utilities.AssertThrows<ArgumentException>(() => CoeffModulus.Create(262144, sm, new int[] { 30 }));
+
+            // Invalid poly_modulus_degree
+            Utilities.AssertThrows<ArgumentException>(() => CoeffModulus.Create(1023, sm, new int[] { 20 }));
+
+            // Invalid bit-size
+            Utilities.AssertThrows<ArgumentException>(() => CoeffModulus.Create(2048, sm, new int[] { 0 }));
+            Utilities.AssertThrows<ArgumentException>(() => CoeffModulus.Create(2048, sm, new int[] { -30 }));
+            Utilities.AssertThrows<ArgumentException>(() => CoeffModulus.Create(2048, sm, new int[] { 30, -30 }));
+
+            // Too large LCM(2 * poly_modulus_degree, plain_modulus)
+            sm.Set(0x20000000000000ul);
+            Utilities.AssertThrows<InvalidOperationException>(() => CoeffModulus.Create(2048, sm, new int[] { 20 }));
+
+            // Too small primes requested
+            sm.Set(2ul);
+            Utilities.AssertThrows<InvalidOperationException>(() => CoeffModulus.Create(2, sm, new int[] { 2 }));
+            sm.Set(30ul);
+            Utilities.AssertThrows<InvalidOperationException>(() => CoeffModulus.Create(2, sm, new int[] { 6, 6 }));
+            sm.Set(257ul);
+            Utilities.AssertThrows<InvalidOperationException>(() => CoeffModulus.Create(1024, sm, new int[] { 20 }));
+            sm.Set(255ul);
+            Utilities.AssertThrows<InvalidOperationException>(() => CoeffModulus.Create(1024, sm, new int[] { 22, 22, 22 }));
         }
     }
 }

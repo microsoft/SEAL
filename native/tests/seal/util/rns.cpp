@@ -262,7 +262,7 @@ namespace sealtest
             }
             {
                 // Large example
-                auto primes = get_primes(1024, 60, 4);
+                auto primes = get_primes(1024 * 2, 60, 4);
                 vector<uint64_t> in_values{ 0xAAAAAAAAAAA, 0xBBBBBBBBBB, 0xCCCCCCCCCC, 0xDDDDDDDDDD };
                 RNSBase base(primes, pool);
                 rns_test(
@@ -316,7 +316,7 @@ namespace sealtest
             }
             {
                 // Large example
-                auto primes = get_primes(1024, 60, 2);
+                auto primes = get_primes(1024 * 2, 60, 2);
                 vector<uint64_t> in_values{ 0xAAAAAAAAAAA, 0xBBBBBBBBBB, 0xCCCCCCCCCC,
                                             0xDDDDDDDDDD,  0xEEEEEEEEEE, 0xFFFFFFFFFF };
                 RNSBase base(primes, pool);
@@ -446,7 +446,7 @@ namespace sealtest
             int prime_bit_count = 20;
 
             Modulus plain_t = 65537;
-            RNSBase coeff_base(get_primes(poly_modulus_degree, prime_bit_count, coeff_base_count), pool);
+            RNSBase coeff_base(get_primes(poly_modulus_degree * 2, prime_bit_count, coeff_base_count), pool);
 
             ASSERT_NO_THROW(RNSTool rns_tool(poly_modulus_degree, coeff_base, plain_t, pool));
 

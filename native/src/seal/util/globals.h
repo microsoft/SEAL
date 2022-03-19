@@ -66,5 +66,5 @@ For .NET Framework wrapper support (C++/CLI) we need to
             */
             const std::map<std::size_t, std::vector<Modulus>> &GetDefaultCoeffModulus256();
         } // namespace global_variables
-    }     // namespace util
+    } // namespace util
 } // namespace seal

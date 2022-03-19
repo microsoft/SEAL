@@ -44,7 +44,7 @@ namespace seal
             success = 0,
 
             /**
-            scheme must be BFV or CKKS
+            scheme must be BFV or CKKS or BGV
             */
             invalid_scheme = 1,
 

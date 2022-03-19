@@ -481,9 +481,9 @@ namespace seal
         /**
         Returns a custom coefficient modulus suitable for use with the specified
         poly_modulus_degree. The return value will be a vector consisting of
-        Modulus elements representing distinct prime numbers of bit-lengths
-        as given in the bit_sizes parameter. The bit sizes of the prime numbers
-        can be at most 60 bits.
+        Modulus elements representing distinct prime numbers such that:
+        1) have bit-lengths as given in the bit_sizes parameter (at most 60 bits) and
+        2) are congruent to 1 modulo 2*poly_modulus_degree.
 
         @param[in] poly_modulus_degree The value of the poly_modulus_degree
         encryption parameter
@@ -495,6 +495,26 @@ namespace seal
         @throws std::logic_error if not enough suitable primes could be found
         */
         SEAL_NODISCARD static std::vector<Modulus> Create(std::size_t poly_modulus_degree, std::vector<int> bit_sizes);
+
+        /**
+        Returns a custom coefficient modulus suitable for use with the specified
+        poly_modulus_degree. The return value will be a vector consisting of
+        Modulus elements representing distinct prime numbers such that:
+        1) have bit-lengths as given in the bit_sizes parameter (at most 60 bits) and
+        2) are congruent to 1 modulo LCM(2*poly_modulus_degree, plain_modulus).
+
+        @param[in] poly_modulus_degree The value of the poly_modulus_degree encryption parameter
+        @param[in] plain_modulus The value of the plain_modulus encryption parameter
+        @param[in] bit_sizes The bit-lengths of the primes to be generated
+        @throws std::invalid_argument if poly_modulus_degree is not a power-of-two
+        or is too large
+        @throws std::invalid_argument if bit_sizes is too large or if its elements
+        are out of bounds
+        @throws std::logic_error if LCM(2*poly_modulus_degree, plain_modulus) is more than 64-bit
+        @throws std::logic_error if not enough suitable primes could be found
+        */
+        SEAL_NODISCARD static std::vector<Modulus> Create(
+            std::size_t poly_modulus_degree, const Modulus &plain_modulus, std::vector<int> bit_sizes);
     };
 
     /**

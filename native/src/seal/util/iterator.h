@@ -1845,7 +1845,7 @@ namespace seal
             template <typename... Ts>
             IterTuple(const std::tuple<Ts...> &tp)
                 : IterTuple(seal_apply(
-                      [](auto &&... args) -> IterTuple { return { std::forward<decltype(args)>(args)... }; },
+                      [](auto &&...args) -> IterTuple { return { std::forward<decltype(args)>(args)... }; },
                       std::forward<decltype(tp)>(tp)))
             {
                 static_assert(
@@ -1855,7 +1855,7 @@ namespace seal
             template <typename... Ts>
             IterTuple(std::tuple<Ts...> &&tp)
                 : IterTuple(seal_apply(
-                      [](auto &&... args) -> IterTuple && { return { std::forward<decltype(args)>(args)... }; },
+                      [](auto &&...args) -> IterTuple && { return { std::forward<decltype(args)>(args)... }; },
                       std::forward<decltype(tp)>(tp)))
             {
                 static_assert(
@@ -1869,7 +1869,7 @@ namespace seal
             SEAL_NODISCARD inline value_type operator*() const noexcept
             {
                 return seal_apply(
-                    [this](auto &&... args) -> value_type {
+                    [this](auto &&...args) -> value_type {
                         return { *first_, std::forward<decltype(args)>(args)... };
                     },
                     *rest_);
@@ -2281,13 +2281,13 @@ namespace seal
         }
 
         template <typename... Ts>
-        SEAL_NODISCARD inline auto iter(Ts &&... ts) noexcept -> typename iterator_internal::IterType<void, Ts...>::type
+        SEAL_NODISCARD inline auto iter(Ts &&...ts) noexcept -> typename iterator_internal::IterType<void, Ts...>::type
         {
             return { std::forward<Ts>(ts)... };
         }
 
         template <typename... Ts>
-        SEAL_NODISCARD inline auto reverse_iter(Ts &&... ts) noexcept
+        SEAL_NODISCARD inline auto reverse_iter(Ts &&...ts) noexcept
             -> ReverseIter<typename iterator_internal::IterType<void, Ts...>::type>
         {
             return typename iterator_internal::IterType<void, Ts...>::type(std::forward<Ts>(ts)...);

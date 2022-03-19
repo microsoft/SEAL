@@ -3,14 +3,14 @@
 
 cmake_minimum_required(VERSION 3.13)
 
-project(SEALExamples VERSION 3.7.3 LANGUAGES CXX)
+project(SEALExamples VERSION 4.0.0 LANGUAGES CXX)
 
 # If not called from root CMakeLists.txt
 if(NOT DEFINED SEAL_BUILD_EXAMPLES)
     set(SEAL_BUILD_EXAMPLES ON)
 
     # Import Microsoft SEAL
-    find_package(SEAL 3.7.3 EXACT REQUIRED)
+    find_package(SEAL 4.0.0 EXACT REQUIRED)
 
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 endif()
@@ -24,10 +24,11 @@ if(SEAL_BUILD_EXAMPLES)
             ${CMAKE_CURRENT_LIST_DIR}/1_bfv_basics.cpp
             ${CMAKE_CURRENT_LIST_DIR}/2_encoders.cpp
             ${CMAKE_CURRENT_LIST_DIR}/3_levels.cpp
-            ${CMAKE_CURRENT_LIST_DIR}/4_ckks_basics.cpp
-            ${CMAKE_CURRENT_LIST_DIR}/5_rotation.cpp
-            ${CMAKE_CURRENT_LIST_DIR}/6_serialization.cpp
-            ${CMAKE_CURRENT_LIST_DIR}/7_performance.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/4_bgv_basics.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/5_ckks_basics.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/6_rotation.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/7_serialization.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/8_performance.cpp
     )
 
     if(TARGET SEAL::seal)

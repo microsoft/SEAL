@@ -420,6 +420,25 @@ SEAL_C_FUNC Ciphertext_SetScale(void *thisptr, double scale)
     return S_OK;
 }
 
+SEAL_C_FUNC Ciphertext_CorrectionFactor(void *thisptr, uint64_t *correction_factor)
+{
+    Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
+    IfNullRet(cipher, E_POINTER);
+    IfNullRet(correction_factor, E_POINTER);
+
+    *correction_factor = cipher->correction_factor();
+    return S_OK;
+}
+
+SEAL_C_FUNC Ciphertext_SetCorrectionFactor(void *thisptr, uint64_t correction_factor)
+{
+    Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);
+    IfNullRet(cipher, E_POINTER);
+
+    cipher->correction_factor() = correction_factor;
+    return S_OK;
+}
+
 SEAL_C_FUNC Ciphertext_Release(void *thisptr)
 {
     Ciphertext *cipher = FromVoid<Ciphertext>(thisptr);

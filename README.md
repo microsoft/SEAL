@@ -4,16 +4,19 @@ Microsoft SEAL is an easy-to-use open-source ([MIT licensed](LICENSE)) homomorph
 Microsoft SEAL is written in modern standard C++ and is easy to compile and run in many different environments.
 For more information about the Microsoft SEAL project, see [sealcrypto.org](https://www.microsoft.com/en-us/research/project/microsoft-seal).
 
-This document pertains to Microsoft SEAL version 3.7.
+This document pertains to Microsoft SEAL version 4.0.
 Users of previous versions of the library should look at the [list of changes](CHANGES.md).
 
 ## News
+
+The [BGV scheme](https://eprint.iacr.org/2011/277) is now available in Microsoft SEAL.
+Implementation details are described in [this paper](https://eprint.iacr.org/2020/1481.pdf).
+We truly appreciate [Alibaba Gemini Lab](https://alibaba-gemini-lab.github.io/) for making massive efforts to develop the BGV scheme and integrate it in Microsoft SEAL. And we would like to thank Privacy Technologies Research, Intel Labs, for continous testing and reporting issues.
 
 Starting from version 3.7.2, Microsoft SEAL will push new changes to the `main`, `master`, and `contrib` branches without creating a new version.
 We adopt this approach to merge community contribution and resolve issues in a timely manner.
 These branches will stay ahead of the latest version branch/tag.
 New versions will be created when there are important bug fixes or new features.
-
 
 The [EVA compiler for CKKS](https://arxiv.org/abs/1912.11951) is available at [GitHub.com/Microsoft/EVA](https://GitHub.com/Microsoft/EVA). See [CKKS Programming with EVA](#ckks-programming-with-eva) below for more information.
 
@@ -100,10 +103,10 @@ Microsoft SEAL itself has a steep learning curve and requires the user to unders
 Even if a user is able to program and run a specific computation using Microsoft SEAL, the difference between efficient and inefficient implementations can be several orders of magnitude, and it can be hard for new users to know how to improve the performance of their computation.
 
 Microsoft SEAL comes with two different homomorphic encryption schemes with very different properties.
-The BFV scheme allows modular arithmetic to be performed on encrypted integers.
+The BFV and BGV schemes allow modular arithmetic to be performed on encrypted integers.
 The CKKS scheme allows additions and multiplications on encrypted real or complex numbers, but yields only approximate results.
 In applications such as summing up encrypted real numbers, evaluating machine learning models on encrypted data, or computing distances of encrypted locations CKKS is going to be by far the best choice.
-For applications where exact values are necessary, the BFV scheme is the only choice.
+For applications where exact values are necessary, the BFV and BGV schemes are more suitable.
 
 ## Getting Started
 
@@ -131,8 +134,8 @@ The optional dependencies and their tested versions (other versions may work as 
 | [Microsoft GSL](https://github.com/microsoft/GSL)      | 3.1.0          | API extensions                                   |
 | [ZLIB](https://github.com/madler/zlib)                 | 1.2.11         | Compressed serialization                         |
 | [Zstandard](https://github.com/facebook/zstd)          | 1.4.5          | Compressed serialization (much faster than ZLIB) |
-| [GoogleTest](https://github.com/google/googletest)     | 1.10.0         | For running tests                                |
-| [GoogleBenchmark](https://github.com/google/benchmark) | 1.5.2          | For running benchmarks                           |
+| [GoogleTest](https://github.com/google/googletest)     | 1.11.0         | For running tests                                |
+| [GoogleBenchmark](https://github.com/google/benchmark) | 1.6.0          | For running benchmarks                           |
 
 #### Intel HEXL
 
@@ -188,10 +191,11 @@ The examples are available (and identical) in C++ and C#, and are divided into s
 | `1_bfv_basics.cpp`    | `1_BFV_Basics.cs`    | Encrypted modular arithmetic using the BFV scheme                            |
 | `2_encoders.cpp`      | `2_Encoders.cs`      | Encoding more complex data into Microsoft SEAL plaintext objects             |
 | `3_levels.cpp`        | `3_Levels.cs`        | Introduces the concept of levels; prerequisite for using the CKKS scheme     |
-| `4_ckks_basics.cpp`   | `4_CKKS_Basics.cs`   | Encrypted real number arithmetic using the CKKS scheme                       |
-| `5_rotation.cpp`      | `5_Rotation.cs`      | Performing cyclic rotations on encrypted vectors in the BFV and CKKS schemes |
-| `6_serialization.cpp` | `6_Serialization.cs` | Serializing objects in Microsoft SEAL                                        |
-| `7_performance.cpp`   | `7_Performance.cs`   | Performance tests                                                            |
+| `4_bgv_basics.cpp`    | `4_BGV_Basics.cs`    | Encrypted modular arithmetic using the BGV scheme                            |
+| `5_ckks_basics.cpp`   | `5_CKKS_Basics.cs`   | Encrypted real number arithmetic using the CKKS scheme                       |
+| `6_rotation.cpp`      | `6_Rotation.cs`      | Performing cyclic rotations on encrypted vectors in the BFV and CKKS schemes |
+| `7_serialization.cpp` | `7_Serialization.cs` | Serializing objects in Microsoft SEAL                                        |
+| `8_performance.cpp`   | `8_Performance.cs`   | Performance tests                                                            |
 
 It is recommended to read the comments and the code snippets along with command line printout from running an example.
 For easier navigation, command line printout provides the line number in the associated source file where the associated code snippets start.
@@ -212,7 +216,7 @@ EVA allows programmers to express desired encrypted computations in Python. It o
 EVA is available at [GitHub.com/Microsoft/EVA](https://GitHub.com/Microsoft/EVA).
 Try it out, and let us know what you think!
 
-**Note:** EVA only supports the CKKS scheme. There are no immediate plans to support the BFV scheme.
+**Note:** EVA only supports the CKKS scheme. There are no immediate plans to support the BFV or BGV scheme.
 
 ## Building Microsoft SEAL Manually
 
@@ -376,7 +380,7 @@ emcc \
  -Wall \
  -flto \
  -O3 \
- build/lib/libseal-3.7.a \
+ build/lib/libseal-4.0.a \
  --bind \
  -o "build/bin/seal_wasm.js" \
  -s WASM=1 \
@@ -430,7 +434,7 @@ The following options can be used with CMake to further configure the build. Mos
 | SEAL_BUILD_STATIC_SEAL_C             | ON / **OFF**              | Set to `ON` to build SEAL_C as a static library instead of a shared library.                                                                                                                                                                                                                             |
 | SEAL_DEFAULT_PRNG                    | **Blake2xb**</br>Shake256 | Microsoft SEAL supports both Blake2xb and Shake256 XOFs for generating random bytes. Blake2xb is much faster, but it is not standardized, whereas Shake256 is a FIPS standard.                                                                                                                           |
 | SEAL_USE_GAUSSIAN_NOISE              | ON / **OFF**              | Set to `ON` to use a non-constant time rounded continuous Gaussian for the error distribution; otherwise a centered binomial distribution &ndash; with slightly larger standard deviation &ndash; is used.                                                                                               |
-| SEAL_AVOID_BRANCHING                 | ON / **OFF**              | Set to `ON` to eliminate branching in critical conditional move operations when compiler has maliciously inserted flags; otherwise assume `cmov` is used.                                                                                               |
+| SEAL_AVOID_BRANCHING                 | ON / **OFF**              | Set to `ON` to eliminate branching in critical functions when compiler has maliciously inserted flags; otherwise assume `cmov` is used.                                                                                               |
 | SEAL_SECURE_COMPILE_OPTIONS          | ON / **OFF**              | Set to `ON` to compile/link with Control-Flow Guard (`/guard:cf`) and Spectre mitigations (`/Qspectre`). This has an effect only when compiling with MSVC.                                                                                                                                               |
 | SEAL_USE_ALIGNED_ALLOC                    | **ON** / OFF              | Set to `ON` to use 64-byte aligned memory allocations. This can improve performance of AVX512 primitives when Intel HEXL is enabled. This depends on C++17 and is disabled on Android.                                                                                               |
 
@@ -440,7 +444,7 @@ It is very easy to link your own applications and libraries with Microsoft SEAL 
 Simply add the following to your `CMakeLists.txt`:
 
 ```PowerShell
-find_package(SEAL 3.7 REQUIRED)
+find_package(SEAL 4.0 REQUIRED)
 target_link_libraries(<your target> SEAL::seal)
 ```
 
@@ -523,6 +527,19 @@ For contributing to Microsoft SEAL, please see [CONTRIBUTING.md](CONTRIBUTING.md
 ## Citing Microsoft SEAL
 
 To cite Microsoft SEAL in academic papers, please use the following BibTeX entries.
+
+### Version 4.0
+
+```tex
+    @misc{sealcrypto,
+        title = {{M}icrosoft {SEAL} (release 4.0)},
+        howpublished = {\url{https://github.com/Microsoft/SEAL}},
+        month = mar,
+        year = 2022,
+        note = {Microsoft Research, Redmond, WA.},
+        key = {SEAL}
+    }
+```
 
 ### Version 3.7
 

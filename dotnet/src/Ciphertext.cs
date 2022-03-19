@@ -602,8 +602,8 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                NativeMethods.Ciphertext_IsNTTForm(NativePtr, out bool isNTTForm);
-                return isNTTForm;
+                NativeMethods.Ciphertext_IsNTTForm(NativePtr, out bool result);
+                return result;
             }
 
             private set
@@ -619,9 +619,9 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                ParmsId parmsId = new ParmsId();
-                NativeMethods.Ciphertext_ParmsId(NativePtr, parmsId.Block);
-                return parmsId;
+                ParmsId result = new ParmsId();
+                NativeMethods.Ciphertext_ParmsId(NativePtr, result.Block);
+                return result;
             }
             private set
             {
@@ -638,12 +638,30 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                NativeMethods.Ciphertext_Scale(NativePtr, out double scale);
-                return scale;
+                NativeMethods.Ciphertext_Scale(NativePtr, out double result);
+                return result;
             }
             set
             {
                 NativeMethods.Ciphertext_SetScale(NativePtr, value);
+            }
+        }
+
+        /// <summary>
+        /// Returns a reference to the correction factor. This is only needed when using the
+        /// BGV encryption scheme. The user should have little or no reason to ever
+        /// change the scale by hand.
+        /// </summary>
+        public ulong CorrectionFactor
+        {
+            get
+            {
+                NativeMethods.Ciphertext_CorrectionFactor(NativePtr, out ulong result);
+                return result;
+            }
+            set
+            {
+                NativeMethods.Ciphertext_SetCorrectionFactor(NativePtr, value);
             }
         }
 
@@ -655,8 +673,8 @@ namespace Microsoft.Research.SEAL
             get
             {
                 NativeMethods.Ciphertext_Pool(NativePtr, out IntPtr pool);
-                MemoryPoolHandle handle = new MemoryPoolHandle(pool);
-                return handle;
+                MemoryPoolHandle result = new MemoryPoolHandle(pool);
+                return result;
             }
         }
 

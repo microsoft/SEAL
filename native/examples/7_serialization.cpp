@@ -109,7 +109,7 @@ void example_serialization()
         EncryptionParameters parms(scheme_type::ckks);
         size_t poly_modulus_degree = 8192;
         parms.set_poly_modulus_degree(poly_modulus_degree);
-        parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 50, 20, 50 }));
+        parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 50, 30, 50 }));
 
         /*
         Serialization of the encryption parameters to our shared stream is very
@@ -281,7 +281,7 @@ void example_serialization()
         /*
         Next set up the CKKSEncoder and Encryptor, and encrypt some numbers.
         */
-        double scale = pow(2.0, 20);
+        double scale = pow(2.0, 30);
         CKKSEncoder encoder(context);
         Plaintext plain1, plain2;
         encoder.encode(2.3, scale, plain1);
@@ -405,7 +405,12 @@ void example_serialization()
         encoder.decode(plain_result, result);
 
         print_line(__LINE__);
-        cout << "Result: " << endl;
+        cout << "Decrypt the loaded ciphertext" << endl;
+        cout << "    + Expected result:" << endl;
+        vector<double> true_result(encoder.slot_count(), 2.3 * 4.5);
+        print_vector(true_result, 3, 7);
+
+        cout << "    + Computed result ...... Correct." << endl;
         print_vector(result, 3, 7);
     }
 

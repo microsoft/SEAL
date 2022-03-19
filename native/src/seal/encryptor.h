@@ -37,7 +37,7 @@ namespace seal
     performance bottlenecks.
 
     @par NTT form
-    When using the BFV scheme (scheme_type::bfv), all plaintext and ciphertexts should
+    When using the BFV/BGV scheme (scheme_type::bfv/bgv), all plaintext and ciphertexts should
     remain by default in the usual coefficient representation, i.e. not in NTT form.
     When using the CKKS scheme (scheme_type::ckks), all plaintexts and ciphertexts
     should remain by default in NTT form. We call these scheme-specific NTT states
@@ -116,7 +116,7 @@ namespace seal
         destination.
 
         The encryption parameters for the resulting ciphertext correspond to:
-        1) in BFV, the highest (data) level in the modulus switching chain,
+        1) in BFV/BGV, the highest (data) level in the modulus switching chain,
         2) in CKKS, the encryption parameters of the plaintext.
         Dynamic memory allocations in the process are allocated from the memory
         pool pointed to by the given MemoryPoolHandle.
@@ -142,7 +142,7 @@ namespace seal
         a serializable object.
 
         The encryption parameters for the resulting ciphertext correspond to:
-        1) in BFV, the highest (data) level in the modulus switching chain,
+        1) in BFV/BGV, the highest (data) level in the modulus switching chain,
         2) in CKKS, the encryption parameters of the plaintext.
         Dynamic memory allocations in the process are allocated from the memory
         pool pointed to by the given MemoryPoolHandle.
@@ -253,7 +253,7 @@ namespace seal
         destination.
 
         The encryption parameters for the resulting ciphertext correspond to:
-        1) in BFV, the highest (data) level in the modulus switching chain,
+        1) in BFV/BGV, the highest (data) level in the modulus switching chain,
         2) in CKKS, the encryption parameters of the plaintext.
         Dynamic memory allocations in the process are allocated from the memory
         pool pointed to by the given MemoryPoolHandle.
@@ -284,7 +284,7 @@ namespace seal
         impact.
 
         The encryption parameters for the resulting ciphertext correspond to:
-        1) in BFV, the highest (data) level in the modulus switching chain,
+        1) in BFV/BGV, the highest (data) level in the modulus switching chain,
         2) in CKKS, the encryption parameters of the plaintext.
         Dynamic memory allocations in the process are allocated from the memory
         pool pointed to by the given MemoryPoolHandle.

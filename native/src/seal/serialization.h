@@ -150,7 +150,7 @@ namespace seal
             }
 
             // Different major versions not supported
-            if (header.version_major != SEAL_VERSION_MAJOR)
+            if (header.version_major != SEAL_VERSION_MAJOR && header.version_major != 3)
             {
                 return false;
             }

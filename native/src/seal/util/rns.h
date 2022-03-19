@@ -164,6 +164,9 @@ namespace seal
 
             void fast_convert_array(ConstRNSIter in, RNSIter out, MemoryPoolHandle pool) const;
 
+            // The exact base convertion function, only supports obase size of 1.
+            void exact_convert_array(ConstRNSIter in, CoeffIter out, MemoryPoolHandle) const;
+
         private:
             BaseConverter(const BaseConverter &copy) = delete;
 
@@ -229,6 +232,16 @@ namespace seal
             */
             void decrypt_scale_and_round(ConstRNSIter phase, CoeffIter destination, MemoryPoolHandle pool) const;
 
+            /**
+            Remove the last q for bgv ciphertext
+            */
+            void mod_t_and_divide_q_last_inplace(RNSIter input, MemoryPoolHandle pool) const;
+
+            /**
+            Compute mod t
+            */
+            void decrypt_modt(RNSIter phase, CoeffIter destination, MemoryPoolHandle pool) const;
+
             SEAL_NODISCARD inline auto inv_q_last_mod_q() const noexcept
             {
                 return inv_q_last_mod_q_.get();
@@ -284,6 +297,16 @@ namespace seal
                 return gamma_;
             }
 
+            SEAL_NODISCARD inline auto &inv_q_last_mod_t() const noexcept
+            {
+                return inv_q_last_mod_t_;
+            }
+
+            SEAL_NODISCARD inline const uint64_t &q_last_mod_t() const noexcept
+            {
+                return q_last_mod_t_;
+            }
+
         private:
             RNSTool(const RNSTool &copy) = delete;
 
@@ -327,6 +350,9 @@ namespace seal
             // Base converter: q --> {t, gamma}
             Pointer<BaseConverter> base_q_to_t_gamma_conv_;
 
+            // Base converter: q --> t
+            Pointer<BaseConverter> base_q_to_t_conv_;
+
             // prod(q)^(-1) mod Bsk
             Pointer<MultiplyUIntModOperand> inv_prod_q_mod_Bsk_;
 
@@ -367,6 +393,10 @@ namespace seal
             Modulus t_;
 
             Modulus gamma_;
+
+            std::uint64_t inv_q_last_mod_t_ = 1;
+
+            std::uint64_t q_last_mod_t_ = 1;
         };
     } // namespace util
 } // namespace seal

@@ -21,7 +21,8 @@ namespace seal
             }
 #endif
             vector<uint64_t> classes{};
-            for (uint64_t i = 0; i < modulus; i++)
+            classes.push_back(0);
+            for (uint64_t i = 1; i < modulus; i++)
             {
                 if (gcd(i, modulus) > 1)
                 {
@@ -274,16 +275,12 @@ namespace seal
             return true;
         }
 
-        vector<Modulus> get_primes(size_t ntt_size, int bit_size, size_t count)
+        vector<Modulus> get_primes(uint64_t factor, int bit_size, size_t count)
         {
 #ifdef SEAL_DEBUG
             if (!count)
             {
                 throw invalid_argument("count must be positive");
-            }
-            if (get_power_of_two(ntt_size) < 0)
-            {
-                throw invalid_argument("ntt_size must be a power of two");
             }
             if (bit_size > SEAL_MOD_BIT_COUNT_MAX || bit_size < SEAL_MOD_BIT_COUNT_MIN)
             {
@@ -291,18 +288,9 @@ namespace seal
             }
 #endif
             vector<Modulus> destination;
-            uint64_t factor = mul_safe(uint64_t(2), safe_cast<uint64_t>(ntt_size));
 
-            // Start with 2^bit_size - 2 * ntt_size + 1
-            uint64_t value = uint64_t(0x1) << bit_size;
-            try
-            {
-                value = sub_safe(value, factor) + 1;
-            }
-            catch (const logic_error &)
-            {
-                throw logic_error("failed to find enough qualifying primes");
-            }
+            // Start with (2^bit_size - 1) / factor * factor + 1
+            uint64_t value = ((uint64_t(0x1) << bit_size) - 1) / factor * factor + 1;
 
             uint64_t lower_bound = uint64_t(0x1) << (bit_size - 1);
             while (count > 0 && value > lower_bound)

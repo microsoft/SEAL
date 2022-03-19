@@ -135,11 +135,13 @@ namespace seal
 
         SEAL_NODISCARD bool is_prime(const Modulus &modulus, std::size_t num_rounds = 40);
 
-        SEAL_NODISCARD std::vector<Modulus> get_primes(std::size_t ntt_size, int bit_size, std::size_t count);
+        // Generate a vector of primes with "bit_size" bits that are congruent to 1 modulo "factor"
+        SEAL_NODISCARD std::vector<Modulus> get_primes(std::uint64_t factor, int bit_size, std::size_t count);
 
-        SEAL_NODISCARD inline Modulus get_prime(std::size_t ntt_size, int bit_size)
+        // Generate one prime with "bit_size" bits that are congruent to 1 modulo "factor"
+        SEAL_NODISCARD inline Modulus get_prime(std::uint64_t factor, int bit_size)
         {
-            return get_primes(ntt_size, bit_size, 1)[0];
+            return get_primes(factor, bit_size, 1)[0];
         }
 
         bool try_invert_uint_mod(std::uint64_t value, std::uint64_t modulus, std::uint64_t &result);

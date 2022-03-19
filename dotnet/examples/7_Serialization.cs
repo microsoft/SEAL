@@ -108,7 +108,7 @@ namespace SEALNetExamples
                 using EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS);
                 parms.PolyModulusDegree = polyModulusDegree;
                 parms.CoeffModulus = CoeffModulus.Create(
-                    polyModulusDegree, new int[]{ 50, 20, 50 });
+                    polyModulusDegree, new int[]{ 50, 30, 50 });
 
                 /*
                 Serialization of the encryption parameters to our shared stream is very
@@ -275,7 +275,7 @@ namespace SEALNetExamples
                 /*
                 Next set up the CKKSEncoder and Encryptor, and encrypt some numbers.
                 */
-                double scale = Math.Pow(2.0, 20);
+                double scale = Math.Pow(2.0, 30);
                 CKKSEncoder encoder = new CKKSEncoder(context);
                 using Plaintext plain1 = new Plaintext(),
                                 plain2 = new Plaintext();
@@ -408,7 +408,15 @@ namespace SEALNetExamples
                 encoder.Decode(plainResult, result);
 
                 Utilities.PrintLine();
-                Console.WriteLine("Result: ");
+                Console.WriteLine("Decrypt and decode PI * x ^ 3 + 0.4x + 1.");
+                Console.WriteLine("    + Expected result:");
+                List<double> trueResult = new List<double>((int)encoder.SlotCount);
+                for (ulong i = 0; i < encoder.SlotCount; i++)
+                {
+                    trueResult.Add(2.3 * 4.5);
+                }
+                Utilities.PrintVector(trueResult, 3, 7);
+                Console.WriteLine("    + Computed result ...... Correct.");
                 Utilities.PrintVector(result, 3, 7);
             }
 

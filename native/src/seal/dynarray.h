@@ -29,7 +29,7 @@ namespace seal
             template <typename SizeT>
             SEAL_NODISCARD SizeT deflate_size_bound(SizeT in_size);
         } // namespace ztools
-    }     // namespace util
+    } // namespace util
 
     /**
     A dynamic array for storing objects allocated from a Microsoft SEAL memory
@@ -553,7 +553,7 @@ namespace seal
         {
             std::size_t members_size = Serialization::ComprSizeEstimate(
                 util::add_safe(
-                    sizeof(std::uint64_t),             // size_
+                    sizeof(std::uint64_t), // size_
                     util::mul_safe(size_, sizeof(T))), // data_
                 compr_mode);
 

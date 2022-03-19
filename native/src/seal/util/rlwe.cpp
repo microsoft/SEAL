@@ -202,18 +202,22 @@ namespace seal
             auto &context_data = *context.get_context_data(parms_id);
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
+            auto &plain_modulus = parms.plain_modulus();
             size_t coeff_modulus_size = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
             auto ntt_tables = context_data.small_ntt_tables();
             size_t encrypted_size = public_key.data().size();
+            scheme_type type = parms.scheme();
 
             // Make destination have right size and parms_id
             // Ciphertext (c_0,c_1, ...)
             destination.resize(context, parms_id, encrypted_size);
             destination.is_ntt_form() = is_ntt_form;
             destination.scale() = 1.0;
+            destination.correction_factor() = 1;
 
-            // c[j] = public_key[j] * u + e[j] where e[j] <-- chi, u <-- R_3
+            // c[j] = public_key[j] * u + e[j] in BFV/CKKS = public_key[j] * u + p * e[j] in BGV
+            // where e[j] <-- chi, u <-- R_3
 
             // Create a PRNG; u and the noise/error share the same PRNG
             auto prng = parms.random_generator()->create();
@@ -241,21 +245,31 @@ namespace seal
             }
 
             // Generate e_j <-- chi
-            // c[j] = public_key[j] * u + e[j]
+            // c[j] = public_key[j] * u + e[j] in BFV/CKKS, = public_key[j] * u + p * e[j] in BGV,
             for (size_t j = 0; j < encrypted_size; j++)
             {
                 SEAL_NOISE_SAMPLER(prng, parms, u.get());
-                for (size_t i = 0; i < coeff_modulus_size; i++)
+                RNSIter gaussian_iter(u.get(), coeff_count);
+
+                // In BGV, p * e is used
+                if (type == scheme_type::bgv)
                 {
-                    // Addition with e_0, e_1 is in NTT form
                     if (is_ntt_form)
                     {
-                        ntt_negacyclic_harvey(u.get() + i * coeff_count, ntt_tables[i]);
+                        ntt_negacyclic_harvey_lazy(gaussian_iter, coeff_modulus_size, ntt_tables);
                     }
-                    add_poly_coeffmod(
-                        u.get() + i * coeff_count, destination.data(j) + i * coeff_count, coeff_count, coeff_modulus[i],
-                        destination.data(j) + i * coeff_count);
+                    multiply_poly_scalar_coeffmod(
+                        gaussian_iter, coeff_modulus_size, plain_modulus.value(), coeff_modulus, gaussian_iter);
                 }
+                else
+                {
+                    if (is_ntt_form)
+                    {
+                        ntt_negacyclic_harvey(gaussian_iter, coeff_modulus_size, ntt_tables);
+                    }
+                }
+                RNSIter dst_iter(destination.data(j), coeff_count);
+                add_poly_coeffmod(gaussian_iter, dst_iter, coeff_modulus_size, coeff_modulus, dst_iter);
             }
         }
 
@@ -275,10 +289,12 @@ namespace seal
             auto &context_data = *context.get_context_data(parms_id);
             auto &parms = context_data.parms();
             auto &coeff_modulus = parms.coeff_modulus();
+            auto &plain_modulus = parms.plain_modulus();
             size_t coeff_modulus_size = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
             auto ntt_tables = context_data.small_ntt_tables();
             size_t encrypted_size = 2;
+            scheme_type type = parms.scheme();
 
             // If a polynomial is too small to store UniformRandomGeneratorInfo,
             // it is best to just disable save_seed. Note that the size needed is
@@ -297,6 +313,7 @@ namespace seal
             destination.resize(context, parms_id, encrypted_size);
             destination.is_ntt_form() = is_ntt_form;
             destination.scale() = 1.0;
+            destination.correction_factor() = 1;
 
             // Create an instance of a random number generator. We use this for sampling
             // a seed for a second PRNG used for sampling u (the seed can be public
@@ -310,7 +327,8 @@ namespace seal
             // Set up a new default PRNG for expanding u from the seed sampled above
             auto ciphertext_prng = UniformRandomGeneratorFactory::DefaultFactory()->create(public_prng_seed);
 
-            // Generate ciphertext: (c[0], c[1]) = ([-(as+e)]_q, a)
+            // Generate ciphertext: (c[0], c[1]) = ([-(as+ e)]_q, a) in BFV/CKKS
+            // Generate ciphertext: (c[0], c[1]) = ([-(as+pe)]_q, a) in BGV
             uint64_t *c0 = destination.data();
             uint64_t *c1 = destination.data(1);
 
@@ -335,7 +353,8 @@ namespace seal
             auto noise(allocate_poly(coeff_count, coeff_modulus_size, pool));
             SEAL_NOISE_SAMPLER(bootstrap_prng, parms, noise.get());
 
-            // Calculate -(a*s + e) (mod q) and store in c[0]
+            // Calculate -(as+ e) (mod q) and store in c[0] in BFV/CKKS
+            // Calculate -(as+pe) (mod q) and store in c[0] in BGV
             for (size_t i = 0; i < coeff_modulus_size; i++)
             {
                 dyadic_product_coeffmod(
@@ -350,9 +369,20 @@ namespace seal
                 {
                     inverse_ntt_negacyclic_harvey(c0 + i * coeff_count, ntt_tables[i]);
                 }
+
+                if (type == scheme_type::bgv)
+                {
+                    // noise = pe instead of e in BGV
+                    multiply_poly_scalar_coeffmod(
+                        noise.get() + i * coeff_count, coeff_count, plain_modulus.value(), coeff_modulus[i],
+                        noise.get() + i * coeff_count);
+                }
+
+                // c0 = as + noise
                 add_poly_coeffmod(
                     noise.get() + i * coeff_count, c0 + i * coeff_count, coeff_count, coeff_modulus[i],
                     c0 + i * coeff_count);
+                // (as + noise, a) -> (-(as + noise), a),
                 negate_poly_coeffmod(c0 + i * coeff_count, coeff_count, coeff_modulus[i], c0 + i * coeff_count);
             }
 

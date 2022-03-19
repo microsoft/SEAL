@@ -1,7 +1,6 @@
 # This defines a pipeline to build on Windows, Linux, and macOS in Debug mode.
 
 pr:
-  batch: true
   branches:
     include:
     - contrib

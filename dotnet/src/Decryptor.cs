@@ -103,7 +103,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="encrypted">The ciphertext</param>
         /// <exception cref="ArgumentNullException">if encrypted is null</exception>
-        /// <exception cref="ArgumentException">if the scheme is not BFV</exception>
+        /// <exception cref="ArgumentException">if the scheme is not BFV or BGV</exception>
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is in NTT form</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>
