@@ -394,7 +394,7 @@ EMSCRIPTEN_BINDINGS(SEAL)
                   }))
         .function("coeffModulus", optional_override([](EncryptionParameters &self) { return self.coeff_modulus(); }))
         .function("plainModulus", optional_override([](EncryptionParameters &self) { return self.plain_modulus(); }))
-        .function("paramsId", optional_override([](EncryptionParameters &self) { return self.parms_id(); }))
+        .function("parmsId", optional_override([](EncryptionParameters &self) { return self.parms_id(); }))
         .function("saveToString", optional_override([](EncryptionParameters &self, compr_mode_type compr_mode) {
                       std::ostringstream buffer;
                       self.save(buffer, compr_mode);
