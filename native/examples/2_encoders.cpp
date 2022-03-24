@@ -32,7 +32,7 @@ void example_batch_encoder()
     print_example_banner("Example: Encoders / Batch Encoder");
 
     /*
-    [BatchEncoder] (For BFV scheme only)
+    [BatchEncoder] (For BFV or BGV scheme)
 
     Let N denote the poly_modulus_degree and T denote the plain_modulus. Batching
     allows the BFV plaintext polynomials to be viewed as 2-by-(N/2) matrices, with
@@ -42,6 +42,11 @@ void example_batch_encoder()
     but the simplest computations, batching should be the preferred method to use
     with BFV, and when used properly will result in implementations outperforming
     anything done without batching.
+
+    In a later example, we will demonstrate how to use the BGV scheme. Batching
+    works similarly for the BGV scheme to this example for the BFV scheme. For example,
+    simply changing `scheme_type::bfv` into `scheme_type::bgv` can make this example
+    work for the BGV scheme.
     */
     EncryptionParameters parms(scheme_type::bfv);
     size_t poly_modulus_degree = 8192;
