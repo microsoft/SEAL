@@ -48,7 +48,7 @@ namespace SEALNetExamples
 
             In a later example, we will demonstrate how to use the BGV scheme. Batching
             works similarly for the BGV scheme to this example for the BFV scheme. For
-            example, simply changing `scheme_type::bfv` into `scheme_type::bgv` can make
+            example, simply changing `SchemeType.BFV` into `SchemeType.BGV` can make
             this example work for the BGV scheme.
             */
             using EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
