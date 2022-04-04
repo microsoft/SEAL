@@ -22,7 +22,7 @@ namespace SEALNetExamples
             polynomial can be considered as plaintext inputs, as we will see below. The
             computation is done modulo the plain_modulus 1032193.
 
-            Computer over encrypted data in the BGV scheme is similar to that in BFV.
+            Computing over encrypted data in the BGV scheme is similar to that in BFV.
             The purpose of this example is mainly to explain the differences between BFV
             and BGV in terms of ciphertext coefficient modulus selection and noise control.
 

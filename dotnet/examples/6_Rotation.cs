@@ -10,9 +10,12 @@ namespace SEALNetExamples
     partial class Examples
     {
         /*
-        Both the BFV scheme (with BatchEncoder) as well as the CKKS scheme support native
-        vectorized computations on encrypted numbers. In addition to computing slot-wise,
+        Both the BFV and BGV schemes (with BatchEncoder) as well as the CKKS scheme support
+        native vectorized computations on encrypted numbers. In addition to computing slot-wise,
         it is possible to rotate the encrypted vectors cyclically.
+
+        Simply changing `SchemeType.BFV` to `SchemeType.BGV` will make this example work for
+        the BGV scheme.
         */
         private static void ExampleRotationBFV()
         {

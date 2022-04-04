@@ -7,9 +7,12 @@ using namespace std;
 using namespace seal;
 
 /*
-Both the BFV scheme (with BatchEncoder) as well as the CKKS scheme support native
-vectorized computations on encrypted numbers. In addition to computing slot-wise,
+Both the BFV and BGV schemes (with BatchEncoder) as well as the CKKS scheme support
+native vectorized computations on encrypted numbers. In addition to computing slot-wise,
 it is possible to rotate the encrypted vectors cyclically.
+
+Simply changing `scheme_type::bfv` to `scheme_type::bgv` will make this example work for
+the BGV scheme.
 */
 void example_rotation_bfv()
 {

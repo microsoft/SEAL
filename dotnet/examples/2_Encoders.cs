@@ -35,7 +35,7 @@ namespace SEALNetExamples
             Utilities.PrintExampleBanner("Example: Encoders / Batch Encoder");
 
             /*
-            [BatchEncoder] (For BFV scheme only)
+            [BatchEncoder] (For BFV or BGV scheme)
 
             Let N denote the PolyModulusDegree and T denote the PlainModulus. Batching
             allows the BFV plaintext polynomials to be viewed as 2-by-(N/2) matrices, with
@@ -45,6 +45,11 @@ namespace SEALNetExamples
             but the simplest computations, batching should be the preferred method to use
             with BFV, and when used properly will result in implementations outperforming
             anything done without batching.
+
+            In a later example, we will demonstrate how to use the BGV scheme. Batching
+            works similarly for the BGV scheme to this example for the BFV scheme. For
+            example, simply changing `SchemeType.BFV` into `SchemeType.BGV` can make
+            this example work for the BGV scheme.
             */
             using EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV);
             ulong polyModulusDegree = 8192;
