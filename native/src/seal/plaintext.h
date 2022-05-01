@@ -265,7 +265,7 @@ namespace seal
 
         /**
         Sets the value of the current plaintext to the polynomial represented by
-        the a given hexadecimal string.
+        the given hexadecimal string.
 
         The string description of the polynomial must adhere to the format returned
         by to_string(), which is of the form "7FFx^3 + 1x^1 + 3" and summarized
