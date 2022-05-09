@@ -25,7 +25,7 @@ namespace seal
     the plaintext elements are fundamentally polynomials in the polynomial quotient ring Z_T[x]/(X^N+1), where T is the
     plaintext modulus and X^N+1 is the polynomial modulus, this is the ring where the arithmetic operations will take
     place. BatchEncoder (batching) provider an alternative possibly more convenient view of the plaintext elements as
-    2-by-(N2/2) matrices of integers modulo the plaintext modulus. In the batching view the arithmetic operations act on
+    2-by-(N/2) matrices of integers modulo the plaintext modulus. In the batching view the arithmetic operations act on
     the matrices element-wise. Some of the operations only apply in the batching view, such as matrix row and column
     rotations. Other operations such as relinearization have no semantic meaning but are necessary for performance
     reasons.
