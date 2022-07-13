@@ -38,7 +38,7 @@ endif()
 # if SEAL_BUILD_TESTS is ON, use GoogleTest
 if(SEAL_BUILD_TESTS)
     if(SEAL_BUILD_DEPS)
-        seal_fetch_thirdparty_content(ExternalGTest)
+        include(ExternalGTest)
         add_library(GTest::gtest ALIAS gtest)
     else()
         find_package(GTest 1.10.0 CONFIG)

@@ -38,7 +38,7 @@ endif()
 # if SEAL_BUILD_BENCH is ON, use GoogleBenchmark
 if(SEAL_BUILD_BENCH)
     if(SEAL_BUILD_DEPS)
-        seal_fetch_thirdparty_content(ExternalBenchmark)
+        include(ExternalBenchmark)
     else()
         find_package(benchmark REQUIRED)
         if(NOT benchmark_FOUND)
