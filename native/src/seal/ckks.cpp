@@ -73,7 +73,7 @@ namespace seal
     }
 
     void CKKSEncoder::encode_internal(
-        double value, parms_id_type parms_id, double scale, Plaintext &destination, MemoryPoolHandle pool)
+        double value, parms_id_type parms_id, double scale, Plaintext &destination, MemoryPoolHandle pool) const
     {
         // Verify parameters.
         auto context_data_ptr = context_.get_context_data(parms_id);
@@ -213,7 +213,7 @@ namespace seal
         destination.scale() = scale;
     }
 
-    void CKKSEncoder::encode_internal(int64_t value, parms_id_type parms_id, Plaintext &destination)
+    void CKKSEncoder::encode_internal(int64_t value, parms_id_type parms_id, Plaintext &destination) const
     {
         // Verify parameters.
         auto context_data_ptr = context_.get_context_data(parms_id);
