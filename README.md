@@ -179,6 +179,20 @@ Simply add this package into your .NET project as a dependency and you are ready
 
 To develop mobile applications using Microsoft SEAL and .NET for Android and iOS, just add this package to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project. Unlike the Microsoft SEAL C++ library, the .NET wrapper library works only on 64-bit platforms, so only `arm64-v8a`/`x86_64` Android ABIs and `arm64`/`x86_64` iOS architectures are supported.
 
+### Installing from vcpkg
+
+The seal port in vcpkg is kept up to date by Microsoft team members and community contributors. The url of vcpkg is: https://github.com/Microsoft/vcpkg . You can download and install seal using the vcpkg dependency manager:
+
+```shell
+git clone https://github.com/Microsoft/vcpkg.git
+cd vcpkg
+./bootstrap-vcpkg.sh  # ./bootstrap-vcpkg.bat for Windows
+./vcpkg integrate install
+./vcpkg install seal
+```
+
+If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
+
 ### Examples
 
 Using Microsoft SEAL will require the user to invest some time in learning fundamental concepts in homomorphic encryption.
