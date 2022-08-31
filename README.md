@@ -36,6 +36,7 @@ The [APSI library for Asymmetric PSI](https://eprint.iacr.org/2021/1116) is avai
     - [Microsoft GSL](#microsoft-gsl)
     - [ZLIB and Zstandard](#zlib-and-zstandard)
   - [Installing from NuGet Package](#installing-from-nuget-package-windows-linux-macos-android-ios)
+  - [Installing from vcpkg](#Installing-from-vcpkg)
   - [Examples](#examples)
   - [CKKS Programming with EVA](#ckks-programming-with-eva)
 - [Building Microsoft SEAL Manually](#building-microsoft-seal-manually)
