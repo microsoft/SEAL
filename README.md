@@ -36,6 +36,7 @@ The [APSI library for Asymmetric PSI](https://eprint.iacr.org/2021/1116) is avai
     - [Microsoft GSL](#microsoft-gsl)
     - [ZLIB and Zstandard](#zlib-and-zstandard)
   - [Installing from NuGet Package](#installing-from-nuget-package-windows-linux-macos-android-ios)
+  - [Installing from vcpkg](#Installing-from-vcpkg)
   - [Examples](#examples)
   - [CKKS Programming with EVA](#ckks-programming-with-eva)
 - [Building Microsoft SEAL Manually](#building-microsoft-seal-manually)
@@ -178,6 +179,20 @@ For .NET developers the easiest way of installing Microsoft SEAL is by using the
 Simply add this package into your .NET project as a dependency and you are ready to go.
 
 To develop mobile applications using Microsoft SEAL and .NET for Android and iOS, just add this package to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project. Unlike the Microsoft SEAL C++ library, the .NET wrapper library works only on 64-bit platforms, so only `arm64-v8a`/`x86_64` Android ABIs and `arm64`/`x86_64` iOS architectures are supported.
+
+### Installing from vcpkg
+
+The seal port in vcpkg is kept up to date by Microsoft team members and community contributors. The url of vcpkg is: https://github.com/Microsoft/vcpkg . You can download and install seal using the vcpkg dependency manager:
+
+```shell
+git clone https://github.com/Microsoft/vcpkg.git
+cd vcpkg
+./bootstrap-vcpkg.sh  # ./bootstrap-vcpkg.bat for Windows
+./vcpkg integrate install
+./vcpkg install seal
+```
+
+If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
 
 ### Examples
 
