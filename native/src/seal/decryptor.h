@@ -92,7 +92,7 @@ namespace seal
         becomes too noisy to decrypt correctly.
 
         @param[in] encrypted The ciphertext
-        @throws std::invalid_argument if the scheme is not BFV
+        @throws std::invalid_argument if the scheme is not BFV/BGV
         @throws std::invalid_argument if encrypted is not valid for the encryption
         parameters
         @throws std::invalid_argument if encrypted is in NTT form
