@@ -1532,6 +1532,30 @@ namespace seal
 #endif
     }
 
+    void Evaluator::mod_reduce_to_inplace(Ciphertext &encrypted, parms_id_type parms_id, MemoryPoolHandle pool) const
+    {
+        // Verify parameters.
+        auto context_data_ptr = context_.get_context_data(encrypted.parms_id());
+        auto target_context_data_ptr = context_.get_context_data(parms_id);
+        if (!context_data_ptr)
+        {
+            throw invalid_argument("encrypted is not valid for encryption parameters");
+        }
+        if (!target_context_data_ptr)
+        {
+            throw invalid_argument("parms_id is not valid for encryption parameters");
+        }
+        if (context_data_ptr->chain_index() < target_context_data_ptr->chain_index())
+        {
+            throw invalid_argument("cannot switch to higher level modulus");
+        }
+
+        while (encrypted.parms_id() != parms_id)
+        {
+            mod_reduce_to_next_inplace(encrypted, pool);
+        }
+    }
+
     void Evaluator::multiply_many(
         const vector<Ciphertext> &encrypteds, const RelinKeys &relin_keys, Ciphertext &destination,
         MemoryPoolHandle pool) const

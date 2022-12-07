@@ -331,25 +331,6 @@ namespace seal
         }
 
         /**
-        Given a ciphertext encrypted modulo q_1...q_k, this function switches the modulus down to q_1...q_{k-1} and
-        stores the result in the destination parameter. Dynamic memory allocations in the process are allocated from the
-        memory pool pointed to by the given MemoryPoolHandle.
-
-        @param[in] encrypted The ciphertext to be switched to a smaller modulus
-        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @param[out] destination The ciphertext to overwrite with the modulus switched result
-        @throws std::invalid_argument if encrypted is not valid for the encryption parameters
-        @throws std::invalid_argument if encrypted is not in the default NTT form
-        @throws std::invalid_argument if encrypted is already at lowest level
-        @throws std::invalid_argument if the scale is too large for the new encryption parameters
-        @throws std::invalid_argument if pool is uninitialized
-        @throws std::logic_error if result ciphertext is transparent
-        */
-        void mod_switch_to_next(
-            const Ciphertext &encrypted, Ciphertext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool()) const;
-
-        /**
         Given a ciphertext encrypted modulo q_1...q_k, this function switches the modulus down to q_1...q_{k-1}. Dynamic
         memory allocations in the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
 
@@ -369,42 +350,23 @@ namespace seal
         }
 
         /**
-        Modulus switches an NTT transformed plaintext from modulo q_1...q_k down to modulo q_1...q_{k-1}.
+        Given a ciphertext encrypted modulo q_1...q_k, this function switches the modulus down to q_1...q_{k-1} and
+        stores the result in the destination parameter. Dynamic memory allocations in the process are allocated from the
+        memory pool pointed to by the given MemoryPoolHandle.
 
-        @param[in] plain The plaintext to be switched to a smaller modulus
-        @throws std::invalid_argument if plain is not in NTT form
-        @throws std::invalid_argument if plain is not valid for the encryption parameters
-        @throws std::invalid_argument if plain is already at lowest level
-        @throws std::invalid_argument if the scale is too large for the new encryption parameters
-        */
-        inline void mod_switch_to_next_inplace(Plaintext &plain) const
-        {
-            // Verify parameters.
-            if (!is_valid_for(plain, context_))
-            {
-                throw std::invalid_argument("plain is not valid for encryption parameters");
-            }
-            mod_switch_drop_to_next(plain);
-        }
-
-        /**
-        Modulus switches an NTT transformed plaintext from modulo q_1...q_k down to modulo q_1...q_{k-1} and stores the
-        result in the destination parameter.
-
-        @param[in] plain The plaintext to be switched to a smaller modulus
+        @param[in] encrypted The ciphertext to be switched to a smaller modulus
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @param[out] destination The plaintext to overwrite with the modulus switched result
-        @throws std::invalid_argument if plain is not in NTT form
-        @throws std::invalid_argument if plain is not valid for the encryption parameters
-        @throws std::invalid_argument if plain is already at lowest level
+        @param[out] destination The ciphertext to overwrite with the modulus switched result
+        @throws std::invalid_argument if encrypted is not valid for the encryption parameters
+        @throws std::invalid_argument if encrypted is not in the default NTT form
+        @throws std::invalid_argument if encrypted is already at lowest level
         @throws std::invalid_argument if the scale is too large for the new encryption parameters
         @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
         */
-        inline void mod_switch_to_next(const Plaintext &plain, Plaintext &destination) const
-        {
-            destination = plain;
-            mod_switch_to_next_inplace(destination);
-        }
+        void mod_switch_to_next(
+            const Ciphertext &encrypted, Ciphertext &destination,
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
         /**
         Given a ciphertext encrypted modulo q_1...q_k, this function switches the modulus down until the parameters
@@ -450,6 +412,44 @@ namespace seal
         {
             destination = encrypted;
             mod_switch_to_inplace(destination, parms_id, std::move(pool));
+        }
+
+        /**
+        Modulus switches an NTT transformed plaintext from modulo q_1...q_k down to modulo q_1...q_{k-1}.
+
+        @param[in] plain The plaintext to be switched to a smaller modulus
+        @throws std::invalid_argument if plain is not in NTT form
+        @throws std::invalid_argument if plain is not valid for the encryption parameters
+        @throws std::invalid_argument if plain is already at lowest level
+        @throws std::invalid_argument if the scale is too large for the new encryption parameters
+        */
+        inline void mod_switch_to_next_inplace(Plaintext &plain) const
+        {
+            // Verify parameters.
+            if (!is_valid_for(plain, context_))
+            {
+                throw std::invalid_argument("plain is not valid for encryption parameters");
+            }
+            mod_switch_drop_to_next(plain);
+        }
+
+        /**
+        Modulus switches an NTT transformed plaintext from modulo q_1...q_k down to modulo q_1...q_{k-1} and stores the
+        result in the destination parameter.
+
+        @param[in] plain The plaintext to be switched to a smaller modulus
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @param[out] destination The plaintext to overwrite with the modulus switched result
+        @throws std::invalid_argument if plain is not in NTT form
+        @throws std::invalid_argument if plain is not valid for the encryption parameters
+        @throws std::invalid_argument if plain is already at lowest level
+        @throws std::invalid_argument if the scale is too large for the new encryption parameters
+        @throws std::invalid_argument if pool is uninitialized
+        */
+        inline void mod_switch_to_next(const Plaintext &plain, Plaintext &destination) const
+        {
+            destination = plain;
+            mod_switch_to_next_inplace(destination);
         }
 
         /**
@@ -571,6 +571,93 @@ namespace seal
         {
             destination = encrypted;
             rescale_to_inplace(destination, parms_id, std::move(pool));
+        }
+
+        /**
+        Given a ciphertext encrypted modulo q_1...q_k, this function reduces the modulus down to q_1...q_{k-1}. Dynamic
+        memory allocations in the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+
+        @param[in] encrypted The ciphertext to be reduced to a smaller modulus
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if encrypted is not valid for the encryption parameters
+        @throws std::invalid_argument if encrypted is not in the default NTT form
+        @throws std::invalid_argument if encrypted is already at lowest level
+        @throws std::invalid_argument if the scale is too large for the new encryption parameters
+        @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
+        */
+        inline void mod_reduce_to_next_inplace(
+            Ciphertext &encrypted, MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        {
+            mod_switch_drop_to_next(encrypted, encrypted, std::move(pool));
+        }
+
+        /**
+        Given a ciphertext encrypted modulo q_1...q_k, this function reduces the modulus down to q_1...q_{k-1} and
+        stores the result in the destination parameter. Dynamic memory allocations in the process are allocated from the
+        memory pool pointed to by the given MemoryPoolHandle.
+
+        @param[in] encrypted The ciphertext to be reduced to a smaller modulus
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @param[out] destination The ciphertext to overwrite with the modular reduced result
+        @throws std::invalid_argument if encrypted is not valid for the encryption parameters
+        @throws std::invalid_argument if encrypted is not in the default NTT form
+        @throws std::invalid_argument if encrypted is already at lowest level
+        @throws std::invalid_argument if the scale is too large for the new encryption parameters
+        @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
+        */
+        void mod_reduce_to_next(
+            const Ciphertext &encrypted, Ciphertext &destination,
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        {
+            mod_switch_drop_to_next(encrypted, destination, std::move(pool));
+        }
+
+        /**
+        Given a ciphertext encrypted modulo q_1...q_k, this function reduces the modulus down until the parameters
+        reach the given parms_id. Dynamic memory allocations in the process are allocated from the memory pool pointed
+        to by the given MemoryPoolHandle.
+
+        @param[in] encrypted The ciphertext to be reduced to a smaller modulus
+        @param[in] parms_id The target parms_id
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if encrypted is not valid for the encryption parameters
+        @throws std::invalid_argument if encrypted is not in the default NTT form
+        @throws std::invalid_argument if parms_id is not valid for the encryption parameters
+        @throws std::invalid_argument if encrypted is already at lower level in modulus chain than the parameters
+        corresponding to parms_id
+        @throws std::invalid_argument if the scale is too large for the new encryption parameters
+        @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
+        */
+        void mod_reduce_to_inplace(
+            Ciphertext &encrypted, parms_id_type parms_id, MemoryPoolHandle pool = MemoryManager::GetPool()) const;
+
+        /**
+        Given a ciphertext encrypted modulo q_1...q_k, this function reduces the modulus down until the parameters
+        reach the given parms_id and stores the result in the destination parameter. Dynamic memory allocations in the
+        process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+
+        @param[in] encrypted The ciphertext to be reduced to a smaller modulus
+        @param[in] parms_id The target parms_id
+        @param[out] destination The ciphertext to overwrite with the modulus reduced result
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if encrypted is not valid for the encryption parameters
+        @throws std::invalid_argument if encrypted is not in the default NTT form
+        @throws std::invalid_argument if parms_id is not valid for the encryption parameters
+        @throws std::invalid_argument if encrypted is already at lower level in modulus chain than the parameters
+        corresponding to parms_id
+        @throws std::invalid_argument if the scale is too large for the new encryption parameters
+        @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
+        */
+        inline void mod_reduce_to(
+            const Ciphertext &encrypted, parms_id_type parms_id, Ciphertext &destination,
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        {
+            destination = encrypted;
+            mod_reduce_to_inplace(destination, parms_id, std::move(pool));
         }
 
         /**
