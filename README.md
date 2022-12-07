@@ -36,7 +36,7 @@ The [APSI library for Asymmetric PSI](https://eprint.iacr.org/2021/1116) is avai
     - [Microsoft GSL](#microsoft-gsl)
     - [ZLIB and Zstandard](#zlib-and-zstandard)
   - [Installing from NuGet Package](#installing-from-nuget-package-windows-linux-macos-android-ios)
-  - [Installing from vcpkg](#Installing-from-vcpkg)
+  - [Installing from vcpkg](#installing-from-vcpkg)
   - [Examples](#examples)
   - [CKKS Programming with EVA](#ckks-programming-with-eva)
 - [Building Microsoft SEAL Manually](#building-microsoft-seal-manually)
@@ -182,7 +182,7 @@ To develop mobile applications using Microsoft SEAL and .NET for Android and iOS
 
 ### Installing from vcpkg
 
-The seal port in vcpkg is kept up to date by Microsoft team members and community contributors. The url of vcpkg is: https://github.com/Microsoft/vcpkg . You can download and install seal using the vcpkg dependency manager:
+You can download and install seal using the [vcpkg](https://github.com/Microsoft/vcpkg) dependency manager.
 
 ```shell
 git clone https://github.com/Microsoft/vcpkg.git
@@ -192,6 +192,7 @@ cd vcpkg
 ./vcpkg install seal
 ```
 
+The "seal" port in vcpkg is kept up to date by Microsoft team members and community contributors.
 If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
 
 ### Examples
