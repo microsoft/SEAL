@@ -1,5 +1,26 @@
 # List of Changes
 
+## Version 4.1.0
+
+### Features
+
+- The BGV scheme now keeps ciphertexts in NTT form. BGV ciphertext multiplication is much faster than version 4.0.0.
+- When a BGV ciphertext saved by previous versions is loaded in the current version, it is automatically converted to NTT form.
+- Increased `SEAL_COEFF_MOD_COUNT_MAX`, the maximum number of primes that define the coefficient modulus, from 64 to 256.
+
+### Other Fixes
+
+- Fixed typos [(PR #512)](https://github.com/microsoft/SEAL/pull/512).
+- Fixed typos [(PR #530)](https://github.com/microsoft/SEAL/pull/530).
+- Fixed typos [(PR #509)](https://github.com/microsoft/SEAL/pull/509).
+- Added missing `const` qualifiers [(PR #556)](https://github.com/microsoft/SEAL/pull/556).
+- Added vcpkg installation instructions [(PR #562)](https://github.com/microsoft/SEAL/pull/562).
+- Fixed an issue in specific environments where allocation fails without throwing `std::bad_alloc`.
+
+### Major API Changes
+
+- Added new public methods `mod_reduce_xxx(...)` (native) or `ModReduceXxx(...)` (dotnet) to the class `Evaluator`.
+
 ## Version 4.0.0
 
 ### Features
