@@ -1,0 +1,18 @@
+[submodule "thirdparty/benchmark"]
+	path = thirdparty/benchmark
+	url = https://github.com/google/benchmark.git
+[submodule "thirdparty/googletest"]
+	path = thirdparty/googletest
+	url = https://github.com/google/googletest.git
+[submodule "thirdparty/hexl"]
+	path = thirdparty/hexl
+	url = https://github.com/intel/hexl
+[submodule "thirdparty/zlib"]
+	path = thirdparty/zlib
+	url = https://github.com/madler/zlib.git
+[submodule "thirdparty/zstd"]
+	path = thirdparty/zstd
+	url = https://github.com/facebook/zstd.git
+[submodule "thirdparty/msgsl"]
+	path = thirdparty/msgsl
+	url = https://github.com/microsoft/GSL.git
