@@ -240,7 +240,16 @@ namespace sealbench
         */
         void randomize_ct_bgv(seal::Ciphertext &ct)
         {
-            randomize_ct_bfv(ct);
+            if (ct.parms_id() != context_.first_parms_id())
+            {
+                ct.resize(context_, std::size_t(2));
+            }
+            auto &parms = context_.first_context_data()->parms();
+            for (std::size_t i = 0; i < ct.size(); i++)
+            {
+                randomize_poly_rns(ct.data(i), parms);
+            }
+            ct.is_ntt_form() = true;
         }
 
         /**
