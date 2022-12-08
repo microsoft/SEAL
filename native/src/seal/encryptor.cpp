@@ -107,11 +107,11 @@ namespace seal
         size_t coeff_count = parms.poly_modulus_degree();
         bool is_ntt_form = false;
 
-        if (parms.scheme() == scheme_type::ckks)
+        if (parms.scheme() == scheme_type::ckks || parms.scheme() == scheme_type::bgv)
         {
             is_ntt_form = true;
         }
-        else if (parms.scheme() != scheme_type::bfv && parms.scheme() != scheme_type::bgv)
+        else if (parms.scheme() != scheme_type::bfv)
         {
             throw invalid_argument("unsupported scheme");
         }
@@ -136,20 +136,20 @@ namespace seal
 
                 // Modulus switching
                 SEAL_ITERATE(iter(temp, destination), temp.size(), [&](auto I) {
-                    if (is_ntt_form)
+                    if (parms.scheme() == scheme_type::ckks)
                     {
                         rns_tool->divide_and_round_q_last_ntt_inplace(
                             get<0>(I), prev_context_data.small_ntt_tables(), pool);
                     }
                     // bfv switch-to-next
-                    else if (parms.scheme() != scheme_type::bgv)
+                    else if (parms.scheme() == scheme_type::bfv)
                     {
                         rns_tool->divide_and_round_q_last_inplace(get<0>(I), pool);
                     }
                     // bgv switch-to-next
-                    else
+                    else if (parms.scheme() == scheme_type::bgv)
                     {
-                        rns_tool->mod_t_and_divide_q_last_inplace(get<0>(I), pool);
+                        rns_tool->mod_t_and_divide_q_last_ntt_inplace(get<0>(I), prev_context_data.small_ntt_tables(), pool);
                     }
                     set_poly(get<0>(I), coeff_count, coeff_modulus_size, get<1>(I));
                 });
@@ -245,11 +245,69 @@ namespace seal
                 throw invalid_argument("plain cannot be in NTT form");
             }
             encrypt_zero_internal(context_.first_parms_id(), is_asymmetric, save_seed, destination, pool);
-            auto context_data_ptr = context_.first_context_data();
-            auto &parms = context_data_ptr->parms();
+
+            auto &context_data = *context_.first_context_data();
+            auto &parms = context_data.parms();
+            auto &coeff_modulus = parms.coeff_modulus();
+            size_t coeff_modulus_size = coeff_modulus.size();
             size_t coeff_count = parms.poly_modulus_degree();
+            size_t plain_coeff_count = plain.coeff_count();
+            uint64_t plain_upper_half_threshold = context_data.plain_upper_half_threshold();
+            auto plain_upper_half_increment = context_data.plain_upper_half_increment();
+            auto ntt_tables = iter(context_data.small_ntt_tables());
+
             // c_{0} = pk_{0}*u + p*e_{0} + M
-            add_plain_without_scaling_variant(plain, *context_data_ptr, RNSIter(destination.data(0), coeff_count));
+            Plaintext plain_copy = plain;
+            // Resize to fit the entire NTT transformed (ciphertext size) polynomial
+            // Note that the new coefficients are automatically set to 0
+            plain_copy.resize(coeff_count * coeff_modulus_size);
+            RNSIter plain_iter(plain_copy.data(), coeff_count);
+            if (!context_data.qualifiers().using_fast_plain_lift)
+            {
+                // Allocate temporary space for an entire RNS polynomial
+                // Slight semantic misuse of RNSIter here, but this works well
+                SEAL_ALLOCATE_ZERO_GET_RNS_ITER(temp, coeff_modulus_size, coeff_count, pool);
+
+                SEAL_ITERATE(iter(plain_copy.data(), temp), plain_coeff_count, [&](auto I) {
+                    auto plain_value = get<0>(I);
+                    if (plain_value >= plain_upper_half_threshold)
+                    {
+                        add_uint(plain_upper_half_increment, coeff_modulus_size, plain_value, get<1>(I));
+                    }
+                    else
+                    {
+                        *get<1>(I) = plain_value;
+                    }
+                });
+
+                context_data.rns_tool()->base_q()->decompose_array(temp, coeff_count, pool);
+
+                // Copy data back to plain
+                set_poly(temp, coeff_count, coeff_modulus_size, plain_copy.data());
+            }
+            else
+            {
+                // Note that in this case plain_upper_half_increment holds its value in RNS form modulo the coeff_modulus
+                // primes.
+
+                // Create a "reversed" helper iterator that iterates in the reverse order both plain RNS components and
+                // the plain_upper_half_increment values.
+                auto helper_iter = reverse_iter(plain_iter, plain_upper_half_increment);
+                advance(helper_iter, -safe_cast<ptrdiff_t>(coeff_modulus_size - 1));
+
+                SEAL_ITERATE(helper_iter, coeff_modulus_size, [&](auto I) {
+                    SEAL_ITERATE(iter(*plain_iter, get<0>(I)), plain_coeff_count, [&](auto J) {
+                        get<1>(J) =
+                            SEAL_COND_SELECT(get<0>(J) >= plain_upper_half_threshold, get<0>(J) + get<1>(I), get<0>(J));
+                    });
+                });
+            }
+            // Transform to NTT domain
+            ntt_negacyclic_harvey(plain_iter, coeff_modulus_size, ntt_tables);
+
+            // The plaintext gets added into the c_0 term of ciphertext (c_0,c_1).
+            RNSIter destination_iter = *iter(destination);
+            add_poly_coeffmod(destination_iter, plain_iter, coeff_modulus_size, coeff_modulus, destination_iter);
         }
         else
         {

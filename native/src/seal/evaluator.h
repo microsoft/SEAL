@@ -331,25 +331,6 @@ namespace seal
         }
 
         /**
-        Given a ciphertext encrypted modulo q_1...q_k, this function switches the modulus down to q_1...q_{k-1}. Dynamic
-        memory allocations in the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
-
-        @param[in] encrypted The ciphertext to be switched to a smaller modulus
-        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
-        @throws std::invalid_argument if encrypted is not valid for the encryption parameters
-        @throws std::invalid_argument if encrypted is not in the default NTT form
-        @throws std::invalid_argument if encrypted is already at lowest level
-        @throws std::invalid_argument if the scale is too large for the new encryption parameters
-        @throws std::invalid_argument if pool is uninitialized
-        @throws std::logic_error if result ciphertext is transparent
-        */
-        inline void mod_switch_to_next_inplace(
-            Ciphertext &encrypted, MemoryPoolHandle pool = MemoryManager::GetPool()) const
-        {
-            mod_switch_to_next(encrypted, encrypted, std::move(pool));
-        }
-
-        /**
         Given a ciphertext encrypted modulo q_1...q_k, this function switches the modulus down to q_1...q_{k-1} and
         stores the result in the destination parameter. Dynamic memory allocations in the process are allocated from the
         memory pool pointed to by the given MemoryPoolHandle.
@@ -367,6 +348,25 @@ namespace seal
         void mod_switch_to_next(
             const Ciphertext &encrypted, Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool()) const;
+
+        /**
+        Given a ciphertext encrypted modulo q_1...q_k, this function switches the modulus down to q_1...q_{k-1}. Dynamic
+        memory allocations in the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+
+        @param[in] encrypted The ciphertext to be switched to a smaller modulus
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::invalid_argument if encrypted is not valid for the encryption parameters
+        @throws std::invalid_argument if encrypted is not in the default NTT form
+        @throws std::invalid_argument if encrypted is already at lowest level
+        @throws std::invalid_argument if the scale is too large for the new encryption parameters
+        @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if result ciphertext is transparent
+        */
+        inline void mod_switch_to_next_inplace(
+            Ciphertext &encrypted, MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        {
+            mod_switch_to_next(encrypted, encrypted, std::move(pool));
+        }
 
         /**
         Given a ciphertext encrypted modulo q_1...q_k, this function switches the modulus down until the parameters
@@ -586,11 +586,8 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         @throws std::logic_error if result ciphertext is transparent
         */
-        inline void mod_reduce_to_next_inplace(
-            Ciphertext &encrypted, MemoryPoolHandle pool = MemoryManager::GetPool()) const
-        {
-            mod_switch_drop_to_next(encrypted, encrypted, std::move(pool));
-        }
+        void mod_reduce_to_next_inplace(
+            Ciphertext &encrypted, MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
         /**
         Given a ciphertext encrypted modulo q_1...q_k, this function reduces the modulus down to q_1...q_{k-1} and
@@ -607,11 +604,12 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         @throws std::logic_error if result ciphertext is transparent
         */
-        void mod_reduce_to_next(
+        inline void mod_reduce_to_next(
             const Ciphertext &encrypted, Ciphertext &destination,
             MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
-            mod_switch_drop_to_next(encrypted, destination, std::move(pool));
+            destination = encrypted;
+            mod_reduce_to_next_inplace(destination, std::move(pool));
         }
 
         /**
@@ -744,12 +742,14 @@ namespace seal
 
         @param[in] encrypted The ciphertext to add
         @param[in] plain The plaintext to add
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if encrypted or plain is not valid for the encryption parameters
         @throws std::invalid_argument if encrypted or plain is not in the default NTT form
         @throws std::invalid_argument if encrypted and plain are at different level or scale
+        @throws std::invalid_argument if pool is uninitialized
         @throws std::logic_error if result ciphertext is transparent
         */
-        void add_plain_inplace(Ciphertext &encrypted, const Plaintext &plain) const;
+        void add_plain_inplace(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
         /**
         Adds a ciphertext and a plaintext. This function adds a ciphertext and a plaintext and stores the result in the
@@ -759,15 +759,17 @@ namespace seal
         @param[in] encrypted The ciphertext to add
         @param[in] plain The plaintext to add
         @param[out] destination The ciphertext to overwrite with the addition result
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if encrypted or plain is not valid for the encryption parameters
         @throws std::invalid_argument if encrypted or plain is not in the default NTT form
         @throws std::invalid_argument if encrypted and plain are at different level or scale
+        @throws std::invalid_argument if pool is uninitialized
         @throws std::logic_error if result ciphertext is transparent
         */
-        inline void add_plain(const Ciphertext &encrypted, const Plaintext &plain, Ciphertext &destination) const
+        inline void add_plain(const Ciphertext &encrypted, const Plaintext &plain, Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             destination = encrypted;
-            add_plain_inplace(destination, plain);
+            add_plain_inplace(destination, plain, std::move(pool));
         }
 
         /**
@@ -775,12 +777,14 @@ namespace seal
 
         @param[in] encrypted The ciphertext to subtract from
         @param[in] plain The plaintext to subtract
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if encrypted or plain is not valid for the encryption parameters
         @throws std::invalid_argument if encrypted or plain is not in the default NTT form
         @throws std::invalid_argument if encrypted and plain are at different level or scale
+        @throws std::invalid_argument if pool is uninitialized
         @throws std::logic_error if result ciphertext is transparent
         */
-        void sub_plain_inplace(Ciphertext &encrypted, const Plaintext &plain) const;
+        void sub_plain_inplace(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
         /**
         Subtracts a plaintext from a ciphertext. This function subtracts a plaintext from a ciphertext and stores the
@@ -789,15 +793,17 @@ namespace seal
         @param[in] encrypted The ciphertext to subtract from
         @param[in] plain The plaintext to subtract
         @param[out] destination The ciphertext to overwrite with the subtraction result
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @throws std::invalid_argument if encrypted or plain is not valid for the encryption parameters
         @throws std::invalid_argument if encrypted or plain is not in the default NTT form
         @throws std::invalid_argument if encrypted and plain are at different level or scale
+        @throws std::invalid_argument if pool is uninitialized
         @throws std::logic_error if result ciphertext is transparent
         */
-        inline void sub_plain(const Ciphertext &encrypted, const Plaintext &plain, Ciphertext &destination) const
+        inline void sub_plain(const Ciphertext &encrypted, const Plaintext &plain, Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             destination = encrypted;
-            sub_plain_inplace(destination, plain);
+            sub_plain_inplace(destination, plain, std::move(pool));
         }
 
         /**

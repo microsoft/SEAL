@@ -274,14 +274,14 @@ namespace SEALNetTest
                     Assert.IsNotNull(encryptor);
 
                     encryptor.EncryptZero(cipher);
-                    Assert.IsFalse(cipher.IsNTTForm);
+                    Assert.IsTrue(cipher.IsNTTForm);
                     Assert.IsFalse(cipher.IsTransparent);
                     Assert.AreEqual(cipher.Scale, 1.0, double.Epsilon);
                     decryptor.Decrypt(cipher, plain);
                     Assert.IsTrue(plain.IsZero);
 
                     encryptor.EncryptZero(nextParms, cipher);
-                    Assert.IsFalse(cipher.IsNTTForm);
+                    Assert.IsTrue(cipher.IsNTTForm);
                     Assert.IsFalse(cipher.IsTransparent);
                     Assert.AreEqual(cipher.Scale, 1.0, double.Epsilon);
                     Assert.AreEqual(cipher.ParmsId, nextParms);
@@ -292,14 +292,14 @@ namespace SEALNetTest
                     Encryptor encryptor = new Encryptor(context, secretKey);
 
                     encryptor.EncryptZeroSymmetric(cipher);
-                    Assert.IsFalse(cipher.IsNTTForm);
+                    Assert.IsTrue(cipher.IsNTTForm);
                     Assert.IsFalse(cipher.IsTransparent);
                     Assert.AreEqual(cipher.Scale, 1.0, double.Epsilon);
                     decryptor.Decrypt(cipher, plain);
                     Assert.IsTrue(plain.IsZero);
 
                     encryptor.EncryptZeroSymmetric(nextParms, cipher);
-                    Assert.IsFalse(cipher.IsNTTForm);
+                    Assert.IsTrue(cipher.IsNTTForm);
                     Assert.IsFalse(cipher.IsTransparent);
                     Assert.AreEqual(cipher.Scale, 1.0, double.Epsilon);
                     Assert.AreEqual(cipher.ParmsId, nextParms);
@@ -313,7 +313,7 @@ namespace SEALNetTest
                     encryptor.EncryptZero().Save(stream);
                     stream.Seek(0, SeekOrigin.Begin);
                     cipher.Load(context, stream);
-                    Assert.IsFalse(cipher.IsNTTForm);
+                    Assert.IsTrue(cipher.IsNTTForm);
                     Assert.IsFalse(cipher.IsTransparent);
                     Assert.AreEqual(cipher.Scale, 1.0, double.Epsilon);
                     decryptor.Decrypt(cipher, plain);
@@ -326,7 +326,7 @@ namespace SEALNetTest
                     encryptor.EncryptZero(nextParms).Save(stream);
                     stream.Seek(0, SeekOrigin.Begin);
                     cipher.Load(context, stream);
-                    Assert.IsFalse(cipher.IsNTTForm);
+                    Assert.IsTrue(cipher.IsNTTForm);
                     Assert.IsFalse(cipher.IsTransparent);
                     Assert.AreEqual(cipher.Scale, 1.0, double.Epsilon);
                     Assert.AreEqual(cipher.ParmsId, nextParms);
@@ -340,7 +340,7 @@ namespace SEALNetTest
                     encryptor.EncryptZeroSymmetric().Save(stream);
                     stream.Seek(0, SeekOrigin.Begin);
                     cipher.Load(context, stream);
-                    Assert.IsFalse(cipher.IsNTTForm);
+                    Assert.IsTrue(cipher.IsNTTForm);
                     Assert.IsFalse(cipher.IsTransparent);
                     Assert.AreEqual(cipher.Scale, 1.0, double.Epsilon);
                     decryptor.Decrypt(cipher, plain);
@@ -353,7 +353,7 @@ namespace SEALNetTest
                     encryptor.EncryptZeroSymmetric(nextParms).Save(stream);
                     stream.Seek(0, SeekOrigin.Begin);
                     cipher.Load(context, stream);
-                    Assert.IsFalse(cipher.IsNTTForm);
+                    Assert.IsTrue(cipher.IsNTTForm);
                     Assert.IsFalse(cipher.IsTransparent);
                     Assert.AreEqual(cipher.Scale, 1.0, double.Epsilon);
                     Assert.AreEqual(cipher.ParmsId, nextParms);

@@ -1522,13 +1522,13 @@ namespace SEALNetTest
                 Plaintext plaindest = new Plaintext();
 
                 encryptor.Encrypt(new Plaintext("0"), encrypted);
-                Assert.IsFalse(encrypted.IsNTTForm);
+                Assert.IsTrue(encrypted.IsNTTForm);
 
-                evaluator.TransformToNTT(encrypted, encdest);
-                Assert.IsTrue(encdest.IsNTTForm);
+                evaluator.TransformFromNTT(encrypted, encdest);
+                Assert.IsFalse(encdest.IsNTTForm);
 
-                evaluator.TransformFromNTT(encdest, encdest2);
-                Assert.IsFalse(encdest2.IsNTTForm);
+                evaluator.TransformToNTT(encdest, encdest2);
+                Assert.IsTrue(encdest2.IsNTTForm);
 
                 decryptor.Decrypt(encdest2, plaindest);
                 Assert.AreEqual(1ul, plaindest.CoeffCount);
@@ -1536,13 +1536,13 @@ namespace SEALNetTest
                 Assert.AreEqual(context.FirstParmsId, encdest2.ParmsId);
 
                 encryptor.Encrypt(new Plaintext("1"), encrypted);
-                Assert.IsFalse(encrypted.IsNTTForm);
-
-                evaluator.TransformToNTTInplace(encrypted);
                 Assert.IsTrue(encrypted.IsNTTForm);
 
                 evaluator.TransformFromNTTInplace(encrypted);
                 Assert.IsFalse(encrypted.IsNTTForm);
+
+                evaluator.TransformToNTTInplace(encrypted);
+                Assert.IsTrue(encrypted.IsNTTForm);
 
                 decryptor.Decrypt(encrypted, plaindest);
 

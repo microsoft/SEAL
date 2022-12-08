@@ -235,7 +235,7 @@ namespace seal
             /**
             Remove the last q for bgv ciphertext
             */
-            void mod_t_and_divide_q_last_inplace(RNSIter input, MemoryPoolHandle pool) const;
+            void mod_t_and_divide_q_last_ntt_inplace(RNSIter input, ConstNTTTablesIter rns_ntt_tables, MemoryPoolHandle pool) const;
 
             /**
             Compute mod t

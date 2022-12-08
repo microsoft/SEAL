@@ -975,7 +975,7 @@ namespace sealtest
         parms_id_type next_parms = context.first_context_data()->next_context_data()->parms_id();
         {
             encryptor.encrypt_zero(ct);
-            ASSERT_FALSE(ct.is_ntt_form());
+            ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
             ASSERT_EQ(ct.correction_factor(), uint64_t(1));
@@ -983,7 +983,7 @@ namespace sealtest
             ASSERT_TRUE(pt.is_zero());
 
             encryptor.encrypt_zero(next_parms, ct);
-            ASSERT_FALSE(ct.is_ntt_form());
+            ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
             ASSERT_EQ(ct.correction_factor(), uint64_t(1));
@@ -995,7 +995,7 @@ namespace sealtest
             stringstream stream;
             encryptor.encrypt_zero().save(stream);
             ct.load(context, stream);
-            ASSERT_FALSE(ct.is_ntt_form());
+            ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
             ASSERT_EQ(ct.correction_factor(), uint64_t(1));
@@ -1004,7 +1004,7 @@ namespace sealtest
 
             encryptor.encrypt_zero(next_parms).save(stream);
             ct.load(context, stream);
-            ASSERT_FALSE(ct.is_ntt_form());
+            ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
             ASSERT_EQ(ct.correction_factor(), uint64_t(1));
@@ -1014,7 +1014,7 @@ namespace sealtest
         }
         {
             encryptor.encrypt_zero_symmetric(ct);
-            ASSERT_FALSE(ct.is_ntt_form());
+            ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
             ASSERT_EQ(ct.correction_factor(), uint64_t(1));
@@ -1022,7 +1022,7 @@ namespace sealtest
             ASSERT_TRUE(pt.is_zero());
 
             encryptor.encrypt_zero_symmetric(next_parms, ct);
-            ASSERT_FALSE(ct.is_ntt_form());
+            ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
             ASSERT_EQ(ct.correction_factor(), uint64_t(1));
@@ -1034,7 +1034,7 @@ namespace sealtest
             stringstream stream;
             encryptor.encrypt_zero_symmetric().save(stream);
             ct.load(context, stream);
-            ASSERT_FALSE(ct.is_ntt_form());
+            ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
             ASSERT_EQ(ct.correction_factor(), uint64_t(1));
@@ -1043,7 +1043,7 @@ namespace sealtest
 
             encryptor.encrypt_zero_symmetric(next_parms).save(stream);
             ct.load(context, stream);
-            ASSERT_FALSE(ct.is_ntt_form());
+            ASSERT_TRUE(ct.is_ntt_form());
             ASSERT_FALSE(ct.is_transparent());
             ASSERT_DOUBLE_EQ(ct.scale(), 1.0);
             ASSERT_EQ(ct.correction_factor(), uint64_t(1));
