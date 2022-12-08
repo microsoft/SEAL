@@ -371,5 +371,12 @@ namespace seal
         stream.exceptions(old_except_mask);
 
         swap(*this, new_data);
+
+        // BGV Ciphertext are converted to NTT form.
+        if (context.key_context_data()->parms().scheme() == scheme_type::bgv && !this->is_ntt_form() && this->data())
+        {
+            ntt_negacyclic_harvey(*this, this->size(), context.get_context_data(this->parms_id())->small_ntt_tables());
+            this->is_ntt_form() = true;
+        }
     }
 } // namespace seal
