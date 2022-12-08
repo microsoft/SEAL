@@ -1200,7 +1200,8 @@ namespace seal
             });
         }
 
-        void RNSTool::mod_t_and_divide_q_last_ntt_inplace(RNSIter input, ConstNTTTablesIter rns_ntt_tables, MemoryPoolHandle pool) const
+        void RNSTool::mod_t_and_divide_q_last_ntt_inplace(
+            RNSIter input, ConstNTTTablesIter rns_ntt_tables, MemoryPoolHandle pool) const
         {
             size_t modulus_size = base_q_->size();
             const Modulus *curr_modulus = base_q_->base();

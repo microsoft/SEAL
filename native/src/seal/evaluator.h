@@ -586,8 +586,7 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         @throws std::logic_error if result ciphertext is transparent
         */
-        void mod_reduce_to_next_inplace(
-            Ciphertext &encrypted, MemoryPoolHandle pool = MemoryManager::GetPool()) const;
+        void mod_reduce_to_next_inplace(Ciphertext &encrypted, MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
         /**
         Given a ciphertext encrypted modulo q_1...q_k, this function reduces the modulus down to q_1...q_{k-1} and
@@ -749,7 +748,8 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         @throws std::logic_error if result ciphertext is transparent
         */
-        void add_plain_inplace(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool = MemoryManager::GetPool()) const;
+        void add_plain_inplace(
+            Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
         /**
         Adds a ciphertext and a plaintext. This function adds a ciphertext and a plaintext and stores the result in the
@@ -766,7 +766,9 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         @throws std::logic_error if result ciphertext is transparent
         */
-        inline void add_plain(const Ciphertext &encrypted, const Plaintext &plain, Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        inline void add_plain(
+            const Ciphertext &encrypted, const Plaintext &plain, Ciphertext &destination,
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             destination = encrypted;
             add_plain_inplace(destination, plain, std::move(pool));
@@ -784,7 +786,8 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         @throws std::logic_error if result ciphertext is transparent
         */
-        void sub_plain_inplace(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool = MemoryManager::GetPool()) const;
+        void sub_plain_inplace(
+            Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool = MemoryManager::GetPool()) const;
 
         /**
         Subtracts a plaintext from a ciphertext. This function subtracts a plaintext from a ciphertext and stores the
@@ -800,7 +803,9 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         @throws std::logic_error if result ciphertext is transparent
         */
-        inline void sub_plain(const Ciphertext &encrypted, const Plaintext &plain, Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        inline void sub_plain(
+            const Ciphertext &encrypted, const Plaintext &plain, Ciphertext &destination,
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             destination = encrypted;
             sub_plain_inplace(destination, plain, std::move(pool));

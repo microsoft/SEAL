@@ -149,7 +149,8 @@ namespace seal
                     // bgv switch-to-next
                     else if (parms.scheme() == scheme_type::bgv)
                     {
-                        rns_tool->mod_t_and_divide_q_last_ntt_inplace(get<0>(I), prev_context_data.small_ntt_tables(), pool);
+                        rns_tool->mod_t_and_divide_q_last_ntt_inplace(
+                            get<0>(I), prev_context_data.small_ntt_tables(), pool);
                     }
                     set_poly(get<0>(I), coeff_count, coeff_modulus_size, get<1>(I));
                 });
@@ -287,8 +288,8 @@ namespace seal
             }
             else
             {
-                // Note that in this case plain_upper_half_increment holds its value in RNS form modulo the coeff_modulus
-                // primes.
+                // Note that in this case plain_upper_half_increment holds its value in RNS form modulo the
+                // coeff_modulus primes.
 
                 // Create a "reversed" helper iterator that iterates in the reverse order both plain RNS components and
                 // the plain_upper_half_increment values.
