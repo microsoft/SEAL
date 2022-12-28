@@ -78,4 +78,8 @@ SEAL_C_FUNC Decryptor_InvariantNoiseBudget(void *thisptr, void *encrypted, int *
     {
         return E_INVALIDARG;
     }
+    catch (const logic_error &)
+    {
+        return COR_E_INVALIDOPERATION;
+    }
 }
