@@ -142,7 +142,7 @@ void example_bgv_basics()
     cout << "NOTE: Decryption can be incorrect if noise budget is zero." << endl;
 
     cout << endl;
-    cout << "~~~~~~ Use modulus switching to calculate x^8. ~~~~~~" << endl;
+    cout << "~~~~~~ Use modulus switching to calculate x^8 ~~~~~~" << endl;
 
     /*
     Noise budget has reached 0, which means that decryption cannot be expected
