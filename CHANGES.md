@@ -10,16 +10,19 @@
 
 ### Other Fixes
 
+- Fixed typos [(PR #590)](https://github.com/microsoft/SEAL/pull/590).
+- Added $schema to cgmanifest.json [(PR #558)](https://github.com/microsoft/SEAL/pull/558).
 - Fixed typos [(PR #512)](https://github.com/microsoft/SEAL/pull/512).
 - Fixed typos [(PR #530)](https://github.com/microsoft/SEAL/pull/530).
 - Fixed typos [(PR #509)](https://github.com/microsoft/SEAL/pull/509).
 - Added missing `const` qualifiers [(PR #556)](https://github.com/microsoft/SEAL/pull/556).
 - Added vcpkg installation instructions [(PR #562)](https://github.com/microsoft/SEAL/pull/562).
 - Fixed an issue in specific environments where allocation fails without throwing `std::bad_alloc`.
+- Fixed comments (C++) and C/.NET wrapper implementation of an exception thrown by `invariant_noise_budget`.
 
 ### Major API Changes
 
-- Added new public methods `mod_reduce_xxx(...)` (native) or `ModReduceXxx(...)` (dotnet) to the class `Evaluator`.
+- Added new public methods `mod_reduce_xxx(...)` (native) and `ModReduceXxx(...)` (dotnet) to the class `Evaluator`.
 
 ## Version 4.0.0
 

@@ -1573,7 +1573,6 @@ namespace seal
     }
 
     void Evaluator::mod_reduce_to_next_inplace(Ciphertext &encrypted, MemoryPoolHandle pool) const
-
     {
         // Verify parameters.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
@@ -1592,7 +1591,6 @@ namespace seal
         }
 
         mod_reduce_to_next(encrypted, encrypted, std::move(pool));
-
 #ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted.is_transparent())
