@@ -40,12 +40,12 @@ steps:
       Expand-Archive -Path $NinjaZipFile -DestinationPath $ToolsDirectory
       Copy-Item -Path $NinjaExeFile -Destination "c:/Program Files/CMake/bin"
 
-- task: CmdLine@2
-  displayName: Update NDK
-  inputs:
-    script: |
-      echo Android home: %ANDROID_SDK_ROOT%
-      "%ANDROID_SDK_ROOT%/tools/bin/sdkmanager" --install "ndk;22.1.7171670"
+# - task: CmdLine@2
+#   displayName: Update NDK
+#   inputs:
+#     script: |
+#       echo Android home: %ANDROID_SDK_ROOT%
+#       "%ANDROID_SDK_ROOT%/tools/bin/sdkmanager" --install "ndk;22.1.7171670"
 
 - task: Gradle@2
   displayName: Compile Android Native Libraries
