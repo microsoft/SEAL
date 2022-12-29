@@ -61,15 +61,15 @@ steps:
 - task: CopyFiles@2
   displayName: Copy files to staging directory
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/android/app/.cxx/RelWithDebInfo/**/arm64-v8a/lib/arm64-v8a'
-    Contents: 'libsealc.so'
+    SourceFolder: '$(Build.SourcesDirectory)/android/app/.cxx/RelWithDebInfo'
+    Contents: '**/arm64-v8a/libsealc.so'
     TargetFolder: '$(Build.ArtifactStagingDirectory)/lib/arm64-v8a'
 
 - task: CopyFiles@2
   displayName: Copy files to staging directory
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/android/app/.cxx/RelWithDebInfo/**/x86_64/lib/x86_64'
-    Contents: 'libsealc.so'
+    SourceFolder: '$(Build.SourcesDirectory)/android/app/.cxx/RelWithDebInfo'
+    Contents: '**/x86_64/libsealc.so'
     TargetFolder: '$(Build.ArtifactStagingDirectory)/lib/x86_64'
 
 - task: PublishBuildArtifacts@1
