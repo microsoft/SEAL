@@ -61,14 +61,14 @@ steps:
 - task: CopyFiles@2
   displayName: Copy files to staging directory
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/android/app/.cxx/cmake/release/arm64-v8a/lib/arm64-v8a'
+    SourceFolder: '$(Build.SourcesDirectory)/android/app/.cxx/RelWithDebInfo/**/arm64-v8a/lib/arm64-v8a'
     Contents: 'libsealc.so'
     TargetFolder: '$(Build.ArtifactStagingDirectory)/lib/arm64-v8a'
 
 - task: CopyFiles@2
   displayName: Copy files to staging directory
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/android/app/.cxx/cmake/release/x86_64/lib/x86_64'
+    SourceFolder: '$(Build.SourcesDirectory)/android/app/.cxx/RelWithDebInfo/**/x86_64/lib/x86_64'
     Contents: 'libsealc.so'
     TargetFolder: '$(Build.ArtifactStagingDirectory)/lib/x86_64'
 
