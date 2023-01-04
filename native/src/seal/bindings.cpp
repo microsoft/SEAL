@@ -556,6 +556,8 @@ EMSCRIPTEN_BINDINGS(SEAL)
             select_overload<void(const Plaintext &, parms_id_type, Plaintext &) const>(&Evaluator::mod_switch_to))
         .function("rescaleToNext", &Evaluator::rescale_to_next)
         .function("rescaleTo", &Evaluator::rescale_to)
+        .function("modReduceToNext", &Evaluator::mod_reduce_to_next)
+        .function("modReduceTo", &Evaluator::mod_reduce_to)
         .function(
             "plainTransformToNtt",
             select_overload<void(const Plaintext &, parms_id_type, Plaintext &, MemoryPoolHandle) const>(
