@@ -1590,7 +1590,7 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
 
-        mod_reduce_to_next(encrypted, encrypted, std::move(pool));
+        mod_switch_drop_to_next(encrypted, encrypted, std::move(pool));
 #ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted.is_transparent())

@@ -650,7 +650,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns a reference to the correction factor. This is only needed when using the
         /// BGV encryption scheme. The user should have little or no reason to ever
-        /// change the scale by hand.
+        /// change the correction factor by hand.
         /// </summary>
         public ulong CorrectionFactor
         {
