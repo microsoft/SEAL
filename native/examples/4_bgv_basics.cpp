@@ -142,7 +142,7 @@ void example_bgv_basics()
     cout << "NOTE: Decryption can be incorrect if noise budget is zero." << endl;
 
     cout << endl;
-    cout << "~~~~~~ Use modulus switching to calculate x^8. ~~~~~~" << endl;
+    cout << "~~~~~~ Use modulus switching to calculate x^8 ~~~~~~" << endl;
 
     /*
     Noise budget has reached 0, which means that decryption cannot be expected
@@ -201,7 +201,7 @@ void example_bgv_basics()
     evaluator.mod_switch_to_next_inplace(x_8th);
     cout << "    + noise budget in x_8th (with modulus switching): " << decryptor.invariant_noise_budget(x_8th)
          << " bits" << endl;
-    decryptor.decrypt(x_4th, decrypted_result);
+    decryptor.decrypt(x_8th, decrypted_result);
     batch_encoder.decode(decrypted_result, pod_result);
     cout << "    + result plaintext matrix ...... Correct." << endl;
     print_matrix(pod_result, row_size);

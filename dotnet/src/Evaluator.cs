@@ -411,6 +411,28 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Given a ciphertext encrypted modulo q_1...q_k, this function switches the modulus down to q_1...q_{k-1}.
+        /// </summary>
+        /// <remarks>
+        /// Given a ciphertext encrypted modulo q_1...q_k, this function switches the modulus down to q_1...q_{k-1}.
+        /// Dynamic memory allocations in the process are allocated from the memory pool pointed to by the given
+        /// MemoryPoolHandle.
+        /// </remarks>
+        /// <param name="encrypted">The ciphertext to be switched to a smaller modulus</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentNullException">if encrypted is null</exception>
+        /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
+        /// <exception cref="ArgumentException">if encrypted is already at lowest level</exception>
+        /// <exception cref="ArgumentException">if the scale is too large for the new encryption parameters</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
+        public void ModSwitchToNextInplace(Ciphertext encrypted, MemoryPoolHandle pool = null)
+        {
+            ModSwitchToNext(encrypted, destination: encrypted, pool: pool);
+        }
+
+        /// <summary>
         /// Given a ciphertext encrypted modulo q_1...q_k, this function switches the modulus down to q_1...q_{k-1} and
         /// stores the result in the destination parameter.
         /// </summary>
@@ -439,64 +461,6 @@ namespace Microsoft.Research.SEAL
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
             NativeMethods.Evaluator_ModSwitchToNext(
                 NativePtr, encrypted.NativePtr, destination.NativePtr, poolPtr);
-        }
-
-        /// <summary>
-        /// Given a ciphertext encrypted modulo q_1...q_k, this function switches the modulus down to q_1...q_{k-1}.
-        /// </summary>
-        /// <remarks>
-        /// Given a ciphertext encrypted modulo q_1...q_k, this function switches the modulus down to q_1...q_{k-1}.
-        /// Dynamic memory allocations in the process are allocated from the memory pool pointed to by the given
-        /// MemoryPoolHandle.
-        /// </remarks>
-        /// <param name="encrypted">The ciphertext to be switched to a smaller modulus</param>
-        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentNullException">if encrypted is null</exception>
-        /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
-        /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
-        /// <exception cref="ArgumentException">if encrypted is already at lowest level</exception>
-        /// <exception cref="ArgumentException">if the scale is too large for the new encryption parameters</exception>
-        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
-        public void ModSwitchToNextInplace(Ciphertext encrypted, MemoryPoolHandle pool = null)
-        {
-            ModSwitchToNext(encrypted, destination: encrypted, pool: pool);
-        }
-
-        /// <summary>
-        /// Modulus switches an NTT transformed plaintext from modulo q_1...q_k down to modulo q_1...q_{k-1}.
-        /// </summary>
-        /// <param name="plain">The plaintext to be switched to a smaller modulus</param>
-        /// <exception cref="ArgumentNullException">if plain is null</exception>
-        /// <exception cref="ArgumentException">if plain is not in NTT form</exception>
-        /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
-        /// <exception cref="ArgumentException">if plain is already at lowest level</exception>
-        /// <exception cref="ArgumentException">if the scale is too large for the new encryption parameters</exception>
-        public void ModSwitchToNextInplace(Plaintext plain)
-        {
-            ModSwitchToNext(plain, destination: plain);
-        }
-
-        /// <summary>
-        /// Modulus switches an NTT transformed plaintext from modulo q_1...q_k down to modulo q_1...q_{k-1} and stores
-        /// the result in the destination parameter.
-        /// </summary>
-        /// <param name="plain">The plaintext to be switched to a smaller modulus</param>
-        /// <param name="destination">destination The plaintext to overwrite with the modulus switched result</param>
-        /// <exception cref="ArgumentNullException">if plain, or destination is null</exception>
-        /// <exception cref="ArgumentException">if plain is not in NTT form</exception>
-        /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
-        /// <exception cref="ArgumentException">if plain is already at lowest level</exception>
-        /// <exception cref="ArgumentException">if the scale is too large for the new encryption parameters</exception>
-        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
-        public void ModSwitchToNext(Plaintext plain, Plaintext destination)
-        {
-            if (null == plain)
-                throw new ArgumentNullException(nameof(plain));
-            if (null == destination)
-                throw new ArgumentNullException(nameof(destination));
-
-            NativeMethods.Evaluator_ModSwitchToNext(NativePtr, plain.NativePtr, destination.NativePtr);
         }
 
         /// <summary>
@@ -559,6 +523,42 @@ namespace Microsoft.Research.SEAL
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
             NativeMethods.Evaluator_ModSwitchTo(
                 NativePtr, encrypted.NativePtr, parmsId.Block, destination.NativePtr, poolPtr);
+        }
+
+        /// <summary>
+        /// Modulus switches an NTT transformed plaintext from modulo q_1...q_k down to modulo q_1...q_{k-1}.
+        /// </summary>
+        /// <param name="plain">The plaintext to be switched to a smaller modulus</param>
+        /// <exception cref="ArgumentNullException">if plain is null</exception>
+        /// <exception cref="ArgumentException">if plain is not in NTT form</exception>
+        /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentException">if plain is already at lowest level</exception>
+        /// <exception cref="ArgumentException">if the scale is too large for the new encryption parameters</exception>
+        public void ModSwitchToNextInplace(Plaintext plain)
+        {
+            ModSwitchToNext(plain, destination: plain);
+        }
+
+        /// <summary>
+        /// Modulus switches an NTT transformed plaintext from modulo q_1...q_k down to modulo q_1...q_{k-1} and stores
+        /// the result in the destination parameter.
+        /// </summary>
+        /// <param name="plain">The plaintext to be switched to a smaller modulus</param>
+        /// <param name="destination">destination The plaintext to overwrite with the modulus switched result</param>
+        /// <exception cref="ArgumentNullException">if plain, or destination is null</exception>
+        /// <exception cref="ArgumentException">if plain is not in NTT form</exception>
+        /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentException">if plain is already at lowest level</exception>
+        /// <exception cref="ArgumentException">if the scale is too large for the new encryption parameters</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        public void ModSwitchToNext(Plaintext plain, Plaintext destination)
+        {
+            if (null == plain)
+                throw new ArgumentNullException(nameof(plain));
+            if (null == destination)
+                throw new ArgumentNullException(nameof(destination));
+
+            NativeMethods.Evaluator_ModSwitchToNext(NativePtr, plain.NativePtr, destination.NativePtr);
         }
 
         /// <summary>
@@ -722,6 +722,121 @@ namespace Microsoft.Research.SEAL
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
             NativeMethods.Evaluator_RescaleTo(
                 NativePtr, encrypted.NativePtr, parmsId.Block, destination.NativePtr, poolPtr);
+        }
+
+        /// <summary>
+        /// Given a ciphertext encrypted modulo q_1...q_k, this function reduces the modulus down to q_1...q_{k-1} and
+        /// stores the result in the destination parameter.
+        /// </summary>
+        /// <remarks>
+        /// Given a ciphertext encrypted modulo q_1...q_k, this function reduces the modulus down to q_1...q_{k-1} and
+        /// stores the result in the destination parameter. Dynamic memory allocations in the process are allocated from
+        /// the memory pool pointed to by the given MemoryPoolHandle.
+        /// </remarks>
+        /// <param name="encrypted">The ciphertext to be reduced to a smaller modulus</param>
+        /// <param name="destination">The ciphertext to overwrite with the modular reduced result</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentNullException">if encrypted, or destination is null</exception>
+        /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
+        /// <exception cref="ArgumentException">if encrypted is already at lowest level</exception>
+        /// <exception cref="ArgumentException">if the scale is too large for the new encryption parameters</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
+        public void ModReduceToNext(Ciphertext encrypted, Ciphertext destination, MemoryPoolHandle pool = null)
+        {
+            if (null == encrypted)
+                throw new ArgumentNullException(nameof(encrypted));
+            if (null == destination)
+                throw new ArgumentNullException(nameof(destination));
+
+            IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
+            NativeMethods.Evaluator_ModReduceToNext(
+                NativePtr, encrypted.NativePtr, destination.NativePtr, poolPtr);
+        }
+
+        /// <summary>
+        /// Given a ciphertext encrypted modulo q_1...q_k, this function reduces the modulus down to q_1...q_{k-1}.
+        /// </summary>
+        /// <remarks>
+        /// Given a ciphertext encrypted modulo q_1...q_k, this function reduces the modulus down to q_1...q_{k-1}.
+        /// Dynamic memory allocations in the process are allocated from the memory pool pointed to by the given
+        /// MemoryPoolHandle.
+        /// </remarks>
+        /// <param name="encrypted">The ciphertext to be reduced to a smaller modulus</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentNullException">if encrypted is null</exception>
+        /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
+        /// <exception cref="ArgumentException">if encrypted is already at lowest level</exception>
+        /// <exception cref="ArgumentException">if the scale is too large for the new encryption parameters</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
+        public void ModReduceToNextInplace(Ciphertext encrypted, MemoryPoolHandle pool = null)
+        {
+            ModReduceToNext(encrypted, destination: encrypted, pool: pool);
+        }
+
+        /// <summary>
+        /// Given a ciphertext encrypted modulo q_1...q_k, this function reduces the modulus down until the parameters
+        /// reach the given ParmsId and stores the result in the destination parameter.
+        /// </summary>
+        /// <remarks>
+        /// Given a ciphertext encrypted modulo q_1...q_k, this function reduces the modulus down until the parameters
+        /// reach the given ParmsId and stores the result in the destination parameter. Dynamic memory allocations in
+        /// the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        /// </remarks>
+        /// <param name="encrypted">The ciphertext to be reduced to a smaller modulus</param>
+        /// <param name="parmsId">The target parmsId</param>
+        /// <param name="destination">The ciphertext to overwrite with the modular reduced result</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentNullException">if encrypted, parmsId, or destination is null</exception>
+        /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentException">if encrypted is already at lower level in modulus chain than the
+        /// parameters corresponding to parmsId</exception>
+        /// <exception cref="ArgumentException">if the scale is too large for the new encryption parameters</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
+        public void ModReduceTo(Ciphertext encrypted, ParmsId parmsId, Ciphertext destination, MemoryPoolHandle pool = null)
+        {
+            if (null == encrypted)
+                throw new ArgumentNullException(nameof(encrypted));
+            if (null == parmsId)
+                throw new ArgumentNullException(nameof(parmsId));
+            if (null == destination)
+                throw new ArgumentNullException(nameof(destination));
+
+            IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
+            NativeMethods.Evaluator_ModReduceTo(
+                NativePtr, encrypted.NativePtr, parmsId.Block, destination.NativePtr, poolPtr);
+        }
+
+        /// <summary>
+        /// Given a ciphertext encrypted modulo q_1...q_k, this function reduces the modulus down until the parameters
+        /// reach the given ParmsId.
+        /// </summary>
+        /// <remarks>
+        /// Given a ciphertext encrypted modulo q_1...q_k, this function reduces the modulus down until the parameters
+        /// reach the given ParmsId. Dynamic memory allocations in the process are allocated from the memory pool
+        /// pointed to by the given MemoryPoolHandle.
+        /// </remarks>
+        /// <param name="encrypted">The ciphertext to be reduced to a smaller modulus</param>
+        /// <param name="parmsId">The target parmsId</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentNullException">if encrypted or parmsId is null</exception>
+        /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
+        /// <exception cref="ArgumentException">if parmsId is not valid for the encryption parameters</exception>
+        /// <exception cref="ArgumentException">if encrypted is already at lower level in modulus chain than the
+        /// parameters corresponding to parmsId</exception>
+        /// <exception cref="ArgumentException">if the scale is too large for the new encryption parameters</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
+        public void ModReduceToInplace(Ciphertext encrypted, ParmsId parmsId, MemoryPoolHandle pool = null)
+        {
+            ModReduceTo(encrypted, parmsId, destination: encrypted, pool: pool);
         }
 
         /// <summary>

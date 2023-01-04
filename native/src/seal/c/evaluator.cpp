@@ -382,26 +382,6 @@ SEAL_C_FUNC Evaluator_ModSwitchToNext1(void *thisptr, void *encrypted, void *des
     }
 }
 
-SEAL_C_FUNC Evaluator_ModSwitchToNext2(void *thisptr, void *plain, void *destination)
-{
-    Evaluator *eval = FromVoid<Evaluator>(thisptr);
-    IfNullRet(eval, E_POINTER);
-    Plaintext *plain_ptr = FromVoid<Plaintext>(plain);
-    IfNullRet(plain_ptr, E_POINTER);
-    Plaintext *destination_ptr = FromVoid<Plaintext>(destination);
-    IfNullRet(destination_ptr, E_POINTER);
-
-    try
-    {
-        eval->mod_switch_to_next(*plain_ptr, *destination_ptr);
-        return S_OK;
-    }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-}
-
 SEAL_C_FUNC Evaluator_ModSwitchTo1(void *thisptr, void *encrypted, uint64_t *parms_id, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
@@ -428,6 +408,26 @@ SEAL_C_FUNC Evaluator_ModSwitchTo1(void *thisptr, void *encrypted, uint64_t *par
     catch (const logic_error &)
     {
         return COR_E_INVALIDOPERATION;
+    }
+}
+
+SEAL_C_FUNC Evaluator_ModSwitchToNext2(void *thisptr, void *plain, void *destination)
+{
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
+    IfNullRet(eval, E_POINTER);
+    Plaintext *plain_ptr = FromVoid<Plaintext>(plain);
+    IfNullRet(plain_ptr, E_POINTER);
+    Plaintext *destination_ptr = FromVoid<Plaintext>(destination);
+    IfNullRet(destination_ptr, E_POINTER);
+
+    try
+    {
+        eval->mod_switch_to_next(*plain_ptr, *destination_ptr);
+        return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
     }
 }
 
@@ -497,6 +497,60 @@ SEAL_C_FUNC Evaluator_RescaleTo(void *thisptr, void *encrypted, uint64_t *parms_
     try
     {
         eval->rescale_to(*encrypted_ptr, parms, *destination_ptr, *pool_ptr);
+        return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
+    }
+    catch (const logic_error &)
+    {
+        return COR_E_INVALIDOPERATION;
+    }
+}
+
+SEAL_C_FUNC Evaluator_ModReduceToNext(void *thisptr, void *encrypted, void *destination, void *pool)
+{
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
+    IfNullRet(eval, E_POINTER);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    IfNullRet(encrypted_ptr, E_POINTER);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
+    IfNullRet(destination_ptr, E_POINTER);
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
+    try
+    {
+        eval->mod_reduce_to_next(*encrypted_ptr, *destination_ptr, *pool_ptr);
+        return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
+    }
+    catch (const logic_error &)
+    {
+        return COR_E_INVALIDOPERATION;
+    }
+}
+
+SEAL_C_FUNC Evaluator_ModReduceTo(void *thisptr, void *encrypted, uint64_t *parms_id, void *destination, void *pool)
+{
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
+    IfNullRet(eval, E_POINTER);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    IfNullRet(encrypted_ptr, E_POINTER);
+    IfNullRet(parms_id, E_POINTER);
+    Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
+    IfNullRet(destination_ptr, E_POINTER);
+    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
+    parms_id_type parms;
+    CopyParmsId(parms_id, parms);
+
+    try
+    {
+        eval->mod_reduce_to(*encrypted_ptr, parms, *destination_ptr, *pool_ptr);
         return S_OK;
     }
     catch (const invalid_argument &)

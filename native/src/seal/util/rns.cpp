@@ -1200,7 +1200,8 @@ namespace seal
             });
         }
 
-        void RNSTool::mod_t_and_divide_q_last_inplace(RNSIter input, MemoryPoolHandle pool) const
+        void RNSTool::mod_t_and_divide_q_last_ntt_inplace(
+            RNSIter input, ConstNTTTablesIter rns_ntt_tables, MemoryPoolHandle pool) const
         {
             size_t modulus_size = base_q_->size();
             const Modulus *curr_modulus = base_q_->base();
@@ -1209,7 +1210,9 @@ namespace seal
 
             SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(neg_c_last_mod_t, coeff_count_, pool);
             // neg_c_last_mod_t = - c_last (mod t)
-            modulo_poly_coeffs(CoeffIter(input[modulus_size - 1]), coeff_count_, plain_modulus, neg_c_last_mod_t);
+            CoeffIter c_last = input[modulus_size - 1];
+            inverse_ntt_negacyclic_harvey(c_last, rns_ntt_tables[modulus_size - 1]);
+            modulo_poly_coeffs(c_last, coeff_count_, plain_modulus, neg_c_last_mod_t);
             negate_poly_coeffmod(neg_c_last_mod_t, coeff_count_, plain_modulus, neg_c_last_mod_t);
             if (inv_q_last_mod_t_ != 1)
             {
@@ -1220,7 +1223,7 @@ namespace seal
 
             SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(delta_mod_q_i, coeff_count_, pool);
 
-            SEAL_ITERATE(iter(input, curr_modulus, inv_q_last_mod_q_), modulus_size - 1, [&](auto I) {
+            SEAL_ITERATE(iter(input, curr_modulus, inv_q_last_mod_q_, rns_ntt_tables), modulus_size - 1, [&](auto I) {
                 // delta_mod_q_i = neg_c_last_mod_t (mod q_i)
                 modulo_poly_coeffs(neg_c_last_mod_t, coeff_count_, get<1>(I), delta_mod_q_i);
 
@@ -1229,9 +1232,12 @@ namespace seal
                     delta_mod_q_i, coeff_count_, last_modulus_value, get<1>(I), delta_mod_q_i);
 
                 // c_i = c_i - c_last - neg_c_last_mod_t * q_last (mod 2q_i)
-                const uint64_t two_times_q_i = get<1>(I).value() << 1;
-                SEAL_ITERATE(iter(get<0>(I), delta_mod_q_i, input[modulus_size - 1]), coeff_count_, [&](auto J) {
-                    get<0>(J) += two_times_q_i - barrett_reduce_64(get<2>(J), get<1>(I)) - get<1>(J);
+                SEAL_ITERATE(iter(delta_mod_q_i, c_last), coeff_count_, [&](auto J) {
+                    get<0>(J) = add_uint_mod(get<0>(J), barrett_reduce_64(get<1>(J), get<1>(I)), get<1>(I));
+                });
+                ntt_negacyclic_harvey(delta_mod_q_i, get<3>(I));
+                SEAL_ITERATE(iter(get<0>(I), delta_mod_q_i), coeff_count_, [&](auto J) {
+                    get<0>(J) = sub_uint_mod(get<0>(J), get<1>(J), get<1>(I));
                 });
 
                 // c_i = c_i * inv_q_last_mod_q_i (mod q_i)

@@ -1,4 +1,11 @@
 steps:
+- task: JavaToolInstaller@0
+  displayName: Use Java 11
+  inputs:
+    versionSpec: '11'
+    jdkArchitectureOption: 'x64'
+    jdkSourceOption: 'PreInstalled'
+
 - task: PowerShell@2
   displayName: Install CMake 3.18.6
   inputs:
@@ -33,13 +40,6 @@ steps:
       Expand-Archive -Path $NinjaZipFile -DestinationPath $ToolsDirectory
       Copy-Item -Path $NinjaExeFile -Destination "c:/Program Files/CMake/bin"
 
-- task: CmdLine@2
-  displayName: Update NDK
-  inputs:
-    script: |
-      echo Android home: %ANDROID_SDK_ROOT%
-      "%ANDROID_SDK_ROOT%/tools/bin/sdkmanager" --install "ndk;22.1.7171670"
-
 - task: Gradle@2
   displayName: Compile Android Native Libraries
   inputs:
@@ -51,19 +51,22 @@ steps:
     testResultsFiles: '**/TEST-*.xml'
     tasks: 'compileReleaseSources'
 
-- task: CopyFiles@2
-  displayName: Copy files to staging directory
+- task: PowerShell@2
+  displayName: Copy binary files to staging directory
   inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/android/app/.cxx/cmake/release/arm64-v8a/lib/arm64-v8a'
-    Contents: 'libsealc.so'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)/lib/arm64-v8a'
+    targetType: 'inline'
+    script: |
+      # Directories
+      $AndroidFilesDirectory = Join-Path -Path $Env:BUILD_SOURCESDIRECTORY -ChildPath android/app/.cxx
+      $TargetDirectoryArm64 = Join-Path -Path $Env:BUILD_ARTIFACTSTAGINGDIRECTORY -ChildPath lib/arm64-v8a
+      $TargetDirectoryX64 = Join-Path -Path $Env:BUILD_ARTIFACTSTAGINGDIRECTORY -ChildPath lib/x86_64
 
-- task: CopyFiles@2
-  displayName: Copy files to staging directory
-  inputs:
-    SourceFolder: '$(Build.SourcesDirectory)/android/app/.cxx/cmake/release/x86_64/lib/x86_64'
-    Contents: 'libsealc.so'
-    TargetFolder: '$(Build.ArtifactStagingDirectory)/lib/x86_64'
+      # Create directory if necessary
+      mkdir -ErrorAction Ignore $TargetDirectoryArm64
+      mkdir -ErrorAction Ignore $TargetDirectoryX64
+
+      Get-ChildItem -Path $AndroidFilesDirectory -Recurse | Where {$_.Fullname -match 'RelWithDebInfo\\.*\\arm64-v8a\\lib\\arm64-v8a\\libsealc.so'} | Copy-Item -Destination $TargetDirectoryArm64
+      Get-ChildItem -Path $AndroidFilesDirectory -Recurse | Where {$_.Fullname -match 'RelWithDebInfo\\.*\\x86_64\\lib\\x86_64\\libsealc.so'} | Copy-Item -Destination $TargetDirectoryX64
 
 - task: PublishBuildArtifacts@1
   displayName: Publish build artifacts

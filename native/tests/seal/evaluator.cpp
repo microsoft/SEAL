@@ -5246,7 +5246,6 @@ namespace sealtest
             ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
         };
         evaluator_transform_encrypted_to_from_ntt(scheme_type::bfv);
-        evaluator_transform_encrypted_to_from_ntt(scheme_type::bgv);
     }
 
     TEST(EvaluatorTest, BFVEncryptMultiplyPlainNTTDecrypt)
@@ -5707,47 +5706,39 @@ namespace sealtest
 
         plain = 0;
         encryptor.encrypt(plain, encrypted);
-        evaluator.transform_to_ntt_inplace(encrypted);
         plain_multiplier = 1;
         evaluator.transform_to_ntt_inplace(plain_multiplier, context.first_parms_id());
         evaluator.multiply_plain_inplace(encrypted, plain_multiplier);
-        evaluator.transform_from_ntt_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
         ASSERT_TRUE(plain.to_string() == "0");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
         plain = 2;
         encryptor.encrypt(plain, encrypted);
-        evaluator.transform_to_ntt_inplace(encrypted);
         plain_multiplier.release();
         plain_multiplier = 3;
         evaluator.transform_to_ntt_inplace(plain_multiplier, context.first_parms_id());
         evaluator.multiply_plain_inplace(encrypted, plain_multiplier);
-        evaluator.transform_from_ntt_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
         ASSERT_TRUE(plain.to_string() == "6");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
         plain = 1;
         encryptor.encrypt(plain, encrypted);
-        evaluator.transform_to_ntt_inplace(encrypted);
         plain_multiplier.release();
         plain_multiplier = "Fx^10 + Ex^9 + Dx^8 + Cx^7 + Bx^6 + Ax^5 + 1x^4 + 2x^3 + 3x^2 + 4x^1 + 5";
         evaluator.transform_to_ntt_inplace(plain_multiplier, context.first_parms_id());
         evaluator.multiply_plain_inplace(encrypted, plain_multiplier);
-        evaluator.transform_from_ntt_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
         ASSERT_TRUE(plain.to_string() == "Fx^10 + Ex^9 + Dx^8 + Cx^7 + Bx^6 + Ax^5 + 1x^4 + 2x^3 + 3x^2 + 4x^1 + 5");
         ASSERT_TRUE(encrypted.parms_id() == context.first_parms_id());
 
         plain = "1x^20";
         encryptor.encrypt(plain, encrypted);
-        evaluator.transform_to_ntt_inplace(encrypted);
         plain_multiplier.release();
         plain_multiplier = "Fx^10 + Ex^9 + Dx^8 + Cx^7 + Bx^6 + Ax^5 + 1x^4 + 2x^3 + 3x^2 + 4x^1 + 5";
         evaluator.transform_to_ntt_inplace(plain_multiplier, context.first_parms_id());
         evaluator.multiply_plain_inplace(encrypted, plain_multiplier);
-        evaluator.transform_from_ntt_inplace(encrypted);
         decryptor.decrypt(encrypted, plain);
         ASSERT_TRUE(
             plain.to_string() ==

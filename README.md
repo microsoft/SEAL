@@ -4,7 +4,7 @@ Microsoft SEAL is an easy-to-use open-source ([MIT licensed](LICENSE)) homomorph
 Microsoft SEAL is written in modern standard C++ and is easy to compile and run in many different environments.
 For more information about the Microsoft SEAL project, see [sealcrypto.org](https://www.microsoft.com/en-us/research/project/microsoft-seal).
 
-This document pertains to Microsoft SEAL version 4.0.
+This document pertains to Microsoft SEAL version 4.1.
 Users of previous versions of the library should look at the [list of changes](CHANGES.md).
 
 ## News
@@ -36,6 +36,7 @@ The [APSI library for Asymmetric PSI](https://eprint.iacr.org/2021/1116) is avai
     - [Microsoft GSL](#microsoft-gsl)
     - [ZLIB and Zstandard](#zlib-and-zstandard)
   - [Installing from NuGet Package](#installing-from-nuget-package-windows-linux-macos-android-ios)
+  - [Installing from vcpkg](#installing-from-vcpkg)
   - [Examples](#examples)
   - [CKKS Programming with EVA](#ckks-programming-with-eva)
 - [Building Microsoft SEAL Manually](#building-microsoft-seal-manually)
@@ -178,6 +179,21 @@ For .NET developers the easiest way of installing Microsoft SEAL is by using the
 Simply add this package into your .NET project as a dependency and you are ready to go.
 
 To develop mobile applications using Microsoft SEAL and .NET for Android and iOS, just add this package to your [Xamarin](https://dotnet.microsoft.com/apps/xamarin) project. Unlike the Microsoft SEAL C++ library, the .NET wrapper library works only on 64-bit platforms, so only `arm64-v8a`/`x86_64` Android ABIs and `arm64`/`x86_64` iOS architectures are supported.
+
+### Installing from vcpkg
+
+You can download and install seal using the [vcpkg](https://github.com/Microsoft/vcpkg) dependency manager.
+
+```shell
+git clone https://github.com/Microsoft/vcpkg.git
+cd vcpkg
+./bootstrap-vcpkg.sh  # ./bootstrap-vcpkg.bat for Windows
+./vcpkg integrate install
+./vcpkg install seal
+```
+
+The "seal" port in vcpkg is kept up to date by Microsoft team members and community contributors.
+If the version is out of date, please [create an issue or pull request](https://github.com/Microsoft/vcpkg) on the vcpkg repository.
 
 ### Examples
 
@@ -380,7 +396,7 @@ emcc \
  -Wall \
  -flto \
  -O3 \
- build/lib/libseal-4.0.a \
+ build/lib/libseal-4.1.a \
  --bind \
  -o "build/bin/seal_wasm.js" \
  -s WASM=1 \
@@ -444,7 +460,7 @@ It is very easy to link your own applications and libraries with Microsoft SEAL 
 Simply add the following to your `CMakeLists.txt`:
 
 ```PowerShell
-find_package(SEAL 4.0 REQUIRED)
+find_package(SEAL 4.1 REQUIRED)
 target_link_libraries(<your target> SEAL::seal)
 ```
 
@@ -527,6 +543,19 @@ For contributing to Microsoft SEAL, please see [CONTRIBUTING.md](CONTRIBUTING.md
 ## Citing Microsoft SEAL
 
 To cite Microsoft SEAL in academic papers, please use the following BibTeX entries.
+
+### Version 4.1
+
+```tex
+    @misc{sealcrypto,
+        title = {{M}icrosoft {SEAL} (release 4.1)},
+        howpublished = {\url{https://github.com/Microsoft/SEAL}},
+        month = dec,
+        year = 2022,
+        note = {Microsoft Research, Redmond, WA.},
+        key = {SEAL}
+    }
+```
 
 ### Version 4.0
 

@@ -188,9 +188,9 @@ namespace seal
 
     void Decryptor::bgv_decrypt(const Ciphertext &encrypted, Plaintext &destination, MemoryPoolHandle pool)
     {
-        if (encrypted.is_ntt_form())
+        if (!encrypted.is_ntt_form())
         {
-            throw invalid_argument("encrypted cannot be in NTT form");
+            throw invalid_argument("encrypted must be in NTT form");
         }
 
         auto &context_data = *context_.get_context_data(encrypted.parms_id());
@@ -199,6 +199,7 @@ namespace seal
         auto &plain_modulus = parms.plain_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_size = coeff_modulus.size();
+        auto ntt_tables = iter(context_data.small_ntt_tables());
 
         SEAL_ALLOCATE_ZERO_GET_RNS_ITER(tmp_dest_modq, coeff_count, coeff_modulus_size, pool);
 
@@ -206,6 +207,8 @@ namespace seal
 
         destination.parms_id() = parms_id_zero;
         destination.resize(coeff_count);
+
+        inverse_ntt_negacyclic_harvey(tmp_dest_modq, coeff_modulus_size, ntt_tables);
 
         context_data.rns_tool()->decrypt_modt(tmp_dest_modq, destination.data(), pool);
 
@@ -396,9 +399,13 @@ namespace seal
         {
             throw logic_error("unsupported scheme");
         }
-        if (encrypted.is_ntt_form())
+        if (scheme == scheme_type::bfv && encrypted.is_ntt_form())
         {
-            throw invalid_argument("encrypted cannot be in NTT form");
+            throw invalid_argument("BFV encrypted cannot be in NTT form");
+        }
+        if (scheme == scheme_type::bgv && !encrypted.is_ntt_form())
+        {
+            throw invalid_argument("BGV encrypted must be in NTT form");
         }
 
         auto &context_data = *context_.get_context_data(encrypted.parms_id());
@@ -407,6 +414,7 @@ namespace seal
         auto &plain_modulus = parms.plain_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_size = coeff_modulus.size();
+        auto ntt_tables = iter(context_data.small_ntt_tables());
 
         // Storage for the infinity norm of noise poly
         auto norm(allocate_uint(coeff_modulus_size, pool_));
@@ -422,6 +430,11 @@ namespace seal
         // Now do the dot product of encrypted_copy and the secret key array using NTT.
         // The secret key powers are already NTT transformed.
         dot_product_ct_sk_array(encrypted, noise_poly, pool_);
+
+        if (scheme == scheme_type::bgv)
+        {
+            inverse_ntt_negacyclic_harvey(noise_poly, coeff_modulus_size, ntt_tables);
+        }
 
         // Multiply by plain_modulus and reduce mod coeff_modulus to get
         // coeff_modulus()*noise.
