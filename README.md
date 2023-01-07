@@ -550,8 +550,8 @@ To cite Microsoft SEAL in academic papers, please use the following BibTeX entri
     @misc{sealcrypto,
         title = {{M}icrosoft {SEAL} (release 4.1)},
         howpublished = {\url{https://github.com/Microsoft/SEAL}},
-        month = dec,
-        year = 2022,
+        month = jan,
+        year = 2023,
         note = {Microsoft Research, Redmond, WA.},
         key = {SEAL}
     }
