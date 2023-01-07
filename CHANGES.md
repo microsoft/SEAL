@@ -1,5 +1,13 @@
 # List of Changes
 
+## Version 4.1.1
+
+### Bug Fixes
+
+- Fixed detection of intrinsics on M1 Macs [(PR #597)](https://github.com/microsoft/SEAL/pull/597).
+- Fixed old dependency version numbers in [README.md](README.md) [(PR #596)](https://github.com/microsoft/SEAL/pull/596).
+- Fixed release date typo in [README.md](README.md).
+
 ## Version 4.1.0
 
 ### Features
