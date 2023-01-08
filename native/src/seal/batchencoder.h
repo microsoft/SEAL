@@ -26,12 +26,12 @@ namespace seal
     Mathematically speaking, if the polynomial modulus is X^N+1, N is a power of two, and
     plain_modulus is a prime number T such that 2N divides T-1, then integers modulo T
     contain a primitive 2N-th root of unity and the polynomial X^N+1 splits into n distinct
-    linear factors as X^N+1 = (X-a_1)*...*(X-a_N) mod T, where the constants a_1, ..., a_n
+    linear factors as X^N+1 = (X-a_1)*...*(X-a_N) mod T, where the constants a_1, ..., a_N
     are all the distinct primitive 2N-th roots of unity in integers modulo T. The Chinese
     Remainder Theorem (CRT) states that the plaintext space Z_T[X]/(X^N+1) in this case is
     isomorphic (as an algebra) to the N-fold direct product of fields Z_T. The isomorphism
     is easy to compute explicitly in both directions, which is what this class does.
-    Furthermore, the Galois group of the extension is (Z/2NZ)* ~= Z/2Z x Z/(N/2) whose
+    Furthermore, the Galois group of the extension is (Z/2NZ)* ~= Z/2Z x Z/(N/2)Z whose
     action on the primitive roots of unity is easy to describe. Since the batching slots
     correspond 1-to-1 to the primitive roots of unity, applying Galois automorphisms on the
     plaintext act by permuting the slots. By applying generators of the two cyclic

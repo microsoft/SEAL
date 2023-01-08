@@ -47,6 +47,11 @@ namespace seal
                 // Allocation failed; rethrow
                 throw;
             }
+            if (new_alloc.data_ptr == nullptr)
+            {
+                // Allocation failed; rethrow
+                throw bad_alloc();
+            }
 
             new_alloc.size = MemoryPool::first_alloc_count;
             new_alloc.free = MemoryPool::first_alloc_count;
@@ -144,6 +149,11 @@ namespace seal
                         // Allocation failed; rethrow
                         throw;
                     }
+                    if (new_alloc.data_ptr == nullptr)
+                    {
+                        // Allocation failed; rethrow
+                        throw bad_alloc();
+                    }
 
                     new_alloc.size = new_size;
                     new_alloc.free = new_size - 1;
@@ -184,6 +194,11 @@ namespace seal
             {
                 // Allocation failed; rethrow
                 throw;
+            }
+            if (new_alloc.data_ptr == nullptr)
+            {
+                // Allocation failed; rethrow
+                throw bad_alloc();
             }
 
             new_alloc.size = MemoryPool::first_alloc_count;
@@ -270,6 +285,11 @@ namespace seal
                     {
                         // Allocation failed; rethrow
                         throw;
+                    }
+                    if (new_alloc.data_ptr == nullptr)
+                    {
+                        // Allocation failed; rethrow
+                        throw bad_alloc();
                     }
 
                     new_alloc.size = new_size;

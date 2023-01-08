@@ -147,7 +147,7 @@ namespace seal
                             std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
         inline void encode(
             const std::vector<T> &values, parms_id_type parms_id, double scale, Plaintext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encode_internal(values.data(), values.size(), parms_id, scale, destination, std::move(pool));
         }
@@ -178,7 +178,7 @@ namespace seal
                             std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
         inline void encode(
             const std::vector<T> &values, double scale, Plaintext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encode(values, context_.first_parms_id(), scale, destination, std::move(pool));
         }
@@ -212,7 +212,7 @@ namespace seal
                             std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
         inline void encode(
             gsl::span<const T> values, parms_id_type parms_id, double scale, Plaintext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encode_internal(
                 values.data(), static_cast<std::size_t>(values.size()), parms_id, scale, destination, std::move(pool));
@@ -244,7 +244,7 @@ namespace seal
                             std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
         inline void encode(
             gsl::span<const T> values, double scale, Plaintext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encode(values, context_.first_parms_id(), scale, destination, std::move(pool));
         }
@@ -271,7 +271,7 @@ namespace seal
         */
         inline void encode(
             double value, parms_id_type parms_id, double scale, Plaintext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encode_internal(value, parms_id, scale, destination, std::move(pool));
         }
@@ -294,7 +294,7 @@ namespace seal
         @throws std::invalid_argument if pool is uninitialized
         */
         inline void encode(
-            double value, double scale, Plaintext &destination, MemoryPoolHandle pool = MemoryManager::GetPool())
+            double value, double scale, Plaintext &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encode(value, context_.first_parms_id(), scale, destination, std::move(pool));
         }
@@ -320,7 +320,7 @@ namespace seal
         */
         inline void encode(
             std::complex<double> value, parms_id_type parms_id, double scale, Plaintext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encode_internal(value, parms_id, scale, destination, std::move(pool));
         }
@@ -344,7 +344,7 @@ namespace seal
         */
         inline void encode(
             std::complex<double> value, double scale, Plaintext &destination,
-            MemoryPoolHandle pool = MemoryManager::GetPool())
+            MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             encode(value, context_.first_parms_id(), scale, destination, std::move(pool));
         }
@@ -360,7 +360,7 @@ namespace seal
         @throws std::invalid_argument if parms_id is not valid for the encryption
         parameters
         */
-        inline void encode(std::int64_t value, parms_id_type parms_id, Plaintext &destination)
+        inline void encode(std::int64_t value, parms_id_type parms_id, Plaintext &destination) const
         {
             encode_internal(value, parms_id, destination);
         }
@@ -374,7 +374,7 @@ namespace seal
         @param[out] destination The plaintext polynomial to overwrite with the
         result
         */
-        inline void encode(std::int64_t value, Plaintext &destination)
+        inline void encode(std::int64_t value, Plaintext &destination) const
         {
             encode(value, context_.first_parms_id(), destination);
         }
@@ -398,7 +398,7 @@ namespace seal
                             std::is_same<std::remove_cv_t<T>, double>::value ||
                             std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
         inline void decode(
-            const Plaintext &plain, std::vector<T> &destination, MemoryPoolHandle pool = MemoryManager::GetPool())
+            const Plaintext &plain, std::vector<T> &destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             destination.resize(slots_);
             decode_internal(plain, destination.data(), std::move(pool));
@@ -423,7 +423,7 @@ namespace seal
                             std::is_same<std::remove_cv_t<T>, double>::value ||
                             std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
         inline void decode(
-            const Plaintext &plain, gsl::span<T> destination, MemoryPoolHandle pool = MemoryManager::GetPool())
+            const Plaintext &plain, gsl::span<T> destination, MemoryPoolHandle pool = MemoryManager::GetPool()) const
         {
             if (destination.size() != slots_)
             {
@@ -447,7 +447,7 @@ namespace seal
                             std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
         void encode_internal(
             const T *values, std::size_t values_size, parms_id_type parms_id, double scale, Plaintext &destination,
-            MemoryPoolHandle pool)
+            MemoryPoolHandle pool) const
         {
             // Verify parameters.
             auto context_data_ptr = context_.get_context_data(parms_id);
@@ -632,7 +632,7 @@ namespace seal
             typename T, typename = std::enable_if_t<
                             std::is_same<std::remove_cv_t<T>, double>::value ||
                             std::is_same<std::remove_cv_t<T>, std::complex<double>>::value>>
-        void decode_internal(const Plaintext &plain, T *destination, MemoryPoolHandle pool)
+        void decode_internal(const Plaintext &plain, T *destination, MemoryPoolHandle pool) const
         {
             // Verify parameters.
             if (!is_valid_for(plain, context_))
@@ -741,17 +741,17 @@ namespace seal
         }
 
         void encode_internal(
-            double value, parms_id_type parms_id, double scale, Plaintext &destination, MemoryPoolHandle pool);
+            double value, parms_id_type parms_id, double scale, Plaintext &destination, MemoryPoolHandle pool) const;
 
         inline void encode_internal(
             std::complex<double> value, parms_id_type parms_id, double scale, Plaintext &destination,
-            MemoryPoolHandle pool)
+            MemoryPoolHandle pool) const
         {
             auto input = util::allocate<std::complex<double>>(slots_, pool_, value);
             encode_internal(input.get(), slots_, parms_id, scale, destination, std::move(pool));
         }
 
-        void encode_internal(std::int64_t value, parms_id_type parms_id, Plaintext &destination);
+        void encode_internal(std::int64_t value, parms_id_type parms_id, Plaintext &destination) const;
 
         MemoryPoolHandle pool_ = MemoryManager::GetPool();
 

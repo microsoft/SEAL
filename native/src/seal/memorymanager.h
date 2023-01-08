@@ -483,7 +483,7 @@ namespace seal
         instructions to the memory manager profile for internal logic.
         */
         template <typename... Args>
-        SEAL_NODISCARD static inline MemoryPoolHandle GetPool(mm_prof_opt_t prof_opt, Args &&...args)
+        SEAL_NODISCARD static inline MemoryPoolHandle GetPool(mm_prof_opt_t prof_opt, Args &&... args)
         {
             switch (prof_opt)
             {

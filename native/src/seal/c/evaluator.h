@@ -42,15 +42,19 @@ SEAL_C_FUNC Evaluator_Relinearize(void *thisptr, void *encrypted, void *relinKey
 
 SEAL_C_FUNC Evaluator_ModSwitchToNext1(void *thisptr, void *encrypted, void *destination, void *pool);
 
-SEAL_C_FUNC Evaluator_ModSwitchToNext2(void *thisptr, void *plain, void *destination);
-
 SEAL_C_FUNC Evaluator_ModSwitchTo1(void *thisptr, void *encrypted, uint64_t *parms_id, void *destination, void *pool);
+
+SEAL_C_FUNC Evaluator_ModSwitchToNext2(void *thisptr, void *plain, void *destination);
 
 SEAL_C_FUNC Evaluator_ModSwitchTo2(void *thisptr, void *plain, uint64_t *parms_id, void *destination);
 
 SEAL_C_FUNC Evaluator_RescaleToNext(void *thisptr, void *encrypted, void *destination, void *pool);
 
 SEAL_C_FUNC Evaluator_RescaleTo(void *thisptr, void *encrypted, uint64_t *parms_id, void *destination, void *pool);
+
+SEAL_C_FUNC Evaluator_ModReduceToNext(void *thisptr, void *encrypted, void *destination, void *pool);
+
+SEAL_C_FUNC Evaluator_ModReduceTo(void *thisptr, void *encrypted, uint64_t *parms_id, void *destination, void *pool);
 
 SEAL_C_FUNC Evaluator_Exponentiate(
     void *thisptr, void *encrypted, uint64_t exponent, void *relin_keys, void *destination, void *pool);

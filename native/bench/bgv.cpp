@@ -341,6 +341,7 @@ namespace sealbench
         {
             state.PauseTiming();
             bm_env->randomize_ct_bgv(ct[0]);
+            bm_env->evaluator()->transform_from_ntt_inplace(ct[0]);
 
             state.ResumeTiming();
             bm_env->evaluator()->transform_to_ntt_inplace(ct[0]);
@@ -354,7 +355,6 @@ namespace sealbench
         {
             state.PauseTiming();
             bm_env->randomize_ct_bgv(ct[0]);
-            bm_env->evaluator()->transform_to_ntt_inplace(ct[0]);
 
             state.ResumeTiming();
             bm_env->evaluator()->transform_from_ntt_inplace(ct[0]);

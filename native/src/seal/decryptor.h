@@ -82,9 +82,9 @@ namespace seal
         @par Invariant Noise Budget
         The invariant noise polynomial of a ciphertext is a rational coefficient
         polynomial, such that a ciphertext decrypts correctly as long as the
-        coefficients of the invariantnoise polynomial are of absolute value less
+        coefficients of the invariant noise polynomial are of absolute value less
         than 1/2. Thus, we call the infinity-norm of the invariant noise polynomial
-        the invariant noise, and for correct decryption requireit to be less than
+        the invariant noise, and for correct decryption require it to be less than
         1/2. If v denotes the invariant noise, we define the invariant noise budget
         as -log2(2v). Thus, the invariant noise budget starts from some initial
         value, which depends on the encryption parameters, and decreases when
@@ -92,7 +92,7 @@ namespace seal
         becomes too noisy to decrypt correctly.
 
         @param[in] encrypted The ciphertext
-        @throws std::invalid_argument if the scheme is not BFV
+        @throws std::logic_error if the scheme is not BFV/BGV
         @throws std::invalid_argument if encrypted is not valid for the encryption
         parameters
         @throws std::invalid_argument if encrypted is in NTT form
