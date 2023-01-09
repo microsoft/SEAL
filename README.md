@@ -11,7 +11,7 @@ Users of previous versions of the library should look at the [list of changes](C
 
 The [BGV scheme](https://eprint.iacr.org/2011/277) is now available in Microsoft SEAL.
 Implementation details are described in [this paper](https://eprint.iacr.org/2020/1481.pdf).
-We truly appreciate [Alibaba Gemini Lab](https://alibaba-gemini-lab.github.io/) for making massive efforts to develop the BGV scheme and integrate it in Microsoft SEAL. And we would like to thank Privacy Technologies Research, Intel Labs, for continous testing and reporting issues.
+We truly appreciate [Alibaba Gemini Lab](https://alibaba-gemini-lab.github.io/) for making massive efforts to develop the BGV scheme and integrate it in Microsoft SEAL. And we would like to thank Privacy Technologies Research, Intel Labs, for continuous testing and reporting issues.
 
 Starting from version 3.7.2, Microsoft SEAL will push new changes to the `main`, `master`, and `contrib` branches without creating a new version.
 We adopt this approach to merge community contribution and resolve issues in a timely manner.
@@ -99,7 +99,7 @@ Microsoft SEAL is a homomorphic encryption library that allows additions and mul
 Other operations, such as encrypted comparison, sorting, or regular expressions, are in most cases not feasible to evaluate on encrypted data using this technology.
 Therefore, only specific privacy-critical cloud computation parts of programs should be implemented with Microsoft SEAL.
 
-It is not always easy or straightfoward to translate an unencrypted computation into a computation on encrypted data, for example, it is not possible to branch on encrypted data.
+It is not always easy or straightforward to translate an unencrypted computation into a computation on encrypted data, for example, it is not possible to branch on encrypted data.
 Microsoft SEAL itself has a steep learning curve and requires the user to understand many homomorphic encryption specific concepts, even though in the end the API is not too complicated.
 Even if a user is able to program and run a specific computation using Microsoft SEAL, the difference between efficient and inefficient implementations can be several orders of magnitude, and it can be hard for new users to know how to improve the performance of their computation.
 
@@ -269,7 +269,7 @@ cmake --build build
 After the build completes, the output binaries can be found in `build/lib/` and `build/bin/` directories.
 
 Various configuration options can be specified and passed to the CMake build system.
-These are decribed below in sections [Basic CMake Options](#basic-cmake-options) and [Advanced CMake Options](#advanced-cmake-options).
+These are described below in sections [Basic CMake Options](#basic-cmake-options) and [Advanced CMake Options](#advanced-cmake-options).
 
 #### Installing Microsoft SEAL
 
@@ -486,9 +486,9 @@ cmake -S . -B build -DSEAL_ROOT=~/mylibs
 cmake --build build
 ```
 
-By default, benchmarks run for a vector of parameters and primitives, which can be overwelmingly informative.
+By default, benchmarks run for a vector of parameters and primitives, which can be overwhelmingly informative.
 To execute a subset of benchmark cases, see [Google Benchmark README](https://github.com/google/benchmark/blob/master/README.md#running-a-subset-of-benchmarks).
-For advanced users, the `bm_parms_vec` variable in [native/bench/bench.cpp](native/bench/bench.cpp) can be overwritten with custom paramter sets.
+For advanced users, the `bm_parms_vec` variable in [native/bench/bench.cpp](native/bench/bench.cpp) can be overwritten with custom parameter sets.
 
 **Note**: The benchmark code is strictly for experimental purposes; it allows insecure parameters that must not be used in real applications.
 Do not follow the benchmarks as examples.
