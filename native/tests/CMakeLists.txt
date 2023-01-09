@@ -3,14 +3,14 @@
 
 cmake_minimum_required(VERSION 3.13)
 
-project(SEALTest VERSION 4.1.0 LANGUAGES CXX C)
+project(SEALTest VERSION 4.1.1 LANGUAGES CXX C)
 
 # If not called from root CMakeLists.txt
 if(NOT DEFINED SEAL_BUILD_TESTS)
     set(SEAL_BUILD_TESTS ON)
 
     # Import Microsoft SEAL
-    find_package(SEAL 4.1.0 EXACT REQUIRED)
+    find_package(SEAL 4.1.1 EXACT REQUIRED)
 
     # Must define these variables and include macros
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUTLIB_PATH})
