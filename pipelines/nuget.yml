@@ -4,6 +4,12 @@ steps:
       inputs:
           versionSpec: ${{ parameters.nuget_version }}
 
+    - task: UseDotNet@2
+      displayName: 'Get .NET Core 6.0 SDK'
+      inputs:
+        packageType: 'sdk'
+        version: '6.0.x'
+
     - task: DownloadBuildArtifacts@0
       inputs:
           downloadType: 'single'
