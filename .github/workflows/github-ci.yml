@@ -1,0 +1,80 @@
+name: Build and Test
+on:
+  # Schedule run every week at 8AM UTC (midnight PST)
+  schedule:
+    - cron: '0 8 * * SUN'
+  
+  # By default this will run when the activity type is "opened", "synchronize",
+  # or "reopened".
+  pull_request:
+    branches:
+      - main
+      - contrib
+      - "[0-9]+.[0-9]+.[0-9]+" # Run on release branch, e.g. 1.2.0
+  
+  # Run when protected branches are pushed to, e.g. via merge
+  push:
+    branches:
+      - main
+      - contrib
+      - "[0-9]+.[0-9]+.[0-9]+" # Run on release branch, e.g. 1.2.0
+
+  # Manually run this workflow on any specified branch.
+  workflow_dispatch:
+
+
+###################
+# Define env vars #
+###################
+env:
+  HEXL_VER: 1.2.3
+  SEAL_VER: 3.7
+
+jobs:
+  # Grab tests from config-tests dir and format into JSON object to reuse in workflow
+  find-scripts:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - id: set-matrix
+        run: |
+          matrix=$(python3 -c 'import os, json; print(json.dumps(os.listdir(".github/config-tests")))')
+          echo $matrix
+          echo "::set-output name=matrix::$matrix"
+  
+  # Execute scripts found in previous job
+  config:
+    needs: find-scripts
+    defaults:
+      run:
+        shell: bash
+    strategy:
+      matrix:
+        os: [ubuntu-20.04, macos-10.15, windows-2019]
+        script: ${{ fromJson(needs.find-scripts.outputs.matrix) }}
+        exclude:
+          # Windows only supports static builds, don't build w/ shared
+          - os: windows-2019
+            script: shared_lib_w_HEXL.sh
+          - os: windows-2019
+            script: shared_lib_w_prebuilt_HEXL.sh
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Checkout hexl
+        uses: actions/checkout@v2
+        with:
+          repository: intel/hexl
+          ref: v${{ env.HEXL_VER }}
+          fetch-depth: 1
+          path: hexl
+
+      - name: Run Config
+        run: |
+          set -xeuo pipefail
+          ./.github/config-tests/${{ matrix.script }}
