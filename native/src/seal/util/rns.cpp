@@ -16,7 +16,7 @@ namespace seal
     namespace util
     {
         RNSBase::RNSBase(const vector<Modulus> &rnsbase, MemoryPoolHandle pool)
-            : pool_(move(pool)), size_(rnsbase.size())
+            : pool_(std::move(pool)), size_(rnsbase.size())
         {
             if (!size_)
             {
@@ -56,7 +56,7 @@ namespace seal
             }
         }
 
-        RNSBase::RNSBase(const RNSBase &copy, MemoryPoolHandle pool) : pool_(move(pool)), size_(copy.size_)
+        RNSBase::RNSBase(const RNSBase &copy, MemoryPoolHandle pool) : pool_(std::move(pool)), size_(copy.size_)
         {
             if (!pool_)
             {
@@ -564,7 +564,7 @@ namespace seal
         RNSTool::RNSTool(
             size_t poly_modulus_degree, const RNSBase &coeff_modulus, const Modulus &plain_modulus,
             MemoryPoolHandle pool)
-            : pool_(move(pool))
+            : pool_(std::move(pool))
         {
 #ifdef SEAL_DEBUG
             if (!pool_)

@@ -124,7 +124,7 @@ namespace seal
                 {
                     PublicKey key(pool_);
                     key.unsafe_load(context, stream);
-                    new_keys[index].emplace_back(move(key));
+                    new_keys[index].emplace_back(std::move(key));
                 }
             }
         }
