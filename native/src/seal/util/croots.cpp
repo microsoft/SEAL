@@ -15,7 +15,7 @@ namespace seal
         constexpr double ComplexRoots::PI_;
 
         ComplexRoots::ComplexRoots(size_t degree_of_roots, MemoryPoolHandle pool)
-            : degree_of_roots_(degree_of_roots), pool_(move(pool))
+            : degree_of_roots_(degree_of_roots), pool_(std::move(pool))
         {
 #ifdef SEAL_DEBUG
             int power = util::get_power_of_two(degree_of_roots_);

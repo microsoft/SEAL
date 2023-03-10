@@ -291,7 +291,7 @@ namespace seal
 
         // Acquire new array
         secret_key_array_size_ = new_size;
-        secret_key_array_.acquire(move(secret_key_array));
+        secret_key_array_.acquire(std::move(secret_key_array));
     }
 
     // Compute c_0 + c_1 *s + ... + c_{count-1} * s^{count-1} mod q.

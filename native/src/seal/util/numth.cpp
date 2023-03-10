@@ -298,7 +298,7 @@ namespace seal
                 Modulus new_mod(value);
                 if (new_mod.is_prime())
                 {
-                    destination.emplace_back(move(new_mod));
+                    destination.emplace_back(std::move(new_mod));
                     count--;
                 }
                 value -= factor;

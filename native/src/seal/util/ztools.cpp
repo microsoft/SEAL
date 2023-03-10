@@ -34,14 +34,14 @@ namespace seal
                 class PointerStorage
                 {
                 public:
-                    PointerStorage(MemoryPoolHandle pool) : pool_(move(pool))
+                    PointerStorage(MemoryPoolHandle pool) : pool_(std::move(pool))
                     {}
 
                     void *allocate(size_t size)
                     {
                         auto ptr = util::allocate<seal_byte>(size, pool_);
                         void *addr = reinterpret_cast<void *>(ptr.get());
-                        ptr_storage_[addr] = move(ptr);
+                        ptr_storage_[addr] = std::move(ptr);
                         return addr;
                     }
 
@@ -392,7 +392,7 @@ namespace seal
             {
                 Serialization::SEALHeader &header = *reinterpret_cast<Serialization::SEALHeader *>(header_ptr);
 
-                auto ret = zlib_deflate_array_inplace(in, move(pool));
+                auto ret = zlib_deflate_array_inplace(in, std::move(pool));
                 if (Z_OK != ret)
                 {
                     stringstream ss;
@@ -752,7 +752,7 @@ namespace seal
             {
                 Serialization::SEALHeader &header = *reinterpret_cast<Serialization::SEALHeader *>(header_ptr);
 
-                auto ret = zstd_deflate_array_inplace(in, move(pool));
+                auto ret = zstd_deflate_array_inplace(in, std::move(pool));
                 if (ZSTD_error_no_error != ret)
                 {
                     stringstream ss;

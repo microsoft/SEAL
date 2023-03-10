@@ -852,15 +852,15 @@ namespace seal
         switch (context_data_ptr->parms().scheme())
         {
         case scheme_type::bfv:
-            bfv_square(encrypted, move(pool));
+            bfv_square(encrypted, std::move(pool));
             break;
 
         case scheme_type::ckks:
-            ckks_square(encrypted, move(pool));
+            ckks_square(encrypted, std::move(pool));
             break;
 
         case scheme_type::bgv:
-            bgv_square(encrypted, move(pool));
+            bgv_square(encrypted, std::move(pool));
             break;
 
         default:
@@ -897,7 +897,7 @@ namespace seal
         // Optimization implemented currently only for size 2 ciphertexts
         if (encrypted_size != 2)
         {
-            bfv_multiply(encrypted, encrypted, move(pool));
+            bfv_multiply(encrypted, encrypted, std::move(pool));
             return;
         }
 
@@ -1036,7 +1036,7 @@ namespace seal
         // Optimization implemented currently only for size 2 ciphertexts
         if (encrypted_size != 2)
         {
-            ckks_multiply(encrypted, encrypted, move(pool));
+            ckks_multiply(encrypted, encrypted, std::move(pool));
             return;
         }
 
@@ -1097,7 +1097,7 @@ namespace seal
         // Optimization implemented currently only for size 2 ciphertexts
         if (encrypted_size != 2)
         {
-            bgv_multiply(encrypted, encrypted, move(pool));
+            bgv_multiply(encrypted, encrypted, std::move(pool));
             return;
         }
 
@@ -1402,16 +1402,16 @@ namespace seal
         {
         case scheme_type::bfv:
             // Modulus switching with scaling
-            mod_switch_scale_to_next(encrypted, destination, move(pool));
+            mod_switch_scale_to_next(encrypted, destination, std::move(pool));
             break;
 
         case scheme_type::ckks:
             // Modulus switching without scaling
-            mod_switch_drop_to_next(encrypted, destination, move(pool));
+            mod_switch_drop_to_next(encrypted, destination, std::move(pool));
             break;
 
         case scheme_type::bgv:
-            mod_switch_scale_to_next(encrypted, destination, move(pool));
+            mod_switch_scale_to_next(encrypted, destination, std::move(pool));
             break;
 
         default:
@@ -1503,7 +1503,7 @@ namespace seal
 
         case scheme_type::ckks:
             // Modulus switching with scaling
-            mod_switch_scale_to_next(encrypted, destination, move(pool));
+            mod_switch_scale_to_next(encrypted, destination, std::move(pool));
             break;
 
         default:
@@ -1682,7 +1682,7 @@ namespace seal
                 multiply(encrypteds[i], encrypteds[i + 1], temp);
             }
             relinearize_inplace(temp, relin_keys, pool);
-            product_vec.emplace_back(move(temp));
+            product_vec.emplace_back(std::move(temp));
         }
         if (encrypteds.size() & 1)
         {
@@ -1695,7 +1695,7 @@ namespace seal
             Ciphertext temp(context_, context_data.parms_id(), pool);
             multiply(product_vec[i], product_vec[i + 1], temp);
             relinearize_inplace(temp, relin_keys, pool);
-            product_vec.emplace_back(move(temp));
+            product_vec.emplace_back(std::move(temp));
         }
 
         destination = product_vec.back();
@@ -1731,7 +1731,7 @@ namespace seal
 
         // Create a vector of copies of encrypted
         vector<Ciphertext> exp_vector(static_cast<size_t>(exponent), encrypted);
-        multiply_many(exp_vector, relin_keys, encrypted, move(pool));
+        multiply_many(exp_vector, relin_keys, encrypted, std::move(pool));
     }
 
     void Evaluator::add_plain_inplace(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool) const
@@ -1823,7 +1823,7 @@ namespace seal
             multiply_poly_scalar_coeffmod(
                 plain.data(), plain.coeff_count(), encrypted.correction_factor(), parms.plain_modulus(),
                 plain_copy.data());
-            transform_to_ntt_inplace(plain_copy, encrypted.parms_id(), move(pool));
+            transform_to_ntt_inplace(plain_copy, encrypted.parms_id(), std::move(pool));
             RNSIter encrypted_iter(encrypted.data(), coeff_count);
             ConstRNSIter plain_iter(plain_copy.data(), coeff_count);
             add_poly_coeffmod(encrypted_iter, plain_iter, coeff_modulus_size, coeff_modulus, encrypted_iter);
@@ -1931,7 +1931,7 @@ namespace seal
             multiply_poly_scalar_coeffmod(
                 plain.data(), plain.coeff_count(), encrypted.correction_factor(), parms.plain_modulus(),
                 plain_copy.data());
-            transform_to_ntt_inplace(plain_copy, encrypted.parms_id(), move(pool));
+            transform_to_ntt_inplace(plain_copy, encrypted.parms_id(), std::move(pool));
             RNSIter encrypted_iter(encrypted.data(), coeff_count);
             ConstRNSIter plain_iter(plain_copy.data(), coeff_count);
             sub_poly_coeffmod(encrypted_iter, plain_iter, coeff_modulus_size, coeff_modulus, encrypted_iter);
@@ -1972,12 +1972,12 @@ namespace seal
         }
         else if (!encrypted.is_ntt_form() && !plain.is_ntt_form())
         {
-            multiply_plain_normal(encrypted, plain, move(pool));
+            multiply_plain_normal(encrypted, plain, std::move(pool));
         }
         else if (encrypted.is_ntt_form() && !plain.is_ntt_form())
         {
             Plaintext plain_copy = plain;
-            transform_to_ntt_inplace(plain_copy, encrypted.parms_id(), move(pool));
+            transform_to_ntt_inplace(plain_copy, encrypted.parms_id(), std::move(pool));
             multiply_plain_ntt(encrypted, plain_copy);
         }
         else
@@ -2493,7 +2493,7 @@ namespace seal
         if (galois_keys.has_key(galois_tool->get_elt_from_step(steps)))
         {
             // Perform rotation and key switching
-            apply_galois_inplace(encrypted, galois_tool->get_elt_from_step(steps), galois_keys, move(pool));
+            apply_galois_inplace(encrypted, galois_tool->get_elt_from_step(steps), galois_keys, std::move(pool));
         }
         else
         {
