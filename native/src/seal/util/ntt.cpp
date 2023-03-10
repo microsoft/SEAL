@@ -179,7 +179,7 @@ namespace intel
             if (ntt_it == ntt_cache_.end())
             {
                 hexl::NTT ntt(N, modulus, root, seal::MemoryManager::GetPool(), hexl::SimpleThreadSafePolicy{});
-                ntt_it = ntt_cache_.emplace(move(key), move(ntt)).first;
+                ntt_it = ntt_cache_.emplace(std::move(key), std::move(ntt)).first;
             }
             return ntt_it->second;
         }
@@ -226,7 +226,7 @@ namespace seal
 {
     namespace util
     {
-        NTTTables::NTTTables(int coeff_count_power, const Modulus &modulus, MemoryPoolHandle pool) : pool_(move(pool))
+        NTTTables::NTTTables(int coeff_count_power, const Modulus &modulus, MemoryPoolHandle pool) : pool_(std::move(pool))
         {
 #ifdef SEAL_DEBUG
             if (!pool_)
@@ -316,7 +316,7 @@ namespace seal
 
             // Other constructors
             NTTTablesCreateIter(int coeff_count_power, vector<Modulus> modulus, MemoryPoolHandle pool)
-                : coeff_count_power_(coeff_count_power), modulus_(modulus), pool_(move(pool))
+                : coeff_count_power_(coeff_count_power), modulus_(modulus), pool_(std::move(pool))
             {}
 
             // Require copy and move constructors and assignments

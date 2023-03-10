@@ -438,7 +438,7 @@ namespace seal
         }
 
         // Add them to the context_data_map_
-        context_data_map_.emplace(make_pair(next_parms_id, make_shared<const ContextData>(move(next_context_data))));
+        context_data_map_.emplace(make_pair(next_parms_id, make_shared<const ContextData>(std::move(next_context_data))));
 
         // Add pointer to next context_data to the previous one (linked list)
         // Add pointer to previous context_data to the next one (doubly linked list)
@@ -453,7 +453,7 @@ namespace seal
 
     SEALContext::SEALContext(
         EncryptionParameters parms, bool expand_mod_chain, sec_level_type sec_level, MemoryPoolHandle pool)
-        : pool_(move(pool)), sec_level_(sec_level)
+        : pool_(std::move(pool)), sec_level_(sec_level)
     {
         if (!pool_)
         {

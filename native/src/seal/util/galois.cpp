@@ -47,7 +47,7 @@ namespace seal
             {
                 return;
             }
-            result.acquire(move(temp));
+            result.acquire(std::move(temp));
         }
 
         uint32_t GaloisTool::get_elt_from_step(int step) const
