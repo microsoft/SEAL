@@ -340,7 +340,7 @@ namespace seal
             {
                 throw invalid_argument("coeff_count");
             }
-            if (shift >= coeff_count)
+            if (shift >= 2 * coeff_count)
             {
                 throw invalid_argument("shift");
             }
