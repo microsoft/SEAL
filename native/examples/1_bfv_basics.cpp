@@ -157,7 +157,7 @@ void example_bfv_basics()
 
     Note that KeyGenerator::create_public_key has another overload that takes
     no parameters and returns a Serializable<PublicKey> object. We will discuss
-    this in `6_serialization.cpp'.
+    this in `7_serialization.cpp'.
     */
     KeyGenerator keygen(context);
     SecretKey secret_key = keygen.secret_key();
@@ -168,7 +168,7 @@ void example_bfv_basics()
     To be able to encrypt we need to construct an instance of Encryptor. Note
     that the Encryptor only requires the public key, as expected. It is also
     possible to use Microsoft SEAL in secret-key mode by providing the Encryptor
-    the secret key instead. We will discuss this in `6_serialization.cpp'.
+    the secret key instead. We will discuss this in `7_serialization.cpp'.
     */
     Encryptor encryptor(context, public_key);
 
@@ -218,7 +218,7 @@ void example_bfv_basics()
     We then encrypt the plaintext, producing a ciphertext. We note that the
     Encryptor::encrypt function has another overload that takes as input only
     a plaintext and returns a Serializable<Ciphertext> object. We will discuss
-    this in `6_serialization.cpp'.
+    this in `7_serialization.cpp'.
     */
     print_line(__LINE__);
     Ciphertext x_encrypted;
