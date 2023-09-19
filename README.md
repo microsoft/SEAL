@@ -50,7 +50,7 @@ The [APSI library for Asymmetric PSI](https://eprint.iacr.org/2021/1116) is avai
     - [Basic CMake Options](#basic-cmake-options)
     - [Advanced CMake Options](#advanced-cmake-options)
     - [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake)
-    - [Examples, Tests, and Benchmark](#examples-tests-and-benchmark)
+    - [Examples, Tests, and Benchmarks](#examples-tests-and-benchmarks)
   - [Building .NET Components](#building-net-components)
     - [Windows, Linux, and macOS](#windows-linux-and-macos)
     - [Android and iOS](#android-and-ios)
