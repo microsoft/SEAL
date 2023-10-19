@@ -228,7 +228,7 @@ namespace seal
         class MemoryPoolMT : public MemoryPool
         {
         public:
-            MemoryPoolMT(bool clear_on_destruction = false) : clear_on_destruction_(clear_on_destruction){};
+            MemoryPoolMT(bool clear_on_destruction = false) : clear_on_destruction_(clear_on_destruction){}
 
             ~MemoryPoolMT() noexcept override;
 
@@ -257,7 +257,7 @@ namespace seal
         class MemoryPoolST : public MemoryPool
         {
         public:
-            MemoryPoolST(bool clear_on_destruction = false) : clear_on_destruction_(clear_on_destruction){};
+            MemoryPoolST(bool clear_on_destruction = false) : clear_on_destruction_(clear_on_destruction){}
 
             ~MemoryPoolST() noexcept override;
 
