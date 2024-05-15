@@ -1,5 +1,12 @@
 # List of Changes
 
+## Version 4.1.2
+
+- Merged [(PR #619)](https://github.com/microsoft/SEAL/pull/619): Removed unqualified calls to `std::move`.
+- Merged [(PR #651)](https://github.com/microsoft/SEAL/pull/651): Fixed filename typos in native examples.
+- Merged [(PR #662)](https://github.com/microsoft/SEAL/pull/662) and [(PR #666)](https://github.com/microsoft/SEAL/pull/666): Fixed broken links in [README.md](README.md).
+- Merged [(PR #669)](https://github.com/microsoft/SEAL/pull/669): Removed extra semicolons that caused compiler warnings.
+
 ## Version 4.1.1
 
 ### Bug Fixes

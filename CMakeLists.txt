@@ -23,7 +23,7 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 message(STATUS "Build type (CMAKE_BUILD_TYPE): ${CMAKE_BUILD_TYPE}")
 
-project(SEAL VERSION 4.1.1 LANGUAGES CXX C)
+project(SEAL VERSION 4.1.2 LANGUAGES CXX C)
 
 ########################
 # Global configuration #
