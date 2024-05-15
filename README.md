@@ -215,7 +215,7 @@ The examples are available (and identical) in C++ and C#, and are divided into s
 
 It is recommended to read the comments and the code snippets along with command line printout from running an example.
 For easier navigation, command line printout provides the line number in the associated source file where the associated code snippets start.
-To build the examples, see [Examples, Tests, and Benchmark](#examples-tests-and-benchmark) (C++) and [Building .NET Components](#building-net-components) (C#).
+To build the examples, see [Examples, Tests, and Benchmark](#examples-tests-and-benchmarks) (C++) and [Building .NET Components](#building-net-components) (C#).
 
 **Note:** It is impossible to know how to use Microsoft SEAL correctly without studying examples 1&ndash;6.
 They are designed to provide the reader with the necessary conceptual background on homomorphic encryption.
