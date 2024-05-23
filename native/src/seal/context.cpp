@@ -438,7 +438,8 @@ namespace seal
         }
 
         // Add them to the context_data_map_
-        context_data_map_.emplace(make_pair(next_parms_id, make_shared<const ContextData>(std::move(next_context_data))));
+        context_data_map_.emplace(
+            make_pair(next_parms_id, make_shared<const ContextData>(std::move(next_context_data))));
 
         // Add pointer to next context_data to the previous one (linked list)
         // Add pointer to previous context_data to the next one (doubly linked list)

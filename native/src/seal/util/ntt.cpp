@@ -226,7 +226,8 @@ namespace seal
 {
     namespace util
     {
-        NTTTables::NTTTables(int coeff_count_power, const Modulus &modulus, MemoryPoolHandle pool) : pool_(std::move(pool))
+        NTTTables::NTTTables(int coeff_count_power, const Modulus &modulus, MemoryPoolHandle pool)
+            : pool_(std::move(pool))
         {
 #ifdef SEAL_DEBUG
             if (!pool_)
