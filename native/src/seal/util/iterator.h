@@ -1837,7 +1837,8 @@ namespace seal
 
             IterTuple() = default;
 
-            IterTuple(SEALIter first, IterTuple<Rest...> rest) : first_(first), rest_(rest){};
+            IterTuple(SEALIter first, IterTuple<Rest...> rest) : first_(first), rest_(rest)
+            {}
 
             IterTuple(SEALIter first, Rest... rest) : first_(first), rest_(rest...)
             {}
@@ -2061,7 +2062,8 @@ namespace seal
             using iterator_category = std::random_access_iterator_tag;
             using difference_type = std::ptrdiff_t;
 
-            IterTuple(){};
+            IterTuple()
+            {}
 
             IterTuple(SEALIter first) : first_(first)
             {}
