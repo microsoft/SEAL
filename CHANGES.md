@@ -7,6 +7,10 @@
 - Merged [(PR #662)](https://github.com/microsoft/SEAL/pull/662) and [(PR #666)](https://github.com/microsoft/SEAL/pull/666): Fixed broken links in [README.md](README.md).
 - Merged [(PR #669)](https://github.com/microsoft/SEAL/pull/669): Removed extra semicolons that caused compiler warnings.
 
+### Hotfix - 6/13/2024
+
+- Merged [(PR #688)](https://github.com/microsoft/SEAL/pull/688): Fixed incorrect version numbers in [native/tests/CMakeLists.txt](native/tests/CMakeLists.txt).
+
 ## Version 4.1.1
 
 ### Bug Fixes
