@@ -19,11 +19,15 @@ static_assert(sizeof(std::size_t) == 8, "Require sizeof(std::size_t) == 8");
 static_assert(false, "Require architecture == x64");
 #endif
 
+#ifdef SEAL_BUILD_STATIC_SEAL_C
+#define SEAL_C_DECOR extern "C"
+#else // SEAL_BUILD_STATIC_SEAL_C
 #if defined(SEAL_C_EXPORTS) || defined(seal_c_EXPORTS) || defined(sealc_EXPORTS)
 #define SEAL_C_DECOR extern "C" __declspec(dllexport)
 #else
 #define SEAL_C_DECOR extern "C" __declspec(dllimport)
 #endif
+#endif // SEAL_BUILD_STATIC_SEAL_C
 
 #define SEAL_C_CALL __cdecl
 
@@ -40,8 +44,6 @@ static_assert(false, "Require architecture == x64");
 #define E_INVALIDARG _HRESULT_TYPEDEF_(0x80070057L)
 #define E_OUTOFMEMORY _HRESULT_TYPEDEF_(0x8007000EL)
 #define E_UNEXPECTED _HRESULT_TYPEDEF_(0x8000FFFFL)
-#define COR_E_IO _HRESULT_TYPEDEF_(0x80131620L)
-#define COR_E_INVALIDOPERATION _HRESULT_TYPEDEF_(0x80131509L)
 
 #define S_OK _HRESULT_TYPEDEF_(0L)
 #define S_FALSE _HRESULT_TYPEDEF_(1L)
@@ -58,5 +60,10 @@ static_assert(false, "Require architecture == x64");
 #define FAILED(hr) (((HRESULT)(hr)) < 0)
 
 #endif // _MSC_VER
+
+// On Windows, these would be defined in <corerror.h>, but we don't
+// want .NET as a dependency just to build C bindings.
+#define COR_E_IO _HRESULT_TYPEDEF_(0x80131620L)
+#define COR_E_INVALIDOPERATION _HRESULT_TYPEDEF_(0x80131509L)
 
 #define SEAL_C_FUNC SEAL_C_DECOR HRESULT SEAL_C_CALL
