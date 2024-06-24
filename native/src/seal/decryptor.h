@@ -74,6 +74,27 @@ namespace seal
         void decrypt(const Ciphertext &encrypted, Plaintext &destination);
 
         /*
+        Computes the invariant noise of a ciphertext. The invariant noise is
+        a value that increases with FHE operations. This function only works
+        with the BFV scheme.
+        
+        @par Invariant Noise
+        The invariant noise polynomial of a ciphertext is a rational coefficient
+        polynomial, such that a ciphertext decrypts correctly as long as the
+        coefficients of the invariant noise polynomial are of absolute value less
+        than 1/2. Thus, we call the infinity-norm of the invariant noise polynomial
+        the invariant noise, and for correct decryption require it to be less than
+        1/2.
+
+        @param[in] encrypted The ciphertext
+        @throws std::invalid_argument if the scheme is not BFV
+        @throws std::invalid_argument if encrypted is not valid for the encryption
+        parameters
+        @throws std::invalid_argument if encrypted is in NTT form
+        */
+        SEAL_NODISCARD double invariant_noise(const Ciphertext &encrypted);
+
+        /*
         Computes the invariant noise budget (in bits) of a ciphertext. The
         invariant noise budget measures the amount of room there is for the noise
         to grow while ensuring correct decryptions. This function works only with
@@ -120,6 +141,8 @@ namespace seal
         // Store result in destination in RNS form.
         // destination has the size of an RNS polynomial.
         void dot_product_ct_sk_array(const Ciphertext &encrypted, util::RNSIter destination, MemoryPoolHandle pool);
+
+        util::Pointer<uint64_t> invariant_noise_internal(const Ciphertext &encrypted);
 
         // We use a fresh memory pool with `clear_on_destruction' enabled.
         MemoryPoolHandle pool_ = MemoryManager::GetPool(mm_prof_opt::mm_force_new, true);
