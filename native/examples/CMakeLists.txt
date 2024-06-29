@@ -3,14 +3,16 @@
 
 cmake_minimum_required(VERSION 3.13)
 
-project(SEALExamples VERSION 4.1.1 LANGUAGES CXX)
+project(SEALExamples VERSION 4.1.2 LANGUAGES CXX)
+
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # If not called from root CMakeLists.txt
 if(NOT DEFINED SEAL_BUILD_EXAMPLES)
     set(SEAL_BUILD_EXAMPLES ON)
 
     # Import Microsoft SEAL
-    find_package(SEAL 4.1.1 EXACT REQUIRED)
+    find_package(SEAL 4.1.2 EXACT REQUIRED)
 
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 endif()
