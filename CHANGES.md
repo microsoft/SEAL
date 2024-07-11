@@ -11,6 +11,10 @@
 
 - Merged [(PR #688)](https://github.com/microsoft/SEAL/pull/688): Fixed incorrect version numbers in [native/tests/CMakeLists.txt](native/tests/CMakeLists.txt).
 
+### Hotfix - 7/10/2024
+
+- Merged [(PR #695)](https://github.com/microsoft/SEAL/pull/695): Fixed incorrect version numbers in [native/examples/CMakeLists.txt](native/examples/CMakeLists.txt)
+
 ## Version 4.1.1
 
 ### Bug Fixes
