@@ -10,6 +10,7 @@
 #include "seal/util/uintarith.h"
 #include "seal/util/uintcore.h"
 #include <algorithm>
+#include <cmath>
 #include <stdexcept>
 
 using namespace std;
@@ -380,8 +381,7 @@ namespace seal
         }
     }
 
-    int Decryptor::invariant_noise_budget(const Ciphertext &encrypted)
-    {
+    util::Pointer<uint64_t> Decryptor::invariant_noise_internal(const Ciphertext &encrypted) {
         // Verify that encrypted is valid.
         if (!is_valid_for(encrypted, context_))
         {
@@ -450,6 +450,43 @@ namespace seal
         // Next we compute the infinity norm mod parms.coeff_modulus()
         StrideIter<const uint64_t *> wide_noise_poly((*noise_poly).ptr(), coeff_modulus_size);
         poly_infty_norm_coeffmod(wide_noise_poly, coeff_count, context_data.total_coeff_modulus(), norm.get(), pool_);
+
+        return norm;
+    }
+
+    double Decryptor::invariant_noise(const Ciphertext &encrypted) {
+        double invariant_noise = 0.0;
+
+        auto &context_data = *context_.get_context_data(encrypted.parms_id());
+        auto &parms = context_data.parms();
+        auto &coeff_modulus = parms.coeff_modulus();
+        size_t coeff_modulus_size = coeff_modulus.size();
+
+        auto norm = invariant_noise_internal(encrypted);
+
+        for (size_t i = 0; i < coeff_modulus_size; i++) {
+            auto power = static_cast<double>(sizeof(uint64_t) * 8 * i);
+            auto word = static_cast<double>(norm.get()[i]);
+            invariant_noise += word * exp2(power);
+        }
+
+        double total_coeff = 1.0;
+
+        for (auto coeff_mod : coeff_modulus) {
+            total_coeff *= static_cast<double>(coeff_mod.value());
+        } 
+
+        return invariant_noise / total_coeff;
+    }
+
+    int Decryptor::invariant_noise_budget(const Ciphertext &encrypted)
+    {
+        auto norm = invariant_noise_internal(encrypted);
+
+        auto &context_data = *context_.get_context_data(encrypted.parms_id());
+        auto &parms = context_data.parms();
+        auto &coeff_modulus = parms.coeff_modulus();
+        size_t coeff_modulus_size = coeff_modulus.size();
 
         // The -1 accounts for scaling the invariant noise by 2;
         // note that we already took plain_modulus into account in compose

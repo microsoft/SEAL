@@ -61,6 +61,26 @@ SEAL_C_FUNC Decryptor_Decrypt(void *thisptr, void *encrypted, void *destination)
     }
 }
 
+SEAL_C_FUNC Decryptor_InvariantNoise(void *thisptr, void *encrypted, double *invariant_noise_budget)
+{
+    Decryptor *decryptor = FromVoid<Decryptor>(thisptr);
+    IfNullRet(decryptor, E_POINTER);
+    Ciphertext *encryptedptr = FromVoid<Ciphertext>(encrypted);
+    IfNullRet(encryptedptr, E_POINTER);
+    IfNullRet(invariant_noise_budget, E_POINTER);
+
+    try
+    {
+        *invariant_noise_budget = decryptor->invariant_noise(*encryptedptr);
+        return S_OK;
+    }
+    catch (const invalid_argument &)
+    {
+        return E_INVALIDARG;
+    }
+}
+
+
 SEAL_C_FUNC Decryptor_InvariantNoiseBudget(void *thisptr, void *encrypted, int *invariant_noise_budget)
 {
     Decryptor *decryptor = FromVoid<Decryptor>(thisptr);
