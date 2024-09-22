@@ -424,6 +424,11 @@ namespace seal
         */
         inline void reserve(std::size_t capacity)
         {
+
+            // Check if capacity is greater than capacity_ before allocating memory
+            if (capacity <= capacity_) {
+                return;
+            }
             std::size_t copy_size = std::min<>(capacity, size_);
 
             // Create new allocation and copy over value
