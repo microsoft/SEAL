@@ -3,7 +3,7 @@
 FetchContent_Declare(
     zlib
     GIT_REPOSITORY https://github.com/madler/zlib.git
-    GIT_TAG        1a8db63788c34a50e39e273d39b7e1033208aea2 # 1.3.1
+    GIT_TAG        51b7f2abdade71cd9bb0e7a373ef2610ec6f9daf # 1.3.1
 )
 FetchContent_GetProperties(zlib)
 if(NOT zlib_POPULATED)
