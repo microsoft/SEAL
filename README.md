@@ -133,7 +133,7 @@ The optional dependencies and their tested versions (other versions may work as 
 | ------------------------------------------------------ | -------------- | ------------------------------------------------ |
 | [Intel HEXL](https://github.com/intel/hexl)            | 1.2.5          | Acceleration of low-level kernels                |
 | [Microsoft GSL](https://github.com/microsoft/GSL)      | 4.0.0          | API extensions                                   |
-| [ZLIB](https://github.com/madler/zlib)                 | 1.2.13         | Compressed serialization                         |
+| [ZLIB](https://github.com/madler/zlib)                 | 1.3.1          | Compressed serialization                         |
 | [Zstandard](https://github.com/facebook/zstd)          | 1.5.2          | Compressed serialization (much faster than ZLIB) |
 | [GoogleTest](https://github.com/google/googletest)     | 1.12.1         | For running tests                                |
 | [GoogleBenchmark](https://github.com/google/benchmark) | 1.7.1          | For running benchmarks                           |
