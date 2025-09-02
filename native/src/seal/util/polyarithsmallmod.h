@@ -471,9 +471,9 @@ namespace seal
 #endif
             
             auto poly_modulus_degree = result.poly_modulus_degree();
-            for (size_t i = 0; i < coeff_modulus_size; i++) {
-                multiply_poly_scalar_coeffmod(poly[i],poly_modulus_degree,scalar,modulus[i],result[i]);
-            }
+            SEAL_ITERATE(iter(poly, modulus, result), coeff_modulus_size, [&](auto I) {
+                multiply_poly_scalar_coeffmod(get<0>(I), poly_modulus_degree, scalar, get<1>(I), get<2>(I));
+            });
         }
 
         inline void multiply_poly_scalar_coeffmod(
