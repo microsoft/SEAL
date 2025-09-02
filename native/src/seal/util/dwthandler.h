@@ -202,7 +202,7 @@ namespace seal
                         std::size_t offset = 0;
                         for (std::size_t i = 0; i < m; i++)
                         {
-                             r = *++roots;
+                            r = *++roots;
                             x = values + offset;
                             y = x + gap;
 
