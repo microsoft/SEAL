@@ -25,19 +25,19 @@ message(STATUS "Build type (CMAKE_BUILD_TYPE): ${CMAKE_BUILD_TYPE}")
 
 project(SEAL VERSION 4.1.2 LANGUAGES CXX C)
 
-# Ορισμός του RISCVRVV ως επιλογή
+# Define RISCV as an option
 option(RISCVRVV "Enable RISC-V RVV extension support" OFF)
 
-# Έλεγχος αν το σύστημα είναι RISC-V
+# Check if RISCV system
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "riscv")
     message(STATUS "Detected RISC-V architecture. Adding custom flags...")
 
-    # Αν το RISCVRVV είναι ενεργοποιημένο (RISCVRVV=ON)
+    # If RISCV is enabled (RISCVRVV=ON)
     if(RISCVRVV)
         message(STATUS "RISC-V RVV flag detected. Adding rv64gcv flags.")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=rv64gcv -mabi=lp64d")
     else()
-        # Αν το RISCVRVV δεν είναι ενεργοποιημένο
+        # If not enabled
         message(STATUS "RISC-V RVV flag not detected. Adding rv64gc flags.")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=rv64gc -mabi=lp64d")
     endif()
@@ -46,7 +46,7 @@ endif()
 
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
-# Εμφάνιση των τελικών flags που προστέθηκαν
+# Print all flags
 message(STATUS "Final CMake CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
 ########################
 # Global configuration #
