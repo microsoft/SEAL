@@ -17,7 +17,6 @@
 #include <riscv_vector.h>
 #endif
 
-
 namespace seal
 {
     namespace util
@@ -93,22 +92,17 @@ namespace seal
                       vuint64m4_t vb = __riscv_vmv_v_x_u64m4(yquot, vl);
                       vuint64m4_t vp = __riscv_vmv_v_x_u64m4(p, vl);
                       vuint64m4_t vop = __riscv_vmv_v_x_u64m4(yop, vl);
-                  
                       // Unsigned high part of a * yquot
                       vuint64m4_t vhi = __riscv_vmulhu_vv_u64m4(a, vb, vl);
-                  
                       // a * yop
                       vuint64m4_t vmul1 = __riscv_vmul_vv_u64m4(a, vop, vl);
-                  
                       // vhi * p
                       vuint64m4_t vmul2 = __riscv_vmul_vv_u64m4(vhi, vp, vl);
-                  
                       // (a * yop) - (vhi * p)
                       vuint64m4_t vres = __riscv_vsub_vv_u64m4(vmul1, vmul2, vl);
-                  
                       return vres;
                   }
-              #endif
+            #endif
 
         private:
             Modulus modulus_;
