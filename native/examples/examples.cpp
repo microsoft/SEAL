@@ -3,13 +3,8 @@
 
 #include "examples.h"
 
-#include<iostream>
-
-
 using namespace std;
 using namespace seal;
-
-
 
 int main()
 {
@@ -38,7 +33,6 @@ int main()
         MemoryManager class can be used to change it. Most users should have
         little or no reason to touch the memory allocation system.
         */
-        
         size_t megabytes = MemoryManager::GetPool().alloc_byte_count() >> 20;
         cout << "[" << setw(7) << right << megabytes << " MB] "
              << "Total allocation from the memory pool" << endl;
@@ -106,6 +100,5 @@ int main()
             return 0;
         }
     } 
-
     return 0;
 }
