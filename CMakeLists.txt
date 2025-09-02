@@ -31,7 +31,7 @@ option(RISCVRVV "Enable RISC-V RVV extension support" OFF)
 # Check if RISCV system
 if(CMAKE_SYSTEM_PROCESSOR MATCHES "riscv")
     message(STATUS "Detected RISC-V architecture. Adding custom flags...")
-
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
     # If RISCV is enabled (RISCVRVV=ON)
     if(RISCVRVV)
         message(STATUS "RISC-V RVV flag detected. Adding rv64gcv flags.")
@@ -42,9 +42,6 @@ if(CMAKE_SYSTEM_PROCESSOR MATCHES "riscv")
         set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=rv64gc -mabi=lp64d")
     endif()
 endif()
-
-
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3")
 
 # Print all flags
 message(STATUS "Final CMake CXX_FLAGS: ${CMAKE_CXX_FLAGS}")
