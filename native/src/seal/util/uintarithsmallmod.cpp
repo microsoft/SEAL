@@ -14,7 +14,6 @@
 
 using namespace std;
 
-
 namespace seal
 {
     namespace util
@@ -170,7 +169,6 @@ namespace seal
         {
             static_assert(SEAL_MULTIPLY_ACCUMULATE_MOD_MAX >= 16, "SEAL_MULTIPLY_ACCUMULATE_MOD_MAX");
             unsigned long long accumulator[2]{ 0, 0 };
-            
             switch (count)
             {
             case 0:
@@ -228,7 +226,6 @@ namespace seal
                 accumulator[0] = dot_product_mod(operand1 + 16, operand2 + 16, count - 16, modulus);
                 goto largest_case;
             };
-            
             return barrett_reduce_128(accumulator, modulus);
         }
     } // namespace util
