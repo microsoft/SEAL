@@ -9,11 +9,7 @@
 #include "seal/util/uintarithsmallmod.h"
 #include <algorithm>
 
-
-
 using namespace std;
-using namespace std::chrono;
-extern long int f;
 
 namespace seal
 {
@@ -457,8 +453,7 @@ namespace seal
                         });
                     }
                 });
-            auto start5 = high_resolution_clock::now();
-            
+                
             #if defined(__riscv_v_intrinsic)
               for (size_t i = 0; i < obase_size; i++) {
                   const uint64_t* base_row = base_change_matrix_[i].get();
@@ -468,7 +463,6 @@ namespace seal
                   for (size_t j = 0; j < count; j++) {
                       temp_ptrs[j] = temp[j];
                   }
-
                   // BEST: Write directly to out[i] - no extra allocation needed
                   vector_dot_product_mod_batch(temp_ptrs, base_row, count, ibase_size, &mod, out[i]);
             }
@@ -480,9 +474,6 @@ namespace seal
                 });
             });
             #endif  
-            auto stop5 = high_resolution_clock::now();
-   	        auto duration5 = duration_cast<microseconds>(stop5 - start5);
-            f+=duration5.count();
         }
         
 
