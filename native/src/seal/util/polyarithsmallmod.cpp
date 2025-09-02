@@ -323,7 +323,7 @@ namespace seal
             const uint64_t modulus_value = modulus.value();
             const uint64_t const_ratio_0 = modulus.const_ratio()[0];
             const uint64_t const_ratio_1 = modulus.const_ratio()[1];
-            auto start4 = high_resolution_clock::now();
+            
             #if defined(__riscv_v_intrinsic)  
             size_t processed = 0;
             while (processed < coeff_count) {
