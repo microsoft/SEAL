@@ -469,7 +469,6 @@ namespace seal
                 throw std::invalid_argument("incompatible iterators");
             }
 #endif
-            
             auto poly_modulus_degree = result.poly_modulus_degree();
             SEAL_ITERATE(iter(poly, modulus, result), coeff_modulus_size, [&](auto I) {
                 multiply_poly_scalar_coeffmod(get<0>(I), poly_modulus_degree, scalar, get<1>(I), get<2>(I));
