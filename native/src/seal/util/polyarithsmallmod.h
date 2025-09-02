@@ -14,10 +14,6 @@
 #include <cstdint>
 #include <stdexcept>
 
-using namespace std::chrono;
-
-extern long int l;
-
 namespace seal
 {
     namespace util
@@ -474,18 +470,10 @@ namespace seal
             }
 #endif
             
-            /*SEAL_ITERATE(iter(poly, modulus, result), coeff_modulus_size, [&](auto I) {
-                multiply_poly_scalar_coeffmod(get<0>(I), poly_modulus_degree, scalar, get<1>(I), get<2>(I));
-            });*/
             auto poly_modulus_degree = result.poly_modulus_degree();
-            auto start6 = high_resolution_clock::now();
-            
             for (size_t i = 0; i < coeff_modulus_size; i++) {
                 multiply_poly_scalar_coeffmod(poly[i],poly_modulus_degree,scalar,modulus[i],result[i]);
             }
-            auto stop6 = high_resolution_clock::now();
-   	    auto duration6 = duration_cast<microseconds>(stop6 - start6);
-            l+=duration6.count();
         }
 
         inline void multiply_poly_scalar_coeffmod(
