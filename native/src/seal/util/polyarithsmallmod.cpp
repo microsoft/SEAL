@@ -11,9 +11,6 @@
 #ifdef SEAL_USE_INTEL_HEXL
 #include "hexl/hexl.hpp"
 #endif
-using namespace std::chrono;
-
-extern long int q;
 
 using namespace std;
 
@@ -276,15 +273,12 @@ namespace seal
 #ifdef SEAL_USE_INTEL_HEXL
             intel::hexl::EltwiseFMAMod(&result[0], &poly[0], scalar.operand, nullptr, coeff_count, modulus.value(), 8);
 #else
-
             #if defined(__riscv_v_intrinsic)
                  size_t processed=0;
-                 
                  while (processed < coeff_count) {
                     size_t vl = __riscv_vsetvl_e64m4(coeff_count - processed);
                     vuint64m4_t vx = __riscv_vle64_v_u64m4(poly + processed, vl);
                     vuint64m4_t vv = multiply_uint_mod_rvv(vx,scalar.quotient, scalar.operand, modulus,vl) ;
-                    
                     __riscv_vse64_v_u64m4(result + processed, vv, vl);
                     processed += vl;
                 }
@@ -332,21 +326,16 @@ namespace seal
             auto start4 = high_resolution_clock::now();
             #if defined(__riscv_v_intrinsic)  
             size_t processed = 0;
-            
             while (processed < coeff_count) {
                 size_t vl = __riscv_vsetvl_e64m4(coeff_count - processed);
-                
                 vuint64m4_t vop1 = __riscv_vle64_v_u64m4(operand1 + processed, vl);
                 vuint64m4_t vop2 = __riscv_vle64_v_u64m4(operand2 + processed, vl);
-                
                 // Use scalar constants - NO vector creation needed!
-                vuint64m4_t vres = dyadic_product_coeffmod_rvv(vop1, vop2,const_ratio_0, const_ratio_1, modulus_value, vl);
-                
+                vuint64m4_t vres = dyadic_product_coeffmod_rvv(vop1, vop2,const_ratio_0, const_ratio_1, modulus_value, vl);               
                 __riscv_vse64_v_u64m4(result + processed, vres, vl);
                 processed += vl;
             }
             #else
-
             SEAL_ITERATE(iter(operand1, operand2, result), coeff_count, [&](auto I) {
                 // Reduces z using base 2^64 Barrett reduction
                 unsigned long long z[2], tmp1, tmp2[2], tmp3, carry;
@@ -372,9 +361,6 @@ namespace seal
                 get<2>(I) = SEAL_COND_SELECT(tmp3 >= modulus_value, tmp3 - modulus_value, tmp3);
             });
             #endif
-            auto stop4 = high_resolution_clock::now();
-   	        auto duration4 = duration_cast<microseconds>(stop4 - start4);
-            q+=duration4.count();
 #endif
         }
 
