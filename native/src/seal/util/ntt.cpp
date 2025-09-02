@@ -303,6 +303,8 @@ namespace seal
             // Pre-compute HEXL NTT object
             intel::seal_ext::get_ntt(coeff_count_, modulus.value(), root_);
 #endif
+            
+            // Populate tables with powers of root in specific orders.
             root_powers_ = allocate<MultiplyUIntModOperand>(coeff_count_, pool_);
             MultiplyUIntModOperand root;
             root.set(root_, modulus_);
