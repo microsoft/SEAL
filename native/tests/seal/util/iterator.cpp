@@ -474,6 +474,15 @@ namespace sealtest
             ASSERT_EQ(1, *get<0>(s));
             ASSERT_EQ(0, *get<1>(s));
 
+            auto tuple_source = make_tuple(2, 3);
+            IterTuple<SeqIter<int>, SeqIter<int>> from_tuple(tuple_source);
+            ASSERT_EQ(2, *get<0>(from_tuple));
+            ASSERT_EQ(3, *get<1>(from_tuple));
+
+            IterTuple<SeqIter<int>, SeqIter<int>> from_moved_tuple(make_tuple(4, 5));
+            ASSERT_EQ(4, *get<0>(from_moved_tuple));
+            ASSERT_EQ(5, *get<1>(from_moved_tuple));
+
             // Get
             ASSERT_EQ(0, get<0>(IterTuple<SeqIter<int>, SeqIter<int>>{ 0, 1 }));
             ASSERT_EQ(1, get<1>(IterTuple<SeqIter<int>, SeqIter<int>>{ 0, 1 }));

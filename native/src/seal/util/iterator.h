@@ -1846,7 +1846,7 @@ namespace seal
             template <typename... Ts>
             IterTuple(const std::tuple<Ts...> &tp)
                 : IterTuple(seal_apply(
-                      [](auto &&... args) -> IterTuple { return { std::forward<decltype(args)>(args)... }; },
+                      [](auto &&... args) -> self_type { return self_type(std::forward<decltype(args)>(args)...); },
                       std::forward<decltype(tp)>(tp)))
             {
                 static_assert(
@@ -1856,7 +1856,7 @@ namespace seal
             template <typename... Ts>
             IterTuple(std::tuple<Ts...> &&tp)
                 : IterTuple(seal_apply(
-                      [](auto &&... args) -> IterTuple && { return { std::forward<decltype(args)>(args)... }; },
+                      [](auto &&... args) -> self_type { return self_type(std::forward<decltype(args)>(args)...); },
                       std::forward<decltype(tp)>(tp)))
             {
                 static_assert(
