@@ -3,6 +3,7 @@
 
 #include "seal/util/locks.h"
 #include <atomic>
+#include <chrono>
 #include <thread>
 #include "gtest/gtest.h"
 
@@ -204,7 +205,7 @@ namespace sealtest
                 writer1->acquire_write();
                 while (!should_unlock1)
                 {
-                    this_thread::sleep_for(10ms);
+                    this_thread::sleep_for(std::chrono::milliseconds(10));
                 }
                 writer1->release();
             });
@@ -223,7 +224,7 @@ namespace sealtest
                 writer2->acquire_write();
                 while (!should_unlock2)
                 {
-                    this_thread::sleep_for(10ms);
+                    this_thread::sleep_for(std::chrono::milliseconds(10));
                 }
                 writer2->release();
             });
