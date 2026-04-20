@@ -51,6 +51,7 @@ SEAL_C_FUNC Serialization_IsCompatibleVersion(uint8_t *headerptr, uint64_t size,
     if (size != static_cast<uint64_t>(sizeof(Serialization::SEALHeader)))
     {
         *result = false;
+        return S_OK;
     }
 
     Serialization::SEALHeader header;
@@ -68,6 +69,7 @@ SEAL_C_FUNC Serialization_IsValidHeader(uint8_t *headerptr, uint64_t size, bool 
     if (size != static_cast<uint64_t>(sizeof(Serialization::SEALHeader)))
     {
         *result = false;
+        return S_OK;
     }
 
     Serialization::SEALHeader header;
