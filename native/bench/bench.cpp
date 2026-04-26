@@ -25,6 +25,71 @@ namespace sealbench
         ->Unit(benchmark::kMicrosecond)                                                                               \
         ->Iterations(10);
 
+    /**
+    Warm up the major SEAL kernels for a given BMEnv before timed benchmarks run.
+    This primes the instruction cache, the SEAL memory pool, and the page tables, so that the first
+    timed benchmark batch is no longer 2-6x slower than subsequent batches on cold systems.
+    See https://github.com/microsoft/SEAL/issues/625.
+    */
+    void warmup_family(unordered_map<EncryptionParameters, shared_ptr<BMEnv>> &bm_env_map)
+    {
+        for (auto &kv : bm_env_map)
+        {
+            const auto &parms = kv.first;
+            auto bm_env = kv.second;
+            auto encryptor = bm_env->encryptor();
+            auto decryptor = bm_env->decryptor();
+            auto evaluator = bm_env->evaluator();
+            const auto &context = bm_env->context();
+
+            Plaintext pt;
+            Ciphertext ct_a, ct_b, ct_dest;
+
+            switch (parms.scheme())
+            {
+            case scheme_type::bfv: {
+                bm_env->randomize_pt_bfv(pt);
+                encryptor->encrypt(pt, ct_a);
+                encryptor->encrypt(pt, ct_b);
+                Plaintext pt_out;
+                decryptor->decrypt(ct_a, pt_out);
+                evaluator->add(ct_a, ct_b, ct_dest);
+                evaluator->multiply(ct_a, ct_b, ct_dest);
+                break;
+            }
+            case scheme_type::bgv: {
+                bm_env->randomize_pt_bgv(pt);
+                encryptor->encrypt(pt, ct_a);
+                encryptor->encrypt(pt, ct_b);
+                Plaintext pt_out;
+                decryptor->decrypt(ct_a, pt_out);
+                evaluator->add(ct_a, ct_b, ct_dest);
+                evaluator->multiply(ct_a, ct_b, ct_dest);
+                break;
+            }
+            case scheme_type::ckks: {
+                vector<double> msg;
+                bm_env->randomize_message_double(msg);
+                bm_env->ckks_encoder()->encode(msg, bm_env->safe_scale(), pt);
+                encryptor->encrypt(pt, ct_a);
+                encryptor->encrypt(pt, ct_b);
+                Plaintext pt_out;
+                decryptor->decrypt(ct_a, pt_out);
+                evaluator->add(ct_a, ct_b, ct_dest);
+                evaluator->multiply(ct_a, ct_b, ct_dest);
+                break;
+            }
+            default:
+                break;
+            }
+
+            if (context.using_keyswitching())
+            {
+                evaluator->relinearize_inplace(ct_dest, bm_env->rlk());
+            }
+        }
+    }
+
     void register_bm_family(
         const pair<size_t, vector<Modulus>> &parms, unordered_map<EncryptionParameters, shared_ptr<BMEnv>> &bm_env_map)
     {
@@ -206,6 +271,12 @@ int main(int argc, char **argv)
     // Now that precomputation have taken place, here is the total memory consumption by SEAL memory pool.
     cout << "[" << setw(7) << right << (seal::MemoryManager::GetPool().alloc_byte_count() >> 20) << " MB] "
          << "Total allocation from the memory pool" << endl;
+
+    // Warm up the major SEAL kernels so that the first timed benchmark batch is not 2-6x slower than
+    // subsequent batches due to cold instruction cache, page faults, and uninitialized memory pool.
+    // See https://github.com/microsoft/SEAL/issues/625.
+    cout << "Running warmup pass ..." << endl;
+    sealbench::warmup_family(bm_env_map);
 
     // For each parameter set in bm_parms_vec, register a family of benchmark cases.
     for (auto &i : bm_parms_vec)
