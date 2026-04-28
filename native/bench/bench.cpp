@@ -220,6 +220,25 @@ namespace sealbench
 
 int main(int argc, char **argv)
 {
+    // Scan for the --no-warmup flag and strip it from argv before handing the
+    // remaining arguments to google-benchmark, which would otherwise warn about
+    // an unknown flag. Disabling warmup is useful when measuring cold-start cost.
+    bool run_warmup = true;
+    for (int i = 1; i < argc; ++i)
+    {
+        if (string(argv[i]) == "--no-warmup")
+        {
+            run_warmup = false;
+            for (int j = i; j < argc - 1; ++j)
+            {
+                argv[j] = argv[j + 1];
+            }
+            argv[argc - 1] = nullptr;
+            --argc;
+            --i;
+        }
+    }
+
     Initialize(&argc, argv);
 
     cout << "Microsoft SEAL version: " << SEAL_VERSION << endl;
@@ -274,9 +293,13 @@ int main(int argc, char **argv)
 
     // Warm up the major SEAL kernels so that the first timed benchmark batch is not 2-6x slower than
     // subsequent batches due to cold instruction cache, page faults, and uninitialized memory pool.
-    // See https://github.com/microsoft/SEAL/issues/625.
-    cout << "Running warmup pass ..." << endl;
-    sealbench::warmup_family(bm_env_map);
+    // See https://github.com/microsoft/SEAL/issues/625. Pass --no-warmup to skip this and measure
+    // the cold-start path instead.
+    if (run_warmup)
+    {
+        cout << "Running warmup pass ..." << endl;
+        sealbench::warmup_family(bm_env_map);
+    }
 
     // For each parameter set in bm_parms_vec, register a family of benchmark cases.
     for (auto &i : bm_parms_vec)
