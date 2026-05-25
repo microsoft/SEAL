@@ -124,7 +124,7 @@ namespace Microsoft.Research.SEAL
         /// </remarks>
         /// <param name="values">The matrix of integers modulo plaintext modulus to batch</param>
         /// <param name="destination">The plaintext polynomial to overwrite with the result</param>
-        /// <exception cref="ArgumentNullException">if either values or destionation are null</exception>
+        /// <exception cref="ArgumentNullException">if either values or destination are null</exception>
         /// <exception cref="ArgumentException">if values is too large</exception>
         public void Encode(IEnumerable<long> values, Plaintext destination)
         {
@@ -151,7 +151,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="plain">The plaintext polynomial to unbatch</param>
         /// <param name="destination">The matrix to be overwritten with the values in the slots</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentNullException">if either plain or destionation are null</exception>
+        /// <exception cref="ArgumentNullException">if either plain or destination are null</exception>
         /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if plain is in NTT form</exception>
         /// <exception cref="ArgumentException">if pool is uninitialized</exception>

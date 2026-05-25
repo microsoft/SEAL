@@ -138,9 +138,9 @@ ZLIB and Zstandard are widely used compression libraries. Microsoft SEAL can opt
 One may ask how compression can help when ciphertext and key data is supposed to be indistinguishable from random.
 In Microsoft SEAL `Ciphertext` objects consist of a large number of integers modulo specific prime numbers (`coeff_modulus` primes).
 When using the CKKS scheme in particular, these prime numbers can be quite small (e.g., 30 bits), but the data is nevertheless serialized as 64-bit integers.
-Therefore, it is not uncommon that almost half of the ciphertext bytes are zeros, and applying a general-purpose compression algorithm is a convenient way of getting rid this wasted space.
+Therefore, it is not uncommon that almost half of the ciphertext bytes are zeros, and applying a general-purpose compression algorithm is a convenient way of getting rid of this wasted space.
 The BFV scheme benefits typically less from this technique, because the prime numbers used for the `coeff_modulus` encryption parameter tend to be larger, and integers modulo these prime numbers fill more of each 64-bit word.
-Compressed serialization can be applied to any serializable Microsoft SEAL object &ndash; not just to `Ciphertext` and keys .
+Compressed serialization can be applied to any serializable Microsoft SEAL object &ndash; not just to `Ciphertext` and keys.
 
 If Microsoft SEAL is compiled with ZLIB or Zstandard support, compression will automatically be used for serialization; see `Serialization::compr_mode_default` in [native/src/seal/serialization.h](native/src/seal/serialization.h).
 However, it is always possible to explicitly pass `compr_mode_type::none` to serialization methods to disable compression.

@@ -73,7 +73,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="scale">Scaling parameter defining encoding precision</param>
         /// <param name="destination">The plaintext polynomial to overwrite with the result</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentNullException">if either values, parmsId or destionation are null.</exception>
+        /// <exception cref="ArgumentNullException">if either values, parmsId or destination are null.</exception>
         /// <exception cref="ArgumentException">if values has invalid size</exception>
         /// <exception cref="ArgumentException">if parmsId is not valid for the encryption
         /// parameters </exception>
@@ -112,7 +112,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="scale">Scaling parameter defining encoding precision</param>
         /// <param name="destination">The plaintext polynomial to overwrite with the result</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentNullException">if either values, parmsId or destionation are null.</exception>
+        /// <exception cref="ArgumentNullException">if either values, parmsId or destination are null.</exception>
         /// <exception cref="ArgumentException">if values has invalid size</exception>
         /// <exception cref="ArgumentException">if parmsId is not valid for the encryption
         /// parameters </exception>
@@ -159,7 +159,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="scale">Scaling parameter defining encoding precision</param>
         /// <param name="destination">The plaintext polynomial to overwrite with the result</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentNullException">if either values or destionation are null.</exception>
+        /// <exception cref="ArgumentNullException">if either values or destination are null.</exception>
         /// <exception cref="ArgumentException">if values has invalid size</exception>
         /// <exception cref="ArgumentException">if scale is not strictly positive</exception>
         /// <exception cref="ArgumentException">if encoding is too large for the encryption
@@ -185,7 +185,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="scale">Scaling parameter defining encoding precision</param>
         /// <param name="destination">The plaintext polynomial to overwrite with the result</param>
         /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
-        /// <exception cref="ArgumentNullException">if either values or destionation are null.</exception>
+        /// <exception cref="ArgumentNullException">if either values or destination are null.</exception>
         /// <exception cref="ArgumentException">if values has invalid size</exception>
         /// <exception cref="ArgumentException">if scale is not strictly positive</exception>
         /// <exception cref="ArgumentException">if encoding is too large for the encryption
@@ -318,7 +318,7 @@ namespace Microsoft.Research.SEAL
         /// <param name="parmsId">parmsId determining the encryption parameters to be used
         /// by the result plaintext</param>
         /// <param name="destination">The plaintext polynomial to overwrite with the result</param>
-        /// <exception cref="ArgumentNullException">if either parmsId or destionation are null</exception>
+        /// <exception cref="ArgumentNullException">if either parmsId or destination are null</exception>
         /// <exception cref="ArgumentException">if parmsId is not valid for the encryption
         /// parameters </exception>
         public void Encode(long value, ParmsId parmsId, Plaintext destination)
