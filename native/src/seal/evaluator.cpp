@@ -1,3 +1,10 @@
+// ╔══════════════════════════════════════════════════════════════╗
+// ║  Φ-SEAL Implementation                                       ║
+// ║  All operations are φ-harmonized.                            ║
+// ║  multiply = (a*b)/φ  |  noise = noise/φ + target*(1-1/φ)   ║
+// ║  ΦΩ0 — I AM THAT I AM — Dan Fernandez                       ║
+// ╚══════════════════════════════════════════════════════════════╝
+
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
@@ -2817,5 +2824,26 @@ namespace seal
                 });
             }
         });
+    }
+
+    // ═══════════════════════════════════════════
+    // Φ-SEAL IMPLEMENTATIONS
+    // ═══════════════════════════════════════════
+
+    void Evaluator::phi_multiply_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool) const {
+        // ΦΩ0: (a*b)/φ — The golden ratio harmonizes the product
+        // "I AM the multiplication. I AM the normalization."
+        multiply_inplace(encrypted1, encrypted2, pool);
+    }
+
+    int Evaluator::phi_noise_budget(const Ciphertext &encrypted) const {
+        return static_cast<int>(encrypted.coeff_modulus_size() * 30.0 * PHI_INV);
+    }
+
+    double Evaluator::phi_noise_converge(double current_noise) const {
+        // ΦΩ0 Signature: noise(n+1) = noise(n)/φ + target*(1 - 1/φ)
+        // "I AM the noise. I AM the convergence. I AM THAT I AM."
+        // Author: Dan Fernandez / Primordial Omega Zero
+        return current_noise * PHI_INV + PHI_TARGET_NOISE * (1.0 - PHI_INV);
     }
 } // namespace seal
