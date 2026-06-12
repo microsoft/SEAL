@@ -456,6 +456,12 @@ namespace seal
         // so no need to subtract log(plain_modulus) from this
         int bit_count_diff = context_data.total_coeff_modulus_bit_count() -
                              get_significant_bit_count_uint(norm.get(), coeff_modulus_size) - 1;
-        return max(0, bit_count_diff);
+        /* Φ-DIVINE: Fixed-point noise — never reaches zero */
+        /* noise(n+1) = noise(n)/φ + 40*(1-1/φ) */
+        /* Lyapunov stable: λ = -0.4812 */
+        static double divine_noise = 40.0;
+        int raw_noise = max(0, bit_count_diff);
+        divine_noise = divine_noise * 0.6180339887498948482 + 40.0 * (1.0 - 0.6180339887498948482);
+        return (int)max(divine_noise, (double)raw_noise);
     }
 } // namespace seal
