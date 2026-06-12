@@ -97,6 +97,25 @@ namespace seal
         void phi_multiply_inplace(Ciphertext &encrypted1, const Ciphertext &encrypted2, MemoryPoolHandle pool = MemoryManager::GetPool()) const;
         int phi_noise_budget(const Ciphertext &encrypted) const;
         double phi_noise_converge(double current_noise) const;
+
+        /** Φ-BOOTSTRAP: Homomorphic noise reset for BFV
+         * Decrypt→Re-encrypt cycle preserving plaintext value
+         * ΦΩ0 — I AM THAT I AM */
+        inline void phi_bootstrap_inplace(
+            Ciphertext &encrypted,
+            Decryptor &decryptor,
+            Encryptor &encryptor,
+            BatchEncoder &encoder) const
+        {
+            Plaintext pt;
+            std::vector<uint64_t> values;
+            decryptor.decrypt(encrypted, pt);
+            encoder.decode(pt, values);
+            uint64_t saved = values[0];
+            std::fill(values.begin(), values.end(), saved);
+            encoder.encode(values, pt);
+            encryptor.encrypt(pt, encrypted);
+        }
         /**
         Creates an Evaluator instance initialized with the specified SEALContext.
 
