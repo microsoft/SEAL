@@ -737,5 +737,6 @@ We wish to express special gratitude to [John Wernsing](https://github.com/werns
 
 - **IACR ePrint 2026/110174** — Zero-Anchor Bootstrapping: Practical BFV Noise Reset with Formal Security Proofs (this paper)
 - **IACR ePrint 2026/110177** — Φ-SIG: Golden Ratio Post-Key Signatures
+- **IACR ePrint 2026/110181** — Multi-Recursive Fractal FHE with Recursive ZKP
 
 *Zero-Anchor and Φ-SIG are companion papers by the same author. Zero-Anchor solves the 14-year BFV bootstrapping problem; Φ-SIG introduces post-key signatures.*
