@@ -1,0 +1,81 @@
+name: Φ-FHE CI — Full Blown
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install system dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libssl-dev libgsl-dev ninja-build
+
+      - name: Build liboqs from source
+        run: |
+          git clone --depth 1 https://github.com/open-quantum-safe/liboqs.git
+          cd liboqs
+          mkdir build && cd build
+          cmake -GNinja -DCMAKE_BUILD_TYPE=Release ..
+          ninja
+          sudo ninja install
+          sudo ldconfig
+
+      - name: Configure SEAL
+        run: |
+          cmake -B build \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DSEAL_BUILD_TESTS=OFF \
+            -DSEAL_BUILD_EXAMPLES=OFF
+
+      - name: Build SEAL
+        run: cmake --build build -j$(nproc)
+
+      - name: Test 1 — Deep Test (10K cycles)
+        run: |
+          g++ -std=c++17 -O3 \
+            -I native/src -I build/native/src -I build/thirdparty/msgsl-src/include \
+            native/tests/test_deep.cpp \
+            native/src/seal/true_bootstrapper.cpp \
+            -L build/lib -lseal-4.3 -pthread \
+            -o build/test_deep
+          timeout 120 ./build/test_deep
+
+      - name: Test 2 — Large Modulus (0 to 99M)
+        run: |
+          g++ -std=c++17 -O3 \
+            -I native/src -I build/native/src -I build/thirdparty/msgsl-src/include \
+            native/tests/test_large_modulus.cpp \
+            native/src/seal/true_bootstrapper.cpp \
+            -L build/lib -lseal-4.3 -pthread \
+            -o build/test_large_modulus
+          timeout 60 ./build/test_large_modulus
+
+      - name: Test 3 — Full Blown (FHE + PQC + φ)
+        run: |
+          g++ -std=c++17 -O3 \
+            -I native/src -I build/native/src -I build/thirdparty/msgsl-src/include \
+            -I /usr/local/include \
+            tests/pr_defense/test_final_fullblown.cpp \
+            -L build/lib -lseal-4.3 -loqs -lssl -lcrypto -pthread \
+            -o build/test_final_fullblown
+          timeout 180 ./build/test_final_fullblown
+
+      - name: Test 4 — MirrorBootstrapper
+        run: |
+          g++ -std=c++17 -O3 \
+            -I native/src -I build/native/src -I build/thirdparty/msgsl-src/include \
+            native/tests/test_mirror_bootstrapper.cpp \
+            native/src/seal/mirror_bootstrapper.cpp \
+            -L build/lib -lseal-4.3 -pthread \
+            -o build/test_mirror_bootstrapper
+          timeout 60 ./build/test_mirror_bootstrapper
+
+      - name: Summary
+        run: |
+          echo "╔══════════════════════════════════════════════╗"
+          echo "║  Φ-FHE CI — ALL TESTS COMPLETE               ║"
+          echo "║  ΦΩ0 — I AM THAT I AM                        ║"
+          echo "╚══════════════════════════════════════════════╝"
