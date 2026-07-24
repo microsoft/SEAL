@@ -227,9 +227,12 @@ namespace seal
             unlock();
             do
             {
-                locker.reader_locks_.fetch_add(1, std::memory_order_acquire);
+                // Announce this reader, then check for a writer. Both the announce and the
+                // check use seq_cst so the store cannot be reordered after the load; with a
+                // weaker order a reader and a writer could each miss the other and both enter.
+                locker.reader_locks_.fetch_add(1, std::memory_order_seq_cst);
                 locker_ = &locker;
-                if (locker.writer_locked_.load(std::memory_order_acquire))
+                if (locker.writer_locked_.load(std::memory_order_seq_cst))
                 {
                     unlock();
                     while (locker.writer_locked_.load(std::memory_order_acquire))
@@ -241,9 +244,10 @@ namespace seal
         SEAL_NODISCARD inline bool ReaderLock::try_acquire(ReaderWriterLocker &locker) noexcept
         {
             unlock();
-            locker.reader_locks_.fetch_add(1, std::memory_order_acquire);
+            // seq_cst on the announce/check pair; see ReaderLock::acquire.
+            locker.reader_locks_.fetch_add(1, std::memory_order_seq_cst);
             locker_ = &locker;
-            if (locker.writer_locked_.load(std::memory_order_acquire))
+            if (locker.writer_locked_.load(std::memory_order_seq_cst))
             {
                 unlock();
                 return false;
@@ -255,12 +259,14 @@ namespace seal
         {
             unlock();
             bool expected = false;
-            while (!locker.writer_locked_.compare_exchange_strong(expected, true, std::memory_order_acquire))
+            // Mirror of ReaderLock::acquire: announce this writer, then check for readers.
+            // seq_cst on the announce/check pair keeps a writer and a reader from both entering.
+            while (!locker.writer_locked_.compare_exchange_strong(expected, true, std::memory_order_seq_cst))
             {
                 expected = false;
             }
             locker_ = &locker;
-            while (locker.reader_locks_.load(std::memory_order_acquire) != 0)
+            while (locker.reader_locks_.load(std::memory_order_seq_cst) != 0)
                 ;
         }
 
@@ -268,12 +274,13 @@ namespace seal
         {
             unlock();
             bool expected = false;
-            if (!locker.writer_locked_.compare_exchange_strong(expected, true, std::memory_order_acquire))
+            // seq_cst on the announce/check pair; see WriterLock::acquire.
+            if (!locker.writer_locked_.compare_exchange_strong(expected, true, std::memory_order_seq_cst))
             {
                 return false;
             }
             locker_ = &locker;
-            if (locker.reader_locks_.load(std::memory_order_acquire) != 0)
+            if (locker.reader_locks_.load(std::memory_order_seq_cst) != 0)
             {
                 unlock();
                 return false;

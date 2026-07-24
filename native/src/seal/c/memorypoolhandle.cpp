@@ -19,9 +19,13 @@ SEAL_C_FUNC MemoryPoolHandle_Create1(void **handle)
 {
     IfNullRet(handle, E_POINTER);
 
-    MemoryPoolHandle *handleptr = new MemoryPoolHandle();
-    *handle = handleptr;
-    return S_OK;
+    try
+    {
+        MemoryPoolHandle *handleptr = new MemoryPoolHandle();
+        *handle = handleptr;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC MemoryPoolHandle_Create2(void *otherptr, void **handle)
@@ -30,9 +34,13 @@ SEAL_C_FUNC MemoryPoolHandle_Create2(void *otherptr, void **handle)
     IfNullRet(other, E_POINTER);
     IfNullRet(handle, E_POINTER);
 
-    MemoryPoolHandle *handleptr = new MemoryPoolHandle(*other);
-    *handle = handleptr;
-    return S_OK;
+    try
+    {
+        MemoryPoolHandle *handleptr = new MemoryPoolHandle(*other);
+        *handle = handleptr;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC MemoryPoolHandle_Destroy(void *thisptr)
@@ -59,30 +67,42 @@ SEAL_C_FUNC MemoryPoolHandle_Global(void **handle)
 {
     IfNullRet(handle, E_POINTER);
 
-    MemoryPoolHandle global = MemoryPoolHandle::Global();
-    MemoryPoolHandle *handleptr = new MemoryPoolHandle(std::move(global));
-    *handle = handleptr;
-    return S_OK;
+    try
+    {
+        MemoryPoolHandle global = MemoryPoolHandle::Global();
+        MemoryPoolHandle *handleptr = new MemoryPoolHandle(std::move(global));
+        *handle = handleptr;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC MemoryPoolHandle_ThreadLocal(void **handle)
 {
     IfNullRet(handle, E_POINTER);
 
-    MemoryPoolHandle threadlocal = MemoryPoolHandle::ThreadLocal();
-    MemoryPoolHandle *handleptr = new MemoryPoolHandle(std::move(threadlocal));
-    *handle = handleptr;
-    return S_OK;
+    try
+    {
+        MemoryPoolHandle threadlocal = MemoryPoolHandle::ThreadLocal();
+        MemoryPoolHandle *handleptr = new MemoryPoolHandle(std::move(threadlocal));
+        *handle = handleptr;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC MemoryPoolHandle_New(bool clear_on_destruction, void **handle)
 {
     IfNullRet(handle, E_POINTER);
 
-    MemoryPoolHandle newhandle = MemoryPoolHandle::New(clear_on_destruction);
-    MemoryPoolHandle *handleptr = new MemoryPoolHandle(std::move(newhandle));
-    *handle = handleptr;
-    return S_OK;
+    try
+    {
+        MemoryPoolHandle newhandle = MemoryPoolHandle::New(clear_on_destruction);
+        MemoryPoolHandle *handleptr = new MemoryPoolHandle(std::move(newhandle));
+        *handle = handleptr;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC MemoryPoolHandle_PoolCount(void *thisptr, uint64_t *count)

@@ -34,8 +34,10 @@ namespace seal
     thread contention in allocations taking place during operations. For example,
     one can share one single Decryptor across any number of threads, but in each
     thread call the decrypt function by giving it a thread-local MemoryPoolHandle
-    to use. It is important for a developer to understand how this works to avoid
-    unnecessary performance bottlenecks.
+    to use. All allocations from a thread-local pool, including object destruction
+    that returns memory to the pool, must remain on the thread that owns it. It is
+    important for a developer to understand how this works to avoid unnecessary
+    performance bottlenecks and unsafe cross-thread use.
 
 
     @par NTT form

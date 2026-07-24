@@ -74,6 +74,13 @@ namespace sealtest
             ASSERT_EQ(1, GaloisTool::GetIndexFromElt(3));
             ASSERT_EQ(4, GaloisTool::GetIndexFromElt(9));
             ASSERT_EQ(5, GaloisTool::GetIndexFromElt(11));
+            ASSERT_EQ(SEAL_POLY_MOD_DEGREE_MAX - 1, GaloisTool::GetIndexFromElt((SEAL_POLY_MOD_DEGREE_MAX << 1) - 1));
+
+            ASSERT_THROW(static_cast<void>(GaloisTool::GetIndexFromElt(0)), invalid_argument);
+            ASSERT_THROW(static_cast<void>(GaloisTool::GetIndexFromElt(2)), invalid_argument);
+            ASSERT_THROW(
+                static_cast<void>(GaloisTool::GetIndexFromElt((SEAL_POLY_MOD_DEGREE_MAX << 1) + 1)), invalid_argument);
+            ASSERT_THROW(static_cast<void>(GaloisTool::GetIndexFromElt(UINT32_MAX)), invalid_argument);
         }
 
         TEST(GaloisToolTest, ApplyGalois)

@@ -102,8 +102,8 @@ namespace Microsoft.Research.SEAL
         /// Returns the KSwitchKeys data.
         /// </summary>
         /// <remarks>
-        /// Returns the KSwitchKeys data. The returned object is valid only as long as
-        /// the KSwitchKeys is valid and not changed.
+        /// Returns the KSwitchKeys data. Each returned PublicKey is an independent copy
+        /// and remains valid after this KSwitchKeys is changed or disposed.
         /// </remarks>
         public IEnumerable<IEnumerable<PublicKey>> Data
         {
@@ -123,7 +123,9 @@ namespace Microsoft.Research.SEAL
                     List<PublicKey> key = new List<PublicKey>(checked((int)count));
                     foreach (IntPtr ptr in pointers)
                     {
-                        key.Add(new PublicKey(ptr, owned: false));
+                        // The C layer returns fresh deep copies (see GetKeyFromVector);
+                        // the managed wrapper owns them and must free them.
+                        key.Add(new PublicKey(ptr, owned: true));
                     }
 
                     result.Add(key);

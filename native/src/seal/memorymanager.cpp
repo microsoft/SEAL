@@ -9,6 +9,7 @@ namespace seal
 {
 #ifndef _M_CEE
     mutex MemoryManager::switch_mutex_;
+    util::ReaderWriterLocker MemoryManager::mm_prof_locker_;
 #else
 #pragma message("WARNING: MemoryManager compiled thread-unsafe and MMProfGuard disabled to support /clr")
 #endif

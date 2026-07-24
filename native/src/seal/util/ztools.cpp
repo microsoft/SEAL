@@ -557,6 +557,8 @@ namespace seal
                 constexpr size_t zstd_process_bytes_in_max =
                     zstd_process_bytes_out_max - (zstd_process_bytes_out_max >> 8) - 64;
 
+                constexpr int zstd_window_log_max = 23;
+
                 // Custom allocator for Zstandard
                 void *zstd_alloc_impl(void *ptr_storage, size_t size)
                 {
@@ -604,6 +606,10 @@ namespace seal
                         mem_.opaque = &ptr_storage_;
                         dctx_ = ZSTD_createDCtx_advanced(mem_);
                         if (!dctx_)
+                        {
+                            failed_ = true;
+                        }
+                        else if (ZSTD_isError(ZSTD_DCtx_setParameter(dctx_, ZSTD_d_windowLogMax, zstd_window_log_max)))
                         {
                             failed_ = true;
                         }

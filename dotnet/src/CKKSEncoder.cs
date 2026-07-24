@@ -131,17 +131,17 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-            double[] valuearray = new double[values.LongCount() * 2];
-            ulong idx = 0;
-            foreach(Complex complex in values)
+            Complex[] valueArray = values.ToArray();
+            double[] flatArray = new double[valueArray.LongLength * 2];
+            for (long i = 0; i < valueArray.LongLength; i++)
             {
-                valuearray[idx++] = complex.Real;
-                valuearray[idx++] = complex.Imaginary;
+                flatArray[i * 2] = valueArray[i].Real;
+                flatArray[i * 2 + 1] = valueArray[i].Imaginary;
             }
 
-            // Note that we should pass values.Count as the length instead of valuearray.Length,
-            // since we are using two doubles in the array per element.
-            NativeMethods.CKKSEncoder_EncodeComplex(NativePtr, (ulong)values.LongCount(), valuearray,
+            // Pass the materialized element count (half the flattened array length), since
+            // each Complex element occupies two doubles in flatArray.
+            NativeMethods.CKKSEncoder_EncodeComplex(NativePtr, (ulong)valueArray.LongLength, flatArray,
                 parmsId.Block, scale, destination.NativePtr, poolPtr);
         }
 

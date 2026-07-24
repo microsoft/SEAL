@@ -2,7 +2,9 @@
 // Licensed under the MIT license.
 
 #include "seal/util/common.h"
+#include <cmath>
 #include <cstdint>
+#include <limits>
 #include "gtest/gtest.h"
 
 using namespace seal;
@@ -21,6 +23,19 @@ namespace sealtest
             ASSERT_EQ(64, bits_per_uint64);
             ASSERT_EQ(2, nibbles_per_byte);
             ASSERT_EQ(16, nibbles_per_uint64);
+        }
+
+        TEST(Common, SafeUint64Cast)
+        {
+            constexpr double two_pow_64 = 18446744073709551616.0;
+
+            ASSERT_TRUE(is_safe_uint64_cast(0.0));
+            ASSERT_TRUE(is_safe_uint64_cast(nextafter(two_pow_64, 0.0)));
+            ASSERT_FALSE(is_safe_uint64_cast(-1.0));
+            ASSERT_FALSE(is_safe_uint64_cast(two_pow_64));
+            ASSERT_FALSE(is_safe_uint64_cast(numeric_limits<double>::infinity()));
+            ASSERT_FALSE(is_safe_uint64_cast(-numeric_limits<double>::infinity()));
+            ASSERT_FALSE(is_safe_uint64_cast(numeric_limits<double>::quiet_NaN()));
         }
 
         TEST(Common, UnsignedComparisons)

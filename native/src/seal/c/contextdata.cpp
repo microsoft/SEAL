@@ -27,6 +27,13 @@ SEAL_C_FUNC ContextData_TotalCoeffModulus(void *thisptr, uint64_t *count, uint64
     IfNullRet(cont_data, E_POINTER);
     IfNullRet(count, E_POINTER);
 
+    // The precomputation buffer is null when it was not computed for these parameters.
+    if (cont_data->total_coeff_modulus() == nullptr)
+    {
+        *count = 0;
+        return S_OK;
+    }
+
     *count = cont_data->parms().coeff_modulus().size();
 
     if (nullptr == total_coeff_modulus)
@@ -58,9 +65,13 @@ SEAL_C_FUNC ContextData_Parms(void *thisptr, void **parms)
     SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
 
-    EncryptionParameters *enc_params = new EncryptionParameters(cont_data->parms());
-    *parms = enc_params;
-    return S_OK;
+    try
+    {
+        EncryptionParameters *enc_params = new EncryptionParameters(cont_data->parms());
+        *parms = enc_params;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC ContextData_Qualifiers(void *thisptr, void **epq)
@@ -69,9 +80,13 @@ SEAL_C_FUNC ContextData_Qualifiers(void *thisptr, void **epq)
     IfNullRet(cont_data, E_POINTER);
     IfNullRet(epq, E_POINTER);
 
-    EncryptionParameterQualifiers *qualifiers = new EncryptionParameterQualifiers(cont_data->qualifiers());
-    *epq = qualifiers;
-    return S_OK;
+    try
+    {
+        EncryptionParameterQualifiers *qualifiers = new EncryptionParameterQualifiers(cont_data->qualifiers());
+        *epq = qualifiers;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC ContextData_CoeffDivPlainModulus(void *thisptr, uint64_t *count, uint64_t *coeff_div)
@@ -79,6 +94,13 @@ SEAL_C_FUNC ContextData_CoeffDivPlainModulus(void *thisptr, uint64_t *count, uin
     SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
     IfNullRet(count, E_POINTER);
+
+    // The precomputation buffer is null when it was not computed for these parameters.
+    if (cont_data->coeff_div_plain_modulus() == nullptr)
+    {
+        *count = 0;
+        return S_OK;
+    }
 
     *count = cont_data->parms().coeff_modulus().size();
 
@@ -111,6 +133,13 @@ SEAL_C_FUNC ContextData_PlainUpperHalfIncrement(void *thisptr, uint64_t *count, 
     SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
     IfNullRet(count, E_POINTER);
+
+    // The precomputation buffer is null when it was not computed for these parameters.
+    if (cont_data->plain_upper_half_increment() == nullptr)
+    {
+        *count = 0;
+        return S_OK;
+    }
 
     *count = cont_data->parms().coeff_modulus().size();
 

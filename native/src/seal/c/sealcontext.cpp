@@ -25,8 +25,12 @@ SEAL_C_FUNC SEALContext_Create(void *encryptionParams, bool expand_mod_chain, in
 
     sec_level_type security_level = static_cast<sec_level_type>(sec_level);
 
-    *context = new SEALContext(*encParams, expand_mod_chain, security_level);
-    return S_OK;
+    try
+    {
+        *context = new SEALContext(*encParams, expand_mod_chain, security_level);
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC SEALContext_Destroy(void *thisptr)

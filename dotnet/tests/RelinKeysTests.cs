@@ -295,6 +295,37 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void DataOwnershipTest()
+        {
+            SEALContext context = GlobalContext.BFVContext;
+            KeyGenerator keygen = new KeyGenerator(context);
+            keygen.CreateRelinKeys(out RelinKeys relinKeys);
+
+            // The Data getter returns independent owned copies. Disposing the copies
+            // must not affect the parent; a fresh materialization still yields valid keys.
+            List<IEnumerable<PublicKey>> first = new List<IEnumerable<PublicKey>>(relinKeys.Data);
+            Assert.IsTrue(first.Count > 0);
+            foreach (IEnumerable<PublicKey> keyParts in first)
+            {
+                foreach (PublicKey pk in keyParts)
+                {
+                    Assert.AreEqual(5ul, pk.Data.CoeffModulusSize);
+                    pk.Dispose();
+                }
+            }
+
+            List<IEnumerable<PublicKey>> second = new List<IEnumerable<PublicKey>>(relinKeys.Data);
+            Assert.AreEqual(first.Count, second.Count);
+            foreach (IEnumerable<PublicKey> keyParts in second)
+            {
+                foreach (PublicKey pk in keyParts)
+                {
+                    Assert.AreEqual(5ul, pk.Data.CoeffModulusSize);
+                }
+            }
+        }
+
+        [TestMethod]
         public void GetKeyTest()
         {
             {

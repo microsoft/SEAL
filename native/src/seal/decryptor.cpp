@@ -237,10 +237,6 @@ namespace seal
         {
             throw invalid_argument("max_power must be at least 1");
         }
-        if (!secret_key_array_size_ || !secret_key_array_)
-        {
-            throw logic_error("secret_key_array_ is uninitialized");
-        }
 #endif
         // WARNING: This function must be called with the original context_data
         auto &context_data = *context_.key_context_data();
@@ -251,6 +247,15 @@ namespace seal
 
         ReaderLock reader_lock(secret_key_array_locker_.acquire_read());
 
+#ifdef SEAL_DEBUG
+        // Check the shared array under the reader lock; a concurrent extension publishes
+        // secret_key_array_size_/secret_key_array_ under the writer lock.
+        if (!secret_key_array_size_ || !secret_key_array_)
+        {
+            throw logic_error("secret_key_array_ is uninitialized");
+        }
+#endif
+
         size_t old_size = secret_key_array_size_;
         size_t new_size = max(max_power, old_size);
 
@@ -259,13 +264,16 @@ namespace seal
             return;
         }
 
-        reader_lock.unlock();
-
         // Need to extend the array
         // Compute powers of secret key until max_power
         auto secret_key_array(allocate_poly_array(new_size, coeff_count, coeff_modulus_size, pool_));
         PolyIter secret_key_array_iter(secret_key_array.get(), coeff_count, coeff_modulus_size);
+        // Copy the existing key powers while the reader lock still pins the shared buffer;
+        // a concurrent extension cannot free it until this reader releases below.
         set_poly_array(secret_key_array_.get(), old_size, coeff_count, coeff_modulus_size, secret_key_array_iter);
+
+        // The remaining powers are computed into the local buffer only, so the lock can drop.
+        reader_lock.unlock();
 
         // Since all of the key powers in secret_key_array_ are already NTT transformed,
         // to get the next one we simply need to compute a dyadic product of the last
@@ -311,6 +319,11 @@ namespace seal
 
         // Make sure we have enough secret key powers computed
         compute_secret_key_array(encrypted_size - 1);
+
+        // Pin the key-power array for the reads below; a concurrent extension cannot free it
+        // while this reader lock is held. Acquired after compute_secret_key_array (which itself
+        // takes the writer lock) to avoid self-deadlock.
+        ReaderLock reader_lock(secret_key_array_locker_.acquire_read());
 
         if (encrypted_size == 2)
         {

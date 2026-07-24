@@ -5,6 +5,7 @@
 #include "seal/context.h"
 #include "seal/keygenerator.h"
 #include "seal/modulus.h"
+#include <limits>
 #include <vector>
 #include "gtest/gtest.h"
 
@@ -118,5 +119,30 @@ namespace sealtest
         {
             ASSERT_EQ(0ULL, short_plain_vec2[i]);
         }
+    }
+
+    TEST(BatchEncoderTest, EncodeRejectsOutOfRangeValues)
+    {
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(64);
+        parms.set_coeff_modulus(CoeffModulus::Create(64, { 60 }));
+        parms.set_plain_modulus(257);
+
+        SEALContext context(parms, false, sec_level_type::none);
+        BatchEncoder batch_encoder(context);
+
+        Plaintext plain;
+
+        // Boundary values remain valid: v < t for unsigned, |v| <= t/2 for signed.
+        ASSERT_NO_THROW(batch_encoder.encode(vector<uint64_t>{ 256 }, plain));
+        ASSERT_NO_THROW(batch_encoder.encode(vector<int64_t>{ 128, -128 }, plain));
+
+        ASSERT_THROW(batch_encoder.encode(vector<uint64_t>{ 257 }, plain), invalid_argument);
+        ASSERT_THROW(batch_encoder.encode(vector<uint64_t>{ uint64_t(1) << 62 }, plain), invalid_argument);
+
+        ASSERT_THROW(batch_encoder.encode(vector<int64_t>{ 200 }, plain), invalid_argument);
+        ASSERT_THROW(batch_encoder.encode(vector<int64_t>{ -200 }, plain), invalid_argument);
+        ASSERT_THROW(
+            batch_encoder.encode(vector<int64_t>{ (numeric_limits<int64_t>::min)() }, plain), invalid_argument);
     }
 } // namespace sealtest

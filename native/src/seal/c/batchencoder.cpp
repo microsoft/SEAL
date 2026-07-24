@@ -27,10 +27,7 @@ SEAL_C_FUNC BatchEncoder_Create(void *context, void **batch_encoder)
         *batch_encoder = encoder;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC BatchEncoder_Destroy(void *thisptr)
@@ -61,10 +58,7 @@ SEAL_C_FUNC BatchEncoder_Encode1(void *thisptr, uint64_t count, uint64_t *values
         encoder->encode(valvec, *plain);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC BatchEncoder_Encode2(void *thisptr, uint64_t count, int64_t *values, void *destination)
@@ -86,10 +80,7 @@ SEAL_C_FUNC BatchEncoder_Encode2(void *thisptr, uint64_t count, int64_t *values,
         encoder->encode(valvec, *plain);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC BatchEncoder_Decode1(void *thisptr, void *plain, uint64_t *count, uint64_t *destination, void *pool)
@@ -107,10 +98,7 @@ SEAL_C_FUNC BatchEncoder_Decode1(void *thisptr, void *plain, uint64_t *count, ui
     {
         encoder->decode(*plainptr, result, *handle);
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 
     // Copy to actual destination
     *count = result.size();
@@ -138,10 +126,7 @@ SEAL_C_FUNC BatchEncoder_Decode2(void *thisptr, void *plain, uint64_t *count, in
     {
         encoder->decode(*plainptr, result, *handle);
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 
     *count = result.size();
 

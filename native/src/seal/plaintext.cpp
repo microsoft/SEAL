@@ -57,8 +57,15 @@ namespace seal
             int power = 0;
             while (is_dec_char(*poly))
             {
-                power *= 10;
-                power += get_dec_value(*poly);
+                // Accumulate in a wider unsigned type and reject any exponent that
+                // would overflow int, so the caller never observes a wrapped
+                // (negative) power. Reuse the existing -1 "parse failure" sentinel.
+                uint64_t next = static_cast<uint64_t>(power) * 10 + static_cast<uint64_t>(get_dec_value(*poly));
+                if (next > static_cast<uint64_t>(numeric_limits<int>::max()))
+                {
+                    return -1;
+                }
+                power = static_cast<int>(next);
                 poly++;
                 length++;
             }
@@ -105,7 +112,11 @@ namespace seal
 
         int assign_coeff_bit_count = 0;
         int pos = 0;
-        int last_power = safe_cast<int>(min(data_.max_size(), safe_cast<size_t>(numeric_limits<int>::max())));
+        // Bound the accepted exponent by the largest polynomial degree any valid
+        // context can use, not by INT_MAX: this caps assign_coeff_count (and hence
+        // the resize below) to a realistic size and prevents a short string from
+        // driving a multi-gigabyte allocation.
+        int last_power = safe_cast<int>(min(data_.max_size(), safe_cast<size_t>(SEAL_POLY_MOD_DEGREE_MAX)));
         const char *hex_poly_ptr = hex_poly.data();
         while (pos < length)
         {
@@ -127,7 +138,7 @@ namespace seal
             // Extract power-term.
             int power_length = 0;
             int power = get_coeff_power(hex_poly_ptr + pos, &power_length);
-            if (power == -1 || power >= last_power)
+            if (power < 0 || power >= last_power)
             {
                 throw invalid_argument("unable to parse hex_poly");
             }
@@ -278,7 +289,7 @@ namespace seal
             // size of the loaded DynArray. This is an important security measure to
             // prevent a malformed DynArray from causing arbitrarily large memory
             // allocations.
-            new_data.data_.load(stream, new_data.coeff_count_);
+            new_data.data_.load(stream, new_data.coeff_count_, true);
 
             // Verify that the buffer is correct
             if (!is_buffer_valid(new_data))

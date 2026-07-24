@@ -112,6 +112,11 @@ namespace seal
             RNSTool cannot be constructed
             */
             failed_creating_rns_tool = 14,
+
+            /**
+            coeff_modulus contains a non-prime value
+            */
+            invalid_coeff_modulus_non_prime = 15,
         };
 
         /**

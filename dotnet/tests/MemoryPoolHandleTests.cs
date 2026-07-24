@@ -4,6 +4,7 @@
 using Microsoft.Research.SEAL;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
+using System.Reflection;
 
 namespace SEALNetTest
 {
@@ -33,7 +34,9 @@ namespace SEALNetTest
             Assert.AreEqual(0ul, handle3.PoolCount);
             Assert.AreEqual(0ul, handle3.AllocByteCount);
 
+#pragma warning disable CS0618
             MemoryPoolHandle handle4 = MemoryManager.GetPool(MMProfOpt.ForceThreadLocal);
+#pragma warning restore CS0618
             Assert.IsNotNull(handle4);
             Assert.AreEqual(0ul, handle4.PoolCount);
             Assert.AreEqual(0ul, handle4.AllocByteCount);
@@ -68,8 +71,33 @@ namespace SEALNetTest
             MemoryPoolHandle handle2 = MemoryPoolHandle.New(clearOnDestruction: true);
             Assert.IsNotNull(handle2);
 
+#pragma warning disable CS0618
             MemoryPoolHandle handle3 = MemoryPoolHandle.ThreadLocal();
+#pragma warning restore CS0618
             Assert.IsNotNull(handle3);
+        }
+
+        [TestMethod]
+        public void ThreadLocalApisAreDeprecatedTest()
+        {
+            MethodInfo handleMethod = typeof(MemoryPoolHandle).GetMethod(
+                "ThreadLocal", BindingFlags.Public | BindingFlags.Static);
+            FieldInfo profileOption = typeof(MMProfOpt).GetField("ForceThreadLocal");
+            Type profileType = typeof(MMProf).Assembly.GetType("Microsoft.Research.SEAL.MMProfThreadLocal");
+
+            Assert.IsNotNull(handleMethod);
+            Assert.IsNotNull(profileOption);
+            Assert.IsNotNull(profileType);
+
+            MemberInfo[] members = { handleMethod, profileOption, profileType };
+            foreach (MemberInfo member in members)
+            {
+                ObsoleteAttribute attribute = member.GetCustomAttribute<ObsoleteAttribute>();
+                Assert.IsNotNull(attribute);
+                Assert.IsFalse(attribute.IsError);
+                StringAssert.Contains(attribute.Message, "MemoryPoolHandle.Global()");
+                StringAssert.Contains(attribute.Message, "MemoryPoolHandle.New()");
+            }
         }
 
         [TestMethod]

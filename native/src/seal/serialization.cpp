@@ -368,6 +368,19 @@ namespace seal
             {
                 throw logic_error("loaded SEALHeader is invalid");
             }
+            if (header.size < sizeof(SEALHeader))
+            {
+                // header.size counts the whole serialized object including the header, so it can never be
+                // smaller than the header. Rejecting here also prevents header.size - sizeof(SEALHeader)
+                // below from underflowing into a huge compressed-payload bound.
+                throw logic_error("loaded SEALHeader is invalid");
+            }
+
+            // Stays false unless the stream is seekable and header.size is confirmed to fit the available
+            // input below. Stream positions (tellg) and header.size are only trusted to drive the
+            // compr_mode::none size check and the trailing skip when this holds; on a non-seekable stream
+            // neither is reliable, so both are gated off.
+            bool size_verified = false;
 
             // Best-effort: reject headers whose advertised size exceeds the bytes actually available,
             // to prevent an attacker-sized allocation in the SafeByteBuffer below. We probe via the
@@ -395,6 +408,10 @@ namespace seal
                     {
                         throw invalid_argument("SEALHeader.size exceeds available input");
                     }
+
+                    // Seekable stream with header.size confirmed to fit the available input: positions are
+                    // meaningful and header.size is safe to use for framing below.
+                    size_verified = true;
                 }
             }
 
@@ -407,7 +424,8 @@ namespace seal
             case compr_mode_type::none:
                 // Read rest of the data
                 load_members(stream, version);
-                if (header.size != safe_cast<uint64_t>(stream.tellg() - stream_start_pos))
+                // The size cross-check relies on stream positions, so it only runs on seekable streams.
+                if (size_verified && header.size != safe_cast<uint64_t>(stream.tellg() - stream_start_pos))
                 {
                     throw logic_error("invalid data size");
                 }
@@ -415,7 +433,10 @@ namespace seal
 #ifdef SEAL_USE_ZLIB
             case compr_mode_type::zlib:
             {
-                auto compr_size = header.size - safe_cast<uint64_t>(stream.tellg() - stream_start_pos);
+                // header.size counts the whole object including the header, so the compressed payload is exactly
+                // header.size - sizeof(SEALHeader). Computing it directly keeps it correct on non-seekable streams,
+                // where tellg() returns -1 and cannot be used to measure the header.
+                auto compr_size = header.size - static_cast<uint64_t>(sizeof(SEALHeader));
 
                 auto safe_pool = MemoryManager::GetPool(mm_prof_opt::mm_force_new, clear_buffers);
 
@@ -438,10 +459,13 @@ namespace seal
                     compressed_remaining = inflate_buffer->remaining();
                 }
 
-                // The parser may not have pulled the whole compressed payload (e.g., a trailing checksum). Skip any
-                // remainder so the stream ends exactly at stream_start_pos + header.size, matching the uncompressed
-                // path and keeping concatenated objects loadable.
-                if (compressed_remaining > 0)
+                // The parser may not have pulled the whole compressed payload (e.g., a trailing checksum). On a
+                // seekable stream, where header.size was confirmed to fit the available input, skip any remainder so
+                // the stream ends exactly at stream_start_pos + header.size, keeping concatenated objects loadable.
+                // On a non-seekable stream header.size is unverified, so skipping is gated off: an inflated
+                // header.size must not drive stream.ignore() past the real data into an over-read or an indefinite
+                // block.
+                if (size_verified && compressed_remaining > 0)
                 {
                     stream.ignore(compressed_remaining);
                 }
@@ -451,7 +475,10 @@ namespace seal
 #ifdef SEAL_USE_ZSTD
             case compr_mode_type::zstd:
             {
-                auto compr_size = header.size - safe_cast<uint64_t>(stream.tellg() - stream_start_pos);
+                // header.size counts the whole object including the header, so the compressed payload is exactly
+                // header.size - sizeof(SEALHeader). Computing it directly keeps it correct on non-seekable streams,
+                // where tellg() returns -1 and cannot be used to measure the header.
+                auto compr_size = header.size - static_cast<uint64_t>(sizeof(SEALHeader));
 
                 auto safe_pool = MemoryManager::GetPool(mm_prof_opt::mm_force_new, clear_buffers);
 
@@ -474,10 +501,13 @@ namespace seal
                     compressed_remaining = inflate_buffer->remaining();
                 }
 
-                // The parser may not have pulled the whole compressed payload (e.g., a trailing checksum). Skip any
-                // remainder so the stream ends exactly at stream_start_pos + header.size, matching the uncompressed
-                // path and keeping concatenated objects loadable.
-                if (compressed_remaining > 0)
+                // The parser may not have pulled the whole compressed payload (e.g., a trailing checksum). On a
+                // seekable stream, where header.size was confirmed to fit the available input, skip any remainder so
+                // the stream ends exactly at stream_start_pos + header.size, keeping concatenated objects loadable.
+                // On a non-seekable stream header.size is unverified, so skipping is gated off: an inflated
+                // header.size must not drive stream.ignore() past the real data into an over-read or an indefinite
+                // block.
+                if (size_verified && compressed_remaining > 0)
                 {
                     stream.ignore(compressed_remaining);
                 }

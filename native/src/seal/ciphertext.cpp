@@ -307,14 +307,18 @@ namespace seal
             auto total_uint64_count =
                 mul_safe(new_data.size_, new_data.poly_modulus_degree_, new_data.coeff_modulus_size_);
 
-            // Reserve memory for the entire (expected) ciphertext data
-            new_data.data_.reserve(total_uint64_count);
+            // Only size-2 ciphertexts can use the single-polynomial seeded representation.
+            // Larger ciphertexts allocate from the serialized DynArray size below.
+            if (new_data.size_ == 2)
+            {
+                new_data.data_.reserve(total_uint64_count);
+            }
 
             // Load the data. Note that we are supplying also the expected maximum
             // size of the loaded DynArray. This is an important security measure to
             // prevent a malformed DynArray from causing arbitrarily large memory
             // allocations.
-            new_data.data_.load(stream, total_uint64_count);
+            new_data.data_.load(stream, total_uint64_count, true);
 
             // Expected buffer size in the seeded case
             auto seeded_uint64_count = poly_modulus_degree64 * coeff_modulus_size64;
@@ -323,6 +327,11 @@ namespace seal
             // ciphertext data was already (possibly) loaded and we are done
             if (unsigned_eq(new_data.data_.size(), seeded_uint64_count))
             {
+                if (new_data.size_ != 2)
+                {
+                    throw logic_error("ciphertext data is invalid");
+                }
+
                 // Single polynomial size data was loaded, so we are in the seeded
                 // ciphertext case. Next load the UniformRandomGeneratorInfo.
                 UniformRandomGeneratorInfo prng_info;
@@ -370,10 +379,22 @@ namespace seal
         }
         stream.exceptions(old_except_mask);
 
+        // BGV ciphertexts are stored in coefficient form and converted to NTT form on load.
+        // ntt_negacyclic_harvey requires coefficients reduced modulo the coefficient modulus, a
+        // precondition not implied by is_metadata_valid_for or is_buffer_valid; the range check in
+        // is_data_valid_for otherwise runs only after the transform (and never for unsafe_load).
+        // Validate the loaded coefficients before transforming so out-of-range words are rejected
+        // rather than transformed and laundered into a valid object by the transform's reduction.
+        bool bgv_to_ntt_form = context.key_context_data()->parms().scheme() == scheme_type::bgv &&
+                               !new_data.is_ntt_form_ && new_data.data_.size() != 0;
+        if (bgv_to_ntt_form && !is_data_valid_for(new_data, context))
+        {
+            throw logic_error("ciphertext data is invalid");
+        }
+
         swap(*this, new_data);
 
-        // BGV Ciphertext are converted to NTT form.
-        if (context.key_context_data()->parms().scheme() == scheme_type::bgv && !this->is_ntt_form() && this->data())
+        if (bgv_to_ntt_form)
         {
             ntt_negacyclic_harvey(*this, this->size(), context.get_context_data(this->parms_id())->small_ntt_tables());
             this->is_ntt_form() = true;

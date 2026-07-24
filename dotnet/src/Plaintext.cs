@@ -212,10 +212,20 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="plaintextPtr">Pointer to native Plaintext object</param>
         /// <param name="owned">Whether this instance owns the native pointer</param>
-        internal Plaintext(IntPtr plaintextPtr, bool owned = true)
+        /// <param name="owner">Managed object whose native memory this pointer refers into;
+        /// held only to keep that object alive while this instance is reachable</param>
+        internal Plaintext(IntPtr plaintextPtr, bool owned = true, object owner = null)
             : base(plaintextPtr, owned)
         {
+            owner_ = owner;
         }
+
+        // When this Plaintext wraps an interior pointer into another object (e.g.
+        // SecretKey.Data), a reference to that owner is kept here so the owner cannot be
+        // finalized while this view is still reachable. Held purely as a GC root; never read.
+#pragma warning disable 0414
+        private readonly object owner_;
+#pragma warning restore 0414
 
         /// <summary>
         /// Allocates enough memory to accommodate the backing array of a plaintext
@@ -591,7 +601,7 @@ namespace Microsoft.Research.SEAL
 
             return Serialization.Load(
                 (byte[] outptr, ulong size, out long outBytes) =>
-                    NativeMethods.Plaintext_UnsafeLoad(context.NativePtr, NativePtr,
+                    NativeMethods.Plaintext_UnsafeLoad(NativePtr, context.NativePtr,
                     outptr, size, out outBytes),
                 stream);
         }

@@ -27,10 +27,7 @@ SEAL_C_FUNC CKKSEncoder_Create(void *context, void **ckks_encoder)
         *ckks_encoder = encoder;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC CKKSEncoder_Destroy(void *thisptr)
@@ -68,10 +65,7 @@ SEAL_C_FUNC CKKSEncoder_Encode1(
         encoder->encode(input, parms, scale, *destinationptr, *handle);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 // Array of complex numbers (two doubles per value)
@@ -100,10 +94,7 @@ SEAL_C_FUNC CKKSEncoder_Encode2(
         encoder->encode(input, parms, scale, *destinationptr, *handle);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 // Single double value
@@ -125,10 +116,7 @@ SEAL_C_FUNC CKKSEncoder_Encode3(
         encoder->encode(value, parms, scale, *destinationptr, *handle);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 // Single complex value
@@ -152,10 +140,7 @@ SEAL_C_FUNC CKKSEncoder_Encode4(
         encoder->encode(input, parms, scale, *destinationptr, *handle);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 // Single Int64 value
@@ -175,10 +160,7 @@ SEAL_C_FUNC CKKSEncoder_Encode5(void *thisptr, int64_t value, uint64_t *parms_id
         encoder->encode(value, parms, *destinationptr);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 // Array of doubles
@@ -198,10 +180,7 @@ SEAL_C_FUNC CKKSEncoder_Decode1(void *thisptr, void *plain, uint64_t *value_coun
     {
         encoder->decode(*plainptr, destination, *handle);
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 
     *value_count = destination.size();
 
@@ -231,10 +210,7 @@ SEAL_C_FUNC CKKSEncoder_Decode2(void *thisptr, void *plain, uint64_t *value_coun
     {
         encoder->decode(*plainptr, destination, *handle);
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 
     *value_count = destination.size();
 

@@ -24,15 +24,17 @@ namespace Microsoft.Research.SEAL
     /// to significant performance issues due to thread contention. For these cases
     /// Microsoft SEAL provides overloads of the functions that take a MemoryPoolHandle as an
     /// additional argument, and uses the associated memory pool for all dynamic
-    /// allocations inside the function. Whenever this functions is called, the
-    /// user can then simply pass a thread-local MemoryPoolHandle to be used.
+    /// allocations inside the function. Managed callers should use the thread-safe
+    /// Global() or New() pools. ThreadLocal() is deprecated because managed finalizers
+    /// can release native allocations from a different thread.
     /// </para>
     /// <para>
     /// Thread-Unsafe Memory Pools
     /// While memory pools are by default thread-safe, in some cases it suffices
     /// to have a memory pool be thread-unsafe. To get a little extra performance,
-    /// the user can optionally create such thread-unsafe memory pools and use them
-    /// just as they would use thread-safe memory pools.
+    /// native callers can optionally use such thread-unsafe memory pools when strict
+    /// thread affinity can be guaranteed. They are unsafe for managed objects because
+    /// finalization can occur on a different thread.
     /// </para>
     /// <para>
     /// Initialized and Uninitialized Handles
@@ -59,6 +61,10 @@ namespace Microsoft.Research.SEAL
     /// </remarks>
     public class MemoryPoolHandle : NativeObject
     {
+        internal const string ThreadLocalPoolObsoleteMessage =
+            "Thread-local memory pools are not safe for managed objects because finalization can release native " +
+            "allocations from a different thread. Use MemoryPoolHandle.Global() or MemoryPoolHandle.New() instead.";
+
         /// <summary>
         /// Creates a new uninitialized MemoryPoolHandle.
         /// </summary>
@@ -123,6 +129,12 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Returns a MemoryPoolHandle pointing to the thread-local memory pool.
         /// </summary>
+        /// <remarks>
+        /// The pool is not synchronized. Managed finalizers can return allocations to it
+        /// from a different thread, causing data races and memory corruption. Use Global()
+        /// or New() instead.
+        /// </remarks>
+        [Obsolete(ThreadLocalPoolObsoleteMessage)]
         public static MemoryPoolHandle ThreadLocal()
         {
             NativeMethods.MemoryPoolHandle_ThreadLocal(out IntPtr handlePtr);

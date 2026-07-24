@@ -540,8 +540,12 @@ namespace seal
                 if (nibble != 0)
                 {
                     int nibble_bits = get_significant_bit_count(static_cast<std::uint64_t>(nibble));
-                    int remaining_nibbles = (char_count - i - 1) * bits_per_nibble;
-                    return nibble_bits + remaining_nibbles;
+                    std::uint64_t remaining_bits = static_cast<std::uint64_t>(char_count - i - 1) * bits_per_nibble;
+                    if (remaining_bits > static_cast<std::uint64_t>(std::numeric_limits<int>::max() - nibble_bits))
+                    {
+                        throw std::invalid_argument("char_count");
+                    }
+                    return nibble_bits + static_cast<int>(remaining_bits);
                 }
             }
             return 0;

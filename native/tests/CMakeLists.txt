@@ -60,6 +60,12 @@ if(SEAL_BUILD_TESTS)
         message(FATAL_ERROR "Cannot find target SEAL::seal or SEAL::seal_shared")
     endif()
 
+    # Link the C export library so the C-ABI exception firewall can be exercised.
+    # The matching test source (cabi.cpp) is added under the same condition.
+    if(TARGET sealc)
+        target_link_libraries(sealtest PRIVATE sealc)
+    endif()
+
     # In Debug mode, enable AddressSanitizer (and LeakSanitizer) on Unix-like platforms.
     if(SEAL_DEBUG AND UNIX)
         # On macOS, only AddressSanitizer is enabled.

@@ -584,7 +584,12 @@ namespace seal
         Loads a DynArray from an input stream overwriting the current DynArray.
         This function takes optionally a bound on the size for the loaded DynArray
         and throws an exception if the size indicated by the loaded metadata exceeds
-        the provided value. The check is omitted if in_size_bound is zero.
+        the provided value. The check is omitted if in_size_bound is zero. Note that
+        if in_size_bound is zero (the default) no size bound is enforced; a corrupted
+        or malicious input can then declare an arbitrarily large size and cause a
+        correspondingly large allocation to be attempted before any data is read. When
+        loading data that may come from an untrusted source, pass a nonzero
+        in_size_bound.
 
         @param[in] stream The stream to load the DynArray from
         @param[in] in_size_bound A bound on the size of the loaded DynArray
@@ -595,11 +600,11 @@ namespace seal
         exceeds in_size_bound, or if decompression failed
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(std::istream &stream, std::size_t in_size_bound = 0)
+        inline std::streamoff load(std::istream &stream, std::size_t in_size_bound = 0, bool strict_bound = false)
         {
             using namespace std::placeholders;
             return Serialization::Load(
-                std::bind(&DynArray<T>::load_members, this, _1, _2, in_size_bound), stream, false);
+                std::bind(&DynArray<T>::load_members, this, _1, _2, in_size_bound, strict_bound), stream, false);
         }
 
         /**
@@ -629,7 +634,11 @@ namespace seal
         DynArray. This function takes optionally a bound on the size for the loaded
         DynArray and throws an exception if the size indicated by the loaded
         metadata exceeds the provided value. The check is omitted if in_size_bound
-        is zero.
+        is zero. Note that if in_size_bound is zero (the default) no size bound is
+        enforced; a corrupted or malicious input can then declare an arbitrarily
+        large size and cause a correspondingly large allocation to be attempted
+        before any data is read. When loading data that may come from an untrusted
+        source, pass a nonzero in_size_bound.
 
         @param[in] in The memory location to load the Modulus from
         @param[in] size The number of bytes available in the given memory location
@@ -641,11 +650,12 @@ namespace seal
         or if the loaded size exceeds in_size_bound
         @throws std::runtime_error if I/O operations failed
         */
-        inline std::streamoff load(const seal_byte *in, std::size_t size, std::size_t in_size_bound = 0)
+        inline std::streamoff load(
+            const seal_byte *in, std::size_t size, std::size_t in_size_bound = 0, bool strict_bound = false)
         {
             using namespace std::placeholders;
             return Serialization::Load(
-                std::bind(&DynArray<T>::load_members, this, _1, _2, in_size_bound), in, size, false);
+                std::bind(&DynArray<T>::load_members, this, _1, _2, in_size_bound, strict_bound), in, size, false);
         }
 
     private:
@@ -679,7 +689,8 @@ namespace seal
             stream.exceptions(old_except_mask);
         }
 
-        void load_members(std::istream &stream, SEAL_MAYBE_UNUSED SEALVersion version, std::size_t in_size_bound)
+        void load_members(
+            std::istream &stream, SEAL_MAYBE_UNUSED SEALVersion version, std::size_t in_size_bound, bool strict_bound)
         {
             auto old_except_mask = stream.exceptions();
             try
@@ -691,8 +702,10 @@ namespace seal
                 stream.read(reinterpret_cast<char *>(&size64), sizeof(std::uint64_t));
 
                 // Check (optionally) that the size in the metadata does not exceed
-                // in_size_bound
-                if (in_size_bound && util::unsigned_gt(size64, in_size_bound))
+                // in_size_bound. A strict_bound caller enforces the bound even when it
+                // is zero (i.e. the loaded size must then be zero); the public default
+                // (strict_bound == false) keeps a zero bound meaning "no bound".
+                if ((strict_bound || in_size_bound) && util::unsigned_gt(size64, in_size_bound))
                 {
                     throw std::logic_error("unexpected size");
                 }

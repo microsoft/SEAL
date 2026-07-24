@@ -695,7 +695,21 @@ namespace seal
 
         inline bool has_seed_marker() const noexcept
         {
-            return (data_.size() && (size_ == 2)) ? (data(1)[0] == 0xFFFFFFFFFFFFFFFFULL) : false;
+            if (!data_.size() || (size_ != 2) || (data(1)[0] != 0xFFFFFFFFFFFFFFFFULL))
+            {
+                return false;
+            }
+
+            // A seed is only stored when the second polynomial is large enough to hold the
+            // serialized UniformRandomGeneratorInfo that save_members reads from data(1) + 1.
+            // Mirror the encrypt-side guard in util/rlwe.cpp; the byte accounting matches
+            // UniformRandomGeneratorInfo::SaveSize(none) but is computed from non-throwing
+            // constexpr primitives so this method stays noexcept.
+            constexpr std::size_t prng_info_byte_count =
+                sizeof(Serialization::SEALHeader) + sizeof(prng_type) + prng_seed_byte_count;
+            constexpr std::size_t prng_info_uint64_count =
+                (prng_info_byte_count + util::bytes_per_uint64 - 1) / util::bytes_per_uint64;
+            return (poly_modulus_degree_ * coeff_modulus_size_) >= (prng_info_uint64_count + 1);
         }
 
         parms_id_type parms_id_ = parms_id_zero;

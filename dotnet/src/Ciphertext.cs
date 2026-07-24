@@ -175,10 +175,20 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         /// <param name="ciphertextPtr">The native Ciphertext pointer</param>
         /// <param name="owned">Whether this object owns the native pointer</param>
-        internal Ciphertext(IntPtr ciphertextPtr, bool owned = true)
+        /// <param name="owner">Managed object whose native memory this pointer refers into;
+        /// held only to keep that object alive while this instance is reachable</param>
+        internal Ciphertext(IntPtr ciphertextPtr, bool owned = true, object owner = null)
             : base(ciphertextPtr, owned)
         {
+            owner_ = owner;
         }
+
+        // When this Ciphertext wraps an interior pointer into another object (e.g.
+        // PublicKey.Data), a reference to that owner is kept here so the owner cannot be
+        // finalized while this view is still reachable. Held purely as a GC root; never read.
+#pragma warning disable 0414
+        private readonly object owner_;
+#pragma warning restore 0414
 
         /// <summary>
         /// Allocates enough memory to accommodate the backing array of a ciphertext

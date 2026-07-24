@@ -117,7 +117,6 @@ namespace seal
         {
             throw invalid_argument("values_matrix size is too large");
         }
-#ifdef SEAL_DEBUG
         uint64_t modulus = context_data.parms().plain_modulus().value();
         for (auto v : values_matrix)
         {
@@ -127,7 +126,7 @@ namespace seal
                 throw invalid_argument("input value is larger than plain_modulus");
             }
         }
-#endif
+
         // Set destination to full size
         destination.resize(slots_);
         destination.parms_id() = parms_id_zero;
@@ -159,17 +158,19 @@ namespace seal
         {
             throw invalid_argument("values_matrix size is too large");
         }
-#ifdef SEAL_DEBUG
         uint64_t plain_modulus_div_two = modulus >> 1;
         for (auto v : values_matrix)
         {
-            // Validate the i-th input
-            if (unsigned_gt(llabs(v), plain_modulus_div_two))
+            // Validate the i-th input. Compute the magnitude in unsigned arithmetic
+            // so that INT64_MIN, whose magnitude is not representable as a signed
+            // integer, does not invoke undefined behavior.
+            uint64_t magnitude = (v < 0) ? (0 - static_cast<uint64_t>(v)) : static_cast<uint64_t>(v);
+            if (magnitude > plain_modulus_div_two)
             {
                 throw invalid_argument("input value is larger than plain_modulus");
             }
         }
-#endif
+
         // Set destination to full size
         destination.resize(slots_);
         destination.parms_id() = parms_id_zero;
@@ -202,7 +203,6 @@ namespace seal
         {
             throw invalid_argument("values_matrix size is too large");
         }
-#ifdef SEAL_DEBUG
         uint64_t modulus = context_data.parms().plain_modulus().value();
         for (auto v : values_matrix)
         {
@@ -212,7 +212,6 @@ namespace seal
                 throw invalid_argument("input value is larger than plain_modulus");
             }
         }
-#endif
         // Set destination to full size
         destination.resize(slots_);
         destination.parms_id() = parms_id_zero;
@@ -243,17 +242,18 @@ namespace seal
         {
             throw invalid_argument("values_matrix size is too large");
         }
-#ifdef SEAL_DEBUG
         uint64_t plain_modulus_div_two = modulus >> 1;
         for (auto v : values_matrix)
         {
-            // Validate the i-th input
-            if (unsigned_gt(llabs(v), plain_modulus_div_two))
+            // Validate the i-th input. Compute the magnitude in unsigned arithmetic
+            // so that INT64_MIN, whose magnitude is not representable as a signed
+            // integer, does not invoke undefined behavior.
+            uint64_t magnitude = (v < 0) ? (0 - static_cast<uint64_t>(v)) : static_cast<uint64_t>(v);
+            if (magnitude > plain_modulus_div_two)
             {
                 throw invalid_argument("input value is larger than plain_modulus");
             }
         }
-#endif
         // Set destination to full size
         destination.resize(slots_);
         destination.parms_id() = parms_id_zero;

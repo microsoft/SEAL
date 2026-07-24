@@ -820,6 +820,13 @@ namespace seal
         Multiplies a ciphertext with a plaintext. The plaintext cannot be identically 0. Dynamic memory allocations in
         the process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
 
+        @warning This operation is not constant-time with respect to the plaintext operand. Operand-dependent
+        optimizations and loop bounds can reveal whether the plaintext is a monomial, the sign of a monomial
+        coefficient, and the plaintext coefficient count. Microsoft SEAL does not provide circuit privacy. When operand
+        structure is confidential, do not expose this operation's timing across a trust boundary. With
+        SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT enabled, a zero plaintext raises a data-dependent exception; handle it with
+        externally uniform response timing and shape.
+
         @param[in] encrypted The ciphertext to multiply
         @param[in] plain The plaintext to multiply
         @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
@@ -836,6 +843,13 @@ namespace seal
         Multiplies a ciphertext with a plaintext. This function multiplies a ciphertext with a plaintext and stores the
         result in the destination parameter. The plaintext cannot be identically 0. Dynamic memory allocations in the
         process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+
+        @warning This operation is not constant-time with respect to the plaintext operand. Operand-dependent
+        optimizations and loop bounds can reveal whether the plaintext is a monomial, the sign of a monomial
+        coefficient, and the plaintext coefficient count. Microsoft SEAL does not provide circuit privacy. When operand
+        structure is confidential, do not expose this operation's timing across a trust boundary. With
+        SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT enabled, a zero plaintext raises a data-dependent exception; handle it with
+        externally uniform response timing and shape.
 
         @param[in] encrypted The ciphertext to multiply
         @param[in] plain The plaintext to multiply

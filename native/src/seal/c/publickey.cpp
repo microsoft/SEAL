@@ -16,9 +16,13 @@ SEAL_C_FUNC PublicKey_Create1(void **public_key)
 {
     IfNullRet(public_key, E_POINTER);
 
-    PublicKey *pkey = new PublicKey();
-    *public_key = pkey;
-    return S_OK;
+    try
+    {
+        PublicKey *pkey = new PublicKey();
+        *public_key = pkey;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC PublicKey_Create2(void *copy, void **public_key)
@@ -27,9 +31,13 @@ SEAL_C_FUNC PublicKey_Create2(void *copy, void **public_key)
     IfNullRet(copyptr, E_POINTER);
     IfNullRet(public_key, E_POINTER);
 
-    PublicKey *pkey = new PublicKey(*copyptr);
-    *public_key = pkey;
-    return S_OK;
+    try
+    {
+        PublicKey *pkey = new PublicKey(*copyptr);
+        *public_key = pkey;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC PublicKey_Set(void *thisptr, void *assign)
@@ -39,8 +47,12 @@ SEAL_C_FUNC PublicKey_Set(void *thisptr, void *assign)
     PublicKey *assignptr = FromVoid<PublicKey>(assign);
     IfNullRet(assignptr, E_POINTER);
 
-    *pkey = *assignptr;
-    return S_OK;
+    try
+    {
+        *pkey = *assignptr;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC PublicKey_Data(void *thisptr, void **data)
@@ -72,9 +84,13 @@ SEAL_C_FUNC PublicKey_Pool(void *thisptr, void **pool)
     IfNullRet(pkey, E_POINTER);
     IfNullRet(pool, E_POINTER);
 
-    MemoryPoolHandle *handleptr = new MemoryPoolHandle(pkey->pool());
-    *pool = handleptr;
-    return S_OK;
+    try
+    {
+        MemoryPoolHandle *handleptr = new MemoryPoolHandle(pkey->pool());
+        *pool = handleptr;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC PublicKey_Destroy(void *thisptr)
@@ -97,14 +113,7 @@ SEAL_C_FUNC PublicKey_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *resul
         *result = static_cast<int64_t>(pkey->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC PublicKey_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes)
@@ -121,18 +130,7 @@ SEAL_C_FUNC PublicKey_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
-    catch (const runtime_error &)
-    {
-        return COR_E_IO;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC PublicKey_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
@@ -150,18 +148,7 @@ SEAL_C_FUNC PublicKey_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, u
             pkey->unsafe_load(*ctx, reinterpret_cast<seal_byte *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
-    catch (const runtime_error &)
-    {
-        return COR_E_IO;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC PublicKey_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
@@ -179,16 +166,5 @@ SEAL_C_FUNC PublicKey_Load(void *thisptr, void *context, uint8_t *inptr, uint64_
             pkey->load(*ctx, reinterpret_cast<seal_byte *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
-    catch (const runtime_error &)
-    {
-        return COR_E_IO;
-    }
+    SEAL_C_CATCH_ALL
 }

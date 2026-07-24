@@ -46,9 +46,14 @@ using ph = struct PublicKey::PublicKeyPrivateHelper
 SEAL_C_FUNC KSwitchKeys_Create1(void **kswitch_keys)
 {
     IfNullRet(kswitch_keys, E_POINTER);
-    KSwitchKeys *keys = new KSwitchKeys();
-    *kswitch_keys = keys;
-    return S_OK;
+
+    try
+    {
+        KSwitchKeys *keys = new KSwitchKeys();
+        *kswitch_keys = keys;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC KSwitchKeys_Create2(void *copy, void **kswitch_keys)
@@ -57,9 +62,13 @@ SEAL_C_FUNC KSwitchKeys_Create2(void *copy, void **kswitch_keys)
     IfNullRet(copyptr, E_POINTER);
     IfNullRet(kswitch_keys, E_POINTER);
 
-    KSwitchKeys *keys = new KSwitchKeys(*copyptr);
-    *kswitch_keys = keys;
-    return S_OK;
+    try
+    {
+        KSwitchKeys *keys = new KSwitchKeys(*copyptr);
+        *kswitch_keys = keys;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC KSwitchKeys_Destroy(void *thisptr)
@@ -78,8 +87,12 @@ SEAL_C_FUNC KSwitchKeys_Set(void *thisptr, void *assign)
     KSwitchKeys *assignptr = FromVoid<KSwitchKeys>(assign);
     IfNullRet(assignptr, E_POINTER);
 
-    *keys = *assignptr;
-    return S_OK;
+    try
+    {
+        *keys = *assignptr;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC KSwitchKeys_Size(void *thisptr, uint64_t *size)
@@ -108,8 +121,17 @@ SEAL_C_FUNC KSwitchKeys_GetKeyList(void *thisptr, uint64_t index, uint64_t *coun
     IfNullRet(keys, E_POINTER);
     IfNullRet(count, E_POINTER);
 
-    auto key = keys->data()[index];
-    return GetKeyFromVector(key, count, key_list);
+    try
+    {
+        if (index >= keys->data().size())
+        {
+            return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
+        }
+
+        const auto &key = keys->data()[static_cast<size_t>(index)];
+        return GetKeyFromVector(key, count, key_list);
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC KSwitchKeys_ClearDataAndReserve(void *thisptr, uint64_t size)
@@ -117,9 +139,13 @@ SEAL_C_FUNC KSwitchKeys_ClearDataAndReserve(void *thisptr, uint64_t size)
     KSwitchKeys *keys = FromVoid<KSwitchKeys>(thisptr);
     IfNullRet(keys, E_POINTER);
 
-    keys->data().clear();
-    keys->data().reserve(size);
-    return S_OK;
+    try
+    {
+        keys->data().clear();
+        keys->data().reserve(size);
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC KSwitchKeys_AddKeyList(void *thisptr, uint64_t count, void **key_list)
@@ -128,22 +154,26 @@ SEAL_C_FUNC KSwitchKeys_AddKeyList(void *thisptr, uint64_t count, void **key_lis
     IfNullRet(keys, E_POINTER);
     IfNullRet(key_list, E_POINTER);
 
-    PublicKey **key = reinterpret_cast<PublicKey **>(key_list);
-
-    // Don't resize, only reserve
-    keys->data().emplace_back();
-    keys->data().back().reserve(count);
-
-    for (uint64_t i = 0; i < count; i++)
+    try
     {
-        PublicKey *pkey = key[i];
-        PublicKey new_pkey(ph::Create(keys->pool()));
-        new_pkey = *pkey;
+        PublicKey **key = reinterpret_cast<PublicKey **>(key_list);
 
-        keys->data().back().emplace_back(std::move(new_pkey));
+        // Don't resize, only reserve
+        keys->data().emplace_back();
+        keys->data().back().reserve(count);
+
+        for (uint64_t i = 0; i < count; i++)
+        {
+            PublicKey *pkey = key[i];
+            PublicKey new_pkey(ph::Create(keys->pool()));
+            new_pkey = *pkey;
+
+            keys->data().back().emplace_back(std::move(new_pkey));
+        }
+
+        return S_OK;
     }
-
-    return S_OK;
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC KSwitchKeys_GetParmsId(void *thisptr, uint64_t *parms_id)
@@ -176,9 +206,13 @@ SEAL_C_FUNC KSwitchKeys_Pool(void *thisptr, void **pool)
     IfNullRet(keys, E_POINTER);
     IfNullRet(pool, E_POINTER);
 
-    MemoryPoolHandle *handleptr = new MemoryPoolHandle(keys->pool());
-    *pool = handleptr;
-    return S_OK;
+    try
+    {
+        MemoryPoolHandle *handleptr = new MemoryPoolHandle(keys->pool());
+        *pool = handleptr;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC KSwitchKeys_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
@@ -192,14 +226,7 @@ SEAL_C_FUNC KSwitchKeys_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *res
         *result = static_cast<int64_t>(keys->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC KSwitchKeys_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes)
@@ -216,18 +243,7 @@ SEAL_C_FUNC KSwitchKeys_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
-    catch (const runtime_error &)
-    {
-        return COR_E_IO;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC KSwitchKeys_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
@@ -245,18 +261,7 @@ SEAL_C_FUNC KSwitchKeys_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr,
             keys->unsafe_load(*ctx, reinterpret_cast<seal_byte *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
-    catch (const runtime_error &)
-    {
-        return COR_E_IO;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC KSwitchKeys_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
@@ -274,16 +279,5 @@ SEAL_C_FUNC KSwitchKeys_Load(void *thisptr, void *context, uint8_t *inptr, uint6
             keys->load(*ctx, reinterpret_cast<seal_byte *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
-    catch (const runtime_error &)
-    {
-        return COR_E_IO;
-    }
+    SEAL_C_CATCH_ALL
 }

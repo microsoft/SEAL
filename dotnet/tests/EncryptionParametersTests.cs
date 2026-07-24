@@ -81,6 +81,26 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void PlainModulusGetterReturnsCopyTest()
+        {
+            using (EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV))
+            {
+                parms.SetPlainModulus(257);
+
+                using (Modulus returned = parms.PlainModulus)
+                {
+                    returned.Set(17);
+                    Assert.AreEqual(17ul, returned.Value);
+                }
+
+                using (Modulus current = parms.PlainModulus)
+                {
+                    Assert.AreEqual(257ul, current.Value);
+                }
+            }
+        }
+
+        [TestMethod]
         public void BFVCoeffModulusTest()
         {
             EncryptionParameters encParams = new EncryptionParameters(SchemeType.BFV);

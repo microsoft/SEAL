@@ -12,6 +12,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <ctime>
+#include <limits>
 #include <string>
 #include "gtest/gtest.h"
 
@@ -2500,6 +2501,98 @@ namespace sealtest
         ASSERT_TRUE(plain2.to_string() == "1x^40 + 8x^30 + 18x^20 + 20x^10 + 10");
     }
 
+    TEST(EvaluatorTest, RelinearizeEmptyKeySlot)
+    {
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(128);
+        parms.set_plain_modulus(1 << 6);
+        parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40, 40 }));
+
+        SEALContext context(parms, true, sec_level_type::none);
+        KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
+        RelinKeys rlk;
+        keygen.create_relin_keys(rlk);
+
+        Encryptor encryptor(context, pk);
+        Evaluator evaluator(context);
+
+        Ciphertext encrypted(context);
+        Plaintext plain("1x^10 + 2");
+        encryptor.encrypt(plain, encrypted);
+        evaluator.square_inplace(encrypted);
+
+        // Prepend an empty slot so the switched index (get_index(2) == 0) lands on an empty vector.
+        rlk.data().insert(rlk.data().begin(), vector<PublicKey>());
+        ASSERT_THROW(evaluator.relinearize_inplace(encrypted, rlk), invalid_argument);
+    }
+
+    TEST(EvaluatorTest, RelinearizeShortKeyVector)
+    {
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(128);
+        parms.set_plain_modulus(1 << 6);
+        parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40, 40 }));
+
+        SEALContext context(parms, true, sec_level_type::none);
+        KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
+        RelinKeys rlk;
+        keygen.create_relin_keys(rlk);
+
+        Encryptor encryptor(context, pk);
+        Evaluator evaluator(context);
+
+        Ciphertext encrypted(context);
+        Plaintext plain("1x^10 + 2");
+        encryptor.encrypt(plain, encrypted);
+        evaluator.square_inplace(encrypted);
+
+        // Truncate the used key slot to a single PublicKey, as a truncated unsafe_load'd blob could.
+        auto &slot = rlk.data()[RelinKeys::get_index(2)];
+        ASSERT_GT(slot.size(), 1ULL);
+        vector<PublicKey> short_slot;
+        short_slot.reserve(1);
+        short_slot.push_back(slot[0]);
+        slot.swap(short_slot);
+
+        ASSERT_THROW(evaluator.relinearize_inplace(encrypted, rlk), invalid_argument);
+    }
+
+    TEST(EvaluatorTest, RelinearizeLowerLevel)
+    {
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(128);
+        parms.set_plain_modulus(1 << 6);
+        parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40, 40 }));
+
+        SEALContext context(parms, true, sec_level_type::none);
+        KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
+        RelinKeys rlk;
+        keygen.create_relin_keys(rlk);
+
+        Encryptor encryptor(context, pk);
+        Evaluator evaluator(context);
+        Decryptor decryptor(context, keygen.secret_key());
+
+        Ciphertext encrypted(context);
+        Plaintext plain("1x^10 + 2");
+        Plaintext plain2;
+        encryptor.encrypt(plain, encrypted);
+        evaluator.square_inplace(encrypted);
+
+        // Mod switch down first so decomp_modulus_size < key_vector.size(); relinearization must
+        // still succeed (guards against tightening the inner-dimension check from >= to ==).
+        evaluator.mod_switch_to_next_inplace(encrypted);
+        evaluator.relinearize_inplace(encrypted, rlk);
+        decryptor.decrypt(encrypted, plain2);
+        ASSERT_TRUE(plain2.to_string() == "1x^20 + 4x^10 + 4");
+    }
+
     TEST(EvaluatorTest, BGVRelinearize)
     {
         EncryptionParameters parms(scheme_type::bgv);
@@ -3613,6 +3706,30 @@ namespace sealtest
                 }
             }
         }
+    }
+
+    TEST(EvaluatorTest, CKKSRescaleRejectsSubnormalScale)
+    {
+        EncryptionParameters parms(scheme_type::ckks);
+        parms.set_poly_modulus_degree(8);
+        parms.set_coeff_modulus(CoeffModulus::Create(8, { 40, 40, 40 }));
+        SEALContext context(parms, true, sec_level_type::none);
+
+        KeyGenerator keygen(context);
+        PublicKey public_key;
+        keygen.create_public_key(public_key);
+        CKKSEncoder encoder(context);
+        Encryptor encryptor(context, public_key);
+        Evaluator evaluator(context);
+
+        vector<double> values(encoder.slot_count(), 0.0);
+        Plaintext plain;
+        encoder.encode(values, context.first_parms_id(), (numeric_limits<double>::min)(), plain);
+
+        Ciphertext encrypted;
+        encryptor.encrypt(plain, encrypted);
+        ASSERT_TRUE(isnormal(encrypted.scale()));
+        ASSERT_THROW(evaluator.rescale_to_next_inplace(encrypted), invalid_argument);
     }
 
     TEST(EvaluatorTest, CKKSEncryptSquareRelinRescaleDecrypt)
@@ -5401,6 +5518,86 @@ namespace sealtest
         ASSERT_TRUE("1x^3 + 2x^2 + 1x^1 + 1" == plain.to_string());
     }
 
+    TEST(EvaluatorTest, ApplyGaloisRejectsWrongNttFormWithoutMutating)
+    {
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(8);
+        parms.set_plain_modulus(257);
+        parms.set_coeff_modulus(CoeffModulus::Create(8, { 40, 40 }));
+
+        SEALContext context(parms, false, sec_level_type::none);
+        KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
+        GaloisKeys glk;
+        keygen.create_galois_keys(vector<uint32_t>{ 3 }, glk);
+
+        Encryptor encryptor(context, pk);
+        Evaluator evaluator(context);
+
+        Plaintext plain("1x^3 + 2x^2 + 1x^1 + 1");
+        Ciphertext encrypted;
+        encryptor.encrypt(plain, encrypted);
+
+        // A BFV ciphertext carrying an NTT-form flag is inconsistent with the scheme; the
+        // operand must be left unchanged when the operation is rejected.
+        encrypted.is_ntt_form() = true;
+        Ciphertext expected(encrypted);
+
+        ASSERT_THROW(evaluator.apply_galois_inplace(encrypted, 3, glk), invalid_argument);
+
+        size_t total = encrypted.size() * encrypted.poly_modulus_degree() * encrypted.coeff_modulus_size();
+        bool unchanged = true;
+        for (size_t i = 0; i < total; i++)
+        {
+            unchanged = unchanged && (encrypted.data()[i] == expected.data()[i]);
+        }
+        ASSERT_TRUE(unchanged);
+        ASSERT_TRUE(encrypted.is_ntt_form());
+    }
+
+    TEST(EvaluatorTest, BFVRotateSizeZeroCiphertext)
+    {
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(8);
+        parms.set_plain_modulus(257);
+        parms.set_coeff_modulus(CoeffModulus::Create(8, { 40, 40 }));
+
+        SEALContext context(parms, false, sec_level_type::none);
+        KeyGenerator keygen(context);
+        GaloisKeys glk;
+        keygen.create_galois_keys(glk);
+        Evaluator evaluator(context);
+
+        Ciphertext encrypted;
+        encrypted.resize(context, context.first_parms_id(), 0);
+        ASSERT_EQ(0ULL, encrypted.size());
+
+        ASSERT_THROW(evaluator.rotate_rows_inplace(encrypted, 1, glk), invalid_argument);
+        ASSERT_THROW(evaluator.rotate_columns_inplace(encrypted, glk), invalid_argument);
+        ASSERT_THROW(evaluator.apply_galois_inplace(encrypted, 3, glk), invalid_argument);
+    }
+
+    TEST(EvaluatorTest, CKKSRotateSizeZeroCiphertext)
+    {
+        EncryptionParameters parms(scheme_type::ckks);
+        parms.set_poly_modulus_degree(8);
+        parms.set_coeff_modulus(CoeffModulus::Create(8, { 40, 40, 40 }));
+
+        SEALContext context(parms, false, sec_level_type::none);
+        KeyGenerator keygen(context);
+        GaloisKeys glk;
+        keygen.create_galois_keys(glk);
+        Evaluator evaluator(context);
+
+        Ciphertext encrypted;
+        encrypted.resize(context, context.first_parms_id(), 0);
+        ASSERT_EQ(0ULL, encrypted.size());
+
+        ASSERT_THROW(evaluator.rotate_vector_inplace(encrypted, 1, glk), invalid_argument);
+        ASSERT_THROW(evaluator.complex_conjugate_inplace(encrypted, glk), invalid_argument);
+    }
+
     TEST(EvaluatorTest, BFVEncryptRotateMatrixDecrypt)
     {
         EncryptionParameters parms(scheme_type::bfv);
@@ -5537,6 +5734,92 @@ namespace sealtest
         parms_id = context.get_context_data(parms_id)->next_context_data()->parms_id();
         ASSERT_TRUE(encryptedRes.parms_id() == parms_id);
         ASSERT_TRUE(plain.to_string() == "5x^64 + Ax^5");
+    }
+
+    TEST(EvaluatorTest, BFVEncryptModReduceToNextDecrypt)
+    {
+        Modulus plain_modulus(1 << 6);
+
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(128);
+        parms.set_plain_modulus(plain_modulus);
+        parms.set_coeff_modulus(CoeffModulus::Create(128, { 30, 30, 30, 30 }));
+
+        SEALContext context(parms, true, sec_level_type::none);
+        KeyGenerator keygen(context);
+        SecretKey secret_key = keygen.secret_key();
+        PublicKey pk;
+        keygen.create_public_key(pk);
+
+        Encryptor encryptor(context, pk);
+        Evaluator evaluator(context);
+        Decryptor decryptor(context, secret_key);
+
+        Plaintext original("Ax^5 + 3x^2 + 7");
+        Ciphertext encrypted(context);
+        encryptor.encrypt(original, encrypted);
+
+        uint64_t dropped = context.get_context_data(encrypted.parms_id())->parms().coeff_modulus().back().value();
+        uint64_t t = plain_modulus.value();
+        uint64_t factor = dropped % t;
+
+        Ciphertext reduced;
+        evaluator.mod_reduce_to_next(encrypted, reduced);
+
+        ASSERT_FALSE(reduced.is_ntt_form());
+        auto next_parms_id = context.get_context_data(encrypted.parms_id())->next_context_data()->parms_id();
+        ASSERT_TRUE(reduced.parms_id() == next_parms_id);
+
+        Plaintext result;
+        decryptor.decrypt(reduced, result);
+
+        Plaintext expected = original;
+        for (size_t i = 0; i < expected.coeff_count(); i++)
+        {
+            expected[i] = (factor * expected[i]) % t;
+        }
+        ASSERT_EQ(expected.to_string(), result.to_string());
+
+        Ciphertext ntt_form(context);
+        encryptor.encrypt(original, ntt_form);
+        evaluator.transform_to_ntt_inplace(ntt_form);
+        Ciphertext unused;
+        ASSERT_THROW(evaluator.mod_reduce_to_next(ntt_form, unused), invalid_argument);
+    }
+
+    TEST(EvaluatorTest, BGVEncryptModReduceToNextDecrypt)
+    {
+        Modulus plain_modulus(65);
+
+        EncryptionParameters parms(scheme_type::bgv);
+        parms.set_poly_modulus_degree(128);
+        parms.set_plain_modulus(plain_modulus);
+        parms.set_coeff_modulus(CoeffModulus::Create(128, { 30, 30, 30, 30 }));
+
+        SEALContext context(parms, true, sec_level_type::none);
+        KeyGenerator keygen(context);
+        SecretKey secret_key = keygen.secret_key();
+        PublicKey pk;
+        keygen.create_public_key(pk);
+
+        Encryptor encryptor(context, pk);
+        Evaluator evaluator(context);
+        Decryptor decryptor(context, secret_key);
+
+        Plaintext original("9x^3 + 2");
+        Ciphertext encrypted(context);
+        encryptor.encrypt(original, encrypted);
+        ASSERT_TRUE(encrypted.is_ntt_form());
+
+        Ciphertext reduced;
+        evaluator.mod_reduce_to_next(encrypted, reduced);
+
+        ASSERT_TRUE(reduced.is_ntt_form());
+        auto next_parms_id = context.get_context_data(encrypted.parms_id())->next_context_data()->parms_id();
+        ASSERT_TRUE(reduced.parms_id() == next_parms_id);
+
+        Plaintext result;
+        ASSERT_NO_THROW(decryptor.decrypt(reduced, result));
     }
 
     TEST(EvaluatorTest, BFVEncryptModSwitchToDecrypt)

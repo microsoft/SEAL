@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 
 namespace SEALNetTest
 {
@@ -189,6 +190,25 @@ namespace SEALNetTest
 
                 Utilities.AssertThrows<ArgumentNullException>(() => ValCheck.IsValidFor(key, null));
             }
+        }
+
+        [TestMethod]
+        public void DataRootsParentTest()
+        {
+            SEALContext context = GlobalContext.BFVContext;
+            KeyGenerator keygen = new KeyGenerator(context);
+
+            keygen.CreatePublicKey(out PublicKey publicKey);
+            Ciphertext data = publicKey.Data;
+            Assert.IsTrue(data.Size > 0);
+
+            // The returned view holds an interior pointer into the PublicKey, so it must
+            // keep a reference to that PublicKey to stop it being finalized while the view
+            // is reachable. (owner_ is otherwise unobservable, so read it reflectively.)
+            FieldInfo ownerField = typeof(Ciphertext).GetField(
+                "owner_", BindingFlags.NonPublic | BindingFlags.Instance);
+            Assert.IsNotNull(ownerField);
+            Assert.AreSame(publicKey, ownerField.GetValue(data));
         }
     }
 }

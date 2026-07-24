@@ -138,12 +138,11 @@ namespace seal
             */
             SEAL_NODISCARD static inline std::size_t GetIndexFromElt(std::uint32_t galois_elt)
             {
-#ifdef SEAL_DEBUG
-                if (!(galois_elt & 1))
+                constexpr std::uint32_t max_galois_elt = static_cast<std::uint32_t>(SEAL_POLY_MOD_DEGREE_MAX) << 1;
+                if (!(galois_elt & 1) || galois_elt >= max_galois_elt)
                 {
                     throw std::invalid_argument("galois_elt is not valid");
                 }
-#endif
                 return util::safe_cast<std::size_t>((galois_elt - 1) >> 1);
             }
 

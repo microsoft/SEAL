@@ -5,6 +5,8 @@
 
 // STD
 #include <cstddef>
+#include <new>
+#include <stdexcept>
 
 // SEALNet
 #include "seal/c/stdafx.h"
@@ -60,3 +62,36 @@ static_assert(false, "Require architecture == x64");
 #endif // _MSC_VER
 
 #define SEAL_C_FUNC SEAL_C_DECOR HRESULT SEAL_C_CALL
+
+// Canonical exception-to-HRESULT translation for the C export layer. Every export
+// that can throw closes its body with this so no C++ exception crosses the extern "C"
+// boundary into the managed/native caller. The typed rungs reproduce the mappings the
+// individual exports already used; the bad_alloc and catch-all rungs convert an
+// out-of-memory or otherwise-unlisted throw into a defined HRESULT instead of aborting
+// the host. Derived types are caught before their bases (invalid_argument/out_of_range
+// before logic_error).
+#define SEAL_C_CATCH_ALL                             \
+    catch (const std::invalid_argument &)            \
+    {                                                \
+        return E_INVALIDARG;                         \
+    }                                                \
+    catch (const std::out_of_range &)                \
+    {                                                \
+        return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX); \
+    }                                                \
+    catch (const std::logic_error &)                 \
+    {                                                \
+        return COR_E_INVALIDOPERATION;               \
+    }                                                \
+    catch (const std::runtime_error &)               \
+    {                                                \
+        return COR_E_IO;                             \
+    }                                                \
+    catch (const std::bad_alloc &)                   \
+    {                                                \
+        return E_OUTOFMEMORY;                        \
+    }                                                \
+    catch (...)                                      \
+    {                                                \
+        return E_UNEXPECTED;                         \
+    }

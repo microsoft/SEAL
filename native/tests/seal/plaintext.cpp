@@ -82,6 +82,25 @@ namespace sealtest
         plain2.parms_id() = { 1ULL, 2ULL, 3ULL, 5ULL };
         ASSERT_FALSE(plain == plain2);
     }
+
+    TEST(PlaintextTest, FromStringExponentBounds)
+    {
+        Plaintext plain;
+
+        // Well-formed strings still parse.
+        plain = "1x^63 + 2x^62 + Fx^32 + Ax^9 + 1x^1 + 1";
+        ASSERT_EQ(64ULL, plain.coeff_count());
+
+        // Exponents that overflow int, or exceed the degree cap, are rejected.
+        ASSERT_THROW(plain = "1x^4294967288", invalid_argument);
+        ASSERT_THROW(plain = "1x^5 + Fx^4294967288", invalid_argument);
+        ASSERT_THROW(plain = "1x^2147483646", invalid_argument);
+        ASSERT_THROW(plain = "1x^131072", invalid_argument);
+
+        // One below the degree cap yields exactly SEAL_POLY_MOD_DEGREE_MAX coefficients.
+        plain = "1x^131071";
+        ASSERT_EQ(static_cast<size_t>(SEAL_POLY_MOD_DEGREE_MAX), plain.coeff_count());
+    }
 #ifdef SEAL_USE_MSGSL
     TEST(PlaintextTest, FromSpan)
     {
@@ -227,5 +246,34 @@ namespace sealtest
             ASSERT_TRUE(plain.data() != plain2.data());
             ASSERT_TRUE(plain2.is_ntt_form());
         }
+    }
+
+    TEST(PlaintextTest, LoadZeroCoeffCountRejectsOversizedDynArray)
+    {
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(8);
+        parms.set_plain_modulus(257);
+        parms.set_coeff_modulus(CoeffModulus::Create(8, { 40, 40 }));
+
+        SEALContext context(parms, false, sec_level_type::none);
+
+        Plaintext plain;
+        ASSERT_EQ(0ULL, plain.coeff_count());
+        ASSERT_FALSE(plain.is_ntt_form());
+
+        stringstream ss;
+        plain.save(ss, compr_mode_type::none);
+        string blob = ss.str();
+
+        // The DynArray element count is the final 8 bytes of a coeff_count-0 plaintext.
+        ASSERT_GE(blob.size(), sizeof(uint64_t));
+        uint64_t evil = uint64_t(1) << 31;
+        blob.replace(
+            blob.size() - sizeof(uint64_t), sizeof(uint64_t),
+            string(reinterpret_cast<const char *>(&evil), sizeof(uint64_t)));
+
+        stringstream bad(blob);
+        Plaintext loaded;
+        ASSERT_THROW(loaded.load(context, bad), logic_error);
     }
 } // namespace sealtest

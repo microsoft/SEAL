@@ -11,12 +11,21 @@
 #include "seal/valcheck.h"
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
+#include <cmath>
 
 using namespace std;
 using namespace seal::util;
 
 namespace seal
 {
+    namespace
+    {
+        SEAL_NODISCARD inline bool is_positive_normal(double value) noexcept
+        {
+            return std::isnormal(value) && value > 0;
+        }
+    } // namespace
+
     bool is_metadata_valid_for(const Plaintext &in, const SEALContext &context, bool allow_pure_key_levels)
     {
         // Verify parameters
@@ -61,6 +70,11 @@ namespace seal
             }
         }
 
+        if (context.first_context_data()->parms().scheme() == scheme_type::ckks && !is_positive_normal(in.scale()))
+        {
+            return false;
+        }
+
         return true;
     }
 
@@ -101,11 +115,11 @@ namespace seal
             return false;
         }
 
-        // Check that scale is 1.0 in BFV and BGV or not 0.0 in CKKS
+        // Check that scale is 1.0 in BFV and BGV or positive and normal in CKKS
         double scale = in.scale();
         scheme_type scheme = context.first_context_data()->parms().scheme();
         if ((scale != 1.0 && (scheme == scheme_type::bfv || scheme == scheme_type::bgv)) ||
-            (scale == 0.0 && scheme == scheme_type::ckks))
+            (!is_positive_normal(scale) && scheme == scheme_type::ckks))
         {
             return false;
         }
