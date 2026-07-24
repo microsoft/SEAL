@@ -270,10 +270,11 @@ namespace Microsoft.Research.SEAL
             if (!IsSupportedComprMode(comprMode))
                 throw new InvalidOperationException("Unsupported compression mode");
 
+            byte[] buffer = null;
             try
             {
                 int sizeInt = checked((int)size);
-                byte[] buffer = new byte[sizeInt];
+                buffer = new byte[sizeInt];
                 SaveData(buffer, checked((ulong)sizeInt), (byte)comprMode, out long outBytes);
                 int intOutBytes = checked((int)outBytes);
                 using (BinaryWriter writer = new BinaryWriter(stream, Encoding.UTF8, true))
@@ -281,14 +282,18 @@ namespace Microsoft.Research.SEAL
                     writer.Write(buffer, 0, intOutBytes);
                 }
 
-                // Clear the buffer for safety reasons
-                Array.Clear(buffer, 0, intOutBytes);
-
                 return outBytes;
             }
             catch (OverflowException ex)
             {
                 throw new ArgumentException($"{nameof(size)} is out of bounds", ex);
+            }
+            finally
+            {
+                if (buffer != null)
+                {
+                    Array.Clear(buffer, 0, buffer.Length);
+                }
             }
         }
 
@@ -319,6 +324,7 @@ namespace Microsoft.Research.SEAL
             if (!stream.CanRead)
                 throw new ArgumentException(nameof(stream));
 
+            byte[] buffer = null;
             try
             {
                 SEALHeader header = new SEALHeader();
@@ -345,27 +351,32 @@ namespace Microsoft.Research.SEAL
                 if (header.Size > checked((ulong)(stream.Length - pos)))
                     throw new EndOfStreamException("SEALHeader.Size exceeds the available input");
 
-                byte[] buffer = null;
-                using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, true))
+                buffer = new byte[sizeInt];
+                int bytesRead = 0;
+                while (bytesRead < sizeInt)
                 {
-                    buffer = reader.ReadBytes(sizeInt);
+                    int read = stream.Read(buffer, bytesRead, sizeInt - bytesRead);
+                    if (read == 0)
+                    {
+                        throw new EndOfStreamException("Stream ended before the full object was read");
+                    }
+                    bytesRead += read;
                 }
 
-                // ReadBytes returns a shorter array without throwing on a truncated stream; never
-                // hand native code a length larger than the array actually read.
-                if (buffer.Length != sizeInt)
-                    throw new EndOfStreamException("Stream ended before the full object was read");
-
                 LoadData(buffer, header.Size, out long outBytes);
-
-                // Clear the buffer for safety reasons
-                Array.Clear(buffer, 0, sizeInt);
 
                 return outBytes;
             }
             catch (OverflowException ex)
             {
                 throw new InvalidOperationException("Size indicated by loaded SEALHeader is out of bounds", ex);
+            }
+            finally
+            {
+                if (buffer != null)
+                {
+                    Array.Clear(buffer, 0, buffer.Length);
+                }
             }
         }
     }

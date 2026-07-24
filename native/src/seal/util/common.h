@@ -541,7 +541,7 @@ namespace seal
                 {
                     int nibble_bits = get_significant_bit_count(static_cast<std::uint64_t>(nibble));
                     std::uint64_t remaining_bits = static_cast<std::uint64_t>(char_count - i - 1) * bits_per_nibble;
-                    if (remaining_bits > static_cast<std::uint64_t>(std::numeric_limits<int>::max() - nibble_bits))
+                    if (remaining_bits > static_cast<std::uint64_t>((std::numeric_limits<int>::max)() - nibble_bits))
                     {
                         throw std::invalid_argument("char_count");
                     }

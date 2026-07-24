@@ -60,10 +60,13 @@ if(SEAL_BUILD_TESTS)
         message(FATAL_ERROR "Cannot find target SEAL::seal or SEAL::seal_shared")
     endif()
 
-    # Link the C export library so the C-ABI exception firewall can be exercised.
-    # The matching test source (cabi.cpp) is added under the same condition.
+    # Keep the C export tests in a separate process because sealc embeds the
+    # static C++ library.
     if(TARGET sealc)
-        target_link_libraries(sealtest PRIVATE sealc)
+        add_executable(sealctest
+            ${CMAKE_CURRENT_LIST_DIR}/seal/cabi.cpp
+            ${CMAKE_CURRENT_LIST_DIR}/seal/testrunner.cpp)
+        target_link_libraries(sealctest PRIVATE sealc GTest::gtest)
     endif()
 
     # In Debug mode, enable AddressSanitizer (and LeakSanitizer) on Unix-like platforms.
@@ -72,6 +75,10 @@ if(SEAL_BUILD_TESTS)
         # On Linux, LeakSanitizer is enabled by default.
         target_compile_options(sealtest PUBLIC -fsanitize=address)
         target_link_options(sealtest PUBLIC -fsanitize=address)
+        if(TARGET sealctest)
+            target_compile_options(sealctest PUBLIC -fsanitize=address)
+            target_link_options(sealctest PUBLIC -fsanitize=address)
+        endif()
         if(NOT APPLE)
             message(STATUS "Sanitizers enabled: address, leak")
         else()

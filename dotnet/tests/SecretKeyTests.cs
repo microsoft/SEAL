@@ -13,6 +13,123 @@ namespace SEALNetTest
     [TestClass]
     public class SecretKeyTests
     {
+        private sealed class FailingWriteStream : Stream
+        {
+            public byte[] Buffer { get; private set; }
+
+            public override bool CanRead => false;
+
+            public override bool CanSeek => false;
+
+            public override bool CanWrite => true;
+
+            public override long Length => throw new NotSupportedException();
+
+            public override long Position
+            {
+                get => throw new NotSupportedException();
+                set => throw new NotSupportedException();
+            }
+
+            public override void Flush()
+            {
+            }
+
+            public override int Read(byte[] buffer, int offset, int count)
+            {
+                throw new NotSupportedException();
+            }
+
+            public override long Seek(long offset, SeekOrigin origin)
+            {
+                throw new NotSupportedException();
+            }
+
+            public override void SetLength(long value)
+            {
+                throw new NotSupportedException();
+            }
+
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                Buffer = buffer;
+                throw new IOException();
+            }
+        }
+
+        private sealed class CapturingReadStream : Stream
+        {
+            private readonly MemoryStream stream_;
+
+            public CapturingReadStream(byte[] data)
+            {
+                stream_ = new MemoryStream(data, writable: false);
+            }
+
+            public byte[] Buffer { get; private set; }
+
+            public override bool CanRead => true;
+
+            public override bool CanSeek => true;
+
+            public override bool CanWrite => false;
+
+            public override long Length => stream_.Length;
+
+            public override long Position
+            {
+                get => stream_.Position;
+                set => stream_.Position = value;
+            }
+
+            public override void Flush()
+            {
+            }
+
+            public override int Read(byte[] buffer, int offset, int count)
+            {
+                if (Buffer == null || buffer.Length > Buffer.Length)
+                {
+                    Buffer = buffer;
+                }
+                return stream_.Read(buffer, offset, count);
+            }
+
+            public override long Seek(long offset, SeekOrigin origin)
+            {
+                return stream_.Seek(offset, origin);
+            }
+
+            public override void SetLength(long value)
+            {
+                throw new NotSupportedException();
+            }
+
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                throw new NotSupportedException();
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                if (disposing)
+                {
+                    stream_.Dispose();
+                }
+                base.Dispose(disposing);
+            }
+        }
+
+        private static void AssertBufferCleared(byte[] buffer)
+        {
+            Assert.IsNotNull(buffer);
+            Assert.IsTrue(buffer.Length > 0);
+            for (int i = 0; i < buffer.Length; i++)
+            {
+                Assert.AreEqual(0, buffer[i]);
+            }
+        }
+
         [TestMethod]
         public void CreateTest()
         {
@@ -140,6 +257,63 @@ namespace SEALNetTest
                 Assert.IsTrue(secret2.Data.IsNTTForm);
                 Assert.AreNotEqual(ParmsId.Zero, secret2.ParmsId);
                 Assert.AreEqual(secret.ParmsId, secret2.ParmsId);
+            }
+        }
+
+        [TestMethod]
+        public void SaveBufferClearedOnExceptionTest()
+        {
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
+            {
+                PolyModulusDegree = 64,
+                PlainModulus = new Modulus(1 << 6),
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
+            };
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false, secLevel: SecLevelType.None);
+            SecretKey secret = new KeyGenerator(context).SecretKey;
+
+            FailingWriteStream output = new FailingWriteStream();
+            Utilities.AssertThrows<IOException>(
+                () => secret.Save(output, ComprModeType.None));
+            AssertBufferCleared(output.Buffer);
+        }
+
+        [TestMethod]
+        public void LoadBufferClearedOnExceptionTest()
+        {
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
+            {
+                PolyModulusDegree = 64,
+                PlainModulus = new Modulus(1 << 6),
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
+            };
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false, secLevel: SecLevelType.None);
+            SecretKey secret = new KeyGenerator(context).SecretKey;
+
+            byte[] serialized;
+            using (MemoryStream stream = new MemoryStream())
+            {
+                secret.Save(stream, ComprModeType.None);
+                serialized = stream.ToArray();
+            }
+
+            EncryptionParameters otherParms = new EncryptionParameters(SchemeType.BFV)
+            {
+                PolyModulusDegree = 64,
+                PlainModulus = new Modulus((1 << 6) + 1),
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 40 })
+            };
+            SEALContext otherContext = new SEALContext(otherParms,
+                expandModChain: false, secLevel: SecLevelType.None);
+
+            using (CapturingReadStream input = new CapturingReadStream(serialized))
+            {
+                SecretKey loaded = new SecretKey();
+                Utilities.AssertThrows<InvalidOperationException>(
+                    () => loaded.Load(otherContext, input));
+                AssertBufferCleared(input.Buffer);
             }
         }
 

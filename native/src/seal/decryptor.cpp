@@ -267,6 +267,9 @@ namespace seal
         // Need to extend the array
         // Compute powers of secret key until max_power
         auto secret_key_array(allocate_poly_array(new_size, coeff_count, coeff_modulus_size, pool_));
+        // Remember the local buffer's poly count; old_size/new_size are reused below for the
+        // published array and no longer describe this buffer once that happens.
+        size_t local_array_size = new_size;
         PolyIter secret_key_array_iter(secret_key_array.get(), coeff_count, coeff_modulus_size);
         // Copy the existing key powers while the reader lock still pins the shared buffer;
         // a concurrent extension cannot free it until this reader releases below.
@@ -294,8 +297,18 @@ namespace seal
 
         if (old_size == new_size)
         {
+            // A concurrent extension already published an array at least as large as the one
+            // just computed locally; wipe the discarded local duplicate before returning.
+            seal_memzero(
+                secret_key_array.get(),
+                mul_safe(local_array_size, coeff_count, coeff_modulus_size, static_cast<size_t>(bytes_per_uint64)));
             return;
         }
+
+        // Wipe the superseded array before acquire() releases it back to the pool below.
+        seal_memzero(
+            secret_key_array_.get(),
+            mul_safe(old_size, coeff_count, coeff_modulus_size, static_cast<size_t>(bytes_per_uint64)));
 
         // Acquire new array
         secret_key_array_size_ = new_size;

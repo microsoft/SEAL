@@ -25,12 +25,4 @@ target_sources(sealtest
         ${CMAKE_CURRENT_LIST_DIR}/testrunner.cpp
 )
 
-# The C-ABI exception-firewall test is only meaningful when the C export library is built.
-if(TARGET sealc)
-    target_sources(sealtest
-        PRIVATE
-            ${CMAKE_CURRENT_LIST_DIR}/cabi.cpp
-    )
-endif()
-
 add_subdirectory(util)
