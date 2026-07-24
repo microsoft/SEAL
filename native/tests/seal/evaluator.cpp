@@ -9,6 +9,7 @@
 #include "seal/evaluator.h"
 #include "seal/keygenerator.h"
 #include "seal/modulus.h"
+#include "seal/valcheck.h"
 #include <cstddef>
 #include <cstdint>
 #include <ctime>
@@ -2559,6 +2560,74 @@ namespace sealtest
         slot.swap(short_slot);
 
         ASSERT_THROW(evaluator.relinearize_inplace(encrypted, rlk), invalid_argument);
+    }
+
+    TEST(EvaluatorTest, SeededCiphertextRejectedByComputation)
+    {
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(128);
+        parms.set_plain_modulus(1 << 6);
+        parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40 }));
+
+        SEALContext context(parms, false, sec_level_type::none);
+        KeyGenerator keygen(context);
+        Encryptor encryptor(context, keygen.secret_key());
+        Decryptor decryptor(context, keygen.secret_key());
+        Evaluator evaluator(context);
+
+        // Ordinary unseeded computation is unaffected: encrypt, negate twice, recover the input.
+        Ciphertext normal;
+        encryptor.encrypt_symmetric(Plaintext("5"), normal);
+        ASSERT_FALSE(normal.contains_seed());
+        ASSERT_TRUE(is_buffer_valid(normal));
+        evaluator.negate_inplace(normal);
+        evaluator.negate_inplace(normal);
+        Plaintext decrypted;
+        decryptor.decrypt(normal, decrypted);
+        ASSERT_EQ("5", decrypted.to_string());
+
+        // Stamp the seed marker into the second polynomial to reproduce the in-memory
+        // serialization-only representation and confirm computation rejects it.
+        Ciphertext seeded;
+        encryptor.encrypt_symmetric(Plaintext("5"), seeded);
+        seeded.data(1)[0] = 0xFFFFFFFFFFFFFFFFULL;
+        ASSERT_TRUE(seeded.contains_seed());
+        ASSERT_FALSE(is_buffer_valid(seeded));
+        ASSERT_THROW(evaluator.negate_inplace(seeded), invalid_argument);
+    }
+
+    TEST(EvaluatorTest, SeededRelinKeyRejectedByRelinearize)
+    {
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(128);
+        parms.set_plain_modulus(1 << 6);
+        parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40, 40 }));
+
+        SEALContext context(parms, true, sec_level_type::none);
+        KeyGenerator keygen(context);
+        RelinKeys rlk;
+        keygen.create_relin_keys(rlk);
+
+        Encryptor encryptor(context, keygen.secret_key());
+        Evaluator evaluator(context);
+
+        Ciphertext squared;
+        encryptor.encrypt_symmetric(Plaintext("1x^10 + 2"), squared);
+        evaluator.square_inplace(squared);
+        ASSERT_EQ(3ULL, squared.size());
+
+        // A well-formed relinearization on the unmodified keys succeeds.
+        Ciphertext control = squared;
+        evaluator.relinearize_inplace(control, rlk);
+        ASSERT_EQ(2ULL, control.size());
+
+        // Stamp the seed marker into the used key slot. is_buffer_valid delegates through
+        // PublicKey to Ciphertext, so switch_key_inplace rejects the seeded key entry.
+        auto &slot = rlk.data()[RelinKeys::get_index(2)];
+        slot[0].data().data(1)[0] = 0xFFFFFFFFFFFFFFFFULL;
+        ASSERT_TRUE(slot[0].data().contains_seed());
+        ASSERT_FALSE(is_buffer_valid(rlk));
+        ASSERT_THROW(evaluator.relinearize_inplace(squared, rlk), invalid_argument);
     }
 
     TEST(EvaluatorTest, RelinearizeLowerLevel)

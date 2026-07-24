@@ -182,7 +182,12 @@ SEAL_C_FUNC CKKSEncoder_Decode1(void *thisptr, void *plain, uint64_t *value_coun
     }
     SEAL_C_CATCH_ALL
 
-    *value_count = destination.size();
+    uint64_t required = static_cast<uint64_t>(destination.size());
+    HRESULT result = PrepareOutputBuffer(required, value_count, values);
+    if (result != S_OK)
+    {
+        return result;
+    }
 
     // Copy to actual destination
     for (uint64_t i = 0; i < destination.size(); i++)
@@ -212,7 +217,12 @@ SEAL_C_FUNC CKKSEncoder_Decode2(void *thisptr, void *plain, uint64_t *value_coun
     }
     SEAL_C_CATCH_ALL
 
-    *value_count = destination.size();
+    uint64_t required = static_cast<uint64_t>(destination.size());
+    HRESULT result = PrepareOutputBuffer(required, value_count, values);
+    if (result != S_OK)
+    {
+        return result;
+    }
 
     // Copy to actual destination
     for (uint64_t i = 0; i < destination.size(); i++)

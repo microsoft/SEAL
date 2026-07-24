@@ -34,15 +34,14 @@ SEAL_C_FUNC ContextData_TotalCoeffModulus(void *thisptr, uint64_t *count, uint64
         return S_OK;
     }
 
-    *count = cont_data->parms().coeff_modulus().size();
-
-    if (nullptr == total_coeff_modulus)
+    uint64_t required = static_cast<uint64_t>(cont_data->parms().coeff_modulus().size());
+    HRESULT capacity_result = PrepareOutputBuffer(required, count, total_coeff_modulus);
+    if (capacity_result != S_OK || nullptr == total_coeff_modulus)
     {
-        // We only wanted the count.
-        return S_OK;
+        return capacity_result;
     }
 
-    for (uint64_t i = 0; i < *count; i++)
+    for (uint64_t i = 0; i < required; i++)
     {
         total_coeff_modulus[i] = cont_data->total_coeff_modulus()[i];
     }
@@ -102,15 +101,14 @@ SEAL_C_FUNC ContextData_CoeffDivPlainModulus(void *thisptr, uint64_t *count, uin
         return S_OK;
     }
 
-    *count = cont_data->parms().coeff_modulus().size();
-
-    if (nullptr == coeff_div)
+    uint64_t required = static_cast<uint64_t>(cont_data->parms().coeff_modulus().size());
+    HRESULT capacity_result = PrepareOutputBuffer(required, count, coeff_div);
+    if (capacity_result != S_OK || nullptr == coeff_div)
     {
-        // We only wanted the size
-        return S_OK;
+        return capacity_result;
     }
 
-    for (uint64_t i = 0; i < *count; i++)
+    for (uint64_t i = 0; i < required; i++)
     {
         coeff_div[i] = cont_data->coeff_div_plain_modulus()[i].operand;
     }
@@ -141,15 +139,14 @@ SEAL_C_FUNC ContextData_PlainUpperHalfIncrement(void *thisptr, uint64_t *count, 
         return S_OK;
     }
 
-    *count = cont_data->parms().coeff_modulus().size();
-
-    if (nullptr == puhi)
+    uint64_t required = static_cast<uint64_t>(cont_data->parms().coeff_modulus().size());
+    HRESULT capacity_result = PrepareOutputBuffer(required, count, puhi);
+    if (capacity_result != S_OK || nullptr == puhi)
     {
-        // We only wanted the size
-        return S_OK;
+        return capacity_result;
     }
 
-    for (uint64_t i = 0; i < *count; i++)
+    for (uint64_t i = 0; i < required; i++)
     {
         puhi[i] = cont_data->plain_upper_half_increment()[i];
     }
@@ -170,15 +167,14 @@ SEAL_C_FUNC ContextData_UpperHalfThreshold(void *thisptr, uint64_t *count, uint6
         return S_OK;
     }
 
-    *count = cont_data->parms().coeff_modulus().size();
-
-    if (nullptr == uht)
+    uint64_t required = static_cast<uint64_t>(cont_data->parms().coeff_modulus().size());
+    HRESULT capacity_result = PrepareOutputBuffer(required, count, uht);
+    if (capacity_result != S_OK || nullptr == uht)
     {
-        // We only wanted the count
-        return S_OK;
+        return capacity_result;
     }
 
-    for (uint64_t i = 0; i < *count; i++)
+    for (uint64_t i = 0; i < required; i++)
     {
         uht[i] = cont_data->upper_half_threshold()[i];
     }
@@ -198,15 +194,14 @@ SEAL_C_FUNC ContextData_UpperHalfIncrement(void *thisptr, uint64_t *count, uint6
         return S_OK;
     }
 
-    *count = cont_data->parms().coeff_modulus().size();
-
-    if (nullptr == uhi)
+    uint64_t required = static_cast<uint64_t>(cont_data->parms().coeff_modulus().size());
+    HRESULT capacity_result = PrepareOutputBuffer(required, count, uhi);
+    if (capacity_result != S_OK || nullptr == uhi)
     {
-        // We only wanted the size
-        return S_OK;
+        return capacity_result;
     }
 
-    for (uint64_t i = 0; i < *count; i++)
+    for (uint64_t i = 0; i < required; i++)
     {
         uhi[i] = cont_data->upper_half_increment()[i];
     }

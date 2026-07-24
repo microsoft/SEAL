@@ -121,11 +121,11 @@ namespace Microsoft.Research.SEAL
                     NativeMethods.KSwitchKeys_GetKeyList(NativePtr, i, ref count, pointers);
 
                     List<PublicKey> key = new List<PublicKey>(checked((int)count));
-                    foreach (IntPtr ptr in pointers)
+                    for (ulong j = 0; j < count; j++)
                     {
                         // The C layer returns fresh deep copies (see GetKeyFromVector);
                         // the managed wrapper owns them and must free them.
-                        key.Add(new PublicKey(ptr, owned: true));
+                        key.Add(new PublicKey(pointers[j], owned: true));
                     }
 
                     result.Add(key);

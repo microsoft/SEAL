@@ -100,10 +100,15 @@ SEAL_C_FUNC BatchEncoder_Decode1(void *thisptr, void *plain, uint64_t *count, ui
     }
     SEAL_C_CATCH_ALL
 
-    // Copy to actual destination
-    *count = result.size();
+    uint64_t required = static_cast<uint64_t>(result.size());
+    HRESULT capacity_result = PrepareOutputBuffer(required, count, destination);
+    if (capacity_result != S_OK)
+    {
+        return capacity_result;
+    }
 
-    for (uint64_t i = 0; i < *count; i++)
+    // Copy to actual destination
+    for (uint64_t i = 0; i < required; i++)
     {
         destination[i] = result[i];
     }
@@ -128,10 +133,15 @@ SEAL_C_FUNC BatchEncoder_Decode2(void *thisptr, void *plain, uint64_t *count, in
     }
     SEAL_C_CATCH_ALL
 
-    *count = result.size();
+    uint64_t required = static_cast<uint64_t>(result.size());
+    HRESULT capacity_result = PrepareOutputBuffer(required, count, destination);
+    if (capacity_result != S_OK)
+    {
+        return capacity_result;
+    }
 
     // Copy to actual destination
-    for (uint64_t i = 0; i < *count; i++)
+    for (uint64_t i = 0; i < required; i++)
     {
         destination[i] = result[i];
     }

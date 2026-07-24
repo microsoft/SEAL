@@ -66,6 +66,9 @@ namespace SEALNetTest
 
             string[] methodNames =
             {
+                "EPQ_ParameterErrorName",
+                "EPQ_ParameterErrorMessage",
+                "Plaintext_ToString",
                 "SEALContext_ParameterErrorName",
                 "SEALContext_ParameterErrorMessage"
             };
@@ -74,7 +77,10 @@ namespace SEALNetTest
                 MethodInfo method = nativeMethods.GetMethod(
                     methodName, BindingFlags.NonPublic | BindingFlags.Static);
                 Assert.IsNotNull(method);
-                Assert.AreEqual(typeof(StringBuilder), method.GetParameters()[1].ParameterType);
+                ParameterInfo[] parameters = method.GetParameters();
+                Assert.AreEqual(typeof(StringBuilder), parameters[1].ParameterType);
+                Assert.AreEqual(typeof(ulong).MakeByRefType(), parameters[2].ParameterType);
+                Assert.IsFalse(parameters[2].IsOut);
 
                 DllImportAttribute import = method.GetCustomAttribute<DllImportAttribute>();
                 Assert.IsNotNull(import);

@@ -31,6 +31,8 @@ SEAL_C_FUNC EPQ_UsingDescendingModulusChain(void *thisptr, bool *using_descendin
 
 SEAL_C_FUNC EPQ_SecLevel(void *thisptr, int *sec_level);
 
+// With a non-null outstr, length is the input capacity excluding the terminator and output required size.
 SEAL_C_FUNC EPQ_ParameterErrorName(void *thisptr, char *outstr, uint64_t *length);
 
+// With a non-null outstr, length is the input capacity excluding the terminator and output required size.
 SEAL_C_FUNC EPQ_ParameterErrorMessage(void *thisptr, char *outstr, uint64_t *length);

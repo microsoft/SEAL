@@ -39,6 +39,7 @@ SEAL_C_FUNC Plaintext_CoeffAt(void *thisptr, uint64_t index, uint64_t *coeff);
 
 SEAL_C_FUNC Plaintext_SetCoeffAt(void *thisptr, uint64_t index, uint64_t value);
 
+// With a non-null outstr, length is the input capacity excluding the terminator and output required size.
 SEAL_C_FUNC Plaintext_ToString(void *thispt, char *outstr, uint64_t *length);
 
 SEAL_C_FUNC Plaintext_IsNTTForm(void *thisptr, bool *is_ntt_form);

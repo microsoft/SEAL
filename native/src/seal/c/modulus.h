@@ -49,9 +49,12 @@ SEAL_C_FUNC Modulus_Reduce(void *thisptr, uint64_t value, uint64_t *result);
 
 SEAL_C_FUNC CoeffModulus_MaxBitCount(uint64_t poly_modulus_degree, int sec_level, int *bit_count);
 
+// With non-null coeffs, length is the input pointer capacity and output required size.
 SEAL_C_FUNC CoeffModulus_BFVDefault(uint64_t poly_modulus_degree, int sec_level, uint64_t *length, void **coeffs);
 
+// coeffs must have space for length pointers.
 SEAL_C_FUNC CoeffModulus_Create1(uint64_t poly_modulus_degree, uint64_t length, int *bit_sizes, void **coeffs);
 
+// coeffs must have space for length pointers.
 SEAL_C_FUNC CoeffModulus_Create2(
     uint64_t poly_modulus_degree, uint64_t length, int *bit_sizes, void *plain_modulus, void **coeffs);
