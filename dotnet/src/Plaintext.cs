@@ -503,9 +503,10 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="InvalidOperationException">if the plaintext is in NTT transformed form</exception>
         public override string ToString()
         {
-            NativeMethods.Plaintext_ToString(NativePtr, null, out ulong length);
+            ulong length = 0;
+            NativeMethods.Plaintext_ToString(NativePtr, null, ref length);
             StringBuilder buffer = new StringBuilder(checked((int)length));
-            NativeMethods.Plaintext_ToString(NativePtr, buffer, out length);
+            NativeMethods.Plaintext_ToString(NativePtr, buffer, ref length);
             return buffer.ToString();
         }
 

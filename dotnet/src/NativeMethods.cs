@@ -59,10 +59,10 @@ namespace Microsoft.Research.SEAL
         internal static extern void EPQ_SecLevel(IntPtr thisptr, out int secLevel);
 
         [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
-        internal static extern void EPQ_ParameterErrorName(IntPtr thisptr, StringBuilder outstr, out ulong length);
+        internal static extern void EPQ_ParameterErrorName(IntPtr thisptr, StringBuilder outstr, ref ulong length);
 
         [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
-        internal static extern void EPQ_ParameterErrorMessage(IntPtr thisptr, StringBuilder outstr, out ulong length);
+        internal static extern void EPQ_ParameterErrorMessage(IntPtr thisptr, StringBuilder outstr, ref ulong length);
 
 #endregion
 
@@ -240,11 +240,11 @@ namespace Microsoft.Research.SEAL
 
         [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
         internal static extern void SEALContext_ParameterErrorName(
-            IntPtr thisptr, StringBuilder outstr, out ulong length);
+            IntPtr thisptr, StringBuilder outstr, ref ulong length);
 
         [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
         internal static extern void SEALContext_ParameterErrorMessage(
-            IntPtr thisptr, StringBuilder outstr, out ulong length);
+            IntPtr thisptr, StringBuilder outstr, ref ulong length);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void SEALContext_KeyContextData(IntPtr thisptr, out IntPtr contextData);
@@ -557,7 +557,7 @@ namespace Microsoft.Research.SEAL
         internal static extern void Plaintext_SetCoeffAt(IntPtr thisptr, ulong index, ulong value);
 
         [DllImport(sealc, PreserveSig = false, CharSet = CharSet.Ansi)]
-        internal static extern void Plaintext_ToString(IntPtr thisptr, StringBuilder outstr, out ulong length);
+        internal static extern void Plaintext_ToString(IntPtr thisptr, StringBuilder outstr, ref ulong length);
 
         [DllImport(sealc, PreserveSig = false)]
         internal static extern void Plaintext_IsNTTForm(IntPtr thisptr, out bool isNTTForm);

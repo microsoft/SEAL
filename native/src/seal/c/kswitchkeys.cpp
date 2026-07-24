@@ -14,22 +14,23 @@ using namespace seal::c;
 
 namespace
 {
-    HRESULT GetKeyFromVector(const vector<PublicKey> &key, uint64_t *count, void **key_list)
+    HRESULT GetKeyFromVector(const vector<PublicKey> &keys, uint64_t *count, void **key_list)
     {
-        *count = key.size();
-
-        if (nullptr == key_list)
+        uint64_t required = static_cast<uint64_t>(keys.size());
+        HRESULT result = PrepareOutputBuffer(required, count, key_list);
+        if (result != S_OK || nullptr == key_list)
         {
-            // We only wanted the count
-            return S_OK;
+            return result;
         }
+
+        vector<unique_ptr<PublicKey>> key_copies;
+        key_copies.reserve(keys.size());
+        transform(keys.cbegin(), keys.cend(), back_inserter(key_copies), [](const auto &key) {
+            return make_unique<PublicKey>(key);
+        });
 
         auto pkeys = reinterpret_cast<PublicKey **>(key_list);
-        for (size_t i = 0; i < key.size(); i++)
-        {
-            pkeys[i] = new PublicKey(key[i]);
-        }
-
+        transform(key_copies.begin(), key_copies.end(), pkeys, [](auto &key) { return key.release(); });
         return S_OK;
     }
 } // namespace

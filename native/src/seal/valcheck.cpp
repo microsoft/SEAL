@@ -226,6 +226,13 @@ namespace seal
             return false;
         }
 
+        // A seeded, serialization-only ciphertext is not a valid computational buffer.
+        // The size check above guarantees the second polynomial is in bounds for this query.
+        if (in.contains_seed())
+        {
+            return false;
+        }
+
         return true;
     }
 

@@ -456,6 +456,19 @@ namespace seal
         }
 
         /**
+        Returns whether the ciphertext holds a seeded, serialization-only
+        representation. This is a size-2 ciphertext whose second polynomial stores
+        a serialized random-number-generator seed instead of a fully sampled
+        polynomial, as produced when a symmetric encryption or key is created with
+        save_seed enabled. Such an object is only meaningful for serialization and
+        is not a valid operand for homomorphic computations.
+        */
+        SEAL_NODISCARD inline bool contains_seed() const noexcept
+        {
+            return has_seed_marker();
+        }
+
+        /**
         Returns an upper bound on the size of the ciphertext, as if it was written
         to an output stream.
 

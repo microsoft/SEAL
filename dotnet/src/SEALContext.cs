@@ -158,9 +158,10 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         public string ParameterErrorName()
         {
-            NativeMethods.SEALContext_ParameterErrorName(NativePtr, null, out ulong length);
+            ulong length = 0;
+            NativeMethods.SEALContext_ParameterErrorName(NativePtr, null, ref length);
             StringBuilder buffer = new StringBuilder(checked((int)length));
-            NativeMethods.SEALContext_ParameterErrorName(NativePtr, buffer, out length);
+            NativeMethods.SEALContext_ParameterErrorName(NativePtr, buffer, ref length);
             return buffer.ToString();
         }
 
@@ -170,9 +171,10 @@ namespace Microsoft.Research.SEAL
         /// </summary>
         public string ParameterErrorMessage()
         {
-            NativeMethods.SEALContext_ParameterErrorMessage(NativePtr, null, out ulong length);
+            ulong length = 0;
+            NativeMethods.SEALContext_ParameterErrorMessage(NativePtr, null, ref length);
             StringBuilder buffer = new StringBuilder(checked((int)length));
-            NativeMethods.SEALContext_ParameterErrorMessage(NativePtr, buffer, out length);
+            NativeMethods.SEALContext_ParameterErrorMessage(NativePtr, buffer, ref length);
             return buffer.ToString();
         }
 

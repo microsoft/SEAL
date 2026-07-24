@@ -35,6 +35,8 @@ SEAL_C_FUNC SEALContext_GetContextData(void *thisptr, uint64_t *parms_id, void *
 
 SEAL_C_FUNC SEALContext_UsingKeyswitching(void *thisptr, bool *using_keyswitching);
 
+// With a non-null outstr, length is the input capacity excluding the terminator and output required size.
 SEAL_C_FUNC SEALContext_ParameterErrorName(void *thisptr, char *outstr, uint64_t *length);
 
+// With a non-null outstr, length is the input capacity excluding the terminator and output required size.
 SEAL_C_FUNC SEALContext_ParameterErrorMessage(void *thisptr, char *outstr, uint64_t *length);

@@ -1,6 +1,9 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+#include "seal/c/batchencoder.h"
+#include "seal/c/ckksencoder.h"
+#include "seal/c/contextdata.h"
 #include "seal/c/encryptionparameters.h"
 #include "seal/c/encryptor.h"
 #include "seal/c/keygenerator.h"
@@ -12,6 +15,8 @@
 #include "seal/c/publickey.h"
 #include "seal/c/sealcontext.h"
 #include "seal/c/secretkey.h"
+#include <algorithm>
+#include <limits>
 #include <vector>
 #include "gtest/gtest.h"
 
@@ -52,6 +57,209 @@ namespace sealtest
         ASSERT_EQ(HRESULT_FROM_WIN32(ERROR_INVALID_INDEX), KSwitchKeys_GetKeyList(keys, 1, &count, nullptr));
 
         ASSERT_EQ(S_OK, KSwitchKeys_Destroy(keys));
+    }
+
+    TEST(CAbiOutputCapacityTest, RejectsInsufficientStringAndModulusBuffers)
+    {
+        void *plain = nullptr;
+        ASSERT_EQ(S_OK, Plaintext_Create2(2, nullptr, &plain));
+        ASSERT_EQ(S_OK, Plaintext_SetCoeffAt(plain, 0, 3));
+        ASSERT_EQ(S_OK, Plaintext_SetCoeffAt(plain, 1, 5));
+
+        uint64_t text_required = 0;
+        ASSERT_EQ(S_OK, Plaintext_ToString(plain, nullptr, &text_required));
+        std::vector<char> text(text_required + 1, 'x');
+        uint64_t text_capacity = text_required - 1;
+        EXPECT_EQ(
+            HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER), Plaintext_ToString(plain, text.data(), &text_capacity));
+        EXPECT_EQ(text_required, text_capacity);
+        EXPECT_TRUE(std::all_of(text.cbegin(), text.cend(), [](char value) { return value == 'x'; }));
+        EXPECT_EQ(S_OK, Plaintext_Destroy(plain));
+
+        constexpr int tc128 = 128;
+        constexpr uint64_t poly_modulus_degree = 1024;
+        uint64_t required = 0;
+        ASSERT_EQ(S_OK, CoeffModulus_BFVDefault(poly_modulus_degree, tc128, &required, nullptr));
+
+        std::vector<void *> coeffs(required);
+        uint64_t coeff_capacity = 0;
+        HRESULT result = CoeffModulus_BFVDefault(poly_modulus_degree, tc128, &coeff_capacity, coeffs.data());
+        bool coeffs_modified =
+            std::any_of(coeffs.cbegin(), coeffs.cend(), [](void *coeff) { return coeff != nullptr; });
+        for (void *coeff : coeffs)
+        {
+            if (coeff)
+            {
+                EXPECT_EQ(S_OK, Modulus_Destroy(coeff));
+            }
+        }
+
+        EXPECT_EQ(HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER), result);
+        EXPECT_EQ(required, coeff_capacity);
+        EXPECT_FALSE(coeffs_modified);
+    }
+
+    TEST(CAbiOutputCapacityTest, RejectsInsufficientKeyListBuffer)
+    {
+        void *keys = nullptr;
+        ASSERT_EQ(S_OK, KSwitchKeys_Create1(&keys));
+        void *public_key = nullptr;
+        ASSERT_EQ(S_OK, PublicKey_Create1(&public_key));
+        void *key_list[]{ public_key };
+        ASSERT_EQ(S_OK, KSwitchKeys_AddKeyList(keys, 1, key_list));
+
+        uint64_t required = 0;
+        ASSERT_EQ(S_OK, KSwitchKeys_GetKeyList(keys, 0, &required, nullptr));
+
+        std::vector<void *> output(required);
+        uint64_t capacity = 0;
+        HRESULT result = KSwitchKeys_GetKeyList(keys, 0, &capacity, output.data());
+        bool output_modified = std::any_of(output.cbegin(), output.cend(), [](void *key) { return key != nullptr; });
+        for (void *key : output)
+        {
+            if (key)
+            {
+                EXPECT_EQ(S_OK, PublicKey_Destroy(key));
+            }
+        }
+
+        EXPECT_EQ(HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER), result);
+        EXPECT_EQ(required, capacity);
+        EXPECT_FALSE(output_modified);
+        EXPECT_EQ(S_OK, PublicKey_Destroy(public_key));
+        EXPECT_EQ(S_OK, KSwitchKeys_Destroy(keys));
+    }
+
+    TEST(CAbiOutputCapacityTest, RejectsInsufficientCKKSDecodeBuffers)
+    {
+        constexpr uint8_t ckks_scheme = 0x2;
+        constexpr int sec_level_none = 0;
+        constexpr uint64_t poly_modulus_degree = 64;
+
+        void *parms = nullptr;
+        ASSERT_EQ(S_OK, EncParams_Create1(ckks_scheme, &parms));
+        ASSERT_EQ(S_OK, EncParams_SetPolyModulusDegree(parms, poly_modulus_degree));
+
+        int bit_sizes[]{ 40, 40, 40, 40 };
+        void *coeffs[4]{};
+        ASSERT_EQ(S_OK, CoeffModulus_Create1(poly_modulus_degree, 4, bit_sizes, coeffs));
+        ASSERT_EQ(S_OK, EncParams_SetCoeffModulus(parms, 4, coeffs));
+        for (void *coeff : coeffs)
+        {
+            ASSERT_EQ(S_OK, Modulus_Destroy(coeff));
+        }
+
+        void *context = nullptr;
+        ASSERT_EQ(S_OK, SEALContext_Create(parms, false, sec_level_none, &context));
+
+        void *context_data = nullptr;
+        ASSERT_EQ(S_OK, SEALContext_FirstContextData(context, &context_data));
+        uint64_t context_required = 0;
+        ASSERT_EQ(S_OK, ContextData_TotalCoeffModulus(context_data, &context_required, nullptr));
+        constexpr uint64_t context_sentinel = 0xDEADBEEF;
+        std::vector<uint64_t> total_coeff_modulus(context_required, context_sentinel);
+        uint64_t context_capacity = 0;
+        EXPECT_EQ(
+            HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER),
+            ContextData_TotalCoeffModulus(context_data, &context_capacity, total_coeff_modulus.data()));
+        EXPECT_EQ(context_required, context_capacity);
+        EXPECT_TRUE(std::all_of(total_coeff_modulus.cbegin(), total_coeff_modulus.cend(), [](uint64_t value) {
+            return value == context_sentinel;
+        }));
+        void *encoder = nullptr;
+        ASSERT_EQ(S_OK, CKKSEncoder_Create(context, &encoder));
+        void *plain = nullptr;
+        ASSERT_EQ(S_OK, Plaintext_Create1(nullptr, &plain));
+
+        uint64_t parms_id[4]{};
+        ASSERT_EQ(S_OK, SEALContext_FirstParmsId(context, parms_id));
+        ASSERT_EQ(S_OK, CKKSEncoder_Encode3(encoder, 1.0, parms_id, 1048576.0, plain, nullptr));
+
+        uint64_t slot_count = 0;
+        ASSERT_EQ(S_OK, CKKSEncoder_SlotCount(encoder, &slot_count));
+        constexpr double sentinel = -12345.0;
+
+        std::vector<double> real_values(slot_count, sentinel);
+        uint64_t real_capacity = 0;
+        EXPECT_EQ(
+            HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER),
+            CKKSEncoder_Decode1(encoder, plain, &real_capacity, real_values.data(), nullptr));
+        EXPECT_EQ(slot_count, real_capacity);
+        EXPECT_TRUE(
+            std::all_of(real_values.cbegin(), real_values.cend(), [](double value) { return value == sentinel; }));
+
+        std::vector<double> complex_values(slot_count * 2, sentinel);
+        uint64_t complex_capacity = 0;
+        EXPECT_EQ(
+            HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER),
+            CKKSEncoder_Decode2(encoder, plain, &complex_capacity, complex_values.data(), nullptr));
+        EXPECT_EQ(slot_count, complex_capacity);
+        EXPECT_TRUE(std::all_of(complex_values.cbegin(), complex_values.cend(), [](double value) {
+            return value == sentinel;
+        }));
+
+        EXPECT_EQ(S_OK, Plaintext_Destroy(plain));
+        EXPECT_EQ(S_OK, CKKSEncoder_Destroy(encoder));
+        EXPECT_EQ(S_OK, SEALContext_Destroy(context));
+        EXPECT_EQ(S_OK, EncParams_Destroy(parms));
+    }
+
+    TEST(CAbiOutputCapacityTest, RejectsInsufficientBatchDecodeBuffers)
+    {
+        constexpr uint8_t bfv_scheme = 0x1;
+        constexpr int sec_level_none = 0;
+        constexpr uint64_t poly_modulus_degree = 64;
+
+        void *parms = nullptr;
+        ASSERT_EQ(S_OK, EncParams_Create1(bfv_scheme, &parms));
+        ASSERT_EQ(S_OK, EncParams_SetPolyModulusDegree(parms, poly_modulus_degree));
+        ASSERT_EQ(S_OK, EncParams_SetPlainModulus2(parms, 257));
+
+        int bit_size = 40;
+        void *coeff = nullptr;
+        ASSERT_EQ(S_OK, CoeffModulus_Create1(poly_modulus_degree, 1, &bit_size, &coeff));
+        void *coeffs[]{ coeff };
+        ASSERT_EQ(S_OK, EncParams_SetCoeffModulus(parms, 1, coeffs));
+        ASSERT_EQ(S_OK, Modulus_Destroy(coeff));
+
+        void *context = nullptr;
+        ASSERT_EQ(S_OK, SEALContext_Create(parms, false, sec_level_none, &context));
+        void *encoder = nullptr;
+        ASSERT_EQ(S_OK, BatchEncoder_Create(context, &encoder));
+        void *plain = nullptr;
+        ASSERT_EQ(S_OK, Plaintext_Create1(nullptr, &plain));
+
+        uint64_t input = 1;
+        ASSERT_EQ(S_OK, BatchEncoder_Encode1(encoder, 1, &input, plain));
+        uint64_t slot_count = 0;
+        ASSERT_EQ(S_OK, BatchEncoder_GetSlotCount(encoder, &slot_count));
+
+        constexpr uint64_t unsigned_sentinel = static_cast<uint64_t>(-1);
+        std::vector<uint64_t> unsigned_values(slot_count, unsigned_sentinel);
+        uint64_t unsigned_capacity = 0;
+        EXPECT_EQ(
+            HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER),
+            BatchEncoder_Decode1(encoder, plain, &unsigned_capacity, unsigned_values.data(), nullptr));
+        EXPECT_EQ(slot_count, unsigned_capacity);
+        EXPECT_TRUE(std::all_of(unsigned_values.cbegin(), unsigned_values.cend(), [](uint64_t value) {
+            return value == unsigned_sentinel;
+        }));
+
+        constexpr int64_t signed_sentinel = (std::numeric_limits<int64_t>::min)();
+        std::vector<int64_t> signed_values(slot_count, signed_sentinel);
+        uint64_t signed_capacity = 0;
+        EXPECT_EQ(
+            HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER),
+            BatchEncoder_Decode2(encoder, plain, &signed_capacity, signed_values.data(), nullptr));
+        EXPECT_EQ(slot_count, signed_capacity);
+        EXPECT_TRUE(std::all_of(signed_values.cbegin(), signed_values.cend(), [](int64_t value) {
+            return value == signed_sentinel;
+        }));
+
+        EXPECT_EQ(S_OK, Plaintext_Destroy(plain));
+        EXPECT_EQ(S_OK, BatchEncoder_Destroy(encoder));
+        EXPECT_EQ(S_OK, SEALContext_Destroy(context));
+        EXPECT_EQ(S_OK, EncParams_Destroy(parms));
     }
 
     TEST(CAbiLifetimeTest, EncryptorCreateReleasesPublicKeyOnInvalidSecretKey)

@@ -25,6 +25,7 @@ SEAL_C_FUNC EncParams_GetPolyModulusDegree(void *thisptr, uint64_t *degree);
 
 SEAL_C_FUNC EncParams_SetPolyModulusDegree(void *thisptr, uint64_t degree);
 
+// With non-null coeffs, length is the input pointer capacity and output required size.
 SEAL_C_FUNC EncParams_GetCoeffModulus(void *thisptr, uint64_t *length, void **coeffs);
 
 SEAL_C_FUNC EncParams_SetCoeffModulus(void *thisptr, uint64_t length, void **coeffs);

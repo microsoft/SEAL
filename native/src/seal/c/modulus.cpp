@@ -239,17 +239,13 @@ SEAL_C_FUNC CoeffModulus_BFVDefault(uint64_t poly_modulus_degree, int sec_level,
 {
     IfNullRet(length, E_POINTER);
 
-    sec_level_type security_level = static_cast<sec_level_type>(sec_level);
-    vector<Modulus> result;
-
     try
     {
-        result = CoeffModulus::BFVDefault(poly_modulus_degree, security_level);
+        sec_level_type security_level = static_cast<sec_level_type>(sec_level);
+        vector<Modulus> result = CoeffModulus::BFVDefault(poly_modulus_degree, security_level);
+        return BuildModulusPointers(result, length, coeffs);
     }
     SEAL_C_CATCH_ALL
-
-    BuildModulusPointers(result, length, coeffs);
-    return S_OK;
 }
 
 SEAL_C_FUNC CoeffModulus_Create1(uint64_t poly_modulus_degree, uint64_t length, int *bit_sizes, void **coeffs)
@@ -257,18 +253,13 @@ SEAL_C_FUNC CoeffModulus_Create1(uint64_t poly_modulus_degree, uint64_t length, 
     IfNullRet(bit_sizes, E_POINTER);
     IfNullRet(coeffs, E_POINTER);
 
-    vector<int> bit_sizes_vec;
-    copy_n(bit_sizes, length, back_inserter(bit_sizes_vec));
-    vector<Modulus> result;
-
     try
     {
-        result = CoeffModulus::Create(poly_modulus_degree, bit_sizes_vec);
+        vector<int> bit_sizes_vec(bit_sizes, bit_sizes + length);
+        vector<Modulus> result = CoeffModulus::Create(poly_modulus_degree, bit_sizes_vec);
+        return BuildModulusPointers(result, &length, coeffs);
     }
     SEAL_C_CATCH_ALL
-
-    BuildModulusPointers(result, &length, coeffs);
-    return S_OK;
 }
 
 SEAL_C_FUNC CoeffModulus_Create2(
@@ -277,17 +268,13 @@ SEAL_C_FUNC CoeffModulus_Create2(
     IfNullRet(bit_sizes, E_POINTER);
     IfNullRet(coeffs, E_POINTER);
 
-    vector<int> bit_sizes_vec;
-    copy_n(bit_sizes, length, back_inserter(bit_sizes_vec));
-    vector<Modulus> result;
     Modulus *modulus = FromVoid<Modulus>(plain_modulus);
     IfNullRet(modulus, E_POINTER);
     try
     {
-        result = CoeffModulus::Create(poly_modulus_degree, *modulus, bit_sizes_vec);
+        vector<int> bit_sizes_vec(bit_sizes, bit_sizes + length);
+        vector<Modulus> result = CoeffModulus::Create(poly_modulus_degree, *modulus, bit_sizes_vec);
+        return BuildModulusPointers(result, &length, coeffs);
     }
     SEAL_C_CATCH_ALL
-
-    BuildModulusPointers(result, &length, coeffs);
-    return S_OK;
 }

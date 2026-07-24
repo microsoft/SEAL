@@ -44,9 +44,15 @@ namespace seal
         std::unique_ptr<seal::MemoryPoolHandle> MemHandleFromVoid(void *voidptr);
 
         /**
-        Build and array of Modulus pointers from a vector
+        Set the required output size and validate the incoming capacity when output is non-null.
         */
-        void BuildModulusPointers(const std::vector<seal::Modulus> &in_mods, uint64_t *length, void **out_mods);
+        HRESULT PrepareOutputBuffer(uint64_t required, uint64_t *size, const void *output);
+
+        /**
+        Build an array of Modulus pointers from a vector.
+        When out_mods is non-null, length is the input capacity and output required size.
+        */
+        HRESULT BuildModulusPointers(const std::vector<seal::Modulus> &in_mods, uint64_t *length, void **out_mods);
 
         /**
         Get a parms_id_type from an uint64_t pointer
@@ -71,12 +77,14 @@ namespace seal
         }
 
         /**
-        Convert std::string to char* with null terminator
+        Convert std::string to char* with null terminator.
+        When outstr is non-null, length is the input capacity excluding the terminator and output required size.
         */
         HRESULT ToStringHelper(const std::string &str, char *outstr, uint64_t *length);
 
         /**
-        Convert const char * to char* with null terminator
+        Convert const char * to char* with null terminator.
+        When outstr is non-null, length is the input capacity excluding the terminator and output required size.
         */
         HRESULT ToStringHelper2(const char *str, char *outstr, uint64_t *length);
     } // namespace c

@@ -15,6 +15,7 @@
 
 SEAL_C_FUNC ContextData_Destroy(void *thisptr);
 
+// With non-null output, count is the input value capacity and output required size.
 SEAL_C_FUNC ContextData_TotalCoeffModulus(void *thisptr, uint64_t *count, uint64_t *total_coeff_modulus);
 
 SEAL_C_FUNC ContextData_TotalCoeffModulusBitCount(void *thisptr, int *bit_count);
@@ -23,14 +24,18 @@ SEAL_C_FUNC ContextData_Parms(void *thisptr, void **parms);
 
 SEAL_C_FUNC ContextData_Qualifiers(void *thisptr, void **epq);
 
+// With non-null output, count is the input value capacity and output required size.
 SEAL_C_FUNC ContextData_CoeffDivPlainModulus(void *thisptr, uint64_t *count, uint64_t *coeff_div);
 
 SEAL_C_FUNC ContextData_PlainUpperHalfThreshold(void *thisptr, uint64_t *puht);
 
+// With non-null output, count is the input value capacity and output required size.
 SEAL_C_FUNC ContextData_PlainUpperHalfIncrement(void *thisptr, uint64_t *count, uint64_t *puhi);
 
+// With non-null output, count is the input value capacity and output required size.
 SEAL_C_FUNC ContextData_UpperHalfThreshold(void *thisptr, uint64_t *count, uint64_t *uht);
 
+// With non-null output, count is the input value capacity and output required size.
 SEAL_C_FUNC ContextData_UpperHalfIncrement(void *thisptr, uint64_t *count, uint64_t *uhi);
 
 SEAL_C_FUNC ContextData_PrevContextData(void *thisptr, void **prev_data);

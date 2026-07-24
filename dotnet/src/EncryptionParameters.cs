@@ -197,9 +197,9 @@ namespace Microsoft.Research.SEAL
                 NativeMethods.EncParams_GetCoeffModulus(NativePtr, ref length, coeffArray);
 
                 List<Modulus> result = new List<Modulus>(checked((int)length));
-                foreach(IntPtr sm in coeffArray)
+                for (ulong i = 0; i < length; i++)
                 {
-                    result.Add(new Modulus(sm));
+                    result.Add(new Modulus(coeffArray[i]));
                 }
 
                 return result;

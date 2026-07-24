@@ -163,10 +163,10 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-            ulong destCount = 0;
+            ulong destCount = SlotCount;
 
             // Allocate a big enough array to hold the result
-            ulong[] destArray = new ulong[SlotCount];
+            ulong[] destArray = new ulong[destCount];
             NativeMethods.BatchEncoder_Decode(NativePtr, plain.NativePtr, ref destCount, destArray, poolPtr);
 
             // Transfer result to actual destination
@@ -203,10 +203,10 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-            ulong destCount = 0;
+            ulong destCount = SlotCount;
 
             // Allocate a big enough array to hold the result
-            long[] destArray = new long[SlotCount];
+            long[] destArray = new long[destCount];
             NativeMethods.BatchEncoder_Decode(NativePtr, plain.NativePtr, ref destCount, destArray, poolPtr);
 
             // Transfer result to actual destination

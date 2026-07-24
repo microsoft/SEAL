@@ -107,8 +107,7 @@ SEAL_C_FUNC EncParams_GetCoeffModulus(void *thisptr, uint64_t *length, void **co
 
     try
     {
-        BuildModulusPointers(params->coeff_modulus(), length, coeffs);
-        return S_OK;
+        return BuildModulusPointers(params->coeff_modulus(), length, coeffs);
     }
     SEAL_C_CATCH_ALL
 }

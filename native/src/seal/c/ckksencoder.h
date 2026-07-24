@@ -39,9 +39,11 @@ SEAL_C_FUNC CKKSEncoder_Encode4(
 SEAL_C_FUNC CKKSEncoder_Encode5(void *thisptr, int64_t value, uint64_t *parms_id, void *destination);
 
 // Array of doubles
+// value_count is the input value capacity and output required size.
 SEAL_C_FUNC CKKSEncoder_Decode1(void *thisptr, void *plain, uint64_t *value_count, double *values, void *pool);
 
 // Array of complex numbers
+// value_count is the input complex-value capacity and output required size; values stores two doubles per value.
 SEAL_C_FUNC CKKSEncoder_Decode2(void *thisptr, void *plain, uint64_t *value_count, double *values, void *pool);
 
 SEAL_C_FUNC CKKSEncoder_SlotCount(void *thisptr, uint64_t *slot_count);

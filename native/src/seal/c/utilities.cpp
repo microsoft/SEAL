@@ -31,37 +31,53 @@ unique_ptr<MemoryPoolHandle> seal::c::MemHandleFromVoid(void *voidptr)
     return make_unique<MemoryPoolHandle>(*handle);
 }
 
-void seal::c::BuildModulusPointers(const vector<Modulus> &in_mods, uint64_t *length, void **out_mods)
+HRESULT seal::c::PrepareOutputBuffer(uint64_t required, uint64_t *size, const void *output)
 {
-    *length = static_cast<uint64_t>(in_mods.size());
-    if (out_mods == nullptr)
+    uint64_t capacity = output ? *size : 0;
+    *size = required;
+    return output && capacity < required ? HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER) : S_OK;
+}
+
+HRESULT seal::c::BuildModulusPointers(const vector<Modulus> &in_mods, uint64_t *length, void **out_mods)
+{
+    uint64_t required = static_cast<uint64_t>(in_mods.size());
+    HRESULT result = PrepareOutputBuffer(required, length, out_mods);
+    if (result != S_OK || out_mods == nullptr)
     {
-        // The caller is only interested in the size
-        return;
+        return result;
     }
 
+    vector<unique_ptr<Modulus>> moduli;
+    moduli.reserve(in_mods.size());
+    transform(in_mods.cbegin(), in_mods.cend(), back_inserter(moduli), [](const auto &mod) {
+        return make_unique<Modulus>(mod);
+    });
+
     Modulus **mod_ptr_array = reinterpret_cast<Modulus **>(out_mods);
-    transform(in_mods.begin(), in_mods.end(), mod_ptr_array, [](const auto &mod) { return new Modulus(mod); });
+    transform(moduli.begin(), moduli.end(), mod_ptr_array, [](auto &mod) { return mod.release(); });
+    return S_OK;
 }
 
 HRESULT seal::c::ToStringHelper(const string &str, char *outstr, uint64_t *length)
 {
-    *length = static_cast<uint64_t>(str.size());
+    uint64_t required = static_cast<uint64_t>(str.size());
+    HRESULT result = PrepareOutputBuffer(required, length, outstr);
 
-    if (nullptr != outstr)
+    if (result == S_OK && nullptr != outstr)
     {
-        memcpy(outstr, str.c_str(), util::add_safe(*length, uint64_t(1)));
+        memcpy(outstr, str.c_str(), util::add_safe(required, uint64_t(1)));
     }
-    return S_OK;
+    return result;
 }
 
 HRESULT seal::c::ToStringHelper2(const char *str, char *outstr, uint64_t *length)
 {
-    *length = static_cast<uint64_t>(strlen(str));
+    uint64_t required = static_cast<uint64_t>(strlen(str));
+    HRESULT result = PrepareOutputBuffer(required, length, outstr);
 
-    if (nullptr != outstr)
+    if (result == S_OK && nullptr != outstr)
     {
-        memcpy(outstr, str, util::add_safe(*length, uint64_t(1)));
+        memcpy(outstr, str, util::add_safe(required, uint64_t(1)));
     }
-    return S_OK;
+    return result;
 }

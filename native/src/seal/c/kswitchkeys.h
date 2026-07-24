@@ -25,6 +25,7 @@ SEAL_C_FUNC KSwitchKeys_Size(void *thisptr, uint64_t *size);
 
 SEAL_C_FUNC KSwitchKeys_RawSize(void *thisptr, uint64_t *key_count);
 
+// With non-null key_list, count is the input pointer capacity and output required size.
 SEAL_C_FUNC KSwitchKeys_GetKeyList(void *thisptr, uint64_t index, uint64_t *count, void **key_list);
 
 SEAL_C_FUNC KSwitchKeys_ClearDataAndReserve(void *thisptr, uint64_t size);

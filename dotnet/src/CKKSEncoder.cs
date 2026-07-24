@@ -369,10 +369,10 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-            ulong destCount = 0;
+            ulong destCount = SlotCount;
 
             // Allocate a big enough array to hold the result
-            double[] destArray = new double[SlotCount];
+            double[] destArray = new double[destCount];
             NativeMethods.CKKSEncoder_DecodeDouble(NativePtr, plain.NativePtr, ref destCount, destArray, poolPtr);
 
             // Transfer result to actual destination; only destArray many slots were filled
@@ -406,10 +406,10 @@ namespace Microsoft.Research.SEAL
                 throw new ArgumentNullException(nameof(destination));
 
             IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
-            ulong destCount = 0;
+            ulong destCount = SlotCount;
 
             // Allocate a big enough array to hold the result
-            double[] destArray = new double[SlotCount * 2];
+            double[] destArray = new double[destCount * 2];
             NativeMethods.CKKSEncoder_DecodeComplex(NativePtr, plain.NativePtr, ref destCount, destArray, poolPtr);
 
             // Transfer result to actual destination
