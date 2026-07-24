@@ -441,6 +441,16 @@ namespace seal
         }
 
     private:
+        SEAL_NODISCARD static inline bool is_finite(double value) noexcept
+        {
+            return std::isfinite(value);
+        }
+
+        SEAL_NODISCARD static inline bool is_finite(const std::complex<double> &value) noexcept
+        {
+            return std::isfinite(value.real()) && std::isfinite(value.imag());
+        }
+
         template <
             typename T, typename = std::enable_if_t<
                             std::is_same<std::remove_cv_t<T>, double>::value ||
@@ -480,8 +490,8 @@ namespace seal
                 throw std::logic_error("invalid parameters");
             }
 
-            // Check that scale is positive and not too large
-            if (!std::isfinite(scale) || scale <= 0 ||
+            // Check that scale is positive, normal, and not too large
+            if (!std::isnormal(scale) || scale <= 0 ||
                 (static_cast<int>(log2(scale)) + 1 >= context_data.total_coeff_modulus_bit_count()))
             {
                 throw std::invalid_argument("scale out of bounds");
@@ -491,19 +501,9 @@ namespace seal
             // FFT into producing inf/NaN coefficients.
             for (std::size_t i = 0; i < values_size; i++)
             {
-                if constexpr (std::is_same<std::remove_cv_t<T>, double>::value)
+                if (!is_finite(values[i]))
                 {
-                    if (!std::isfinite(values[i]))
-                    {
-                        throw std::invalid_argument("values must be finite");
-                    }
-                }
-                else
-                {
-                    if (!std::isfinite(values[i].real()) || !std::isfinite(values[i].imag()))
-                    {
-                        throw std::invalid_argument("values must be finite");
-                    }
+                    throw std::invalid_argument("values must be finite");
                 }
             }
 
@@ -525,7 +525,12 @@ namespace seal
             double max_coeff = 0;
             for (std::size_t i = 0; i < n; i++)
             {
-                max_coeff = std::max<>(max_coeff, std::fabs(conj_values[i].real()));
+                double coeff = std::fabs(conj_values[i].real());
+                if (std::isnan(coeff))
+                {
+                    throw std::invalid_argument("encoded values are too large");
+                }
+                max_coeff = std::max<>(max_coeff, coeff);
             }
             // Catch FFT overflow before the cast: even finite inputs can
             // produce inf coefficients after multiplication by scale/n.
@@ -557,8 +562,13 @@ namespace seal
                 {
                     double coeffd = std::round(conj_values[i].real());
                     bool is_negative = std::signbit(coeffd);
+                    coeffd = std::fabs(coeffd);
 
-                    std::uint64_t coeffu = static_cast<std::uint64_t>(std::fabs(coeffd));
+                    if (!util::is_safe_uint64_cast(coeffd))
+                    {
+                        throw std::invalid_argument("encoded values are too large");
+                    }
+                    std::uint64_t coeffu = static_cast<std::uint64_t>(coeffd);
 
                     if (is_negative)
                     {
@@ -585,8 +595,14 @@ namespace seal
                     bool is_negative = std::signbit(coeffd);
                     coeffd = std::fabs(coeffd);
 
-                    std::uint64_t coeffu[2]{ static_cast<std::uint64_t>(std::fmod(coeffd, two_pow_64)),
-                                             static_cast<std::uint64_t>(coeffd / two_pow_64) };
+                    double coeffd_low = std::fmod(coeffd, two_pow_64);
+                    double coeffd_high = coeffd / two_pow_64;
+                    if (!util::is_safe_uint64_cast(coeffd_low) || !util::is_safe_uint64_cast(coeffd_high))
+                    {
+                        throw std::invalid_argument("encoded values are too large");
+                    }
+                    std::uint64_t coeffu[2]{ static_cast<std::uint64_t>(coeffd_low),
+                                             static_cast<std::uint64_t>(coeffd_high) };
 
                     if (is_negative)
                     {
@@ -620,7 +636,12 @@ namespace seal
                     auto coeffu_ptr = coeffu.get();
                     while (coeffd >= 1)
                     {
-                        *coeffu_ptr++ = static_cast<std::uint64_t>(std::fmod(coeffd, two_pow_64));
+                        double coeffd_low = std::fmod(coeffd, two_pow_64);
+                        if (!util::is_safe_uint64_cast(coeffd_low))
+                        {
+                            throw std::invalid_argument("encoded values are too large");
+                        }
+                        *coeffu_ptr++ = static_cast<std::uint64_t>(coeffd_low);
                         coeffd /= two_pow_64;
                     }
 
@@ -687,8 +708,8 @@ namespace seal
 
             auto ntt_tables = context_data.small_ntt_tables();
 
-            // Check that scale is positive and not too large
-            if (!std::isfinite(plain.scale()) || plain.scale() <= 0 ||
+            // Check that scale is positive, normal, and not too large
+            if (!std::isnormal(plain.scale()) || plain.scale() <= 0 ||
                 (static_cast<int>(log2(plain.scale())) >= context_data.total_coeff_modulus_bit_count()))
             {
                 throw std::invalid_argument("scale out of bounds");

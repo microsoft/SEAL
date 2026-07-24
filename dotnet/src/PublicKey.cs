@@ -74,15 +74,15 @@ namespace Microsoft.Research.SEAL
         /// Returns the underlying Ciphertext.
         /// </summary>
         /// <remarks>
-        /// Returns the underlying Ciphertext. The returned Ciphertext is valid
-        /// only as long as the PublicKey is valid and not changed.
+        /// Returns the underlying Ciphertext. The returned Ciphertext keeps this PublicKey
+        /// alive and remains valid until this PublicKey is disposed or changed.
         /// </remarks>
         public Ciphertext Data
         {
             get
             {
                 NativeMethods.PublicKey_Data(NativePtr, out IntPtr cipherPtr);
-                Ciphertext cipher = new Ciphertext(cipherPtr, owned: false);
+                Ciphertext cipher = new Ciphertext(cipherPtr, owned: false, owner: this);
                 return cipher;
             }
         }

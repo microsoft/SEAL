@@ -34,10 +34,7 @@ SEAL_C_FUNC EncParams_Create1(uint8_t scheme, void **enc_params)
         *enc_params = params;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC EncParams_Create2(void *copy, void **enc_params)
@@ -46,9 +43,13 @@ SEAL_C_FUNC EncParams_Create2(void *copy, void **enc_params)
     IfNullRet(copypt, E_POINTER);
     IfNullRet(enc_params, E_POINTER);
 
-    EncryptionParameters *params = new EncryptionParameters(*copypt);
-    *enc_params = params;
-    return S_OK;
+    try
+    {
+        EncryptionParameters *params = new EncryptionParameters(*copypt);
+        *enc_params = params;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC EncParams_Destroy(void *thisptr)
@@ -67,8 +68,12 @@ SEAL_C_FUNC EncParams_Set(void *thisptr, void *assign)
     EncryptionParameters *assignpt = FromVoid<EncryptionParameters>(assign);
     IfNullRet(assignpt, E_POINTER);
 
-    *params = *assignpt;
-    return S_OK;
+    try
+    {
+        *params = *assignpt;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC EncParams_GetPolyModulusDegree(void *thisptr, uint64_t *degree)
@@ -91,10 +96,7 @@ SEAL_C_FUNC EncParams_SetPolyModulusDegree(void *thisptr, uint64_t degree)
         params->set_poly_modulus_degree(degree);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC EncParams_GetCoeffModulus(void *thisptr, uint64_t *length, void **coeffs)
@@ -103,8 +105,12 @@ SEAL_C_FUNC EncParams_GetCoeffModulus(void *thisptr, uint64_t *length, void **co
     IfNullRet(params, E_POINTER);
     IfNullRet(length, E_POINTER);
 
-    BuildModulusPointers(params->coeff_modulus(), length, coeffs);
-    return S_OK;
+    try
+    {
+        BuildModulusPointers(params->coeff_modulus(), length, coeffs);
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC EncParams_SetCoeffModulus(void *thisptr, uint64_t length, void **coeffs)
@@ -126,10 +132,7 @@ SEAL_C_FUNC EncParams_SetCoeffModulus(void *thisptr, uint64_t length, void **coe
         params->set_coeff_modulus(coefficients);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC EncParams_GetScheme(void *thisptr, uint8_t *scheme)
@@ -181,10 +184,7 @@ SEAL_C_FUNC EncParams_SetPlainModulus1(void *thisptr, void *plain_modulus)
         params->set_plain_modulus(*modulus);
         return S_OK;
     }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC EncParams_SetPlainModulus2(void *thisptr, uint64_t plain_modulus)
@@ -197,10 +197,7 @@ SEAL_C_FUNC EncParams_SetPlainModulus2(void *thisptr, uint64_t plain_modulus)
         params->set_plain_modulus(plain_modulus);
         return S_OK;
     }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC EncParams_Equals(void *thisptr, void *otherptr, bool *result)
@@ -226,14 +223,7 @@ SEAL_C_FUNC EncParams_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *resul
         *result = static_cast<int64_t>(params->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC EncParams_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes)
@@ -250,18 +240,7 @@ SEAL_C_FUNC EncParams_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
-    catch (const runtime_error &)
-    {
-        return COR_E_IO;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC EncParams_Load(void *thisptr, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
@@ -277,16 +256,5 @@ SEAL_C_FUNC EncParams_Load(void *thisptr, uint8_t *inptr, uint64_t size, int64_t
             util::safe_cast<int64_t>(params->load(reinterpret_cast<seal_byte *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
-    catch (const runtime_error &)
-    {
-        return COR_E_IO;
-    }
+    SEAL_C_CATCH_ALL
 }

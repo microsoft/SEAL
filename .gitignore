@@ -637,3 +637,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Other
+.github
+.claude
+CLAUDE.local.md
+.nvim

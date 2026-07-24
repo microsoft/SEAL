@@ -21,9 +21,13 @@ SEAL_C_FUNC EPQ_Create(void *copy, void **epq)
     IfNullRet(copyptr, E_POINTER);
     IfNullRet(epq, E_POINTER);
 
-    EncryptionParameterQualifiers *result = new EncryptionParameterQualifiers(*copyptr);
-    *epq = result;
-    return S_OK;
+    try
+    {
+        EncryptionParameterQualifiers *result = new EncryptionParameterQualifiers(*copyptr);
+        *epq = result;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC EPQ_Destroy(void *thisptr)

@@ -2,6 +2,7 @@
 // Licensed under the MIT license.
 
 using System;
+using System.Threading;
 
 namespace Microsoft.Research.SEAL.Tools
 {
@@ -37,21 +38,27 @@ namespace Microsoft.Research.SEAL.Tools
 
         #region IDisposable Support
 
-        private bool disposedValue = false; // To detect redundant calls
+        // Claims the right to run disposal exactly once, atomically, so that concurrent
+        // Dispose calls (or a Dispose racing the finalizer) release the native resource a
+        // single time and cannot double-free it.
+        private int disposeRequested = 0;
+        private bool disposedValue = false; // Set to true once disposal has completed
 
         private void Dispose(bool disposing)
         {
-            if (!disposedValue)
+            if (Interlocked.Exchange(ref disposeRequested, 1) != 0)
             {
-                if (disposing)
-                {
-                    DisposeManagedResources();
-                }
-
-                DisposeNativeResources();
-
-                disposedValue = true;
+                return;
             }
+
+            if (disposing)
+            {
+                DisposeManagedResources();
+            }
+
+            DisposeNativeResources();
+
+            disposedValue = true;
         }
 
         /// <summary>

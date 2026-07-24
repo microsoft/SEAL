@@ -67,4 +67,20 @@ namespace sealtest
         }
         ASSERT_EQ(1L, pool.use_count());
     }
+
+    TEST(MemoryManagerTest, SwitchProfileGetPool)
+    {
+        MemoryPoolHandle global_pool = MemoryPoolHandle::Global();
+        MemoryPoolHandle fixed_pool = MemoryPoolHandle::New();
+        ASSERT_FALSE(fixed_pool == global_pool);
+
+        auto entry_prof = MemoryManager::SwitchProfile(new MMProfFixed(fixed_pool));
+        ASSERT_TRUE(MemoryManager::GetPool() == fixed_pool);
+        ASSERT_TRUE(MemoryManager::GetPool(mm_prof_opt::mm_force_global) == global_pool);
+
+        MemoryManager::SwitchProfile(new MMProfGlobal());
+        ASSERT_TRUE(MemoryManager::GetPool() == global_pool);
+
+        MemoryManager::SwitchProfile(move(entry_prof));
+    }
 } // namespace sealtest

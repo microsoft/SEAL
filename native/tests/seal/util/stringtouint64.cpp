@@ -5,6 +5,7 @@
 #include "seal/util/uintcore.h"
 #include <cstdint>
 #include <cstring>
+#include <limits>
 #include "gtest/gtest.h"
 
 using namespace seal::util;
@@ -117,6 +118,13 @@ namespace sealtest
             ASSERT_EQ(15, get_hex_string_bit_count("7FFF30001", 4));
             ASSERT_EQ(3, get_hex_string_bit_count("7FFF30001", 1));
             ASSERT_EQ(0, get_hex_string_bit_count("7FFF30001", 0));
+        }
+
+        TEST(StringToUInt64, GetHexStringBitCountOverflow)
+        {
+            int max_char_count = numeric_limits<int>::max() / bits_per_nibble;
+            ASSERT_EQ(max_char_count * bits_per_nibble, get_hex_string_bit_count("8", max_char_count));
+            ASSERT_THROW(static_cast<void>(get_hex_string_bit_count("8", max_char_count + 1)), invalid_argument);
         }
 
         TEST(StringToUInt64, HexStringToUInt64)

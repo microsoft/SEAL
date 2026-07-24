@@ -67,8 +67,7 @@ namespace seal
         the result in the destination parameter. The input vector must have size at most equal
         to the degree of the polynomial modulus. The first half of the elements represent the
         first row of the matrix, and the second half represent the second row. The numbers
-        in the matrix can be at most equal to the plaintext modulus for it to represent
-        a valid plaintext.
+        in the matrix must be strictly less than the plaintext modulus.
 
         If the destination plaintext overlaps the input values in memory, the behavior of
         this function is undefined.
@@ -76,6 +75,7 @@ namespace seal
         @param[in] values The matrix of integers modulo plaintext modulus to batch
         @param[out] destination The plaintext polynomial to overwrite with the result
         @throws std::invalid_argument if values is too large
+        @throws std::invalid_argument if a value is greater than or equal to the plaintext modulus
         */
         void encode(const std::vector<std::uint64_t> &values, Plaintext &destination) const;
 
@@ -85,8 +85,7 @@ namespace seal
         the result in the destination parameter. The input vector must have size at most equal
         to the degree of the polynomial modulus. The first half of the elements represent the
         first row of the matrix, and the second half represent the second row. The numbers
-        in the matrix can be at most equal to the plaintext modulus for it to represent
-        a valid plaintext.
+        in the matrix must have absolute value at most the plaintext modulus divided by two.
 
         If the destination plaintext overlaps the input values in memory, the behavior of
         this function is undefined.
@@ -94,6 +93,7 @@ namespace seal
         @param[in] values The matrix of integers modulo plaintext modulus to batch
         @param[out] destination The plaintext polynomial to overwrite with the result
         @throws std::invalid_argument if values is too large
+        @throws std::invalid_argument if a value has absolute value greater than the plaintext modulus divided by two
         */
         void encode(const std::vector<std::int64_t> &values, Plaintext &destination) const;
 #ifdef SEAL_USE_MSGSL
@@ -103,8 +103,7 @@ namespace seal
         the result in the destination parameter. The input must have size at most equal
         to the degree of the polynomial modulus. The first half of the elements represent the
         first row of the matrix, and the second half represent the second row. The numbers
-        in the matrix can be at most equal to the plaintext modulus for it to represent
-        a valid plaintext.
+        in the matrix must be strictly less than the plaintext modulus.
 
         If the destination plaintext overlaps the input values in memory, the behavior of
         this function is undefined.
@@ -112,6 +111,7 @@ namespace seal
         @param[in] values The matrix of integers modulo plaintext modulus to batch
         @param[out] destination The plaintext polynomial to overwrite with the result
         @throws std::invalid_argument if values is too large
+        @throws std::invalid_argument if a value is greater than or equal to the plaintext modulus
         */
         void encode(gsl::span<const std::uint64_t> values, Plaintext &destination) const;
 
@@ -121,8 +121,7 @@ namespace seal
         the result in the destination parameter. The input must have size at most equal
         to the degree of the polynomial modulus. The first half of the elements represent the
         first row of the matrix, and the second half represent the second row. The numbers
-        in the matrix can be at most equal to the plaintext modulus for it to represent
-        a valid plaintext.
+        in the matrix must have absolute value at most the plaintext modulus divided by two.
 
         If the destination plaintext overlaps the input values in memory, the behavior of
         this function is undefined.
@@ -130,6 +129,7 @@ namespace seal
         @param[in] values The matrix of integers modulo plaintext modulus to batch
         @param[out] destination The plaintext polynomial to overwrite with the result
         @throws std::invalid_argument if values is too large
+        @throws std::invalid_argument if a value has absolute value greater than the plaintext modulus divided by two
         */
         void encode(gsl::span<const std::int64_t> values, Plaintext &destination) const;
 #endif

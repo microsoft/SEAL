@@ -93,7 +93,7 @@ namespace Microsoft.Research.SEAL
             if (IntPtr.Zero.Equals(contextData))
                 return null;
 
-            ContextData data = new ContextData(contextData, owned: false);
+            ContextData data = new ContextData(this, contextData, owned: false);
             return data;
         }
 
@@ -106,7 +106,7 @@ namespace Microsoft.Research.SEAL
             get
             {
                 NativeMethods.SEALContext_KeyContextData(NativePtr, out IntPtr contextData);
-                ContextData data = new ContextData(contextData, owned: false);
+                ContextData data = new ContextData(this, contextData, owned: false);
                 return data;
             }
         }
@@ -120,7 +120,7 @@ namespace Microsoft.Research.SEAL
             get
             {
                 NativeMethods.SEALContext_FirstContextData(NativePtr, out IntPtr contextData);
-                ContextData data = new ContextData(contextData, owned: false);
+                ContextData data = new ContextData(this, contextData, owned: false);
                 return data;
             }
         }
@@ -134,7 +134,7 @@ namespace Microsoft.Research.SEAL
             get
             {
                 NativeMethods.SEALContext_LastContextData(NativePtr, out IntPtr contextData);
-                ContextData data = new ContextData(contextData, owned: false);
+                ContextData data = new ContextData(this, contextData, owned: false);
                 return data;
             }
         }
@@ -159,9 +159,9 @@ namespace Microsoft.Research.SEAL
         public string ParameterErrorName()
         {
             NativeMethods.SEALContext_ParameterErrorName(NativePtr, null, out ulong length);
-            byte[] buffer = new byte[length];
+            StringBuilder buffer = new StringBuilder(checked((int)length));
             NativeMethods.SEALContext_ParameterErrorName(NativePtr, buffer, out length);
-            return Encoding.ASCII.GetString(buffer);
+            return buffer.ToString();
         }
 
         /// <summary>
@@ -171,9 +171,9 @@ namespace Microsoft.Research.SEAL
         public string ParameterErrorMessage()
         {
             NativeMethods.SEALContext_ParameterErrorMessage(NativePtr, null, out ulong length);
-            byte[] buffer = new byte[length];
+            StringBuilder buffer = new StringBuilder(checked((int)length));
             NativeMethods.SEALContext_ParameterErrorMessage(NativePtr, buffer, out length);
-            return Encoding.ASCII.GetString(buffer);
+            return buffer.ToString();
         }
 
         /// <summary>
@@ -254,11 +254,13 @@ namespace Microsoft.Research.SEAL
             /// <summary>
             /// Build a ContextData object from a native pointer.
             /// </summary>
+            /// <param name="context">The SEALContext that owns the native object</param>
             /// <param name="ptr">Pointer to native object</param>
             /// <param name="owned">Whether this instance owns the native object</param>
-            internal ContextData(IntPtr ptr, bool owned = true)
+            internal ContextData(SEALContext context, IntPtr ptr, bool owned = false)
                 : base(ptr, owned)
             {
+                context_ = context;
             }
 
             /// <summary>
@@ -268,7 +270,7 @@ namespace Microsoft.Research.SEAL
             {
                 get
                 {
-                    NativeMethods.ContextData_Parms(NativePtr, out IntPtr parms);
+                    NativeMethods.ContextData_Parms(Ptr, out IntPtr parms);
                     return new EncryptionParameters(parms);
                 }
             }
@@ -299,7 +301,7 @@ namespace Microsoft.Research.SEAL
             {
                 get
                 {
-                    NativeMethods.ContextData_Qualifiers(NativePtr, out IntPtr epq);
+                    NativeMethods.ContextData_Qualifiers(Ptr, out IntPtr epq);
                     EncryptionParameterQualifiers qualifiers = new EncryptionParameterQualifiers(epq);
                     return qualifiers;
                 }
@@ -319,10 +321,10 @@ namespace Microsoft.Research.SEAL
                 get
                 {
                     ulong count = 0;
-                    NativeMethods.ContextData_TotalCoeffModulus(NativePtr, ref count, null);
+                    NativeMethods.ContextData_TotalCoeffModulus(Ptr, ref count, null);
 
                     ulong[] result = new ulong[count];
-                    NativeMethods.ContextData_TotalCoeffModulus(NativePtr, ref count, result);
+                    NativeMethods.ContextData_TotalCoeffModulus(Ptr, ref count, result);
 
                     return result;
                 }
@@ -335,7 +337,7 @@ namespace Microsoft.Research.SEAL
             {
                 get
                 {
-                    NativeMethods.ContextData_TotalCoeffModulusBitCount(NativePtr, out int bitCount);
+                    NativeMethods.ContextData_TotalCoeffModulusBitCount(Ptr, out int bitCount);
                     return bitCount;
                 }
             }
@@ -349,10 +351,10 @@ namespace Microsoft.Research.SEAL
                 get
                 {
                     ulong count = 0;
-                    NativeMethods.ContextData_CoeffDivPlainModulus(NativePtr, ref count, null);
+                    NativeMethods.ContextData_CoeffDivPlainModulus(Ptr, ref count, null);
 
                     ulong[] cdpm = new ulong[count];
-                    NativeMethods.ContextData_CoeffDivPlainModulus(NativePtr, ref count, cdpm);
+                    NativeMethods.ContextData_CoeffDivPlainModulus(Ptr, ref count, cdpm);
 
                     return cdpm;
                 }
@@ -366,7 +368,7 @@ namespace Microsoft.Research.SEAL
             {
                 get
                 {
-                    NativeMethods.ContextData_PlainUpperHalfThreshold(NativePtr, out ulong puht);
+                    NativeMethods.ContextData_PlainUpperHalfThreshold(Ptr, out ulong puht);
                     return puht;
                 }
             }
@@ -386,10 +388,10 @@ namespace Microsoft.Research.SEAL
                 get
                 {
                     ulong count = 0;
-                    NativeMethods.ContextData_PlainUpperHalfIncrement(NativePtr, ref count, null);
+                    NativeMethods.ContextData_PlainUpperHalfIncrement(Ptr, ref count, null);
 
                     ulong[] puhi = new ulong[count];
-                    NativeMethods.ContextData_PlainUpperHalfIncrement(NativePtr, ref count, puhi);
+                    NativeMethods.ContextData_PlainUpperHalfIncrement(Ptr, ref count, puhi);
 
                     return puhi;
                 }
@@ -404,13 +406,13 @@ namespace Microsoft.Research.SEAL
                 get
                 {
                     ulong count = 0;
-                    NativeMethods.ContextData_UpperHalfThreshold(NativePtr, ref count, null);
+                    NativeMethods.ContextData_UpperHalfThreshold(Ptr, ref count, null);
 
                     if (count == 0)
                         return null;
 
                     ulong[] uht = new ulong[count];
-                    NativeMethods.ContextData_UpperHalfThreshold(NativePtr, ref count, uht);
+                    NativeMethods.ContextData_UpperHalfThreshold(Ptr, ref count, uht);
 
                     return uht;
                 }
@@ -435,13 +437,13 @@ namespace Microsoft.Research.SEAL
                 get
                 {
                     ulong count = 0;
-                    NativeMethods.ContextData_UpperHalfIncrement(NativePtr, ref count, null);
+                    NativeMethods.ContextData_UpperHalfIncrement(Ptr, ref count, null);
 
                     if (count == 0)
                         return null;
 
                     ulong[] uhi = new ulong[count];
-                    NativeMethods.ContextData_UpperHalfIncrement(NativePtr, ref count, uhi);
+                    NativeMethods.ContextData_UpperHalfIncrement(Ptr, ref count, uhi);
 
                     return uhi;
                 }
@@ -460,12 +462,12 @@ namespace Microsoft.Research.SEAL
             {
                 get
                 {
-                    NativeMethods.ContextData_PrevContextData(NativePtr, out IntPtr prev);
+                    NativeMethods.ContextData_PrevContextData(Ptr, out IntPtr prev);
 
                     if (IntPtr.Zero.Equals(prev))
                         return null;
 
-                    ContextData data = new ContextData(prev, owned: false);
+                    ContextData data = new ContextData(context_, prev, owned: false);
                     return data;
                 }
             }
@@ -483,12 +485,12 @@ namespace Microsoft.Research.SEAL
             {
                 get
                 {
-                    NativeMethods.ContextData_NextContextData(NativePtr, out IntPtr next);
+                    NativeMethods.ContextData_NextContextData(Ptr, out IntPtr next);
 
                     if (IntPtr.Zero.Equals(next))
                         return null;
 
-                    ContextData data = new ContextData(next, owned: false);
+                    ContextData data = new ContextData(context_, next, owned: false);
                     return data;
                 }
             }
@@ -504,7 +506,7 @@ namespace Microsoft.Research.SEAL
             {
                 get
                 {
-                    NativeMethods.ContextData_ChainIndex(NativePtr, out ulong index);
+                    NativeMethods.ContextData_ChainIndex(Ptr, out ulong index);
                     return index;
                 }
             }
@@ -515,6 +517,31 @@ namespace Microsoft.Research.SEAL
             protected override void DestroyNativeObject()
             {
                 NativeMethods.ContextData_Destroy(NativePtr);
+            }
+
+            /// <summary>
+            /// The SEALContext that owns the native ContextData. The native pointer is an
+            /// interior pointer into this context's data map, so keeping a reference here
+            /// roots the context (and thus the pointer) for as long as this ContextData is
+            /// reachable, preventing the context from being finalized out from under it.
+            /// </summary>
+            private readonly SEALContext context_;
+
+            /// <summary>
+            /// Returns the native pointer after confirming the owning SEALContext has not
+            /// been disposed. The native object is an interior pointer into the context, so
+            /// reading it once the context is gone would dereference freed native memory.
+            /// </summary>
+            private IntPtr Ptr
+            {
+                get
+                {
+                    if (context_ != null && context_.IsDisposed)
+                    {
+                        throw new ObjectDisposedException(typeof(SEALContext).FullName);
+                    }
+                    return NativePtr;
+                }
             }
         }
     }

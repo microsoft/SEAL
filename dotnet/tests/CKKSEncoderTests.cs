@@ -227,5 +227,124 @@ namespace SEALNetTest
             Utilities.AssertThrows<ArgumentNullException>(() => encoder.Decode(plain_null, valc));
             Utilities.AssertThrows<ArgumentException>(() => encoder.Decode(plain, valc, pool));
         }
+
+        [TestMethod]
+        public void EncodeComplexEnumeratesOnceTest()
+        {
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
+            {
+                PolyModulusDegree = 64,
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 40, 40, 40, 40 })
+            };
+
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                secLevel: SecLevelType.None);
+            CKKSEncoder encoder = new CKKSEncoder(context);
+
+            List<Complex> values = new List<Complex>();
+            for (int i = 0; i < 16; i++)
+            {
+                values.Add(new Complex(i + 1, i + 2));
+            }
+
+            CountingComplexEnumerable source = new CountingComplexEnumerable(values);
+            Plaintext plain = new Plaintext();
+            encoder.Encode(source, scale: Math.Pow(2, 30), destination: plain);
+
+            // The source enumerable must be enumerated exactly once.
+            Assert.AreEqual(1, source.EnumerationCount);
+
+            List<Complex> result = new List<Complex>();
+            encoder.Decode(plain, result);
+            for (int i = 0; i < values.Count; i++)
+            {
+                Assert.AreEqual(values[i].Real, result[i].Real, delta: 0.001);
+                Assert.AreEqual(values[i].Imaginary, result[i].Imaginary, delta: 0.001);
+            }
+        }
+
+        [TestMethod]
+        public void EncodeComplexDivergentCountTest()
+        {
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
+            {
+                PolyModulusDegree = 64,
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 40, 40, 40, 40 })
+            };
+
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                secLevel: SecLevelType.None);
+            CKKSEncoder encoder = new CKKSEncoder(context);
+
+            List<Complex> values = new List<Complex>();
+            for (int i = 0; i < 16; i++)
+            {
+                values.Add(new Complex(i + 1, i + 2));
+            }
+
+            // Reports 16 elements on the first two enumerations (buffer sizing and fill)
+            // but only 8 on the third; every element must still be encoded.
+            DivergentCountComplexEnumerable source = new DivergentCountComplexEnumerable(values, 8);
+            Plaintext plain = new Plaintext();
+            encoder.Encode(source, scale: Math.Pow(2, 30), destination: plain);
+
+            List<Complex> result = new List<Complex>();
+            encoder.Decode(plain, result);
+            for (int i = 0; i < values.Count; i++)
+            {
+                Assert.AreEqual(values[i].Real, result[i].Real, delta: 0.001);
+                Assert.AreEqual(values[i].Imaginary, result[i].Imaginary, delta: 0.001);
+            }
+        }
+
+        private class CountingComplexEnumerable : IEnumerable<Complex>
+        {
+            private readonly List<Complex> data_;
+
+            public int EnumerationCount { get; private set; }
+
+            public CountingComplexEnumerable(IEnumerable<Complex> data)
+            {
+                data_ = new List<Complex>(data);
+            }
+
+            public IEnumerator<Complex> GetEnumerator()
+            {
+                EnumerationCount++;
+                return data_.GetEnumerator();
+            }
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+        }
+
+        private class DivergentCountComplexEnumerable : IEnumerable<Complex>
+        {
+            private readonly List<Complex> data_;
+            private readonly int laterCount_;
+            private int calls_;
+
+            public DivergentCountComplexEnumerable(IEnumerable<Complex> data, int laterCount)
+            {
+                data_ = new List<Complex>(data);
+                laterCount_ = laterCount;
+            }
+
+            public IEnumerator<Complex> GetEnumerator()
+            {
+                calls_++;
+                int count = (calls_ >= 3) ? laterCount_ : data_.Count;
+                return data_.GetRange(0, count).GetEnumerator();
+            }
+
+            System.Collections.IEnumerator System.Collections.IEnumerable.GetEnumerator()
+            {
+                return GetEnumerator();
+            }
+        }
     }
 }

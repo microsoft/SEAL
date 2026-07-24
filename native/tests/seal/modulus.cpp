@@ -215,6 +215,9 @@ namespace sealtest
         ASSERT_THROW(auto modulus = CoeffModulus::Create(2048, Modulus(2), { -30 }), invalid_argument);
         ASSERT_THROW(auto modulus = CoeffModulus::Create(2048, Modulus(2), { 30, -30 }), invalid_argument);
 
+        // Zero plain_modulus
+        ASSERT_THROW(auto modulus = CoeffModulus::Create(2048, Modulus(0), { 30 }), invalid_argument);
+
         // Too large LCM(2 * poly_modulus_degree, plain_modulus)
         ASSERT_THROW(auto modulus = CoeffModulus::Create(2048, Modulus(uint64_t(1) << 53), { 20 }), logic_error);
 

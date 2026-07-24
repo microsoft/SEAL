@@ -3,11 +3,14 @@
 
 #include "seal/serialization.h"
 #include "seal/util/defines.h"
+#include "seal/util/ztools.h"
 #include <array>
 #include <cstdint>
+#include <cstring>
 #include <fstream>
 #include <functional>
 #include <sstream>
+#include <streambuf>
 #include <string>
 #include <vector>
 #include "gtest/gtest.h"
@@ -137,6 +140,96 @@ namespace sealtest
             }
         };
 
+        // Serializes a nested object under a compressed mode, overstates that nested frame's declared header.size,
+        // and appends an incompressible filler. Loading performs a nested Serialization::Load over the inflating
+        // stream, where stream positions cannot bound the nested size; the overstated size must not drive the outer
+        // decompressor through the filler.
+        struct inflated_nested_struct
+        {
+            test_struct inner{};
+            compr_mode_type inner_mode = compr_mode_type::none;
+            uint64_t inner_size_extra = 0;
+            size_t filler_size = 0;
+
+            void save_members(ostream &stream)
+            {
+                using namespace std::placeholders;
+
+                // Serialize the nested object, then overstate its header.size (offset 8, 8 bytes).
+                stringstream inner_ss;
+                Serialization::Save(
+                    std::bind(&test_struct::save_members, &inner, _1), inner.save_size(inner_mode), inner_ss,
+                    inner_mode, false);
+                string inner_bytes = inner_ss.str();
+                uint64_t inner_size = 0;
+                memcpy(&inner_size, &inner_bytes[8], sizeof(uint64_t));
+                inner_size += inner_size_extra;
+                memcpy(&inner_bytes[8], &inner_size, sizeof(uint64_t));
+                stream.write(inner_bytes.data(), static_cast<streamsize>(inner_bytes.size()));
+
+                // Incompressible filler (splitmix64 output) so the outer compressed frame stays about as large as
+                // the filler itself; this makes bytes read from the underlying stream track decompression work.
+                std::vector<char> filler(filler_size);
+                uint64_t state = 0x9E3779B97F4A7C15ULL;
+                for (size_t i = 0; i < filler_size; i++)
+                {
+                    state += 0x9E3779B97F4A7C15ULL;
+                    uint64_t z = state;
+                    z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ULL;
+                    z = (z ^ (z >> 27)) * 0x94D049BB133111EBULL;
+                    z = z ^ (z >> 31);
+                    filler[i] = static_cast<char>(z & 0xFF);
+                }
+                stream.write(filler.data(), static_cast<streamsize>(filler.size()));
+            }
+
+            void load_members(istream &stream)
+            {
+                using namespace std::placeholders;
+                Serialization::Load(std::bind(&test_struct::load_members, &inner, _1), stream, false);
+            }
+
+            streamoff save_size(compr_mode_type compr_mode) const
+            {
+                size_t raw = static_cast<size_t>(inner.save_size(compr_mode_type::none)) +
+                             static_cast<size_t>(sizeof(Serialization::SEALHeader)) + filler_size;
+                return static_cast<streamoff>(
+                    sizeof(Serialization::SEALHeader) + Serialization::ComprSizeEstimate(raw, compr_mode));
+            }
+        };
+
+        // An input streambuf that presents its whole backing buffer for reading but refuses every seek
+        // (seekoff/seekpos return -1). Serialization::Load treats such a stream as non-seekable, exercising the
+        // load paths that cannot rely on tellg(). consumed() reports how many bytes have been read so far.
+        class NonSeekableBuffer : public std::streambuf
+        {
+        public:
+            explicit NonSeekableBuffer(std::string data) : data_(std::move(data))
+            {
+                char *base = &data_[0];
+                setg(base, base, base + data_.size());
+            }
+
+            std::streamsize consumed() const
+            {
+                return gptr() - eback();
+            }
+
+        protected:
+            pos_type seekoff(off_type, std::ios_base::seekdir, std::ios_base::openmode) override
+            {
+                return pos_type(off_type(-1));
+            }
+
+            pos_type seekpos(pos_type, std::ios_base::openmode) override
+            {
+                return pos_type(off_type(-1));
+            }
+
+        private:
+            std::string data_;
+        };
+
         // The compression modes available in this build.
         std::vector<compr_mode_type> available_compr_modes()
         {
@@ -179,6 +272,21 @@ namespace sealtest
         invalid_header.compr_mode = (compr_mode_type)0x03;
         ASSERT_FALSE(Serialization::IsValidHeader(invalid_header));
     }
+
+#ifdef SEAL_USE_ZSTD
+    TEST(SerializationTest, ZstdWindowLimit)
+    {
+        const unsigned char frame[]{ 0x28, 0xB5, 0x2F, 0xFD, 0x00, 0x88, 0x01, 0x00, 0x00 };
+        string frame_bytes(reinterpret_cast<const char *>(frame), sizeof(frame));
+        istringstream input(frame_bytes);
+        auto inflater = util::ztools::make_zstd_inflate_buffer(
+            input, static_cast<streamoff>(frame_bytes.size()), MemoryManager::GetPool());
+        istream inflated(inflater.get());
+
+        ASSERT_EQ(istream::traits_type::eof(), inflated.peek());
+        ASSERT_TRUE(inflater->failed());
+    }
+#endif
 
     TEST(SerializationTest, SEALHeaderSaveLoad)
     {
@@ -565,6 +673,97 @@ namespace sealtest
             stringstream truncated(bytes);
             large_struct st2;
             ASSERT_ANY_THROW(Serialization::Load(bind(&large_struct::load_members, &st2, _1), truncated, false));
+        }
+    }
+
+    // On a non-seekable stream the size-vs-available clamp cannot run, so an oversized header.size must not drive
+    // the loader into an unbounded skip of trailing bytes. The load must still succeed while consuming only a
+    // bounded amount.
+    TEST(SerializationTest, NonSeekableStreamInflatedSizeBoundedConsumption)
+    {
+        using namespace placeholders;
+
+        for (auto mode : available_compr_modes())
+        {
+            test_struct st{ 7, ~5, 1.4142 };
+            stringstream ss;
+            Serialization::Save(bind(&test_struct::save_members, &st, _1), st.save_size(mode), ss, mode, false);
+
+            string bytes = ss.str();
+            size_t real_size = bytes.size();
+
+            // Overstate header.size (offset 8, 8 bytes) by 8 MB and append 8 MB it could skip into.
+            constexpr uint64_t extra = uint64_t(8) << 20;
+            uint64_t inflated = static_cast<uint64_t>(real_size) + extra;
+            memcpy(&bytes[8], &inflated, sizeof(uint64_t));
+            bytes.append(static_cast<size_t>(extra), '\0');
+
+            NonSeekableBuffer buf(std::move(bytes));
+            istream in(&buf);
+
+            test_struct st2;
+            Serialization::Load(bind(&test_struct::load_members, &st2, _1), in, false);
+            ASSERT_EQ(st.a, st2.a);
+            ASSERT_EQ(st.b, st2.b);
+            ASSERT_EQ(st.c, st2.c);
+
+            // Reads only the object plus at most one internal decompression buffer, never the 8 MB trailer.
+            ASSERT_LT(buf.consumed(), streamsize(1) << 20);
+        }
+    }
+
+    // An uncompressed object must load from a non-seekable stream, where stream positions are unavailable and so
+    // cannot be used to cross-check the object size.
+    TEST(SerializationTest, NonSeekableStreamUncompressedLoads)
+    {
+        using namespace placeholders;
+
+        test_struct st{ -2, 8, 2.5 };
+        stringstream ss;
+        Serialization::Save(
+            bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::none), ss, compr_mode_type::none,
+            false);
+
+        NonSeekableBuffer buf(ss.str());
+        istream in(&buf);
+
+        test_struct st2;
+        Serialization::Load(bind(&test_struct::load_members, &st2, _1), in, false);
+        ASSERT_EQ(st.a, st2.a);
+        ASSERT_EQ(st.b, st2.b);
+        ASSERT_EQ(st.c, st2.c);
+    }
+
+    // A nested compressed frame reads from an inflating stream, where positions cannot bound its header.size. An
+    // overstated nested header.size must not drive the outer decompressor past the nested object into the trailing
+    // filler; the load succeeds while consuming only a bounded amount.
+    TEST(SerializationTest, CompressedNestedInflatedSizeBoundedConsumption)
+    {
+        using namespace placeholders;
+
+        for (auto mode : available_compr_modes())
+        {
+            inflated_nested_struct outer;
+            outer.inner = test_struct{ 9, ~2, 3.5 };
+            outer.inner_mode = mode;
+            outer.inner_size_extra = uint64_t(1) << 40;
+            outer.filler_size = size_t(8) << 20; // 8 MB incompressible
+
+            stringstream ss;
+            Serialization::Save(
+                bind(&inflated_nested_struct::save_members, &outer, _1), outer.save_size(mode), ss, mode, false);
+
+            NonSeekableBuffer buf(ss.str());
+            istream in(&buf);
+
+            inflated_nested_struct loaded;
+            Serialization::Load(bind(&inflated_nested_struct::load_members, &loaded, _1), in, false);
+            ASSERT_EQ(outer.inner.a, loaded.inner.a);
+            ASSERT_EQ(outer.inner.b, loaded.inner.b);
+            ASSERT_EQ(outer.inner.c, loaded.inner.c);
+
+            // Consumes the nested object plus a bounded number of decompression buffers, never the 8 MB filler.
+            ASSERT_LT(buf.consumed(), streamsize(1) << 20);
         }
     }
 } // namespace sealtest

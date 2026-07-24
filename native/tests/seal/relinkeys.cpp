@@ -201,4 +201,78 @@ namespace sealtest
         relin_keys_seeded_save_load(scheme_type::bfv);
         relin_keys_seeded_save_load(scheme_type::bgv);
     }
+
+    TEST(RelinKeysTest, LoadOversizedDimensionsRejected)
+    {
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(4096);
+        parms.set_plain_modulus(1 << 6);
+        parms.set_coeff_modulus(CoeffModulus::Create(4096, { 40, 40, 40 }));
+
+        SEALContext context(parms, false, sec_level_type::none);
+        KeyGenerator keygen(context);
+
+        RelinKeys keys;
+        keygen.create_relin_keys(keys);
+
+        stringstream ss;
+        keys.save(ss, compr_mode_type::none);
+        string blob = ss.str();
+
+        // Layout after the 16-byte SEALHeader: parms_id (32 bytes), then the outer
+        // dimension (8 bytes) followed by the first inner dimension (8 bytes).
+        const size_t dim1_offset = Serialization::seal_header_size + sizeof(parms_id_type);
+        const size_t dim2_offset = dim1_offset + sizeof(uint64_t);
+        ASSERT_GE(blob.size(), dim2_offset + sizeof(uint64_t));
+
+        auto patched = [&](size_t offset, uint64_t value) {
+            string out = blob;
+            out.replace(offset, sizeof(uint64_t), string(reinterpret_cast<const char *>(&value), sizeof(uint64_t)));
+            return out;
+        };
+
+        // The context permits at most poly_modulus_degree outer keys.
+        {
+            stringstream bad(patched(dim1_offset, uint64_t(SEAL_POLY_MOD_DEGREE_MAX)));
+            RelinKeys loaded;
+            ASSERT_THROW(loaded.load(context, bad), logic_error);
+        }
+        // The context permits at most first_context_data's coeff_modulus count inner keys.
+        {
+            stringstream bad(patched(dim2_offset, uint64_t(SEAL_COEFF_MOD_COUNT_MAX)));
+            RelinKeys loaded;
+            ASSERT_THROW(loaded.load(context, bad), logic_error);
+        }
+    }
+
+    TEST(RelinKeysTest, LoadPreservesParmsIdOnFailure)
+    {
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(4096);
+        parms.set_plain_modulus(1 << 6);
+        parms.set_coeff_modulus(CoeffModulus::Create(4096, { 40, 40, 40 }));
+
+        SEALContext context(parms, false, sec_level_type::none);
+        KeyGenerator keygen(context);
+
+        RelinKeys keys;
+        keygen.create_relin_keys(keys);
+
+        stringstream ss;
+        keys.save(ss, compr_mode_type::none);
+        string blob = ss.str();
+
+        // Trip the outer-dimension check, which throws after parms_id has been read.
+        const size_t dim1_offset = Serialization::seal_header_size + sizeof(parms_id_type);
+        ASSERT_GE(blob.size(), dim1_offset + sizeof(uint64_t));
+        uint64_t oversized = uint64_t(SEAL_POLY_MOD_DEGREE_MAX);
+        blob.replace(
+            dim1_offset, sizeof(uint64_t), string(reinterpret_cast<const char *>(&oversized), sizeof(uint64_t)));
+
+        RelinKeys loaded;
+        parms_id_type before = loaded.parms_id();
+        stringstream bad(blob);
+        ASSERT_THROW(loaded.unsafe_load(context, bad), logic_error);
+        ASSERT_TRUE(loaded.parms_id() == before);
+    }
 } // namespace sealtest

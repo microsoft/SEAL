@@ -338,11 +338,23 @@ namespace Microsoft.Research.SEAL
                 int sizeInt = checked((int)header.Size);
                 stream.Seek(pos, SeekOrigin.Begin);
 
+                // Bound the claimed size against what the stream can actually supply before
+                // allocating, so a tiny header cannot force a multi-GB buffer allocation. The
+                // stream is guaranteed seekable here (the Seek above would have thrown otherwise),
+                // and header.Size is the total size counted from pos (the pre-header position).
+                if (header.Size > checked((ulong)(stream.Length - pos)))
+                    throw new EndOfStreamException("SEALHeader.Size exceeds the available input");
+
                 byte[] buffer = null;
                 using (BinaryReader reader = new BinaryReader(stream, Encoding.UTF8, true))
                 {
                     buffer = reader.ReadBytes(sizeInt);
                 }
+
+                // ReadBytes returns a shorter array without throwing on a truncated stream; never
+                // hand native code a length larger than the array actually read.
+                if (buffer.Length != sizeInt)
+                    throw new EndOfStreamException("Stream ended before the full object was read");
 
                 LoadData(buffer, header.Size, out long outBytes);
 

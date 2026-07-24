@@ -204,6 +204,10 @@ namespace seal
         {
             throw invalid_argument("bit_sizes is invalid");
         }
+        if (plain_modulus.is_zero())
+        {
+            throw invalid_argument("plain_modulus cannot be zero");
+        }
 
         unordered_map<int, size_t> count_table;
         unordered_map<int, vector<Modulus>> prime_table;

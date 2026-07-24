@@ -53,10 +53,7 @@ SEAL_C_FUNC Plaintext_Create1(void *memoryPoolHandle, void **plaintext)
         *plaintext = plain;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_Create2(uint64_t coeffCount, void *memoryPoolHandle, void **plaintext)
@@ -71,10 +68,7 @@ SEAL_C_FUNC Plaintext_Create2(uint64_t coeffCount, void *memoryPoolHandle, void 
         *plaintext = plain;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_Create3(uint64_t capacity, uint64_t coeffCount, void *memoryPoolHandle, void **plaintext)
@@ -89,10 +83,7 @@ SEAL_C_FUNC Plaintext_Create3(uint64_t capacity, uint64_t coeffCount, void *memo
         *plaintext = plain;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_Create4(char *hex_poly, void *memoryPoolHandle, void **plaintext)
@@ -108,10 +99,7 @@ SEAL_C_FUNC Plaintext_Create4(char *hex_poly, void *memoryPoolHandle, void **pla
         *plaintext = plain;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_Create5(void *copy, void **plaintext)
@@ -120,9 +108,13 @@ SEAL_C_FUNC Plaintext_Create5(void *copy, void **plaintext)
     IfNullRet(copyptr, E_POINTER);
     IfNullRet(plaintext, E_POINTER);
 
-    Plaintext *plain = new Plaintext(*copyptr);
-    *plaintext = plain;
-    return S_OK;
+    try
+    {
+        Plaintext *plain = new Plaintext(*copyptr);
+        *plaintext = plain;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_Set1(void *thisptr, void *assign)
@@ -132,8 +124,12 @@ SEAL_C_FUNC Plaintext_Set1(void *thisptr, void *assign)
     Plaintext *assignptr = FromVoid<Plaintext>(assign);
     IfNullRet(assignptr, E_POINTER);
 
-    *plain = *assignptr;
-    return S_OK;
+    try
+    {
+        *plain = *assignptr;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_Set2(void *thisptr, char *hex_poly)
@@ -148,10 +144,7 @@ SEAL_C_FUNC Plaintext_Set2(void *thisptr, char *hex_poly)
         *plain = hex_poly_str;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_Set3(void *thisptr, uint64_t const_coeff)
@@ -159,8 +152,12 @@ SEAL_C_FUNC Plaintext_Set3(void *thisptr, uint64_t const_coeff)
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
-    *plain = const_coeff;
-    return S_OK;
+    try
+    {
+        *plain = const_coeff;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_Set4(void *thisptr, uint64_t count, uint64_t *coeffs)
@@ -168,8 +165,12 @@ SEAL_C_FUNC Plaintext_Set4(void *thisptr, uint64_t count, uint64_t *coeffs)
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
-    ph::set(plain, count, coeffs);
-    return S_OK;
+    try
+    {
+        ph::set(plain, count, coeffs);
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_Destroy(void *thisptr)
@@ -202,14 +203,7 @@ SEAL_C_FUNC Plaintext_CoeffAt(void *thisptr, uint64_t index, uint64_t *coeff)
         *coeff = (*plain)[index];
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const out_of_range &)
-    {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_SetCoeffAt(void *thisptr, uint64_t index, uint64_t value)
@@ -222,10 +216,7 @@ SEAL_C_FUNC Plaintext_SetCoeffAt(void *thisptr, uint64_t index, uint64_t value)
         (*plain)[index] = value;
         return S_OK;
     }
-    catch (const out_of_range &)
-    {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_ToString(void *thispt, char *outstr, uint64_t *length)
@@ -234,7 +225,11 @@ SEAL_C_FUNC Plaintext_ToString(void *thispt, char *outstr, uint64_t *length)
     IfNullRet(plain, E_POINTER);
     IfNullRet(length, E_POINTER);
 
-    return ToStringHelper(plain->to_string(), outstr, length);
+    try
+    {
+        return ToStringHelper(plain->to_string(), outstr, length);
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_IsNTTForm(void *thisptr, bool *is_ntt_form)
@@ -299,10 +294,7 @@ SEAL_C_FUNC Plaintext_SetZero2(void *thisptr, uint64_t start_coeff)
         plain->set_zero(safe_cast<size_t>(start_coeff));
         return S_OK;
     }
-    catch (const out_of_range &)
-    {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_SetZero3(void *thisptr, uint64_t start_coeff, uint64_t length)
@@ -315,10 +307,7 @@ SEAL_C_FUNC Plaintext_SetZero3(void *thisptr, uint64_t start_coeff, uint64_t len
         plain->set_zero(safe_cast<size_t>(start_coeff), safe_cast<size_t>(length));
         return S_OK;
     }
-    catch (const out_of_range &)
-    {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_Reserve(void *thisptr, uint64_t capacity)
@@ -331,14 +320,7 @@ SEAL_C_FUNC Plaintext_Reserve(void *thisptr, uint64_t capacity)
         plain->reserve(capacity);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_Resize(void *thisptr, uint64_t coeff_count)
@@ -351,14 +333,7 @@ SEAL_C_FUNC Plaintext_Resize(void *thisptr, uint64_t coeff_count)
         plain->resize(coeff_count);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_ShrinkToFit(void *thisptr)
@@ -366,8 +341,12 @@ SEAL_C_FUNC Plaintext_ShrinkToFit(void *thisptr)
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
 
-    plain->shrink_to_fit();
-    return S_OK;
+    try
+    {
+        plain->shrink_to_fit();
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_Release(void *thisptr)
@@ -446,12 +425,16 @@ SEAL_C_FUNC Plaintext_SwapData(void *thisptr, uint64_t count, uint64_t *new_data
     IfNullRet(plain, E_POINTER);
     IfNullRet(new_data, E_POINTER);
 
-    DynArray<uint64_t> new_array(plain->pool());
-    new_array.resize(count);
-    copy_n(new_data, count, new_array.begin());
+    try
+    {
+        DynArray<uint64_t> new_array(plain->pool());
+        new_array.resize(count);
+        copy_n(new_data, count, new_array.begin());
 
-    ph::swap_data(plain, new_array);
-    return S_OK;
+        ph::swap_data(plain, new_array);
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_Pool(void *thisptr, void **pool)
@@ -460,9 +443,13 @@ SEAL_C_FUNC Plaintext_Pool(void *thisptr, void **pool)
     IfNullRet(plain, E_POINTER);
     IfNullRet(pool, E_POINTER);
 
-    MemoryPoolHandle *handleptr = new MemoryPoolHandle(plain->pool());
-    *pool = handleptr;
-    return S_OK;
+    try
+    {
+        MemoryPoolHandle *handleptr = new MemoryPoolHandle(plain->pool());
+        *pool = handleptr;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
@@ -476,14 +463,7 @@ SEAL_C_FUNC Plaintext_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *resul
         *result = static_cast<int64_t>(plain->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes)
@@ -500,18 +480,7 @@ SEAL_C_FUNC Plaintext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
-    catch (const runtime_error &)
-    {
-        return COR_E_IO;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
@@ -529,18 +498,7 @@ SEAL_C_FUNC Plaintext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, u
             plain->unsafe_load(*ctx, reinterpret_cast<seal_byte *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
-    catch (const runtime_error &)
-    {
-        return COR_E_IO;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Plaintext_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
@@ -558,16 +516,5 @@ SEAL_C_FUNC Plaintext_Load(void *thisptr, void *context, uint8_t *inptr, uint64_
             plain->load(*ctx, reinterpret_cast<seal_byte *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
-    catch (const runtime_error &)
-    {
-        return COR_E_IO;
-    }
+    SEAL_C_CATCH_ALL
 }

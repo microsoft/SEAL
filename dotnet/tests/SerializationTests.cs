@@ -133,5 +133,52 @@ namespace SEALNetTest
                 }
             }
         }
+
+        [TestMethod]
+        public void TruncatedStreamLoadTest()
+        {
+            SEALContext context = GlobalContext.BFVContext;
+
+            // A bare 16-byte header claiming a near-int.MaxValue size must be rejected before
+            // allocating a buffer of that size.
+            using (MemoryStream mem = new MemoryStream())
+            {
+                Serialization.SEALHeader header = new Serialization.SEALHeader();
+                header.ComprMode = Serialization.ComprModeDefault;
+                header.Size = 0x7FFFFFC7;
+                Serialization.SaveHeader(header, mem);
+                mem.Seek(offset: 0, loc: SeekOrigin.Begin);
+
+                Ciphertext cipher = new Ciphertext();
+                Utilities.AssertThrows<EndOfStreamException>(() => cipher.Load(context, mem));
+            }
+
+            // A truncated body whose header still claims the full size must throw rather than hand
+            // native code a length past the end of the read buffer.
+            {
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreatePublicKey(out PublicKey publicKey);
+                Encryptor encryptor = new Encryptor(context, publicKey);
+
+                Ciphertext cipher = new Ciphertext();
+                Plaintext plain = new Plaintext("2x^3 + 4x^2 + 5x^1 + 6");
+                encryptor.Encrypt(plain, cipher);
+
+                byte[] full;
+                using (MemoryStream mem = new MemoryStream())
+                {
+                    cipher.Save(mem);
+                    full = mem.ToArray();
+                }
+
+                byte[] truncated = new byte[full.Length - 8];
+                Array.Copy(full, truncated, truncated.Length);
+                using (MemoryStream mem = new MemoryStream(truncated))
+                {
+                    Ciphertext loaded = new Ciphertext();
+                    Utilities.AssertThrows<EndOfStreamException>(() => loaded.Load(context, mem));
+                }
+            }
+        }
     }
 }

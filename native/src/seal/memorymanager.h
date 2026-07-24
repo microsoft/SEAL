@@ -5,6 +5,7 @@
 
 #include "seal/util/defines.h"
 #include "seal/util/globals.h"
+#include "seal/util/locks.h"
 #include "seal/util/mempool.h"
 #include <memory>
 #include <stdexcept>
@@ -39,14 +40,17 @@ namespace seal
     to significant performance issues due to thread contention. For these cases
     Microsoft SEAL provides overloads of the functions that take a MemoryPoolHandle
     as an additional argument, and uses the associated memory pool for all dynamic
-    allocations inside the function. Whenever these functions are called, the
-    user can then simply pass a thread-local MemoryPoolHandle to be used.
+    allocations inside the function. Native callers can pass a thread-local
+    MemoryPoolHandle when every allocation and deallocation remains on the thread
+    that owns the pool.
 
     @par Thread-Unsafe Memory Pools
     While memory pools are by default thread-safe, in some cases it suffices
     to have a memory pool be thread-unsafe. To get a little extra performance,
     the user can optionally create such thread-unsafe memory pools and use them
-    just as they would use thread-safe memory pools.
+    when thread affinity can be guaranteed. A thread-unsafe pool, any handle to it,
+    and every object backed by it must remain on the owning thread through
+    destruction. Cross-thread use can cause data races and memory corruption.
 
     @par Initialized and Uninitialized Handles
     A MemoryPoolHandle has to be set to point either to the global memory pool,
@@ -144,6 +148,11 @@ namespace seal
 #ifndef _M_CEE
         /**
         Returns a MemoryPoolHandle pointing to the thread-local memory pool.
+
+        @warning The pool is not synchronized. Every allocation and deallocation,
+        including destruction of objects backed by the pool, must occur on the thread
+        that owns the pool. Do not use this pool with managed wrappers whose finalizers
+        can run on another thread.
         */
         SEAL_NODISCARD inline static MemoryPoolHandle ThreadLocal() noexcept
         {
@@ -390,12 +399,13 @@ namespace seal
 #ifndef _M_CEE
     /**
     A memory manager profile that always returns a MemoryPoolHandle pointing to
-    the thread-local memory pool. This profile should be used with care, as any
-    memory allocated by it will be released once the thread exits. In other words,
-    the thread-local memory pool cannot be used to share memory across different
-    threads. On the other hand, this profile can be useful when a very high number
-    of threads doing simultaneous allocations would cause contention in the
-    global memory pool.
+    the thread-local memory pool. The pool is not synchronized: every allocation
+    and deallocation, including destruction of objects backed by the pool, must
+    occur on the thread that owns it. The pool, its handles, and its backed objects
+    cannot be shared across threads. This profile can be useful when a very high
+    number of threads doing simultaneous allocations would cause contention in the
+    global memory pool and strict thread affinity can be guaranteed. Do not use
+    this profile with managed wrappers whose finalizers can run on another thread.
     */
     class MMProfThreadLocal : public MMProf
     {
@@ -475,6 +485,9 @@ namespace seal
             mm_prof_opt::force_global: return MemoryPoolHandle::Global()
             mm_prof_opt::force_thread_local: return MemoryPoolHandle::ThreadLocal()
 
+        The force_thread_local option has the same strict thread-affinity
+        requirements as MemoryPoolHandle::ThreadLocal().
+
         Other values for prof_opt are forwarded to the current profile and, depending
         on the profile, may or may not have an effect. The value mm_prof_opt::default
         will always invoke a default behavior for the current profile.
@@ -497,17 +510,19 @@ namespace seal
                 return MemoryPoolHandle::ThreadLocal();
 #endif
             default:
-#ifdef SEAL_DEBUG
             {
-                auto pool = GetMMProf()->get_pool(prof_opt);
+#ifndef _M_CEE
+                auto reader_lock = mm_prof_locker_.acquire_read();
+#endif
+                MemoryPoolHandle pool = GetMMProf()->get_pool(prof_opt);
+#ifdef SEAL_DEBUG
                 if (!pool)
                 {
                     throw std::logic_error("cannot return uninitialized pool");
                 }
+#endif
                 return pool;
             }
-#endif
-                return GetMMProf()->get_pool(prof_opt);
             }
         }
 
@@ -523,6 +538,9 @@ namespace seal
             {
                 throw std::invalid_argument("mm_prof cannot be null");
             }
+#ifndef _M_CEE
+            auto writer_lock = mm_prof_locker_.acquire_write();
+#endif
             auto ret_mm_prof = std::move(GetMMProf());
             GetMMProf().reset(mm_prof);
             return ret_mm_prof;
@@ -535,6 +553,9 @@ namespace seal
             {
                 throw std::invalid_argument("mm_prof cannot be null");
             }
+#ifndef _M_CEE
+            auto writer_lock = mm_prof_locker_.acquire_write();
+#endif
             std::swap(GetMMProf(), mm_prof);
             return std::move(mm_prof);
         }
@@ -546,6 +567,8 @@ namespace seal
         }
 #ifndef _M_CEE
         static std::mutex switch_mutex_;
+
+        static util::ReaderWriterLocker mm_prof_locker_;
 #endif
     };
 #ifndef _M_CEE

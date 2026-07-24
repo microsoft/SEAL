@@ -1,11 +1,16 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
+#include "seal/ciphertext.h"
 #include "seal/ckks.h"
 #include "seal/context.h"
 #include "seal/keygenerator.h"
 #include "seal/modulus.h"
+#include "seal/valcheck.h"
+#include <cmath>
+#include <cstdint>
 #include <ctime>
+#include <limits>
 #include <vector>
 #include "gtest/gtest.h"
 
@@ -245,6 +250,72 @@ namespace sealtest
                 }
             }
         }
+    }
+
+    TEST(CKKSEncoderTest, CKKSEncoderRejectsTransformOverflow)
+    {
+        EncryptionParameters parms(scheme_type::ckks);
+        parms.set_poly_modulus_degree(4096);
+        parms.set_coeff_modulus(CoeffModulus::Create(4096, { 60, 40, 40, 60 }));
+        SEALContext context(parms, false, sec_level_type::none);
+        CKKSEncoder encoder(context);
+
+        vector<double> values(encoder.slot_count());
+        uint64_t state = 0x243F6A8885A308D3ULL;
+        auto next_random = [&state]() {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            return state;
+        };
+
+        constexpr double two_pow_52 = 4503599627370496.0;
+        for (auto &value : values)
+        {
+            uint64_t bits = next_random();
+            double significand = 1.0 + static_cast<double>(bits & 0xFFFFFFFFFFFFFULL) / two_pow_52;
+            value = ldexp(significand, 1023);
+            if (bits & (1ULL << 63))
+            {
+                value = -value;
+            }
+            ASSERT_TRUE(isfinite(value));
+        }
+
+        Plaintext plain;
+        EXPECT_THROW(encoder.encode(values, context.first_parms_id(), pow(2.0, 40), plain), invalid_argument);
+    }
+
+    TEST(CKKSEncoderTest, CKKSScaleValidation)
+    {
+        EncryptionParameters parms(scheme_type::ckks);
+        parms.set_poly_modulus_degree(8);
+        parms.set_coeff_modulus(CoeffModulus::Create(8, { 40, 40, 40 }));
+        SEALContext context(parms, false, sec_level_type::none);
+        CKKSEncoder encoder(context);
+
+        vector<double> values(encoder.slot_count(), 0.0);
+        Plaintext plain;
+        Ciphertext encrypted(context);
+        double min_normal = (numeric_limits<double>::min)();
+        encoder.encode(values, context.first_parms_id(), min_normal, plain);
+        encrypted.scale() = min_normal;
+        ASSERT_TRUE(is_metadata_valid_for(plain, context));
+        ASSERT_TRUE(is_metadata_valid_for(encrypted, context));
+
+        double invalid_scales[]{ 0.0, -1.0, numeric_limits<double>::denorm_min(), numeric_limits<double>::infinity(),
+                                 numeric_limits<double>::quiet_NaN() };
+        for (double scale : invalid_scales)
+        {
+            plain.scale() = scale;
+            encrypted.scale() = scale;
+            ASSERT_FALSE(is_metadata_valid_for(plain, context));
+            ASSERT_FALSE(is_metadata_valid_for(encrypted, context));
+        }
+
+        ASSERT_THROW(
+            encoder.encode(values, context.first_parms_id(), numeric_limits<double>::denorm_min(), plain),
+            invalid_argument);
     }
 
     TEST(CKKSEncoderTest, CKKSEncoderEncodeSingleDecodeTest)

@@ -26,10 +26,7 @@ SEAL_C_FUNC Decryptor_Create(void *context, void *secret_key, void **decryptor)
         *decryptor = decr;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Decryptor_Destroy(void *thisptr)
@@ -55,10 +52,7 @@ SEAL_C_FUNC Decryptor_Decrypt(void *thisptr, void *encrypted, void *destination)
         decryptor->decrypt(*encryptedptr, *destinationptr);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Decryptor_InvariantNoiseBudget(void *thisptr, void *encrypted, int *invariant_noise_budget)
@@ -74,12 +68,5 @@ SEAL_C_FUNC Decryptor_InvariantNoiseBudget(void *thisptr, void *encrypted, int *
         *invariant_noise_budget = decryptor->invariant_noise_budget(*encryptedptr);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }

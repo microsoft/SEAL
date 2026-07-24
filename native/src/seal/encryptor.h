@@ -33,8 +33,10 @@ namespace seal
     contention in allocations taking place during operations. For example, one can
     share one single Encryptor across any number of threads, but in each thread
     call the encrypt function by giving it a thread-local MemoryPoolHandle to use.
-    It is important for a developer to understand how this works to avoid unnecessary
-    performance bottlenecks.
+    All allocations from a thread-local pool, including object destruction that
+    returns memory to the pool, must remain on the thread that owns it. It is
+    important for a developer to understand how this works to avoid unnecessary
+    performance bottlenecks and unsafe cross-thread use.
 
     @par NTT form
     When using the BFV/BGV scheme (scheme_type::bfv/bgv), all plaintext and ciphertexts should

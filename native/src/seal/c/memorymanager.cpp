@@ -63,32 +63,40 @@ SEAL_C_FUNC MemoryManager_GetPool1(int prof_opt, bool clear_on_destruction, void
 {
     IfNullRet(pool_handle, E_POINTER);
 
-    mm_prof_opt profile_opt = static_cast<mm_prof_opt>(prof_opt);
-    MemoryPoolHandle handle;
-
-    // clear_on_destruction is only used when using mm_force_new
-    if (profile_opt == mm_prof_opt::mm_force_new)
+    try
     {
-        handle = MemoryManager::GetPool(profile_opt, clear_on_destruction);
-    }
-    else
-    {
-        handle = MemoryManager::GetPool(profile_opt);
-    }
+        mm_prof_opt profile_opt = static_cast<mm_prof_opt>(prof_opt);
+        MemoryPoolHandle handle;
 
-    MemoryPoolHandle *handle_ptr = new MemoryPoolHandle(std::move(handle));
-    *pool_handle = handle_ptr;
-    return S_OK;
+        // clear_on_destruction is only used when using mm_force_new
+        if (profile_opt == mm_prof_opt::mm_force_new)
+        {
+            handle = MemoryManager::GetPool(profile_opt, clear_on_destruction);
+        }
+        else
+        {
+            handle = MemoryManager::GetPool(profile_opt);
+        }
+
+        MemoryPoolHandle *handle_ptr = new MemoryPoolHandle(std::move(handle));
+        *pool_handle = handle_ptr;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC MemoryManager_GetPool2(void **pool_handle)
 {
     IfNullRet(pool_handle, E_POINTER);
 
-    MemoryPoolHandle handle = MemoryManager::GetPool();
-    MemoryPoolHandle *handle_ptr = new MemoryPoolHandle(std::move(handle));
-    *pool_handle = handle_ptr;
-    return S_OK;
+    try
+    {
+        MemoryPoolHandle handle = MemoryManager::GetPool();
+        MemoryPoolHandle *handle_ptr = new MemoryPoolHandle(std::move(handle));
+        *pool_handle = handle_ptr;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC MemoryManager_SwitchProfile(void *new_profile)
@@ -96,23 +104,31 @@ SEAL_C_FUNC MemoryManager_SwitchProfile(void *new_profile)
     MMProf *profile = FromVoid<MMProf>(new_profile);
     IfNullRet(profile, E_POINTER);
 
-    // SwitchProfile takes ownership of the profile pointer that is passed.
-    // The managed side will keep ownership of the new_profile parameter, so we
-    // need to make a copy that will be owned by the Memory Manager.
-    MMProf *new_mm_profile = nullptr;
-    IfFailRet(CreateProfileCopy(profile, &new_mm_profile));
+    try
+    {
+        // SwitchProfile takes ownership of the profile pointer that is passed.
+        // The managed side will keep ownership of the new_profile parameter, so we
+        // need to make a copy that will be owned by the Memory Manager.
+        MMProf *new_mm_profile = nullptr;
+        IfFailRet(CreateProfileCopy(profile, &new_mm_profile));
 
-    MemoryManager::SwitchProfile(std::move(static_cast<MMProf *>(new_mm_profile)));
-    return S_OK;
+        MemoryManager::SwitchProfile(std::move(static_cast<MMProf *>(new_mm_profile)));
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC MMProf_CreateGlobal(void **profile)
 {
     IfNullRet(profile, E_POINTER);
 
-    MMProfGlobal *global = new MMProfGlobal();
-    *profile = global;
-    return S_OK;
+    try
+    {
+        MMProfGlobal *global = new MMProfGlobal();
+        *profile = global;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC MMProf_CreateFixed(void *pool, void **profile)
@@ -121,28 +137,40 @@ SEAL_C_FUNC MMProf_CreateFixed(void *pool, void **profile)
     IfNullRet(poolptr, E_POINTER);
     IfNullRet(profile, E_POINTER);
 
-    MemoryPoolHandle myhandle(*poolptr);
-    MMProfFixed *fixed = new MMProfFixed(myhandle);
-    *profile = fixed;
-    return S_OK;
+    try
+    {
+        MemoryPoolHandle myhandle(*poolptr);
+        MMProfFixed *fixed = new MMProfFixed(myhandle);
+        *profile = fixed;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC MMProf_CreateNew(void **profile)
 {
     IfNullRet(profile, E_POINTER);
 
-    MMProfNew *newprof = new MMProfNew();
-    *profile = newprof;
-    return S_OK;
+    try
+    {
+        MMProfNew *newprof = new MMProfNew();
+        *profile = newprof;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC MMProf_CreateThreadLocal(void **profile)
 {
     IfNullRet(profile, E_POINTER);
 
-    MMProfThreadLocal *threadlocal = new MMProfThreadLocal();
-    *profile = threadlocal;
-    return S_OK;
+    try
+    {
+        MMProfThreadLocal *threadlocal = new MMProfThreadLocal();
+        *profile = threadlocal;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC MMProf_GetPool(void *thisptr, void **pool_handle)
@@ -151,10 +179,14 @@ SEAL_C_FUNC MMProf_GetPool(void *thisptr, void **pool_handle)
     IfNullRet(profile, E_POINTER);
     IfNullRet(pool_handle, E_POINTER);
 
-    // The parameter to get_pool is always ignored, so just pass 0
-    MemoryPoolHandle *handle_ptr = new MemoryPoolHandle(profile->get_pool(0));
-    *pool_handle = handle_ptr;
-    return S_OK;
+    try
+    {
+        // The parameter to get_pool is always ignored, so just pass 0
+        MemoryPoolHandle *handle_ptr = new MemoryPoolHandle(profile->get_pool(0));
+        *pool_handle = handle_ptr;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC MMProf_Destroy(void *thisptr)

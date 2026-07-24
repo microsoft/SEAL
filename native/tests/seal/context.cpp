@@ -33,7 +33,7 @@ namespace sealtest
 
         // Not relatively prime coeff moduli
         parms.set_poly_modulus_degree(4);
-        parms.set_coeff_modulus({ 2, 30 });
+        parms.set_coeff_modulus({ 17, 17 });
         parms.set_plain_modulus(2);
         parms.set_random_generator(UniformRandomGeneratorFactory::DefaultFactory());
         {
@@ -310,6 +310,22 @@ namespace sealtest
         }
     }
 
+    TEST(ContextTest, CoeffModulusPrimality)
+    {
+        EncryptionParameters parms(scheme_type::ckks);
+        parms.set_poly_modulus_degree(2048);
+        parms.set_coeff_modulus({ 12289ULL * 40961ULL });
+
+        ASSERT_FALSE(parms.coeff_modulus()[0].is_prime());
+
+        SEALContext context(parms, false, sec_level_type::tc128);
+        auto qualifiers = context.first_context_data()->qualifiers();
+        ASSERT_FALSE(qualifiers.parameters_set());
+        ASSERT_EQ(error_type::invalid_coeff_modulus_non_prime, qualifiers.parameter_error);
+        ASSERT_STREQ("invalid_coeff_modulus_non_prime", qualifiers.parameter_error_name());
+        ASSERT_STREQ("coeff_modulus contains a non-prime value", qualifiers.parameter_error_message());
+    }
+
     TEST(ContextTest, ModulusChainExpansion)
     {
         {
@@ -466,7 +482,7 @@ namespace sealtest
 
         // Not relatively prime coeff moduli
         parms.set_poly_modulus_degree(4);
-        parms.set_coeff_modulus({ 2, 30 });
+        parms.set_coeff_modulus({ 17, 17 });
         parms.set_plain_modulus(2);
         parms.set_random_generator(UniformRandomGeneratorFactory::DefaultFactory());
         {

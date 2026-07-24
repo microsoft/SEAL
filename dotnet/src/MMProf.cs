@@ -94,13 +94,12 @@ namespace Microsoft.Research.SEAL
 
     /// <summary>
     /// A memory manager profile that always returns a MemoryPoolHandle pointing to
-    /// the thread-local memory pool. This profile should be used with care, as any
-    /// memory allocated by it will be released once the thread exits. In other words,
-    /// the thread-local memory pool cannot be used to share memory across different
-    /// threads. On the other hand, this profile can be useful when a very high number
-    /// of threads doing simultaneous allocations would cause contention in the
-    /// global memory pool.
+    /// the thread-local memory pool. The pool is not synchronized, and managed
+    /// finalizers can return allocations to it from a different thread, causing data
+    /// races and memory corruption. Use MMProfGlobal or MMProfFixed with a thread-safe
+    /// MemoryPoolHandle instead.
     /// </summary>
+    [Obsolete(MemoryPoolHandle.ThreadLocalPoolObsoleteMessage)]
     public class MMProfThreadLocal : MMProf
     {
         /// <summary>

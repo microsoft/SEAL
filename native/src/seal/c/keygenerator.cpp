@@ -59,10 +59,7 @@ SEAL_C_FUNC KeyGenerator_Create1(void *context, void **key_generator)
         *key_generator = keygen;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC KeyGenerator_Create2(void *context, void *secret_key, void **key_generator)
@@ -79,10 +76,7 @@ SEAL_C_FUNC KeyGenerator_Create2(void *context, void *secret_key, void **key_gen
         *key_generator = keygen;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC KeyGenerator_Destroy(void *thisptr)
@@ -106,14 +100,7 @@ SEAL_C_FUNC KeyGenerator_CreateRelinKeys(void *thisptr, bool save_seed, void **r
         *relin_keys = relinKeys;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC KeyGenerator_CreateGaloisKeysFromElts(
@@ -133,14 +120,7 @@ SEAL_C_FUNC KeyGenerator_CreateGaloisKeysFromElts(
         *galois_keys = keys;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC KeyGenerator_CreateGaloisKeysFromSteps(
@@ -162,14 +142,7 @@ SEAL_C_FUNC KeyGenerator_CreateGaloisKeysFromSteps(
         *galois_keys = keys;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC KeyGenerator_CreateGaloisKeysAll(void *thisptr, bool save_seed, void **galois_keys)
@@ -186,14 +159,7 @@ SEAL_C_FUNC KeyGenerator_CreateGaloisKeysAll(void *thisptr, bool save_seed, void
         *galois_keys = keys;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC KeyGenerator_CreatePublicKey(void *thisptr, bool save_seed, void **public_key)
@@ -202,9 +168,13 @@ SEAL_C_FUNC KeyGenerator_CreatePublicKey(void *thisptr, bool save_seed, void **p
     IfNullRet(keygen, E_POINTER);
     IfNullRet(public_key, E_POINTER);
 
-    PublicKey *key = new PublicKey(ph::create_public_key(keygen, save_seed));
-    *public_key = key;
-    return S_OK;
+    try
+    {
+        PublicKey *key = new PublicKey(ph::create_public_key(keygen, save_seed));
+        *public_key = key;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC KeyGenerator_SecretKey(void *thisptr, void **secret_key)
@@ -213,9 +183,13 @@ SEAL_C_FUNC KeyGenerator_SecretKey(void *thisptr, void **secret_key)
     IfNullRet(keygen, E_POINTER);
     IfNullRet(secret_key, E_POINTER);
 
-    SecretKey *key = new SecretKey(keygen->secret_key());
-    *secret_key = key;
-    return S_OK;
+    try
+    {
+        SecretKey *key = new SecretKey(keygen->secret_key());
+        *secret_key = key;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC KeyGenerator_ContextUsingKeyswitching(void *thisptr, bool *using_keyswitching)

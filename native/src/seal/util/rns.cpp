@@ -1179,24 +1179,14 @@ namespace seal
             // Now compute the subtraction to remove error and perform final multiplication by
             // gamma inverse mod t
             SEAL_ITERATE(iter(temp_t_gamma[0], temp_t_gamma[1], destination), coeff_count_, [&](auto I) {
-                // Need correction because of centered mod
-                if (get<1>(I) > gamma_div_2)
-                {
-                    // Compute -(gamma - a) instead of (a - gamma)
-                    get<2>(I) = add_uint_mod(get<0>(I), barrett_reduce_64(gamma_.value() - get<1>(I), t_), t_);
-                }
-                // No correction needed
-                else
-                {
-                    get<2>(I) = sub_uint_mod(get<0>(I), barrett_reduce_64(get<1>(I), t_), t_);
-                }
+                uint64_t gamma_component = get<1>(I);
+                uint64_t add_result =
+                    add_uint_mod(get<0>(I), barrett_reduce_64(gamma_.value() - gamma_component, t_), t_);
+                uint64_t sub_result = sub_uint_mod(get<0>(I), barrett_reduce_64(gamma_component, t_), t_);
+                get<2>(I) = SEAL_COND_SELECT(gamma_component > gamma_div_2, add_result, sub_result);
 
-                // If this coefficient was non-zero, multiply by gamma^(-1)
-                if (0 != get<2>(I))
-                {
-                    // Perform final multiplication by gamma inverse mod t
-                    get<2>(I) = multiply_uint_mod(get<2>(I), inv_gamma_mod_t_, t_);
-                }
+                // Perform final multiplication by gamma inverse mod t
+                get<2>(I) = multiply_uint_mod(get<2>(I), inv_gamma_mod_t_, t_);
             });
         }
 

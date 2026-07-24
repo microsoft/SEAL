@@ -12,9 +12,6 @@ jobs:
       timeoutInMinutes: 0
     pool:
       vmImage: 'windows-latest'
-    variables:
-      CodeQL.Enabled: 'true'
-      LGTM.UploadSnapshot: 'true'
     steps:
     - template: windows.yml
       parameters:

@@ -75,15 +75,15 @@ namespace Microsoft.Research.SEAL
         /// Returns the underlying Plaintext.
         /// </summary>
         /// <remarks>
-        /// Returns the underlying Plaintext. The returned Plaintext is valid
-        /// only as long as the SecretKey is valid and not changed.
+        /// Returns the underlying Plaintext. The returned Plaintext keeps this SecretKey
+        /// alive and remains valid until this SecretKey is disposed or changed.
         /// </remarks>
         public Plaintext Data
         {
             get
             {
                 NativeMethods.SecretKey_Data(NativePtr, out IntPtr plaintextPtr);
-                Plaintext plaintext = new Plaintext(plaintextPtr, owned: false);
+                Plaintext plaintext = new Plaintext(plaintextPtr, owned: false, owner: this);
                 return plaintext;
             }
         }

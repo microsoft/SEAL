@@ -395,6 +395,44 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void UnsafeSaveLoadTest()
+        {
+            foreach (SEALContext context in new[] { GlobalContext.BFVContext, GlobalContext.BGVContext })
+            {
+                Plaintext plain = new Plaintext("6x^5 + 5x^4 + 4x^3 + 3x^2 + 2x^1 + 5");
+                Plaintext other = new Plaintext();
+
+                Assert.AreNotSame(plain, other);
+                Assert.AreNotEqual(plain, other);
+
+                using (MemoryStream stream = new MemoryStream())
+                {
+                    plain.Save(stream);
+
+                    stream.Seek(offset: 0, loc: SeekOrigin.Begin);
+
+                    other.UnsafeLoad(context, stream);
+                }
+
+                Assert.AreNotSame(plain, other);
+                Assert.AreEqual(plain, other);
+                Assert.IsTrue(ValCheck.IsValidFor(other, context));
+            }
+        }
+
+        [TestMethod]
+        public void FromStringExponentTest()
+        {
+            Utilities.AssertThrows<ArgumentException>(() => { Plaintext plain = new Plaintext("1x^4294967288"); });
+            Utilities.AssertThrows<ArgumentException>(() =>
+            {
+                Plaintext plain = new Plaintext();
+                plain.Set("1x^5 + Fx^4294967288");
+            });
+            Utilities.AssertThrows<ArgumentException>(() => { Plaintext plain = new Plaintext("1x^2147483646"); });
+        }
+
+        [TestMethod]
         public void HashCodeTest()
         {
             Plaintext plain1 = new Plaintext("6x^40 + 5x^35 + 4x^30 + 3x^20 + 2x^10 + 5");

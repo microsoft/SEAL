@@ -51,10 +51,13 @@ SEAL_C_FUNC Encryptor_Create(void *context, void *public_key, void *secret_key, 
         Encryptor *enc;
         if (nullptr != pkey)
         {
-            enc = new Encryptor(*ctx, *pkey);
             if (nullptr != skey)
             {
-                enc->set_secret_key(*skey);
+                enc = new Encryptor(*ctx, *pkey, *skey);
+            }
+            else
+            {
+                enc = new Encryptor(*ctx, *pkey);
             }
         }
         else
@@ -64,10 +67,7 @@ SEAL_C_FUNC Encryptor_Create(void *context, void *public_key, void *secret_key, 
         *encryptor = enc;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Encryptor_SetPublicKey(void *thisptr, void *public_key)
@@ -82,10 +82,7 @@ SEAL_C_FUNC Encryptor_SetPublicKey(void *thisptr, void *public_key)
         encryptor->set_public_key(*pkey);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Encryptor_SetSecretKey(void *thisptr, void *secret_key)
@@ -100,10 +97,7 @@ SEAL_C_FUNC Encryptor_SetSecretKey(void *thisptr, void *secret_key)
         encryptor->set_secret_key(*skey);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Encryptor_Encrypt(void *thisptr, void *plaintext, void *destination, void *pool_handle)
@@ -121,14 +115,7 @@ SEAL_C_FUNC Encryptor_Encrypt(void *thisptr, void *plaintext, void *destination,
         encryptor->encrypt(*plain, *cipher, *pool);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Encryptor_EncryptZero1(void *thisptr, uint64_t *parms_id, void *destination, void *pool_handle)
@@ -148,14 +135,7 @@ SEAL_C_FUNC Encryptor_EncryptZero1(void *thisptr, uint64_t *parms_id, void *dest
         encryptor->encrypt_zero(parms, *cipher, *pool);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Encryptor_EncryptZero2(void *thisptr, void *destination, void *pool_handle)
@@ -171,14 +151,7 @@ SEAL_C_FUNC Encryptor_EncryptZero2(void *thisptr, void *destination, void *pool_
         encryptor->encrypt_zero(*cipher, *pool);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Encryptor_EncryptSymmetric(
@@ -197,14 +170,7 @@ SEAL_C_FUNC Encryptor_EncryptSymmetric(
         ph::encrypt_symmetric_internal(encryptor, *plain, save_seed, *cipher, *pool);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Encryptor_EncryptZeroSymmetric1(
@@ -225,14 +191,7 @@ SEAL_C_FUNC Encryptor_EncryptZeroSymmetric1(
         ph::encrypt_zero_symmetric_internal(encryptor, parms, save_seed, *cipher, *pool);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Encryptor_EncryptZeroSymmetric2(void *thisptr, bool save_seed, void *destination, void *pool_handle)
@@ -248,14 +207,7 @@ SEAL_C_FUNC Encryptor_EncryptZeroSymmetric2(void *thisptr, bool save_seed, void 
         ph::encrypt_zero_symmetric_internal(encryptor, save_seed, *cipher, *pool);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Encryptor_Destroy(void *thisptr)

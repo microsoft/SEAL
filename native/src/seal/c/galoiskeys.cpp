@@ -21,8 +21,5 @@ SEAL_C_FUNC GaloisKeys_GetIndex(uint32_t galois_elt, uint64_t *index)
         *index = GaloisKeys::get_index(galois_elt);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }

@@ -8,6 +8,7 @@
 #include "seal/util/uintarith.h"
 #include "seal/util/uintarithsmallmod.h"
 #include <algorithm>
+#include <new>
 #include <stdexcept>
 #include <utility>
 
@@ -70,6 +71,9 @@ namespace seal
         case error_type::failed_creating_rns_tool:
             return "failed_creating_rns_tool";
 
+        case error_type::invalid_coeff_modulus_non_prime:
+            return "invalid_coeff_modulus_non_prime";
+
         default:
             return "invalid parameter_error";
         }
@@ -127,6 +131,9 @@ namespace seal
         case error_type::failed_creating_rns_tool:
             return "RNSTool cannot be constructed";
 
+        case error_type::invalid_coeff_modulus_non_prime:
+            return "coeff_modulus contains a non-prime value";
+
         default:
             return "invalid parameter_error";
         }
@@ -162,6 +169,11 @@ namespace seal
                 !(coeff_modulus[i].value() >> (SEAL_USER_MOD_BIT_COUNT_MIN - 1)))
             {
                 context_data.qualifiers_.parameter_error = error_type::invalid_coeff_modulus_bit_count;
+                return context_data;
+            }
+            if (!coeff_modulus[i].is_prime())
+            {
+                context_data.qualifiers_.parameter_error = error_type::invalid_coeff_modulus_non_prime;
                 return context_data;
             }
         }
@@ -249,6 +261,15 @@ namespace seal
             context_data.qualifiers_.parameter_error = error_type::invalid_coeff_modulus_no_ntt;
             return context_data;
         }
+        catch (const bad_alloc &)
+        {
+            // The NTT precomputation tables are too large to allocate for these
+            // parameters. Treat this as a parameter failure rather than letting
+            // bad_alloc escape validate() and the SEALContext constructor.
+            context_data.qualifiers_.using_ntt = false;
+            context_data.qualifiers_.parameter_error = error_type::invalid_parameters_too_large;
+            return context_data;
+        }
 
         if (parms.scheme() == scheme_type::bfv || parms.scheme() == scheme_type::bgv)
         {
@@ -289,6 +310,14 @@ namespace seal
             catch (const invalid_argument &)
             {
                 context_data.qualifiers_.using_batching = false;
+            }
+            catch (const bad_alloc &)
+            {
+                // A failed plain-modulus NTT precomputation is a parameter
+                // failure, handled the same way as the coeff_modulus tables above.
+                context_data.qualifiers_.using_batching = false;
+                context_data.qualifiers_.parameter_error = error_type::invalid_parameters_too_large;
+                return context_data;
             }
 
             // Check for plain_lift
@@ -413,7 +442,18 @@ namespace seal
         }
 
         // Create GaloisTool
-        context_data.galois_tool_ = allocate<GaloisTool>(pool_, coeff_count_power, pool_);
+        try
+        {
+            context_data.galois_tool_ = allocate<GaloisTool>(pool_, coeff_count_power, pool_);
+        }
+        catch (const bad_alloc &)
+        {
+            // As with the NTT tables above, a failed GaloisTool precomputation
+            // is a parameter failure, not an exception that should escape the
+            // SEALContext constructor.
+            context_data.qualifiers_.parameter_error = error_type::invalid_parameters_too_large;
+            return context_data;
+        }
 
         // Done with validation and pre-computations
         return context_data;

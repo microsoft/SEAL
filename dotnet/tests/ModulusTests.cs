@@ -364,6 +364,9 @@ namespace SEALNetTest
             Utilities.AssertThrows<ArgumentException>(() => CoeffModulus.Create(2048, sm, new int[] { -30 }));
             Utilities.AssertThrows<ArgumentException>(() => CoeffModulus.Create(2048, sm, new int[] { 30, -30 }));
 
+            // Zero plain_modulus
+            Utilities.AssertThrows<ArgumentException>(() => CoeffModulus.Create(2048, new Modulus(), new int[] { 30 }));
+
             // Too large LCM(2 * poly_modulus_degree, plain_modulus)
             sm.Set(0x20000000000000ul);
             Utilities.AssertThrows<InvalidOperationException>(() => CoeffModulus.Create(2048, sm, new int[] { 20 }));

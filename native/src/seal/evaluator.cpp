@@ -44,7 +44,7 @@ namespace seal
                 scale_bit_count_bound = -1;
             };
 
-            return !(!isfinite(scale) || scale <= 0 || (static_cast<int>(log2(scale)) >= scale_bit_count_bound));
+            return !(!isnormal(scale) || scale <= 0 || (static_cast<int>(log2(scale)) >= scale_bit_count_bound));
         }
 
         /**
@@ -1226,6 +1226,21 @@ namespace seal
         auto &next_parms = next_context_data.parms();
         auto rns_tool = context_data.rns_tool();
 
+        double destination_scale = 1.0;
+        if (next_parms.scheme() == scheme_type::ckks)
+        {
+            if (!is_scale_within_bounds(encrypted.scale(), context_data))
+            {
+                throw invalid_argument("scale out of bounds");
+            }
+            destination_scale =
+                encrypted.scale() / static_cast<double>(context_data.parms().coeff_modulus().back().value());
+            if (!is_scale_within_bounds(destination_scale, next_context_data))
+            {
+                throw invalid_argument("scale out of bounds");
+            }
+        }
+
         size_t encrypted_size = encrypted.size();
         size_t coeff_count = next_parms.poly_modulus_degree();
         size_t next_coeff_modulus_size = next_parms.coeff_modulus().size();
@@ -1268,8 +1283,7 @@ namespace seal
         if (next_parms.scheme() == scheme_type::ckks)
         {
             // Change the scale when using CKKS
-            destination.scale() =
-                encrypted.scale() / static_cast<double>(context_data.parms().coeff_modulus().back().value());
+            destination.scale() = destination_scale;
         }
         else if (next_parms.scheme() == scheme_type::bgv)
         {
@@ -1284,9 +1298,17 @@ namespace seal
     {
         // Assuming at this point encrypted is already validated.
         auto context_data_ptr = context_.get_context_data(encrypted.parms_id());
+        if (context_data_ptr->parms().scheme() == scheme_type::bfv && encrypted.is_ntt_form())
+        {
+            throw invalid_argument("BFV encrypted cannot be in NTT form");
+        }
         if (context_data_ptr->parms().scheme() == scheme_type::ckks && !encrypted.is_ntt_form())
         {
             throw invalid_argument("CKKS encrypted must be in NTT form");
+        }
+        if (context_data_ptr->parms().scheme() == scheme_type::bgv && !encrypted.is_ntt_form())
+        {
+            throw invalid_argument("BGV encrypted must be in NTT form");
         }
 
         // Extract encryption parameters.
@@ -1339,7 +1361,7 @@ namespace seal
             // Copy data over to destination; only copy the RNS components relevant after modulus drop
             drop_modulus_and_copy(encrypted, destination);
         }
-        destination.is_ntt_form() = true;
+        destination.is_ntt_form() = encrypted.is_ntt_form();
         destination.scale() = encrypted.scale();
         destination.correction_factor() = encrypted.correction_factor();
     }
@@ -2402,9 +2424,25 @@ namespace seal
         {
             throw invalid_argument("Galois element is not valid");
         }
-        if (encrypted_size > 2)
+        if (encrypted_size != 2)
         {
             throw invalid_argument("encrypted size must be 2");
+        }
+
+        // The NTT form must match the scheme. This precondition is also enforced by the
+        // switch_key_inplace call below, but verify it here before mutating the operand.
+        auto scheme = parms.scheme();
+        if (scheme == scheme_type::bfv && encrypted.is_ntt_form())
+        {
+            throw invalid_argument("BFV encrypted cannot be in NTT form");
+        }
+        if (scheme == scheme_type::ckks && !encrypted.is_ntt_form())
+        {
+            throw invalid_argument("CKKS encrypted must be in NTT form");
+        }
+        if (scheme == scheme_type::bgv && !encrypted.is_ntt_form())
+        {
+            throw invalid_argument("BGV encrypted must be in NTT form");
         }
 
         SEAL_ALLOCATE_GET_RNS_ITER(temp, coeff_count, coeff_modulus_size, pool);
@@ -2587,8 +2625,17 @@ namespace seal
             throw logic_error("invalid parameters");
         }
 
-        // Prepare input
-        auto &key_vector = kswitch_keys.data()[kswitch_keys_index];
+        // Prepare input. Use the checked accessor so an empty key slot throws rather than
+        // dereferencing key_vector[0] through a null pointer.
+        auto &key_vector = kswitch_keys.data(kswitch_keys_index);
+        // The loop below indexes key_vector up to decomp_modulus_size; reject an inner vector
+        // that is too short (e.g. from unsafe_load) before it drives an out-of-bounds read. Keys
+        // are sized to the top-level modulus count, so a valid lower-level ciphertext has
+        // key_vector.size() >= decomp_modulus_size; use >=, not ==.
+        if (key_vector.size() < decomp_modulus_size)
+        {
+            throw invalid_argument("kswitch_keys inner dimension is too small");
+        }
         size_t key_component_count = key_vector[0].data().size();
 
         // Check only the used component in KSwitchKeys.

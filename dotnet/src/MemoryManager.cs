@@ -26,8 +26,10 @@ namespace Microsoft.Research.SEAL
         ForceNew = 2,
 
         /// <summary>
-        /// Force use of the Thread Local profile
+        /// Force use of the Thread Local profile. This option is deprecated because
+        /// managed finalizers can release native allocations from a different thread.
         /// </summary>
+        [Obsolete(MemoryPoolHandle.ThreadLocalPoolObsoleteMessage)]
         ForceThreadLocal = 4
     }
 
@@ -75,6 +77,9 @@ namespace Microsoft.Research.SEAL
         ///     MMProfOpt.ForceNew: return MemoryPoolHandle.New()
         ///     MMProfOpt.ForceGlobal: return MemoryPoolHandle.Global()
         ///     MMProfOpt.ForceThreadLocal: return MemoryPoolHandle.ThreadLocal()
+        ///
+        /// ForceThreadLocal is deprecated and unsafe for managed objects because
+        /// finalization can occur on a different thread. Use ForceGlobal or ForceNew.
         ///
         /// Other values for profOpt are forwarded to the current profile and, depending
         /// on the profile, may or may not have an effect. The value MMProfOpt.Default

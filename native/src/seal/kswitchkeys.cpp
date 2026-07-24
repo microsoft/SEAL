@@ -94,6 +94,11 @@ namespace seal
         // Create new keys
         vector<vector<PublicKey>> new_keys;
 
+        // Stage parms_id locally so a throw mid-load cannot leave this object with
+        // a new parms_id paired with its old keys_. It is committed next to the
+        // swap below, matching the atomic staging used by the other loaders.
+        parms_id_type new_parms_id{};
+
         auto old_except_mask = stream.exceptions();
         try
         {
@@ -101,20 +106,27 @@ namespace seal
             stream.exceptions(ios_base::badbit | ios_base::failbit);
 
             // Read the parms_id
-            stream.read(reinterpret_cast<char *>(&parms_id_), sizeof(parms_id_type));
+            stream.read(reinterpret_cast<char *>(&new_parms_id), sizeof(parms_id_type));
 
             // Read in the size of keys_
             uint64_t keys_dim1 = 0;
             stream.read(reinterpret_cast<char *>(&keys_dim1), sizeof(uint64_t));
 
-            // Bound keys_dim1 against the maximum possible number of key-switching
-            // keys (one per Galois element, at most SEAL_POLY_MOD_DEGREE_MAX) to
-            // prevent a hostile stream from triggering an arbitrarily large
-            // allocation in reserve() below.
-            if (keys_dim1 > SEAL_POLY_MOD_DEGREE_MAX)
+            // Bound keys_dim1 by the number of key-switching keys this context can
+            // legitimately require, not the compile-time maximum. For Galois keys
+            // that is at most poly_modulus_degree (one key per coefficient slot); for
+            // relinearization keys it is far smaller. Using the context-derived bound
+            // prevents a hostile stream from claiming a huge key count and driving a
+            // large allocation in reserve() below before any key is validated.
+            size_t max_keys_dim1 = context.key_context_data()->parms().poly_modulus_degree();
+            if (keys_dim1 > max_keys_dim1)
             {
                 throw logic_error("KSwitchKeys outer dimension is invalid");
             }
+
+            // The inner dimension is the RNS decomposition count, which equals the
+            // number of primes in the first (data-level) coeff_modulus.
+            size_t max_keys_dim2 = context.first_context_data()->parms().coeff_modulus().size();
 
             // Reserve first for dimension of keys_
             new_keys.reserve(safe_cast<size_t>(keys_dim1));
@@ -126,9 +138,9 @@ namespace seal
                 uint64_t keys_dim2 = 0;
                 stream.read(reinterpret_cast<char *>(&keys_dim2), sizeof(uint64_t));
 
-                // Bound keys_dim2 by the maximum coefficient modulus count, for
-                // the same reason as above.
-                if (keys_dim2 > SEAL_COEFF_MOD_COUNT_MAX)
+                // Bound keys_dim2 by the context's RNS decomposition count rather
+                // than the compile-time maximum, for the same reason as above.
+                if (keys_dim2 > max_keys_dim2)
                 {
                     throw logic_error("KSwitchKeys inner dimension is invalid");
                 }
@@ -156,6 +168,7 @@ namespace seal
         }
         stream.exceptions(old_except_mask);
 
+        parms_id_ = new_parms_id;
         swap(keys_, new_keys);
     }
 } // namespace seal

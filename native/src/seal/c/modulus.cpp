@@ -26,10 +26,7 @@ SEAL_C_FUNC Modulus_Create1(uint64_t value, void **small_modulus)
         *small_modulus = sm;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Modulus_Create2(void *copy, void **small_modulus)
@@ -37,9 +34,13 @@ SEAL_C_FUNC Modulus_Create2(void *copy, void **small_modulus)
     Modulus *copypt = FromVoid<Modulus>(copy);
     IfNullRet(copypt, E_POINTER);
 
-    Modulus *sm = new Modulus(*copypt);
-    *small_modulus = sm;
-    return S_OK;
+    try
+    {
+        Modulus *sm = new Modulus(*copypt);
+        *small_modulus = sm;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Modulus_Destroy(void *thisptr)
@@ -121,10 +122,7 @@ SEAL_C_FUNC Modulus_Set2(void *thisptr, uint64_t value)
     {
         *sm = value;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 
     return S_OK;
 }
@@ -178,14 +176,7 @@ SEAL_C_FUNC Modulus_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
         *result = static_cast<int64_t>(sm->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Modulus_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes)
@@ -202,18 +193,7 @@ SEAL_C_FUNC Modulus_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t 
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
-    catch (const runtime_error &)
-    {
-        return COR_E_IO;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Modulus_Load(void *thisptr, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
@@ -229,18 +209,7 @@ SEAL_C_FUNC Modulus_Load(void *thisptr, uint8_t *inptr, uint64_t size, int64_t *
             util::safe_cast<int64_t>(sm->load(reinterpret_cast<seal_byte *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
-    catch (const runtime_error &)
-    {
-        return COR_E_IO;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Modulus_Reduce(void *thisptr, uint64_t value, uint64_t *result)
@@ -254,10 +223,7 @@ SEAL_C_FUNC Modulus_Reduce(void *thisptr, uint64_t value, uint64_t *result)
         *result = sm->reduce(value);
         return S_OK;
     }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC CoeffModulus_MaxBitCount(uint64_t poly_modulus_degree, int sec_level, int *bit_count)
@@ -280,10 +246,7 @@ SEAL_C_FUNC CoeffModulus_BFVDefault(uint64_t poly_modulus_degree, int sec_level,
     {
         result = CoeffModulus::BFVDefault(poly_modulus_degree, security_level);
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 
     BuildModulusPointers(result, length, coeffs);
     return S_OK;
@@ -302,14 +265,7 @@ SEAL_C_FUNC CoeffModulus_Create1(uint64_t poly_modulus_degree, uint64_t length, 
     {
         result = CoeffModulus::Create(poly_modulus_degree, bit_sizes_vec);
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 
     BuildModulusPointers(result, &length, coeffs);
     return S_OK;
@@ -330,14 +286,7 @@ SEAL_C_FUNC CoeffModulus_Create2(
     {
         result = CoeffModulus::Create(poly_modulus_degree, *modulus, bit_sizes_vec);
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 
     BuildModulusPointers(result, &length, coeffs);
     return S_OK;

@@ -3,7 +3,11 @@
 
 using Microsoft.Research.SEAL;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System;
 using System.Collections.Generic;
+using System.Reflection;
+using System.Runtime.InteropServices;
+using System.Text;
 
 namespace SEALNetTest
 {
@@ -51,6 +55,30 @@ namespace SEALNetTest
             for (int i = 0; i < totalCoeffMod1.Length; i++)
             {
                 Assert.AreEqual(totalCoeffMod1[i], totalCoeffMod2[i]);
+            }
+        }
+
+        [TestMethod]
+        public void ParameterErrorStringInteropTest()
+        {
+            Type nativeMethods = typeof(SEALContext).Assembly.GetType("Microsoft.Research.SEAL.NativeMethods");
+            Assert.IsNotNull(nativeMethods);
+
+            string[] methodNames =
+            {
+                "SEALContext_ParameterErrorName",
+                "SEALContext_ParameterErrorMessage"
+            };
+            foreach (string methodName in methodNames)
+            {
+                MethodInfo method = nativeMethods.GetMethod(
+                    methodName, BindingFlags.NonPublic | BindingFlags.Static);
+                Assert.IsNotNull(method);
+                Assert.AreEqual(typeof(StringBuilder), method.GetParameters()[1].ParameterType);
+
+                DllImportAttribute import = method.GetCustomAttribute<DllImportAttribute>();
+                Assert.IsNotNull(import);
+                Assert.AreEqual(CharSet.Ansi, import.CharSet);
             }
         }
 
@@ -218,6 +246,79 @@ namespace SEALNetTest
             Assert.AreEqual(1ul, data4.PrevContextData.ChainIndex);
 
             Assert.IsNull(data4.NextContextData);
+        }
+
+        [TestMethod]
+        public void ContextDataNullPrecomputationTest()
+        {
+            // Valid CKKS: coeff_div_plain_modulus_ is only computed for BFV/BGV, so on
+            // CKKS CoeffDivPlainModulus must report empty rather than read a null buffer.
+            int slotSize = 4;
+            EncryptionParameters ckksParms = new EncryptionParameters(SchemeType.CKKS)
+            {
+                PolyModulusDegree = 2 * (ulong)slotSize,
+                CoeffModulus = CoeffModulus.Create(2 * (ulong)slotSize, new int[] { 40, 40, 40, 40 })
+            };
+            SEALContext ckksContext = new SEALContext(ckksParms,
+                expandModChain: true,
+                secLevel: SecLevelType.None);
+            SEALContext.ContextData ckksData = ckksContext.KeyContextData;
+            Assert.IsNotNull(ckksData);
+            Assert.AreEqual(0, ckksData.CoeffDivPlainModulus.Length);
+
+            // Failed validation with a non-empty coeff modulus leaves every precomputation
+            // buffer unallocated; these accessors must report empty rather than read null.
+            EncryptionParameters badParms = new EncryptionParameters(SchemeType.BFV)
+            {
+                PolyModulusDegree = 128,
+                PlainModulus = new Modulus(1 << 6),
+                CoeffModulus = new List<Modulus> { new Modulus(1ul << 60) }
+            };
+            SEALContext badContext = new SEALContext(badParms,
+                expandModChain: false,
+                secLevel: SecLevelType.None);
+            Assert.IsFalse(badContext.ParametersSet);
+            SEALContext.ContextData badData = badContext.KeyContextData;
+            Assert.IsNotNull(badData);
+            Assert.AreEqual(0, badData.TotalCoeffModulus.Length);
+            Assert.AreEqual(0, badData.CoeffDivPlainModulus.Length);
+            Assert.AreEqual(0, badData.PlainUpperHalfIncrement.Length);
+        }
+
+        [TestMethod]
+        public void ContextDataParentLifetimeTest()
+        {
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
+            {
+                PolyModulusDegree = 128,
+                PlainModulus = new Modulus(1 << 6),
+                CoeffModulus = CoeffModulus.Create(128, new int[] { 40, 40 })
+            };
+
+            // A ContextData holds an interior pointer into its SEALContext, so it must
+            // root that context. After the only context reference goes out of scope and
+            // the GC runs, reading through the ContextData must still be valid.
+            SEALContext.ContextData data;
+            {
+                SEALContext context = new SEALContext(parms,
+                    expandModChain: true, secLevel: SecLevelType.None);
+                data = context.FirstContextData;
+            }
+            GC.Collect();
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            Assert.IsTrue(data.TotalCoeffModulus.Length > 0);
+
+            // Once the owning context is disposed the interior pointer is no longer valid,
+            // so the accessor must throw rather than dereference freed native memory.
+            SEALContext disposedContext = new SEALContext(parms,
+                expandModChain: true, secLevel: SecLevelType.None);
+            SEALContext.ContextData orphan = disposedContext.FirstContextData;
+            disposedContext.Dispose();
+            Assert.ThrowsException<ObjectDisposedException>(() =>
+            {
+                ulong[] unused = orphan.TotalCoeffModulus;
+            });
         }
 
         [TestMethod]

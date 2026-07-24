@@ -37,10 +37,7 @@ SEAL_C_FUNC Ciphertext_Create1(void *memoryPoolHandle, void **ciphertext)
         *ciphertext = cipher;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_Create2(void *copy, void **ciphertext)
@@ -49,9 +46,13 @@ SEAL_C_FUNC Ciphertext_Create2(void *copy, void **ciphertext)
     IfNullRet(copyptr, E_POINTER);
     IfNullRet(ciphertext, E_POINTER);
 
-    Ciphertext *cipher = new Ciphertext(*copyptr);
-    *ciphertext = cipher;
-    return S_OK;
+    try
+    {
+        Ciphertext *cipher = new Ciphertext(*copyptr);
+        *ciphertext = cipher;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_Create3(void *context, void *pool, void **ciphertext)
@@ -67,10 +68,7 @@ SEAL_C_FUNC Ciphertext_Create3(void *context, void *pool, void **ciphertext)
         *ciphertext = cipher;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_Create4(void *context, uint64_t *parms_id, void *pool, void **ciphertext)
@@ -90,10 +88,7 @@ SEAL_C_FUNC Ciphertext_Create4(void *context, uint64_t *parms_id, void *pool, vo
         *ciphertext = cipher;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_Create5(void *context, uint64_t *parms_id, uint64_t capacity, void *pool, void **ciphertext)
@@ -113,10 +108,7 @@ SEAL_C_FUNC Ciphertext_Create5(void *context, uint64_t *parms_id, uint64_t capac
         *ciphertext = cipher;
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_Reserve1(void *thisptr, void *context, uint64_t *parms_id, uint64_t size_capacity)
@@ -135,10 +127,7 @@ SEAL_C_FUNC Ciphertext_Reserve1(void *thisptr, void *context, uint64_t *parms_id
         cipher->reserve(*ctx, parms, size_capacity);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_Reserve2(void *thisptr, void *context, uint64_t size_capacity)
@@ -153,10 +142,7 @@ SEAL_C_FUNC Ciphertext_Reserve2(void *thisptr, void *context, uint64_t size_capa
         cipher->reserve(*ctx, size_capacity);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_Reserve3(void *thisptr, uint64_t size_capacity)
@@ -169,10 +155,7 @@ SEAL_C_FUNC Ciphertext_Reserve3(void *thisptr, uint64_t size_capacity)
         cipher->reserve(size_capacity);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_Set(void *thisptr, void *assign)
@@ -182,8 +165,12 @@ SEAL_C_FUNC Ciphertext_Set(void *thisptr, void *assign)
     Ciphertext *assignptr = FromVoid<Ciphertext>(assign);
     IfNullRet(assignptr, E_POINTER);
 
-    *cipher = *assignptr;
-    return S_OK;
+    try
+    {
+        *cipher = *assignptr;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_Destroy(void *thisptr)
@@ -270,10 +257,7 @@ SEAL_C_FUNC Ciphertext_Resize1(void *thisptr, void *context, uint64_t *parms_id,
         cipher->resize(*ctx, parms, size);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_Resize2(void *thisptr, void *context, uint64_t size)
@@ -288,10 +272,7 @@ SEAL_C_FUNC Ciphertext_Resize2(void *thisptr, void *context, uint64_t size)
         cipher->resize(*ctx, size);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_Resize3(void *thisptr, uint64_t size)
@@ -304,10 +285,7 @@ SEAL_C_FUNC Ciphertext_Resize3(void *thisptr, uint64_t size)
         cipher->resize(size);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_Resize4(void *thisptr, uint64_t size, uint64_t polyModulusDegree, uint64_t coeffModCount)
@@ -320,10 +298,7 @@ SEAL_C_FUNC Ciphertext_Resize4(void *thisptr, uint64_t size, uint64_t polyModulu
         ph::resize(cipher, size, polyModulusDegree, coeffModCount);
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_GetDataAt1(void *thisptr, uint64_t index, uint64_t *data)
@@ -337,10 +312,7 @@ SEAL_C_FUNC Ciphertext_GetDataAt1(void *thisptr, uint64_t index, uint64_t *data)
         *data = (*cipher)[index];
         return S_OK;
     }
-    catch (const out_of_range &)
-    {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_GetDataAt2(void *thisptr, uint64_t poly_index, uint64_t coeff_index, uint64_t *data)
@@ -360,10 +332,7 @@ SEAL_C_FUNC Ciphertext_GetDataAt2(void *thisptr, uint64_t poly_index, uint64_t c
         *data = cipher->data(poly_index)[coeff_index];
         return S_OK;
     }
-    catch (const out_of_range &)
-    {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_SetDataAt(void *thisptr, uint64_t index, uint64_t value)
@@ -376,10 +345,7 @@ SEAL_C_FUNC Ciphertext_SetDataAt(void *thisptr, uint64_t index, uint64_t value)
         (*cipher)[index] = value;
         return S_OK;
     }
-    catch (const out_of_range &)
-    {
-        return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_IsNTTForm(void *thisptr, bool *is_ntt_form)
@@ -464,9 +430,13 @@ SEAL_C_FUNC Ciphertext_Pool(void *thisptr, void **pool)
     IfNullRet(cipher, E_POINTER);
     IfNullRet(pool, E_POINTER);
 
-    MemoryPoolHandle *handleptr = new MemoryPoolHandle(cipher->pool());
-    *pool = handleptr;
-    return S_OK;
+    try
+    {
+        MemoryPoolHandle *handleptr = new MemoryPoolHandle(cipher->pool());
+        *pool = handleptr;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *result)
@@ -480,14 +450,7 @@ SEAL_C_FUNC Ciphertext_SaveSize(void *thisptr, uint8_t compr_mode, int64_t *resu
         *result = static_cast<int64_t>(cipher->save_size(static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8_t compr_mode, int64_t *out_bytes)
@@ -504,18 +467,7 @@ SEAL_C_FUNC Ciphertext_Save(void *thisptr, uint8_t *outptr, uint64_t size, uint8
             static_cast<compr_mode_type>(compr_mode)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
-    catch (const runtime_error &)
-    {
-        return COR_E_IO;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
@@ -533,18 +485,7 @@ SEAL_C_FUNC Ciphertext_UnsafeLoad(void *thisptr, void *context, uint8_t *inptr, 
             cipher->unsafe_load(*ctx, reinterpret_cast<seal_byte *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
-    catch (const runtime_error &)
-    {
-        return COR_E_IO;
-    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_Load(void *thisptr, void *context, uint8_t *inptr, uint64_t size, int64_t *in_bytes)
@@ -562,16 +503,5 @@ SEAL_C_FUNC Ciphertext_Load(void *thisptr, void *context, uint8_t *inptr, uint64
             cipher->load(*ctx, reinterpret_cast<seal_byte *>(inptr), util::safe_cast<size_t>(size)));
         return S_OK;
     }
-    catch (const invalid_argument &)
-    {
-        return E_INVALIDARG;
-    }
-    catch (const logic_error &)
-    {
-        return COR_E_INVALIDOPERATION;
-    }
-    catch (const runtime_error &)
-    {
-        return COR_E_IO;
-    }
+    SEAL_C_CATCH_ALL
 }
