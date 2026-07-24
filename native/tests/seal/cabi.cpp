@@ -1,16 +1,18 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT license.
 
-// This file is compiled only when the C export library (sealc) is built; the
-// test CMakeLists adds it to sealtest under `if(TARGET sealc)`.
-
+#include "seal/c/encryptionparameters.h"
 #include "seal/c/encryptor.h"
+#include "seal/c/keygenerator.h"
 #include "seal/c/kswitchkeys.h"
 #include "seal/c/memorymanager.h"
 #include "seal/c/memorypoolhandle.h"
+#include "seal/c/modulus.h"
 #include "seal/c/plaintext.h"
-#include "seal/keygenerator.h"
-#include "seal/modulus.h"
+#include "seal/c/publickey.h"
+#include "seal/c/sealcontext.h"
+#include "seal/c/secretkey.h"
+#include <vector>
 #include "gtest/gtest.h"
 
 namespace sealtest
@@ -54,17 +56,36 @@ namespace sealtest
 
     TEST(CAbiLifetimeTest, EncryptorCreateReleasesPublicKeyOnInvalidSecretKey)
     {
-        seal::EncryptionParameters parms(seal::scheme_type::bfv);
-        parms.set_poly_modulus_degree(1024);
-        parms.set_coeff_modulus(seal::CoeffModulus::BFVDefault(1024));
-        parms.set_plain_modulus(257);
-        seal::SEALContext context(parms, false);
+        constexpr uint8_t bfv_scheme = 0x1;
+        constexpr int tc128 = 128;
+        constexpr uint64_t poly_modulus_degree = 1024;
 
-        seal::KeyGenerator keygen(context);
-        seal::PublicKey public_key;
-        keygen.create_public_key(public_key);
-        seal::SecretKey valid_secret_key = keygen.secret_key();
-        seal::SecretKey invalid_secret_key;
+        void *parms = nullptr;
+        ASSERT_EQ(S_OK, EncParams_Create1(bfv_scheme, &parms));
+        ASSERT_EQ(S_OK, EncParams_SetPolyModulusDegree(parms, poly_modulus_degree));
+
+        uint64_t coeff_modulus_size = 0;
+        ASSERT_EQ(S_OK, CoeffModulus_BFVDefault(poly_modulus_degree, tc128, &coeff_modulus_size, nullptr));
+        std::vector<void *> coeff_modulus(coeff_modulus_size);
+        ASSERT_EQ(S_OK, CoeffModulus_BFVDefault(poly_modulus_degree, tc128, &coeff_modulus_size, coeff_modulus.data()));
+        ASSERT_EQ(S_OK, EncParams_SetCoeffModulus(parms, coeff_modulus_size, coeff_modulus.data()));
+        for (void *modulus : coeff_modulus)
+        {
+            ASSERT_EQ(S_OK, Modulus_Destroy(modulus));
+        }
+        ASSERT_EQ(S_OK, EncParams_SetPlainModulus2(parms, 257));
+
+        void *context = nullptr;
+        ASSERT_EQ(S_OK, SEALContext_Create(parms, false, tc128, &context));
+
+        void *keygen = nullptr;
+        ASSERT_EQ(S_OK, KeyGenerator_Create1(context, &keygen));
+        void *public_key = nullptr;
+        ASSERT_EQ(S_OK, KeyGenerator_CreatePublicKey(keygen, false, &public_key));
+        void *valid_secret_key = nullptr;
+        ASSERT_EQ(S_OK, KeyGenerator_SecretKey(keygen, &valid_secret_key));
+        void *invalid_secret_key = nullptr;
+        ASSERT_EQ(S_OK, SecretKey_Create1(&invalid_secret_key));
 
         void *active_pool = nullptr;
         ASSERT_EQ(S_OK, MemoryManager_GetPool2(&active_pool));
@@ -76,23 +97,30 @@ namespace sealtest
         ASSERT_EQ(S_OK, MemoryPoolHandle_Destroy(same_pool));
 
         void *valid_encryptor = nullptr;
-        ASSERT_EQ(S_OK, Encryptor_Create(&context, &public_key, nullptr, &valid_encryptor));
+        ASSERT_EQ(S_OK, Encryptor_Create(context, public_key, nullptr, &valid_encryptor));
         ASSERT_EQ(S_OK, Encryptor_Destroy(valid_encryptor));
 
         valid_encryptor = nullptr;
-        ASSERT_EQ(S_OK, Encryptor_Create(&context, &public_key, &valid_secret_key, &valid_encryptor));
+        ASSERT_EQ(S_OK, Encryptor_Create(context, public_key, valid_secret_key, &valid_encryptor));
         ASSERT_EQ(S_OK, Encryptor_Destroy(valid_encryptor));
 
         long use_count_before = 0;
         ASSERT_EQ(S_OK, MemoryPoolHandle_UseCount(active_pool, &use_count_before));
 
         void *encryptor = nullptr;
-        ASSERT_EQ(E_INVALIDARG, Encryptor_Create(&context, &public_key, &invalid_secret_key, &encryptor));
+        ASSERT_EQ(E_INVALIDARG, Encryptor_Create(context, public_key, invalid_secret_key, &encryptor));
         ASSERT_EQ(nullptr, encryptor);
 
         long use_count_after = 0;
         ASSERT_EQ(S_OK, MemoryPoolHandle_UseCount(active_pool, &use_count_after));
         EXPECT_EQ(use_count_before, use_count_after);
         EXPECT_EQ(S_OK, MemoryPoolHandle_Destroy(active_pool));
+
+        EXPECT_EQ(S_OK, SecretKey_Destroy(invalid_secret_key));
+        EXPECT_EQ(S_OK, SecretKey_Destroy(valid_secret_key));
+        EXPECT_EQ(S_OK, PublicKey_Destroy(public_key));
+        EXPECT_EQ(S_OK, KeyGenerator_Destroy(keygen));
+        EXPECT_EQ(S_OK, SEALContext_Destroy(context));
+        EXPECT_EQ(S_OK, EncParams_Destroy(parms));
     }
 } // namespace sealtest

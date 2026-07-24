@@ -12,6 +12,18 @@ steps:
     workingDirectory: '$(Build.SourcesDirectory)'
     cmakeArgs: '--version'
 
+- task: PowerShell@2
+  displayName: Verify Gradle wrapper JAR
+  inputs:
+    targetType: 'inline'
+    script: |
+      $ExpectedHash = '2db75c40782f5e8ba1fc278a5574bab070adccb2d21ca5a6e5ed840888448046'
+      $WrapperPath = Join-Path -Path $Env:BUILD_SOURCESDIRECTORY -ChildPath 'android/gradle/wrapper/gradle-wrapper.jar'
+      $ActualHash = (Get-FileHash -Path $WrapperPath -Algorithm SHA256).Hash.ToLowerInvariant()
+      if ($ActualHash -ne $ExpectedHash) {
+          throw "Gradle wrapper JAR checksum mismatch: expected $ExpectedHash, got $ActualHash"
+      }
+
 - task: Gradle@4
   displayName: Compile Android Native Libraries
   inputs:

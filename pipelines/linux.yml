@@ -19,6 +19,7 @@ steps:
 - script: |
       cd $BUILD_SOURCESDIRECTORY
       LD_PRELOAD=libasan.so ./build/bin/sealtest
+      LD_PRELOAD=libasan.so ./build/bin/sealctest
   displayName: 'Run unit tests'
 
 - task: UseDotNet@2

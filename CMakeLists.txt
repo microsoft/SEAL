@@ -305,7 +305,11 @@ mark_as_advanced(FORCE SEAL_USE_GAUSSIAN_NOISE)
 # [option] SEAL_DEFAULT_PRNG (default: Blake2xb)
 # Choose either Blake2xb or Shake256 to be the default PRNG.
 set(SEAL_DEFAULT_PRNG_STR "Choose the default PRNG")
-set(SEAL_DEFAULT_PRNG "Blake2xb" CACHE STRING ${SEAL_DEFAULT_PRNG_STR} FORCE)
+set(SEAL_DEFAULT_PRNG "Blake2xb" CACHE STRING "${SEAL_DEFAULT_PRNG_STR}")
+if(NOT "${SEAL_DEFAULT_PRNG}" STREQUAL "Blake2xb" AND
+    NOT "${SEAL_DEFAULT_PRNG}" STREQUAL "Shake256")
+    message(FATAL_ERROR "SEAL_DEFAULT_PRNG must be either `Blake2xb` or `Shake256`")
+endif()
 message(STATUS "SEAL_DEFAULT_PRNG: ${SEAL_DEFAULT_PRNG}")
 set_property(CACHE SEAL_DEFAULT_PRNG PROPERTY
     STRINGS "Blake2xb" "Shake256")
