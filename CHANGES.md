@@ -1,5 +1,14 @@
 # List of Changes
 
+## Version 4.4.0
+
+- **Critical security update:** all users should upgrade to Microsoft SEAL 4.4.0 as soon as possible.
+- Hardened untrusted deserialization.
+- Restored loading of objects serialized by earlier Microsoft SEAL 4.x minor releases; the wire format is unchanged.
+- Fixed native memory-safety and concurrency defects across ciphertext evaluation and memory management.
+- Hardened the C ABI and .NET wrapper against various failures.
+- Strengthened cryptographic input validation and release-build/dependency security controls.
+
 ## Version 4.3.3
 
 - Hardened `Serialization::Load` against hostile input by bounding deserialized `KSwitchKeys`/`GaloisKeys`/`RelinKeys` dimensions and rejecting a `SEALHeader` whose size exceeds the available input, including on non-seekable streams.

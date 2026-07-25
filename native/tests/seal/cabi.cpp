@@ -163,9 +163,10 @@ namespace sealtest
             HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER),
             ContextData_TotalCoeffModulus(context_data, &context_capacity, total_coeff_modulus.data()));
         EXPECT_EQ(context_required, context_capacity);
-        EXPECT_TRUE(std::all_of(total_coeff_modulus.cbegin(), total_coeff_modulus.cend(), [](uint64_t value) {
-            return value == context_sentinel;
-        }));
+        EXPECT_TRUE(
+            std::all_of(total_coeff_modulus.cbegin(), total_coeff_modulus.cend(), [context_sentinel](uint64_t value) {
+                return value == context_sentinel;
+            }));
         void *encoder = nullptr;
         ASSERT_EQ(S_OK, CKKSEncoder_Create(context, &encoder));
         void *plain = nullptr;
@@ -185,8 +186,9 @@ namespace sealtest
             HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER),
             CKKSEncoder_Decode1(encoder, plain, &real_capacity, real_values.data(), nullptr));
         EXPECT_EQ(slot_count, real_capacity);
-        EXPECT_TRUE(
-            std::all_of(real_values.cbegin(), real_values.cend(), [](double value) { return value == sentinel; }));
+        EXPECT_TRUE(std::all_of(real_values.cbegin(), real_values.cend(), [sentinel](double value) {
+            return value == sentinel;
+        }));
 
         std::vector<double> complex_values(slot_count * 2, sentinel);
         uint64_t complex_capacity = 0;
@@ -194,7 +196,7 @@ namespace sealtest
             HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER),
             CKKSEncoder_Decode2(encoder, plain, &complex_capacity, complex_values.data(), nullptr));
         EXPECT_EQ(slot_count, complex_capacity);
-        EXPECT_TRUE(std::all_of(complex_values.cbegin(), complex_values.cend(), [](double value) {
+        EXPECT_TRUE(std::all_of(complex_values.cbegin(), complex_values.cend(), [sentinel](double value) {
             return value == sentinel;
         }));
 
@@ -241,7 +243,7 @@ namespace sealtest
             HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER),
             BatchEncoder_Decode1(encoder, plain, &unsigned_capacity, unsigned_values.data(), nullptr));
         EXPECT_EQ(slot_count, unsigned_capacity);
-        EXPECT_TRUE(std::all_of(unsigned_values.cbegin(), unsigned_values.cend(), [](uint64_t value) {
+        EXPECT_TRUE(std::all_of(unsigned_values.cbegin(), unsigned_values.cend(), [unsigned_sentinel](uint64_t value) {
             return value == unsigned_sentinel;
         }));
 
@@ -252,7 +254,7 @@ namespace sealtest
             HRESULT_FROM_WIN32(ERROR_INSUFFICIENT_BUFFER),
             BatchEncoder_Decode2(encoder, plain, &signed_capacity, signed_values.data(), nullptr));
         EXPECT_EQ(slot_count, signed_capacity);
-        EXPECT_TRUE(std::all_of(signed_values.cbegin(), signed_values.cend(), [](int64_t value) {
+        EXPECT_TRUE(std::all_of(signed_values.cbegin(), signed_values.cend(), [signed_sentinel](int64_t value) {
             return value == signed_sentinel;
         }));
 

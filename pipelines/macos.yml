@@ -12,6 +12,7 @@ steps:
       -DSEAL_BUILD_TESTS=ON
       -DSEAL_BUILD_SEAL_C=ON
       -DSEAL_BUILD_EXAMPLES=ON
+      -DSEAL_SECURE_COMPILE_OPTIONS=ON
 
 - script: |
     cmake --build build-x64 \
@@ -34,6 +35,7 @@ steps:
       -DSEAL_BUILD_TESTS=ON
       -DSEAL_BUILD_SEAL_C=ON
       -DSEAL_BUILD_EXAMPLES=ON
+      -DSEAL_SECURE_COMPILE_OPTIONS=ON
       -C cmake/functions.macos-arm64.cmake
 
 - script: |

@@ -143,8 +143,8 @@ namespace seal
         */
         SEAL_NODISCARD static bool IsCompatibleVersion(const SEALHeader &header) noexcept
         {
-            // Exact same version
-            if (header.version_major == SEAL_VERSION_MAJOR && header.version_minor == SEAL_VERSION_MINOR)
+            // Same major version and no newer minor version
+            if (header.version_major == SEAL_VERSION_MAJOR && header.version_minor <= SEAL_VERSION_MINOR)
             {
                 return true;
             }

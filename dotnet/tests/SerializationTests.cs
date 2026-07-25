@@ -33,6 +33,20 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void PreviousMinorVersionCompatibility()
+        {
+            Serialization.SEALHeader header = new Serialization.SEALHeader();
+            for (byte minor = 0; minor <= SEALVersion.Minor; minor++)
+            {
+                header.VersionMinor = minor;
+                Assert.IsTrue(Serialization.IsCompatibleVersion(header));
+            }
+
+            header.VersionMinor = checked((byte)(SEALVersion.Minor + 1));
+            Assert.IsFalse(Serialization.IsCompatibleVersion(header));
+        }
+
+        [TestMethod]
         public void SEALHeaderSaveLoad()
         {
             Serialization.SEALHeader header = new Serialization.SEALHeader();
