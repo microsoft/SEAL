@@ -25,6 +25,7 @@ android {
                 cppFlags '-std=c++17',
                          '-Wno-gnu-statement-expression-from-macro-expansion'
                 arguments '-DSEAL_BUILD_SEAL_C=1',
+                          '-DSEAL_SECURE_COMPILE_OPTIONS=ON',
                           '-C ../../cmake/functions.android.cmake'
             }
         }

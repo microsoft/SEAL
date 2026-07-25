@@ -273,6 +273,43 @@ namespace sealtest
         ASSERT_FALSE(Serialization::IsValidHeader(invalid_header));
     }
 
+    TEST(SerializationTest, PreviousMinorVersionCompatibility)
+    {
+        Serialization::SEALHeader header;
+        for (int minor = 0; minor <= SEAL_VERSION_MINOR; minor++)
+        {
+            header.version_minor = static_cast<uint8_t>(minor);
+            ASSERT_TRUE(Serialization::IsCompatibleVersion(header));
+        }
+        header.version_minor = static_cast<uint8_t>(SEAL_VERSION_MINOR + 1);
+        ASSERT_FALSE(Serialization::IsCompatibleVersion(header));
+
+        test_struct source{ 3, ~0, 3.14159 };
+        using namespace placeholders;
+        stringstream stream;
+        Serialization::Save(
+            bind(&test_struct::save_members, &source, _1), source.save_size(compr_mode_type::none), stream,
+            compr_mode_type::none, false);
+        string serialized = stream.str();
+
+        for (int minor = 0; minor <= SEAL_VERSION_MINOR; minor++)
+        {
+            Serialization::SEALHeader previous_header;
+            memcpy(&previous_header, serialized.data(), sizeof(previous_header));
+            previous_header.version_minor = static_cast<uint8_t>(minor);
+
+            string previous_serialized = serialized;
+            memcpy(&previous_serialized[0], &previous_header, sizeof(previous_header));
+            stringstream previous_stream(previous_serialized);
+
+            test_struct loaded;
+            Serialization::Load(bind(&test_struct::load_members, &loaded, _1), previous_stream, false);
+            ASSERT_EQ(source.a, loaded.a);
+            ASSERT_EQ(source.b, loaded.b);
+            ASSERT_EQ(source.c, loaded.c);
+        }
+    }
+
 #ifdef SEAL_USE_ZSTD
     TEST(SerializationTest, ZstdWindowLimit)
     {
