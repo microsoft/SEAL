@@ -16,7 +16,7 @@ endif()
 #   4. SEAL C++ tests                             #
 ###################################################
 
-project(SEAL VERSION 4.4.0 LANGUAGES CXX C)
+project(SEAL VERSION 4.4.1 LANGUAGES CXX C)
 
 # [option] CMAKE_BUILD_TYPE (default: "Release")
 # Build in one of the following modes: Release, Debug, MinSizeRel, or RelWithDebInfo.

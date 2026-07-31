@@ -13,6 +13,14 @@ stages:
     - template: jobs.yml
       parameters:
         debug: false
+        name: WindowsMinGW
+    - template: jobs.yml
+      parameters:
+        debug: false
+        name: LinuxCxx14
+    - template: jobs.yml
+      parameters:
+        debug: false
         name: Linux
     - template: jobs.yml
       parameters:

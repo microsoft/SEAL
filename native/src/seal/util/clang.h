@@ -14,10 +14,18 @@
 #include "seal/util/config.h"
 
 #ifdef SEAL_USE_ALIGNED_ALLOC
+#ifdef _WIN32
+// The Windows C runtime provides no std::aligned_alloc; _aligned_malloc results must be
+// released with _aligned_free.
+#include <malloc.h>
+#define SEAL_MALLOC(size) static_cast<seal_byte *>(_aligned_malloc((size), 64))
+#define SEAL_FREE(ptr) _aligned_free(ptr)
+#else
 #include <cstdlib>
 #define SEAL_MALLOC(size) \
     static_cast<seal_byte *>((((size) & 63) == 0) ? std::aligned_alloc(64, (size)) : std::malloc((size)))
 #define SEAL_FREE(ptr) std::free(ptr)
+#endif
 #endif
 
 // Are intrinsics enabled?

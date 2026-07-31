@@ -1,4 +1,4 @@
-# This defines a pipeline to build on Linux in Debug mode.
+# This defines a pipeline to build on Android in Debug mode.
 
 trigger:
   batch: true

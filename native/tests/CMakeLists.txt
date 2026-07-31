@@ -3,14 +3,14 @@
 
 cmake_minimum_required(VERSION 3.22)
 
-project(SEALTest VERSION 4.4.0 LANGUAGES CXX C)
+project(SEALTest VERSION 4.4.1 LANGUAGES CXX C)
 
 # If not called from root CMakeLists.txt
 if(NOT DEFINED SEAL_BUILD_TESTS)
     set(SEAL_BUILD_TESTS ON)
 
     # Import Microsoft SEAL
-    find_package(SEAL 4.4.0 EXACT REQUIRED)
+    find_package(SEAL 4.4.1 EXACT REQUIRED)
 
     # Must define these variables and include macros
     set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/${OUTLIB_PATH})
@@ -70,9 +70,12 @@ if(SEAL_BUILD_TESTS)
     endif()
 
     # In Debug mode, enable AddressSanitizer (and LeakSanitizer) on Unix-like platforms.
+    # SEAL_DEBUG is defined only for single-configuration generators (see the top-level
+    # CMakeLists.txt), so multi-configuration generators such as Xcode never reach this
+    # block, whichever configuration they are built with.
     if(SEAL_DEBUG AND UNIX)
-        # On macOS, only AddressSanitizer is enabled.
-        # On Linux, LeakSanitizer is enabled by default.
+        # LeakSanitizer is enabled by default alongside AddressSanitizer on Linux. It is
+        # unsupported on macOS, where only AddressSanitizer is enabled.
         target_compile_options(sealtest PUBLIC -fsanitize=address)
         target_link_options(sealtest PUBLIC -fsanitize=address)
         if(TARGET sealctest)

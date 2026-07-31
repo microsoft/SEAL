@@ -1,6 +1,9 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
+# Directory holding this file, captured here because macros below expand at their call site.
+set(SEAL_CMAKE_MODULE_DIR ${CMAKE_CURRENT_LIST_DIR})
+
 # Set the C++ language version
 macro(seal_set_language target)
     if(SEAL_USE_CXX17)
@@ -75,25 +78,23 @@ macro(seal_combine_archives target dependency)
             DEPENDS $<TARGET_FILE:${target}> $<TARGET_FILE:${dependency}>
             WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
     else()
-        if(CMAKE_HOST_WIN32)
-            get_filename_component(CXX_DIR "${CMAKE_CXX_COMPILER}" DIRECTORY)
-            set(AR_CMD_PATH "${CXX_DIR}/llvm-ar.exe")
-            file(TO_NATIVE_PATH "${AR_CMD_PATH}" AR_CMD_PATH)
-            set(DEL_CMD "del")
-            set(DEL_CMD_OPTS "")
+        # CMAKE_AR is the archiver that matches the active toolchain (GNU ar for MinGW,
+        # llvm-ar for the Android NDK, emar for Emscripten).
+        if(CMAKE_AR)
+            set(SEAL_AR_COMMAND "${CMAKE_AR}")
+        elseif(EMSCRIPTEN)
+            set(SEAL_AR_COMMAND "emar")
         else()
-            set(AR_CMD_PATH "ar")
-            set(DEL_CMD "rm")
-            set(DEL_CMD_OPTS "-rf")
-        endif()
-        if(EMSCRIPTEN)
-            set(AR_CMD_PATH "emar")
+            set(SEAL_AR_COMMAND "ar")
         endif()
         add_custom_command(TARGET ${target} POST_BUILD
-            COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:${target}>
-            COMMAND "${AR_CMD_PATH}" x $<TARGET_FILE:${dependency}>
-            COMMAND "${AR_CMD_PATH}" rcs $<TARGET_FILE:${target}> *.o
-            COMMAND ${DEL_CMD} ${DEL_CMD_OPTS} *.o
+            COMMAND ${CMAKE_COMMAND}
+                -DSEAL_AR_COMMAND=${SEAL_AR_COMMAND}
+                -DSEAL_TARGET_ARCHIVE=$<TARGET_FILE:${target}>
+                -DSEAL_DEPENDENCY_ARCHIVE=$<TARGET_FILE:${dependency}>
+                -DSEAL_WORK_DIR=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
+                -P ${SEAL_CMAKE_MODULE_DIR}/CombineArchives.cmake
+            DEPENDS $<TARGET_FILE:${target}> $<TARGET_FILE:${dependency}>
             WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
     endif()
 endmacro()

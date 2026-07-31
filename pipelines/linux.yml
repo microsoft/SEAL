@@ -14,13 +14,14 @@ steps:
 
 - script: |
     cd $BUILD_SOURCESDIRECTORY
-    cmake --build build --config ${{ parameters.configuration }} -- -j$(nproc)
+    cmake --build build --config ${{ parameters.configuration }} -- -j`nproc`
   displayName: 'Build SEAL'
 
 - script: |
+      set -e
       cd $BUILD_SOURCESDIRECTORY
-      LD_PRELOAD=libasan.so ./build/bin/sealtest
-      LD_PRELOAD=libasan.so ./build/bin/sealctest
+      ./build/bin/sealtest
+      ./build/bin/sealctest
   displayName: 'Run unit tests'
 
 - task: UseDotNet@2

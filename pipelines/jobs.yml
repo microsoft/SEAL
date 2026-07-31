@@ -15,7 +15,32 @@ jobs:
     steps:
     - template: windows.yml
       parameters:
-        nuget_version: '6.14.0'
+        ${{ if eq(parameters.debug, 'true') }}:
+          configuration: 'Debug'
+        ${{ if eq(parameters.debug, 'false') }}:
+          configuration: 'Release'
+
+- ${{ if eq(parameters.name, 'WindowsMinGW') }}:
+  - job: WindowsMinGW
+    displayName: Windows MinGW
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - template: windows-mingw.yml
+      parameters:
+        ${{ if eq(parameters.debug, 'true') }}:
+          configuration: 'Debug'
+        ${{ if eq(parameters.debug, 'false') }}:
+          configuration: 'Release'
+
+- ${{ if eq(parameters.name, 'LinuxCxx14') }}:
+  - job: LinuxCxx14
+    displayName: Linux C++14
+    pool:
+      vmImage: 'ubuntu-latest'
+    steps:
+    - template: linux-cxx14.yml
+      parameters:
         ${{ if eq(parameters.debug, 'true') }}:
           configuration: 'Debug'
         ${{ if eq(parameters.debug, 'false') }}:

@@ -1,0 +1,32 @@
+steps:
+# SEAL_USE_CXX17 defaults to ON, so every other platform job builds as C++17. This job
+# guards the C++14 fallbacks in native/src/seal/util/defines.h (SEAL_USE_STD_BYTE,
+# SEAL_USE_IF_CONSTEXPR, SEAL_USE_MAYBE_UNUSED, SEAL_USE_NODISCARD, SEAL_USE_SHARED_MUTEX,
+# SEAL_USE_STD_FOR_EACH_N). It builds and tests only, and publishes no artifacts, so it
+# stays out of the NuGet job's dependencies.
+- task: CMake@1
+  displayName: 'Configure SEAL (C++14)'
+  inputs:
+    workingDirectory: '$(Build.SourcesDirectory)'
+    cmakeArgs: >
+      -S .
+      -B build-cxx14
+      -DCMAKE_BUILD_TYPE=${{ parameters.configuration }}
+      -DSEAL_USE_CXX17=OFF
+      -DSEAL_BUILD_TESTS=ON
+      -DSEAL_BUILD_SEAL_C=ON
+      -DSEAL_BUILD_EXAMPLES=ON
+      -DSEAL_SECURE_COMPILE_OPTIONS=ON
+
+- script: |
+      set -e
+      cd $BUILD_SOURCESDIRECTORY
+      cmake --build build-cxx14 --config ${{ parameters.configuration }} -- -j`nproc`
+  displayName: 'Build SEAL (C++14)'
+
+- script: |
+      set -e
+      cd $BUILD_SOURCESDIRECTORY
+      ./build-cxx14/bin/sealtest
+      ./build-cxx14/bin/sealctest
+  displayName: 'Run unit tests (C++14)'

@@ -1,4 +1,4 @@
-# This defines a pipeline to build on Windows in Debug mode.
+# This defines a pipeline to build on Windows in Debug mode, with MSVC and with MinGW.
 
 trigger:
   batch: true
@@ -25,3 +25,7 @@ stages:
       parameters:
         debug: true
         name: Windows
+    - template: jobs.yml
+      parameters:
+        debug: true
+        name: WindowsMinGW

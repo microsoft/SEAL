@@ -1,0 +1,36 @@
+steps:
+# The hosted Windows images ship MinGW-w64 GCC on PATH (C:\mingw64\bin) along with Ninja,
+# so no toolchain installation is required. This job guards the MinGW/UCRT build paths that
+# the MSVC job cannot exercise: std::aligned_alloc availability and static-archive merging
+# with a non-MSVC archiver on a Windows host.
+- script: |
+    gcc --version || exit /b 1
+    g++ --version || exit /b 1
+    ar --version || exit /b 1
+    ninja --version || exit /b 1
+  displayName: 'Report MinGW toolchain'
+
+- task: CMake@1
+  displayName: 'Configure SEAL (MinGW)'
+  inputs:
+    workingDirectory: '$(Build.SourcesDirectory)'
+    cmakeArgs: >
+      -S .
+      -B build-mingw
+      -G Ninja
+      -DCMAKE_C_COMPILER=gcc
+      -DCMAKE_CXX_COMPILER=g++
+      -DCMAKE_BUILD_TYPE=${{ parameters.configuration }}
+      -DSEAL_BUILD_DEPS=ON
+      -DSEAL_BUILD_TESTS=ON
+      -DSEAL_BUILD_EXAMPLES=ON
+
+- script: |
+    cmake --build build-mingw
+  displayName: 'Build SEAL (MinGW)'
+  workingDirectory: '$(Build.SourcesDirectory)'
+
+- script: |
+    build-mingw\bin\sealtest.exe
+  displayName: 'Run unit tests (MinGW)'
+  workingDirectory: '$(Build.SourcesDirectory)'

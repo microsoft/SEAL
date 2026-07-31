@@ -1,5 +1,12 @@
 # List of Changes
 
+## Version 4.4.1
+
+- Fixed the MinGW-w64 build on Windows ([issue #750](https://github.com/microsoft/SEAL/issues/750)): `SEAL_MALLOC`/`SEAL_FREE` now use `_aligned_malloc`/`_aligned_free` on Windows, where libstdc++ does not provide `std::aligned_alloc`.
+- Fixed merging of bundled static dependencies into `libseal` on Windows hosts with non-MSVC archivers; the archiver is now taken from `CMAKE_AR` and object files are enumerated by CMake instead of being passed as an unexpanded `*.o` wildcard.
+- Added a MinGW-w64 CI job.
+- Fixed some bugs in CI pipelines.
+
 ## Version 4.4.0
 
 - **Critical security update:** all users should upgrade to Microsoft SEAL 4.4.0 as soon as possible.

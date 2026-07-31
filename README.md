@@ -1,8 +1,8 @@
 # Microsoft SEAL
 
 > [!IMPORTANT]
-> **Microsoft SEAL 4.4.0 is a critical security update.**
-> All users should upgrade to version 4.4.0 as soon as possible. This release includes important fixes for untrusted-input handling, native memory safety, and managed/native interoperability.
+> **Microsoft SEAL 4.4 is a critical security update.**
+> All users should upgrade to version 4.4.0 or later as soon as possible. These include important fixes for untrusted-input handling, native memory safety, and managed/native interoperability.
 
 Microsoft SEAL is an easy-to-use open-source ([MIT licensed](LICENSE)) homomorphic encryption library developed by the Cryptography Research Group at Microsoft.
 Microsoft SEAL is written in modern standard C++ and is easy to compile and run in many different environments.

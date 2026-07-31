@@ -33,30 +33,43 @@ steps:
     options: '--stacktrace --no-parallel'
     publishJUnitResults: false
     testResultsFiles: '**/TEST-*.xml'
-    tasks: 'build'
+    # Build only the variant this job was asked for. Lint is wired to the debug variant,
+    # so it runs in the Debug pipeline that gates pull requests.
+    ${{ if eq(parameters.configuration, 'Debug') }}:
+      tasks: 'assembleDebug lintDebug'
+    ${{ if eq(parameters.configuration, 'Release') }}:
+      tasks: 'assembleRelease'
 
 - task: PowerShell@2
   displayName: Copy binary files to staging directory
   inputs:
     targetType: 'inline'
     script: |
-      # Directories
-      $TargetDirectoryArm64 = Join-Path -Path $Env:BUILD_ARTIFACTSTAGINGDIRECTORY -ChildPath lib/arm64-v8a
-      $TargetDirectoryX64 = Join-Path -Path $Env:BUILD_ARTIFACTSTAGINGDIRECTORY -ChildPath lib/x86_64
+      $ErrorActionPreference = 'Stop'
 
-      # Create directory if necessary
-      mkdir -ErrorAction Ignore $TargetDirectoryArm64
-      mkdir -ErrorAction Ignore $TargetDirectoryX64
+      # The Android Gradle plugin maps the debug variant to a CMake Debug build and the
+      # release variant to RelWithDebInfo.
+      $CMakeBuildType = '${{ parameters.configuration }}'
+      if ($CMakeBuildType -eq 'Release') {
+          $CMakeBuildType = 'RelWithDebInfo'
+      }
 
-      # Show files to be copied
-      Write-Host "Files to be copied:"
-      Get-ChildItem -Path $Env::BUILD_SOURCESDIRECTORY -Recurse | Where {$_.Fullname -match 'RelWithDebInfo\\.*\\arm64-v8a\\lib\\arm64-v8a\\libsealc.so'}
-      Get-ChildItem -Path $Env::BUILD_SOURCESDIRECTORY -Recurse | Where {$_.Fullname -match 'RelWithDebInfo\\.*\\x86_64\\lib\\x86_64\\libsealc.so'}
+      $SearchRoot = Join-Path -Path $Env:BUILD_SOURCESDIRECTORY -ChildPath "android\app\.cxx\$CMakeBuildType"
+      Write-Host "Collecting $CMakeBuildType binaries from $SearchRoot"
 
-      # Copy files to target directories
-      Write-Host "Copying files to $TargetDirectoryArm64 and $TargetDirectoryX64"
-      Get-ChildItem -Path $Env::BUILD_SOURCESDIRECTORY -Recurse | Where {$_.Fullname -match 'RelWithDebInfo\\.*\\arm64-v8a\\lib\\arm64-v8a\\libsealc.so'} | Copy-Item -Destination $TargetDirectoryArm64
-      Get-ChildItem -Path $Env::BUILD_SOURCESDIRECTORY -Recurse | Where {$_.Fullname -match 'RelWithDebInfo\\.*\\x86_64\\lib\\x86_64\\libsealc.so'} | Copy-Item -Destination $TargetDirectoryX64
+      foreach ($Abi in 'arm64-v8a', 'x86_64') {
+          $TargetDirectory = Join-Path -Path $Env:BUILD_ARTIFACTSTAGINGDIRECTORY -ChildPath "lib\$Abi"
+          New-Item -ItemType Directory -Force -Path $TargetDirectory | Out-Null
+
+          $Binaries = @(Get-ChildItem -Path $SearchRoot -Recurse -Filter 'libsealc.so' |
+              Where-Object { $_.FullName -like "*\$Abi\lib\$Abi\libsealc.so" })
+          if ($Binaries.Count -ne 1) {
+              throw "Expected exactly one $Abi libsealc.so under $SearchRoot, found $($Binaries.Count)"
+          }
+
+          Write-Host "Copying $($Binaries[0].FullName) to $TargetDirectory"
+          Copy-Item -Path $Binaries[0].FullName -Destination $TargetDirectory
+      }
 
 - task: PublishBuildArtifacts@1
   displayName: Publish build artifacts

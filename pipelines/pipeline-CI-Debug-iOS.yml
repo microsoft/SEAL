@@ -1,4 +1,4 @@
-# This defines a pipeline to build on Mac.
+# This defines a pipeline to build on iOS in Debug mode.
 
 trigger:
   batch: true

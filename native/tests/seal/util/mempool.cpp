@@ -8,6 +8,7 @@
 #include "seal/util/pointer.h"
 #include "seal/util/uintcore.h"
 #include <algorithm>
+#include <cstdint>
 #include <memory>
 #include <vector>
 #include "gtest/gtest.h"
@@ -560,6 +561,20 @@ namespace sealtest
             vector<seal_byte> bytes{ seal_byte(0), seal_byte(1), seal_byte(2), seal_byte(3), seal_byte(4) };
             auto ptr = allocate(bytes.begin(), bytes.size(), pool);
             ASSERT_TRUE(equal(bytes.begin(), bytes.end(), ptr.get()));
+        }
+
+        TEST(MemoryPoolTests, SealMallocFreeRoundTrip)
+        {
+            for (size_t size : { size_t(64), size_t(128), size_t(4096) })
+            {
+                seal_byte *ptr = SEAL_MALLOC(size);
+                ASSERT_NE(nullptr, ptr);
+#ifdef SEAL_USE_ALIGNED_ALLOC
+                ASSERT_EQ(size_t(0), reinterpret_cast<uintptr_t>(ptr) % 64);
+#endif
+                fill_n(ptr, size, seal_byte(0xA5));
+                SEAL_FREE(ptr);
+            }
         }
     } // namespace util
 } // namespace sealtest
