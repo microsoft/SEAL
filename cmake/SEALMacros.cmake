@@ -62,6 +62,14 @@ macro(seal_link_threads target)
     target_link_libraries(${target} PUBLIC Threads::Threads)
 endmacro()
 
+# Link platform-specific system libraries
+macro(seal_link_platform_libraries target)
+    if(WIN32)
+        # seal::random_bytes needs bcrypt for BCryptGenRandom.
+        target_link_libraries(${target} PUBLIC bcrypt)
+    endif()
+endmacro()
+
 # Include target to given export
 macro(seal_install_target target export)
     install(TARGETS ${target} EXPORT ${export}

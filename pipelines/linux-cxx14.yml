@@ -27,15 +27,6 @@ steps:
 - script: |
       set -e
       cd $BUILD_SOURCESDIRECTORY
-      echo "--- DT_NEEDED entries, in load order ---"
-      readelf -d ./build-cxx14/bin/sealtest | grep NEEDED || true
-      echo "--- resolved shared objects ---"
-      ldd ./build-cxx14/bin/sealtest || true
-  displayName: 'Report sealtest linkage (C++14)'
-
-- script: |
-      set -e
-      cd $BUILD_SOURCESDIRECTORY
       ./build-cxx14/bin/sealtest
       ./build-cxx14/bin/sealctest
   displayName: 'Run unit tests (C++14)'

@@ -11,6 +11,9 @@
 #if (SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS)
 #include <Windows.h>
 #include <bcrypt.h>
+// bcrypt is linked through the CMake target for every toolchain. MSVC also records it in
+// seal.lib via this pragma, which covers consumers that link the library without CMake.
+// Other compilers ignore this pragma.
 #pragma comment(lib, "bcrypt")
 #endif
 

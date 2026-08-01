@@ -70,28 +70,28 @@ static_assert(false, "Require architecture == x64");
 // out-of-memory or otherwise-unlisted throw into a defined HRESULT instead of aborting
 // the host. Derived types are caught before their bases (invalid_argument/out_of_range
 // before logic_error).
-#define SEAL_C_CATCH_ALL                             \
-    catch (const std::invalid_argument &)            \
-    {                                                \
-        return E_INVALIDARG;                         \
-    }                                                \
-    catch (const std::out_of_range &)                \
-    {                                                \
+#define SEAL_C_CATCH_ALL                                \
+    catch (const std::invalid_argument &)               \
+    {                                                   \
+        return E_INVALIDARG;                            \
+    }                                                   \
+    catch (const std::out_of_range &)                   \
+    {                                                   \
         return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX); \
-    }                                                \
-    catch (const std::logic_error &)                 \
-    {                                                \
-        return COR_E_INVALIDOPERATION;               \
-    }                                                \
-    catch (const std::runtime_error &)               \
-    {                                                \
-        return COR_E_IO;                             \
-    }                                                \
-    catch (const std::bad_alloc &)                   \
-    {                                                \
-        return E_OUTOFMEMORY;                        \
-    }                                                \
-    catch (...)                                      \
-    {                                                \
-        return E_UNEXPECTED;                         \
+    }                                                   \
+    catch (const std::logic_error &)                    \
+    {                                                   \
+        return COR_E_INVALIDOPERATION;                  \
+    }                                                   \
+    catch (const std::runtime_error &)                  \
+    {                                                   \
+        return COR_E_IO;                                \
+    }                                                   \
+    catch (const std::bad_alloc &)                      \
+    {                                                   \
+        return E_OUTOFMEMORY;                           \
+    }                                                   \
+    catch (...)                                         \
+    {                                                   \
+        return E_UNEXPECTED;                            \
     }

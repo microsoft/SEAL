@@ -23,5 +23,10 @@ if(NOT MSVC AND SEAL_DEBUG)
     seal_enable_cxx_compiler_flag_if_supported("-Wconversion")
     seal_enable_cxx_compiler_flag_if_supported("-Wshadow")
     seal_enable_cxx_compiler_flag_if_supported("-pedantic")
-    seal_enable_cxx_compiler_flag_if_supported("-Wno-gnu-statement-expression-from-macro-expansion")
+    if(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+        # GCC accepts unknown -Wno-* flags without error, so the support probe above
+        # cannot reject this Clang-only flag. Offer it only to compilers that implement
+        # it, otherwise GCC reports it as unrecognized alongside every other diagnostic.
+        seal_enable_cxx_compiler_flag_if_supported("-Wno-gnu-statement-expression-from-macro-expansion")
+    endif()
 endif()

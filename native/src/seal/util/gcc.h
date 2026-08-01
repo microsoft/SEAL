@@ -41,10 +41,10 @@
 #endif
 
 #ifdef SEAL_USE___BUILTIN_CLZLL
-#define SEAL_MSB_INDEX_UINT64(result, value)                                      \
-    do                                                                            \
-    {                                                                             \
-        *result = 63UL - static_cast<unsigned long long>(__builtin_clzll(value)); \
+#define SEAL_MSB_INDEX_UINT64(result, value)                               \
+    do                                                                     \
+    {                                                                      \
+        *result = static_cast<unsigned long>(63 - __builtin_clzll(value)); \
     } while (false)
 #endif
 
