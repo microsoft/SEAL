@@ -333,4 +333,53 @@ namespace sealtest
         EXPECT_EQ(S_OK, SEALContext_Destroy(context));
         EXPECT_EQ(S_OK, EncParams_Destroy(parms));
     }
+
+    TEST(CAbiNullInputTest, RejectsNullRequiredInputArrays)
+    {
+        constexpr uint8_t ckks_scheme = 0x2;
+        constexpr int sec_level_none = 0;
+        constexpr uint64_t poly_modulus_degree = 64;
+
+        void *parms = nullptr;
+        ASSERT_EQ(S_OK, EncParams_Create1(ckks_scheme, &parms));
+        ASSERT_EQ(S_OK, EncParams_SetPolyModulusDegree(parms, poly_modulus_degree));
+
+        int bit_sizes[]{ 40, 40, 40, 40 };
+        void *coeffs[4]{};
+        ASSERT_EQ(S_OK, CoeffModulus_Create1(poly_modulus_degree, 4, bit_sizes, coeffs));
+        ASSERT_EQ(S_OK, EncParams_SetCoeffModulus(parms, 4, coeffs));
+
+        uint64_t const_ratio[3]{};
+        EXPECT_EQ(S_OK, Modulus_ConstRatio(coeffs[0], 3, const_ratio));
+        EXPECT_EQ(E_POINTER, Modulus_ConstRatio(coeffs[0], 3, nullptr));
+
+        for (void *coeff : coeffs)
+        {
+            ASSERT_EQ(S_OK, Modulus_Destroy(coeff));
+        }
+
+        void *context = nullptr;
+        ASSERT_EQ(S_OK, SEALContext_Create(parms, false, sec_level_none, &context));
+        void *encoder = nullptr;
+        ASSERT_EQ(S_OK, CKKSEncoder_Create(context, &encoder));
+        void *plain = nullptr;
+        ASSERT_EQ(S_OK, Plaintext_Create1(nullptr, &plain));
+
+        uint64_t parms_id[4]{};
+        ASSERT_EQ(S_OK, SEALContext_FirstParmsId(context, parms_id));
+
+        EXPECT_EQ(E_POINTER, CKKSEncoder_Encode1(encoder, 1, nullptr, parms_id, 1048576.0, plain, nullptr));
+        EXPECT_EQ(E_POINTER, CKKSEncoder_Encode2(encoder, 1, nullptr, parms_id, 1048576.0, plain, nullptr));
+        EXPECT_EQ(E_POINTER, Plaintext_Set4(plain, 1, nullptr));
+
+        // The guards are unconditional, matching the other array-taking exports.
+        EXPECT_EQ(E_POINTER, CKKSEncoder_Encode1(encoder, 0, nullptr, parms_id, 1048576.0, plain, nullptr));
+        EXPECT_EQ(E_POINTER, CKKSEncoder_Encode2(encoder, 0, nullptr, parms_id, 1048576.0, plain, nullptr));
+        EXPECT_EQ(E_POINTER, Plaintext_Set4(plain, 0, nullptr));
+
+        EXPECT_EQ(S_OK, Plaintext_Destroy(plain));
+        EXPECT_EQ(S_OK, CKKSEncoder_Destroy(encoder));
+        EXPECT_EQ(S_OK, SEALContext_Destroy(context));
+        EXPECT_EQ(S_OK, EncParams_Destroy(parms));
+    }
 } // namespace sealtest

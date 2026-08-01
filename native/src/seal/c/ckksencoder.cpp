@@ -46,6 +46,7 @@ SEAL_C_FUNC CKKSEncoder_Encode1(
 {
     CKKSEncoder *encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
+    IfNullRet(values, E_POINTER);
     Plaintext *destinationptr = FromVoid<Plaintext>(destination);
     IfNullRet(destinationptr, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
@@ -75,6 +76,7 @@ SEAL_C_FUNC CKKSEncoder_Encode2(
 {
     CKKSEncoder *encoder = FromVoid<CKKSEncoder>(thisptr);
     IfNullRet(encoder, E_POINTER);
+    IfNullRet(complex_values, E_POINTER);
     Plaintext *destinationptr = FromVoid<Plaintext>(destination);
     IfNullRet(destinationptr, E_POINTER);
     IfNullRet(parms_id, E_POINTER);

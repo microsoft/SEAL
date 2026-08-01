@@ -164,6 +164,7 @@ SEAL_C_FUNC Plaintext_Set4(void *thisptr, uint64_t count, uint64_t *coeffs)
 {
     Plaintext *plain = FromVoid<Plaintext>(thisptr);
     IfNullRet(plain, E_POINTER);
+    IfNullRet(coeffs, E_POINTER);
 
     try
     {

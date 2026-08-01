@@ -1,5 +1,10 @@
 # List of Changes
 
+## Version 4.4.2
+
+- Fixed null-pointer dereferences in the C API ([issue #752](https://github.com/microsoft/SEAL/issues/752)): `Plaintext_Set4`, `CKKSEncoder_Encode1`, and `CKKSEncoder_Encode2` validated the target object but not the caller-provided input array, and crashed instead of returning `E_POINTER`.
+- Fixed `Modulus_ConstRatio` to reject a null output buffer with `E_POINTER` instead of writing to it.
+
 ## Version 4.4.1
 
 - Fixed the MinGW-w64 build on Windows ([issue #750](https://github.com/microsoft/SEAL/issues/750)): `SEAL_MALLOC`/`SEAL_FREE` now use `_aligned_malloc`/`_aligned_free` on Windows, where libstdc++ does not provide `std::aligned_alloc`.

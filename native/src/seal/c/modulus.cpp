@@ -131,6 +131,7 @@ SEAL_C_FUNC Modulus_ConstRatio(void *thisptr, uint64_t length, uint64_t ratio[])
 {
     Modulus *sm = FromVoid<Modulus>(thisptr);
     IfNullRet(sm, E_POINTER);
+    IfNullRet(ratio, E_POINTER);
 
     if (length != 3)
     {
