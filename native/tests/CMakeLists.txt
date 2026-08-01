@@ -87,5 +87,41 @@ if(SEAL_BUILD_TESTS)
         else()
             message(STATUS "Sanitizers enabled: address")
         endif()
+
+        # GCC and non-Apple Clang link the AddressSanitizer runtime as a shared object by
+        # default, which requires it to precede every other entry in the initial library
+        # list. Link it statically instead so the test binaries carry the runtime
+        # themselves and do not depend on load order or on an LD_PRELOAD at launch. Apple
+        # platforms ship only a dynamic runtime, so they keep the default.
+        if(NOT APPLE)
+            if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+                set(SEAL_STATIC_SANITIZER_FLAG -static-libasan)
+            elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+                set(SEAL_STATIC_SANITIZER_FLAG -static-libsan)
+            endif()
+
+            if(DEFINED SEAL_STATIC_SANITIZER_FLAG)
+                include(CheckCXXSourceCompiles)
+                include(CMakePushCheckState)
+                cmake_push_check_state(RESET)
+                set(CMAKE_REQUIRED_QUIET TRUE)
+                set(CMAKE_REQUIRED_FLAGS "-fsanitize=address")
+                set(CMAKE_REQUIRED_LINK_OPTIONS ${SEAL_STATIC_SANITIZER_FLAG})
+                check_cxx_source_compiles("int main() { return 0; }" SEAL_STATIC_SANITIZER_RUNTIME)
+                cmake_pop_check_state()
+            endif()
+
+            if(SEAL_STATIC_SANITIZER_RUNTIME)
+                target_link_options(sealtest PUBLIC ${SEAL_STATIC_SANITIZER_FLAG})
+                if(TARGET sealctest)
+                    target_link_options(sealctest PUBLIC ${SEAL_STATIC_SANITIZER_FLAG})
+                endif()
+                message(STATUS "Sanitizer runtime: static")
+            else()
+                message(STATUS "Sanitizer runtime: shared")
+            endif()
+
+            unset(SEAL_STATIC_SANITIZER_FLAG)
+        endif()
     endif()
 endif()
