@@ -35,13 +35,19 @@ namespace seal
             (0 to 7) stored verbatim before the packed run, chosen by the encoder to minimize the encoded size of
             the block. Bytes after the last whole word in the block are likewise stored verbatim.
 
-            The encoded format is the size of the original byte stream followed by one encoded block per
-            block_len = min(bitpack_block_bytes, bytes remaining) original bytes:
+            The encoded format is the size of the original byte stream and the block size, followed by one
+            encoded block per block_len = min(block size, bytes remaining) original bytes:
 
-                +---------------+---------+---------+--   --+---------+
-                | original size | block 0 | block 1 |  ...  | block k |
-                |   (8 bytes)   |         |         |       |         |
-                +---------------+---------+---------+--   --+---------+
+                +---------------+------------+---------+---------+--   --+---------+
+                | original size | block size | block 0 | block 1 |  ...  | block k |
+                |   (8 bytes)   |   (log2,   |         |         |       |         |
+                |               |   1 byte)  |         |         |       |         |
+                +---------------+------------+---------+---------+--   --+---------+
+
+            The block size is a power of two between 64 and 65536 bytes, recorded as its base-2 logarithm; it
+            trades the two per-block header bytes (favoring large blocks) against how much data shares a block
+            with unpackable bytes such as serialized metadata (favoring small blocks). This encoder always
+            writes bitpack_block_bytes, a good compromise across object sizes; decoders accept the full range.
 
             Each block encodes its block_len original bytes as
 
@@ -64,8 +70,19 @@ namespace seal
             serialized data, the encoding is in the byte order of the host.
             */
 
-            // Number of original bytes encoded in each bit-packed block.
-            constexpr std::size_t bitpack_block_bytes = 4096;
+            // Bounds for the base-2 logarithm of the block size accepted when unpacking.
+            constexpr int bitpack_block_log2_min = 6;
+
+            constexpr int bitpack_block_log2_max = 16;
+
+            // Number of original bytes encoded in each bit-packed block by this encoder.
+            constexpr std::size_t bitpack_block_bytes = 1024;
+
+            static_assert(
+                (bitpack_block_bytes & (bitpack_block_bytes - 1)) == 0 &&
+                    bitpack_block_bytes >= (std::size_t(1) << bitpack_block_log2_min) &&
+                    bitpack_block_bytes <= (std::size_t(1) << bitpack_block_log2_max),
+                "bitpack_block_bytes must be a power of two within the accepted range");
 
             /**
             Bit-packs data in the given buffer, completes the given SEALHeader by writing in the size of the output
@@ -132,6 +149,9 @@ namespace seal
                     off_type off, std::ios_base::seekdir dir,
                     std::ios_base::openmode which = std::ios_base::in | std::ios_base::out) override;
 
+                MemoryPoolHandle pool_;
+
+                // Allocated once the block size has been read from the packed data.
                 Pointer<unsigned char> in_buf_;
 
                 Pointer<unsigned char> out_buf_;
@@ -144,6 +164,9 @@ namespace seal
 
                 // Number of original bytes that remain to be produced; valid once started_ is set.
                 std::uint64_t raw_remaining_ = 0;
+
+                // Block size read from the packed data; valid once started_ is set.
+                std::size_t block_bytes_ = 0;
 
                 bool started_ = false;
 
@@ -162,9 +185,10 @@ namespace seal
             template <typename SizeT>
             SEAL_NODISCARD SizeT bitpack_size_bound(SizeT in_size)
             {
-                // 8 bytes for the original size and a width and a phase byte per block of bitpack_block_bytes =
-                // 4096 original bytes (plus rounding up); the blocks themselves never exceed their original size.
-                return util::add_safe<SizeT>(in_size, in_size >> 11, SizeT(17));
+                // 9 bytes for the original size and the block size, and a width and a phase byte per block of
+                // bitpack_block_bytes = 1024 original bytes (plus rounding up); the blocks themselves never
+                // exceed their original size.
+                return util::add_safe<SizeT>(in_size, in_size >> 9, SizeT(17));
             }
         } // namespace bitpack
     } // namespace util

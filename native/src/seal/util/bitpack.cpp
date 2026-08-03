@@ -58,10 +58,11 @@ namespace seal
                 DynArray<seal_byte> out(add_safe(bitpack_size_bound(in_size), block_slack), pool);
                 unsigned char *out_data = reinterpret_cast<unsigned char *>(out.begin());
 
-                // Write the original byte count
+                // Write the original byte count and the block size
                 uint64_t in_size64 = static_cast<uint64_t>(in_size);
                 memcpy(out_data, &in_size64, bytes_per_word);
                 size_t out_pos = bytes_per_word;
+                out_data[out_pos++] = static_cast<unsigned char>(get_significant_bit_count(bitpack_block_bytes) - 1);
 
                 for (size_t block_start = 0; block_start < in_size;)
                 {
@@ -158,17 +159,21 @@ namespace seal
             }
 
             BitUnpackGetBuffer::BitUnpackGetBuffer(istream &in_stream, streamoff in_size, MemoryPoolHandle pool)
-                : in_buf_(allocate<unsigned char>(bitpack_block_bytes + block_slack, pool)),
-                  out_buf_(allocate<unsigned char>(bitpack_block_bytes, pool)), in_stream_(in_stream),
-                  in_remaining_(in_size), in_stream_except_mask_(in_stream.exceptions())
+                : pool_(std::move(pool)), in_stream_(in_stream), in_remaining_(in_size),
+                  in_stream_except_mask_(in_stream.exceptions())
             {
+                if (!pool_)
+                {
+                    throw invalid_argument("pool is uninitialized");
+                }
+
                 // Unpacking reports failure through failed_ rather than stream exceptions, so clear the mask while
                 // we read; it is restored in the destructor.
                 in_stream_.exceptions(ios_base::goodbit);
 
-                // Start with an empty get area so that the first read triggers underflow().
-                char_type *base = reinterpret_cast<char_type *>(out_buf_.get());
-                setg(base, base, base);
+                // Start with an empty get area so that the first read triggers underflow(); the buffers are
+                // allocated once the block size has been read from the packed data.
+                setg(nullptr, nullptr, nullptr);
             }
 
             BitUnpackGetBuffer::~BitUnpackGetBuffer()
@@ -198,15 +203,24 @@ namespace seal
 
                 if (!started_)
                 {
-                    // The packed data begins with the original byte count
-                    unsigned char size_bytes[bytes_per_word];
-                    if (read_packed(size_bytes, static_cast<streamsize>(bytes_per_word)) !=
-                        static_cast<streamsize>(bytes_per_word))
+                    // The packed data begins with the original byte count and the block size
+                    unsigned char prologue[bytes_per_word + 1];
+                    if (read_packed(prologue, static_cast<streamsize>(sizeof(prologue))) !=
+                        static_cast<streamsize>(sizeof(prologue)))
                     {
                         failed_ = true;
                         return 0;
                     }
-                    memcpy(&raw_remaining_, size_bytes, bytes_per_word);
+                    memcpy(&raw_remaining_, prologue, bytes_per_word);
+                    int block_log2 = static_cast<int>(prologue[bytes_per_word]);
+                    if (block_log2 < bitpack_block_log2_min || block_log2 > bitpack_block_log2_max)
+                    {
+                        failed_ = true;
+                        return 0;
+                    }
+                    block_bytes_ = size_t(1) << block_log2;
+                    in_buf_ = allocate<unsigned char>(block_bytes_ + block_slack, pool_);
+                    out_buf_ = allocate<unsigned char>(block_bytes_, pool_);
                     started_ = true;
                     if (!raw_remaining_)
                     {
@@ -216,7 +230,7 @@ namespace seal
                 }
 
                 size_t block_len =
-                    static_cast<size_t>(min<uint64_t>(static_cast<uint64_t>(bitpack_block_bytes), raw_remaining_));
+                    static_cast<size_t>(min<uint64_t>(static_cast<uint64_t>(block_bytes_), raw_remaining_));
 
                 unsigned char block_header[2];
                 if (read_packed(block_header, 2) != 2)
@@ -330,7 +344,7 @@ namespace seal
                     streamsize avail = min<streamsize>(count - total, static_cast<streamsize>(egptr() - gptr()));
                     copy_n(gptr(), avail, s + total);
 
-                    // avail is at most bitpack_block_bytes, which is well within the range of int.
+                    // avail is at most the block size (at most 64 KB), which is well within the range of int.
                     gbump(static_cast<int>(avail));
                     total += avail;
                 }

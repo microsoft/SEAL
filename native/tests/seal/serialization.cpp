@@ -887,14 +887,15 @@ namespace sealtest
     }
 
     // Bit-packing an all-word payload of bounded-width values must produce exactly the size the format prescribes
-    // (8 bytes for the original size, then per block a width byte, a phase byte, and the packed words) and must
-    // round-trip.
+    // (the original size and the block size, then per block a width byte, a phase byte, and the packed words) and
+    // must round-trip.
     TEST(SerializationTest, BitPackSizeAndRoundTrip)
     {
         using namespace placeholders;
 
         // 1023 values of at most 36 significant bits; with the 8-byte count in front, the serialized stream is
-        // exactly 8192 bytes, i.e. two full blocks of 512 word-aligned words each (phase 0, no verbatim bytes).
+        // exactly 8192 bytes, i.e. eight full 1024-byte blocks of 128 word-aligned words each (phase 0, no
+        // verbatim bytes).
         word_struct st;
         st.words.resize(1023);
         uint64_t state = 1;
@@ -904,18 +905,21 @@ namespace sealtest
             st.words[i] = state & ((uint64_t(1) << 36) - 1);
         }
 
-        // Pin the width of both blocks to exactly 36 bits. The stream words are the count followed by the values,
-        // so the second block starts at value index 511.
+        // Pin the width of every block to exactly 36 bits. The stream words are the count followed by the values,
+        // so block i (of 128 stream words each) starts at value index 128 * i - 1.
         st.words[0] |= uint64_t(1) << 35;
-        st.words[511] |= uint64_t(1) << 35;
+        for (size_t block = 1; block < 8; block++)
+        {
+            st.words[128 * block - 1] |= uint64_t(1) << 35;
+        }
 
         stringstream stream;
         auto out_size = Serialization::Save(
             bind(&word_struct::save_members, &st, _1), st.save_size(compr_mode_type::bitpack), stream,
             compr_mode_type::bitpack, false);
 
-        // 16 (SEALHeader) + 8 (original size) + 2 * (1 width byte + 1 phase byte + 512 * 36 / 8)
-        ASSERT_EQ(16 + 8 + 2 * (2 + 2304), out_size);
+        // 16 (SEALHeader) + 8 (original size) + 1 (block size) + 8 * (1 width byte + 1 phase byte + 128 * 36 / 8)
+        ASSERT_EQ(16 + 8 + 1 + 8 * (2 + 576), out_size);
 
         word_struct st2;
         auto in_size = Serialization::Load(bind(&word_struct::load_members, &st2, _1), stream, false);
@@ -970,9 +974,10 @@ namespace sealtest
             bind(&prefixed_word_struct::save_members, &st, _1), st.save_size(compr_mode_type::bitpack), prefixed_stream,
             compr_mode_type::bitpack, false);
 
-        // The prefixed stream is 1 original byte longer and spans 3 blocks instead of 2; the packed words must
-        // not grow beyond the extra verbatim and block-header bytes.
-        ASSERT_LE(prefixed_size, aligned_size + 16);
+        // The prefixed stream is 1 original byte longer and spans one more block; realignment costs at most the
+        // per-block phase and tail verbatim bytes plus one extra block header, far below the 8 bits per word
+        // (over 4,000 bytes here) that losing alignment would cost.
+        ASSERT_LE(prefixed_size, aligned_size + 80);
     }
 
     // A width byte exceeding 64 is malformed and must be rejected cleanly.
@@ -986,9 +991,10 @@ namespace sealtest
             bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::bitpack), ss,
             compr_mode_type::bitpack, false);
 
-        // The first block's width byte follows the SEALHeader (16 bytes) and the original size (8 bytes).
+        // The first block's width byte follows the SEALHeader (16 bytes), the original size (8 bytes), and the
+        // block size (1 byte).
         string bytes = ss.str();
-        bytes[24] = static_cast<char>(65);
+        bytes[25] = static_cast<char>(65);
 
         stringstream tampered(bytes);
         test_struct st2;
@@ -1006,14 +1012,38 @@ namespace sealtest
             bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::bitpack), ss,
             compr_mode_type::bitpack, false);
 
-        // The first block's phase byte follows the SEALHeader (16 bytes), the original size (8 bytes), and the
-        // width byte.
+        // The first block's phase byte follows the SEALHeader (16 bytes), the original size (8 bytes), the block
+        // size (1 byte), and the width byte.
         string bytes = ss.str();
-        bytes[25] = static_cast<char>(8);
+        bytes[26] = static_cast<char>(8);
 
         stringstream tampered(bytes);
         test_struct st2;
         ASSERT_ANY_THROW(Serialization::Load(bind(&test_struct::load_members, &st2, _1), tampered, false));
+    }
+
+    // A block size outside the accepted power-of-two range is malformed and must be rejected cleanly.
+    TEST(SerializationTest, BitPackTamperedBlockSizeThrows)
+    {
+        using namespace placeholders;
+
+        test_struct st{ 3, ~0, 3.14159 };
+        stringstream ss;
+        Serialization::Save(
+            bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::bitpack), ss,
+            compr_mode_type::bitpack, false);
+
+        // The block size byte follows the SEALHeader (16 bytes) and the original size (8 bytes).
+        string bytes = ss.str();
+        bytes[24] = static_cast<char>(5);
+
+        stringstream tampered(bytes);
+        test_struct st2;
+        ASSERT_ANY_THROW(Serialization::Load(bind(&test_struct::load_members, &st2, _1), tampered, false));
+
+        bytes[24] = static_cast<char>(17);
+        stringstream tampered2(bytes);
+        ASSERT_ANY_THROW(Serialization::Load(bind(&test_struct::load_members, &st2, _1), tampered2, false));
     }
 
     // An understated original size makes the parser read past the end of the unpacked data and must be rejected
