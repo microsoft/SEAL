@@ -3,6 +3,7 @@
 
 # Source files in this directory
 set(SEAL_SOURCE_FILES ${SEAL_SOURCE_FILES}
+    ${CMAKE_CURRENT_LIST_DIR}/bitpack.cpp
     ${CMAKE_CURRENT_LIST_DIR}/blake2b.c
     ${CMAKE_CURRENT_LIST_DIR}/blake2xb.c
     ${CMAKE_CURRENT_LIST_DIR}/clipnormal.cpp
@@ -31,6 +32,7 @@ set(SEAL_SOURCE_FILES ${SEAL_SOURCE_FILES}
 # Add header files for installation
 install(
     FILES
+        ${CMAKE_CURRENT_LIST_DIR}/bitpack.h
         ${CMAKE_CURRENT_LIST_DIR}/blake2.h
         ${CMAKE_CURRENT_LIST_DIR}/blake2-impl.h
         ${CMAKE_CURRENT_LIST_DIR}/clang.h
