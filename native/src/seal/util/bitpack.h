@@ -35,15 +35,30 @@ namespace seal
             (0 to 7) stored verbatim before the packed run, chosen by the encoder to minimize the encoded size of
             the block. Bytes after the last whole word in the block are likewise stored verbatim.
 
-            The encoded format is, in order:
+            The encoded format is the size of the original byte stream followed by one encoded block per
+            block_len = min(bitpack_block_bytes, bytes remaining) original bytes:
 
-            1. the size in bytes of the original byte stream (8 bytes)
-            2. for each block of block_len = min(bitpack_block_bytes, bytes remaining) original bytes:
-               a. the bit width used for the packed words (1 byte, at most 64)
-               b. the phase (1 byte, at most min(7, block_len))
-               c. phase verbatim bytes
-               d. the (block_len - phase) / 8 words packed consecutively starting from the least significant bit
-               e. the remaining (block_len - phase) % 8 bytes verbatim
+                +---------------+---------+---------+--   --+---------+
+                | original size | block 0 | block 1 |  ...  | block k |
+                |   (8 bytes)   |         |         |       |         |
+                +---------------+---------+---------+--   --+---------+
+
+            Each block encodes its block_len original bytes as
+
+                +-----------+-----------+~~~~~~~~~~~~~+--------------------------------+~~~~~~~~~~~~~+
+                | width     | phase     |  verbatim   |          packed words          |  verbatim   |
+                | (1 byte,  | (1 byte,  |  (phase     |  (ceil(words * width / 8)      |  (tail      |
+                | max 64)   | max 7)    |  bytes)     |  bytes)                        |  bytes)     |
+                +-----------+-----------+~~~~~~~~~~~~~+--------------------------------+~~~~~~~~~~~~~+
+
+            where words = (block_len - phase) / 8 and tail = (block_len - phase) % 8; the phase never exceeds
+            block_len. In the packed words area, word i occupies bits [i * width, (i + 1) * width), least
+            significant bit first, with no regard for byte boundaries:
+
+                bit:  0         width     2 * width
+                      +---------+---------+---------+--
+                      | word 0  | word 1  | word 2  |  ...
+                      +---------+---------+---------+--
 
             A width of zero denotes words that are all zero, packed into no bytes at all. Like the rest of the
             serialized data, the encoding is in the byte order of the host.
