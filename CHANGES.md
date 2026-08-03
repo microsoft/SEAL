@@ -1,5 +1,12 @@
 # List of Changes
 
+## Unreleased
+
+- Added a new serialization mode `compr_mode_type::bitpack` (native) or `ComprModeType.BitPack` (dotnet) that re-encodes each block of 64-bit words using only as many bits per word as the largest word in the block requires.
+Ciphertext and key data store integers modulo primes much smaller than the word size, and their significant bits are close to uniformly random, so bit-packing typically produces smaller output than ZLIB or Zstandard, which cannot remove partial bytes.
+The mode is always available (it requires no external dependency) and loading is streamed with bounded memory use, like compressed loading.
+The default compression mode is unchanged, and the wire format of all existing modes is unchanged; objects serialized with bit-packing cannot be loaded by earlier versions of Microsoft SEAL.
+
 ## Version 4.4.2
 
 - Fixed null-pointer dereferences in the C API ([issue #752](https://github.com/microsoft/SEAL/issues/752)): `Plaintext_Set4`, `CKKSEncoder_Encode1`, and `CKKSEncoder_Encode2` validated the target object but not the caller-provided input array, and crashed instead of returning `E_POINTER`.

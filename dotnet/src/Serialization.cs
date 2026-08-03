@@ -15,6 +15,14 @@ namespace Microsoft.Research.SEAL
     /// a large number of zero bytes in the output. Any compression algorithm should
     /// be able to clean up these zero bytes and hence compress both ciphertext and
     /// key data.
+    ///
+    /// Alternatively, ComprModeType.BitPack re-encodes each block of 64-bit words
+    /// using only as many bits per word as the largest word in the block requires,
+    /// discarding exactly the always-zero high bits. The significant bits of
+    /// ciphertext and key data are close to uniformly random and hence essentially
+    /// incompressible, so bit-packing typically produces smaller output than a
+    /// general-purpose compressor, which cannot remove partial bytes. Unlike ZLIB
+    /// and Zstandard, bit-packing performs no integrity checking of the data.
     /// </summary>
     public enum ComprModeType : byte
     {
@@ -25,7 +33,10 @@ namespace Microsoft.Research.SEAL
         ZLIB = 1,
 
         /// <summary>Use Zstandard compression.</summary>
-        ZSTD = 2
+        ZSTD = 2,
+
+        /// <summary>Use bit-packing of 64-bit words.</summary>
+        BitPack = 3
     }
 
     /// <summary>Class to provide functionality for serialization.</summary>

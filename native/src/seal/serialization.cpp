@@ -4,6 +4,7 @@
 #include "seal/dynarray.h"
 #include "seal/memorymanager.h"
 #include "seal/serialization.h"
+#include "seal/util/bitpack.h"
 #include "seal/util/common.h"
 #include "seal/util/streambuf.h"
 #include "seal/util/ztools.h"
@@ -99,6 +100,9 @@ namespace seal
         case compr_mode_type::zlib:
             return ztools::zlib_deflate_size_bound(in_size);
 #endif
+        case compr_mode_type::bitpack:
+            return bitpack::bitpack_size_bound(in_size);
+
         case compr_mode_type::none:
             // No compression
             return in_size;
@@ -315,6 +319,29 @@ namespace seal
                 break;
             }
 #endif
+            case compr_mode_type::bitpack:
+            {
+                // First save_members to a temporary byte stream; set the size of the temporary stream to be right from
+                // the start to avoid extra reallocs.
+                SafeByteBuffer safe_buffer(
+                    bitpack::bitpack_size_bound(raw_size - static_cast<streamoff>(sizeof(SEALHeader))), clear_buffers);
+                iostream temp_stream(&safe_buffer);
+                temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
+                save_members(temp_stream);
+
+                auto safe_pool(MemoryManager::GetPool(mm_prof_opt::mm_force_new, clear_buffers));
+
+                // Create temporary aliasing DynArray to wrap safe_buffer
+                DynArray<seal_byte> safe_buffer_array(
+                    Pointer<seal_byte>::Aliasing(safe_buffer.data()), safe_buffer.size(),
+                    static_cast<size_t>(temp_stream.tellp()), false, safe_pool);
+
+                // After bit-packing, write_header_pack_buffer will write the final size to the given header and
+                // write the header to stream, before writing the bit-packed output.
+                bitpack::bitpack_write_header_pack_buffer(
+                    safe_buffer_array, reinterpret_cast<void *>(&header), stream, safe_pool);
+                break;
+            }
             default:
                 throw invalid_argument("unsupported compression mode");
             }
@@ -514,6 +541,45 @@ namespace seal
                 break;
             }
 #endif
+            case compr_mode_type::bitpack:
+            {
+                // header.size counts the whole object including the header, so the packed payload is exactly
+                // header.size - sizeof(SEALHeader). Computing it directly keeps it correct on non-seekable streams,
+                // where tellg() returns -1 and cannot be used to measure the header.
+                auto packed_size = header.size - static_cast<uint64_t>(sizeof(SEALHeader));
+
+                auto safe_pool = MemoryManager::GetPool(mm_prof_opt::mm_force_new, clear_buffers);
+
+                // Unpack on demand directly into the parser rather than decoding the entire payload up front. This
+                // bounds memory use during loading to what the parser actually reads, so a hostile size claim in the
+                // packed data cannot drive an unbounded allocation.
+                streamoff packed_remaining = 0;
+                {
+                    auto unpack_buffer =
+                        bitpack::make_bitpack_unpack_buffer(stream, safe_cast<streamoff>(packed_size), safe_pool);
+                    istream temp_stream(unpack_buffer.get());
+                    temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
+
+                    load_members(temp_stream, version);
+
+                    if (unpack_buffer->failed())
+                    {
+                        throw logic_error("stream decompression failed");
+                    }
+                    packed_remaining = unpack_buffer->remaining();
+                }
+
+                // The parser may not have pulled the whole packed payload. On a seekable stream, where header.size
+                // was confirmed to fit the available input, skip any remainder so the stream ends exactly at
+                // stream_start_pos + header.size, keeping concatenated objects loadable. On a non-seekable stream
+                // header.size is unverified, so skipping is gated off: an inflated header.size must not drive
+                // stream.ignore() past the real data into an over-read or an indefinite block.
+                if (size_verified && packed_remaining > 0)
+                {
+                    stream.ignore(packed_remaining);
+                }
+                break;
+            }
             default:
                 throw invalid_argument("unsupported compression mode");
             }
