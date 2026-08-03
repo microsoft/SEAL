@@ -1,0 +1,35 @@
+steps:
+# SEAL_USE_CXX17 defaults to ON, so the other Windows jobs build as C++17. This job guards the
+# C++14 fallbacks in native/src/seal/util/defines.h with MSVC. It also covers SEAL_USE_ALIGNED_ALLOC,
+# which the configure-time probe enables on Windows under either standard, because _aligned_malloc
+# is a CRT function rather than a C++17 library function. It builds and tests only, and publishes
+# no artifacts, so it stays out of the NuGet job's dependencies.
+- task: CMake@1
+  displayName: 'Configure SEAL (MSVC, C++14)'
+  inputs:
+    workingDirectory: '$(Build.SourcesDirectory)'
+    cmakeArgs: >
+      -S .
+      -B build-cxx14
+      -A x64
+      -DSEAL_USE_CXX17=OFF
+      -DSEAL_BUILD_DEPS=ON
+      -DSEAL_BUILD_TESTS=ON
+      -DSEAL_BUILD_SEAL_C=ON
+      -DSEAL_BUILD_EXAMPLES=ON
+      -DSEAL_SECURE_COMPILE_OPTIONS=ON
+
+- script: |
+    cmake --build build-cxx14 --config ${{ parameters.configuration }} || exit /b 1
+  displayName: 'Build SEAL (MSVC, C++14)'
+  workingDirectory: '$(Build.SourcesDirectory)'
+
+# Each binary is followed by `exit /b 1` on failure: a Windows script step reports only the
+# exit code of its last command, so without this a sealtest failure would be masked by a
+# passing sealctest. The Visual Studio generator is multi-config, so the binaries land in a
+# per-configuration subdirectory.
+- script: |
+    build-cxx14\bin\${{ parameters.configuration }}\sealtest.exe || exit /b 1
+    build-cxx14\bin\${{ parameters.configuration }}\sealctest.exe || exit /b 1
+  displayName: 'Run unit tests (MSVC, C++14)'
+  workingDirectory: '$(Build.SourcesDirectory)'

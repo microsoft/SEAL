@@ -1,0 +1,35 @@
+steps:
+# The MinGW counterpart of windows-cxx14.yml: it builds as C++14 with the toolchain that
+# issue #750 was reported against, where libstdc++ provides no std::aligned_alloc and
+# SEAL_USE_ALIGNED_ALLOC therefore rests on _aligned_malloc. It builds and tests only, and
+# publishes no artifacts, so it stays out of the NuGet job's dependencies.
+- task: CMake@1
+  displayName: 'Configure SEAL (MinGW, C++14)'
+  inputs:
+    workingDirectory: '$(Build.SourcesDirectory)'
+    cmakeArgs: >
+      -S .
+      -B build-mingw-cxx14
+      -G Ninja
+      -DCMAKE_C_COMPILER=gcc
+      -DCMAKE_CXX_COMPILER=g++
+      -DCMAKE_BUILD_TYPE=${{ parameters.configuration }}
+      -DSEAL_USE_CXX17=OFF
+      -DSEAL_BUILD_DEPS=ON
+      -DSEAL_BUILD_TESTS=ON
+      -DSEAL_BUILD_SEAL_C=ON
+      -DSEAL_BUILD_EXAMPLES=ON
+
+- script: |
+    cmake --build build-mingw-cxx14 || exit /b 1
+  displayName: 'Build SEAL (MinGW, C++14)'
+  workingDirectory: '$(Build.SourcesDirectory)'
+
+# Each binary is followed by `exit /b 1` on failure: a Windows script step reports only the
+# exit code of its last command, so without this a sealtest failure would be masked by a
+# passing sealctest.
+- script: |
+    build-mingw-cxx14\bin\sealtest.exe || exit /b 1
+    build-mingw-cxx14\bin\sealctest.exe || exit /b 1
+  displayName: 'Run unit tests (MinGW, C++14)'
+  workingDirectory: '$(Build.SourcesDirectory)'

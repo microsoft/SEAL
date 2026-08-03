@@ -117,8 +117,8 @@ The optional dependencies and their tested versions (other versions may work as 
 
 | Optional dependency                                    | Tested version | Use                                              |
 | ------------------------------------------------------ | -------------- | ------------------------------------------------ |
-| [Intel HEXL](https://github.com/intel/hexl)            | 1.2.6          | Acceleration of low-level kernels                |
-| [Microsoft GSL](https://github.com/microsoft/GSL)      | 4.2.1          | API extensions                                   |
+| [Intel HEXL](https://github.com/IntelLabs/hexl)        | 1.2.6          | Acceleration of low-level kernels                |
+| [Microsoft GSL](https://github.com/microsoft/GSL)      | 4.2.2          | API extensions                                   |
 | [ZLIB](https://github.com/madler/zlib)                 | 1.3.2          | Compressed serialization                         |
 | [Zstandard](https://github.com/facebook/zstd)          | 1.5.7          | Compressed serialization (much faster than ZLIB) |
 | [GoogleTest](https://github.com/google/googletest)     | 1.17.0         | For running tests                                |
@@ -222,7 +222,8 @@ A global install requires elevated (root or administrator) privileges.
 
 | System | Toolchain |
 |---|---|
-| Windows | Visual Studio 2022 with C++ CMake Tools for Windows |
+| Windows | Visual Studio (>= 2022) with C++ CMake Tools for Windows |
+| Windows (MinGW-w64) | MSYS2 with GNU G++ (>= 6.0) or Clang++ (>= 5.0), CMake (>= 3.22), Ninja |
 | Linux | Clang++ (>= 5.0) or GNU G++ (>= 6.0), CMake (>= 3.22) |
 | macOS/iOS | Xcode toolchain (>= 9.3), CMake (>= 3.22) |
 | Android | Android Studio |
@@ -306,6 +307,44 @@ This will open the CMake settings editor that provides a user interface where yo
 After the build completes, the output static library `seal-<version>.lib` can be found in `build\lib\` or `build\lib\Release\`.
 When linking with applications, using CMake as is explained in [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake) is highly recommended.
 Alternatively, you need to add `native\src\` (full path) and `build\native\src\` as include directories to locate the Microsoft SEAL header files.
+
+#### Building with MinGW-w64 on Windows
+
+Microsoft SEAL can also be built on Windows with the MinGW-w64 toolchain.
+The simplest way to obtain the toolchain is [MSYS2](https://www.msys2.org/), which can be installed with `winget install MSYS2.MSYS2`.
+MSYS2 provides several environments that differ in compiler and C runtime, each launched by its own executable in the MSYS2 installation directory (`C:\msys64` by default).
+
+| Launcher | Environment | Compiler | C runtime | C++ standard library |
+|---|---|---|---|---|
+| `mingw64.exe` | MINGW64 | GCC | `msvcrt` | libstdc++ |
+| `ucrt64.exe` | UCRT64 | GCC | UCRT | libstdc++ |
+| `clang64.exe` | CLANG64 | Clang | UCRT | libc++ |
+
+All three are supported and you will need to install the toolchain for the environment you intend to use, for example for MINGW64:
+
+```bash
+pacman -S --needed mingw-w64-x86_64-gcc mingw-w64-x86_64-cmake mingw-w64-x86_64-ninja
+```
+
+Substitute the package prefix `mingw-w64-ucrt-x86_64-` for UCRT64, or `mingw-w64-clang-x86_64-` with `clang` in place of `gcc` for CLANG64.
+Then, in the shell for that environment, configure and build in the root directory of Microsoft SEAL:
+
+```bash
+cmake -S . -B build-mingw -G Ninja \
+ -DCMAKE_C_COMPILER=gcc            \
+ -DCMAKE_CXX_COMPILER=g++          \
+ -DSEAL_BUILD_DEPS=ON              \
+ -DSEAL_BUILD_TESTS=ON             \
+ -DSEAL_BUILD_EXAMPLES=ON
+cmake --build build-mingw
+```
+
+In the CLANG64 environment use `clang` and `clang++` instead.
+The unit tests can then be run with
+
+```bash
+./build-mingw/bin/sealtest.exe
+```
 
 #### Building for Android and iOS
 

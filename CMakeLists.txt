@@ -16,7 +16,7 @@ endif()
 #   4. SEAL C++ tests                             #
 ###################################################
 
-project(SEAL VERSION 4.4.2 LANGUAGES CXX C)
+project(SEAL VERSION 4.4.3 LANGUAGES CXX C)
 
 # [option] CMAKE_BUILD_TYPE (default: "Release")
 # Build in one of the following modes: Release, Debug, MinSizeRel, or RelWithDebInfo.
@@ -331,16 +331,8 @@ include(EnableIntrinsics)
 # Use safe memset methods if available.
 include(CheckMemset)
 
-# [option] SEAL_USE_ALIGNED_ALLOC (default: ON, advanced)
-# Not available if SEAL_USE_CXX17 is OFF or building for Android.
-# Use 64-byte aligned malloc if available, set of OFF otherwise
-if(MSVC)
-    set(SEAL_USE_ALIGNED_ALLOC_OPTION_STR "Use _aligned_malloc")
-else()
-    set(SEAL_USE_ALIGNED_ALLOC_OPTION_STR "Use std::aligned_alloc")
-endif()
-cmake_dependent_option(SEAL_USE_ALIGNED_ALLOC ${SEAL_USE_ALIGNED_ALLOC_OPTION_STR} ON "SEAL_USE_CXX17;NOT ANDROID_ABI" OFF)
-mark_as_advanced(FORCE SEAL_USE_ALIGNED_ALLOC)
+# Check for an aligned allocation routine and set SEAL_USE_ALIGNED_ALLOC accordingly.
+include(CheckAlignedAlloc)
 
 # Add source files to library and header files to install
 set(SEAL_SOURCE_FILES "")

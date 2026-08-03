@@ -2,19 +2,8 @@
 # Licensed under the MIT license.
 
 macro(seal_make_memfn_option id docstring)
-    set(_SEAL_USE_FN_NAME "SEAL_USE_${id}")
-    set(_SEAL_FOUND_FN_NAME "SEAL_${id}_FOUND")
-
-    option(${_SEAL_USE_FN_NAME} "${docstring}" ON)
-    mark_as_advanced(FORCE ${_SEAL_USE_FN_NAME})
-
-    # Disable if the presence test failed
-    if(NOT (DEFINED ${_SEAL_FOUND_FN_NAME} AND ${_SEAL_FOUND_FN_NAME}))
-        set(${_SEAL_USE_FN_NAME} OFF CACHE BOOL "${docstring}" FORCE)
-    endif()
-
-    unset(_SEAL_USE_FN_NAME)
-    unset(_SEAL_FOUND_FN_NAME)
+    cmake_dependent_option(SEAL_USE_${id} "${docstring}" ON "SEAL_${id}_FOUND" OFF)
+    mark_as_advanced(FORCE SEAL_USE_${id})
 endmacro()
 
 # Check for SecureZeroMemory

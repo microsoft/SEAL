@@ -9,10 +9,10 @@
 #include "seal/valcheck.h"
 #include <cmath>
 #include <cstdint>
-#include <ctime>
 #include <limits>
 #include <vector>
 #include "gtest/gtest.h"
+#include "testseed.h"
 
 using namespace seal;
 using namespace seal::util;
@@ -58,7 +58,7 @@ namespace sealtest
 
             vector<complex<double>> values(slots);
 
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
             int data_bound = (1 << 30);
 
             for (size_t i = 0; i < slots; i++)
@@ -88,7 +88,7 @@ namespace sealtest
 
             vector<complex<double>> values(slots);
 
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
             int data_bound = (1 << 30);
 
             for (size_t i = 0; i < slots; i++)
@@ -118,7 +118,7 @@ namespace sealtest
 
             vector<complex<double>> values(slots);
 
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
             int data_bound = (1 << 30);
 
             for (size_t i = 0; i < slots; i++)
@@ -148,7 +148,7 @@ namespace sealtest
 
             vector<complex<double>> values(slots);
 
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
             int data_bound = (1 << 30);
 
             for (size_t i = 0; i < slots; i++)
@@ -181,7 +181,7 @@ namespace sealtest
 
             vector<complex<double>> values(slots);
 
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
             int data_bound = (1 << 30);
 
             for (size_t i = 0; i < slots; i++)
@@ -211,7 +211,7 @@ namespace sealtest
 
             vector<complex<double>> values(slots);
 
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
             int data_bound = (1 << 20);
 
             for (size_t i = 0; i < slots; i++)
@@ -328,7 +328,7 @@ namespace sealtest
             SEALContext context(parms, false, sec_level_type::none);
             CKKSEncoder encoder(context);
 
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
             int data_bound = (1 << 30);
             double delta = (1ULL << 16);
             Plaintext plain;
@@ -354,7 +354,7 @@ namespace sealtest
             SEALContext context(parms, false, sec_level_type::none);
             CKKSEncoder encoder(context);
 
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
             {
                 int data_bound = (1 << 30);
                 Plaintext plain;

@@ -1,8 +1,7 @@
 steps:
 # The hosted Windows images ship MinGW-w64 GCC on PATH (C:\mingw64\bin) along with Ninja,
-# so no toolchain installation is required. This job guards the MinGW/UCRT build paths that
-# the MSVC job cannot exercise: std::aligned_alloc availability and static-archive merging
-# with a non-MSVC archiver on a Windows host.
+# so no toolchain installation is required. That toolchain links msvcrt.dll rather than the
+# UCRT; building against the UCRT would require a separate MSYS2 UCRT64 toolchain.
 - script: |
     gcc --version || exit /b 1
     g++ --version || exit /b 1
@@ -23,6 +22,7 @@ steps:
       -DCMAKE_BUILD_TYPE=${{ parameters.configuration }}
       -DSEAL_BUILD_DEPS=ON
       -DSEAL_BUILD_TESTS=ON
+      -DSEAL_BUILD_SEAL_C=ON
       -DSEAL_BUILD_EXAMPLES=ON
 
 - script: |
@@ -30,7 +30,11 @@ steps:
   displayName: 'Build SEAL (MinGW)'
   workingDirectory: '$(Build.SourcesDirectory)'
 
+# Each binary is followed by `exit /b 1` on failure: a Windows script step reports only the
+# exit code of its last command, so without this a sealtest failure would be masked by a
+# passing sealctest.
 - script: |
-    build-mingw\bin\sealtest.exe
+    build-mingw\bin\sealtest.exe || exit /b 1
+    build-mingw\bin\sealctest.exe || exit /b 1
   displayName: 'Run unit tests (MinGW)'
   workingDirectory: '$(Build.SourcesDirectory)'

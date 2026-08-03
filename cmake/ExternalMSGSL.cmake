@@ -4,7 +4,7 @@
 FetchContent_Declare(
     msgsl
     GIT_REPOSITORY https://github.com/microsoft/GSL.git
-    GIT_TAG        249146590e322123cd0b378b1f364d6069717687 # 4.2.1
+    GIT_TAG        152d6eb989a1ecd23fe9c9cfb2fb8cfc7c0cd0c1 # 4.2.2
 )
 FetchContent_GetProperties(msgsl)
 

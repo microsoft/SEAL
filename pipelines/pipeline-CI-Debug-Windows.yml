@@ -29,3 +29,11 @@ stages:
       parameters:
         debug: true
         name: WindowsMinGW
+    - template: jobs.yml
+      parameters:
+        debug: true
+        name: WindowsCxx14
+    - template: jobs.yml
+      parameters:
+        debug: true
+        name: WindowsMinGWCxx14

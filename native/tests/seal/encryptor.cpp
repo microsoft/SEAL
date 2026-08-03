@@ -10,8 +10,8 @@
 #include "seal/modulus.h"
 #include <cstddef>
 #include <cstdint>
-#include <ctime>
 #include "gtest/gtest.h"
+#include "testseed.h"
 
 using namespace seal;
 using namespace std;
@@ -678,7 +678,7 @@ namespace sealtest
             vector<complex<double>> input(slot_size);
             vector<complex<double>> output(slot_size);
 
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
             int input_bound = 1 << 30;
             const double delta = static_cast<double>(1ULL << 50);
 
@@ -727,7 +727,7 @@ namespace sealtest
             vector<complex<double>> input(slot_size);
             vector<complex<double>> output(slot_size);
 
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
             int input_bound = 1 << 30;
             const double delta = static_cast<double>(1ULL << 60);
 

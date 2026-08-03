@@ -33,6 +33,32 @@ jobs:
         ${{ if eq(parameters.debug, 'false') }}:
           configuration: 'Release'
 
+- ${{ if eq(parameters.name, 'WindowsCxx14') }}:
+  - job: WindowsCxx14
+    displayName: Windows C++14
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - template: windows-cxx14.yml
+      parameters:
+        ${{ if eq(parameters.debug, 'true') }}:
+          configuration: 'Debug'
+        ${{ if eq(parameters.debug, 'false') }}:
+          configuration: 'Release'
+
+- ${{ if eq(parameters.name, 'WindowsMinGWCxx14') }}:
+  - job: WindowsMinGWCxx14
+    displayName: Windows MinGW C++14
+    pool:
+      vmImage: 'windows-latest'
+    steps:
+    - template: windows-mingw-cxx14.yml
+      parameters:
+        ${{ if eq(parameters.debug, 'true') }}:
+          configuration: 'Debug'
+        ${{ if eq(parameters.debug, 'false') }}:
+          configuration: 'Release'
+
 - ${{ if eq(parameters.name, 'LinuxCxx14') }}:
   - job: LinuxCxx14
     displayName: Linux C++14

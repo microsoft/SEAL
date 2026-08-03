@@ -4,7 +4,7 @@
 FetchContent_Declare(
     hexl
     PREFIX hexl
-    GIT_REPOSITORY https://github.com/intel/hexl
+    GIT_REPOSITORY https://github.com/IntelLabs/hexl
     GIT_TAG 75a60b8cc908fb4c166315dd8b55b2e1ee7faea7 # 1.2.6
 )
 FetchContent_GetProperties(hexl)

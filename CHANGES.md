@@ -1,5 +1,16 @@
 # List of Changes
 
+## Version 4.4.3
+
+- More bug fixes and improvements to unit tests.
+- Improved MinGW CI pipeline to cover also `sealc`.
+- Added C++14 CI jobs for Windows, with both MSVC and MinGW.
+- Added documentation for building with MinGW-w64 on Windows.
+- Checking now for aligned allocator at configure time; this enables it also on Windows with C++14 and on Android API 28+.
+- Fixed `SEAL_USE_INTRIN=OFF` not taking effect in an existing build tree.
+- Fixed `seal_combine_archives` for CMake 3.28 and newer (policy CMP0175).
+- Updated dependencies.
+
 ## Version 4.4.2
 
 - Fixed null-pointer dereferences in the C API ([issue #752](https://github.com/microsoft/SEAL/issues/752)): `Plaintext_Set4`, `CKKSEncoder_Encode1`, and `CKKSEncoder_Encode2` validated the target object but not the caller-provided input array, and crashed instead of returning `E_POINTER`.

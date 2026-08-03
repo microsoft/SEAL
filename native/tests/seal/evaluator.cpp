@@ -12,10 +12,10 @@
 #include "seal/valcheck.h"
 #include <cstddef>
 #include <cstdint>
-#include <ctime>
 #include <limits>
 #include <string>
 #include "gtest/gtest.h"
+#include "testseed.h"
 
 using namespace seal;
 using namespace std;
@@ -427,7 +427,7 @@ namespace sealtest
             int data_bound = (1 << 30);
             const double delta = static_cast<double>(1 << 16);
 
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
 
             for (int expCount = 0; expCount < 100; expCount++)
             {
@@ -487,7 +487,7 @@ namespace sealtest
             int data_bound = (1 << 30);
             const double delta = static_cast<double>(1 << 16);
 
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
 
             for (int expCount = 0; expCount < 100; expCount++)
             {
@@ -590,7 +590,7 @@ namespace sealtest
             int data_bound = (1 << 8);
             const double delta = static_cast<double>(1ULL << 16);
 
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
 
             for (int expCount = 0; expCount < 50; expCount++)
             {
@@ -648,7 +648,7 @@ namespace sealtest
             int data_bound = (1 << 8);
             const double delta = static_cast<double>(1ULL << 16);
 
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
 
             for (int expCount = 0; expCount < 50; expCount++)
             {
@@ -706,7 +706,7 @@ namespace sealtest
             int data_bound = (1 << 8);
             const double delta = static_cast<double>(1ULL << 16);
 
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
 
             for (int expCount = 0; expCount < 50; expCount++)
             {
@@ -808,7 +808,7 @@ namespace sealtest
             int data_bound = (1 << 8);
             const double delta = static_cast<double>(1ULL << 16);
 
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
 
             for (int expCount = 0; expCount < 100; expCount++)
             {
@@ -866,7 +866,7 @@ namespace sealtest
             int data_bound = (1 << 8);
             const double delta = static_cast<double>(1ULL << 16);
 
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
 
             for (int expCount = 0; expCount < 100; expCount++)
             {
@@ -2809,7 +2809,7 @@ namespace sealtest
             const double delta = static_cast<double>(1ULL << 40);
 
             int data_bound = (1 << 10);
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
 
             for (int round = 0; round < 100; round++)
             {
@@ -2867,7 +2867,7 @@ namespace sealtest
             const double delta = static_cast<double>(1ULL << 40);
 
             int data_bound = (1 << 10);
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
 
             for (int round = 0; round < 100; round++)
             {
@@ -2927,7 +2927,7 @@ namespace sealtest
             vector<complex<double>> expected(slot_size, 0.0);
 
             int data_bound = (1 << 10);
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
 
             for (int iExp = 0; iExp < 50; iExp++)
             {
@@ -2984,7 +2984,7 @@ namespace sealtest
             vector<complex<double>> expected(slot_size, 0.0);
 
             int data_bound = (1 << 10);
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
 
             for (int iExp = 0; iExp < 50; iExp++)
             {
@@ -3042,7 +3042,7 @@ namespace sealtest
             vector<complex<double>> output(slot_size);
 
             int data_bound = (1 << 10);
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
 
             for (int iExp = 0; iExp < 50; iExp++)
             {
@@ -3099,7 +3099,7 @@ namespace sealtest
             vector<complex<double>> output(slot_size);
 
             int data_bound = (1 << 10);
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
 
             for (int iExp = 0; iExp < 50; iExp++)
             {
@@ -3166,7 +3166,7 @@ namespace sealtest
 
             for (int round = 0; round < 50; round++)
             {
-                srand(static_cast<unsigned>(time(NULL)));
+                srand(seal_test_seed);
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     input1[i] = static_cast<double>(rand() % data_bound);
@@ -3231,7 +3231,7 @@ namespace sealtest
 
             for (int round = 0; round < 50; round++)
             {
-                srand(static_cast<unsigned>(time(NULL)));
+                srand(seal_test_seed);
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     input1[i] = static_cast<double>(rand() % data_bound);
@@ -3298,7 +3298,7 @@ namespace sealtest
 
             for (int round = 0; round < 50; round++)
             {
-                srand(static_cast<unsigned>(time(NULL)));
+                srand(seal_test_seed);
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     input1[i] = static_cast<double>(rand() % data_bound);
@@ -3360,7 +3360,7 @@ namespace sealtest
             vector<complex<double>> expected(slot_size, 0.0);
 
             int data_bound = 1 << 7;
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
 
             for (int round = 0; round < 100; round++)
             {
@@ -3418,7 +3418,7 @@ namespace sealtest
             vector<complex<double>> expected(slot_size, 0.0);
 
             int data_bound = 1 << 7;
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
 
             for (int round = 0; round < 100; round++)
             {
@@ -3476,7 +3476,7 @@ namespace sealtest
             vector<complex<double>> expected(slot_size, 0.0);
 
             int data_bound = 1 << 7;
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
 
             for (int round = 0; round < 100; round++)
             {
@@ -3546,7 +3546,7 @@ namespace sealtest
             for (int round = 0; round < 100; round++)
             {
                 int data_bound = 1 << 7;
-                srand(static_cast<unsigned>(time(NULL)));
+                srand(seal_test_seed);
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     input1[i] = static_cast<double>(rand() % data_bound);
@@ -3616,7 +3616,7 @@ namespace sealtest
             for (int round = 0; round < 100; round++)
             {
                 int data_bound = 1 << 7;
-                srand(static_cast<unsigned>(time(NULL)));
+                srand(seal_test_seed);
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     input1[i] = static_cast<double>(rand() % data_bound);
@@ -3685,7 +3685,7 @@ namespace sealtest
             for (int round = 0; round < 100; round++)
             {
                 int data_bound = 1 << 7;
-                srand(static_cast<unsigned>(time(NULL)));
+                srand(seal_test_seed);
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     input1[i] = static_cast<double>(rand() % data_bound);
@@ -3731,7 +3731,7 @@ namespace sealtest
             for (int round = 0; round < 100; round++)
             {
                 int data_bound = 1 << 7;
-                srand(static_cast<unsigned>(time(NULL)));
+                srand(seal_test_seed);
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     input1[i] = static_cast<double>(rand() % data_bound);
@@ -3834,7 +3834,7 @@ namespace sealtest
 
             for (int round = 0; round < 100; round++)
             {
-                srand(static_cast<unsigned>(time(NULL)));
+                srand(seal_test_seed);
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     input[i] = static_cast<double>(rand() % data_bound);
@@ -3895,7 +3895,7 @@ namespace sealtest
 
             for (int round = 0; round < 100; round++)
             {
-                srand(static_cast<unsigned>(time(NULL)));
+                srand(seal_test_seed);
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     input[i] = static_cast<double>(rand() % data_bound);
@@ -3949,7 +3949,7 @@ namespace sealtest
             Evaluator evaluator(context);
 
             int data_bound = 1 << 30;
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
 
             vector<complex<double>> input(slot_size, 0.0);
             vector<complex<double>> output(slot_size);
@@ -4022,7 +4022,7 @@ namespace sealtest
             Evaluator evaluator(context);
 
             int data_bound = 1 << 30;
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
 
             vector<complex<double>> input(slot_size, 0.0);
             vector<complex<double>> output(slot_size);
@@ -4095,7 +4095,7 @@ namespace sealtest
             Evaluator evaluator(context);
 
             int data_bound = 1 << 30;
-            srand(static_cast<unsigned>(time(NULL)));
+            srand(seal_test_seed);
 
             vector<complex<double>> input(slot_size, 0.0);
             vector<complex<double>> output(slot_size);
@@ -4190,7 +4190,7 @@ namespace sealtest
             for (int round = 0; round < 100; round++)
             {
                 int data_bound = 1 << 8;
-                srand(static_cast<unsigned>(time(NULL)));
+                srand(seal_test_seed);
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     input1[i] = static_cast<double>(rand() % data_bound);
@@ -4274,7 +4274,7 @@ namespace sealtest
             for (int round = 0; round < 100; round++)
             {
                 int data_bound = 1 << 8;
-                srand(static_cast<unsigned>(time(NULL)));
+                srand(seal_test_seed);
                 for (size_t i = 0; i < slot_size; i++)
                 {
                     input1[i] = static_cast<double>(rand() % data_bound);

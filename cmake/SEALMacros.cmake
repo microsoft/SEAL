@@ -78,12 +78,10 @@ macro(seal_install_target target export)
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endmacro()
 
-# Manually combine archives, using ${CMAKE_LIBRARY_OUTPUT_DIRECTORY} to keep temporary files.
 macro(seal_combine_archives target dependency)
     if(MSVC)
         add_custom_command(TARGET ${target} POST_BUILD
             COMMAND lib.exe /OUT:$<TARGET_FILE:${target}> $<TARGET_FILE:${target}> $<TARGET_FILE:${dependency}>
-            DEPENDS $<TARGET_FILE:${target}> $<TARGET_FILE:${dependency}>
             WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
     else()
         # CMAKE_AR is the archiver that matches the active toolchain (GNU ar for MinGW,
@@ -102,7 +100,6 @@ macro(seal_combine_archives target dependency)
                 -DSEAL_DEPENDENCY_ARCHIVE=$<TARGET_FILE:${dependency}>
                 -DSEAL_WORK_DIR=${CMAKE_LIBRARY_OUTPUT_DIRECTORY}
                 -P ${SEAL_CMAKE_MODULE_DIR}/CombineArchives.cmake
-            DEPENDS $<TARGET_FILE:${target}> $<TARGET_FILE:${dependency}>
             WORKING_DIRECTORY ${CMAKE_LIBRARY_OUTPUT_DIRECTORY})
     endif()
 endmacro()
