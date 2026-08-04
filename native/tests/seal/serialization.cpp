@@ -1022,6 +1022,49 @@ namespace sealtest
         ASSERT_ANY_THROW(Serialization::Load(bind(&test_struct::load_members, &st2, _1), tampered, false));
     }
 
+    // A block shorter than a word admits several equivalent encodings: any phase up to the block length splits
+    // the bytes between the verbatim phase prefix and the verbatim tail, with zero packed words. The decoder must
+    // accept all of them (an encoder is free to emit any) and must reject a phase beyond the block length, which
+    // would underflow the word count.
+    TEST(SerializationTest, BitPackTinyBlockPhases)
+    {
+        using namespace placeholders;
+
+        for (unsigned phase = 0; phase <= 4; phase++)
+        {
+            // Hand-craft a stream holding the 3 original bytes { 0xAA, 0xBB, 0xCC } in a single tiny block
+            Serialization::SEALHeader header;
+            header.compr_mode = compr_mode_type::bitpack;
+            header.size = 16 + 8 + 1 + 2 + 3;
+            string blob(reinterpret_cast<const char *>(&header), sizeof(Serialization::SEALHeader));
+            uint64_t original_size = 3;
+            blob.append(reinterpret_cast<const char *>(&original_size), sizeof(uint64_t));
+            blob.push_back(static_cast<char>(10)); // block size: 2^10 bytes
+            blob.push_back(static_cast<char>(0)); // width
+            blob.push_back(static_cast<char>(phase));
+            blob.push_back(static_cast<char>(0xAA));
+            blob.push_back(static_cast<char>(0xBB));
+            blob.push_back(static_cast<char>(0xCC));
+
+            stringstream stream(blob);
+            unsigned char loaded[3]{};
+            auto load_fn = [&](istream &in_stream, SEALVersion) {
+                in_stream.read(reinterpret_cast<char *>(loaded), 3);
+            };
+            if (phase <= 3)
+            {
+                Serialization::Load(load_fn, stream, false);
+                ASSERT_EQ(0xAA, loaded[0]);
+                ASSERT_EQ(0xBB, loaded[1]);
+                ASSERT_EQ(0xCC, loaded[2]);
+            }
+            else
+            {
+                ASSERT_ANY_THROW(Serialization::Load(load_fn, stream, false));
+            }
+        }
+    }
+
     // A block size outside the accepted power-of-two range is malformed and must be rejected cleanly.
     TEST(SerializationTest, BitPackTamperedBlockSizeThrows)
     {

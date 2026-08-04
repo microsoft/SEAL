@@ -71,7 +71,9 @@ namespace seal
                     // The word data in the stream need not fall on the stream's own word grid (serialized metadata
                     // is not always a multiple of eight bytes), so choose the phase that minimizes the encoded size
                     // of the block. A phase of bytes_per_word would reproduce the alignment of phase zero, so only
-                    // smaller values need to be considered.
+                    // smaller values need to be considered. The clamp to block_len keeps the word count from
+                    // underflowing on a block shorter than a word; for such a block every phase encodes zero words
+                    // at the same size and the tie-break below settles on phase zero.
                     size_t phase = 0;
                     int width = 0;
                     size_t body_size = block_len;
