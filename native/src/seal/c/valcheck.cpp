@@ -20,8 +20,12 @@ SEAL_C_FUNC ValCheck_Plaintext_IsValidFor(void *plaintext, void *context, bool *
     IfNullRet(plain, E_POINTER);
     IfNullRet(result, E_POINTER);
 
-    *result = is_valid_for(*plain, *ctx);
-    return S_OK;
+    try
+    {
+        *result = is_valid_for(*plain, *ctx);
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC ValCheck_Ciphertext_IsValidFor(void *ciphertext, void *context, bool *result)
@@ -32,8 +36,12 @@ SEAL_C_FUNC ValCheck_Ciphertext_IsValidFor(void *ciphertext, void *context, bool
     IfNullRet(cipher, E_POINTER);
     IfNullRet(result, E_POINTER);
 
-    *result = is_valid_for(*cipher, *ctx);
-    return S_OK;
+    try
+    {
+        *result = is_valid_for(*cipher, *ctx);
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC ValCheck_SecretKey_IsValidFor(void *secret_key, void *context, bool *result)
@@ -44,8 +52,12 @@ SEAL_C_FUNC ValCheck_SecretKey_IsValidFor(void *secret_key, void *context, bool 
     IfNullRet(skey, E_POINTER);
     IfNullRet(result, E_POINTER);
 
-    *result = is_valid_for(*skey, *ctx);
-    return S_OK;
+    try
+    {
+        *result = is_valid_for(*skey, *ctx);
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC ValCheck_PublicKey_IsValidFor(void *public_key, void *context, bool *result)
@@ -56,8 +68,12 @@ SEAL_C_FUNC ValCheck_PublicKey_IsValidFor(void *public_key, void *context, bool 
     IfNullRet(pkey, E_POINTER);
     IfNullRet(result, E_POINTER);
 
-    *result = is_valid_for(*pkey, *ctx);
-    return S_OK;
+    try
+    {
+        *result = is_valid_for(*pkey, *ctx);
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC ValCheck_KSwitchKeys_IsValidFor(void *kswitch_keys, void *context, bool *result)
@@ -68,8 +84,12 @@ SEAL_C_FUNC ValCheck_KSwitchKeys_IsValidFor(void *kswitch_keys, void *context, b
     IfNullRet(keys, E_POINTER);
     IfNullRet(result, E_POINTER);
 
-    *result = is_valid_for(*keys, *ctx);
-    return S_OK;
+    try
+    {
+        *result = is_valid_for(*keys, *ctx);
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC ValCheck_RelinKeys_IsValidFor(void *relin_keys, void *context, bool *result)
@@ -80,8 +100,12 @@ SEAL_C_FUNC ValCheck_RelinKeys_IsValidFor(void *relin_keys, void *context, bool 
     IfNullRet(keys, E_POINTER);
     IfNullRet(result, E_POINTER);
 
-    *result = is_valid_for(*keys, *ctx);
-    return S_OK;
+    try
+    {
+        *result = is_valid_for(*keys, *ctx);
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC ValCheck_GaloisKeys_IsValidFor(void *galois_keys, void *context, bool *result)
@@ -92,6 +116,10 @@ SEAL_C_FUNC ValCheck_GaloisKeys_IsValidFor(void *galois_keys, void *context, boo
     IfNullRet(keys, E_POINTER);
     IfNullRet(result, E_POINTER);
 
-    *result = is_valid_for(*keys, *ctx);
-    return S_OK;
+    try
+    {
+        *result = is_valid_for(*keys, *ctx);
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }

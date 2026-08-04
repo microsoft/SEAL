@@ -47,14 +47,14 @@ SEAL_C_FUNC BatchEncoder_Encode1(void *thisptr, uint64_t count, uint64_t *values
     Plaintext *plain = FromVoid<Plaintext>(destination);
     IfNullRet(plain, E_POINTER);
 
-    vector<uint64_t> valvec(count);
-    for (uint64_t i = 0; i < count; i++)
-    {
-        valvec[i] = values[i];
-    }
-
     try
     {
+        vector<uint64_t> valvec(count);
+        for (uint64_t i = 0; i < count; i++)
+        {
+            valvec[i] = values[i];
+        }
+
         encoder->encode(valvec, *plain);
         return S_OK;
     }
@@ -69,14 +69,14 @@ SEAL_C_FUNC BatchEncoder_Encode2(void *thisptr, uint64_t count, int64_t *values,
     Plaintext *plain = FromVoid<Plaintext>(destination);
     IfNullRet(plain, E_POINTER);
 
-    vector<int64_t> valvec(count);
-    for (uint64_t i = 0; i < count; i++)
-    {
-        valvec[i] = values[i];
-    }
-
     try
     {
+        vector<int64_t> valvec(count);
+        for (uint64_t i = 0; i < count; i++)
+        {
+            valvec[i] = values[i];
+        }
+
         encoder->encode(valvec, *plain);
         return S_OK;
     }
@@ -91,11 +91,12 @@ SEAL_C_FUNC BatchEncoder_Decode1(void *thisptr, void *plain, uint64_t *count, ui
     IfNullRet(destination, E_POINTER);
     Plaintext *plainptr = FromVoid<Plaintext>(plain);
     IfNullRet(plainptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
     vector<uint64_t> result;
     try
     {
+        unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
+
         encoder->decode(*plainptr, result, *handle);
     }
     SEAL_C_CATCH_ALL
@@ -124,11 +125,12 @@ SEAL_C_FUNC BatchEncoder_Decode2(void *thisptr, void *plain, uint64_t *count, in
     IfNullRet(destination, E_POINTER);
     Plaintext *plainptr = FromVoid<Plaintext>(plain);
     IfNullRet(plainptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
     vector<int64_t> result;
     try
     {
+        unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
+
         encoder->decode(*plainptr, result, *handle);
     }
     SEAL_C_CATCH_ALL

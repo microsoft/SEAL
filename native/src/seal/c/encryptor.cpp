@@ -108,10 +108,11 @@ SEAL_C_FUNC Encryptor_Encrypt(void *thisptr, void *plaintext, void *destination,
     IfNullRet(plain, E_POINTER);
     Ciphertext *cipher = FromVoid<Ciphertext>(destination);
     IfNullRet(cipher, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool = MemHandleFromVoid(pool_handle);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool = MemHandleFromVoid(pool_handle);
+
         encryptor->encrypt(*plain, *cipher, *pool);
         return S_OK;
     }
@@ -125,13 +126,14 @@ SEAL_C_FUNC Encryptor_EncryptZero1(void *thisptr, uint64_t *parms_id, void *dest
     IfNullRet(parms_id, E_POINTER);
     Ciphertext *cipher = FromVoid<Ciphertext>(destination);
     IfNullRet(cipher, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool = MemHandleFromVoid(pool_handle);
 
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool = MemHandleFromVoid(pool_handle);
+
         encryptor->encrypt_zero(parms, *cipher, *pool);
         return S_OK;
     }
@@ -144,10 +146,11 @@ SEAL_C_FUNC Encryptor_EncryptZero2(void *thisptr, void *destination, void *pool_
     IfNullRet(encryptor, E_POINTER);
     Ciphertext *cipher = FromVoid<Ciphertext>(destination);
     IfNullRet(cipher, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool = MemHandleFromVoid(pool_handle);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool = MemHandleFromVoid(pool_handle);
+
         encryptor->encrypt_zero(*cipher, *pool);
         return S_OK;
     }
@@ -163,10 +166,11 @@ SEAL_C_FUNC Encryptor_EncryptSymmetric(
     IfNullRet(plain, E_POINTER);
     Ciphertext *cipher = FromVoid<Ciphertext>(destination);
     IfNullRet(cipher, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool = MemHandleFromVoid(pool_handle);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool = MemHandleFromVoid(pool_handle);
+
         ph::encrypt_symmetric_internal(encryptor, *plain, save_seed, *cipher, *pool);
         return S_OK;
     }
@@ -181,13 +185,14 @@ SEAL_C_FUNC Encryptor_EncryptZeroSymmetric1(
     IfNullRet(parms_id, E_POINTER);
     Ciphertext *cipher = FromVoid<Ciphertext>(destination);
     IfNullRet(cipher, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool = MemHandleFromVoid(pool_handle);
 
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool = MemHandleFromVoid(pool_handle);
+
         ph::encrypt_zero_symmetric_internal(encryptor, parms, save_seed, *cipher, *pool);
         return S_OK;
     }
@@ -200,10 +205,11 @@ SEAL_C_FUNC Encryptor_EncryptZeroSymmetric2(void *thisptr, bool save_seed, void 
     IfNullRet(encryptor, E_POINTER);
     Ciphertext *cipher = FromVoid<Ciphertext>(destination);
     IfNullRet(cipher, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool = MemHandleFromVoid(pool_handle);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool = MemHandleFromVoid(pool_handle);
+
         ph::encrypt_zero_symmetric_internal(encryptor, save_seed, *cipher, *pool);
         return S_OK;
     }

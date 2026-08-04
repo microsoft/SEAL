@@ -119,15 +119,16 @@ SEAL_C_FUNC EncParams_SetCoeffModulus(void *thisptr, uint64_t length, void **coe
     IfNullRet(coeffs, E_POINTER);
 
     Modulus **coeff_array = reinterpret_cast<Modulus **>(coeffs);
-    vector<Modulus> coefficients(length);
-
-    for (uint64_t i = 0; i < length; i++)
-    {
-        coefficients[i] = *coeff_array[i];
-    }
 
     try
     {
+        vector<Modulus> coefficients(length);
+        for (uint64_t i = 0; i < length; i++)
+        {
+            IfNullRet(coeff_array[i], E_POINTER);
+            coefficients[i] = *coeff_array[i];
+        }
+
         params->set_coeff_modulus(coefficients);
         return S_OK;
     }
@@ -166,9 +167,16 @@ SEAL_C_FUNC EncParams_GetPlainModulus(void *thisptr, void **plain_modulus)
     IfNullRet(params, E_POINTER);
     IfNullRet(plain_modulus, E_POINTER);
 
-    const auto plainmodulus = &params->plain_modulus();
-    *plain_modulus = const_cast<Modulus *>(plainmodulus);
-    return S_OK;
+    // Return an independently owned copy. Handing out a pointer to the internal
+    // subobject would let callers mutate it without updating parms_id, and would
+    // make Modulus_Destroy delete an interior subobject.
+    try
+    {
+        Modulus *plainmodulus = new Modulus(params->plain_modulus());
+        *plain_modulus = plainmodulus;
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC EncParams_SetPlainModulus1(void *thisptr, void *plain_modulus)

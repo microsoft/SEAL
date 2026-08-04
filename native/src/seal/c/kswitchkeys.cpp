@@ -159,18 +159,24 @@ SEAL_C_FUNC KSwitchKeys_AddKeyList(void *thisptr, uint64_t count, void **key_lis
     {
         PublicKey **key = reinterpret_cast<PublicKey **>(key_list);
 
-        // Don't resize, only reserve
-        keys->data().emplace_back();
-        keys->data().back().reserve(count);
+        // Build the key list separately and hand it over only once it is complete, so that
+        // neither a null element nor a failed allocation can leave a partially populated
+        // key list behind. Reserving first also rejects an unusable count before any
+        // element is read.
+        vector<PublicKey> new_key_list;
+        new_key_list.reserve(count);
 
         for (uint64_t i = 0; i < count; i++)
         {
-            PublicKey *pkey = key[i];
-            PublicKey new_pkey(ph::Create(keys->pool()));
-            new_pkey = *pkey;
+            IfNullRet(key[i], E_POINTER);
 
-            keys->data().back().emplace_back(std::move(new_pkey));
+            PublicKey new_pkey(ph::Create(keys->pool()));
+            new_pkey = *key[i];
+
+            new_key_list.emplace_back(std::move(new_pkey));
         }
+
+        keys->data().emplace_back(std::move(new_key_list));
 
         return S_OK;
     }

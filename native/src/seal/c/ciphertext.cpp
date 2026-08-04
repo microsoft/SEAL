@@ -29,10 +29,11 @@ using ph = struct seal::Ciphertext::CiphertextPrivateHelper
 SEAL_C_FUNC Ciphertext_Create1(void *memoryPoolHandle, void **ciphertext)
 {
     IfNullRet(ciphertext, E_POINTER);
-    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
+
         Ciphertext *cipher = new Ciphertext(*handle);
         *ciphertext = cipher;
         return S_OK;
@@ -60,10 +61,11 @@ SEAL_C_FUNC Ciphertext_Create3(void *context, void *pool, void **ciphertext)
     const SEALContext *ctx = FromVoid<SEALContext>(context);
     IfNullRet(ctx, E_POINTER);
     IfNullRet(ciphertext, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         Ciphertext *cipher = new Ciphertext(*ctx, *pool_ptr);
         *ciphertext = cipher;
         return S_OK;
@@ -77,10 +79,11 @@ SEAL_C_FUNC Ciphertext_Create4(void *context, uint64_t *parms_id, void *pool, vo
     IfNullRet(ctx, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
     IfNullRet(ciphertext, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         parms_id_type parmsid;
         CopyParmsId(parms_id, parmsid);
 
@@ -97,10 +100,11 @@ SEAL_C_FUNC Ciphertext_Create5(void *context, uint64_t *parms_id, uint64_t capac
     IfNullRet(ctx, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
     IfNullRet(ciphertext, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         parms_id_type parmsid;
         CopyParmsId(parms_id, parmsid);
 
@@ -321,14 +325,14 @@ SEAL_C_FUNC Ciphertext_GetDataAt2(void *thisptr, uint64_t poly_index, uint64_t c
     IfNullRet(cipher, E_POINTER);
     IfNullRet(data, E_POINTER);
 
-    auto poly_uint64_count = util::mul_safe(cipher->poly_modulus_degree(), cipher->coeff_modulus_size());
-
-    // poly_index is verified by the data method, we need to verify coeff_index ourselves.
-    if (coeff_index >= poly_uint64_count)
-        return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
-
     try
     {
+        auto poly_uint64_count = util::mul_safe(cipher->poly_modulus_degree(), cipher->coeff_modulus_size());
+
+        // poly_index is verified by the data method, we need to verify coeff_index ourselves.
+        if (coeff_index >= poly_uint64_count)
+            return HRESULT_FROM_WIN32(ERROR_INVALID_INDEX);
+
         *data = cipher->data(poly_index)[coeff_index];
         return S_OK;
     }
@@ -420,8 +424,12 @@ SEAL_C_FUNC Ciphertext_IsTransparent(void *thisptr, bool *result)
     IfNullRet(cipher, E_POINTER);
     IfNullRet(result, E_POINTER);
 
-    *result = cipher->is_transparent();
-    return S_OK;
+    try
+    {
+        *result = cipher->is_transparent();
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC Ciphertext_Pool(void *thisptr, void **pool)

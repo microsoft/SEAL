@@ -44,11 +44,12 @@ using ph = struct Plaintext::PlaintextPrivateHelper
 SEAL_C_FUNC Plaintext_Create1(void *memoryPoolHandle, void **plaintext)
 {
     IfNullRet(plaintext, E_POINTER);
-    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
     Plaintext *plain = nullptr;
 
     try
     {
+        unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
+
         plain = new Plaintext(*handle);
         *plaintext = plain;
         return S_OK;
@@ -59,11 +60,12 @@ SEAL_C_FUNC Plaintext_Create1(void *memoryPoolHandle, void **plaintext)
 SEAL_C_FUNC Plaintext_Create2(uint64_t coeffCount, void *memoryPoolHandle, void **plaintext)
 {
     IfNullRet(plaintext, E_POINTER);
-    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
     Plaintext *plain = nullptr;
 
     try
     {
+        unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
+
         plain = new Plaintext(coeffCount, *handle);
         *plaintext = plain;
         return S_OK;
@@ -74,11 +76,12 @@ SEAL_C_FUNC Plaintext_Create2(uint64_t coeffCount, void *memoryPoolHandle, void 
 SEAL_C_FUNC Plaintext_Create3(uint64_t capacity, uint64_t coeffCount, void *memoryPoolHandle, void **plaintext)
 {
     IfNullRet(plaintext, E_POINTER);
-    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
     Plaintext *plain = nullptr;
 
     try
     {
+        unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
+
         plain = new Plaintext(capacity, coeffCount, *handle);
         *plaintext = plain;
         return S_OK;
@@ -90,11 +93,12 @@ SEAL_C_FUNC Plaintext_Create4(char *hex_poly, void *memoryPoolHandle, void **pla
 {
     IfNullRet(plaintext, E_POINTER);
     IfNullRet(hex_poly, E_POINTER);
-    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
-    string hex_poly_str(hex_poly);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(memoryPoolHandle);
+
+        string hex_poly_str(hex_poly);
         Plaintext *plain = new Plaintext(hex_poly_str, *handle);
         *plaintext = plain;
         return S_OK;

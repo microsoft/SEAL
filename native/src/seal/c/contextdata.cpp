@@ -63,6 +63,7 @@ SEAL_C_FUNC ContextData_Parms(void *thisptr, void **parms)
 {
     SEALContext::ContextData *cont_data = FromVoid<SEALContext::ContextData>(thisptr);
     IfNullRet(cont_data, E_POINTER);
+    IfNullRet(parms, E_POINTER);
 
     try
     {

@@ -111,11 +111,12 @@ SEAL_C_FUNC KeyGenerator_CreateGaloisKeysFromElts(
     IfNullRet(galois_elts, E_POINTER);
     IfNullRet(galois_keys, E_POINTER);
 
-    vector<uint32_t> galois_elts_vec;
-    copy_n(galois_elts, count, back_inserter(galois_elts_vec));
-
     try
     {
+        vector<uint32_t> galois_elts_vec;
+        galois_elts_vec.reserve(count);
+        copy_n(galois_elts, count, back_inserter(galois_elts_vec));
+
         GaloisKeys *keys = new GaloisKeys(ph::create_galois_keys(keygen, galois_elts_vec, save_seed));
         *galois_keys = keys;
         return S_OK;
@@ -131,13 +132,13 @@ SEAL_C_FUNC KeyGenerator_CreateGaloisKeysFromSteps(
     IfNullRet(steps, E_POINTER);
     IfNullRet(galois_keys, E_POINTER);
 
-    vector<int> steps_vec;
-    copy_n(steps, count, back_inserter(steps_vec));
-    vector<uint32_t> galois_elts_vec;
-
     try
     {
-        galois_elts_vec = ph::galois_tool(keygen)->get_elts_from_steps(steps_vec);
+        vector<int> steps_vec;
+        steps_vec.reserve(count);
+        copy_n(steps, count, back_inserter(steps_vec));
+
+        vector<uint32_t> galois_elts_vec = ph::galois_tool(keygen)->get_elts_from_steps(steps_vec);
         GaloisKeys *keys = new GaloisKeys(ph::create_galois_keys(keygen, galois_elts_vec, save_seed));
         *galois_keys = keys;
         return S_OK;
@@ -151,10 +152,9 @@ SEAL_C_FUNC KeyGenerator_CreateGaloisKeysAll(void *thisptr, bool save_seed, void
     IfNullRet(keygen, E_POINTER);
     IfNullRet(galois_keys, E_POINTER);
 
-    vector<uint32_t> galois_elts_vec = ph::galois_tool(keygen)->get_elts_all();
-
     try
     {
+        vector<uint32_t> galois_elts_vec = ph::galois_tool(keygen)->get_elts_all();
         GaloisKeys *keys = new GaloisKeys(ph::create_galois_keys(keygen, galois_elts_vec, save_seed));
         *galois_keys = keys;
         return S_OK;

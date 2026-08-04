@@ -97,16 +97,17 @@ SEAL_C_FUNC Evaluator_AddMany(void *thisptr, uint64_t count, void **encrypteds, 
     IfNullRet(destination_ptr, E_POINTER);
 
     Ciphertext **encrypteds_pp = reinterpret_cast<Ciphertext **>(encrypteds);
-    vector<Ciphertext> encrypteds_vec;
-
-    encrypteds_vec.reserve(count);
-    for (uint64_t i = 0; i < count; i++)
-    {
-        encrypteds_vec.emplace_back(*encrypteds_pp[i]);
-    }
 
     try
     {
+        vector<Ciphertext> encrypteds_vec;
+        encrypteds_vec.reserve(count);
+        for (uint64_t i = 0; i < count; i++)
+        {
+            IfNullRet(encrypteds_pp[i], E_POINTER);
+            encrypteds_vec.emplace_back(*encrypteds_pp[i]);
+        }
+
         eval->add_many(encrypteds_vec, *destination_ptr);
         return S_OK;
     }
@@ -180,10 +181,11 @@ SEAL_C_FUNC Evaluator_Multiply(void *thisptr, void *encrypted1, void *encrypted2
     IfNullRet(encrypted2_ptr, E_POINTER);
     Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         eval->multiply(*encrypted1_ptr, *encrypted2_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
@@ -200,19 +202,21 @@ SEAL_C_FUNC Evaluator_MultiplyMany(
     IfNullRet(relin_keys_ptr, E_POINTER);
     Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     Ciphertext **encrypteds_pp = reinterpret_cast<Ciphertext **>(encrypteds);
-    vector<Ciphertext> encrypteds_vec;
-
-    encrypteds_vec.reserve(count);
-    for (uint64_t i = 0; i < count; i++)
-    {
-        encrypteds_vec.emplace_back(*encrypteds_pp[i]);
-    }
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
+        vector<Ciphertext> encrypteds_vec;
+        encrypteds_vec.reserve(count);
+        for (uint64_t i = 0; i < count; i++)
+        {
+            IfNullRet(encrypteds_pp[i], E_POINTER);
+            encrypteds_vec.emplace_back(*encrypteds_pp[i]);
+        }
+
         eval->multiply_many(encrypteds_vec, *relin_keys_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
@@ -229,10 +233,11 @@ SEAL_C_FUNC Evaluator_MultiplyPlain(void *thisptr, void *encrypted, void *plain,
     IfNullRet(plain_ptr, E_POINTER);
     Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         eval->multiply_plain(*encrypted_ptr, *plain_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
@@ -247,10 +252,11 @@ SEAL_C_FUNC Evaluator_Square(void *thisptr, void *encrypted, void *destination, 
     IfNullRet(encrypted_ptr, E_POINTER);
     Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         eval->square(*encrypted_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
@@ -267,10 +273,11 @@ SEAL_C_FUNC Evaluator_Relinearize(void *thisptr, void *encrypted, void *relin_ke
     IfNullRet(relin_keys_ptr, E_POINTER);
     Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         eval->relinearize(*encrypted_ptr, *relin_keys_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
@@ -285,10 +292,11 @@ SEAL_C_FUNC Evaluator_ModSwitchToNext1(void *thisptr, void *encrypted, void *des
     IfNullRet(encrypted_ptr, E_POINTER);
     Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         eval->mod_switch_to_next(*encrypted_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
@@ -304,13 +312,14 @@ SEAL_C_FUNC Evaluator_ModSwitchTo1(void *thisptr, void *encrypted, uint64_t *par
     IfNullRet(parms_id, E_POINTER);
     Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         eval->mod_switch_to(*encrypted_ptr, parms, *destination_ptr, *pool_ptr);
         return S_OK;
     }
@@ -363,10 +372,11 @@ SEAL_C_FUNC Evaluator_RescaleToNext(void *thisptr, void *encrypted, void *destin
     IfNullRet(encrypted_ptr, E_POINTER);
     Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         eval->rescale_to_next(*encrypted_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
@@ -382,13 +392,14 @@ SEAL_C_FUNC Evaluator_RescaleTo(void *thisptr, void *encrypted, uint64_t *parms_
     IfNullRet(parms_id, E_POINTER);
     Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         eval->rescale_to(*encrypted_ptr, parms, *destination_ptr, *pool_ptr);
         return S_OK;
     }
@@ -403,10 +414,11 @@ SEAL_C_FUNC Evaluator_ModReduceToNext(void *thisptr, void *encrypted, void *dest
     IfNullRet(encrypted_ptr, E_POINTER);
     Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         eval->mod_reduce_to_next(*encrypted_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
@@ -422,13 +434,14 @@ SEAL_C_FUNC Evaluator_ModReduceTo(void *thisptr, void *encrypted, uint64_t *parm
     IfNullRet(parms_id, E_POINTER);
     Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         eval->mod_reduce_to(*encrypted_ptr, parms, *destination_ptr, *pool_ptr);
         return S_OK;
     }
@@ -446,10 +459,11 @@ SEAL_C_FUNC Evaluator_Exponentiate(
     IfNullRet(relin_keys_ptr, E_POINTER);
     Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         eval->exponentiate(*encrypted_ptr, exponent, *relin_keys_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
@@ -465,13 +479,14 @@ SEAL_C_FUNC Evaluator_TransformToNTT1(void *thisptr, void *plain, uint64_t *parm
     IfNullRet(parms_id, E_POINTER);
     Plaintext *destination_ptr = FromVoid<Plaintext>(destination_ntt);
     IfNullRet(destination_ptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         eval->transform_to_ntt(*plain_ptr, parms, *destination_ptr, *pool_ptr);
         return S_OK;
     }
@@ -523,10 +538,11 @@ SEAL_C_FUNC Evaluator_ApplyGalois(
     IfNullRet(galois_keys_ptr, E_POINTER);
     Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         eval->apply_galois(*encrypted_ptr, galois_elt, *galois_keys_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
@@ -544,10 +560,11 @@ SEAL_C_FUNC Evaluator_RotateRows(
     IfNullRet(galois_keys_ptr, E_POINTER);
     Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         eval->rotate_rows(*encrypted_ptr, steps, *galois_keys_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
@@ -564,10 +581,11 @@ SEAL_C_FUNC Evaluator_RotateColumns(void *thisptr, void *encrypted, void *galois
     IfNullRet(galois_keys_ptr, E_POINTER);
     Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         eval->rotate_columns(*encrypted_ptr, *galois_keys_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
@@ -585,10 +603,11 @@ SEAL_C_FUNC Evaluator_RotateVector(
     IfNullRet(galois_keys_ptr, E_POINTER);
     Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         eval->rotate_vector(*encrypted_ptr, steps, *galois_keys_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }
@@ -605,10 +624,11 @@ SEAL_C_FUNC Evaluator_ComplexConjugate(void *thisptr, void *encrypted, void *gal
     IfNullRet(galois_keys_ptr, E_POINTER);
     Ciphertext *destination_ptr = FromVoid<Ciphertext>(destination);
     IfNullRet(destination_ptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
         eval->complex_conjugate(*encrypted_ptr, *galois_keys_ptr, *destination_ptr, *pool_ptr);
         return S_OK;
     }

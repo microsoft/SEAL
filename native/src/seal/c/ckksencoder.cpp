@@ -50,19 +50,20 @@ SEAL_C_FUNC CKKSEncoder_Encode1(
     Plaintext *destinationptr = FromVoid<Plaintext>(destination);
     IfNullRet(destinationptr, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
-    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
 
-    vector<double> input(value_count);
-    for (uint64_t i = 0; i < value_count; i++)
-    {
-        input[i] = values[i];
-    }
-
     try
     {
+        unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
+
+        vector<double> input(value_count);
+        for (uint64_t i = 0; i < value_count; i++)
+        {
+            input[i] = values[i];
+        }
+
         encoder->encode(input, parms, scale, *destinationptr, *handle);
         return S_OK;
     }
@@ -80,19 +81,20 @@ SEAL_C_FUNC CKKSEncoder_Encode2(
     Plaintext *destinationptr = FromVoid<Plaintext>(destination);
     IfNullRet(destinationptr, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
-    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
 
-    vector<complex<double>> input(value_count);
-    for (uint64_t i = 0; i < value_count; i++)
-    {
-        input[i] = complex<double>(complex_values[i * 2], complex_values[i * 2 + 1]);
-    }
-
     try
     {
+        unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
+
+        vector<complex<double>> input(value_count);
+        for (uint64_t i = 0; i < value_count; i++)
+        {
+            input[i] = complex<double>(complex_values[i * 2], complex_values[i * 2 + 1]);
+        }
+
         encoder->encode(input, parms, scale, *destinationptr, *handle);
         return S_OK;
     }
@@ -108,13 +110,14 @@ SEAL_C_FUNC CKKSEncoder_Encode3(
     Plaintext *destinationptr = FromVoid<Plaintext>(destination);
     IfNullRet(destinationptr, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
-    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
 
     try
     {
+        unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
+
         encoder->encode(value, parms, scale, *destinationptr, *handle);
         return S_OK;
     }
@@ -130,7 +133,6 @@ SEAL_C_FUNC CKKSEncoder_Encode4(
     Plaintext *destinationptr = FromVoid<Plaintext>(destination);
     IfNullRet(destinationptr, E_POINTER);
     IfNullRet(parms_id, E_POINTER);
-    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
     parms_id_type parms;
     CopyParmsId(parms_id, parms);
@@ -139,6 +141,8 @@ SEAL_C_FUNC CKKSEncoder_Encode4(
 
     try
     {
+        unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
+
         encoder->encode(input, parms, scale, *destinationptr, *handle);
         return S_OK;
     }
@@ -174,12 +178,13 @@ SEAL_C_FUNC CKKSEncoder_Decode1(void *thisptr, void *plain, uint64_t *value_coun
     IfNullRet(values, E_POINTER);
     Plaintext *plainptr = FromVoid<Plaintext>(plain);
     IfNullRet(plainptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
     vector<double> destination;
 
     try
     {
+        unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
+
         encoder->decode(*plainptr, destination, *handle);
     }
     SEAL_C_CATCH_ALL
@@ -209,12 +214,13 @@ SEAL_C_FUNC CKKSEncoder_Decode2(void *thisptr, void *plain, uint64_t *value_coun
     IfNullRet(values, E_POINTER);
     Plaintext *plainptr = FromVoid<Plaintext>(plain);
     IfNullRet(plainptr, E_POINTER);
-    unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
 
     vector<complex<double>> destination;
 
     try
     {
+        unique_ptr<MemoryPoolHandle> handle = MemHandleFromVoid(pool);
+
         encoder->decode(*plainptr, destination, *handle);
     }
     SEAL_C_CATCH_ALL

@@ -235,9 +235,8 @@ namespace Microsoft.Research.SEAL
         {
             get
             {
-                NativeMethods.EncParams_GetPlainModulus(NativePtr, out IntPtr borrowedPtr);
-                NativeMethods.Modulus_Create(borrowedPtr, out IntPtr copyPtr);
-                return new Modulus(copyPtr);
+                NativeMethods.EncParams_GetPlainModulus(NativePtr, out IntPtr plainModulusPtr);
+                return new Modulus(plainModulusPtr);
             }
             set
             {

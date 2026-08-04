@@ -89,9 +89,13 @@ SEAL_C_FUNC SEALContext_KeyContextData(void *thisptr, void **context_data)
     IfNullRet(context_data, E_POINTER);
 
     // The pointer that is returned should not be deleted.
-    auto data = context->key_context_data();
-    *context_data = const_cast<SEALContext::ContextData *>(data.get());
-    return S_OK;
+    try
+    {
+        auto data = context->key_context_data();
+        *context_data = const_cast<SEALContext::ContextData *>(data.get());
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC SEALContext_FirstContextData(void *thisptr, void **context_data)
@@ -101,9 +105,13 @@ SEAL_C_FUNC SEALContext_FirstContextData(void *thisptr, void **context_data)
     IfNullRet(context_data, E_POINTER);
 
     // The pointer that is returned should not be deleted.
-    auto data = context->first_context_data();
-    *context_data = const_cast<SEALContext::ContextData *>(data.get());
-    return S_OK;
+    try
+    {
+        auto data = context->first_context_data();
+        *context_data = const_cast<SEALContext::ContextData *>(data.get());
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC SEALContext_LastContextData(void *thisptr, void **context_data)
@@ -113,9 +121,13 @@ SEAL_C_FUNC SEALContext_LastContextData(void *thisptr, void **context_data)
     IfNullRet(context_data, E_POINTER);
 
     // The pointer that is returned should not be deleted.
-    auto data = context->last_context_data();
-    *context_data = const_cast<SEALContext::ContextData *>(data.get());
-    return S_OK;
+    try
+    {
+        auto data = context->last_context_data();
+        *context_data = const_cast<SEALContext::ContextData *>(data.get());
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC SEALContext_GetContextData(void *thisptr, uint64_t *parms_id, void **context_data)
@@ -126,11 +138,15 @@ SEAL_C_FUNC SEALContext_GetContextData(void *thisptr, uint64_t *parms_id, void *
     IfNullRet(context_data, E_POINTER);
 
     // The pointer that is returned should not be deleted.
-    parms_id_type parms;
-    CopyParmsId(parms_id, parms);
-    auto data = context->get_context_data(parms);
-    *context_data = const_cast<SEALContext::ContextData *>(data.get());
-    return S_OK;
+    try
+    {
+        parms_id_type parms;
+        CopyParmsId(parms_id, parms);
+        auto data = context->get_context_data(parms);
+        *context_data = const_cast<SEALContext::ContextData *>(data.get());
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC SEALContext_UsingKeyswitching(void *thisptr, bool *using_keyswitching)
@@ -149,7 +165,11 @@ SEAL_C_FUNC SEALContext_ParameterErrorName(void *thisptr, char *outstr, uint64_t
     IfNullRet(context, E_POINTER);
     IfNullRet(length, E_POINTER);
 
-    return ToStringHelper2(context->parameter_error_name(), outstr, length);
+    try
+    {
+        return ToStringHelper2(context->parameter_error_name(), outstr, length);
+    }
+    SEAL_C_CATCH_ALL
 }
 
 SEAL_C_FUNC SEALContext_ParameterErrorMessage(void *thisptr, char *outstr, uint64_t *length)
@@ -158,5 +178,9 @@ SEAL_C_FUNC SEALContext_ParameterErrorMessage(void *thisptr, char *outstr, uint6
     IfNullRet(context, E_POINTER);
     IfNullRet(length, E_POINTER);
 
-    return ToStringHelper2(context->parameter_error_message(), outstr, length);
+    try
+    {
+        return ToStringHelper2(context->parameter_error_message(), outstr, length);
+    }
+    SEAL_C_CATCH_ALL
 }

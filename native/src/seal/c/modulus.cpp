@@ -33,6 +33,7 @@ SEAL_C_FUNC Modulus_Create2(void *copy, void **small_modulus)
 {
     Modulus *copypt = FromVoid<Modulus>(copy);
     IfNullRet(copypt, E_POINTER);
+    IfNullRet(small_modulus, E_POINTER);
 
     try
     {

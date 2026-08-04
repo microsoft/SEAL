@@ -2,10 +2,12 @@
 // Licensed under the MIT license.
 
 #include "seal/c/batchencoder.h"
+#include "seal/c/ciphertext.h"
 #include "seal/c/ckksencoder.h"
 #include "seal/c/contextdata.h"
 #include "seal/c/encryptionparameters.h"
 #include "seal/c/encryptor.h"
+#include "seal/c/evaluator.h"
 #include "seal/c/keygenerator.h"
 #include "seal/c/kswitchkeys.h"
 #include "seal/c/memorymanager.h"
@@ -376,6 +378,284 @@ namespace sealtest
         EXPECT_EQ(E_POINTER, CKKSEncoder_Encode1(encoder, 0, nullptr, parms_id, 1048576.0, plain, nullptr));
         EXPECT_EQ(E_POINTER, CKKSEncoder_Encode2(encoder, 0, nullptr, parms_id, 1048576.0, plain, nullptr));
         EXPECT_EQ(E_POINTER, Plaintext_Set4(plain, 0, nullptr));
+
+        EXPECT_EQ(S_OK, Plaintext_Destroy(plain));
+        EXPECT_EQ(S_OK, CKKSEncoder_Destroy(encoder));
+        EXPECT_EQ(S_OK, SEALContext_Destroy(context));
+        EXPECT_EQ(S_OK, EncParams_Destroy(parms));
+    }
+
+    TEST(CAbiNullInputTest, RejectsNullOutputHandles)
+    {
+        constexpr uint8_t bfv_scheme = 0x1;
+        constexpr int tc128 = 128;
+        constexpr uint64_t poly_modulus_degree = 1024;
+
+        void *parms = nullptr;
+        ASSERT_EQ(S_OK, EncParams_Create1(bfv_scheme, &parms));
+        ASSERT_EQ(S_OK, EncParams_SetPolyModulusDegree(parms, poly_modulus_degree));
+
+        uint64_t coeff_modulus_size = 0;
+        ASSERT_EQ(S_OK, CoeffModulus_BFVDefault(poly_modulus_degree, tc128, &coeff_modulus_size, nullptr));
+        std::vector<void *> coeff_modulus(coeff_modulus_size);
+        ASSERT_EQ(S_OK, CoeffModulus_BFVDefault(poly_modulus_degree, tc128, &coeff_modulus_size, coeff_modulus.data()));
+        ASSERT_EQ(S_OK, EncParams_SetCoeffModulus(parms, coeff_modulus_size, coeff_modulus.data()));
+        ASSERT_EQ(S_OK, EncParams_SetPlainModulus2(parms, 257));
+
+        EXPECT_EQ(E_POINTER, Modulus_Create2(coeff_modulus[0], nullptr));
+
+        void *context = nullptr;
+        ASSERT_EQ(S_OK, SEALContext_Create(parms, false, tc128, &context));
+
+        uint64_t parms_id[4]{};
+        ASSERT_EQ(S_OK, SEALContext_FirstParmsId(context, parms_id));
+        void *context_data = nullptr;
+        ASSERT_EQ(S_OK, SEALContext_GetContextData(context, parms_id, &context_data));
+
+        EXPECT_EQ(E_POINTER, ContextData_Parms(context_data, nullptr));
+
+        for (void *modulus : coeff_modulus)
+        {
+            ASSERT_EQ(S_OK, Modulus_Destroy(modulus));
+        }
+        EXPECT_EQ(S_OK, SEALContext_Destroy(context));
+        EXPECT_EQ(S_OK, EncParams_Destroy(parms));
+    }
+
+    TEST(CAbiNullInputTest, RejectsNullHandleArrayElements)
+    {
+        constexpr uint8_t bfv_scheme = 0x1;
+        constexpr int tc128 = 128;
+        constexpr uint64_t poly_modulus_degree = 4096;
+
+        void *parms = nullptr;
+        ASSERT_EQ(S_OK, EncParams_Create1(bfv_scheme, &parms));
+        ASSERT_EQ(S_OK, EncParams_SetPolyModulusDegree(parms, poly_modulus_degree));
+
+        uint64_t coeff_modulus_size = 0;
+        ASSERT_EQ(S_OK, CoeffModulus_BFVDefault(poly_modulus_degree, tc128, &coeff_modulus_size, nullptr));
+        std::vector<void *> coeff_modulus(coeff_modulus_size);
+        ASSERT_EQ(S_OK, CoeffModulus_BFVDefault(poly_modulus_degree, tc128, &coeff_modulus_size, coeff_modulus.data()));
+
+        std::vector<void *> with_null(coeff_modulus);
+        with_null.back() = nullptr;
+        EXPECT_EQ(E_POINTER, EncParams_SetCoeffModulus(parms, coeff_modulus_size, with_null.data()));
+
+        ASSERT_EQ(S_OK, EncParams_SetCoeffModulus(parms, coeff_modulus_size, coeff_modulus.data()));
+        ASSERT_EQ(S_OK, EncParams_SetPlainModulus2(parms, 257));
+        for (void *modulus : coeff_modulus)
+        {
+            ASSERT_EQ(S_OK, Modulus_Destroy(modulus));
+        }
+
+        void *context = nullptr;
+        ASSERT_EQ(S_OK, SEALContext_Create(parms, false, tc128, &context));
+        void *keygen = nullptr;
+        ASSERT_EQ(S_OK, KeyGenerator_Create1(context, &keygen));
+        void *public_key = nullptr;
+        ASSERT_EQ(S_OK, KeyGenerator_CreatePublicKey(keygen, false, &public_key));
+        void *relin_keys = nullptr;
+        ASSERT_EQ(S_OK, KeyGenerator_CreateRelinKeys(keygen, false, &relin_keys));
+
+        void *evaluator = nullptr;
+        ASSERT_EQ(S_OK, Evaluator_Create(context, &evaluator));
+        void *cipher = nullptr;
+        ASSERT_EQ(S_OK, Ciphertext_Create1(nullptr, &cipher));
+        void *destination = nullptr;
+        ASSERT_EQ(S_OK, Ciphertext_Create1(nullptr, &destination));
+
+        void *encrypteds[2]{ cipher, nullptr };
+        EXPECT_EQ(E_POINTER, Evaluator_AddMany(evaluator, 2, encrypteds, destination));
+        EXPECT_EQ(E_POINTER, Evaluator_MultiplyMany(evaluator, 2, encrypteds, relin_keys, destination, nullptr));
+
+        void *keys = nullptr;
+        ASSERT_EQ(S_OK, KSwitchKeys_Create1(&keys));
+        void *key_list[2]{ public_key, nullptr };
+        EXPECT_EQ(E_POINTER, KSwitchKeys_AddKeyList(keys, 2, key_list));
+        void *leading_null[2]{ nullptr, public_key };
+        EXPECT_EQ(E_POINTER, KSwitchKeys_AddKeyList(keys, 2, leading_null));
+
+        // Neither rejected call may have added a key list slot.
+        uint64_t raw_size = 0;
+        ASSERT_EQ(S_OK, KSwitchKeys_RawSize(keys, &raw_size));
+        EXPECT_EQ(0, raw_size);
+
+        EXPECT_EQ(S_OK, KSwitchKeys_Destroy(keys));
+        EXPECT_EQ(S_OK, Ciphertext_Destroy(destination));
+        EXPECT_EQ(S_OK, Ciphertext_Destroy(cipher));
+        EXPECT_EQ(S_OK, Evaluator_Destroy(evaluator));
+        EXPECT_EQ(S_OK, KSwitchKeys_Destroy(relin_keys));
+        EXPECT_EQ(S_OK, PublicKey_Destroy(public_key));
+        EXPECT_EQ(S_OK, KeyGenerator_Destroy(keygen));
+        EXPECT_EQ(S_OK, SEALContext_Destroy(context));
+        EXPECT_EQ(S_OK, EncParams_Destroy(parms));
+    }
+
+    TEST(CAbiLifetimeTest, PlainModulusHandleIsIndependentCopy)
+    {
+        constexpr uint8_t bfv_scheme = 0x1;
+
+        void *parms = nullptr;
+        ASSERT_EQ(S_OK, EncParams_Create1(bfv_scheme, &parms));
+        ASSERT_EQ(S_OK, EncParams_SetPlainModulus2(parms, 65537));
+
+        uint64_t parms_id_before[4]{};
+        ASSERT_EQ(S_OK, EncParams_GetParmsId(parms, parms_id_before));
+
+        void *first = nullptr;
+        void *second = nullptr;
+        ASSERT_EQ(S_OK, EncParams_GetPlainModulus(parms, &first));
+        ASSERT_EQ(S_OK, EncParams_GetPlainModulus(parms, &second));
+        EXPECT_NE(first, second);
+
+        // Each handle is owned by the caller, so mutating or destroying one leaves both
+        // the other handle and the parameters untouched.
+        ASSERT_EQ(S_OK, Modulus_Set2(first, 257));
+        EXPECT_EQ(S_OK, Modulus_Destroy(first));
+
+        uint64_t value = 0;
+        ASSERT_EQ(S_OK, Modulus_Value(second, &value));
+        EXPECT_EQ(65537, value);
+        EXPECT_EQ(S_OK, Modulus_Destroy(second));
+
+        void *third = nullptr;
+        ASSERT_EQ(S_OK, EncParams_GetPlainModulus(parms, &third));
+        ASSERT_EQ(S_OK, Modulus_Value(third, &value));
+        EXPECT_EQ(65537, value);
+        EXPECT_EQ(S_OK, Modulus_Destroy(third));
+
+        uint64_t parms_id_after[4]{};
+        ASSERT_EQ(S_OK, EncParams_GetParmsId(parms, parms_id_after));
+        EXPECT_TRUE(std::equal(parms_id_before, parms_id_before + 4, parms_id_after));
+
+        EXPECT_EQ(S_OK, EncParams_Destroy(parms));
+    }
+    TEST(CAbiExceptionFirewallTest, OversizedCountReturnsHResult)
+    {
+        constexpr uint8_t bfv_scheme = 0x1;
+        constexpr int sec_level_none = 0;
+        constexpr uint64_t poly_modulus_degree = 64;
+        constexpr uint64_t oversized_count = uint64_t(1) << 62;
+
+        void *parms = nullptr;
+        ASSERT_EQ(S_OK, EncParams_Create1(bfv_scheme, &parms));
+        ASSERT_EQ(S_OK, EncParams_SetPolyModulusDegree(parms, poly_modulus_degree));
+
+        int bit_sizes[]{ 40, 40, 40, 40 };
+        void *coeffs[4]{};
+        ASSERT_EQ(S_OK, CoeffModulus_Create1(poly_modulus_degree, 4, bit_sizes, coeffs));
+
+        EXPECT_EQ(COR_E_INVALIDOPERATION, EncParams_SetCoeffModulus(parms, oversized_count, coeffs));
+
+        ASSERT_EQ(S_OK, EncParams_SetCoeffModulus(parms, 4, coeffs));
+        ASSERT_EQ(S_OK, EncParams_SetPlainModulus2(parms, 257));
+        for (void *coeff : coeffs)
+        {
+            ASSERT_EQ(S_OK, Modulus_Destroy(coeff));
+        }
+
+        void *context = nullptr;
+        ASSERT_EQ(S_OK, SEALContext_Create(parms, false, sec_level_none, &context));
+        void *encoder = nullptr;
+        ASSERT_EQ(S_OK, BatchEncoder_Create(context, &encoder));
+        void *plain = nullptr;
+        ASSERT_EQ(S_OK, Plaintext_Create1(nullptr, &plain));
+
+        uint64_t uvalues[1]{ 1 };
+        int64_t ivalues[1]{ 1 };
+        EXPECT_EQ(COR_E_INVALIDOPERATION, BatchEncoder_Encode1(encoder, oversized_count, uvalues, plain));
+        EXPECT_EQ(COR_E_INVALIDOPERATION, BatchEncoder_Encode2(encoder, oversized_count, ivalues, plain));
+
+        void *keygen = nullptr;
+        ASSERT_EQ(S_OK, KeyGenerator_Create1(context, &keygen));
+        void *relin_keys = nullptr;
+        ASSERT_EQ(S_OK, KeyGenerator_CreateRelinKeys(keygen, false, &relin_keys));
+
+        uint32_t galois_elts[1]{ 3 };
+        int galois_steps[1]{ 1 };
+        void *galois_keys = nullptr;
+        EXPECT_EQ(
+            COR_E_INVALIDOPERATION,
+            KeyGenerator_CreateGaloisKeysFromElts(keygen, oversized_count, galois_elts, false, &galois_keys));
+        EXPECT_EQ(
+            COR_E_INVALIDOPERATION,
+            KeyGenerator_CreateGaloisKeysFromSteps(keygen, oversized_count, galois_steps, false, &galois_keys));
+
+        void *evaluator = nullptr;
+        ASSERT_EQ(S_OK, Evaluator_Create(context, &evaluator));
+        void *cipher = nullptr;
+        ASSERT_EQ(S_OK, Ciphertext_Create1(nullptr, &cipher));
+        void *destination = nullptr;
+        ASSERT_EQ(S_OK, Ciphertext_Create1(nullptr, &destination));
+
+        void *encrypteds[1]{ cipher };
+        EXPECT_EQ(COR_E_INVALIDOPERATION, Evaluator_AddMany(evaluator, oversized_count, encrypteds, destination));
+        EXPECT_EQ(
+            COR_E_INVALIDOPERATION,
+            Evaluator_MultiplyMany(evaluator, oversized_count, encrypteds, relin_keys, destination, nullptr));
+
+        void *public_key = nullptr;
+        ASSERT_EQ(S_OK, KeyGenerator_CreatePublicKey(keygen, false, &public_key));
+        void *keys = nullptr;
+        ASSERT_EQ(S_OK, KSwitchKeys_Create1(&keys));
+        void *key_list[1]{ public_key };
+        EXPECT_EQ(COR_E_INVALIDOPERATION, KSwitchKeys_AddKeyList(keys, oversized_count, key_list));
+
+        // The rejected call may not have added a key list slot.
+        uint64_t raw_size = 0;
+        ASSERT_EQ(S_OK, KSwitchKeys_RawSize(keys, &raw_size));
+        EXPECT_EQ(0, raw_size);
+
+        EXPECT_EQ(S_OK, KSwitchKeys_Destroy(keys));
+        EXPECT_EQ(S_OK, PublicKey_Destroy(public_key));
+        EXPECT_EQ(S_OK, Ciphertext_Destroy(destination));
+        EXPECT_EQ(S_OK, Ciphertext_Destroy(cipher));
+        EXPECT_EQ(S_OK, Evaluator_Destroy(evaluator));
+        EXPECT_EQ(S_OK, KSwitchKeys_Destroy(relin_keys));
+        EXPECT_EQ(S_OK, KeyGenerator_Destroy(keygen));
+        EXPECT_EQ(S_OK, Plaintext_Destroy(plain));
+        EXPECT_EQ(S_OK, BatchEncoder_Destroy(encoder));
+        EXPECT_EQ(S_OK, SEALContext_Destroy(context));
+        EXPECT_EQ(S_OK, EncParams_Destroy(parms));
+    }
+
+    TEST(CAbiExceptionFirewallTest, OversizedCKKSEncodeReturnsHResult)
+    {
+        constexpr uint8_t ckks_scheme = 0x2;
+        constexpr int sec_level_none = 0;
+        constexpr uint64_t poly_modulus_degree = 64;
+        constexpr uint64_t oversized_count = uint64_t(1) << 62;
+
+        void *parms = nullptr;
+        ASSERT_EQ(S_OK, EncParams_Create1(ckks_scheme, &parms));
+        ASSERT_EQ(S_OK, EncParams_SetPolyModulusDegree(parms, poly_modulus_degree));
+
+        int bit_sizes[]{ 40, 40, 40, 40 };
+        void *coeffs[4]{};
+        ASSERT_EQ(S_OK, CoeffModulus_Create1(poly_modulus_degree, 4, bit_sizes, coeffs));
+        ASSERT_EQ(S_OK, EncParams_SetCoeffModulus(parms, 4, coeffs));
+        for (void *coeff : coeffs)
+        {
+            ASSERT_EQ(S_OK, Modulus_Destroy(coeff));
+        }
+
+        void *context = nullptr;
+        ASSERT_EQ(S_OK, SEALContext_Create(parms, false, sec_level_none, &context));
+        void *encoder = nullptr;
+        ASSERT_EQ(S_OK, CKKSEncoder_Create(context, &encoder));
+        void *plain = nullptr;
+        ASSERT_EQ(S_OK, Plaintext_Create1(nullptr, &plain));
+
+        uint64_t parms_id[4]{};
+        ASSERT_EQ(S_OK, SEALContext_FirstParmsId(context, parms_id));
+
+        double values[2]{ 1.0, 1.0 };
+        EXPECT_EQ(
+            COR_E_INVALIDOPERATION,
+            CKKSEncoder_Encode1(encoder, oversized_count, values, parms_id, 1048576.0, plain, nullptr));
+        EXPECT_EQ(
+            COR_E_INVALIDOPERATION,
+            CKKSEncoder_Encode2(encoder, oversized_count, values, parms_id, 1048576.0, plain, nullptr));
 
         EXPECT_EQ(S_OK, Plaintext_Destroy(plain));
         EXPECT_EQ(S_OK, CKKSEncoder_Destroy(encoder));

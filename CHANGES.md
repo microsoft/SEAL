@@ -2,13 +2,17 @@
 
 ## Version 4.4.3
 
-- More bug fixes and improvements to unit tests.
+- Fixed null-output-pointer dereferences in the C API ([issue #753](https://github.com/microsoft/SEAL/issues/753)): `ContextData_Parms` and `Modulus_Create2` wrote the created handle without validating the output pointer.
+- Fixed null-element dereferences in the C API ([issue #754](https://github.com/microsoft/SEAL/issues/754)): `EncParams_SetCoeffModulus`, `Evaluator_AddMany`, `Evaluator_MultiplyMany`, and `KSwitchKeys_AddKeyList` validated the handle array but not its elements.
+- Fixed `EncParams_GetPlainModulus` ([issue #755](https://github.com/microsoft/SEAL/issues/755)) to return an independently allocated `Modulus`, owned by the caller.
+- Fixed multiple instances where a C++ exception could leak across the C API boundary, resulting in process termination.
+- Fixed some bugs and improved unit tests.
 - Improved MinGW CI pipeline to cover also `sealc`.
 - Added C++14 CI jobs for Windows, with both MSVC and MinGW.
-- Added documentation for building with MinGW-w64 on Windows.
-- Checking now for aligned allocator at configure time; this enables it also on Windows with C++14 and on Android API 28+.
-- Fixed `SEAL_USE_INTRIN=OFF` not taking effect in an existing build tree.
-- Fixed `seal_combine_archives` for CMake 3.28 and newer (policy CMP0175).
+- Added documentation in [README.md](README.md) for building with MinGW-w64 on Windows.
+- Added a configure-time aligned allocator check.
+- Fixed a bug where `SEAL_USE_INTRIN=OFF` was in some cases not taking effect properly in an existing build tree.
+- Fixed a bug in `seal_combine_archives`.
 - Updated dependencies.
 
 ## Version 4.4.2
