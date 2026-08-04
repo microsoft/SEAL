@@ -53,8 +53,7 @@ namespace seal
                 size_t in_size = in.size();
                 const unsigned char *in_data = reinterpret_cast<const unsigned char *>(in.cbegin());
 
-                // The whole-uint64_t writes below rely on the output being zero-filled (DynArray zero-fills) and on
-                // block_slack bytes of headroom past the size bound.
+                // Allocates a zero-filled array with block_slack bytes of extra headroom past the size bound.
                 DynArray<seal_byte> out(add_safe(bitpack_size_bound(in_size), block_slack), pool);
                 unsigned char *out_data = reinterpret_cast<unsigned char *>(out.begin());
 
@@ -71,11 +70,12 @@ namespace seal
 
                     // The word data in the stream need not fall on the stream's own word grid (serialized metadata
                     // is not always a multiple of eight bytes), so choose the phase that minimizes the encoded size
-                    // of the block.
+                    // of the block. A phase of bytes_per_word would reproduce the alignment of phase zero, so only
+                    // smaller values need to be considered.
                     size_t phase = 0;
                     int width = 0;
                     size_t body_size = block_len;
-                    for (size_t p = 0; p <= min<size_t>(size_t(7), block_len); p++)
+                    for (size_t p = 0; p <= min<size_t>(bytes_per_word - 1, block_len); p++)
                     {
                         size_t words = block_word_count(block_len, p);
                         uint64_t block_or = 0;
@@ -240,7 +240,7 @@ namespace seal
                 }
                 int width = static_cast<int>(block_header[0]);
                 size_t phase = static_cast<size_t>(block_header[1]);
-                if (width > bits_per_uint64 || phase > min<size_t>(size_t(7), block_len))
+                if (width > bits_per_uint64 || phase > min<size_t>(bytes_per_word - 1, block_len))
                 {
                     failed_ = true;
                     return 0;
