@@ -19,4 +19,6 @@ SEAL_C_FUNC Decryptor_Destroy(void *thisptr);
 
 SEAL_C_FUNC Decryptor_Decrypt(void *thisptr, void *encrypted, void *destination);
 
+SEAL_C_FUNC Decryptor_InvariantNoise(void *thisptr, void *encrypted, double *invariant_noise_budget);
+
 SEAL_C_FUNC Decryptor_InvariantNoiseBudget(void *thisptr, void *encrypted, int *invariant_noise_budget);
