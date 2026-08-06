@@ -28,14 +28,14 @@ namespace seal
 
             The vast majority of data serialized / deserialized by SEAL will be arrays of uint64_t representing
             polynomial coefficients in RNS form. Each of the uint64_ts in a single array will be residues modulo
-            some prime q, where q <= 2^60. Thus, some number of high-order bits of these values will always be zero,
+            some prime q, where q < 2^61. Thus, some number of high-order bits of these values will always be zero,
             while the lower-order bits will (when serializing any cryptographic data) have high entropy. Standard
             compression algorithms like zlib are designed to operate on whole bytes, so they will fail to compress
             any zero bits that do not appear as a whole byte, and the high-entropy cryptographic bits are
             incompressible.
 
             The optimal way to compress these arrays of polynomial coefficients would be to simply use knowledge
-            of q to append one coefficient after another with no zero-bits inbetween. However, SEAL's serialization
+            of q to append one coefficient after another with no padding bits in between. However, SEAL's serialization
             API deliberately hides details of the payload's schema from the serializer, which just sees a raw byte
             stream. While the majority of that byte stream will usually contain these uint64_t arrays, each array
             may have a different value of q, and the stream may be interspersed with other small data structures such
@@ -61,8 +61,8 @@ namespace seal
             +---------------+------------+---------+---------+--   --+---------+
 
             The compression algorithm for each block works independently, as follows. The algorithm assumes that
-            the input block contains a series of uint64_t values with some number of high bits that are consistently 0,
-            however the start of the first uint64_t value may be offset from the start of the stream by some unknown
+            the input block contains a series of uint64_t values with some number of high bits that are consistently
+            0; however, the start of the first uint64_t value may be offset from the start of the stream by some unknown
             number of bytes between 0 and 7 (this misalignment can be caused by interleaved metadata earlier in the
             stream, for example). This offset is called the "phase," and the compression algorithm simply tries all
             possible phase values between 0 and 7 and proceeds with the one that yields the smallest compressed block.
@@ -70,15 +70,15 @@ namespace seal
             An example input stream might look like the following. (The annotations below the figure represent where
             the data came from.)
 
-             00  00  00  00  00  25  EB  79  2B  00  00  00  00  14  AC  2D  26  00  00  00 ...
+             00  00  00  00  00  25  EB  79  2B  00  00  00  00  14  AC  2D  27  00  00  00 ...
             +-------------------+-------------------------------+---------------------------+
             | metadata tail     |         coefficient 0         |       coefficient 1       |
-            | (from prev block) |     0x2B79EB25 -> 30 bits     |     0x272DAC14 -> 29 bits |
+            | (from prev block) |     0x2B79EB25 -> 30 bits     |     0x272DAC14 -> 30 bits |
             +-------------------+-------------------------------+---------------------------+
 
             Here we can see that the optimal value of "phase" will be 5, since this stream does actually contain an
             array of uint64_t values and they start on the sixth byte. The algorithm will then cast the remainder of the
-            stream as uint64_ts, bitwise-OR those values together, and record the position of the highest-order 1 bit.
+            block as uint64_ts, bitwise-OR those values together, and record the position of the highest-order 1 bit.
             This is the "width," and the number of uint64_ts in the array is the value of "words". (The width is the
             algorithm's best guess at the bit size of the coefficient modulus.) The final output of compression is
             then:
@@ -94,20 +94,23 @@ namespace seal
 
             For the example stream above, this would look like:
 
-                1C     05     00 00 00 00 00   25 EB 79 2B 05 6B CB ...           00 00 00
+                1E     05     00 00 00 00 00   25 EB 79 2B 05 6B CB ...           xx xx xx
             +-------+-------+~~~~~~~~~~~~~~~~+----------------------------------+~~~~~~~~~~~+
             | width | phase |  verbatim      |          packed words            |  verbatim |
             |  1 B  |  1 B  |     5 B        |  127 words x 30 bits -> 477 B    |   3 B     |
             +-------+-------+~~~~~~~~~~~~~~~~+----------------------------------+~~~~~~~~~~~+
 
-            The total size of the compressed block in this example would be 487 bytes.
+            The trailing xx bytes are the start of a coefficient that no longer fit in a whole uint64_t before the
+            block ended; they are carried verbatim, and being the low-order bytes of a coefficient they are
+            high-entropy rather than zero. The total size of the compressed block in this example would be 487
+            bytes.
 
             Two other scenarios are worth mentioning. First, when the input stream contains something other than the
             expected content (e.g. metadata), generally this algorithm will not find any value for "width" below 64,
-            and phase will default to 0, meaning the "compressed" output will be the raw input block plus two
-            additional bytes carrying the width (64) and phase (0). Second, if the input contains all 0-bits for
-            whatever reason, the computed width and phase will both be 0, so the compressed output will simply be two
-            bytes containing 0s.
+            and phase will default to 0, meaning the "compressed" output will two bytes carrying the width (64) and
+            phase (0), followed by the raw input block. Second, if the input contains all 0-bits for whatever reason,
+            the computed width and phase will both be 0, so the compressed output will simply be two bytes containing
+            0s.
             */
 
             // Bounds for the base-2 logarithm of the block size accepted when unpacking.
