@@ -19,7 +19,6 @@ namespace seal
     a large number of zero bytes in the output. Any compression algorithm should
     be able to clean up these zero bytes and hence compress both ciphertext and
     key data.
-
     */
     enum class compr_mode_type : std::uint8_t
     {
@@ -33,7 +32,8 @@ namespace seal
         // Use Zstandard compression
         zstd = 2,
 #endif
-        // Use bit-packing of 64-bit words
+        // Use bit-packing of 64-bit words. Unlike ZLIB and Zstandard, bit-packing performs no integrity
+        // checking of the data.
         bitpack = 3,
     };
 
