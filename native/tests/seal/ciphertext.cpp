@@ -153,9 +153,10 @@ namespace sealtest
             is_equal_uint(ctxt.data(), ctxt2.data(), parms.poly_modulus_degree() * parms.coeff_modulus().size() * 2));
         ASSERT_TRUE(ctxt.data() != ctxt2.data());
 
-        // The first block contains the ciphertext metadata (among it full-width parms_id hash words) and packs at
-        // up to the full 64 bits, but every later block holds only coefficients smaller than the coefficient
-        // modulus primes and hence packs at their bit width, so the total is guaranteed to beat the unpacked size.
+        // The first block contains the ciphertext metadata (among them the full-width parms_id hash words) and
+        // packs at up to the full 64 bits, but every later block holds only coefficients smaller than the
+        // coefficient modulus primes and hence packs at their bit width, so the total is guaranteed to beat the
+        // unpacked size.
         ASSERT_LT(bitpack_size, ctxt.save_size(compr_mode_type::none));
 
         // Seeded ciphertexts bit-pack too: the same seeded object saved with and without bit-packing must load to

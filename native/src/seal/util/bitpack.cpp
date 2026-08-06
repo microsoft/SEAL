@@ -57,7 +57,7 @@ namespace seal
                 DynArray<seal_byte> out(add_safe(bitpack_size_bound(in_size), block_slack), pool);
                 unsigned char *out_data = reinterpret_cast<unsigned char *>(out.begin());
 
-                // Write the original byte count and the block size
+                // Write the 9-byte stream header: the original byte count and the base-2 log of the block size
                 uint64_t in_size64 = static_cast<uint64_t>(in_size);
                 memcpy(out_data, &in_size64, bytes_per_word);
                 size_t out_pos = bytes_per_word;
@@ -74,6 +74,12 @@ namespace seal
                     // smaller values need to be considered. The clamp to block_len keeps the word count from
                     // underflowing on a block shorter than a word; for such a block every phase encodes zero words
                     // at the same size and the tie-break below settles on phase zero.
+                    //
+                    // (Note: The current approach scans through the block eight times, one for each possible phase.
+                    //  An optimization is possible that cuts this down to one scan, using the fact that we could OR
+                    //  all (phase 0) uint64_ts together and infer the phase from where the zeroes ended up. However,
+                    //  this has more complicated bookkeeping around the start and end of the block and leads to only a
+                    //  modest speedup for an already very-fast routine, so it's been left for future work.)
                     size_t phase = 0;
                     int width = 0;
                     size_t body_size = block_len;
@@ -205,7 +211,8 @@ namespace seal
 
                 if (!started_)
                 {
-                    // The packed data begins with the original byte count and the block size
+                    // The compressed stream begins with its 9-byte header: the original byte count and the base-2
+                    // log of the block size
                     unsigned char prologue[bytes_per_word + 1];
                     if (read_packed(prologue, static_cast<streamsize>(sizeof(prologue))) !=
                         static_cast<streamsize>(sizeof(prologue)))

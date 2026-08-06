@@ -20,14 +20,6 @@ namespace seal
     be able to clean up these zero bytes and hence compress both ciphertext and
     key data.
 
-    Alternatively, compr_mode_type::bitpack re-encodes each block of 64-bit
-    words using only as many bits per word as the largest word in the block
-    requires, discarding exactly the always-zero high bits. The significant
-    bits of ciphertext and key data are close to uniformly random and hence
-    essentially incompressible, so bit-packing typically produces smaller
-    output than a general-purpose compressor, which cannot remove partial
-    bytes. Unlike ZLIB and Zstandard, bit-packing performs no integrity
-    checking of the data.
     */
     enum class compr_mode_type : std::uint8_t
     {

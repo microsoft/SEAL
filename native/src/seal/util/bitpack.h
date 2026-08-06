@@ -107,10 +107,10 @@ namespace seal
 
             Two other scenarios are worth mentioning. First, when the input stream contains something other than the
             expected content (e.g. metadata), generally this algorithm will not find any value for "width" below 64,
-            and phase will default to 0, meaning the "compressed" output will two bytes carrying the width (64) and
-            phase (0), followed by the raw input block. Second, if the input contains all 0-bits for whatever reason,
-            the computed width and phase will both be 0, so the compressed output will simply be two bytes containing
-            0s.
+            and phase will default to 0, meaning the "compressed" output will be two bytes carrying the width (64)
+            and phase (0), followed by the raw input block. Second, if the input contains all 0-bits for whatever
+            reason, the computed width and phase will both be 0, so the compressed output will simply be two bytes
+            containing 0s.
             */
 
             // Bounds for the base-2 logarithm of the block size accepted when unpacking.
