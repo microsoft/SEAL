@@ -127,6 +127,53 @@ namespace sealtest
         ASSERT_TRUE(ctxt.data() != ctxt2.data());
     }
 
+    TEST(CiphertextTest, BFVBitPackSaveLoadCiphertext)
+    {
+        stringstream stream;
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(1024);
+        parms.set_coeff_modulus(CoeffModulus::BFVDefault(1024));
+        parms.set_plain_modulus(0xF0F0);
+
+        SEALContext context(parms, false);
+        KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
+        Encryptor encryptor(context, pk);
+
+        Ciphertext ctxt;
+        encryptor.encrypt(Plaintext("Ax^10 + 9x^9 + 8x^8 + 7x^7 + 6x^6 + 5x^5 + 4x^4 + 3x^3 + 2x^2 + 1"), ctxt);
+
+        // A bit-packed round-trip preserves the ciphertext exactly
+        auto bitpack_size = ctxt.save(stream, compr_mode_type::bitpack);
+        Ciphertext ctxt2;
+        ctxt2.load(context, stream);
+        ASSERT_TRUE(ctxt.parms_id() == ctxt2.parms_id());
+        ASSERT_TRUE(
+            is_equal_uint(ctxt.data(), ctxt2.data(), parms.poly_modulus_degree() * parms.coeff_modulus().size() * 2));
+        ASSERT_TRUE(ctxt.data() != ctxt2.data());
+
+        // The first block contains the ciphertext metadata (among them the full-width parms_id hash words) and
+        // packs at up to the full 64 bits, but every later block holds only coefficients smaller than the
+        // coefficient modulus primes and hence packs at their bit width, so the total is guaranteed to beat the
+        // unpacked size.
+        ASSERT_LT(bitpack_size, ctxt.save_size(compr_mode_type::none));
+
+        // Seeded ciphertexts bit-pack too: the same seeded object saved with and without bit-packing must load to
+        // identical data
+        Encryptor sym_encryptor(context, keygen.secret_key());
+        auto seeded = sym_encryptor.encrypt_symmetric(Plaintext("3x^7 + 2"));
+        stringstream seeded_stream;
+        seeded.save(seeded_stream, compr_mode_type::bitpack);
+        seeded.save(seeded_stream, compr_mode_type::none);
+        Ciphertext from_bitpack, from_none;
+        from_bitpack.load(context, seeded_stream);
+        from_none.load(context, seeded_stream);
+        ASSERT_TRUE(from_bitpack.parms_id() == from_none.parms_id());
+        ASSERT_TRUE(is_equal_uint(
+            from_bitpack.data(), from_none.data(), parms.poly_modulus_degree() * parms.coeff_modulus().size() * 2));
+    }
+
     TEST(CiphertextTest, LoadZeroSizeRejectsOversizedDynArray)
     {
         EncryptionParameters parms(scheme_type::bfv);

@@ -425,4 +425,39 @@ namespace sealbench
     void bm_ckks_rescale_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_ckks_relin_inplace(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
     void bm_ckks_rotate(benchmark::State &state, std::shared_ptr<BMEnv> bm_env);
+
+    /**
+    Benchmark cases for serialization save/load under a given compression mode. Each case reports the
+    serialized size in bytes as the counter "size".
+    */
+    void bm_serialize_save_ct(benchmark::State &state, std::shared_ptr<BMEnv> bm_env, seal::compr_mode_type compr_mode);
+    void bm_serialize_load_ct(benchmark::State &state, std::shared_ptr<BMEnv> bm_env, seal::compr_mode_type compr_mode);
+    void bm_serialize_save_pk(benchmark::State &state, std::shared_ptr<BMEnv> bm_env, seal::compr_mode_type compr_mode);
+    void bm_serialize_load_pk(benchmark::State &state, std::shared_ptr<BMEnv> bm_env, seal::compr_mode_type compr_mode);
+    void bm_serialize_save_rlk(
+        benchmark::State &state, std::shared_ptr<BMEnv> bm_env, seal::compr_mode_type compr_mode);
+    void bm_serialize_load_rlk(
+        benchmark::State &state, std::shared_ptr<BMEnv> bm_env, seal::compr_mode_type compr_mode);
+    void bm_serialize_save_glk(
+        benchmark::State &state, std::shared_ptr<BMEnv> bm_env, seal::compr_mode_type compr_mode);
+    void bm_serialize_load_glk(
+        benchmark::State &state, std::shared_ptr<BMEnv> bm_env, seal::compr_mode_type compr_mode);
+    void bm_serialize_save_sk(benchmark::State &state, std::shared_ptr<BMEnv> bm_env, seal::compr_mode_type compr_mode);
+    void bm_serialize_load_sk(benchmark::State &state, std::shared_ptr<BMEnv> bm_env, seal::compr_mode_type compr_mode);
+    void bm_serialize_save_seeded_ct(
+        benchmark::State &state, std::shared_ptr<BMEnv> bm_env, seal::compr_mode_type compr_mode);
+    void bm_serialize_load_seeded_ct(
+        benchmark::State &state, std::shared_ptr<BMEnv> bm_env, seal::compr_mode_type compr_mode);
+    void bm_serialize_save_seeded_pk(
+        benchmark::State &state, std::shared_ptr<BMEnv> bm_env, seal::compr_mode_type compr_mode);
+    void bm_serialize_load_seeded_pk(
+        benchmark::State &state, std::shared_ptr<BMEnv> bm_env, seal::compr_mode_type compr_mode);
+    void bm_serialize_save_seeded_rlk(
+        benchmark::State &state, std::shared_ptr<BMEnv> bm_env, seal::compr_mode_type compr_mode);
+    void bm_serialize_load_seeded_rlk(
+        benchmark::State &state, std::shared_ptr<BMEnv> bm_env, seal::compr_mode_type compr_mode);
+    void bm_serialize_save_seeded_glk(
+        benchmark::State &state, std::shared_ptr<BMEnv> bm_env, seal::compr_mode_type compr_mode);
+    void bm_serialize_load_seeded_glk(
+        benchmark::State &state, std::shared_ptr<BMEnv> bm_env, seal::compr_mode_type compr_mode);
 } // namespace sealbench

@@ -32,6 +32,9 @@ namespace seal
         // Use Zstandard compression
         zstd = 2,
 #endif
+        // Use bit-packing compression. Unlike ZLIB and Zstandard, bit-packing performs no integrity
+        // checking of the data.
+        bitpack = 3,
     };
 
     /**
@@ -109,7 +112,9 @@ namespace seal
 #endif
 #ifdef SEAL_USE_ZSTD
             case static_cast<std::uint8_t>(compr_mode_type::zstd):
+                /* fall through */
 #endif
+            case static_cast<std::uint8_t>(compr_mode_type::bitpack):
                 return true;
             }
             return false;
