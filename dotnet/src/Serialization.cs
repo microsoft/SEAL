@@ -27,7 +27,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>Use Zstandard compression.</summary>
         ZSTD = 2,
 
-        /// <summary>Use bit-packing of 64-bit words. Unlike ZLIB and Zstandard, bit-packing performs no
+        /// <summary>Use bit-packing compression. Unlike ZLIB and Zstandard, bit-packing performs no
         /// integrity checking of the data.</summary>
         BitPack = 3
     }

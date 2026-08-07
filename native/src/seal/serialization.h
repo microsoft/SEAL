@@ -32,7 +32,7 @@ namespace seal
         // Use Zstandard compression
         zstd = 2,
 #endif
-        // Use bit-packing of 64-bit words. Unlike ZLIB and Zstandard, bit-packing performs no integrity
+        // Use bit-packing compression. Unlike ZLIB and Zstandard, bit-packing performs no integrity
         // checking of the data.
         bitpack = 3,
     };
