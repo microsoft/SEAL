@@ -1,5 +1,9 @@
 # List of Changes
 
+## Version 4.4.5
+
+- Fixed `seal::random_bytes` to fill the caller's buffer with `std::memcpy` instead of storing through a `reinterpret_cast` `std::uint32_t` pointer.
+
 ## Version 4.4.4
 
 - Fixed `CKKSEncoder::encode(std::int64_t, ...)` ([issue #757](https://github.com/microsoft/SEAL/issues/757)) to encode negative values whose magnitude exceeds a coefficient modulus, and to handle `INT64_MIN` without undefined behavior.

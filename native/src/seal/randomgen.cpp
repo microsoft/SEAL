@@ -6,6 +6,7 @@
 #include "seal/util/common.h"
 #include "seal/util/fips202.h"
 #include <algorithm>
+#include <cstring>
 #include <iostream>
 #include <random>
 #if (SEAL_SYSTEM == SEAL_SYSTEM_WINDOWS)
@@ -38,7 +39,8 @@ namespace seal
         random_device rd("/dev/urandom");
         while (count >= 4)
         {
-            *reinterpret_cast<uint32_t *>(buf) = rd();
+            uint32_t value = rd();
+            memcpy(buf, &value, 4);
             buf += 4;
             count -= 4;
         }
@@ -87,7 +89,8 @@ namespace seal
         random_device rd;
         while (count >= 4)
         {
-            *reinterpret_cast<uint32_t *>(buf) = rd();
+            uint32_t value = rd();
+            memcpy(buf, &value, 4);
             buf += 4;
             count -= 4;
         }
