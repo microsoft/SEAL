@@ -787,6 +787,10 @@ namespace seal
             operand2 >>= 32;
 
             auto middle1 = operand1 * operand2_coeff_right;
+#if defined(__wasm__) && defined(__clang__)
+            // Prevent LLVM from replacing the partial products with a __multi3 call.
+             __asm__("" : "+r"(middle1));
+#endif
             T middle;
             auto left = operand1 * operand2 +
                         (static_cast<T>(add_uint64(middle1, operand2 * operand1_coeff_right, &middle)) << 32);

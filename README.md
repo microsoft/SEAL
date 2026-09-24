@@ -462,7 +462,7 @@ emcmake cmake -S . -B build \
 emmake make -C build -j
 
 # Build the WebAssembly module
-emcc \
+em++ \
  -Wall \
  -flto \
  -O3 \

@@ -145,7 +145,7 @@ macro(seal_detect___builtin_addcll)
             }"
             SEAL___BUILTIN_ADDCLL_FOUND
         )
-    
+
     seal_end_detect_intrinsics()
 endmacro()
 
@@ -161,6 +161,6 @@ macro(seal_detect___builtin_subcll)
             }"
             SEAL___BUILTIN_SUBCLL_FOUND
         )
-    
+
     seal_end_detect_intrinsics()
 endmacro()

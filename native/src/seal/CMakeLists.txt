@@ -21,6 +21,10 @@ set(SEAL_SOURCE_FILES ${SEAL_SOURCE_FILES}
     ${CMAKE_CURRENT_LIST_DIR}/valcheck.cpp
 )
 
+if(EMSCRIPTEN)
+    list(APPEND SEAL_SOURCE_FILES ${CMAKE_CURRENT_LIST_DIR}/bindings.cpp)
+endif()
+
 # Add header files for installation
 install(
     FILES
@@ -52,6 +56,13 @@ install(
     DESTINATION
         ${SEAL_INCLUDES_INSTALL_DIR}/seal
 )
+
+if(EMSCRIPTEN)
+    install(
+        FILES ${CMAKE_CURRENT_LIST_DIR}/base64.h
+        DESTINATION ${SEAL_INCLUDES_INSTALL_DIR}/seal
+    )
+endif()
 
 add_subdirectory(util)
 set(SEAL_SOURCE_FILES ${SEAL_SOURCE_FILES} PARENT_SCOPE)
