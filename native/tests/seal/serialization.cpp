@@ -339,8 +339,8 @@ namespace sealtest
             Serialization::LoadHeader(stream, loaded_header);
             ASSERT_EQ(Serialization::seal_magic, loaded_header.magic);
             ASSERT_EQ(Serialization::seal_header_size, loaded_header.header_size);
-            ASSERT_EQ(SEAL_VERSION_MAJOR, loaded_header.version_major);
-            ASSERT_EQ(SEAL_VERSION_MINOR, loaded_header.version_minor);
+            ASSERT_EQ(Serialization::format_version_major, loaded_header.version_major);
+            ASSERT_EQ(Serialization::format_version_minor, loaded_header.version_minor);
             ASSERT_EQ(Serialization::compr_mode_default, loaded_header.compr_mode);
             ASSERT_EQ(0x00, loaded_header.reserved);
             ASSERT_EQ(256, loaded_header.size);
@@ -357,11 +357,82 @@ namespace sealtest
             Serialization::LoadHeader(buffer.data(), buffer.size(), loaded_header);
             ASSERT_EQ(Serialization::seal_magic, loaded_header.magic);
             ASSERT_EQ(Serialization::seal_header_size, loaded_header.header_size);
-            ASSERT_EQ(SEAL_VERSION_MAJOR, loaded_header.version_major);
-            ASSERT_EQ(SEAL_VERSION_MINOR, loaded_header.version_minor);
+            ASSERT_EQ(Serialization::format_version_major, loaded_header.version_major);
+            ASSERT_EQ(Serialization::format_version_minor, loaded_header.version_minor);
             ASSERT_EQ(Serialization::compr_mode_default, loaded_header.compr_mode);
             ASSERT_EQ(0x00, loaded_header.reserved);
             ASSERT_EQ(256, loaded_header.size);
+        }
+    }
+
+    TEST(SerializationTest, SaveFormatVersion)
+    {
+        // Microsoft SEAL 4.0 accepts only version 4.0; Microsoft SEAL 4.4 accepts 4.0-4.4.
+        ASSERT_EQ(4, Serialization::format_version_major);
+        ASSERT_EQ(0, Serialization::format_version_minor);
+        ASSERT_EQ(1, Serialization::format_version_minor_ntt_ciphertext);
+        Serialization::SEALHeader ntt_header;
+        ntt_header.version_minor = Serialization::format_version_minor_ntt_ciphertext;
+        ASSERT_TRUE(Serialization::IsValidHeader(ntt_header));
+
+        test_struct source{ 3, ~0, 3.14159 };
+        using namespace placeholders;
+        auto save_members = bind(&test_struct::save_members, &source, _1);
+        auto raw_size = source.save_size(compr_mode_type::none);
+
+        auto header_of = [](const string &serialized) {
+            Serialization::SEALHeader header;
+            Serialization::LoadHeader(
+                reinterpret_cast<const seal_byte *>(serialized.data()), serialized.size(), header);
+            return header;
+        };
+
+        auto compr_modes = available_compr_modes();
+        compr_modes.push_back(compr_mode_type::none);
+        for (auto compr_mode : compr_modes)
+        {
+            stringstream stream;
+            Serialization::Save(save_members, raw_size, stream, compr_mode, false);
+            auto header = header_of(stream.str());
+            ASSERT_EQ(Serialization::format_version_major, header.version_major);
+            ASSERT_EQ(Serialization::format_version_minor, header.version_minor);
+
+            for (int minor = 0; minor <= SEAL_VERSION_MINOR; minor++)
+            {
+                stringstream minor_stream;
+                Serialization::Save(
+                    save_members, raw_size, minor_stream, compr_mode, false, static_cast<uint8_t>(minor));
+                ASSERT_EQ(minor, header_of(minor_stream.str()).version_minor);
+
+                vector<seal_byte> buffer(static_cast<size_t>(source.save_size(compr_mode)));
+                auto out_size = Serialization::Save(
+                    save_members, raw_size, buffer.data(), buffer.size(), compr_mode, false,
+                    static_cast<uint8_t>(minor));
+                ASSERT_EQ(
+                    minor,
+                    header_of(string(reinterpret_cast<const char *>(buffer.data()), static_cast<size_t>(out_size)))
+                        .version_minor);
+
+                test_struct loaded;
+                Serialization::Load(bind(&test_struct::load_members, &loaded, _1), minor_stream, false);
+                ASSERT_EQ(source.a, loaded.a);
+                ASSERT_EQ(source.b, loaded.b);
+                ASSERT_EQ(source.c, loaded.c);
+            }
+
+            // Writing a version this library would not accept is rejected
+            stringstream bad_stream;
+            ASSERT_THROW(
+                Serialization::Save(
+                    save_members, raw_size, bad_stream, compr_mode, false,
+                    static_cast<uint8_t>(SEAL_VERSION_MINOR + 1)),
+                invalid_argument);
+            vector<seal_byte> bad_buffer(static_cast<size_t>(source.save_size(compr_mode)));
+            ASSERT_THROW(
+                Serialization::Save(
+                    save_members, raw_size, bad_buffer.data(), bad_buffer.size(), compr_mode, false,
+                    static_cast<uint8_t>(SEAL_VERSION_MINOR + 1)),
+                invalid_argument);
         }
     }
     /*

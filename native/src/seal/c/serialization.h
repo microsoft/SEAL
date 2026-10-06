@@ -17,6 +17,10 @@ SEAL_C_FUNC Serialization_SEALMagic(uint16_t *result);
 
 SEAL_C_FUNC Serialization_SEALHeaderSize(uint8_t *result);
 
+SEAL_C_FUNC Serialization_FormatVersionMajor(uint8_t *result);
+
+SEAL_C_FUNC Serialization_FormatVersionMinor(uint8_t *result);
+
 SEAL_C_FUNC Serialization_IsSupportedComprMode(uint8_t compr_mode, bool *result);
 
 SEAL_C_FUNC Serialization_ComprModeDefault(uint8_t *result);

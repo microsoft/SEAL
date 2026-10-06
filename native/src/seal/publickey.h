@@ -106,7 +106,11 @@ namespace seal
         inline std::streamoff save(
             std::ostream &stream, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
-            return pk_.save(stream, compr_mode);
+            // Public keys have always been in NTT form, so unlike BGV ciphertexts they keep format version 4.0.
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&Ciphertext::save_members, &pk_, _1), pk_.save_size(compr_mode_type::none), stream,
+                compr_mode, false);
         }
 
         /**
@@ -169,7 +173,10 @@ namespace seal
         inline std::streamoff save(
             seal_byte *out, std::size_t size, compr_mode_type compr_mode = Serialization::compr_mode_default) const
         {
-            return pk_.save(out, size, compr_mode);
+            using namespace std::placeholders;
+            return Serialization::Save(
+                std::bind(&Ciphertext::save_members, &pk_, _1), pk_.save_size(compr_mode_type::none), out, size,
+                compr_mode, false);
         }
 
         /**

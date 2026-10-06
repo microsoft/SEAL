@@ -4,9 +4,13 @@
 #include "seal/ciphertext.h"
 #include "seal/context.h"
 #include "seal/encryptor.h"
+#include "seal/evaluator.h"
 #include "seal/keygenerator.h"
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"
+#include <functional>
+#include <sstream>
+#include <vector>
 #include "gtest/gtest.h"
 
 using namespace seal;
@@ -367,6 +371,99 @@ namespace sealtest
 
         Ciphertext loaded;
         ASSERT_THROW(loaded.load(context, ss), logic_error);
+    }
+
+    TEST(CiphertextTest, SaveFormatVersion)
+    {
+        // BGV ciphertexts are in NTT form since Microsoft SEAL 4.1, so every NTT-form ciphertext uses
+        // format version 4.1 to be rejected by Microsoft SEAL 4.0; other ciphertexts use 4.0.
+        vector<compr_mode_type> compr_modes{ compr_mode_type::none };
+#ifdef SEAL_USE_ZLIB
+        compr_modes.push_back(compr_mode_type::zlib);
+#endif
+#ifdef SEAL_USE_ZSTD
+        compr_modes.push_back(compr_mode_type::zstd);
+#endif
+
+        auto check = [&](const SEALContext &context, const function<void(ostream &, compr_mode_type)> &save,
+                         uint8_t expected_minor, bool expected_ntt_form) {
+            for (auto compr_mode : compr_modes)
+            {
+                stringstream ss;
+                save(ss, compr_mode);
+                Serialization::SEALHeader header;
+                Serialization::LoadHeader(ss, header);
+                ASSERT_EQ(Serialization::format_version_major, header.version_major);
+                ASSERT_EQ(expected_minor, header.version_minor);
+
+                ss.seekg(0);
+                Ciphertext loaded;
+                loaded.load(context, ss);
+                ASSERT_EQ(expected_ntt_form, loaded.is_ntt_form());
+            }
+        };
+
+        for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
+        {
+            EncryptionParameters parms(scheme);
+            parms.set_poly_modulus_degree(1024);
+            parms.set_coeff_modulus(CoeffModulus::BFVDefault(1024));
+            if (scheme != scheme_type::ckks)
+            {
+                parms.set_plain_modulus(0xF0F0);
+            }
+            SEALContext context(parms, false);
+            KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            Encryptor encryptor(context, pk, keygen.secret_key());
+            Evaluator evaluator(context);
+
+            bool ntt_form = scheme != scheme_type::bfv;
+            uint8_t minor =
+                ntt_form ? Serialization::format_version_minor_ntt_ciphertext : Serialization::format_version_minor;
+
+            Ciphertext ct;
+            encryptor.encrypt_zero(ct);
+            ASSERT_EQ(ntt_form, ct.is_ntt_form());
+            check(context, [&](ostream &stream, compr_mode_type mode) { ct.save(stream, mode); }, minor, ntt_form);
+
+            // Seeded ciphertexts
+            check(
+                context,
+                [&](ostream &stream, compr_mode_type mode) { encryptor.encrypt_zero_symmetric().save(stream, mode); },
+                minor, ntt_form);
+
+            // Saving to a buffer
+            check(
+                context,
+                [&](ostream &stream, compr_mode_type mode) {
+                    vector<seal_byte> buffer(static_cast<size_t>(ct.save_size(mode)));
+                    auto out_size = ct.save(buffer.data(), buffer.size(), mode);
+                    stream.write(reinterpret_cast<const char *>(buffer.data()), static_cast<streamsize>(out_size));
+                },
+                minor, ntt_form);
+
+            if (scheme == scheme_type::bfv)
+            {
+                // BFV ciphertexts in NTT form
+                Ciphertext ct_ntt;
+                evaluator.transform_to_ntt(ct, ct_ntt);
+                check(
+                    context, [&](ostream &stream, compr_mode_type mode) { ct_ntt.save(stream, mode); },
+                    Serialization::format_version_minor_ntt_ciphertext, true);
+            }
+            else if (scheme == scheme_type::bgv)
+            {
+                // BGV ciphertexts in coefficient form have the Microsoft SEAL 4.0 meaning and are converted to NTT
+                // form on load
+                Ciphertext ct_coeff;
+                evaluator.transform_from_ntt(ct, ct_coeff);
+                check(
+                    context, [&](ostream &stream, compr_mode_type mode) { ct_coeff.save(stream, mode); },
+                    Serialization::format_version_minor, true);
+            }
+        }
     }
 
 } // namespace sealtest

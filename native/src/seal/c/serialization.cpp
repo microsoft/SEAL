@@ -28,6 +28,22 @@ SEAL_C_FUNC Serialization_SEALHeaderSize(uint8_t *result)
     return S_OK;
 }
 
+SEAL_C_FUNC Serialization_FormatVersionMajor(uint8_t *result)
+{
+    IfNullRet(result, E_POINTER);
+
+    *result = Serialization::format_version_major;
+    return S_OK;
+}
+
+SEAL_C_FUNC Serialization_FormatVersionMinor(uint8_t *result)
+{
+    IfNullRet(result, E_POINTER);
+
+    *result = Serialization::format_version_minor;
+    return S_OK;
+}
+
 SEAL_C_FUNC Serialization_IsSupportedComprMode(uint8_t compr_mode, bool *result)
 {
     IfNullRet(result, E_POINTER);

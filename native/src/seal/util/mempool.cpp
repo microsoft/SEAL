@@ -16,15 +16,15 @@ namespace seal
     {
         // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to
         // ensure symbol is created.
-        constexpr double MemoryPool::alloc_size_multiplier;
+        SEAL_CONSTEXPR_MEMBER_DEF constexpr double MemoryPool::alloc_size_multiplier;
 
         // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to
         // ensure symbol is created.
-        constexpr size_t MemoryPool::max_pool_head_count;
+        SEAL_CONSTEXPR_MEMBER_DEF constexpr size_t MemoryPool::max_pool_head_count;
 
         // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to
         // ensure symbol is created.
-        constexpr size_t MemoryPool::first_alloc_count;
+        SEAL_CONSTEXPR_MEMBER_DEF constexpr size_t MemoryPool::first_alloc_count;
 
         MemoryPoolHeadMT::MemoryPoolHeadMT(size_t item_byte_count, bool clear_on_destruction)
             : clear_on_destruction_(clear_on_destruction), locked_(false), item_byte_count_(item_byte_count),

@@ -229,7 +229,7 @@ namespace seal
         Compares MemoryPoolHandles. This function returns whether the current
         MemoryPoolHandle points to the same memory pool as a given MemoryPoolHandle.
         */
-        inline bool operator==(const MemoryPoolHandle &compare) noexcept
+        inline bool operator==(const MemoryPoolHandle &compare) const noexcept
         {
             return pool_ == compare.pool_;
         }
@@ -239,7 +239,7 @@ namespace seal
         MemoryPoolHandle points to a different memory pool than a given
         MemoryPoolHandle.
         */
-        inline bool operator!=(const MemoryPoolHandle &compare) noexcept
+        inline bool operator!=(const MemoryPoolHandle &compare) const noexcept
         {
             return pool_ != compare.pool_;
         }

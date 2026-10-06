@@ -162,7 +162,7 @@ namespace sealtest
 
             // The non-adjacent form of INT_MAX needs a term of 2^31, which no int can hold, so
             // the conversion is rejected instead of wrapping.
-            ASSERT_THROW(naf((numeric_limits<int>::max)()), logic_error);
+            ASSERT_THROW(static_cast<void>(naf((numeric_limits<int>::max)())), logic_error);
         }
 
         TEST(NumberTheory, TryPrimitiveRootMod)

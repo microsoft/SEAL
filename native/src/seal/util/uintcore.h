@@ -315,17 +315,12 @@ namespace seal
                 throw std::invalid_argument("result");
             }
 #endif
-            if (value == result || !value_uint64_count)
+            std::size_t min_uint64_count = std::min<>(value_uint64_count, result_uint64_count);
+            if (value != result)
             {
-                // Fast path to handle self assignment.
-                std::fill(result + value_uint64_count, result + result_uint64_count, std::uint64_t(0));
-            }
-            else
-            {
-                std::size_t min_uint64_count = std::min<>(value_uint64_count, result_uint64_count);
                 std::copy_n(value, min_uint64_count, result);
-                std::fill(result + min_uint64_count, result + result_uint64_count, std::uint64_t(0));
             }
+            std::fill(result + min_uint64_count, result + result_uint64_count, std::uint64_t(0));
         }
 
         /**

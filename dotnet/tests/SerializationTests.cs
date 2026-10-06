@@ -70,6 +70,46 @@ namespace SEALNetTest
                 Assert.AreEqual(loaded.Size, header.Size);
             }
         }
+
+        [TestMethod]
+        public void FormatVersion()
+        {
+            Assert.AreEqual((byte)4, Serialization.FormatVersionMajor);
+            Assert.AreEqual((byte)0, Serialization.FormatVersionMinor);
+            Serialization.SEALHeader header = new Serialization.SEALHeader();
+            Assert.AreEqual(Serialization.FormatVersionMajor, header.VersionMajor);
+            Assert.AreEqual(Serialization.FormatVersionMinor, header.VersionMinor);
+
+            static Serialization.SEALHeader HeaderOf(Action<Stream> save)
+            {
+                using MemoryStream mem = new MemoryStream();
+                save(mem);
+                mem.Seek(offset: 0, loc: SeekOrigin.Begin);
+                Serialization.SEALHeader loaded = new Serialization.SEALHeader();
+                Serialization.LoadHeader(mem, loaded);
+                Assert.AreEqual(Serialization.FormatVersionMajor, loaded.VersionMajor);
+                return loaded;
+            }
+
+            // NTT-form ciphertexts (BGV, CKKS) use format version 4.1; everything else uses 4.0
+            foreach (SEALContext context in new[] { GlobalContext.BFVContext, GlobalContext.BGVContext, GlobalContext.CKKSContext })
+            {
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreatePublicKey(out PublicKey publicKey);
+                keygen.CreateRelinKeys(out RelinKeys relinKeys);
+                Encryptor encryptor = new Encryptor(context, publicKey);
+                Ciphertext cipher = new Ciphertext();
+                encryptor.EncryptZero(cipher);
+
+                byte cipherMinor = (byte)(cipher.IsNTTForm ? 1 : 0);
+                Assert.AreEqual(context.KeyContextData.Parms.Scheme != SchemeType.BFV, cipher.IsNTTForm);
+                Assert.AreEqual(cipherMinor, HeaderOf(s => cipher.Save(s)).VersionMinor);
+                Assert.AreEqual(Serialization.FormatVersionMinor, HeaderOf(s => publicKey.Save(s)).VersionMinor);
+                Assert.AreEqual(Serialization.FormatVersionMinor, HeaderOf(s => relinKeys.Save(s)).VersionMinor);
+                Assert.AreEqual(Serialization.FormatVersionMinor, HeaderOf(s => keygen.SecretKey.Save(s)).VersionMinor);
+                Assert.AreEqual(Serialization.FormatVersionMinor, HeaderOf(s => context.KeyContextData.Parms.Save(s)).VersionMinor);
+            }
+        }
 /*
         [TestMethod]
         public void SEALHeaderUpgrade()

@@ -54,6 +54,8 @@ namespace seal
     */
     class Ciphertext
     {
+        friend class PublicKey;
+
     public:
         using ct_coeff_type = std::uint64_t;
 
@@ -495,7 +497,7 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Save(
                 std::bind(&Ciphertext::save_members, this, _1), save_size(compr_mode_type::none), stream, compr_mode,
-                false);
+                false, format_version_minor());
         }
 
         /**
@@ -559,7 +561,7 @@ namespace seal
             using namespace std::placeholders;
             return Serialization::Save(
                 std::bind(&Ciphertext::save_members, this, _1), save_size(compr_mode_type::none), out, size, compr_mode,
-                false);
+                false, format_version_minor());
         }
 
         /**
@@ -703,6 +705,13 @@ namespace seal
         void expand_seed(const SEALContext &context, const UniformRandomGeneratorInfo &prng_info, SEALVersion version);
 
         void save_members(std::ostream &stream) const;
+
+        // BGV ciphertexts are in NTT form since Microsoft SEAL 4.1; see Serialization.
+        SEAL_NODISCARD inline std::uint8_t format_version_minor() const noexcept
+        {
+            return is_ntt_form_ ? Serialization::format_version_minor_ntt_ciphertext
+                                : Serialization::format_version_minor;
+        }
 
         void load_members(const SEALContext &context, std::istream &stream, SEALVersion version);
 

@@ -169,6 +169,12 @@ namespace sealtest
             set_uint(ptr1.get(), 1, 2, ptr1.get());
             ASSERT_EQ(static_cast<uint64_t>(0x1231231231231321), ptr1[0]);
             ASSERT_EQ(static_cast<uint64_t>(0), ptr1[1]);
+
+            // Self assignment to a shorter result leaves the remaining words untouched
+            ptr1[1] = 0x3213213213213211;
+            set_uint(ptr1.get(), 2, 1, ptr1.get());
+            ASSERT_EQ(static_cast<uint64_t>(0x1231231231231321), ptr1[0]);
+            ASSERT_EQ(static_cast<uint64_t>(0x3213213213213211), ptr1[1]);
         }
 
         TEST(UIntCore, IsZeroUInt)

@@ -7,6 +7,10 @@
 #include "seal/evaluator.h"
 #include "seal/keygenerator.h"
 #include "seal/valcheck.h"
+#include <cstring>
+#include <sstream>
+#include <string>
+#include <vector>
 #include "gtest/gtest.h"
 
 using namespace seal;
@@ -515,5 +519,99 @@ namespace sealtest
 
         constructors(scheme_type::bfv);
         constructors(scheme_type::bgv);
+    }
+
+    TEST(KeyGeneratorTest, SaveFormatVersion)
+    {
+        // Keys are NTT-form ciphertexts or plaintexts, but their serialization is unchanged since Microsoft SEAL 4.0.
+        auto minor_of = [](const string &blob, size_t offset = 0) {
+            Serialization::SEALHeader header;
+            Serialization::LoadHeader(
+                reinterpret_cast<const seal_byte *>(blob.data()) + offset, blob.size() - offset, header);
+            EXPECT_EQ(Serialization::format_version_major, header.version_major);
+            return header.version_minor;
+        };
+
+        // Checks the outer header and each nested PublicKey header; compr_mode_type::none only
+        auto check_kswitch_keys = [&](const string &blob) {
+            ASSERT_EQ(Serialization::format_version_minor, minor_of(blob));
+            size_t offset = Serialization::seal_header_size + sizeof(parms_id_type);
+            auto read_u64 = [&]() {
+                uint64_t value;
+                memcpy(&value, blob.data() + offset, sizeof(uint64_t));
+                offset += sizeof(uint64_t);
+                return value;
+            };
+            size_t nested_count = 0;
+            for (uint64_t i = 0, dim1 = read_u64(); i < dim1; i++)
+            {
+                for (uint64_t j = 0, dim2 = read_u64(); j < dim2; j++)
+                {
+                    Serialization::SEALHeader header;
+                    Serialization::LoadHeader(
+                        reinterpret_cast<const seal_byte *>(blob.data()) + offset, blob.size() - offset, header);
+                    ASSERT_EQ(Serialization::format_version_major, header.version_major);
+                    ASSERT_EQ(Serialization::format_version_minor, header.version_minor);
+                    offset += static_cast<size_t>(header.size);
+                    nested_count++;
+                }
+            }
+            ASSERT_EQ(blob.size(), offset);
+            ASSERT_LT(0, nested_count);
+        };
+
+        auto save = [](const auto &obj, compr_mode_type compr_mode = Serialization::compr_mode_default) {
+            stringstream ss;
+            obj.save(ss, compr_mode);
+            return ss.str();
+        };
+
+        for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
+        {
+            EncryptionParameters parms(scheme);
+            parms.set_poly_modulus_degree(64);
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 60, 60 }));
+            if (scheme != scheme_type::ckks)
+            {
+                parms.set_plain_modulus(65537);
+            }
+            SEALContext context(parms, false, sec_level_type::none);
+            KeyGenerator keygen(context);
+
+            ASSERT_EQ(Serialization::format_version_minor, minor_of(save(parms)));
+            ASSERT_EQ(Serialization::format_version_minor, minor_of(save(keygen.secret_key())));
+
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            ASSERT_TRUE(pk.data().is_ntt_form());
+            ASSERT_EQ(Serialization::format_version_minor, minor_of(save(pk)));
+            ASSERT_EQ(Serialization::format_version_minor, minor_of(save(keygen.create_public_key())));
+            vector<seal_byte> buffer(static_cast<size_t>(pk.save_size()));
+            auto out_size = pk.save(buffer.data(), buffer.size());
+            ASSERT_EQ(
+                Serialization::format_version_minor,
+                minor_of(string(reinterpret_cast<const char *>(buffer.data()), static_cast<size_t>(out_size))));
+
+            RelinKeys rlk;
+            keygen.create_relin_keys(rlk);
+            check_kswitch_keys(save(rlk, compr_mode_type::none));
+            check_kswitch_keys(save(keygen.create_relin_keys(), compr_mode_type::none));
+            ASSERT_EQ(Serialization::format_version_minor, minor_of(save(rlk)));
+
+            GaloisKeys glk;
+            keygen.create_galois_keys(vector<int>{ 1 }, glk);
+            check_kswitch_keys(save(glk, compr_mode_type::none));
+            check_kswitch_keys(save(keygen.create_galois_keys(vector<int>{ 1 }), compr_mode_type::none));
+
+            // Loading still works
+            PublicKey pk2;
+            stringstream pk_stream(save(pk));
+            pk2.load(context, pk_stream);
+            ASSERT_TRUE(pk2.data().is_ntt_form());
+            RelinKeys rlk2;
+            stringstream rlk_stream(save(rlk));
+            rlk2.load(context, rlk_stream);
+            ASSERT_EQ(rlk.size(), rlk2.size());
+        }
     }
 } // namespace sealtest

@@ -17,15 +17,27 @@ namespace seal
 {
     // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to ensure
     // symbol is created.
-    constexpr compr_mode_type Serialization::compr_mode_default;
+    SEAL_CONSTEXPR_MEMBER_DEF constexpr compr_mode_type Serialization::compr_mode_default;
 
     // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to ensure
     // symbol is created.
-    constexpr uint16_t Serialization::seal_magic;
+    SEAL_CONSTEXPR_MEMBER_DEF constexpr uint16_t Serialization::seal_magic;
 
     // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to ensure
     // symbol is created.
-    constexpr uint8_t Serialization::seal_header_size;
+    SEAL_CONSTEXPR_MEMBER_DEF constexpr uint8_t Serialization::seal_header_size;
+
+    // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to ensure
+    // symbol is created.
+    SEAL_CONSTEXPR_MEMBER_DEF constexpr uint8_t Serialization::format_version_major;
+
+    // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to ensure
+    // symbol is created.
+    SEAL_CONSTEXPR_MEMBER_DEF constexpr uint8_t Serialization::format_version_minor;
+
+    // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to ensure
+    // symbol is created.
+    SEAL_CONSTEXPR_MEMBER_DEF constexpr uint8_t Serialization::format_version_minor_ntt_ciphertext;
 
     namespace
     {
@@ -223,7 +235,7 @@ namespace seal
 
     streamoff Serialization::Save(
         function<void(ostream &)> save_members, streamoff raw_size, ostream &stream, compr_mode_type compr_mode,
-        SEAL_MAYBE_UNUSED bool clear_buffers)
+        SEAL_MAYBE_UNUSED bool clear_buffers, uint8_t version_minor)
     {
         if (!save_members)
         {
@@ -236,6 +248,10 @@ namespace seal
         if (!IsSupportedComprMode(compr_mode))
         {
             throw invalid_argument("unsupported compression mode");
+        }
+        if (version_minor > SEAL_VERSION_MINOR)
+        {
+            throw invalid_argument("version_minor is invalid");
         }
 
         streamoff out_size = 0;
@@ -251,6 +267,7 @@ namespace seal
 
             // Create the header
             SEALHeader header;
+            header.version_minor = version_minor;
 
             switch (compr_mode)
             {
@@ -537,7 +554,7 @@ namespace seal
 
     streamoff Serialization::Save(
         function<void(ostream &)> save_members, streamoff raw_size, seal_byte *out, size_t size,
-        compr_mode_type compr_mode, bool clear_buffers)
+        compr_mode_type compr_mode, bool clear_buffers, uint8_t version_minor)
     {
         if (!out)
         {
@@ -553,7 +570,7 @@ namespace seal
         }
         ArrayPutBuffer apbuf(reinterpret_cast<char *>(out), static_cast<streamsize>(size));
         ostream stream(&apbuf);
-        return Save(save_members, raw_size, stream, compr_mode, clear_buffers);
+        return Save(save_members, raw_size, stream, compr_mode, clear_buffers, version_minor);
     }
 
     streamoff Serialization::Load(

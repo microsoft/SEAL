@@ -7,6 +7,7 @@
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"
 #include "seal/plaintext.h"
+#include <cmath>
 #include <vector>
 #include "gtest/gtest.h"
 #ifdef SEAL_USE_MSGSL
@@ -275,5 +276,26 @@ namespace sealtest
         stringstream bad(blob);
         Plaintext loaded;
         ASSERT_THROW(loaded.load(context, bad), logic_error);
+    }
+
+    TEST(PlaintextTest, SaveFormatVersion)
+    {
+        // Plaintexts in NTT form have the same serialization as in Microsoft SEAL 4.0
+        EncryptionParameters parms(scheme_type::ckks);
+        parms.set_poly_modulus_degree(64);
+        parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 30 }));
+        SEALContext context(parms, false, sec_level_type::none);
+        CKKSEncoder encoder(context);
+
+        Plaintext plain;
+        encoder.encode(1.0, pow(2.0, 20), plain);
+        ASSERT_TRUE(plain.is_ntt_form());
+
+        stringstream ss;
+        plain.save(ss);
+        Serialization::SEALHeader header;
+        Serialization::LoadHeader(ss, header);
+        ASSERT_EQ(Serialization::format_version_major, header.version_major);
+        ASSERT_EQ(Serialization::format_version_minor, header.version_minor);
     }
 } // namespace sealtest

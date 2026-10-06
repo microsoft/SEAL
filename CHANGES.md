@@ -1,5 +1,15 @@
 # List of Changes
 
+## Version 4.5.0
+
+- `SEALHeader` now records the serialization format version instead of the library version: 4.1 for NTT-form ciphertexts (BGV ciphertexts are in NTT form since Microsoft SEAL 4.1), and 4.0 for everything else. Microsoft SEAL 4.0 can now load objects saved by this version, except NTT-form ciphertexts (BGV, CKKS, or BFV transformed to NTT form) and encryption parameters with more than 64 coefficient modulus primes. Microsoft SEAL 4.1-4.3 still cannot load objects saved by this version. The serialization format is otherwise unchanged. `SEALHeader` version fields no longer identify the library that wrote the object.
+- Added `Serialization::format_version_major`, `Serialization::format_version_minor`, `Serialization::format_version_minor_ntt_ciphertext`, and an optional `version_minor` parameter to `Serialization::Save`.
+- Added `Serialization_FormatVersionMajor` and `Serialization_FormatVersionMinor` to the C API, and `Serialization.FormatVersionMajor` and `Serialization.FormatVersionMinor` to the .NET wrapper.
+- `MemoryPoolHandle::operator==` and `operator!=` are now `const`, so `const` handles can be compared; C++20 compilers without P2468 no longer report the comparison as ambiguous ([issue #710](https://github.com/microsoft/SEAL/issues/710)).
+- Fixed undefined behavior in `util::set_uint` for a self assignment to a shorter result.
+- Fixed multiple definition link errors with GCC when Microsoft SEAL is built as C++14 and linked with code compiled as C++17 or newer.
+- Fixed ignored `[[nodiscard]]` results, an unqualified `std::move`, and unused lambda captures in the tests ([issue #710](https://github.com/microsoft/SEAL/issues/710)).
+
 ## Version 4.4.5
 
 - Fixed `seal::random_bytes` to fill the caller's buffer with `std::memcpy` instead of storing through a `reinterpret_cast` `std::uint32_t` pointer.

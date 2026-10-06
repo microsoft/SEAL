@@ -1022,6 +1022,12 @@ namespace Microsoft.Research.SEAL
         internal static extern void Serialization_SEALHeaderSize(out byte result);
 
         [DllImport(sealc, PreserveSig = false)]
+        internal static extern void Serialization_FormatVersionMajor(out byte result);
+
+        [DllImport(sealc, PreserveSig = false)]
+        internal static extern void Serialization_FormatVersionMinor(out byte result);
+
+        [DllImport(sealc, PreserveSig = false)]
         internal static extern void Serialization_IsSupportedComprMode(byte comprMode, out bool result);
 
         [DllImport(sealc, PreserveSig = false)]

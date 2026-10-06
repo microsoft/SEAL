@@ -30,6 +30,10 @@ namespace sealtest
         ASSERT_FALSE(pool == pool2);
         pool2 = MemoryPoolHandle::Global();
         ASSERT_TRUE(pool == pool2);
+
+        const MemoryPoolHandle const_pool = pool;
+        ASSERT_TRUE(const_pool == pool2);
+        ASSERT_FALSE(const_pool != pool2);
     }
 
     TEST(MemoryPoolHandleTest, MemoryPoolHandleAllocate)
@@ -81,6 +85,6 @@ namespace sealtest
         MemoryManager::SwitchProfile(new MMProfGlobal());
         ASSERT_TRUE(MemoryManager::GetPool() == global_pool);
 
-        MemoryManager::SwitchProfile(move(entry_prof));
+        MemoryManager::SwitchProfile(std::move(entry_prof));
     }
 } // namespace sealtest

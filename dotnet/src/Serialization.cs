@@ -56,6 +56,26 @@ namespace Microsoft.Research.SEAL
             return sealHeaderSize;
         }))();
 
+        /// <summary>The serialization format major version written to SEALHeader by default.</summary>
+        /// <remarks>
+        /// Rather than the library version, SEALHeader records the Microsoft SEAL version that introduced the
+        /// serialization format of the object. Microsoft SEAL 4.4 and later load any format up to their own version,
+        /// and Microsoft SEAL 4.0 loads format 4.0; Microsoft SEAL 4.1-4.3 accept only their own version. The format
+        /// is unchanged since Microsoft SEAL 4.0, except that BGV ciphertexts are in NTT form since Microsoft SEAL 4.1.
+        /// NTT-form ciphertexts (BGV, CKKS, or BFV transformed to NTT form) are therefore saved with format version
+        /// 4.1.
+        /// </remarks>
+        public static readonly byte FormatVersionMajor = ((Func<byte>)(() => {
+            NativeMethods.Serialization_FormatVersionMajor(out byte formatVersionMajor);
+            return formatVersionMajor;
+        }))();
+
+        /// <summary>The serialization format minor version written to SEALHeader by default.</summary>
+        public static readonly byte FormatVersionMinor = ((Func<byte>)(() => {
+            NativeMethods.Serialization_FormatVersionMinor(out byte formatVersionMinor);
+            return formatVersionMinor;
+        }))();
+
         /// <summary>Struct to contain header information for serialization.</summary>
         /// <remarks>
         /// Struct to contain header information for serialization. The size of the header is 16 bytes and it consists
@@ -63,11 +83,14 @@ namespace Microsoft.Research.SEAL
         ///
         /// 1. a magic number identifying this is a SEALHeader struct (2 bytes)
         /// 2. size in bytes of the SEALHeader struct (1 byte)
-        /// 3. Microsoft SEAL's major version number (1 byte)
-        /// 4. Microsoft SEAL's minor version number (1 byte)
+        /// 3. serialization format major version number (1 byte)
+        /// 4. serialization format minor version number (1 byte)
         /// 5. a ComprModeType indicating whether data after the header is compressed (1 byte)
         /// 6. reserved for future use and data alignment (2 bytes)
         /// 7. the size in bytes of the entire serialized object, including the header (8 bytes)
+        ///
+        /// Microsoft SEAL 4.4.x and earlier wrote the library version number instead of the serialization format
+        /// version number.
         /// </remarks>
         [StructLayout(LayoutKind.Explicit, Size=16)]
         public class SEALHeader : ISettable<SEALHeader>
@@ -78,11 +101,11 @@ namespace Microsoft.Research.SEAL
             /// <summary>Size in bytes of the SEALHeader struct (1 byte)</summary>
             [FieldOffset(2)]public byte HeaderSize = SEALHeaderSize;
 
-            /// <summary>Microsoft SEAL's major version number (1 byte)</summary>
-            [FieldOffset(3)]public byte VersionMajor = SEALVersion.Major;
+            /// <summary>Serialization format major version number (1 byte)</summary>
+            [FieldOffset(3)]public byte VersionMajor = FormatVersionMajor;
 
-            /// <summary>Microsoft SEAL's minor version number (1 byte)</summary>
-            [FieldOffset(4)]public byte VersionMinor = SEALVersion.Minor;
+            /// <summary>Serialization format minor version number (1 byte)</summary>
+            [FieldOffset(4)]public byte VersionMinor = FormatVersionMinor;
 
             /// <summary>A compr_mode_type indicating whether data after the header is compressed (1 byte)</summary>
             [FieldOffset(5)]public ComprModeType ComprMode = ComprModeDefault;

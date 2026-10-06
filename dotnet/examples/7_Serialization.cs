@@ -430,8 +430,8 @@ namespace SEALNetExamples
 
                 [offset 0] 2-byte magic number 0xA15E (Serialization.SEALMagic)
                 [offset 2] 1-byte indicating the header size in bytes (always 16)
-                [offset 3] 1-byte indicating the Microsoft SEAL major version number
-                [offset 4] 1-byte indicating the Microsoft SEAL minor version number
+                [offset 3] 1-byte indicating the serialization format major version number
+                [offset 4] 1-byte indicating the serialization format minor version number
                 [offset 5] 1-byte indicating the compression mode type
                 [offset 6] 2-byte reserved field (unused)
                 [offset 8] 8-byte size in bytes of the serialized data, including the header

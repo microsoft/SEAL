@@ -14,7 +14,7 @@ namespace seal
     {
         // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to
         // ensure symbol is created.
-        constexpr double SafeByteBuffer::expansion_factor_;
+        SEAL_CONSTEXPR_MEMBER_DEF constexpr double SafeByteBuffer::expansion_factor_;
 
         SafeByteBuffer::SafeByteBuffer(std::streamsize size, bool clear_buffers)
             : size_(size), clear_buffers_(clear_buffers),

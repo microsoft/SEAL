@@ -49,10 +49,12 @@ namespace sealtest
             // The magnitude of these steps exceeds half the polynomial degree. INT_MIN has no
             // representable negation as a signed integer and must be handled like any other
             // out-of-range step.
-            ASSERT_THROW(galois_tool.get_elt_from_step((numeric_limits<int>::min)()), invalid_argument);
-            ASSERT_THROW(galois_tool.get_elt_from_step((numeric_limits<int>::max)()), invalid_argument);
-            ASSERT_THROW(galois_tool.get_elt_from_step(4), invalid_argument);
-            ASSERT_THROW(galois_tool.get_elt_from_step(-4), invalid_argument);
+            ASSERT_THROW(
+                static_cast<void>(galois_tool.get_elt_from_step((numeric_limits<int>::min)())), invalid_argument);
+            ASSERT_THROW(
+                static_cast<void>(galois_tool.get_elt_from_step((numeric_limits<int>::max)())), invalid_argument);
+            ASSERT_THROW(static_cast<void>(galois_tool.get_elt_from_step(4)), invalid_argument);
+            ASSERT_THROW(static_cast<void>(galois_tool.get_elt_from_step(-4)), invalid_argument);
         }
 
         TEST(GaloisToolTest, EltsFromSteps)
