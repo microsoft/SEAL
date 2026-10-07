@@ -597,6 +597,7 @@ endif()
 
 if(UNIX OR APPLE)
     # Set the requirements according to the current configuration if SEAL_BUILD_DEPS=OFF
+    set(SEAL_PKGCONFIG_REQUIRES)
     if(NOT SEAL_BUILD_DEPS)
         if(SEAL_USE_MSGSL)
             # Extract the include directories from Microsoft.GSL::GSL
@@ -608,19 +609,20 @@ if(UNIX OR APPLE)
             # Create the Microsoft GSL pkg-config file
             configure_file(${SEAL_PKGCONFIG_MSGSL_IN_FILENAME} ${SEAL_PKGCONFIG_MSGSL_FILENAME} @ONLY)
 
-            set(SEAL_PKGCONFIG_MSGSL_REQUIRES_STRING "seal_msgsl >= ${Microsoft.GSL_VERSION_MAJOR}")
+            list(APPEND SEAL_PKGCONFIG_REQUIRES "seal_msgsl >= ${Microsoft.GSL_VERSION_MAJOR}")
         endif()
         if(SEAL_USE_ZLIB)
-            set(SEAL_PKGCONFIG_ZLIB_REQUIRES_STRING "zlib >= ${ZLIB_VERSION_STRING}")
+            list(APPEND SEAL_PKGCONFIG_REQUIRES "zlib >= ${ZLIB_VERSION_STRING}")
         endif()
         if(SEAL_USE_ZSTD)
-            set(SEAL_PKGCONFIG_ZSTD_REQUIRES_STRING "libzstd >= ${zstd_VERSION_MAJOR}")
+            list(APPEND SEAL_PKGCONFIG_REQUIRES "libzstd >= ${zstd_VERSION_MAJOR}")
         endif()
         if(SEAL_USE_INTEL_HEXL)
-            set(SEAL_PKGCONFIG_INTEL_HEXL_REQUIRES_STRING "hexl >= ${HEXL_VERSION_MAJOR}")
-            message(STATUS "Intel HEXL does not have a pkg-config file")
+            list(APPEND SEAL_PKGCONFIG_REQUIRES "hexl >= ${HEXL_VERSION_MAJOR}")
         endif()
     endif()
+    # A pkg-config file can have only one Requires field
+    list(JOIN SEAL_PKGCONFIG_REQUIRES ", " SEAL_PKGCONFIG_REQUIRES_STRING)
 
     # Create the pkg-config file
     if(TARGET seal)

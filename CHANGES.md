@@ -9,6 +9,7 @@
 - Fixed undefined behavior in `util::set_uint` for a self assignment to a shorter result.
 - Fixed multiple definition link errors with GCC when Microsoft SEAL is built as C++14 and linked with code compiled as C++17 or newer.
 - Fixed `SEAL_USE_CXX17=OFF` to build Microsoft SEAL as C++14 also with compilers that default to C++17 or newer, such as GCC 11 or newer. A C++ standard set with `CMAKE_CXX_STANDARD` takes precedence.
+- Fixed the pkg-config files `seal.pc` and `seal_shared.pc` to require all of Microsoft GSL, zlib, Zstandard, and Intel HEXL that Microsoft SEAL was built with when `SEAL_BUILD_DEPS=OFF`. The requirements are now listed in a single `Requires` field, as pkg-config and vcpkg use only one.
 - Fixed ignored `[[nodiscard]]` results, an unqualified `std::move`, and unused lambda captures in the tests ([issue #710](https://github.com/microsoft/SEAL/issues/710)).
 
 ## Version 4.4.5
