@@ -8,6 +8,7 @@
 - `MemoryPoolHandle::operator==` and `operator!=` are now `const`, so `const` handles can be compared; C++20 compilers without P2468 no longer report the comparison as ambiguous ([issue #710](https://github.com/microsoft/SEAL/issues/710)).
 - Fixed undefined behavior in `util::set_uint` for a self assignment to a shorter result.
 - Fixed multiple definition link errors with GCC when Microsoft SEAL is built as C++14 and linked with code compiled as C++17 or newer.
+- Fixed `SEAL_USE_CXX17=OFF` to build Microsoft SEAL as C++14 also with compilers that default to C++17 or newer, such as GCC 11 or newer. A C++ standard set with `CMAKE_CXX_STANDARD` takes precedence.
 - Fixed ignored `[[nodiscard]]` results, an unqualified `std::move`, and unused lambda captures in the tests ([issue #710](https://github.com/microsoft/SEAL/issues/710)).
 
 ## Version 4.4.5

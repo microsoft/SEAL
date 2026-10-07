@@ -281,21 +281,46 @@ namespace sealtest
     TEST(PlaintextTest, SaveFormatVersion)
     {
         // Plaintexts in NTT form have the same serialization as in Microsoft SEAL 4.0
-        EncryptionParameters parms(scheme_type::ckks);
-        parms.set_poly_modulus_degree(64);
-        parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 30 }));
-        SEALContext context(parms, false, sec_level_type::none);
-        CKKSEncoder encoder(context);
+        auto check = [](const SEALContext &context, const Plaintext &plain) {
+            ASSERT_TRUE(plain.is_ntt_form());
 
-        Plaintext plain;
-        encoder.encode(1.0, pow(2.0, 20), plain);
-        ASSERT_TRUE(plain.is_ntt_form());
+            stringstream ss;
+            plain.save(ss);
+            Serialization::SEALHeader header;
+            Serialization::LoadHeader(ss, header);
+            ASSERT_EQ(Serialization::format_version_major, header.version_major);
+            ASSERT_EQ(Serialization::format_version_minor, header.version_minor);
 
-        stringstream ss;
-        plain.save(ss);
-        Serialization::SEALHeader header;
-        Serialization::LoadHeader(ss, header);
-        ASSERT_EQ(Serialization::format_version_major, header.version_major);
-        ASSERT_EQ(Serialization::format_version_minor, header.version_minor);
+            ss.seekg(0);
+            Plaintext loaded;
+            loaded.load(context, ss);
+            ASSERT_TRUE(loaded.is_ntt_form());
+            ASSERT_EQ(plain.parms_id(), loaded.parms_id());
+        };
+
+        {
+            EncryptionParameters parms(scheme_type::ckks);
+            parms.set_poly_modulus_degree(64);
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 30 }));
+            SEALContext context(parms, false, sec_level_type::none);
+            CKKSEncoder encoder(context);
+
+            Plaintext plain;
+            encoder.encode(1.0, pow(2.0, 20), plain);
+            check(context, plain);
+        }
+        for (auto scheme : { scheme_type::bfv, scheme_type::bgv })
+        {
+            EncryptionParameters parms(scheme);
+            parms.set_poly_modulus_degree(64);
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 30, 30 }));
+            parms.set_plain_modulus(65537);
+            SEALContext context(parms, false, sec_level_type::none);
+            Evaluator evaluator(context);
+
+            Plaintext plain("1x^1 + 2");
+            evaluator.transform_to_ntt_inplace(plain, context.first_parms_id());
+            check(context, plain);
+        }
     }
 } // namespace sealtest

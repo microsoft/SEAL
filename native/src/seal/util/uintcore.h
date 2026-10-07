@@ -316,7 +316,7 @@ namespace seal
             }
 #endif
             std::size_t min_uint64_count = std::min<>(value_uint64_count, result_uint64_count);
-            if (value != result)
+            if (value != result && value_uint64_count)
             {
                 std::copy_n(value, min_uint64_count, result);
             }

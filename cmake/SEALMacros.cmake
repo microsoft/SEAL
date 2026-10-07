@@ -10,6 +10,13 @@ macro(seal_set_language target)
         target_compile_features(${target} PUBLIC cxx_std_17)
     else()
         target_compile_features(${target} PUBLIC cxx_std_14)
+        # cxx_std_14 is only a minimum, so a compiler that defaults to C++17 or newer (e.g., GCC 11 or newer) would build
+        # as that default. Pin the standard unless the user set one, e.g., through CMAKE_CXX_STANDARD.
+        get_target_property(SEAL_TARGET_CXX_STANDARD ${target} CXX_STANDARD)
+        if(NOT SEAL_TARGET_CXX_STANDARD)
+            set_target_properties(${target} PROPERTIES CXX_STANDARD 14)
+        endif()
+        unset(SEAL_TARGET_CXX_STANDARD)
     endif()
 endmacro()
 

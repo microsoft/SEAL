@@ -158,10 +158,13 @@ namespace seal
 #endif
 
 // Out-of-class definitions of static constexpr data members are required in C++14. Since C++17 these members are
-// implicitly inline, and on ELF platforms GCC emits them as unique symbols that conflict with a strong definition in
-// a library compiled as C++14. Making the C++14 definitions weak allows linking with code compiled as C++17 or newer.
+// implicitly inline, and GCC emits them as unique symbols on ELF platforms and as COMDAT symbols on MinGW, both of
+// which conflict with a strong definition in a library compiled as C++14. Making the C++14 definitions weak on ELF and
+// link-once (selectany) on MinGW allows linking with code compiled as C++17 or newer.
 #if defined(__ELF__) && (__cplusplus < 201703L)
 #define SEAL_CONSTEXPR_MEMBER_DEF __attribute__((weak))
+#elif defined(__MINGW32__) && (__cplusplus < 201703L)
+#define SEAL_CONSTEXPR_MEMBER_DEF __attribute__((selectany))
 #else
 #define SEAL_CONSTEXPR_MEMBER_DEF
 #endif
