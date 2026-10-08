@@ -473,6 +473,13 @@ namespace seal
                     {
                         throw logic_error("stream decompression failed");
                     }
+
+                    // Reads are capped at the compressed size, so a failed stream means the input ended early, even
+                    // if the parser did not need the missing bytes (e.g., a trailing checksum).
+                    if (stream.fail())
+                    {
+                        expressive_rethrow_on_ios_base_failure(stream);
+                    }
                     compressed_remaining = inflate_buffer->remaining();
                 }
 
@@ -514,6 +521,13 @@ namespace seal
                     if (inflate_buffer->failed())
                     {
                         throw logic_error("stream decompression failed");
+                    }
+
+                    // Reads are capped at the compressed size, so a failed stream means the input ended early, even
+                    // if the parser did not need the missing bytes (e.g., a trailing checksum).
+                    if (stream.fail())
+                    {
+                        expressive_rethrow_on_ios_base_failure(stream);
                     }
                     compressed_remaining = inflate_buffer->remaining();
                 }

@@ -198,6 +198,45 @@ namespace sealtest
             }
         };
 
+        // Serializes a nested object under a compressed mode and keeps only the nested header and the first few bytes
+        // of its compressed payload. Loading performs a nested Serialization::Load over the inflating stream, where
+        // the nested header.size cannot be checked against the available input, so the nested decompressor runs out
+        // of input inside the outer object.
+        struct truncated_nested_struct
+        {
+            static constexpr size_t kept_payload_size = 4;
+            test_struct inner{};
+            compr_mode_type inner_mode = compr_mode_type::none;
+
+            void save_members(ostream &stream)
+            {
+                using namespace std::placeholders;
+
+                stringstream inner_ss;
+                Serialization::Save(
+                    std::bind(&test_struct::save_members, &inner, _1), inner.save_size(inner_mode), inner_ss,
+                    inner_mode, false);
+                string inner_bytes = inner_ss.str();
+                size_t kept_size = sizeof(Serialization::SEALHeader) + kept_payload_size;
+                ASSERT_GT(inner_bytes.size(), kept_size);
+                inner_bytes.resize(kept_size);
+                stream.write(inner_bytes.data(), static_cast<streamsize>(inner_bytes.size()));
+            }
+
+            void load_members(istream &stream)
+            {
+                using namespace std::placeholders;
+                Serialization::Load(std::bind(&test_struct::load_members, &inner, _1), stream, false);
+            }
+
+            streamoff save_size(compr_mode_type compr_mode) const
+            {
+                size_t raw = static_cast<size_t>(inner.save_size(inner_mode));
+                return static_cast<streamoff>(
+                    sizeof(Serialization::SEALHeader) + Serialization::ComprSizeEstimate(raw, compr_mode));
+            }
+        };
+
         // An input streambuf that presents its whole backing buffer for reading but refuses every seek
         // (seekoff/seekpos return -1). Serialization::Load treats such a stream as non-seekable, exercising the
         // load paths that cannot rely on tellg(). consumed() reports how many bytes have been read so far.
@@ -872,6 +911,102 @@ namespace sealtest
 
             // Consumes the nested object plus a bounded number of decompression buffers, never the 8 MB filler.
             ASSERT_LT(buf.consumed(), streamsize(1) << 20);
+        }
+    }
+
+    // On a non-seekable stream header.size cannot be checked against the available input, so truncated compressed
+    // input is detected only when the decompressor runs out of input. The load must throw rather than terminate, and
+    // must restore the stream's exception mask.
+    TEST(SerializationTest, NonSeekableStreamTruncatedCompressedThrows)
+    {
+        using namespace placeholders;
+
+        large_struct st;
+        st.data.resize(size_t(1) << 20); // 1 MB
+        for (size_t i = 0; i < st.data.size(); i++)
+        {
+            st.data[i] = static_cast<uint8_t>((i * 40503ULL) >> 8);
+        }
+
+        for (auto mode : available_compr_modes())
+        {
+            stringstream ss;
+            Serialization::Save(bind(&large_struct::save_members, &st, _1), st.save_size(mode), ss, mode, false);
+
+            string bytes = ss.str();
+            ASSERT_GT(bytes.size(), sizeof(Serialization::SEALHeader) + 64);
+            bytes.resize(bytes.size() / 2); // drop the second half of the compressed payload
+
+            NonSeekableBuffer buf(std::move(bytes));
+            istream in(&buf);
+
+            large_struct st2;
+            ASSERT_ANY_THROW(Serialization::Load(bind(&large_struct::load_members, &st2, _1), in, false));
+            ASSERT_TRUE(in.exceptions() == ios_base::goodbit);
+        }
+    }
+
+    // On a non-seekable stream, input that ends before the compressed size in header.size must be rejected even if
+    // the parser does not need the missing bytes, such as a trailing checksum.
+    TEST(SerializationTest, NonSeekableStreamTruncatedTrailerThrows)
+    {
+        using namespace placeholders;
+
+        for (auto mode : available_compr_modes())
+        {
+            test_struct st{ 5, ~7, 1.25 };
+            stringstream ss;
+            Serialization::Save(bind(&test_struct::save_members, &st, _1), st.save_size(mode), ss, mode, false);
+            string bytes = ss.str();
+
+            // Drop the last 4 bytes, which for zlib are the Adler-32 checksum
+            {
+                NonSeekableBuffer buf(bytes.substr(0, bytes.size() - 4));
+                istream in(&buf);
+                test_struct st2;
+                ASSERT_ANY_THROW(Serialization::Load(bind(&test_struct::load_members, &st2, _1), in, false));
+            }
+
+            // Overstate header.size (offset 8, 8 bytes) by one byte, with no trailing data
+            {
+                string overstated = bytes;
+                uint64_t size = 0;
+                memcpy(&size, &overstated[8], sizeof(uint64_t));
+                size++;
+                memcpy(&overstated[8], &size, sizeof(uint64_t));
+                NonSeekableBuffer buf(std::move(overstated));
+                istream in(&buf);
+                test_struct st2;
+                ASSERT_ANY_THROW(Serialization::Load(bind(&test_struct::load_members, &st2, _1), in, false));
+            }
+        }
+    }
+
+    // A truncated compressed frame nested in a compressed object runs out of input inside the outer inflating
+    // stream, where its header.size cannot be checked against the available input, even if the outer stream is
+    // seekable. The load must throw rather than terminate, and must restore the stream's exception mask.
+    TEST(SerializationTest, CompressedNestedTruncatedThrows)
+    {
+        using namespace placeholders;
+
+        for (auto outer_mode : available_compr_modes())
+        {
+            for (auto inner_mode : available_compr_modes())
+            {
+                truncated_nested_struct outer;
+                outer.inner = test_struct{ 4, ~6, 0.5 };
+                outer.inner_mode = inner_mode;
+
+                stringstream ss;
+                Serialization::Save(
+                    bind(&truncated_nested_struct::save_members, &outer, _1), outer.save_size(outer_mode), ss,
+                    outer_mode, false);
+
+                truncated_nested_struct loaded;
+                ASSERT_ANY_THROW(
+                    Serialization::Load(bind(&truncated_nested_struct::load_members, &loaded, _1), ss, false));
+                ASSERT_TRUE(ss.exceptions() == ios_base::goodbit);
+            }
         }
     }
 } // namespace sealtest
