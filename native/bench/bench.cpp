@@ -129,6 +129,7 @@ namespace sealbench
         // 3. BGV
         // 4. CKKS
         // 5. Util
+        // 6. Serialize
         int n = static_cast<int>(parms.first);
         int log_q = static_cast<int>(
             bm_env_map.find(parms_ckks)->second->context().key_context_data()->total_coeff_modulus_bit_count());
@@ -224,6 +225,148 @@ namespace sealbench
         SEAL_BENCHMARK_REGISTER(UTIL, n, 0, NTTInverseLowLevel, bm_util_ntt_inverse_low_level, bm_env_bfv);
         SEAL_BENCHMARK_REGISTER(UTIL, n, 0, NTTForwardLowLevelLazy, bm_util_ntt_forward_low_level_lazy, bm_env_bfv);
         SEAL_BENCHMARK_REGISTER(UTIL, n, 0, NTTInverseLowLevelLazy, bm_util_ntt_inverse_low_level_lazy, bm_env_bfv);
+
+        // Serialization cases save and load a ciphertext (per scheme) and the keys under each supported
+        // compression mode, reporting the serialized size in bytes as the counter "size". Keys have the same
+        // size and content shape in every scheme, so they are registered once, under the BFV environment. Note
+        // that the Galois keys here contain two elements; full rotation key sets scale the numbers linearly.
+#define SEAL_BENCHMARK_REGISTER_SERIALIZE(name, func, env, mode) \
+    SEAL_BENCHMARK_REGISTER(SERIALIZE, n, log_q, name, func, env, seal::compr_mode_type::mode)
+
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveCiphertextBFVNone, bm_serialize_save_ct, bm_env_bfv, none);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadCiphertextBFVNone, bm_serialize_load_ct, bm_env_bfv, none);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveCiphertextBGVNone, bm_serialize_save_ct, bm_env_bgv, none);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadCiphertextBGVNone, bm_serialize_load_ct, bm_env_bgv, none);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveCiphertextCKKSNone, bm_serialize_save_ct, bm_env_ckks, none);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadCiphertextCKKSNone, bm_serialize_load_ct, bm_env_ckks, none);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SavePublicKeyNone, bm_serialize_save_pk, bm_env_bfv, none);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadPublicKeyNone, bm_serialize_load_pk, bm_env_bfv, none);
+#ifdef SEAL_USE_ZLIB
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveCiphertextBFVZlib, bm_serialize_save_ct, bm_env_bfv, zlib);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadCiphertextBFVZlib, bm_serialize_load_ct, bm_env_bfv, zlib);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveCiphertextBGVZlib, bm_serialize_save_ct, bm_env_bgv, zlib);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadCiphertextBGVZlib, bm_serialize_load_ct, bm_env_bgv, zlib);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveCiphertextCKKSZlib, bm_serialize_save_ct, bm_env_ckks, zlib);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadCiphertextCKKSZlib, bm_serialize_load_ct, bm_env_ckks, zlib);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SavePublicKeyZlib, bm_serialize_save_pk, bm_env_bfv, zlib);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadPublicKeyZlib, bm_serialize_load_pk, bm_env_bfv, zlib);
+#endif
+#ifdef SEAL_USE_ZSTD
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveCiphertextBFVZstd, bm_serialize_save_ct, bm_env_bfv, zstd);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadCiphertextBFVZstd, bm_serialize_load_ct, bm_env_bfv, zstd);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveCiphertextBGVZstd, bm_serialize_save_ct, bm_env_bgv, zstd);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadCiphertextBGVZstd, bm_serialize_load_ct, bm_env_bgv, zstd);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveCiphertextCKKSZstd, bm_serialize_save_ct, bm_env_ckks, zstd);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadCiphertextCKKSZstd, bm_serialize_load_ct, bm_env_ckks, zstd);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SavePublicKeyZstd, bm_serialize_save_pk, bm_env_bfv, zstd);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadPublicKeyZstd, bm_serialize_load_pk, bm_env_bfv, zstd);
+#endif
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveCiphertextBFVBitPack, bm_serialize_save_ct, bm_env_bfv, bitpack);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadCiphertextBFVBitPack, bm_serialize_load_ct, bm_env_bfv, bitpack);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveCiphertextBGVBitPack, bm_serialize_save_ct, bm_env_bgv, bitpack);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadCiphertextBGVBitPack, bm_serialize_load_ct, bm_env_bgv, bitpack);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveCiphertextCKKSBitPack, bm_serialize_save_ct, bm_env_ckks, bitpack);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadCiphertextCKKSBitPack, bm_serialize_load_ct, bm_env_ckks, bitpack);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SavePublicKeyBitPack, bm_serialize_save_pk, bm_env_bfv, bitpack);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadPublicKeyBitPack, bm_serialize_load_pk, bm_env_bfv, bitpack);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSecretKeyNone, bm_serialize_save_sk, bm_env_bfv, none);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSecretKeyNone, bm_serialize_load_sk, bm_env_bfv, none);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSeededCiphertextBFVNone, bm_serialize_save_seeded_ct, bm_env_bfv, none);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSeededCiphertextBFVNone, bm_serialize_load_seeded_ct, bm_env_bfv, none);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSeededCiphertextBGVNone, bm_serialize_save_seeded_ct, bm_env_bgv, none);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSeededCiphertextBGVNone, bm_serialize_load_seeded_ct, bm_env_bgv, none);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSeededCiphertextCKKSNone, bm_serialize_save_seeded_ct, bm_env_ckks, none);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSeededCiphertextCKKSNone, bm_serialize_load_seeded_ct, bm_env_ckks, none);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSeededPublicKeyNone, bm_serialize_save_seeded_pk, bm_env_bfv, none);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSeededPublicKeyNone, bm_serialize_load_seeded_pk, bm_env_bfv, none);
+#ifdef SEAL_USE_ZLIB
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSecretKeyZlib, bm_serialize_save_sk, bm_env_bfv, zlib);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSecretKeyZlib, bm_serialize_load_sk, bm_env_bfv, zlib);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSeededCiphertextBFVZlib, bm_serialize_save_seeded_ct, bm_env_bfv, zlib);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSeededCiphertextBFVZlib, bm_serialize_load_seeded_ct, bm_env_bfv, zlib);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSeededCiphertextBGVZlib, bm_serialize_save_seeded_ct, bm_env_bgv, zlib);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSeededCiphertextBGVZlib, bm_serialize_load_seeded_ct, bm_env_bgv, zlib);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSeededCiphertextCKKSZlib, bm_serialize_save_seeded_ct, bm_env_ckks, zlib);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSeededCiphertextCKKSZlib, bm_serialize_load_seeded_ct, bm_env_ckks, zlib);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSeededPublicKeyZlib, bm_serialize_save_seeded_pk, bm_env_bfv, zlib);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSeededPublicKeyZlib, bm_serialize_load_seeded_pk, bm_env_bfv, zlib);
+#endif
+#ifdef SEAL_USE_ZSTD
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSecretKeyZstd, bm_serialize_save_sk, bm_env_bfv, zstd);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSecretKeyZstd, bm_serialize_load_sk, bm_env_bfv, zstd);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSeededCiphertextBFVZstd, bm_serialize_save_seeded_ct, bm_env_bfv, zstd);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSeededCiphertextBFVZstd, bm_serialize_load_seeded_ct, bm_env_bfv, zstd);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSeededCiphertextBGVZstd, bm_serialize_save_seeded_ct, bm_env_bgv, zstd);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSeededCiphertextBGVZstd, bm_serialize_load_seeded_ct, bm_env_bgv, zstd);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSeededCiphertextCKKSZstd, bm_serialize_save_seeded_ct, bm_env_ckks, zstd);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSeededCiphertextCKKSZstd, bm_serialize_load_seeded_ct, bm_env_ckks, zstd);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSeededPublicKeyZstd, bm_serialize_save_seeded_pk, bm_env_bfv, zstd);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSeededPublicKeyZstd, bm_serialize_load_seeded_pk, bm_env_bfv, zstd);
+#endif
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSecretKeyBitPack, bm_serialize_save_sk, bm_env_bfv, bitpack);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSecretKeyBitPack, bm_serialize_load_sk, bm_env_bfv, bitpack);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(
+            SaveSeededCiphertextBFVBitPack, bm_serialize_save_seeded_ct, bm_env_bfv, bitpack);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(
+            LoadSeededCiphertextBFVBitPack, bm_serialize_load_seeded_ct, bm_env_bfv, bitpack);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(
+            SaveSeededCiphertextBGVBitPack, bm_serialize_save_seeded_ct, bm_env_bgv, bitpack);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(
+            LoadSeededCiphertextBGVBitPack, bm_serialize_load_seeded_ct, bm_env_bgv, bitpack);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(
+            SaveSeededCiphertextCKKSBitPack, bm_serialize_save_seeded_ct, bm_env_ckks, bitpack);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(
+            LoadSeededCiphertextCKKSBitPack, bm_serialize_load_seeded_ct, bm_env_ckks, bitpack);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSeededPublicKeyBitPack, bm_serialize_save_seeded_pk, bm_env_bfv, bitpack);
+        SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSeededPublicKeyBitPack, bm_serialize_load_seeded_pk, bm_env_bfv, bitpack);
+        if (bm_env_bfv->context().using_keyswitching())
+        {
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveRelinKeysNone, bm_serialize_save_rlk, bm_env_bfv, none);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadRelinKeysNone, bm_serialize_load_rlk, bm_env_bfv, none);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveGaloisKeysNone, bm_serialize_save_glk, bm_env_bfv, none);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadGaloisKeysNone, bm_serialize_load_glk, bm_env_bfv, none);
+#ifdef SEAL_USE_ZLIB
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveRelinKeysZlib, bm_serialize_save_rlk, bm_env_bfv, zlib);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadRelinKeysZlib, bm_serialize_load_rlk, bm_env_bfv, zlib);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveGaloisKeysZlib, bm_serialize_save_glk, bm_env_bfv, zlib);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadGaloisKeysZlib, bm_serialize_load_glk, bm_env_bfv, zlib);
+#endif
+#ifdef SEAL_USE_ZSTD
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveRelinKeysZstd, bm_serialize_save_rlk, bm_env_bfv, zstd);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadRelinKeysZstd, bm_serialize_load_rlk, bm_env_bfv, zstd);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveGaloisKeysZstd, bm_serialize_save_glk, bm_env_bfv, zstd);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadGaloisKeysZstd, bm_serialize_load_glk, bm_env_bfv, zstd);
+#endif
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveRelinKeysBitPack, bm_serialize_save_rlk, bm_env_bfv, bitpack);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadRelinKeysBitPack, bm_serialize_load_rlk, bm_env_bfv, bitpack);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveGaloisKeysBitPack, bm_serialize_save_glk, bm_env_bfv, bitpack);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadGaloisKeysBitPack, bm_serialize_load_glk, bm_env_bfv, bitpack);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSeededRelinKeysNone, bm_serialize_save_seeded_rlk, bm_env_bfv, none);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSeededRelinKeysNone, bm_serialize_load_seeded_rlk, bm_env_bfv, none);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSeededGaloisKeysNone, bm_serialize_save_seeded_glk, bm_env_bfv, none);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSeededGaloisKeysNone, bm_serialize_load_seeded_glk, bm_env_bfv, none);
+#ifdef SEAL_USE_ZLIB
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSeededRelinKeysZlib, bm_serialize_save_seeded_rlk, bm_env_bfv, zlib);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSeededRelinKeysZlib, bm_serialize_load_seeded_rlk, bm_env_bfv, zlib);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSeededGaloisKeysZlib, bm_serialize_save_seeded_glk, bm_env_bfv, zlib);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSeededGaloisKeysZlib, bm_serialize_load_seeded_glk, bm_env_bfv, zlib);
+#endif
+#ifdef SEAL_USE_ZSTD
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSeededRelinKeysZstd, bm_serialize_save_seeded_rlk, bm_env_bfv, zstd);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSeededRelinKeysZstd, bm_serialize_load_seeded_rlk, bm_env_bfv, zstd);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(SaveSeededGaloisKeysZstd, bm_serialize_save_seeded_glk, bm_env_bfv, zstd);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(LoadSeededGaloisKeysZstd, bm_serialize_load_seeded_glk, bm_env_bfv, zstd);
+#endif
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(
+                SaveSeededRelinKeysBitPack, bm_serialize_save_seeded_rlk, bm_env_bfv, bitpack);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(
+                LoadSeededRelinKeysBitPack, bm_serialize_load_seeded_rlk, bm_env_bfv, bitpack);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(
+                SaveSeededGaloisKeysBitPack, bm_serialize_save_seeded_glk, bm_env_bfv, bitpack);
+            SEAL_BENCHMARK_REGISTER_SERIALIZE(
+                LoadSeededGaloisKeysBitPack, bm_serialize_load_seeded_glk, bm_env_bfv, bitpack);
+        }
+#undef SEAL_BENCHMARK_REGISTER_SERIALIZE
     }
 
 } // namespace sealbench

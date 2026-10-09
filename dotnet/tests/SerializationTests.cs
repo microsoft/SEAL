@@ -28,7 +28,9 @@ namespace SEALNetTest
             invalidHeader.VersionMajor = 0x02;
             Assert.IsFalse(Serialization.IsValidHeader(invalidHeader));
             invalidHeader.VersionMajor = SEALVersion.Major;
-            invalidHeader.ComprMode = (ComprModeType)0x03;
+            invalidHeader.ComprMode = ComprModeType.BitPack;
+            Assert.IsTrue(Serialization.IsValidHeader(invalidHeader));
+            invalidHeader.ComprMode = (ComprModeType)0x04;
             Assert.IsFalse(Serialization.IsValidHeader(invalidHeader));
         }
 

@@ -25,7 +25,11 @@ namespace Microsoft.Research.SEAL
         ZLIB = 1,
 
         /// <summary>Use Zstandard compression.</summary>
-        ZSTD = 2
+        ZSTD = 2,
+
+        /// <summary>Use bit-packing compression. Unlike ZLIB and Zstandard, bit-packing performs no
+        /// integrity checking of the data.</summary>
+        BitPack = 3
     }
 
     /// <summary>Class to provide functionality for serialization.</summary>

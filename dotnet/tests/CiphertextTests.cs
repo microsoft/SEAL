@@ -222,6 +222,44 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void BFVBitPackSaveLoadTest()
+        {
+            SEALContext context = GlobalContext.BFVContext;
+            KeyGenerator keygen = new KeyGenerator(context);
+            keygen.CreatePublicKey(out PublicKey publicKey);
+
+            Encryptor encryptor = new Encryptor(context, publicKey);
+            Plaintext plain = new Plaintext("2x^3 + 4x^2 + 5x^1 + 6");
+            Ciphertext cipher = new Ciphertext();
+
+            encryptor.Encrypt(plain, cipher);
+
+            Ciphertext loaded = new Ciphertext();
+            long saveSize = 0;
+
+            using (MemoryStream mem = new MemoryStream())
+            {
+                saveSize = cipher.Save(mem, ComprModeType.BitPack);
+
+                mem.Seek(offset: 0, loc: SeekOrigin.Begin);
+
+                loaded.Load(context, mem);
+            }
+
+            Assert.IsTrue(ValCheck.IsValidFor(loaded, context));
+
+            ulong ulongCount = cipher.Size * cipher.PolyModulusDegree * cipher.CoeffModulusSize;
+            for (ulong i = 0; i < ulongCount; i++)
+            {
+                Assert.AreEqual(cipher[i], loaded[i]);
+            }
+
+            // The coefficients are uniformly random modulo the coefficient modulus primes, which are well under
+            // 64 bits, so packing each 64-bit word to its significant bits must beat the unpacked size.
+            Assert.IsTrue(saveSize < cipher.SaveSize(ComprModeType.None));
+        }
+
+        [TestMethod]
         public void BGVSaveLoadTest()
         {
             SEALContext context = GlobalContext.BGVContext;

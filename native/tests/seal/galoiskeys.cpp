@@ -98,6 +98,61 @@ namespace sealtest
         galoiskey_save_load(scheme_type::bgv);
     }
 
+    TEST(GaloisKeysTest, GaloisKeysBitPackSaveLoad)
+    {
+        auto galoiskey_bitpack_save_load = [](scheme_type scheme) {
+            EncryptionParameters parms(scheme);
+            parms.set_poly_modulus_degree(256);
+            parms.set_plain_modulus(65537);
+            parms.set_coeff_modulus(CoeffModulus::Create(256, { 60, 50 }));
+            SEALContext context(parms, false, sec_level_type::none);
+            KeyGenerator keygen(context);
+
+            auto compare_keys = [](const GaloisKeys &a, const GaloisKeys &b) {
+                ASSERT_TRUE(a.parms_id() == b.parms_id());
+                ASSERT_EQ(a.data().size(), b.data().size());
+                for (size_t j = 0; j < a.data().size(); j++)
+                {
+                    ASSERT_EQ(a.data()[j].size(), b.data()[j].size());
+                    for (size_t i = 0; i < a.data()[j].size(); i++)
+                    {
+                        ASSERT_EQ(a.data()[j][i].data().dyn_array().size(), b.data()[j][i].data().dyn_array().size());
+                        ASSERT_TRUE(is_equal_uint(
+                            a.data()[j][i].data().data(), b.data()[j][i].data().data(),
+                            a.data()[j][i].data().dyn_array().size()));
+                    }
+                }
+            };
+
+            // Expanded keys round-trip bit-packed
+            stringstream stream;
+            GaloisKeys keys;
+            GaloisKeys test_keys;
+            keygen.create_galois_keys(keys);
+            auto bitpack_size = keys.save(stream, compr_mode_type::bitpack);
+            test_keys.load(context, stream);
+            compare_keys(keys, test_keys);
+
+            // The key data is uniformly random modulo the coefficient modulus primes, so bit-packing must beat
+            // the unpacked size
+            ASSERT_LT(bitpack_size, keys.save_size(compr_mode_type::none));
+
+            // Seeded keys bit-pack too, with the seeded polynomials regenerated on load: the same seeded object
+            // saved with and without bit-packing must load to identical keys
+            stringstream seeded_stream;
+            auto seeded = keygen.create_galois_keys();
+            seeded.save(seeded_stream, compr_mode_type::bitpack);
+            seeded.save(seeded_stream, compr_mode_type::none);
+            GaloisKeys from_bitpack;
+            GaloisKeys from_none;
+            from_bitpack.load(context, seeded_stream);
+            from_none.load(context, seeded_stream);
+            compare_keys(from_bitpack, from_none);
+        };
+        galoiskey_bitpack_save_load(scheme_type::bfv);
+        galoiskey_bitpack_save_load(scheme_type::bgv);
+    }
+
     TEST(GaloisKeysTest, GaloisKeysSeededSaveLoad)
     {
         auto galoiskey_seeded_save_load = [](scheme_type scheme) {
