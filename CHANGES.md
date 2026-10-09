@@ -1,5 +1,11 @@
 # List of Changes
 
+## Version 4.5.1
+
+- Fixed loading of zlib- or Zstandard-compressed objects to throw an exception instead of terminating the process with `std::terminate` when the input ends before the compressed data does. This affected truncated input on a non-seekable stream, and a truncated compressed object nested in another compressed object, such as the data of a `Ciphertext`, on any stream. The problem was introduced in Microsoft SEAL 4.3.3.
+- Fixed undefined behavior in `util::compare_uint` for operands of zero length.
+- Fixed AddressSanitizer reporting use-after-poison when Microsoft SEAL is built with AddressSanitizer and saves with Zstandard compression. Zstandard poisons parts of its workspace, which it allocates from a Microsoft SEAL memory pool, and does not unpoison them when it frees the workspace, so Microsoft SEAL now unpoisons the memory before returning it to the pool.
+
 ## Version 4.5.0
 
 - `SEALHeader` now records the serialization format version instead of the library version: 4.1 for NTT-form ciphertexts (BGV ciphertexts are in NTT form since Microsoft SEAL 4.1), and 4.0 for everything else. Microsoft SEAL 4.0 can now load objects saved by this version, except NTT-form ciphertexts (BGV, CKKS, or BFV transformed to NTT form) and encryption parameters with more than 64 coefficient modulus primes. Microsoft SEAL 4.1-4.3 still cannot load objects saved by this version. The serialization format is otherwise unchanged. `SEALHeader` version fields no longer identify the library that wrote the object.

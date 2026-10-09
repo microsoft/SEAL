@@ -577,6 +577,41 @@ namespace sealtest
             ASSERT_FALSE(is_less_than_or_equal_uint(ptr1.get(), ptr2.get(), 2));
         }
 
+        TEST(UIntCore, CompareUIntDifferentSizes)
+        {
+            ASSERT_EQ(0, compare_uint(nullptr, 0, nullptr, 0));
+            ASSERT_FALSE(is_greater_than_uint(nullptr, 0, nullptr, 0));
+            ASSERT_FALSE(is_less_than_uint(nullptr, 0, nullptr, 0));
+
+            MemoryPool &pool = *global_variables::global_memory_pool;
+            auto ptr1(allocate_uint(3, pool));
+            auto ptr2(allocate_uint(2, pool));
+            ptr1[0] = 5;
+            ptr1[1] = 0;
+            ptr1[2] = 0;
+            ptr2[0] = 5;
+            ptr2[1] = 0;
+
+            // An empty operand compares as zero
+            ASSERT_EQ(1, compare_uint(ptr1.get(), 1, nullptr, 0));
+            ASSERT_EQ(-1, compare_uint(nullptr, 0, ptr2.get(), 1));
+            ASSERT_EQ(0, compare_uint(ptr1.get() + 1, 2, nullptr, 0));
+
+            // Zero high words of the longer operand do not affect the result
+            ASSERT_EQ(0, compare_uint(ptr1.get(), 3, ptr2.get(), 2));
+            ASSERT_EQ(0, compare_uint(ptr2.get(), 2, ptr1.get(), 3));
+            ptr1[0] = 4;
+            ASSERT_EQ(-1, compare_uint(ptr1.get(), 3, ptr2.get(), 2));
+            ASSERT_EQ(1, compare_uint(ptr2.get(), 2, ptr1.get(), 3));
+
+            // A nonzero high word of the longer operand decides the result
+            ptr1[2] = 1;
+            ASSERT_EQ(1, compare_uint(ptr1.get(), 3, ptr2.get(), 2));
+            ASSERT_EQ(-1, compare_uint(ptr2.get(), 2, ptr1.get(), 3));
+            ASSERT_TRUE(is_greater_than_uint(ptr1.get(), 3, ptr2.get(), 2));
+            ASSERT_TRUE(is_less_than_uint(ptr2.get(), 2, ptr1.get(), 3));
+        }
+
         TEST(UIntCore, GetPowerOfTwo)
         {
             ASSERT_EQ(-1, get_power_of_two(0));
