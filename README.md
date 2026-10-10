@@ -150,7 +150,7 @@ If Microsoft SEAL is compiled with ZLIB or Zstandard support, compression will a
 However, it is always possible to explicitly pass `compr_mode_type::none` to serialization methods to disable compression.
 If both ZLIB and Zstandard support are enabled, Zstandard is used by default due to its much better performance.
 
-Microsoft SEAL also provides bit-packing (`compr_mode_type::bitpack` in C++, `ComprModeType.BitPack` in .NET), which needs neither library and removes exactly the always-zero high-order bits described above.
+Microsoft SEAL also provides bit-packing (`compr_mode_type::bitpack` in C++, `ComprModeType.BitPack` in .NET), which needs neither library and removes exactly the always-zero high-order bits described above, as well as low-order bits that are zero in every word, such as bits an application has cleared.
 For ciphertexts and keys it is typically smaller and faster than Zstandard, but for other data, such as plaintexts, Zstandard compresses much better.
 Bit-packing is never used by default, and objects saved with it can be loaded only by Microsoft SEAL 4.6 or later.
 

@@ -158,10 +158,9 @@ namespace sealtest
             is_equal_uint(ctxt.data(), ctxt2.data(), parms.poly_modulus_degree() * parms.coeff_modulus().size() * 2));
         ASSERT_TRUE(ctxt.data() != ctxt2.data());
 
-        // The first block contains the ciphertext metadata (among them the full-width parms_id hash words) and
-        // packs at up to the full 64 bits, but every later block holds only coefficients smaller than the
-        // coefficient modulus primes and hence packs at their bit width, so the total is guaranteed to beat the
-        // unpacked size.
+        // The ciphertext metadata (among them the full-width parms_id hash words) is stored verbatim at the start of
+        // the first block, and every block packs its coefficients, which are smaller than the coefficient modulus
+        // primes, at their bit width, so the total is guaranteed to beat the unpacked size.
         ASSERT_LT(bitpack_size, ctxt.save_size(compr_mode_type::none));
 
         // Seeded ciphertexts bit-pack too: the same seeded object saved with and without bit-packing must load to
@@ -177,6 +176,48 @@ namespace sealtest
         ASSERT_TRUE(from_bitpack.parms_id() == from_none.parms_id());
         ASSERT_TRUE(is_equal_uint(
             from_bitpack.data(), from_none.data(), parms.poly_modulus_degree() * parms.coeff_modulus().size() * 2));
+    }
+
+    // Some applications clear low-order bits of ciphertext coefficients that decryption does not need, to make the
+    // ciphertexts they send smaller. Bit-packing stores only the remaining bits of each coefficient, and stores the
+    // ciphertext metadata verbatim at the start of the first block, so that it does not widen the coefficients after
+    // it.
+    TEST(CiphertextTest, BFVBitPackClearedLowBits)
+    {
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(2048);
+        parms.set_coeff_modulus(CoeffModulus::Create(2048, { 40 }));
+        parms.set_plain_modulus(12289);
+
+        SEALContext context(parms);
+        KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
+        Encryptor encryptor(context, pk);
+
+        Ciphertext ctxt;
+        encryptor.encrypt(Plaintext("1x^1 + 2"), ctxt);
+
+        // Clear the low 15 bits of every coefficient, leaving 25 significant bits
+        size_t coeff_count = ctxt.size() * parms.poly_modulus_degree();
+        for (size_t i = 0; i < coeff_count; i++)
+        {
+            ctxt.data()[i] &= ~((uint64_t(1) << 15) - 1);
+        }
+
+        stringstream stream;
+        auto bitpack_size = ctxt.save(stream, compr_mode_type::bitpack);
+        Ciphertext ctxt2;
+        ctxt2.load(context, stream);
+        ASSERT_TRUE(is_equal_uint(ctxt.data(), ctxt2.data(), coeff_count));
+
+        // The coefficients take 25 bits each. On top of that come the SEALHeader (16 bytes), the bit-packing
+        // prologue (9 bytes), the 97 bytes of ciphertext metadata, and for each of the 33 blocks at most 3 header
+        // bytes, 8 verbatim bytes around the words, and 1 byte of rounding. Storing the cleared bits, or the
+        // metadata within the words of the first block, would take hundreds of bytes more.
+        size_t data_bytes = coeff_count * 25 / 8;
+        ASSERT_GE(bitpack_size, static_cast<streamoff>(data_bytes));
+        ASSERT_LE(bitpack_size, static_cast<streamoff>(data_bytes + 16 + 9 + 97 + 33 * (3 + 8 + 1)));
     }
 
     TEST(CiphertextTest, LoadZeroSizeRejectsOversizedDynArray)

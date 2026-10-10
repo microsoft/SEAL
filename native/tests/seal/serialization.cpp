@@ -132,6 +132,36 @@ namespace sealtest
             }
         };
 
+        // Wraps hand-crafted bit-packed blocks of a payload of original_size bytes in a SEALHeader and the 9-byte
+        // prologue.
+        string make_bitpack_stream(uint64_t original_size, const string &blocks)
+        {
+            Serialization::SEALHeader header;
+            header.compr_mode = compr_mode_type::bitpack;
+            header.version_minor = Serialization::format_version_minor_bitpack;
+            header.size = sizeof(Serialization::SEALHeader) + 8 + 1 + blocks.size();
+            string stream(reinterpret_cast<const char *>(&header), sizeof(Serialization::SEALHeader));
+            unsigned char size_bytes[8]{};
+            util::bitpack::store_uint64_le(size_bytes, original_size);
+            stream.append(reinterpret_cast<const char *>(size_bytes), sizeof(size_bytes));
+            stream.push_back(static_cast<char>(util::bitpack::bitpack_block_log2));
+            stream += blocks;
+            return stream;
+        }
+
+        // Loads the original bytes of a bit-packed stream
+        vector<uint8_t> load_bitpack_stream(const string &stream, size_t original_size)
+        {
+            stringstream in(stream);
+            vector<uint8_t> loaded(original_size);
+            Serialization::Load(
+                [&](istream &in_stream, SEALVersion) {
+                    in_stream.read(reinterpret_cast<char *>(loaded.data()), static_cast<streamsize>(loaded.size()));
+                },
+                in, false);
+            return loaded;
+        }
+
         // A serializable object that, on save, writes a small prefix followed by a large filler, but on load reads
         // only the prefix. Modeling a hostile/oversized payload: the loader must not need to inflate the unread filler
         // (the decompression-bomb defense), and must leave the stream positioned at the end of the object.
@@ -1037,14 +1067,14 @@ namespace sealtest
     }
 
     // Bit-packing an all-word payload of bounded-width values must produce exactly the size the format prescribes
-    // (the original size and the block size, then per block a width byte, a phase byte, and the packed words) and
+    // (the original size and the block size, then per block a width byte, a prefix byte, and the packed words) and
     // must round-trip.
     TEST(SerializationTest, BitPackSizeAndRoundTrip)
     {
         using namespace placeholders;
 
         // 1023 values of at most 36 significant bits; with the 8-byte count in front, the serialized stream is
-        // exactly 8192 bytes, i.e. eight full 1024-byte blocks of 128 word-aligned words each (phase 0, no
+        // exactly 8192 bytes, i.e. eight full 1024-byte blocks of 128 word-aligned words each (no prefix, no
         // verbatim bytes).
         word_struct st;
         st.words.resize(1023);
@@ -1068,7 +1098,7 @@ namespace sealtest
             bind(&word_struct::save_members, &st, _1), st.save_size(compr_mode_type::bitpack), stream,
             compr_mode_type::bitpack, false);
 
-        // 16 (SEALHeader) + 8 (original size) + 1 (block size) + 8 * (1 width byte + 1 phase byte + 128 * 36 / 8)
+        // 16 (SEALHeader) + 8 (original size) + 1 (block size) + 8 * (1 width byte + 1 prefix byte + 128 * 36 / 8)
         ASSERT_EQ(16 + 8 + 1 + 8 * (2 + 576), out_size);
 
         word_struct st2;
@@ -1077,9 +1107,187 @@ namespace sealtest
         ASSERT_TRUE(st.words == st2.words);
     }
 
+    // Words whose low-order bits are all zero must be packed without those bits: the block stores each word shifted
+    // right by the number of low-order zero bits, and a shift byte. A leading word that is not like the others, here
+    // the word count, is stored in a verbatim prefix instead.
+    TEST(SerializationTest, BitPackLowZeroShift)
+    {
+        using namespace placeholders;
+
+        // 1023 values with bits 7 to 35 significant and bits 0 to 6 zero; with the 8-byte count in front, the
+        // serialized stream is exactly 8192 bytes, i.e. eight full blocks of 128 words each.
+        word_struct st;
+        st.words.resize(1023);
+        uint64_t state = 1;
+        for (size_t i = 0; i < st.words.size(); i++)
+        {
+            state = state * 6364136223846793005ULL + 1442695040888963407ULL;
+            st.words[i] = (state >> 28) & ~((uint64_t(1) << 7) - 1);
+        }
+
+        // Pin the width and shift of every block to exactly 29 and 7. The stream words are the count followed by
+        // the values, so block i (of 128 stream words each) starts at value index 128 * i - 1.
+        st.words[0] |= (uint64_t(1) << 35) | (uint64_t(1) << 7);
+        for (size_t block = 1; block < 8; block++)
+        {
+            st.words[128 * block - 1] |= (uint64_t(1) << 35) | (uint64_t(1) << 7);
+        }
+
+        stringstream stream;
+        auto out_size = Serialization::Save(
+            bind(&word_struct::save_members, &st, _1), st.save_size(compr_mode_type::bitpack), stream,
+            compr_mode_type::bitpack, false);
+
+        // 16 (SEALHeader) + 8 (original size) + 1 (block size); the first block: 3 header bytes, the count in an
+        // 8-byte prefix, and 127 words at 29 bits; then seven blocks of 3 header bytes and 128 words at 29 bits
+        ASSERT_EQ(16 + 8 + 1 + (3 + 8 + (127 * 29 + 7) / 8) + 7 * (3 + 128 * 29 / 8), out_size);
+
+        // The first block has an equally small encoding with a 5-byte prefix: the words then start at the count's
+        // three zero high-order bytes, which add 24 low-order zero bits to the shift, and those bytes become the
+        // tail instead. Among equally small encodings the shortest prefix wins. The other blocks need no prefix.
+        string bytes = stream.str();
+        ASSERT_EQ(29 | 0x80, static_cast<uint8_t>(bytes[25]));
+        ASSERT_EQ(5, static_cast<uint8_t>(bytes[26]));
+        ASSERT_EQ(31, static_cast<uint8_t>(bytes[27]));
+        size_t second_block = 25 + 3 + 8 + (127 * 29 + 7) / 8;
+        ASSERT_EQ(29 | 0x80, static_cast<uint8_t>(bytes[second_block]));
+        ASSERT_EQ(0, static_cast<uint8_t>(bytes[second_block + 1]));
+        ASSERT_EQ(7, static_cast<uint8_t>(bytes[second_block + 2]));
+
+        word_struct st2;
+        auto in_size = Serialization::Load(bind(&word_struct::load_members, &st2, _1), stream, false);
+        ASSERT_EQ(out_size, in_size);
+        ASSERT_TRUE(st.words == st2.words);
+    }
+
+    // A block may begin with bytes that are not word data, such as the metadata of a ciphertext. They are stored in
+    // a verbatim prefix of up to 255 bytes, so that they do not widen the words after them.
+    TEST(SerializationTest, BitPackLongPrefix)
+    {
+        using namespace placeholders;
+
+        uint64_t state = 0x0123456789ABCDEFULL;
+        auto next = [&state]() {
+            state = state * 6364136223846793005ULL + 1442695040888963407ULL;
+            return state;
+        };
+
+        // Appends 30-bit odd words, the first with its top bit set, so that their width is 30 with no shift
+        auto append_words = [&](byte_struct &st, size_t count) {
+            for (size_t i = 0; i < count; i++)
+            {
+                uint64_t word = (next() >> 34) | 1 | (i ? 0 : uint64_t(1) << 29);
+                size_t old_size = st.bytes.size();
+                st.bytes.resize(old_size + 8);
+                util::bitpack::store_uint64_le(st.bytes.data() + old_size, word);
+            }
+        };
+
+        // The first block holds 100 bytes of metadata, 115 words, and 4 more bytes. The second block holds 300 bytes
+        // of metadata, more than any prefix can hold, 90 words, and 4 more bytes.
+        byte_struct st;
+        for (size_t i = 0; i < 100; i++)
+        {
+            st.bytes.push_back(static_cast<uint8_t>(next() >> 56));
+        }
+        append_words(st, 115);
+        st.bytes.insert(st.bytes.end(), { 0xA1, 0xA2, 0xA3, 0xA4 });
+        st.bytes.insert(st.bytes.end(), 300, 0xFF);
+        append_words(st, 90);
+        st.bytes.insert(st.bytes.end(), { 0xB1, 0xB2, 0xB3, 0xB4 });
+        ASSERT_EQ(size_t(2048), st.bytes.size());
+
+        stringstream stream;
+        auto out_size = Serialization::Save(
+            bind(&byte_struct::save_members, &st, _1), st.save_size(compr_mode_type::bitpack), stream,
+            compr_mode_type::bitpack, false);
+
+        // 16 (SEALHeader) + 8 (original size) + 1 (block size); the first block: 2 header bytes, the 100-byte
+        // prefix, 115 words at 30 bits, and the 4-byte tail; the second block: 2 header bytes and its 1024 bytes,
+        // since every word on any grid with a prefix of at most 255 bytes includes metadata
+        ASSERT_EQ(16 + 8 + 1 + (2 + 100 + (115 * 30 + 7) / 8 + 4) + (2 + 1024), out_size);
+        string bytes = stream.str();
+        ASSERT_EQ(30, static_cast<uint8_t>(bytes[25]));
+        ASSERT_EQ(100, static_cast<uint8_t>(bytes[26]));
+        size_t second_block = 25 + 2 + 100 + (115 * 30 + 7) / 8 + 4;
+        ASSERT_EQ(64, static_cast<uint8_t>(bytes[second_block]));
+        ASSERT_EQ(0, static_cast<uint8_t>(bytes[second_block + 1]));
+
+        byte_struct loaded;
+        loaded.bytes.resize(st.bytes.size());
+        auto in_size = Serialization::Load(bind(&byte_struct::load_members, &loaded, _1), stream, false);
+        ASSERT_EQ(out_size, in_size);
+        ASSERT_EQ(st.bytes, loaded.bytes);
+    }
+
+    // Bit-packing must round-trip words of every shift and of various widths after prefixes of various lengths, and
+    // must encode the first block with exactly that width, shift, and prefix.
+    TEST(SerializationTest, BitPackRandomizedShiftAndPrefix)
+    {
+        using namespace placeholders;
+
+        uint64_t state = 0x5A5A5A5AA5A5A5A5ULL;
+        auto next = [&state]() {
+            state = state * 6364136223846793005ULL + 1442695040888963407ULL;
+            return state;
+        };
+
+        const size_t prefixes[]{ 0, 1, 7, 8, 9, 97, 128, 200, 254, 255 };
+        size_t case_index = 0;
+        for (int shift = 1; shift < 64; shift++)
+        {
+            for (int width : { 1, (65 - shift) / 2, 64 - shift })
+            {
+                size_t prefix = prefixes[case_index++ % (sizeof(prefixes) / sizeof(prefixes[0]))];
+
+                // The prefix, 300 words of width bits shifted left by shift bits, the first with its top and bottom
+                // bits set, and 3 more bytes
+                byte_struct st;
+                st.bytes.assign(prefix, 0xFF);
+                for (size_t k = 0; k < 300; k++)
+                {
+                    uint64_t value = next() & ((uint64_t(1) << width) - 1);
+                    if (!k)
+                    {
+                        value |= (uint64_t(1) << (width - 1)) | 1;
+                    }
+                    size_t old_size = st.bytes.size();
+                    st.bytes.resize(old_size + 8);
+                    util::bitpack::store_uint64_le(st.bytes.data() + old_size, value << shift);
+                }
+                for (size_t i = 0; i < 3; i++)
+                {
+                    st.bytes.push_back(static_cast<uint8_t>(next() >> 56));
+                }
+
+                stringstream stream;
+                auto out_size = Serialization::Save(
+                    bind(&byte_struct::save_members, &st, _1), st.save_size(compr_mode_type::bitpack), stream,
+                    compr_mode_type::bitpack, false);
+                ASSERT_LE(out_size, st.save_size(compr_mode_type::bitpack));
+                string bytes = stream.str();
+
+                // When the shift is a whole number of bytes, encodings with the words starting whole bytes later or
+                // earlier, without a shift, can be as small or smaller, so only the round trip is checked then.
+                if (shift % 8)
+                {
+                    ASSERT_EQ(width | 0x80, static_cast<uint8_t>(bytes[25]));
+                    ASSERT_EQ(prefix, static_cast<uint8_t>(bytes[26]));
+                    ASSERT_EQ(shift, static_cast<uint8_t>(bytes[27]));
+                }
+
+                byte_struct loaded;
+                loaded.bytes.resize(st.bytes.size());
+                auto in_size = Serialization::Load(bind(&byte_struct::load_members, &loaded, _1), stream, false);
+                ASSERT_EQ(out_size, in_size);
+                ASSERT_EQ(st.bytes, loaded.bytes);
+            }
+        }
+    }
+
     // The encoder must find word data that does not fall on the stream's own word grid: values shifted off the
     // grid by a 1-byte prefix (as a seal_byte member does in real objects) must still pack at their bit width,
-    // costing only the per-block phase bytes relative to the aligned encoding.
+    // costing only the per-block prefix bytes relative to the aligned encoding.
     TEST(SerializationTest, BitPackMisalignedWords)
     {
         using namespace placeholders;
@@ -1125,7 +1333,7 @@ namespace sealtest
             compr_mode_type::bitpack, false);
 
         // The prefixed stream is 1 original byte longer and spans one more block; realignment costs at most the
-        // per-block phase and tail verbatim bytes plus one extra block header, far below the 8 bits per word
+        // per-block prefix and tail verbatim bytes plus one extra block header, far below the 8 bits per word
         // (over 4,000 bytes here) that losing alignment would cost.
         ASSERT_LE(prefixed_size, aligned_size + 80);
     }
@@ -1151,7 +1359,7 @@ namespace sealtest
     }
 
     // Bit-packing must round-trip buffers with sizes around block boundaries, holding runs of words of every width at
-    // every phase that continue across blocks, and the output must fit in the estimated size.
+    // every alignment that continue across blocks, and the output must fit in the estimated size.
     TEST(SerializationTest, BitPackRandomizedRoundTrip)
     {
         using namespace placeholders;
@@ -1192,23 +1400,23 @@ namespace sealtest
             round_trip(st, payload);
         }
 
-        // For each width from 0 to 64, a run of words at phase width % 8 that continues across blocks and switches to
-        // a second width from the third block on, followed by a partial word. The first word of each block has the
-        // top bit of its width set, so the encoder must choose exactly this width and phase.
+        // For each width from 0 to 64, a run of words after a prefix of width % 8 bytes that continues across blocks
+        // and switches to a second width from the third block on, followed by a partial word. The first word of each
+        // block has the top bit of its width set, so the encoder must choose exactly this width and prefix.
         const size_t sizes[]{ 1024, 1025, 1031, 2047, 2048, 2049, 3071, 3072, 3073, 4097 };
         for (int width = 0; width <= 64; width++)
         {
-            size_t phase = static_cast<size_t>(width) % 8;
+            size_t prefix = static_cast<size_t>(width) % 8;
             int width2 = (width + 29) % 65;
             size_t size = sizes[static_cast<size_t>(width) % (sizeof(sizes) / sizeof(sizes[0]))];
 
             byte_struct st;
             st.bytes.resize(size);
-            for (size_t i = 0; i < phase; i++)
+            for (size_t i = 0; i < prefix; i++)
             {
                 st.bytes[i] = static_cast<uint8_t>(0xF0 + i);
             }
-            size_t word_count = (size - phase) / 8;
+            size_t word_count = (size - prefix) / 8;
             for (size_t k = 0; k < word_count; k++)
             {
                 int word_width = k < 256 ? width : width2;
@@ -1218,9 +1426,9 @@ namespace sealtest
                 {
                     word |= uint64_t(1) << (word_width - 1);
                 }
-                util::bitpack::store_uint64_le(st.bytes.data() + phase + 8 * k, word);
+                util::bitpack::store_uint64_le(st.bytes.data() + prefix + 8 * k, word);
             }
-            for (size_t i = phase + 8 * word_count; i < size; i++)
+            for (size_t i = prefix + 8 * word_count; i < size; i++)
             {
                 st.bytes[i] = static_cast<uint8_t>(next() >> 56);
             }
@@ -1228,10 +1436,10 @@ namespace sealtest
             string payload;
             round_trip(st, payload);
 
-            // The first block is full, so it must be encoded at exactly this width and phase
+            // The first block is full, so it must be encoded at exactly this width and prefix
             ASSERT_LT(size_t(10), payload.size());
             ASSERT_EQ(width, static_cast<int>(static_cast<uint8_t>(payload[9])));
-            ASSERT_EQ(phase, static_cast<size_t>(static_cast<uint8_t>(payload[10])));
+            ASSERT_EQ(prefix, static_cast<size_t>(static_cast<uint8_t>(payload[10])));
         }
     }
 
@@ -1271,8 +1479,8 @@ namespace sealtest
         ASSERT_EQ(st.bytes, loaded.bytes);
     }
 
-    // Pins the wire format of a multi-block payload: a 5-byte prefix followed by 61-bit words (phase 5, with bits
-    // spilling into a ninth byte), an all-zero block (width 0), and a partial block of random bytes (width 64). The
+    // Pins the wire format of a multi-block payload: a 5-byte prefix followed by 61-bit words (with bits spilling
+    // into a ninth byte), an all-zero block (width 0), and a partial block of random bytes (width 64). The
     // expected length and FNV-1a hash were computed with an independent bit-by-bit reference encoder.
     TEST(SerializationTest, BitPackGoldenVectorMultiBlock)
     {
@@ -1315,7 +1523,7 @@ namespace sealtest
         string payload = stream.str().substr(sizeof(Serialization::SEALHeader));
         ASSERT_EQ(size_t(1444), payload.size());
 
-        // Width and phase of each block
+        // Width and prefix of each block
         ASSERT_EQ(61, static_cast<uint8_t>(payload[9]));
         ASSERT_EQ(5, static_cast<uint8_t>(payload[10]));
         ASSERT_EQ(0, static_cast<uint8_t>(payload[988]));
@@ -1330,6 +1538,157 @@ namespace sealtest
             hash *= 0x100000001B3ULL;
         }
         ASSERT_EQ(0x6D76F2CA1F37F06CULL, hash);
+
+        byte_struct loaded;
+        loaded.bytes.resize(st.bytes.size());
+        Serialization::Load(bind(&byte_struct::load_members, &loaded, _1), stream, false);
+        ASSERT_EQ(st.bytes, loaded.bytes);
+    }
+
+    // Pins the wire format of single blocks whose words have low-order zero bits, and the encoder's choice of
+    // whether to shift them out: it must shift only when that makes the block strictly smaller. Each case also has
+    // an equally valid encoding that the encoder must not emit (shifted where the expected one is not, and vice
+    // versa), which must decode to the same bytes. The expected bytes were computed with an independent bit-by-bit
+    // reference encoder.
+    TEST(SerializationTest, BitPackGoldenVectorShift)
+    {
+        using namespace placeholders;
+
+        struct golden_case
+        {
+            vector<uint8_t> original;
+            vector<uint8_t> expected_payload;
+            vector<uint8_t> alternative_blocks;
+        };
+        auto make_original = [](const vector<uint8_t> &prefix, const vector<uint64_t> &words,
+                                const vector<uint8_t> &tail) {
+            vector<uint8_t> result = prefix;
+            for (auto word : words)
+            {
+                size_t old_size = result.size();
+                result.resize(old_size + 8);
+                util::bitpack::store_uint64_le(result.data() + old_size, word);
+            }
+            result.insert(result.end(), tail.begin(), tail.end());
+            return result;
+        };
+
+        vector<golden_case> cases{
+            // The words of BitPackGoldenVector shifted left by 9 bits: with the shift (width 30, prefix 3, shift 9),
+            // they pack into the same bytes as there. Without it (width 39), the block is 2 bytes larger.
+            { make_original(
+                  { 0xAA, 0xBB, 0xCC }, { 0x12345678ULL << 9, 0x30ABCDEFULL << 9, 0x2AAAAAAAULL << 9 },
+                  { 0xDD, 0xEE, 0xFF, 0x11 }),
+              { 0x1F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A, 0x9E, 0x03, 0x09, 0xAA, 0xBB, 0xCC, 0x78,
+                0x56, 0x34, 0xD2, 0x7B, 0xF3, 0x2A, 0xAC, 0xAA, 0xAA, 0xAA, 0x02, 0xDD, 0xEE, 0xFF, 0x11 },
+              { 0x27, 0x03, 0xAA, 0xBB, 0xCC, 0x00, 0xF0, 0xAC, 0x68, 0x24, 0x00, 0xEF,
+                0xCD, 0xAB, 0x30, 0x00, 0x55, 0x55, 0x55, 0x15, 0xDD, 0xEE, 0xFF, 0x11 } },
+
+            // The words 2 and 4: without the shift (width 3), they pack into one byte. With it (width 2, shift 1),
+            // they still need one byte, so the shift byte would make the block larger.
+            { make_original({}, { 2, 4 }, {}),
+              { 0x10, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A, 0x03, 0x00, 0x22 },
+              { 0x82, 0x00, 0x01, 0x09 } },
+
+            // Words with exactly one low-order zero bit: the shift saves one packed byte (width 12 instead of 13),
+            // which only pays for the shift byte, so the encoder does not shift.
+            { make_original({ 0xC3 }, { 0x1236, 0x0A4E, 0x1FFE, 0x0B5A }, { 0x5A }),
+              { 0x22, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A, 0x0D,
+                0x01, 0xC3, 0x36, 0xD2, 0x49, 0xF9, 0x7F, 0xAD, 0x05, 0x5A },
+              { 0x8C, 0x01, 0x01, 0xC3, 0x1B, 0x79, 0x52, 0xFF, 0xDF, 0x5A, 0x5A } }
+        };
+
+        for (const auto &c : cases)
+        {
+            byte_struct st;
+            st.bytes = c.original;
+            stringstream stream;
+            Serialization::Save(
+                bind(&byte_struct::save_members, &st, _1), st.save_size(compr_mode_type::bitpack), stream,
+                compr_mode_type::bitpack, false);
+            string bytes = stream.str();
+            ASSERT_EQ(c.expected_payload.size(), bytes.size() - sizeof(Serialization::SEALHeader));
+            ASSERT_TRUE(equal(
+                c.expected_payload.begin(), c.expected_payload.end(),
+                reinterpret_cast<const uint8_t *>(bytes.data() + sizeof(Serialization::SEALHeader))));
+
+            byte_struct loaded;
+            loaded.bytes.resize(st.bytes.size());
+            Serialization::Load(bind(&byte_struct::load_members, &loaded, _1), stream, false);
+            ASSERT_EQ(st.bytes, loaded.bytes);
+
+            string alternative(c.alternative_blocks.begin(), c.alternative_blocks.end());
+            ASSERT_EQ(
+                c.original,
+                load_bitpack_stream(make_bitpack_stream(c.original.size(), alternative), c.original.size()));
+        }
+    }
+
+    // Pins the wire format of a multi-block payload with low-order zero bits: 100 random bytes followed by 31-bit
+    // words with 5 low-order zero bits (prefix 100, shift 5); a block starting in the middle of a word, where the
+    // prefixes 1 to 4 tie and the smallest wins (shift 29); and a partial block where random bytes interrupt the
+    // words (width 64). The expected length and FNV-1a hash were computed with an independent bit-by-bit reference
+    // encoder.
+    TEST(SerializationTest, BitPackGoldenVectorShiftMultiBlock)
+    {
+        using namespace placeholders;
+
+        uint64_t state = 0x0123456789ABCDEFULL;
+        auto splitmix64 = [&state]() {
+            state += 0x9E3779B97F4A7C15ULL;
+            uint64_t z = state;
+            z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ULL;
+            z = (z ^ (z >> 27)) * 0x94D049BB133111EBULL;
+            return z ^ (z >> 31);
+        };
+
+        byte_struct st;
+        auto append_bytes = [&](size_t count) {
+            for (size_t i = 0; i < count; i++)
+            {
+                st.bytes.push_back(static_cast<uint8_t>(splitmix64()));
+            }
+        };
+        auto append_words = [&](size_t count) {
+            for (size_t i = 0; i < count; i++)
+            {
+                size_t old_size = st.bytes.size();
+                st.bytes.resize(old_size + 8);
+                util::bitpack::store_uint64_le(
+                    st.bytes.data() + old_size, (splitmix64() & ((uint64_t(1) << 31) - 1)) << 5);
+            }
+        };
+        append_bytes(100);
+        append_words(250);
+        append_bytes(260);
+        append_words(40);
+        st.bytes.insert(st.bytes.end(), { 0xA1, 0xA2, 0xA3 });
+        ASSERT_EQ(size_t(2683), st.bytes.size());
+
+        stringstream stream;
+        Serialization::Save(
+            bind(&byte_struct::save_members, &st, _1), st.save_size(compr_mode_type::bitpack), stream,
+            compr_mode_type::bitpack, false);
+        string payload = stream.str().substr(sizeof(Serialization::SEALHeader));
+        ASSERT_EQ(size_t(1703), payload.size());
+
+        // Width byte, prefix, and shift of each block
+        ASSERT_EQ(0x9F, static_cast<uint8_t>(payload[9]));
+        ASSERT_EQ(100, static_cast<uint8_t>(payload[10]));
+        ASSERT_EQ(5, static_cast<uint8_t>(payload[11]));
+        ASSERT_EQ(0x9F, static_cast<uint8_t>(payload[562]));
+        ASSERT_EQ(1, static_cast<uint8_t>(payload[563]));
+        ASSERT_EQ(29, static_cast<uint8_t>(payload[564]));
+        ASSERT_EQ(64, static_cast<uint8_t>(payload[1066]));
+        ASSERT_EQ(0, static_cast<uint8_t>(payload[1067]));
+
+        uint64_t hash = 0xCBF29CE484222325ULL;
+        for (char c : payload)
+        {
+            hash ^= static_cast<uint8_t>(c);
+            hash *= 0x100000001B3ULL;
+        }
+        ASSERT_EQ(0x2B583A7F2A4A9DD1ULL, hash);
 
         byte_struct loaded;
         loaded.bytes.resize(st.bytes.size());
@@ -1383,41 +1742,65 @@ namespace sealtest
         ASSERT_ANY_THROW(Serialization::Load(bind(&test_struct::load_members, &st2, _1), tampered, false));
     }
 
-    // A phase byte exceeding 7 is malformed and must be rejected cleanly.
-    TEST(SerializationTest, BitPackTamperedPhaseThrows)
+    // A prefix longer than its block is malformed and must be rejected cleanly. The stream carries enough bytes
+    // for the longer prefix and the tail that an unchecked word count would imply, so that only the prefix check,
+    // not a shortage of input, can reject it.
+    TEST(SerializationTest, BitPackTamperedPrefixThrows)
     {
-        using namespace placeholders;
+        // A 16-byte block of two zero-width words: a 16-byte prefix is valid, a 17-byte one is not
+        string valid_block{ static_cast<char>(0), static_cast<char>(16) };
+        valid_block.append(16, static_cast<char>(0x5A));
+        auto loaded = load_bitpack_stream(make_bitpack_stream(16, valid_block), 16);
+        ASSERT_EQ(vector<uint8_t>(16, 0x5A), loaded);
 
-        test_struct st{ 3, ~0, 3.14159 };
-        stringstream ss;
-        Serialization::Save(
-            bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::bitpack), ss,
-            compr_mode_type::bitpack, false);
-
-        // The first block's phase byte follows the SEALHeader (16 bytes), the original size (8 bytes), the block
-        // size (1 byte), and the width byte.
-        string bytes = ss.str();
-        bytes[26] = static_cast<char>(8);
-
-        stringstream tampered(bytes);
-        test_struct st2;
-        ASSERT_ANY_THROW(Serialization::Load(bind(&test_struct::load_members, &st2, _1), tampered, false));
+        string long_block{ static_cast<char>(0), static_cast<char>(17) };
+        long_block.append(24, static_cast<char>(0x5A));
+        ASSERT_ANY_THROW(load_bitpack_stream(make_bitpack_stream(16, long_block), 16));
     }
 
-    // A block shorter than a word admits several equivalent encodings: any phase up to the block length splits
-    // the bytes between the verbatim phase prefix and the verbatim tail, with zero packed words. The decoder must
-    // accept all of them (an encoder is free to emit any) and must reject a phase beyond the block length, which
+    // A shift byte must be nonzero, may only follow a nonzero width, and the shifted words must fit in 64 bits.
+    // Each tampered block below would otherwise decode, so only the targeted check can reject it.
+    TEST(SerializationTest, BitPackTamperedShiftThrows)
+    {
+        // Two words, 0x30 and 0x10: width 2 and shift 4, packed as the 2-bit values 3 and 1 in the byte 0x07
+        const vector<uint8_t> original{ 0x30, 0, 0, 0, 0, 0, 0, 0, 0x10, 0, 0, 0, 0, 0, 0, 0 };
+        auto block = [](unsigned char width_byte, unsigned char shift, bool packed) {
+            string result{ static_cast<char>(width_byte), static_cast<char>(0), static_cast<char>(shift) };
+            if (packed)
+            {
+                result.push_back(static_cast<char>(0x07));
+            }
+            return result;
+        };
+        ASSERT_EQ(original, load_bitpack_stream(make_bitpack_stream(16, block(0x82, 4, true)), 16));
+
+        // Shift of zero
+        ASSERT_ANY_THROW(load_bitpack_stream(make_bitpack_stream(16, block(0x82, 0, true)), 16));
+
+        // Width of zero
+        ASSERT_ANY_THROW(load_bitpack_stream(make_bitpack_stream(16, block(0x80, 4, false)), 16));
+
+        // Width plus shift exceeding 64
+        ASSERT_ANY_THROW(load_bitpack_stream(make_bitpack_stream(16, block(0x82, 63, true)), 16));
+
+        // Missing shift byte
+        ASSERT_ANY_THROW(load_bitpack_stream(make_bitpack_stream(16, string{ static_cast<char>(0x82), 0 }), 16));
+    }
+
+    // A block shorter than a word admits several equivalent encodings: any prefix up to the block length splits
+    // the bytes between the verbatim prefix and the verbatim tail, with zero packed words. The decoder must
+    // accept all of them (an encoder is free to emit any) and must reject a prefix beyond the block length, which
     // would underflow the word count.
-    TEST(SerializationTest, BitPackTinyBlockPhases)
+    TEST(SerializationTest, BitPackTinyBlockPrefixes)
     {
         using namespace placeholders;
 
-        for (unsigned phase = 0; phase <= 4; phase++)
+        for (unsigned prefix = 0; prefix <= 4; prefix++)
         {
             // Hand-craft a stream holding the 3 original bytes { 0xAA, 0xBB, 0xCC } in a single tiny block. The
-            // rejected phase is padded so that only the phase check, not a shortage of input, can reject it.
+            // rejected prefix is padded so that only the prefix check, not a shortage of input, can reject it.
             string body{ static_cast<char>(0xAA), static_cast<char>(0xBB), static_cast<char>(0xCC) };
-            if (phase > 3)
+            if (prefix > 3)
             {
                 body.append(8, '\0');
             }
@@ -1431,7 +1814,7 @@ namespace sealtest
             blob.append(reinterpret_cast<const char *>(original_size), sizeof(original_size));
             blob.push_back(static_cast<char>(util::bitpack::bitpack_block_log2));
             blob.push_back(static_cast<char>(0)); // width
-            blob.push_back(static_cast<char>(phase));
+            blob.push_back(static_cast<char>(prefix));
             blob += body;
 
             stringstream stream(blob);
@@ -1439,7 +1822,7 @@ namespace sealtest
             auto load_fn = [&](istream &in_stream, SEALVersion) {
                 in_stream.read(reinterpret_cast<char *>(loaded), 3);
             };
-            if (phase <= 3)
+            if (prefix <= 3)
             {
                 Serialization::Load(load_fn, stream, false);
                 ASSERT_EQ(0xAA, loaded[0]);

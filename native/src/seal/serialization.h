@@ -32,9 +32,9 @@ namespace seal
         // Use Zstandard compression
         zstd = 2,
 #endif
-        // Use bit-packing, which removes the always-zero high bits of 64-bit words. It is designed for ciphertext
-        // and key data, requires no external library, and performs no integrity checking. Loading requires Microsoft
-        // SEAL 4.6 or later.
+        // Use bit-packing, which removes the high-order bits, and the low-order bits, that are zero in all 64-bit
+        // words of a block of data. It is designed for ciphertext and key data, requires no external library, and
+        // performs no integrity checking. Loading requires Microsoft SEAL 4.6 or later.
         bitpack = 3,
     };
 

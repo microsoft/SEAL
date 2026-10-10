@@ -25,19 +25,27 @@ namespace seal
                 // writes near the end of a block without stepping out of bounds.
                 constexpr size_t block_slack = bytes_per_word;
 
-                // Number of whole 64-bit words in a block of block_len bytes read at the given phase.
-                SEAL_NODISCARD inline size_t block_word_count(size_t block_len, size_t phase) noexcept
+                // Number of whole 64-bit words in a block of block_len bytes after a verbatim prefix of the given
+                // length.
+                SEAL_NODISCARD inline size_t block_word_count(size_t block_len, size_t prefix) noexcept
                 {
-                    return (block_len - phase) / bytes_per_word;
+                    return (block_len - prefix) / bytes_per_word;
                 }
 
-                // Encoded size in bytes of the body of a block of block_len bytes read at the given phase: the
-                // verbatim phase bytes, the packed words, and the verbatim tail bytes.
-                SEAL_NODISCARD inline size_t block_body_size(size_t block_len, size_t phase, int width) noexcept
+                // Size in bytes of the encoding of a block of block_len bytes with the given prefix length, width,
+                // and shift: the width and prefix bytes, the shift byte if the shift is nonzero, the verbatim
+                // prefix, the packed words, and the verbatim tail.
+                SEAL_NODISCARD inline size_t block_encoded_size(size_t block_len, size_t prefix, int width, int shift)
                 {
-                    size_t words = block_word_count(block_len, phase);
+                    size_t words = block_word_count(block_len, prefix);
                     size_t packed_bytes = (words * static_cast<size_t>(width) + size_t(7)) >> 3;
-                    return block_len - words * bytes_per_word + packed_bytes;
+                    return size_t(shift ? 3 : 2) + block_len - words * bytes_per_word + packed_bytes;
+                }
+
+                // Number of low-order zero bits of a nonzero value.
+                SEAL_NODISCARD inline int trailing_zero_count(uint64_t value)
+                {
+                    return get_significant_bit_count(value & (~value + 1)) - 1;
                 }
             } // namespace
 
@@ -68,65 +76,126 @@ namespace seal
                     size_t block_len = min(bitpack_block_bytes, in_size - block_start);
                     const unsigned char *block_in = in_data + block_start;
 
-                    // The word data in the stream need not fall on the stream's own word grid (serialized metadata
-                    // is not always a multiple of eight bytes), so choose the phase that minimizes the encoded size
-                    // of the block. A phase of bytes_per_word would reproduce the alignment of phase zero, so only
-                    // smaller values need to be considered. The clamp to block_len keeps the word count from
-                    // underflowing on a block shorter than a word; for such a block every phase encodes zero words
-                    // at the same size and the tie-break below settles on phase zero.
-                    size_t phase = 0;
+                    // Choose the smallest encoding of the block. Its words follow a verbatim prefix: the word data
+                    // need not fall on the stream's own word grid (serialized metadata is not always a multiple of
+                    // eight bytes), and a block may begin with bytes that are not word data at all, such as the
+                    // metadata of a ciphertext. For each phase of the word grid, every prefix on that grid of at
+                    // most bitpack_prefix_max bytes is considered, and the OR of the words after the prefix gives
+                    // the width and the low-order zero bits that can be shifted out. A phase of bytes_per_word would
+                    // reproduce the grid of phase zero, so only smaller phases need to be considered. The clamp to
+                    // block_len keeps the word count from underflowing on a block shorter than a word; for such a
+                    // block every candidate has the same size, and the tie-break settles on an empty prefix.
+                    size_t prefix = 0;
                     int width = 0;
-                    size_t body_size = block_len;
-                    for (size_t p = 0; p <= min<size_t>(bytes_per_word - 1, block_len); p++)
+                    int shift = 0;
+                    size_t encoded_size = numeric_limits<size_t>::max();
+                    uint64_t suffix_or[bitpack_prefix_max / bytes_per_word + 1];
+                    for (size_t phase = 0; phase <= min<size_t>(bytes_per_word - 1, block_len); phase++)
                     {
-                        size_t words = block_word_count(block_len, p);
-                        uint64_t block_or = 0;
-                        for (size_t i = 0; i < words; i++)
+                        // A prefix on this grid holds at most max_k words
+                        size_t phase_words = block_word_count(block_len, phase);
+                        size_t max_k = min(phase_words, (bitpack_prefix_max - phase) / bytes_per_word);
+                        uint64_t head_or = 0;
+                        for (size_t i = 0; i < max_k; i++)
                         {
-                            block_or |= load_uint64_le(block_in + p + i * bytes_per_word);
+                            head_or |= load_uint64_le(block_in + phase + i * bytes_per_word);
                         }
-                        int p_width = get_significant_bit_count(block_or);
-                        size_t p_body_size = block_body_size(block_len, p, p_width);
-                        if (p == 0 || p_body_size < body_size)
+                        uint64_t words_or = 0;
+                        for (size_t i = max_k; i < phase_words; i++)
                         {
-                            phase = p;
-                            width = p_width;
-                            body_size = p_body_size;
+                            words_or |= load_uint64_le(block_in + phase + i * bytes_per_word);
+                        }
+
+                        // Moving a word into the prefix without changing the OR adds 8 verbatim bytes and saves at
+                        // most 8 packed bytes, so it cannot make the block smaller. In particular, if the words that a
+                        // prefix can hold add no bits to the OR of the words after them, no prefix on this grid beats
+                        // the shortest one. Otherwise, for k up to max_k, suffix_or[k] is the OR of the words on this
+                        // grid from the k-th word on.
+                        size_t k_end = 0;
+                        suffix_or[0] = words_or;
+                        if (head_or & ~words_or)
+                        {
+                            k_end = max_k;
+                            suffix_or[max_k] = words_or;
+                            for (size_t k = max_k; k > 0; k--)
+                            {
+                                suffix_or[k - 1] =
+                                    suffix_or[k] | load_uint64_le(block_in + phase + (k - 1) * bytes_per_word);
+                            }
+                        }
+
+                        for (size_t k = 0; k <= k_end; k++)
+                        {
+                            if (k && suffix_or[k] == suffix_or[k - 1])
+                            {
+                                continue;
+                            }
+                            size_t k_prefix = phase + k * bytes_per_word;
+                            int k_width = get_significant_bit_count(suffix_or[k]);
+                            int k_shift = 0;
+                            size_t k_size = block_encoded_size(block_len, k_prefix, k_width, 0);
+
+                            // Shift out the low-order bits that are zero in every word if that makes the block
+                            // smaller despite the shift byte.
+                            if (suffix_or[k] && !(suffix_or[k] & 1))
+                            {
+                                int zero_bits = trailing_zero_count(suffix_or[k]);
+                                size_t shifted_size =
+                                    block_encoded_size(block_len, k_prefix, k_width - zero_bits, zero_bits);
+                                if (shifted_size < k_size)
+                                {
+                                    k_shift = zero_bits;
+                                    k_size = shifted_size;
+                                }
+                            }
+
+                            // Among equally small encodings, choose the one with the shortest prefix
+                            if (k_size < encoded_size || (k_size == encoded_size && k_prefix < prefix))
+                            {
+                                prefix = k_prefix;
+                                width = k_width - k_shift;
+                                shift = k_shift;
+                                encoded_size = k_size;
+                            }
                         }
                     }
-                    size_t words = block_word_count(block_len, phase);
+                    size_t words = block_word_count(block_len, prefix);
 
-                    out_data[out_pos++] = static_cast<unsigned char>(width);
-                    out_data[out_pos++] = static_cast<unsigned char>(phase);
+                    out_data[out_pos++] = static_cast<unsigned char>(width | (shift ? bitpack_shift_flag : 0));
+                    out_data[out_pos++] = static_cast<unsigned char>(prefix);
+                    if (shift)
+                    {
+                        out_data[out_pos++] = static_cast<unsigned char>(shift);
+                    }
 
-                    // Verbatim phase bytes
-                    memcpy(out_data + out_pos, block_in, phase);
-                    out_pos += phase;
+                    // Verbatim prefix bytes
+                    memcpy(out_data + out_pos, block_in, prefix);
+                    out_pos += prefix;
 
-                    // Pack the words consecutively starting from the least significant bit. Each word carries at
-                    // most width significant bits, so nothing is lost; the read-modify-write below only ever ORs
-                    // significant bits into the zero-filled output.
+                    // Pack the words, without their shifted-out low-order bits, consecutively starting from the least
+                    // significant bit. Each shifted word carries at most width significant bits, so nothing is lost;
+                    // the read-modify-write below only ever ORs significant bits into the zero-filled output.
                     unsigned char *packed_out = out_data + out_pos;
                     size_t bit_pos = 0;
                     for (size_t i = 0; i < words; i++)
                     {
-                        uint64_t word = load_uint64_le(block_in + phase + i * bytes_per_word);
+                        uint64_t word = load_uint64_le(block_in + prefix + i * bytes_per_word) >> shift;
                         size_t byte_index = bit_pos >> 3;
-                        int shift = static_cast<int>(bit_pos & size_t(7));
+                        int bit_offset = static_cast<int>(bit_pos & size_t(7));
                         uint64_t low_word = load_uint64_le(packed_out + byte_index);
-                        low_word |= word << shift;
+                        low_word |= word << bit_offset;
                         store_uint64_le(packed_out + byte_index, low_word);
-                        if (shift && width > bits_per_uint64 - shift)
+                        if (bit_offset && width > bits_per_uint64 - bit_offset)
                         {
                             packed_out[byte_index + bytes_per_word] =
-                                static_cast<unsigned char>(word >> (bits_per_uint64 - shift));
+                                static_cast<unsigned char>(word >> (bits_per_uint64 - bit_offset));
                         }
                         bit_pos += static_cast<size_t>(width);
                     }
                     out_pos += (words * static_cast<size_t>(width) + size_t(7)) >> 3;
 
                     // Verbatim tail bytes
-                    size_t tail = block_len - phase - words * bytes_per_word;
+                    size_t tail = block_len - prefix - words * bytes_per_word;
                     memcpy(out_data + out_pos, block_in + block_len - tail, tail);
                     out_pos += tail;
 
@@ -259,19 +328,38 @@ namespace seal
                     failed_ = true;
                     return 0;
                 }
-                int width = static_cast<int>(block_header[0]);
-                size_t phase = static_cast<size_t>(block_header[1]);
-                if (width > bits_per_uint64 || phase > min<size_t>(bytes_per_word - 1, block_len))
+                int width = static_cast<int>(block_header[0] & static_cast<unsigned char>(~bitpack_shift_flag));
+                bool has_shift = (block_header[0] & bitpack_shift_flag) != 0;
+                size_t prefix = static_cast<size_t>(block_header[1]);
+                if (width > bits_per_uint64 || prefix > block_len)
                 {
                     failed_ = true;
                     return 0;
                 }
-                size_t words = block_word_count(block_len, phase);
-                size_t packed_bytes = (words * static_cast<size_t>(width) + size_t(7)) >> 3;
-                size_t tail = block_len - phase - words * bytes_per_word;
+                int shift = 0;
+                if (has_shift)
+                {
+                    unsigned char shift_byte = 0;
+                    if (read_packed(&shift_byte, 1) != 1)
+                    {
+                        failed_ = true;
+                        return 0;
+                    }
+                    shift = static_cast<int>(shift_byte);
 
-                // Verbatim phase bytes
-                if (read_packed(out_buf_.get(), safe_cast<streamsize>(phase)) != safe_cast<streamsize>(phase))
+                    // A shift applies to words with stored bits, and the restored words must fit in 64 bits
+                    if (!shift || !width || width + shift > bits_per_uint64)
+                    {
+                        failed_ = true;
+                        return 0;
+                    }
+                }
+                size_t words = block_word_count(block_len, prefix);
+                size_t packed_bytes = (words * static_cast<size_t>(width) + size_t(7)) >> 3;
+                size_t tail = block_len - prefix - words * bytes_per_word;
+
+                // Verbatim prefix bytes
+                if (read_packed(out_buf_.get(), safe_cast<streamsize>(prefix)) != safe_cast<streamsize>(prefix))
                 {
                     failed_ = true;
                     return 0;
@@ -286,23 +374,24 @@ namespace seal
 
                 fill_n(in_buf_.get() + packed_bytes, block_slack, uint8_t(0));
 
-                // Unpack the words. The whole-uint64_t reads may pick up bits past the packed data (block_slack
-                // bytes of headroom make them safe); the mask discards everything above the significant bits.
+                // Unpack the words and restore their shifted-out low-order zero bits. The whole-uint64_t reads may
+                // pick up bits past the packed data (block_slack bytes of headroom make them safe); the mask discards
+                // everything above the stored bits.
                 uint64_t mask = (width == bits_per_uint64) ? ~uint64_t(0) : ((uint64_t(1) << width) - 1);
                 size_t bit_pos = 0;
                 for (size_t i = 0; i < words; i++)
                 {
                     size_t byte_index = bit_pos >> 3;
-                    int shift = static_cast<int>(bit_pos & size_t(7));
+                    int bit_offset = static_cast<int>(bit_pos & size_t(7));
                     uint64_t low_word = load_uint64_le(in_buf_.get() + byte_index);
-                    low_word >>= shift;
-                    if (shift && width > bits_per_uint64 - shift)
+                    low_word >>= bit_offset;
+                    if (bit_offset && width > bits_per_uint64 - bit_offset)
                     {
                         uint64_t high_byte = in_buf_.get()[byte_index + bytes_per_word];
-                        low_word |= high_byte << (bits_per_uint64 - shift);
+                        low_word |= high_byte << (bits_per_uint64 - bit_offset);
                     }
-                    uint64_t word = low_word & mask;
-                    store_uint64_le(out_buf_.get() + phase + i * bytes_per_word, word);
+                    uint64_t word = (low_word & mask) << shift;
+                    store_uint64_le(out_buf_.get() + prefix + i * bytes_per_word, word);
                     bit_pos += static_cast<size_t>(width);
                 }
 

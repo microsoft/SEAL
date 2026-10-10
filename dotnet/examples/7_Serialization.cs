@@ -160,12 +160,13 @@ namespace SEALNetExamples
                 convenient way to get rid of these zeros is to apply a general-purpose
                 compression algorithm on the encrypted data. The compression rate can be
                 significant (up to 50-60%) when using CKKS with small primes. Bit-packing
-                instead removes the zero high-order bits of the 64-bit words directly: for
-                ciphertext and key data it is typically smaller and faster than Zstandard,
-                but it is not a general-purpose compressor, and for other data such as
-                plaintexts Zstandard can produce much smaller output. Bit-packing performs
-                no integrity checking, and loading bit-packed objects requires Microsoft
-                SEAL 4.6 or later.
+                instead removes the zero high-order bits of the 64-bit words directly, as
+                well as low-order bits that are zero in all of them, such as bits an
+                application has cleared. For ciphertext and key data it is typically
+                smaller and faster than Zstandard, but it is not a general-purpose
+                compressor, and for other data such as plaintexts Zstandard can produce
+                much smaller output. Bit-packing performs no integrity checking, and
+                loading bit-packed objects requires Microsoft SEAL 4.6 or later.
                 */
 
                 /*
