@@ -224,19 +224,24 @@ namespace seal
         /**
         Loads a KSwitchKeys from an input stream overwriting the current KSwitchKeys.
         The loaded KSwitchKeys is verified to be valid for the given SEALContext.
+        Compressed data is rejected if it expands far more than valid key data can.
 
         @param[in] context The SEALContext
         @param[in] stream The stream to load the KSwitchKeys from
         @throws std::invalid_argument if the encryption parameters are not valid
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
-        @throws std::runtime_error if I/O operations failed
+        @throws std::runtime_error if I/O operations failed, or if compressed data
+        expands far more than valid key data can
         */
         inline std::streamoff load(const SEALContext &context, std::istream &stream)
         {
+            using namespace std::placeholders;
             KSwitchKeys new_keys;
             new_keys.pool_ = pool_;
-            auto in_size = new_keys.unsafe_load(context, stream);
+            constexpr bool bounded_expansion = true;
+            auto in_size = Serialization::Load(
+                std::bind(&KSwitchKeys::load_members, &new_keys, context, _1, _2), stream, false, bounded_expansion);
             if (!is_valid_for(new_keys, context))
             {
                 throw std::logic_error("KSwitchKeys data is invalid");
@@ -292,7 +297,8 @@ namespace seal
         /**
         Loads a KSwitchKeys from a given memory location overwriting the current
         KSwitchKeys. The loaded KSwitchKeys is verified to be valid for the given
-        SEALContext.
+        SEALContext. Compressed data is rejected if it expands far more than valid
+        key data can.
 
         @param[in] context The SEALContext
         @param[in] in The memory location to load the KSwitchKeys from
@@ -302,13 +308,17 @@ namespace seal
         contain a SEALHeader
         @throws std::logic_error if the data cannot be loaded by this version of
         Microsoft SEAL, if the loaded data is invalid, or if decompression failed
-        @throws std::runtime_error if I/O operations failed
+        @throws std::runtime_error if I/O operations failed, or if compressed data
+        expands far more than valid key data can
         */
         inline std::streamoff load(const SEALContext &context, const seal_byte *in, std::size_t size)
         {
+            using namespace std::placeholders;
             KSwitchKeys new_keys;
             new_keys.pool_ = pool_;
-            auto in_size = new_keys.unsafe_load(context, in, size);
+            constexpr bool bounded_expansion = true;
+            auto in_size = Serialization::Load(
+                std::bind(&KSwitchKeys::load_members, &new_keys, context, _1, _2), in, size, false, bounded_expansion);
             if (!is_valid_for(new_keys, context))
             {
                 throw std::logic_error("KSwitchKeys data is invalid");

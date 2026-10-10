@@ -139,26 +139,6 @@ namespace sealbench
         bm_serialize_load(state, bm_env->context(), bm_env->rlk(), compr_mode);
     }
 
-    void bm_serialize_save_glk(State &state, shared_ptr<BMEnv> bm_env, compr_mode_type compr_mode)
-    {
-        bm_serialize_save(state, bm_env->glk(), compr_mode);
-    }
-
-    void bm_serialize_load_glk(State &state, shared_ptr<BMEnv> bm_env, compr_mode_type compr_mode)
-    {
-        bm_serialize_load(state, bm_env->context(), bm_env->glk(), compr_mode);
-    }
-
-    void bm_serialize_save_sk(State &state, shared_ptr<BMEnv> bm_env, compr_mode_type compr_mode)
-    {
-        bm_serialize_save(state, bm_env->sk(), compr_mode);
-    }
-
-    void bm_serialize_load_sk(State &state, shared_ptr<BMEnv> bm_env, compr_mode_type compr_mode)
-    {
-        bm_serialize_load(state, bm_env->context(), bm_env->sk(), compr_mode);
-    }
-
     void bm_serialize_save_seeded_ct(State &state, shared_ptr<BMEnv> bm_env, compr_mode_type compr_mode)
     {
         auto seeded = make_seeded_ct(bm_env);
@@ -168,42 +148,6 @@ namespace sealbench
     void bm_serialize_load_seeded_ct(State &state, shared_ptr<BMEnv> bm_env, compr_mode_type compr_mode)
     {
         auto seeded = make_seeded_ct(bm_env);
-        bm_serialize_load_seeded(state, bm_env->context(), seeded, compr_mode);
-    }
-
-    void bm_serialize_save_seeded_pk(State &state, shared_ptr<BMEnv> bm_env, compr_mode_type compr_mode)
-    {
-        auto seeded = bm_env->keygen()->create_public_key();
-        bm_serialize_save(state, seeded, compr_mode);
-    }
-
-    void bm_serialize_load_seeded_pk(State &state, shared_ptr<BMEnv> bm_env, compr_mode_type compr_mode)
-    {
-        auto seeded = bm_env->keygen()->create_public_key();
-        bm_serialize_load_seeded(state, bm_env->context(), seeded, compr_mode);
-    }
-
-    void bm_serialize_save_seeded_rlk(State &state, shared_ptr<BMEnv> bm_env, compr_mode_type compr_mode)
-    {
-        auto seeded = bm_env->keygen()->create_relin_keys();
-        bm_serialize_save(state, seeded, compr_mode);
-    }
-
-    void bm_serialize_load_seeded_rlk(State &state, shared_ptr<BMEnv> bm_env, compr_mode_type compr_mode)
-    {
-        auto seeded = bm_env->keygen()->create_relin_keys();
-        bm_serialize_load_seeded(state, bm_env->context(), seeded, compr_mode);
-    }
-
-    void bm_serialize_save_seeded_glk(State &state, shared_ptr<BMEnv> bm_env, compr_mode_type compr_mode)
-    {
-        auto seeded = bm_env->keygen()->create_galois_keys(bm_env->galois_elts_all());
-        bm_serialize_save(state, seeded, compr_mode);
-    }
-
-    void bm_serialize_load_seeded_glk(State &state, shared_ptr<BMEnv> bm_env, compr_mode_type compr_mode)
-    {
-        auto seeded = bm_env->keygen()->create_galois_keys(bm_env->galois_elts_all());
         bm_serialize_load_seeded(state, bm_env->context(), seeded, compr_mode);
     }
 } // namespace sealbench

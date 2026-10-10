@@ -246,7 +246,8 @@ namespace seal
         stream.exceptions(old_except_mask);
     }
 
-    void Ciphertext::load_members(const SEALContext &context, istream &stream, SEAL_MAYBE_UNUSED SEALVersion version)
+    void Ciphertext::load_members(
+        const SEALContext &context, istream &stream, SEAL_MAYBE_UNUSED SEALVersion version, size_t max_size)
     {
         // Verify parameters
         if (!context.parameters_set())
@@ -298,6 +299,10 @@ namespace seal
             // based on load_members succeeding that the Ciphertext is valid for
             // computations.
             if (!is_metadata_valid_for(new_data, context, true))
+            {
+                throw logic_error("ciphertext data is invalid");
+            }
+            if (new_data.size_ > max_size)
             {
                 throw logic_error("ciphertext data is invalid");
             }

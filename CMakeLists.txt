@@ -16,7 +16,7 @@ endif()
 #   4. SEAL C++ tests                             #
 ###################################################
 
-project(SEAL VERSION 4.5.1 LANGUAGES CXX C)
+project(SEAL VERSION 4.6.0 LANGUAGES CXX C)
 
 # [option] CMAKE_BUILD_TYPE (default: "Release")
 # Build in one of the following modes: Release, Debug, MinSizeRel, or RelWithDebInfo.
@@ -50,6 +50,11 @@ include(CheckSymbolExists)
 # Extra modules
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_LIST_DIR}/cmake)
 include(SEALMacros)
+
+# Microsoft SEAL requires a little-endian platform; see native/src/seal/util/defines.h.
+if(CMAKE_CXX_BYTE_ORDER STREQUAL "BIG_ENDIAN")
+    message(FATAL_ERROR "Microsoft SEAL requires a little-endian platform")
+endif()
 
 # Always build position-independent-code.
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

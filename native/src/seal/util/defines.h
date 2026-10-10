@@ -99,6 +99,13 @@ static_assert(sizeof(unsigned long long) == 8, "Require sizeof(unsigned long lon
 #error "Unsupported compiler"
 #endif
 
+// Require a little-endian platform. Microsoft SEAL saves data in the platform's byte order, so data saved on a
+// big-endian platform could not be loaded on a little-endian one, or vice versa. All MSVC targets are little-endian.
+#if (SEAL_COMPILER != SEAL_COMPILER_MSVC) && \
+    (!defined(__BYTE_ORDER__) || !defined(__ORDER_LITTLE_ENDIAN__) || (__BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__))
+#error "Microsoft SEAL requires a little-endian platform"
+#endif
+
 // MSVC support
 #include "seal/util/msvc.h"
 

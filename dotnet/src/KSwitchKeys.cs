@@ -238,7 +238,8 @@ namespace Microsoft.Research.SEAL
         /// <remarks>
         /// Loads a KSwitchKeys from an input stream overwriting the current
         /// KSwitchKeys. The loaded KSwitchKeys is verified to be valid for the given
-        /// SEALContext.
+        /// SEALContext. Compressed data is rejected if it expands far more than valid
+        /// key data can.
         /// </remarks>
         /// <param name="context">The SEALContext</param>
         /// <param name="stream">The stream to load the KSwitchKeys from</param>
@@ -249,7 +250,8 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if the encryption parameters are not valid</exception>
         /// <exception cref="EndOfStreamException">if the stream ended
         /// unexpectedly</exception>
-        /// <exception cref="IOException">if I/O operations failed</exception>
+        /// <exception cref="IOException">if I/O operations failed, or if compressed
+        /// data expands far more than valid key data can</exception>
         /// <exception cref="InvalidOperationException">if the data cannot be loaded
         /// by this version of Microsoft SEAL, if the loaded data is invalid, or if the
         /// loaded compression mode is not supported</exception>

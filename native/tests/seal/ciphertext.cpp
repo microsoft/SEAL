@@ -8,6 +8,7 @@
 #include "seal/keygenerator.h"
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"
+#include <algorithm>
 #include <functional>
 #include <sstream>
 #include <vector>
@@ -431,17 +432,21 @@ namespace sealtest
 #ifdef SEAL_USE_ZSTD
         compr_modes.push_back(compr_mode_type::zstd);
 #endif
+        compr_modes.push_back(compr_mode_type::bitpack);
 
         auto check = [&](const SEALContext &context, const function<void(ostream &, compr_mode_type)> &save,
                          uint8_t expected_minor, bool expected_ntt_form) {
             for (auto compr_mode : compr_modes)
             {
+                uint8_t saved_minor = compr_mode == compr_mode_type::bitpack
+                                          ? max(expected_minor, Serialization::format_version_minor_bitpack)
+                                          : expected_minor;
                 stringstream ss;
                 save(ss, compr_mode);
                 Serialization::SEALHeader header;
                 Serialization::LoadHeader(ss, header);
                 ASSERT_EQ(Serialization::format_version_major, header.version_major);
-                ASSERT_EQ(expected_minor, header.version_minor);
+                ASSERT_EQ(saved_minor, header.version_minor);
 
                 ss.seekg(0);
                 Ciphertext loaded;

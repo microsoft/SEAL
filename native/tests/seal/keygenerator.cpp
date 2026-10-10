@@ -580,28 +580,39 @@ namespace sealtest
 
             ASSERT_EQ(Serialization::format_version_minor, minor_of(save(parms)));
             ASSERT_EQ(Serialization::format_version_minor, minor_of(save(keygen.secret_key())));
+            ASSERT_EQ(
+                Serialization::format_version_minor_bitpack,
+                minor_of(save(keygen.secret_key(), compr_mode_type::bitpack)));
 
             PublicKey pk;
             keygen.create_public_key(pk);
             ASSERT_TRUE(pk.data().is_ntt_form());
             ASSERT_EQ(Serialization::format_version_minor, minor_of(save(pk)));
+            ASSERT_EQ(Serialization::format_version_minor_bitpack, minor_of(save(pk, compr_mode_type::bitpack)));
             ASSERT_EQ(Serialization::format_version_minor, minor_of(save(keygen.create_public_key())));
             vector<seal_byte> buffer(static_cast<size_t>(pk.save_size()));
             auto out_size = pk.save(buffer.data(), buffer.size());
             ASSERT_EQ(
                 Serialization::format_version_minor,
                 minor_of(string(reinterpret_cast<const char *>(buffer.data()), static_cast<size_t>(out_size))));
+            vector<seal_byte> bitpack_buffer(static_cast<size_t>(pk.save_size(compr_mode_type::bitpack)));
+            out_size = pk.save(bitpack_buffer.data(), bitpack_buffer.size(), compr_mode_type::bitpack);
+            ASSERT_EQ(
+                Serialization::format_version_minor_bitpack,
+                minor_of(string(reinterpret_cast<const char *>(bitpack_buffer.data()), static_cast<size_t>(out_size))));
 
             RelinKeys rlk;
             keygen.create_relin_keys(rlk);
             check_kswitch_keys(save(rlk, compr_mode_type::none));
             check_kswitch_keys(save(keygen.create_relin_keys(), compr_mode_type::none));
             ASSERT_EQ(Serialization::format_version_minor, minor_of(save(rlk)));
+            ASSERT_EQ(Serialization::format_version_minor_bitpack, minor_of(save(rlk, compr_mode_type::bitpack)));
 
             GaloisKeys glk;
             keygen.create_galois_keys(vector<int>{ 1 }, glk);
             check_kswitch_keys(save(glk, compr_mode_type::none));
             check_kswitch_keys(save(keygen.create_galois_keys(vector<int>{ 1 }), compr_mode_type::none));
+            ASSERT_EQ(Serialization::format_version_minor_bitpack, minor_of(save(glk, compr_mode_type::bitpack)));
 
             // Loading still works
             PublicKey pk2;

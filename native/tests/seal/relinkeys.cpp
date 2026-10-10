@@ -2,11 +2,16 @@
 // Licensed under the MIT license.
 
 #include "seal/context.h"
+#include "seal/galoiskeys.h"
 #include "seal/keygenerator.h"
 #include "seal/modulus.h"
 #include "seal/relinkeys.h"
+#include "seal/serialization.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/uintcore.h"
+#include <sstream>
+#include <string>
+#include <vector>
 #include "gtest/gtest.h"
 
 using namespace seal;
@@ -15,6 +20,41 @@ using namespace std;
 
 namespace sealtest
 {
+    namespace
+    {
+        // The compression modes available in this build
+        vector<compr_mode_type> compressed_modes()
+        {
+            vector<compr_mode_type> modes;
+#ifdef SEAL_USE_ZLIB
+            modes.push_back(compr_mode_type::zlib);
+#endif
+#ifdef SEAL_USE_ZSTD
+            modes.push_back(compr_mode_type::zstd);
+#endif
+            modes.push_back(compr_mode_type::bitpack);
+            return modes;
+        }
+
+        // Key-switching keys with key_set_count key sets whose data is all zero
+        KSwitchKeys make_zero_keys(const SEALContext &context, size_t key_set_count)
+        {
+            KSwitchKeys keys;
+            keys.parms_id() = context.key_parms_id();
+            keys.data().resize(key_set_count);
+            for (auto &key_set : keys.data())
+            {
+                key_set.resize(context.first_context_data()->parms().coeff_modulus().size());
+                for (auto &key : key_set)
+                {
+                    key.data().resize(context, context.key_parms_id(), 2);
+                    key.data().is_ntt_form() = true;
+                }
+            }
+            return keys;
+        }
+    } // namespace
+
     TEST(RelinKeysTest, RelinKeysSaveLoad)
     {
         auto relin_keys_save_load = [](scheme_type scheme) {
@@ -330,5 +370,316 @@ namespace sealtest
         stringstream bad(blob);
         ASSERT_THROW(loaded.unsafe_load(context, bad), logic_error);
         ASSERT_TRUE(loaded.parms_id() == before);
+    }
+
+    // Keys in key-switching keys have size 2, and loading rejects larger keys before allocating memory for them.
+    TEST(RelinKeysTest, LoadRejectsLargeKeys)
+    {
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(4096);
+        parms.set_plain_modulus(1 << 6);
+        parms.set_coeff_modulus(CoeffModulus::Create(4096, { 40, 40, 40 }));
+
+        SEALContext context(parms, false, sec_level_type::none);
+
+        KSwitchKeys keys = make_zero_keys(context, 1);
+        for (auto &key : keys.data()[0])
+        {
+            key.data().resize(context, context.key_parms_id(), SEAL_CIPHERTEXT_SIZE_MIN + 1);
+        }
+        stringstream stream;
+        keys.save(stream, compr_mode_type::none);
+        string bytes = stream.str();
+
+        // Keys loaded into loaded are allocated from pool
+        MemoryPoolHandle pool = MemoryPoolHandle::New();
+        unique_ptr<RelinKeys> loaded;
+        {
+            MMProfGuard guard(make_unique<MMProfFixed>(pool));
+            loaded = make_unique<RelinKeys>();
+        }
+        ASSERT_TRUE(loaded->pool() == pool);
+
+        stringstream in(bytes);
+        ASSERT_THROW(loaded->load(context, in), logic_error);
+        ASSERT_EQ(size_t(0), pool.alloc_byte_count());
+
+        stringstream trusted_in(bytes);
+        RelinKeys trusted_loaded;
+        ASSERT_THROW(trusted_loaded.unsafe_load(context, trusted_in), logic_error);
+    }
+
+    // Loading keys rejects compressed data that expands far more than valid key data can. Loading from a trusted
+    // source does not bound the expansion.
+    TEST(RelinKeysTest, LoadBoundsCompressedExpansion)
+    {
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(4096);
+        parms.set_plain_modulus(1 << 6);
+        parms.set_coeff_modulus(CoeffModulus::Create(4096, { 40, 40, 40 }));
+
+        SEALContext context(parms, false, sec_level_type::none);
+
+        // 64 key sets of two zero keys
+        KSwitchKeys keys = make_zero_keys(context, 64);
+        auto raw_size = keys.save_size(compr_mode_type::none);
+
+        // Uncompressed, the keys are valid and load
+        {
+            stringstream stream;
+            keys.save(stream, compr_mode_type::none);
+            KSwitchKeys loaded;
+            loaded.load(context, stream);
+            ASSERT_EQ(keys.data().size(), loaded.data().size());
+        }
+
+        for (auto compr_mode : compressed_modes())
+        {
+            stringstream stream;
+            auto out_size = keys.save(stream, compr_mode);
+            string bytes = stream.str();
+
+            // The data expands far beyond 4 MiB plus 64 times the compressed size
+            ASSERT_GT(raw_size, (streamoff(4) << 20) + 64 * out_size);
+
+            {
+                stringstream in(bytes);
+                KSwitchKeys loaded;
+                ASSERT_THROW(loaded.load(context, in), runtime_error);
+            }
+            {
+                KSwitchKeys loaded;
+                ASSERT_THROW(
+                    loaded.load(context, reinterpret_cast<const seal_byte *>(bytes.data()), bytes.size()),
+                    runtime_error);
+            }
+            {
+                stringstream in(bytes);
+                RelinKeys loaded;
+                ASSERT_THROW(loaded.load(context, in), runtime_error);
+            }
+            {
+                stringstream in(bytes);
+                GaloisKeys loaded;
+                ASSERT_THROW(loaded.load(context, in), runtime_error);
+            }
+            {
+                stringstream in(bytes);
+                KSwitchKeys loaded;
+                loaded.unsafe_load(context, in);
+                ASSERT_EQ(keys.data().size(), loaded.data().size());
+            }
+        }
+    }
+
+    // Valid keys load in every compression mode, including seeded keys and keys larger than the bound's free
+    // allowance. Keys with small primes compress the most.
+    TEST(RelinKeysTest, LoadCompressedValidKeys)
+    {
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(4096);
+        parms.set_plain_modulus(1 << 6);
+        parms.set_coeff_modulus(CoeffModulus::Create(4096, { 20, 20, 20 }));
+
+        SEALContext context(parms, false, sec_level_type::none);
+        KeyGenerator keygen(context);
+
+        RelinKeys relin_keys;
+        keygen.create_relin_keys(relin_keys);
+        GaloisKeys galois_keys;
+        keygen.create_galois_keys(vector<uint32_t>{ 3, 2 * 4096 - 1 }, galois_keys);
+        auto seeded_relin_keys = keygen.create_relin_keys();
+        auto seeded_galois_keys = keygen.create_galois_keys();
+        ASSERT_GT(seeded_galois_keys.save_size(compr_mode_type::none), streamoff(4) << 20);
+        auto galois_elts = context.key_context_data()->galois_tool()->get_elts_all();
+
+        auto compr_modes = compressed_modes();
+        compr_modes.push_back(compr_mode_type::none);
+        for (auto compr_mode : compr_modes)
+        {
+            {
+                stringstream stream;
+                relin_keys.save(stream, compr_mode);
+                RelinKeys loaded;
+                loaded.load(context, stream);
+                ASSERT_EQ(relin_keys.size(), loaded.size());
+            }
+            {
+                stringstream stream;
+                galois_keys.save(stream, compr_mode);
+                GaloisKeys loaded;
+                loaded.load(context, stream);
+                ASSERT_EQ(galois_keys.size(), loaded.size());
+            }
+            {
+                stringstream stream;
+                seeded_relin_keys.save(stream, compr_mode);
+                RelinKeys loaded;
+                loaded.load(context, stream);
+                ASSERT_EQ(relin_keys.size(), loaded.size());
+            }
+            {
+                stringstream stream;
+                seeded_galois_keys.save(stream, compr_mode);
+                string bytes = stream.str();
+                GaloisKeys loaded;
+                loaded.load(context, reinterpret_cast<const seal_byte *>(bytes.data()), bytes.size());
+                for (auto galois_elt : galois_elts)
+                {
+                    ASSERT_TRUE(loaded.has_key(galois_elt));
+                }
+            }
+        }
+    }
+
+    // Galois keys hold an empty slot for each Galois element without a key, and these compress extremely well. A key
+    // for only the highest Galois element follows the most empty slots, which the bound's free allowance covers.
+    TEST(RelinKeysTest, LoadCompressedSparseGaloisKeys)
+    {
+        size_t poly_modulus_degree = SEAL_POLY_MOD_DEGREE_MAX;
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(poly_modulus_degree);
+        parms.set_plain_modulus(1 << 6);
+        parms.set_coeff_modulus(CoeffModulus::Create(poly_modulus_degree, { 30, 30 }));
+
+        SEALContext context(parms, false, sec_level_type::none);
+        KeyGenerator keygen(context);
+
+        uint32_t galois_elt = static_cast<uint32_t>(2 * poly_modulus_degree - 1);
+        GaloisKeys keys;
+        keygen.create_galois_keys(vector<uint32_t>{ galois_elt }, keys);
+        ASSERT_EQ(size_t(1), keys.size());
+
+        auto compr_modes = compressed_modes();
+        compr_modes.push_back(compr_mode_type::none);
+        for (auto compr_mode : compr_modes)
+        {
+            stringstream stream;
+            keys.save(stream, compr_mode);
+            GaloisKeys loaded;
+            loaded.load(context, stream);
+            ASSERT_TRUE(loaded.has_key(galois_elt));
+        }
+    }
+
+    // Microsoft SEAL never compresses the keys nested in key-switching keys, and loading keys rejects compressed nested
+    // keys, so the bound on the expansion of compressed data applies to all of the key data.
+    TEST(RelinKeysTest, LoadRejectsCompressedNestedKeys)
+    {
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(4096);
+        parms.set_plain_modulus(1 << 6);
+        parms.set_coeff_modulus(CoeffModulus::Create(4096, { 40, 40, 40 }));
+
+        SEALContext context(parms, false, sec_level_type::none);
+        KeyGenerator keygen(context);
+
+        RelinKeys keys;
+        keygen.create_relin_keys(keys);
+
+        // Saves keys uncompressed, with each nested key saved with nested_mode
+        auto save_with_nested = [&](compr_mode_type nested_mode) {
+            stringstream members;
+            members.write(reinterpret_cast<const char *>(&keys.parms_id()), sizeof(parms_id_type));
+            uint64_t key_set_count = keys.data().size();
+            members.write(reinterpret_cast<const char *>(&key_set_count), sizeof(uint64_t));
+            for (auto &key_set : keys.data())
+            {
+                uint64_t key_count = key_set.size();
+                members.write(reinterpret_cast<const char *>(&key_count), sizeof(uint64_t));
+                for (auto &key : key_set)
+                {
+                    key.save(members, nested_mode);
+                }
+            }
+            string member_bytes = members.str();
+
+            stringstream stream;
+            Serialization::Save(
+                [&](ostream &out) { out.write(member_bytes.data(), static_cast<streamsize>(member_bytes.size())); },
+                static_cast<streamoff>(sizeof(Serialization::SEALHeader) + member_bytes.size()), stream,
+                compr_mode_type::none, false);
+            return stream.str();
+        };
+
+        {
+            stringstream in(save_with_nested(compr_mode_type::none));
+            RelinKeys loaded;
+            loaded.load(context, in);
+            ASSERT_EQ(keys.size(), loaded.size());
+        }
+
+        for (auto nested_mode : compressed_modes())
+        {
+            string bytes = save_with_nested(nested_mode);
+            {
+                stringstream in(bytes);
+                RelinKeys loaded;
+                ASSERT_THROW(loaded.load(context, in), logic_error);
+            }
+
+            // Loading from a trusted source accepts compressed nested keys
+            {
+                stringstream in(bytes);
+                RelinKeys loaded;
+                loaded.unsafe_load(context, in);
+                ASSERT_EQ(keys.size(), loaded.size());
+            }
+
+            // The rejection does not affect later loads of compressed objects
+            stringstream key_stream;
+            keys.data()[0][0].save(key_stream, nested_mode);
+            PublicKey key;
+            key.unsafe_load(context, key_stream);
+            ASSERT_TRUE(key.parms_id() == keys.parms_id());
+        }
+    }
+
+    // Keys load as usual inside a user's own container, compressed or not, and the objects loaded after them in the
+    // same container may be compressed.
+    TEST(RelinKeysTest, LoadInsideUserContainer)
+    {
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(1024);
+        parms.set_plain_modulus(1 << 6);
+        parms.set_coeff_modulus(CoeffModulus::Create(1024, { 30, 30 }));
+
+        SEALContext context(parms, false, sec_level_type::none);
+        KeyGenerator keygen(context);
+
+        RelinKeys keys;
+        keygen.create_relin_keys(keys);
+        PublicKey public_key;
+        keygen.create_public_key(public_key);
+
+        auto compr_modes = compressed_modes();
+        compr_modes.push_back(compr_mode_type::none);
+        for (auto container_mode : compr_modes)
+        {
+            for (auto compr_mode : compr_modes)
+            {
+                stringstream members;
+                keys.save(members, compr_mode);
+                public_key.save(members, compr_mode);
+                string member_bytes = members.str();
+
+                stringstream stream;
+                Serialization::Save(
+                    [&](ostream &out) { out.write(member_bytes.data(), static_cast<streamsize>(member_bytes.size())); },
+                    static_cast<streamoff>(sizeof(Serialization::SEALHeader) + member_bytes.size()), stream,
+                    container_mode, false);
+
+                RelinKeys loaded_keys;
+                PublicKey loaded_public_key;
+                Serialization::Load(
+                    [&](istream &in, SEALVersion) {
+                        loaded_keys.load(context, in);
+                        loaded_public_key.load(context, in);
+                    },
+                    stream, false);
+                ASSERT_EQ(keys.size(), loaded_keys.size());
+                ASSERT_TRUE(loaded_public_key.parms_id() == public_key.parms_id());
+            }
+        }
     }
 } // namespace sealtest

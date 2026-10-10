@@ -27,8 +27,9 @@ namespace Microsoft.Research.SEAL
         /// <summary>Use Zstandard compression.</summary>
         ZSTD = 2,
 
-        /// <summary>Use bit-packing compression. Unlike ZLIB and Zstandard, bit-packing performs no
-        /// integrity checking of the data.</summary>
+        /// <summary>Use bit-packing, which removes the always-zero high bits of 64-bit words. It is designed for
+        /// ciphertext and key data, requires no external library, and performs no integrity checking. Loading requires
+        /// Microsoft SEAL 4.6 or later.</summary>
         BitPack = 3
     }
 
@@ -65,9 +66,9 @@ namespace Microsoft.Research.SEAL
         /// Rather than the library version, SEALHeader records the Microsoft SEAL version that introduced the
         /// serialization format of the object. Microsoft SEAL 4.4 and later load any format up to their own version,
         /// and Microsoft SEAL 4.0 loads format 4.0; Microsoft SEAL 4.1-4.3 accept only their own version. The format
-        /// is unchanged since Microsoft SEAL 4.0, except that BGV ciphertexts are in NTT form since Microsoft SEAL 4.1.
-        /// NTT-form ciphertexts (BGV, CKKS, or BFV transformed to NTT form) are therefore saved with format version
-        /// 4.1.
+        /// is unchanged since Microsoft SEAL 4.0, except that BGV ciphertexts are in NTT form since Microsoft SEAL 4.1
+        /// and bit-packed objects require Microsoft SEAL 4.6. NTT-form ciphertexts (BGV, CKKS, or BFV transformed to
+        /// NTT form) are therefore saved with format version 4.1. Bit-packed objects are saved with format version 4.6.
         /// </remarks>
         public static readonly byte FormatVersionMajor = ((Func<byte>)(() => {
             NativeMethods.Serialization_FormatVersionMajor(out byte formatVersionMajor);
@@ -94,7 +95,7 @@ namespace Microsoft.Research.SEAL
         /// 7. the size in bytes of the entire serialized object, including the header (8 bytes)
         ///
         /// Microsoft SEAL 4.4.x and earlier wrote the library version number instead of the serialization format
-        /// version number.
+        /// version number. Bit-packed objects are written with format version 4.6.
         /// </remarks>
         [StructLayout(LayoutKind.Explicit, Size=16)]
         public class SEALHeader : ISettable<SEALHeader>

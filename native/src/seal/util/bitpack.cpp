@@ -6,6 +6,7 @@
 #include "seal/util/common.h"
 #include <algorithm>
 #include <cstring>
+#include <limits>
 
 using namespace std;
 
@@ -57,11 +58,10 @@ namespace seal
                 DynArray<seal_byte> out(add_safe(bitpack_size_bound(in_size), block_slack), pool);
                 unsigned char *out_data = reinterpret_cast<unsigned char *>(out.begin());
 
-                // Write the 9-byte stream header: the original byte count and the base-2 log of the block size
-                uint64_t in_size64 = static_cast<uint64_t>(in_size);
-                memcpy(out_data, &in_size64, bytes_per_word);
+                // Write the 9-byte stream header: the original byte count and the base-2 log of the block size.
+                store_uint64_le(out_data, static_cast<uint64_t>(in_size));
                 size_t out_pos = bytes_per_word;
-                out_data[out_pos++] = static_cast<unsigned char>(get_significant_bit_count(bitpack_block_bytes) - 1);
+                out_data[out_pos++] = static_cast<unsigned char>(bitpack_block_log2);
 
                 for (size_t block_start = 0; block_start < in_size;)
                 {
@@ -74,12 +74,6 @@ namespace seal
                     // smaller values need to be considered. The clamp to block_len keeps the word count from
                     // underflowing on a block shorter than a word; for such a block every phase encodes zero words
                     // at the same size and the tie-break below settles on phase zero.
-                    //
-                    // (Note: The current approach scans through the block eight times, one for each possible phase.
-                    //  An optimization is possible that cuts this down to one scan, using the fact that we could OR
-                    //  all (phase 0) uint64_ts together and infer the phase from where the zeroes ended up. However,
-                    //  this has more complicated bookkeeping around the start and end of the block and leads to only a
-                    //  modest speedup for an already very-fast routine, so it's been left for future work.)
                     size_t phase = 0;
                     int width = 0;
                     size_t body_size = block_len;
@@ -89,9 +83,7 @@ namespace seal
                         uint64_t block_or = 0;
                         for (size_t i = 0; i < words; i++)
                         {
-                            uint64_t word = 0;
-                            memcpy(&word, block_in + p + i * bytes_per_word, bytes_per_word);
-                            block_or |= word;
+                            block_or |= load_uint64_le(block_in + p + i * bytes_per_word);
                         }
                         int p_width = get_significant_bit_count(block_or);
                         size_t p_body_size = block_body_size(block_len, p, p_width);
@@ -118,14 +110,12 @@ namespace seal
                     size_t bit_pos = 0;
                     for (size_t i = 0; i < words; i++)
                     {
-                        uint64_t word = 0;
-                        memcpy(&word, block_in + phase + i * bytes_per_word, bytes_per_word);
+                        uint64_t word = load_uint64_le(block_in + phase + i * bytes_per_word);
                         size_t byte_index = bit_pos >> 3;
                         int shift = static_cast<int>(bit_pos & size_t(7));
-                        uint64_t low_word = 0;
-                        memcpy(&low_word, packed_out + byte_index, bytes_per_word);
+                        uint64_t low_word = load_uint64_le(packed_out + byte_index);
                         low_word |= word << shift;
-                        memcpy(packed_out + byte_index, &low_word, bytes_per_word);
+                        store_uint64_le(packed_out + byte_index, low_word);
                         if (shift && width > bits_per_uint64 - shift)
                         {
                             packed_out[byte_index + bytes_per_word] =
@@ -186,12 +176,19 @@ namespace seal
 
             BitUnpackGetBuffer::~BitUnpackGetBuffer()
             {
-                in_stream_.exceptions(in_stream_except_mask_);
+                // Restoring the mask throws if truncated input left the stream in a failed state, but a destructor
+                // must not throw. The mask is restored anyway, and the stream keeps its error state for the caller.
+                try
+                {
+                    in_stream_.exceptions(in_stream_except_mask_);
+                }
+                catch (...)
+                {}
             }
 
             streamsize BitUnpackGetBuffer::read_packed(unsigned char *dst, streamsize count)
             {
-                streamsize to_read = min<streamsize>(count, in_remaining_);
+                streamsize to_read = static_cast<streamsize>(min<streamoff>(count, in_remaining_));
                 if (to_read <= 0)
                 {
                     return 0;
@@ -199,7 +196,19 @@ namespace seal
                 in_stream_.read(reinterpret_cast<char *>(dst), to_read);
                 streamsize got = in_stream_.gcount();
                 in_remaining_ -= got;
+                in_read_ += static_cast<uint64_t>(got);
                 return got;
+            }
+
+            bool BitUnpackGetBuffer::expansion_exceeded(uint64_t produced) const noexcept
+            {
+                if (!expansion_max_ratio_ || produced <= expansion_free_bytes_)
+                {
+                    return false;
+                }
+
+                // The comparison is produced - free_bytes > max_ratio * in_read_, rearranged to avoid overflow.
+                return (produced - expansion_free_bytes_ - 1) / expansion_max_ratio_ >= in_read_;
             }
 
             size_t BitUnpackGetBuffer::unpack_block()
@@ -220,14 +229,17 @@ namespace seal
                         failed_ = true;
                         return 0;
                     }
-                    memcpy(&raw_remaining_, prologue, bytes_per_word);
+                    raw_remaining_ = load_uint64_le(prologue);
                     int block_log2 = static_cast<int>(prologue[bytes_per_word]);
-                    if (block_log2 < bitpack_block_log2_min || block_log2 > bitpack_block_log2_max)
+                    uint64_t block_count =
+                        raw_remaining_ / bitpack_block_bytes + (raw_remaining_ % bitpack_block_bytes != 0);
+                    if (raw_remaining_ > static_cast<uint64_t>(numeric_limits<streamoff>::max()) ||
+                        block_log2 != bitpack_block_log2 || block_count > static_cast<uint64_t>(in_remaining_) / 2)
                     {
                         failed_ = true;
                         return 0;
                     }
-                    block_bytes_ = size_t(1) << block_log2;
+                    block_bytes_ = bitpack_block_bytes;
                     in_buf_ = allocate<unsigned char>(block_bytes_ + block_slack, pool_);
                     out_buf_ = allocate<unsigned char>(block_bytes_, pool_);
                     started_ = true;
@@ -272,6 +284,8 @@ namespace seal
                     return 0;
                 }
 
+                fill_n(in_buf_.get() + packed_bytes, block_slack, uint8_t(0));
+
                 // Unpack the words. The whole-uint64_t reads may pick up bits past the packed data (block_slack
                 // bytes of headroom make them safe); the mask discards everything above the significant bits.
                 uint64_t mask = (width == bits_per_uint64) ? ~uint64_t(0) : ((uint64_t(1) << width) - 1);
@@ -280,8 +294,7 @@ namespace seal
                 {
                     size_t byte_index = bit_pos >> 3;
                     int shift = static_cast<int>(bit_pos & size_t(7));
-                    uint64_t low_word = 0;
-                    memcpy(&low_word, in_buf_.get() + byte_index, bytes_per_word);
+                    uint64_t low_word = load_uint64_le(in_buf_.get() + byte_index);
                     low_word >>= shift;
                     if (shift && width > bits_per_uint64 - shift)
                     {
@@ -289,7 +302,7 @@ namespace seal
                         low_word |= high_byte << (bits_per_uint64 - shift);
                     }
                     uint64_t word = low_word & mask;
-                    memcpy(out_buf_.get() + phase + i * bytes_per_word, &word, bytes_per_word);
+                    store_uint64_le(out_buf_.get() + phase + i * bytes_per_word, word);
                     bit_pos += static_cast<size_t>(width);
                 }
 
@@ -328,6 +341,11 @@ namespace seal
                     }
                     if (produced)
                     {
+                        if (expansion_exceeded(static_cast<uint64_t>(total_produced_) + produced))
+                        {
+                            failed_ = true;
+                            break;
+                        }
                         char_type *base = reinterpret_cast<char_type *>(out_buf_.get());
                         setg(base, base, base + produced);
                         total_produced_ += static_cast<streamoff>(produced);
@@ -353,7 +371,7 @@ namespace seal
                     streamsize avail = min<streamsize>(count - total, static_cast<streamsize>(egptr() - gptr()));
                     copy_n(gptr(), avail, s + total);
 
-                    // avail is at most the block size (at most 64 KB), which is well within the range of int.
+                    // avail is at most bitpack_block_bytes, which is well within the range of int.
                     gbump(static_cast<int>(avail));
                     total += avail;
                 }

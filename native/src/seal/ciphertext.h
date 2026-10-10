@@ -516,7 +516,9 @@ namespace seal
         inline std::streamoff unsafe_load(const SEALContext &context, std::istream &stream)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Ciphertext::load_members, this, context, _1, _2), stream, false);
+            return Serialization::Load(
+                std::bind(&Ciphertext::load_members, this, context, _1, _2, std::size_t(SEAL_CIPHERTEXT_SIZE_MAX)),
+                stream, false);
         }
 
         /**
@@ -583,7 +585,9 @@ namespace seal
         inline std::streamoff unsafe_load(const SEALContext &context, const seal_byte *in, std::size_t size)
         {
             using namespace std::placeholders;
-            return Serialization::Load(std::bind(&Ciphertext::load_members, this, context, _1, _2), in, size, false);
+            return Serialization::Load(
+                std::bind(&Ciphertext::load_members, this, context, _1, _2, std::size_t(SEAL_CIPHERTEXT_SIZE_MAX)), in,
+                size, false);
         }
 
         /**
@@ -713,7 +717,8 @@ namespace seal
                                 : Serialization::format_version_minor;
         }
 
-        void load_members(const SEALContext &context, std::istream &stream, SEALVersion version);
+        // Rejects a ciphertext larger than max_size before allocating memory for its data.
+        void load_members(const SEALContext &context, std::istream &stream, SEALVersion version, std::size_t max_size);
 
         inline bool has_seed_marker() const noexcept
         {

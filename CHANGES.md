@@ -1,5 +1,11 @@
 # List of Changes
 
+## Version 4.6.0
+
+- Added `compr_mode_type::bitpack` (`ComprModeType.BitPack` in .NET), a serialization mode that removes the always-zero high-order bits of the 64-bit words in ciphertext and key data ([PR #758](https://github.com/microsoft/SEAL/pull/758)). For such data it is typically smaller and faster than Zstandard, but it is not a general-purpose compressor: for other data, such as plaintexts, Zstandard can produce much smaller output. Bit-packing requires no external library and is always available, but it is not the default compression mode and performs no integrity checking.
+- Bit-packed objects use serialization format version 4.6, so earlier releases of Microsoft SEAL reject them as incompatible. Added `Serialization::format_version_minor_bitpack`. `Serialization::Save` writes at least this format version for bit-packed objects, and `Serialization::IsValidHeader` rejects bit-packed data with an older format version.
+- Building Microsoft SEAL for a big-endian platform now fails with an error. Microsoft SEAL saves data in the platform's byte order and has never supported big-endian platforms: data saved on a big-endian platform cannot be loaded on a little-endian one, or vice versa.
+
 ## Version 4.5.1
 
 - Fixed loading of zlib- or Zstandard-compressed objects to throw an exception instead of terminating the process with `std::terminate` when the input ends before the compressed data does. This affected truncated input on a non-seekable stream, and a truncated compressed object nested in another compressed object, such as the data of a `Ciphertext`, on any stream. The problem was introduced in Microsoft SEAL 4.3.3.

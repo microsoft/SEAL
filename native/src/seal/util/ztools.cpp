@@ -129,7 +129,21 @@ namespace seal
                 in_stream_.read(reinterpret_cast<char *>(dst), to_read);
                 streamsize got = in_stream_.gcount();
                 in_remaining_ -= got;
+                in_read_ += static_cast<uint64_t>(got);
                 return got;
+            }
+
+            bool InflateGetBuffer::expansion_exceeded(uint64_t produced) const noexcept
+            {
+                if (!expansion_max_ratio_ || produced <= expansion_free_bytes_)
+                {
+                    return false;
+                }
+
+                // Input read ahead into in_buf_ but not yet consumed by the decompressor does not count. The
+                // comparison is produced - free_bytes > max_ratio * consumed, rearranged to avoid overflow.
+                uint64_t consumed = in_read_ - static_cast<uint64_t>(in_avail_);
+                return (produced - expansion_free_bytes_ - 1) / expansion_max_ratio_ >= consumed;
             }
 
             InflateGetBuffer::int_type InflateGetBuffer::underflow()
@@ -151,6 +165,11 @@ namespace seal
                     }
                     if (produced)
                     {
+                        if (expansion_exceeded(static_cast<uint64_t>(total_produced_) + produced))
+                        {
+                            failed_ = true;
+                            break;
+                        }
                         char_type *base = reinterpret_cast<char_type *>(out_buf_.get());
                         setg(base, base, base + produced);
                         total_produced_ += static_cast<streamoff>(produced);

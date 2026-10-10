@@ -29,7 +29,16 @@ namespace SEALNetTest
             Assert.IsFalse(Serialization.IsValidHeader(invalidHeader));
             invalidHeader.VersionMajor = SEALVersion.Major;
             invalidHeader.ComprMode = ComprModeType.BitPack;
+            for (byte minor = 0; minor < 6; minor++)
+            {
+                invalidHeader.VersionMinor = minor;
+                Assert.IsFalse(Serialization.IsValidHeader(invalidHeader));
+            }
+            invalidHeader.VersionMinor = 6;
             Assert.IsTrue(Serialization.IsValidHeader(invalidHeader));
+            invalidHeader.VersionMajor = 3;
+            Assert.IsFalse(Serialization.IsValidHeader(invalidHeader));
+            invalidHeader.VersionMajor = SEALVersion.Major;
             invalidHeader.ComprMode = (ComprModeType)0x04;
             Assert.IsFalse(Serialization.IsValidHeader(invalidHeader));
         }
@@ -106,9 +115,13 @@ namespace SEALNetTest
                 byte cipherMinor = (byte)(cipher.IsNTTForm ? 1 : 0);
                 Assert.AreEqual(context.KeyContextData.Parms.Scheme != SchemeType.BFV, cipher.IsNTTForm);
                 Assert.AreEqual(cipherMinor, HeaderOf(s => cipher.Save(s)).VersionMinor);
+                Assert.AreEqual((byte)6, HeaderOf(s => cipher.Save(s, ComprModeType.BitPack)).VersionMinor);
                 Assert.AreEqual(Serialization.FormatVersionMinor, HeaderOf(s => publicKey.Save(s)).VersionMinor);
+                Assert.AreEqual((byte)6, HeaderOf(s => publicKey.Save(s, ComprModeType.BitPack)).VersionMinor);
                 Assert.AreEqual(Serialization.FormatVersionMinor, HeaderOf(s => relinKeys.Save(s)).VersionMinor);
+                Assert.AreEqual((byte)6, HeaderOf(s => relinKeys.Save(s, ComprModeType.BitPack)).VersionMinor);
                 Assert.AreEqual(Serialization.FormatVersionMinor, HeaderOf(s => keygen.SecretKey.Save(s)).VersionMinor);
+                Assert.AreEqual((byte)6, HeaderOf(s => keygen.SecretKey.Save(s, ComprModeType.BitPack)).VersionMinor);
                 Assert.AreEqual(Serialization.FormatVersionMinor, HeaderOf(s => context.KeyContextData.Parms.Save(s)).VersionMinor);
             }
         }

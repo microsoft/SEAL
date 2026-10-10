@@ -242,6 +242,10 @@ namespace SEALNetTest
                 saveSize = cipher.Save(mem, ComprModeType.BitPack);
 
                 mem.Seek(offset: 0, loc: SeekOrigin.Begin);
+                Serialization.SEALHeader header = new Serialization.SEALHeader();
+                Serialization.LoadHeader(mem, header);
+                Assert.AreEqual((byte)6, header.VersionMinor);
+                mem.Seek(offset: 0, loc: SeekOrigin.Begin);
 
                 loaded.Load(context, mem);
             }

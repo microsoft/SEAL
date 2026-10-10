@@ -32,8 +32,9 @@ namespace seal
         // Use Zstandard compression
         zstd = 2,
 #endif
-        // Use bit-packing compression. Unlike ZLIB and Zstandard, bit-packing performs no integrity
-        // checking of the data.
+        // Use bit-packing, which removes the always-zero high bits of 64-bit words. It is designed for ciphertext
+        // and key data, requires no external library, and performs no integrity checking. Loading requires Microsoft
+        // SEAL 4.6 or later.
         bitpack = 3,
     };
 
@@ -72,8 +73,9 @@ namespace seal
         later load any format up to their own version, and Microsoft SEAL 4.0 loads
         format 4.0; Microsoft SEAL 4.1-4.3 accept only their own version. The format
         is unchanged since Microsoft SEAL 4.0, except that BGV ciphertexts are in NTT
-        form since Microsoft SEAL 4.1. Objects that save the members of another type
-        directly, such as keys, must be updated whenever that type's format changes.
+        form since Microsoft SEAL 4.1 and bit-packed objects require Microsoft SEAL
+        4.6. Objects that save the members of another type directly, such as keys,
+        must be updated whenever that type's format changes.
         */
         static constexpr std::uint8_t format_version_major = 4;
 
@@ -93,6 +95,17 @@ namespace seal
         static constexpr std::uint8_t format_version_minor_ntt_ciphertext = 1;
 
         /**
+        The serialization format minor version written to SEALHeader for bit-packed
+        objects. Earlier Microsoft SEAL 4.x releases do not understand the bit-packed
+        wire format and reject these objects as incompatible. Save writes at least
+        this version for bit-packed data, and IsValidHeader rejects bit-packed data
+        with an older version.
+        */
+        static constexpr std::uint8_t format_version_minor_bitpack = 6;
+
+        static_assert(format_version_minor_bitpack <= SEAL_VERSION_MINOR, "bitpack format version is too new");
+
+        /**
         Struct to contain metadata for serialization comprising the following fields:
 
         1. a magic number identifying this is a SEALHeader struct (2 bytes)
@@ -104,7 +117,8 @@ namespace seal
         7. the size in bytes of the entire serialized object, including the header (8 bytes)
 
         Microsoft SEAL 4.4.x and earlier wrote the library version number instead
-        of the serialization format version number.
+        of the serialization format version number. Bit-packed objects are written
+        with format version 4.6.
         */
         struct SEALHeader
         {
@@ -224,6 +238,11 @@ namespace seal
             {
                 return false;
             }
+            if (header.compr_mode == compr_mode_type::bitpack &&
+                (header.version_major != format_version_major || header.version_minor < format_version_minor_bitpack))
+            {
+                return false;
+            }
             return true;
         }
 
@@ -294,7 +313,7 @@ namespace seal
         @param[in] compr_mode The desired compression mode
         @param[in] clear_buffers Whether internal buffers should be cleared
         @param[in] version_minor The serialization format minor version to write
-        to SEALHeader
+        to SEALHeader; bit-packed data is raised to format_version_minor_bitpack
         @throws std::invalid_argument if save_members is invalid
         @throws std::invalid_argument if raw_size is smaller than SEALHeader size
         @throws std::invalid_argument if version_minor is newer than this version
@@ -349,7 +368,7 @@ namespace seal
         @param[in] compr_mode The desired compression mode
         @param[in] clear_buffers Whether internal buffers should be cleared
         @param[in] version_minor The serialization format minor version to write
-        to SEALHeader
+        to SEALHeader; bit-packed data is raised to format_version_minor_bitpack
         @throws std::invalid_argument if save_members is invalid, if raw_size or
         size is smaller than SEALHeader size, if out is null, or if version_minor
         is newer than this version of Microsoft SEAL
@@ -386,6 +405,19 @@ namespace seal
 
     private:
         Serialization() = delete;
+
+        friend class KSwitchKeys;
+
+        // The following overloads of Load are the same as the public ones, except that if bounded_expansion is true,
+        // compressed data is rejected if it expands far more than valid key data can, and objects nested in the data
+        // must not be compressed.
+        static std::streamoff Load(
+            std::function<void(std::istream &, SEALVersion)> load_members, std::istream &stream, bool clear_buffers,
+            bool bounded_expansion);
+
+        static std::streamoff Load(
+            std::function<void(std::istream &, SEALVersion)> load_members, const seal_byte *in, std::size_t size,
+            bool clear_buffers, bool bounded_expansion);
     };
 
     namespace legacy_headers

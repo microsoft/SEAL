@@ -8,8 +8,10 @@
 #include "seal/util/common.h"
 #include "seal/util/streambuf.h"
 #include "seal/util/ztools.h"
+#include <algorithm>
 #include <stdexcept>
 #include <typeinfo>
+#include <utility>
 
 using namespace std;
 using namespace seal::util;
@@ -39,6 +41,10 @@ namespace seal
     // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to ensure
     // symbol is created.
     SEAL_CONSTEXPR_MEMBER_DEF constexpr uint8_t Serialization::format_version_minor_ntt_ciphertext;
+
+    // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to ensure
+    // symbol is created.
+    SEAL_CONSTEXPR_MEMBER_DEF constexpr uint8_t Serialization::format_version_minor_bitpack;
 
     namespace
     {
@@ -93,6 +99,47 @@ namespace seal
             // Generic message
             throw runtime_error("I/O error");
         }
+
+        // When loading with bounded expansion, decompression fails once its output exceeds
+        // bounded_expansion_free_bytes plus bounded_expansion_ratio times the compressed input consumed. Data loaded
+        // this way, such as key-switching keys, consists of uniformly random residues modulo primes that are 1 modulo
+        // 2n, so at least 5, and cannot compress by more than about 64 / log2(5), i.e., 28:1. The free bytes cover the
+        // empty slots of Galois keys, 8 bytes per slot and so at most 1 MiB.
+        constexpr uint64_t bounded_expansion_free_bytes = uint64_t(4) << 20;
+
+        constexpr uint64_t bounded_expansion_ratio = 64;
+
+        // Nonzero while loading the members of data loaded with bounded expansion. Objects nested in such data must
+        // not be compressed, so that the bound applies to all of the data; Microsoft SEAL never compresses nested
+        // objects.
+        thread_local size_t bounded_expansion_depth = 0;
+
+        class BoundedExpansionScope
+        {
+        public:
+            explicit BoundedExpansionScope(bool active) noexcept : active_(active)
+            {
+                if (active_)
+                {
+                    bounded_expansion_depth++;
+                }
+            }
+
+            ~BoundedExpansionScope()
+            {
+                if (active_)
+                {
+                    bounded_expansion_depth--;
+                }
+            }
+
+            BoundedExpansionScope(const BoundedExpansionScope &copy) = delete;
+
+            BoundedExpansionScope &operator=(const BoundedExpansionScope &assign) = delete;
+
+        private:
+            bool active_;
+        };
     } // namespace
 
     size_t Serialization::ComprSizeEstimate(size_t in_size, compr_mode_type compr_mode)
@@ -272,6 +319,10 @@ namespace seal
             // Create the header
             SEALHeader header;
             header.version_minor = version_minor;
+            if (compr_mode == compr_mode_type::bitpack)
+            {
+                header.version_minor = max(header.version_minor, format_version_minor_bitpack);
+            }
 
             switch (compr_mode)
             {
@@ -383,7 +434,14 @@ namespace seal
     }
 
     streamoff Serialization::Load(
-        function<void(istream &, SEALVersion)> load_members, istream &stream, SEAL_MAYBE_UNUSED bool clear_buffers)
+        function<void(istream &, SEALVersion)> load_members, istream &stream, bool clear_buffers)
+    {
+        return Load(std::move(load_members), stream, clear_buffers, false);
+    }
+
+    streamoff Serialization::Load(
+        function<void(istream &, SEALVersion)> load_members, istream &stream, SEAL_MAYBE_UNUSED bool clear_buffers,
+        bool bounded_expansion)
     {
         if (!load_members)
         {
@@ -418,6 +476,11 @@ namespace seal
                 // smaller than the header. Rejecting here also prevents header.size - sizeof(SEALHeader)
                 // below from underflowing into a huge compressed-payload bound.
                 throw logic_error("loaded SEALHeader is invalid");
+            }
+            if (bounded_expansion_depth && header.compr_mode != compr_mode_type::none)
+            {
+                // Objects nested in data loaded with bounded expansion must not be compressed
+                throw logic_error("unexpected compressed data");
             }
 
             // Stays false unless the stream is seekable and header.size is confirmed to fit the available
@@ -463,6 +526,9 @@ namespace seal
             // correct variant of load_members.
             SEALVersion version{ header.version_major, header.version_minor, 0, 0 };
 
+            // Objects nested in data loaded with bounded expansion must not be compressed
+            BoundedExpansionScope bounded_expansion_scope(bounded_expansion);
+
             switch (header.compr_mode)
             {
             case compr_mode_type::none:
@@ -491,6 +557,10 @@ namespace seal
                 {
                     auto inflate_buffer =
                         ztools::make_zlib_inflate_buffer(stream, safe_cast<streamoff>(compr_size), safe_pool);
+                    if (bounded_expansion)
+                    {
+                        inflate_buffer->set_expansion_limit(bounded_expansion_free_bytes, bounded_expansion_ratio);
+                    }
                     istream temp_stream(inflate_buffer.get());
                     temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
 
@@ -540,6 +610,10 @@ namespace seal
                 {
                     auto inflate_buffer =
                         ztools::make_zstd_inflate_buffer(stream, safe_cast<streamoff>(compr_size), safe_pool);
+                    if (bounded_expansion)
+                    {
+                        inflate_buffer->set_expansion_limit(bounded_expansion_free_bytes, bounded_expansion_ratio);
+                    }
                     istream temp_stream(inflate_buffer.get());
                     temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
 
@@ -588,6 +662,10 @@ namespace seal
                 {
                     auto unpack_buffer =
                         bitpack::make_bitpack_unpack_buffer(stream, safe_cast<streamoff>(packed_size), safe_pool);
+                    if (bounded_expansion)
+                    {
+                        unpack_buffer->set_expansion_limit(bounded_expansion_free_bytes, bounded_expansion_ratio);
+                    }
                     istream temp_stream(unpack_buffer.get());
                     temp_stream.exceptions(ios_base::badbit | ios_base::failbit);
 
@@ -656,6 +734,13 @@ namespace seal
     streamoff Serialization::Load(
         function<void(istream &, SEALVersion)> load_members, const seal_byte *in, size_t size, bool clear_buffers)
     {
+        return Load(std::move(load_members), in, size, clear_buffers, false);
+    }
+
+    streamoff Serialization::Load(
+        function<void(istream &, SEALVersion)> load_members, const seal_byte *in, size_t size, bool clear_buffers,
+        bool bounded_expansion)
+    {
         if (!in)
         {
             throw invalid_argument("in cannot be null");
@@ -670,6 +755,6 @@ namespace seal
         }
         ArrayGetBuffer agbuf(reinterpret_cast<const char *>(in), static_cast<streamsize>(size));
         istream stream(&agbuf);
-        return Load(load_members, stream, clear_buffers);
+        return Load(std::move(load_members), stream, clear_buffers, bounded_expansion);
     }
 } // namespace seal

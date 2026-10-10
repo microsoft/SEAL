@@ -10,6 +10,7 @@
 #include "seal/memorymanager.h"
 #include "seal/util/pointer.h"
 #include <cstddef>
+#include <cstdint>
 #include <ios>
 #include <iostream>
 #include <memory>
@@ -88,6 +89,14 @@ namespace seal
                     return in_remaining_;
                 }
 
+                // Makes decompression fail once the output exceeds free_bytes plus max_ratio times the compressed
+                // input consumed so far. A max_ratio of zero means no limit.
+                void set_expansion_limit(std::uint64_t free_bytes, std::uint64_t max_ratio) noexcept
+                {
+                    expansion_free_bytes_ = free_bytes;
+                    expansion_max_ratio_ = max_ratio;
+                }
+
             protected:
                 // Inflates the next chunk into out_buf_, returning the number of bytes produced. Sets finished_ at the
                 // end of the compressed stream and failed_ on a decompression error or truncated input. Implemented per
@@ -116,12 +125,22 @@ namespace seal
                     off_type off, std::ios_base::seekdir dir,
                     std::ios_base::openmode which = std::ios_base::in | std::ios_base::out) override;
 
+                // True if producing a total of produced bytes would exceed the expansion limit.
+                SEAL_NODISCARD bool expansion_exceeded(std::uint64_t produced) const noexcept;
+
                 std::istream &in_stream_;
                 std::streamoff in_remaining_;
                 std::ios_base::iostate in_stream_except_mask_;
 
                 // Total decompressed bytes handed to the get area so far; used to report the read position.
                 std::streamoff total_produced_ = 0;
+
+                // Total compressed bytes read from the underlying stream, including any not yet consumed.
+                std::uint64_t in_read_ = 0;
+
+                std::uint64_t expansion_free_bytes_ = 0;
+
+                std::uint64_t expansion_max_ratio_ = 0;
             };
 
 #ifdef SEAL_USE_ZLIB

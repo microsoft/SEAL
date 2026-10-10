@@ -8,7 +8,7 @@ Microsoft SEAL is an easy-to-use open-source ([MIT licensed](LICENSE)) homomorph
 Microsoft SEAL is written in modern standard C++ and is easy to compile and run in many different environments.
 For more information about the Microsoft SEAL project, see [sealcrypto.org](https://www.microsoft.com/en-us/research/project/microsoft-seal).
 
-This document pertains to Microsoft SEAL version 4.5.
+This document pertains to Microsoft SEAL version 4.6.
 Users of previous versions of the library should look at the [list of changes](CHANGES.md).
 
 ## Contents
@@ -150,7 +150,11 @@ If Microsoft SEAL is compiled with ZLIB or Zstandard support, compression will a
 However, it is always possible to explicitly pass `compr_mode_type::none` to serialization methods to disable compression.
 If both ZLIB and Zstandard support are enabled, Zstandard is used by default due to its much better performance.
 
-**Note:** The compression rate for a `SecretKey` can (in theory at least) reveal information about the key.
+Microsoft SEAL also provides bit-packing (`compr_mode_type::bitpack` in C++, `ComprModeType.BitPack` in .NET), which needs neither library and removes exactly the always-zero high-order bits described above.
+For ciphertexts and keys it is typically smaller and faster than Zstandard, but for other data, such as plaintexts, Zstandard compresses much better.
+Bit-packing is never used by default, and objects saved with it can be loaded only by Microsoft SEAL 4.6 or later.
+
+**Note:** The compressed or bit-packed size of a `SecretKey` can (in theory at least) reveal information about the key.
 In most common applications of Microsoft SEAL the size of a `SecretKey` would not be deliberately revealed to untrusted parties.
 If this is a concern, one can always save the `SecretKey` in an uncompressed form.
 
@@ -228,6 +232,8 @@ A global install requires elevated (root or administrator) privileges.
 | macOS/iOS | Xcode toolchain (>= 9.3), CMake (>= 3.22) |
 | Android | Android Studio |
 | FreeBSD | CMake (>= 3.22) |
+
+Microsoft SEAL requires a little-endian platform.
 
 **Note:** Microsoft SEAL compiled with Clang++ has much better runtime performance than one compiled with GNU G++.
 
@@ -361,7 +367,7 @@ cmake -P cmake/ios_xcframework.cmake
 cmake -DBUILD_TYPE=Debug -DOUTPUT_DIR=./out -P cmake/ios_xcframework.cmake
 ```
 
-This configures and builds for both device (`iphoneos`) and simulator (`iphonesimulator`), installs both, and creates `libseal-4.5.xcframework` and `libsealc-4.5.xcframework`.
+This configures and builds for both device (`iphoneos`) and simulator (`iphonesimulator`), installs both, and creates `libseal-4.6.xcframework` and `libsealc-4.6.xcframework`.
 Both slices target `arm64`.
 Intermediate build files are placed in `out/ios-xcframework/` by default; override with `-DWORK_DIR=<path>`.
 
@@ -398,25 +404,25 @@ cmake --install $D/build-simulator --config Release --prefix $D/install-simulato
 # Stage headers per slice. XCFramework requires separate header trees because
 # generated files (e.g. config.h) can differ between device and simulator.
 mkdir -p $D/staging/device $D/staging/simulator
-rsync -a $D/install-device/include/SEAL-4.5/    $D/staging/device/
-rsync -a $D/install-simulator/include/SEAL-4.5/ $D/staging/simulator/
+rsync -a $D/install-device/include/SEAL-4.6/    $D/staging/device/
+rsync -a $D/install-simulator/include/SEAL-4.6/ $D/staging/simulator/
 
 # xcodebuild refuses to overwrite an existing .xcframework output.
-rm -rf libseal-4.5.xcframework libsealc-4.5.xcframework
+rm -rf libseal-4.6.xcframework libsealc-4.6.xcframework
 
 # Create the XCFrameworks.
 xcodebuild -create-xcframework                          \
-    -library $D/install-device/lib/libseal-4.5.a        \
+    -library $D/install-device/lib/libseal-4.6.a        \
     -headers $D/staging/device                          \
-    -library $D/install-simulator/lib/libseal-4.5.a     \
+    -library $D/install-simulator/lib/libseal-4.6.a     \
     -headers $D/staging/simulator                       \
-    -output  libseal-4.5.xcframework
+    -output  libseal-4.6.xcframework
 xcodebuild -create-xcframework                          \
-    -library $D/install-device/lib/libsealc-4.5.a       \
+    -library $D/install-device/lib/libsealc-4.6.a       \
     -headers $D/staging/device                          \
-    -library $D/install-simulator/lib/libsealc-4.5.a    \
+    -library $D/install-simulator/lib/libsealc-4.6.a    \
     -headers $D/staging/simulator                       \
-    -output  libsealc-4.5.xcframework
+    -output  libsealc-4.6.xcframework
 ```
 
 </details>
@@ -466,7 +472,7 @@ emcc \
  -Wall \
  -flto \
  -O3 \
- build/lib/libseal-4.5.a \
+ build/lib/libseal-4.6.a \
  --bind \
  -o "build/bin/seal_wasm.js" \
  -s WASM=1 \
@@ -530,7 +536,7 @@ It is very easy to link your own applications and libraries with Microsoft SEAL 
 Simply add the following to your `CMakeLists.txt`:
 
 ```PowerShell
-find_package(SEAL 4.5 REQUIRED)
+find_package(SEAL 4.6 REQUIRED)
 target_link_libraries(<your target> SEAL::seal)
 ```
 
@@ -612,6 +618,19 @@ For contributing to Microsoft SEAL, please see [CONTRIBUTING.md](CONTRIBUTING.md
 ## Citing Microsoft SEAL
 
 To cite Microsoft SEAL in academic papers, please use the following BibTeX entries.
+
+### Version 4.6
+
+```tex
+    @misc{sealcrypto,
+        title = {{M}icrosoft {SEAL} (release 4.6)},
+        howpublished = {\url{https://github.com/Microsoft/SEAL}},
+        month = oct,
+        year = 2026,
+        note = {Microsoft Research, Redmond, WA.},
+        key = {SEAL}
+    }
+```
 
 ### Version 4.5
 

@@ -2,13 +2,16 @@
 // Licensed under the MIT license.
 
 #include "seal/serialization.h"
+#include "seal/util/bitpack.h"
 #include "seal/util/defines.h"
 #include "seal/util/ztools.h"
+#include <algorithm>
 #include <array>
 #include <cstdint>
 #include <cstring>
 #include <fstream>
 #include <functional>
+#include <limits>
 #include <sstream>
 #include <streambuf>
 #include <string>
@@ -105,6 +108,27 @@ namespace sealtest
                 size_t raw = sizeof(uint64_t) + words.size() * 8;
                 return static_cast<streamoff>(
                     sizeof(Serialization::SEALHeader) + Serialization::ComprSizeEstimate(raw, compr_mode));
+            }
+        };
+
+        struct byte_struct
+        {
+            std::vector<uint8_t> bytes;
+
+            void save_members(ostream &stream)
+            {
+                stream.write(reinterpret_cast<const char *>(bytes.data()), static_cast<streamsize>(bytes.size()));
+            }
+
+            void load_members(istream &stream)
+            {
+                stream.read(reinterpret_cast<char *>(bytes.data()), static_cast<streamsize>(bytes.size()));
+            }
+
+            streamoff save_size(compr_mode_type compr_mode) const
+            {
+                return static_cast<streamoff>(
+                    sizeof(Serialization::SEALHeader) + Serialization::ComprSizeEstimate(bytes.size(), compr_mode));
             }
         };
 
@@ -312,10 +336,10 @@ namespace sealtest
             return modes;
         }
 
-        // The compression modes that verify the integrity of the compressed data on load. Bit-packing performs no
-        // integrity checking: corrupted packed bits decode to wrong values rather than a detected error, like
-        // compr_mode_type::none.
-        std::vector<compr_mode_type> checksummed_compr_modes()
+        // The compression modes whose decoders reject the heavy corruption made by LoadCorruptCompressedThrows as
+        // malformed data. Bit-packing has almost no redundancy and performs no integrity checking, so corrupted packed
+        // bits mostly decode to wrong values rather than a detected error, like compr_mode_type::none.
+        std::vector<compr_mode_type> corruption_detecting_compr_modes()
         {
             std::vector<compr_mode_type> modes;
 #ifdef SEAL_USE_ZLIB
@@ -354,7 +378,16 @@ namespace sealtest
         ASSERT_FALSE(Serialization::IsValidHeader(invalid_header));
         invalid_header.version_major = SEAL_VERSION_MAJOR;
         invalid_header.compr_mode = compr_mode_type::bitpack;
+        for (uint8_t minor = 0; minor < Serialization::format_version_minor_bitpack; minor++)
+        {
+            invalid_header.version_minor = minor;
+            ASSERT_FALSE(Serialization::IsValidHeader(invalid_header));
+        }
+        invalid_header.version_minor = Serialization::format_version_minor_bitpack;
         ASSERT_TRUE(Serialization::IsValidHeader(invalid_header));
+        invalid_header.version_major = 3;
+        ASSERT_FALSE(Serialization::IsValidHeader(invalid_header));
+        invalid_header.version_major = SEAL_VERSION_MAJOR;
         invalid_header.compr_mode = (compr_mode_type)0x04;
         ASSERT_FALSE(Serialization::IsValidHeader(invalid_header));
     }
@@ -457,6 +490,7 @@ namespace sealtest
         ASSERT_EQ(4, Serialization::format_version_major);
         ASSERT_EQ(0, Serialization::format_version_minor);
         ASSERT_EQ(1, Serialization::format_version_minor_ntt_ciphertext);
+        ASSERT_EQ(6, Serialization::format_version_minor_bitpack);
         Serialization::SEALHeader ntt_header;
         ntt_header.version_minor = Serialization::format_version_minor_ntt_ciphertext;
         ASSERT_TRUE(Serialization::IsValidHeader(ntt_header));
@@ -481,21 +515,27 @@ namespace sealtest
             Serialization::Save(save_members, raw_size, stream, compr_mode, false);
             auto header = header_of(stream.str());
             ASSERT_EQ(Serialization::format_version_major, header.version_major);
-            ASSERT_EQ(Serialization::format_version_minor, header.version_minor);
+            uint8_t default_minor = compr_mode == compr_mode_type::bitpack ? Serialization::format_version_minor_bitpack
+                                                                           : Serialization::format_version_minor;
+            ASSERT_EQ(default_minor, header.version_minor);
 
             for (int minor = 0; minor <= SEAL_VERSION_MINOR; minor++)
             {
+                uint8_t expected_minor =
+                    compr_mode == compr_mode_type::bitpack
+                        ? max<uint8_t>(static_cast<uint8_t>(minor), Serialization::format_version_minor_bitpack)
+                        : static_cast<uint8_t>(minor);
                 stringstream minor_stream;
                 Serialization::Save(
                     save_members, raw_size, minor_stream, compr_mode, false, static_cast<uint8_t>(minor));
-                ASSERT_EQ(minor, header_of(minor_stream.str()).version_minor);
+                ASSERT_EQ(expected_minor, header_of(minor_stream.str()).version_minor);
 
                 vector<seal_byte> buffer(static_cast<size_t>(source.save_size(compr_mode)));
                 auto out_size = Serialization::Save(
                     save_members, raw_size, buffer.data(), buffer.size(), compr_mode, false,
                     static_cast<uint8_t>(minor));
                 ASSERT_EQ(
-                    minor,
+                    expected_minor,
                     header_of(string(reinterpret_cast<const char *>(buffer.data()), static_cast<size_t>(out_size)))
                         .version_minor);
 
@@ -816,7 +856,7 @@ namespace sealtest
             st.data[i] = static_cast<uint8_t>((i * 2654435761ULL) >> 24);
         }
 
-        for (auto mode : checksummed_compr_modes())
+        for (auto mode : corruption_detecting_compr_modes())
         {
             stringstream stream;
             Serialization::Save(bind(&large_struct::save_members, &st, _1), st.save_size(mode), stream, mode, false);
@@ -1090,6 +1130,233 @@ namespace sealtest
         ASSERT_LE(prefixed_size, aligned_size + 80);
     }
 
+    // The little-endian helpers must agree with byte-by-byte composition, which defines the wire format.
+    TEST(SerializationTest, BitPackLittleEndianHelpers)
+    {
+        const unsigned char known[]{ 1, 2, 3, 4, 5, 6, 7, 8 };
+        ASSERT_EQ(0x0807060504030201ULL, util::bitpack::load_uint64_le(known));
+
+        uint64_t state = 0x123456789ABCDEF0ULL;
+        for (size_t i = 0; i < 1000; i++)
+        {
+            state = state * 6364136223846793005ULL + 1442695040888963407ULL;
+            unsigned char stored[8]{};
+            util::bitpack::store_uint64_le(stored, state);
+            for (int j = 0; j < 8; j++)
+            {
+                ASSERT_EQ(static_cast<unsigned char>(state >> (8 * j)), stored[j]);
+            }
+            ASSERT_EQ(state, util::bitpack::load_uint64_le(stored));
+        }
+    }
+
+    // Bit-packing must round-trip buffers with sizes around block boundaries, holding runs of words of every width at
+    // every phase that continue across blocks, and the output must fit in the estimated size.
+    TEST(SerializationTest, BitPackRandomizedRoundTrip)
+    {
+        using namespace placeholders;
+
+        uint64_t state = 0xA5A5A5A55A5A5A5AULL;
+        auto next = [&state]() {
+            state = state * 6364136223846793005ULL + 1442695040888963407ULL;
+            return state;
+        };
+
+        // Saves and loads st with bit-packing, and returns the bit-packed payload
+        auto round_trip = [](byte_struct &st, string &payload) {
+            stringstream stream;
+            auto out_size = Serialization::Save(
+                bind(&byte_struct::save_members, &st, _1), st.save_size(compr_mode_type::bitpack), stream,
+                compr_mode_type::bitpack, false);
+            ASSERT_LE(out_size, st.save_size(compr_mode_type::bitpack));
+            payload = stream.str().substr(sizeof(Serialization::SEALHeader));
+
+            byte_struct loaded;
+            loaded.bytes.resize(st.bytes.size());
+            auto in_size = Serialization::Load(bind(&byte_struct::load_members, &loaded, _1), stream, false);
+            ASSERT_EQ(out_size, in_size);
+            ASSERT_EQ(st.bytes, loaded.bytes);
+        };
+
+        // Arbitrary bytes, including sizes that leave no whole word or only part of a block
+        const size_t short_sizes[]{ 0, 1, 7, 8, 9, 15, 16, 17, 1023 };
+        for (size_t size : short_sizes)
+        {
+            byte_struct st;
+            st.bytes.resize(size);
+            for (auto &value : st.bytes)
+            {
+                value = static_cast<uint8_t>(next() >> 56);
+            }
+            string payload;
+            round_trip(st, payload);
+        }
+
+        // For each width from 0 to 64, a run of words at phase width % 8 that continues across blocks and switches to
+        // a second width from the third block on, followed by a partial word. The first word of each block has the
+        // top bit of its width set, so the encoder must choose exactly this width and phase.
+        const size_t sizes[]{ 1024, 1025, 1031, 2047, 2048, 2049, 3071, 3072, 3073, 4097 };
+        for (int width = 0; width <= 64; width++)
+        {
+            size_t phase = static_cast<size_t>(width) % 8;
+            int width2 = (width + 29) % 65;
+            size_t size = sizes[static_cast<size_t>(width) % (sizeof(sizes) / sizeof(sizes[0]))];
+
+            byte_struct st;
+            st.bytes.resize(size);
+            for (size_t i = 0; i < phase; i++)
+            {
+                st.bytes[i] = static_cast<uint8_t>(0xF0 + i);
+            }
+            size_t word_count = (size - phase) / 8;
+            for (size_t k = 0; k < word_count; k++)
+            {
+                int word_width = k < 256 ? width : width2;
+                uint64_t mask = word_width == 64 ? ~uint64_t(0) : ((uint64_t(1) << word_width) - 1);
+                uint64_t word = next() & mask;
+                if (word_width && k % 128 == 0)
+                {
+                    word |= uint64_t(1) << (word_width - 1);
+                }
+                util::bitpack::store_uint64_le(st.bytes.data() + phase + 8 * k, word);
+            }
+            for (size_t i = phase + 8 * word_count; i < size; i++)
+            {
+                st.bytes[i] = static_cast<uint8_t>(next() >> 56);
+            }
+
+            string payload;
+            round_trip(st, payload);
+
+            // The first block is full, so it must be encoded at exactly this width and phase
+            ASSERT_LT(size_t(10), payload.size());
+            ASSERT_EQ(width, static_cast<int>(static_cast<uint8_t>(payload[9])));
+            ASSERT_EQ(phase, static_cast<size_t>(static_cast<uint8_t>(payload[10])));
+        }
+    }
+
+    // Pins the wire format of a short single-block payload. The expected bytes were computed with an independent
+    // bit-by-bit reference encoder.
+    TEST(SerializationTest, BitPackGoldenVector)
+    {
+        using namespace placeholders;
+
+        byte_struct st;
+        st.bytes = { 0xAA, 0xBB, 0xCC };
+        for (auto word : { 0x0000000012345678ULL, 0x0000000030ABCDEFULL, 0x000000002AAAAAAAULL })
+        {
+            size_t old_size = st.bytes.size();
+            st.bytes.resize(old_size + 8);
+            util::bitpack::store_uint64_le(st.bytes.data() + old_size, word);
+        }
+        st.bytes.insert(st.bytes.end(), { 0xDD, 0xEE, 0xFF, 0x11 });
+
+        const vector<uint8_t> expected_payload{ 0x1F, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x0A, 0x1E,
+                                                0x03, 0xAA, 0xBB, 0xCC, 0x78, 0x56, 0x34, 0xD2, 0x7B, 0xF3,
+                                                0x2A, 0xAC, 0xAA, 0xAA, 0xAA, 0x02, 0xDD, 0xEE, 0xFF, 0x11 };
+
+        stringstream stream;
+        Serialization::Save(
+            bind(&byte_struct::save_members, &st, _1), st.save_size(compr_mode_type::bitpack), stream,
+            compr_mode_type::bitpack, false);
+        string bytes = stream.str();
+        ASSERT_EQ(expected_payload.size(), bytes.size() - sizeof(Serialization::SEALHeader));
+        ASSERT_TRUE(equal(
+            expected_payload.begin(), expected_payload.end(),
+            reinterpret_cast<const uint8_t *>(bytes.data() + sizeof(Serialization::SEALHeader))));
+
+        byte_struct loaded;
+        loaded.bytes.resize(st.bytes.size());
+        Serialization::Load(bind(&byte_struct::load_members, &loaded, _1), stream, false);
+        ASSERT_EQ(st.bytes, loaded.bytes);
+    }
+
+    // Pins the wire format of a multi-block payload: a 5-byte prefix followed by 61-bit words (phase 5, with bits
+    // spilling into a ninth byte), an all-zero block (width 0), and a partial block of random bytes (width 64). The
+    // expected length and FNV-1a hash were computed with an independent bit-by-bit reference encoder.
+    TEST(SerializationTest, BitPackGoldenVectorMultiBlock)
+    {
+        using namespace placeholders;
+
+        uint64_t state = 0x0123456789ABCDEFULL;
+        auto splitmix64 = [&state]() {
+            state += 0x9E3779B97F4A7C15ULL;
+            uint64_t z = state;
+            z = (z ^ (z >> 30)) * 0xBF58476D1CE4E5B9ULL;
+            z = (z ^ (z >> 27)) * 0x94D049BB133111EBULL;
+            return z ^ (z >> 31);
+        };
+
+        byte_struct st;
+        st.bytes = { 0x11, 0x22, 0x33, 0x44, 0x55 };
+        for (size_t i = 0; i < 127; i++)
+        {
+            uint64_t word = splitmix64() & ((uint64_t(1) << 61) - 1);
+            if (i == 0)
+            {
+                word |= uint64_t(1) << 60;
+            }
+            size_t old_size = st.bytes.size();
+            st.bytes.resize(old_size + 8);
+            util::bitpack::store_uint64_le(st.bytes.data() + old_size, word);
+        }
+        st.bytes.insert(st.bytes.end(), { 0xA1, 0xA2, 0xA3 });
+        ASSERT_EQ(size_t(1024), st.bytes.size());
+        st.bytes.resize(2048, 0);
+        while (st.bytes.size() < 2500)
+        {
+            st.bytes.push_back(static_cast<uint8_t>(splitmix64()));
+        }
+
+        stringstream stream;
+        Serialization::Save(
+            bind(&byte_struct::save_members, &st, _1), st.save_size(compr_mode_type::bitpack), stream,
+            compr_mode_type::bitpack, false);
+        string payload = stream.str().substr(sizeof(Serialization::SEALHeader));
+        ASSERT_EQ(size_t(1444), payload.size());
+
+        // Width and phase of each block
+        ASSERT_EQ(61, static_cast<uint8_t>(payload[9]));
+        ASSERT_EQ(5, static_cast<uint8_t>(payload[10]));
+        ASSERT_EQ(0, static_cast<uint8_t>(payload[988]));
+        ASSERT_EQ(0, static_cast<uint8_t>(payload[989]));
+        ASSERT_EQ(64, static_cast<uint8_t>(payload[990]));
+        ASSERT_EQ(0, static_cast<uint8_t>(payload[991]));
+
+        uint64_t hash = 0xCBF29CE484222325ULL;
+        for (char c : payload)
+        {
+            hash ^= static_cast<uint8_t>(c);
+            hash *= 0x100000001B3ULL;
+        }
+        ASSERT_EQ(0x6D76F2CA1F37F06CULL, hash);
+
+        byte_struct loaded;
+        loaded.bytes.resize(st.bytes.size());
+        Serialization::Load(bind(&byte_struct::load_members, &loaded, _1), stream, false);
+        ASSERT_EQ(st.bytes, loaded.bytes);
+    }
+
+    // Bit-packed data with a format version older than 4.6 must be rejected.
+    TEST(SerializationTest, BitPackMinorVersionGate)
+    {
+        using namespace placeholders;
+
+        test_struct st{ 3, ~0, 3.14159 };
+        stringstream ss;
+        Serialization::Save(
+            bind(&test_struct::save_members, &st, _1), st.save_size(compr_mode_type::bitpack), ss,
+            compr_mode_type::bitpack, false);
+
+        string bytes = ss.str();
+        ASSERT_EQ(static_cast<char>(Serialization::format_version_minor_bitpack), bytes[4]);
+        bytes[4] = static_cast<char>(Serialization::format_version_minor_bitpack - 1);
+
+        stringstream downgraded(bytes);
+        test_struct st2;
+        ASSERT_ANY_THROW(Serialization::Load(bind(&test_struct::load_members, &st2, _1), downgraded, false));
+    }
+
     // A width byte exceeding 64 is malformed and must be rejected cleanly.
     TEST(SerializationTest, BitPackTamperedWidthThrows)
     {
@@ -1105,6 +1372,11 @@ namespace sealtest
         // block size (1 byte).
         string bytes = ss.str();
         bytes[25] = static_cast<char>(65);
+        uint64_t size = 0;
+        memcpy(&size, &bytes[8], sizeof(uint64_t));
+        size++;
+        memcpy(&bytes[8], &size, sizeof(uint64_t));
+        bytes.push_back(0);
 
         stringstream tampered(bytes);
         test_struct st2;
@@ -1142,19 +1414,25 @@ namespace sealtest
 
         for (unsigned phase = 0; phase <= 4; phase++)
         {
-            // Hand-craft a stream holding the 3 original bytes { 0xAA, 0xBB, 0xCC } in a single tiny block
+            // Hand-craft a stream holding the 3 original bytes { 0xAA, 0xBB, 0xCC } in a single tiny block. The
+            // rejected phase is padded so that only the phase check, not a shortage of input, can reject it.
+            string body{ static_cast<char>(0xAA), static_cast<char>(0xBB), static_cast<char>(0xCC) };
+            if (phase > 3)
+            {
+                body.append(8, '\0');
+            }
             Serialization::SEALHeader header;
             header.compr_mode = compr_mode_type::bitpack;
-            header.size = 16 + 8 + 1 + 2 + 3;
+            header.version_minor = Serialization::format_version_minor_bitpack;
+            header.size = sizeof(Serialization::SEALHeader) + 8 + 1 + 2 + body.size();
             string blob(reinterpret_cast<const char *>(&header), sizeof(Serialization::SEALHeader));
-            uint64_t original_size = 3;
-            blob.append(reinterpret_cast<const char *>(&original_size), sizeof(uint64_t));
-            blob.push_back(static_cast<char>(10)); // block size: 2^10 bytes
+            unsigned char original_size[8]{};
+            util::bitpack::store_uint64_le(original_size, 3);
+            blob.append(reinterpret_cast<const char *>(original_size), sizeof(original_size));
+            blob.push_back(static_cast<char>(util::bitpack::bitpack_block_log2));
             blob.push_back(static_cast<char>(0)); // width
             blob.push_back(static_cast<char>(phase));
-            blob.push_back(static_cast<char>(0xAA));
-            blob.push_back(static_cast<char>(0xBB));
-            blob.push_back(static_cast<char>(0xCC));
+            blob += body;
 
             stringstream stream(blob);
             unsigned char loaded[3]{};
@@ -1175,7 +1453,7 @@ namespace sealtest
         }
     }
 
-    // A block size outside the accepted power-of-two range is malformed and must be rejected cleanly.
+    // A block size other than 2^10 is malformed and must be rejected cleanly.
     TEST(SerializationTest, BitPackTamperedBlockSizeThrows)
     {
         using namespace placeholders;
@@ -1188,15 +1466,14 @@ namespace sealtest
 
         // The block size byte follows the SEALHeader (16 bytes) and the original size (8 bytes).
         string bytes = ss.str();
-        bytes[24] = static_cast<char>(5);
+        for (int block_log2 : { 9, 11 })
+        {
+            bytes[24] = static_cast<char>(block_log2);
 
-        stringstream tampered(bytes);
-        test_struct st2;
-        ASSERT_ANY_THROW(Serialization::Load(bind(&test_struct::load_members, &st2, _1), tampered, false));
-
-        bytes[24] = static_cast<char>(17);
-        stringstream tampered2(bytes);
-        ASSERT_ANY_THROW(Serialization::Load(bind(&test_struct::load_members, &st2, _1), tampered2, false));
+            stringstream tampered(bytes);
+            test_struct st2;
+            ASSERT_ANY_THROW(Serialization::Load(bind(&test_struct::load_members, &st2, _1), tampered, false));
+        }
     }
 
     // An understated original size makes the parser read past the end of the unpacked data and must be rejected
@@ -1214,7 +1491,7 @@ namespace sealtest
         // The original size is the 8 bytes following the SEALHeader; understate it below what load_members reads.
         string bytes = ss.str();
         uint64_t small_size = 8;
-        memcpy(&bytes[16], &small_size, sizeof(uint64_t));
+        util::bitpack::store_uint64_le(reinterpret_cast<unsigned char *>(&bytes[16]), small_size);
 
         stringstream tampered(bytes);
         test_struct st2;
@@ -1245,11 +1522,79 @@ namespace sealtest
         // The original size is the 8 bytes following the SEALHeader; overstate it to 2^63.
         string bytes = ss.str();
         uint64_t huge_size = uint64_t(1) << 63;
-        memcpy(&bytes[16], &huge_size, sizeof(uint64_t));
+        util::bitpack::store_uint64_le(reinterpret_cast<unsigned char *>(&bytes[16]), huge_size);
 
         stringstream tampered(bytes);
         large_struct st2;
         ASSERT_ANY_THROW(Serialization::Load(bind(&large_struct::load_members, &st2, _1), tampered, false));
+    }
+
+    // The original size must be representable as a stream offset and fit in the blocks that the packed bytes can
+    // hold. Frames claiming more must be rejected, even if the parser reads only a prefix.
+    TEST(SerializationTest, BitPackPrologueSizeBounds)
+    {
+        auto make_zero_blocks = [](uint64_t original_size, size_t block_count) {
+            Serialization::SEALHeader header;
+            header.compr_mode = compr_mode_type::bitpack;
+            header.version_minor = Serialization::format_version_minor_bitpack;
+            header.size = static_cast<uint64_t>(sizeof(Serialization::SEALHeader) + 8 + 1 + 2 * block_count);
+            string blob(reinterpret_cast<const char *>(&header), sizeof(Serialization::SEALHeader));
+            unsigned char size_bytes[8]{};
+            util::bitpack::store_uint64_le(size_bytes, original_size);
+            blob.append(reinterpret_cast<const char *>(size_bytes), sizeof(size_bytes));
+            blob.push_back(static_cast<char>(util::bitpack::bitpack_block_log2));
+            for (size_t i = 0; i < block_count; i++)
+            {
+                blob.push_back(0);
+                blob.push_back(0);
+            }
+            return blob;
+        };
+
+        constexpr size_t block_count = 3;
+        byte_struct loaded;
+        loaded.bytes.resize(block_count * util::bitpack::bitpack_block_bytes);
+        string valid = make_zero_blocks(loaded.bytes.size(), block_count);
+        stringstream valid_stream(valid);
+        Serialization::Load(bind(&byte_struct::load_members, &loaded, placeholders::_1), valid_stream, false);
+        ASSERT_TRUE(all_of(loaded.bytes.begin(), loaded.bytes.end(), [](uint8_t value) { return value == 0; }));
+
+        // Read only a prefix, so that only the size checks, not a shortage of input, can reject the frame
+        auto read_one = [](istream &stream, SEALVersion) {
+            char value = 0;
+            stream.read(&value, 1);
+        };
+
+        // One byte more than the blocks can hold needs a partial fourth block
+        string too_many_blocks = make_zero_blocks(block_count * util::bitpack::bitpack_block_bytes + 1, block_count);
+        stringstream too_many_stream(too_many_blocks);
+        ASSERT_ANY_THROW(Serialization::Load(read_one, too_many_stream, false));
+
+        loaded.bytes.resize(1);
+        string huge = make_zero_blocks(numeric_limits<uint64_t>::max(), block_count);
+        stringstream huge_stream(huge);
+        ASSERT_ANY_THROW(
+            Serialization::Load(bind(&byte_struct::load_members, &loaded, placeholders::_1), huge_stream, false));
+
+        string impossible = make_zero_blocks((block_count + 1) * util::bitpack::bitpack_block_bytes, block_count);
+        stringstream impossible_stream(impossible);
+        ASSERT_ANY_THROW(Serialization::Load(read_one, impossible_stream, false));
+
+        string direct;
+        unsigned char size_bytes[8]{};
+        util::bitpack::store_uint64_le(
+            size_bytes, static_cast<uint64_t>(numeric_limits<streamoff>::max()) + uint64_t(1));
+        direct.append(reinterpret_cast<const char *>(size_bytes), sizeof(size_bytes));
+        direct.push_back(static_cast<char>(util::bitpack::bitpack_block_log2));
+        direct.push_back(0);
+        direct.push_back(0);
+        stringstream direct_stream(direct);
+        auto unpack_buffer = util::bitpack::make_bitpack_unpack_buffer(
+            direct_stream, numeric_limits<streamoff>::max(), MemoryManager::GetPool());
+        istream unpacked(unpack_buffer.get());
+        char value = 0;
+        unpacked.read(&value, 1);
+        ASSERT_TRUE(unpack_buffer->failed());
     }
 
     // On a non-seekable stream header.size cannot be checked against the available input, so truncated compressed
@@ -1305,7 +1650,10 @@ namespace sealtest
                 ASSERT_ANY_THROW(Serialization::Load(bind(&test_struct::load_members, &st2, _1), in, false));
             }
 
-            // Overstate header.size (offset 8, 8 bytes) by one byte, with no trailing data
+            // Overstate header.size (offset 8, 8 bytes) by one byte, with no trailing data. Bit-packing reads exactly
+            // the bytes the parser needs, so like an uncompressed object it cannot detect this on a non-seekable
+            // stream.
+            if (mode != compr_mode_type::bitpack)
             {
                 string overstated = bytes;
                 uint64_t size = 0;
