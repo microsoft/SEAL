@@ -20,7 +20,7 @@ endmacro()
 macro(seal_detect__umul128)
     seal_start_detect_intrinsics()
 
-    check_cxx_source_runs("
+    seal_check_cxx_program("
         #include <${SEAL_INTRIN_HEADER}>
         int main() {
             unsigned long long a = 0, b = 0;
@@ -39,7 +39,7 @@ endmacro()
 macro(seal_detect___umulh)
     seal_start_detect_intrinsics()
 
-    check_cxx_source_runs("
+    seal_check_cxx_program("
         #include <${SEAL_INTRIN_HEADER}>
         int main() {
             unsigned long long a = 0, b = 0;
@@ -71,7 +71,7 @@ endmacro()
 macro(seal_detect__BitScanReverse64)
     seal_start_detect_intrinsics()
 
-    check_cxx_source_runs("
+    seal_check_cxx_program("
         #include <${SEAL_INTRIN_HEADER}>
         int main() {
             unsigned long a = 0, b = 0;
@@ -88,7 +88,7 @@ endmacro()
 macro(seal_detect___builtin_clzll)
     seal_start_detect_intrinsics()
 
-    check_cxx_source_runs("
+    seal_check_cxx_program("
         int main() {
             volatile auto res = __builtin_clzll(1);
             return 0;
@@ -103,7 +103,7 @@ endmacro()
 macro(seal_detect__addcarry_u64)
     seal_start_detect_intrinsics()
 
-    check_cxx_source_runs("
+    seal_check_cxx_program("
         #include <${SEAL_INTRIN_HEADER}>
         int main() {
             unsigned long long a;
@@ -120,7 +120,7 @@ endmacro()
 macro(seal_detect__subborrow_u64)
     seal_start_detect_intrinsics()
 
-    check_cxx_source_runs("
+    seal_check_cxx_program("
         #include <${SEAL_INTRIN_HEADER}>
         int main() {
             unsigned long long a;
@@ -137,7 +137,7 @@ endmacro()
 macro(seal_detect___builtin_addcll)
     seal_start_detect_intrinsics()
 
-    check_cxx_source_runs("
+    seal_check_cxx_program("
             int main() {
                 unsigned long long a;
                 volatile auto res = __builtin_addcll(0,0,0,&a);
@@ -153,7 +153,7 @@ endmacro()
 macro(seal_detect___builtin_subcll)
     seal_start_detect_intrinsics()
 
-    check_cxx_source_runs("
+    seal_check_cxx_program("
             int main() {
                 unsigned long long a;
                 volatile auto res = __builtin_subcll(0,0,0,&a);

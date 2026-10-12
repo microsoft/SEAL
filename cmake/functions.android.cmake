@@ -1,8 +1,8 @@
 # Copyright (c) Microsoft Corporation. All rights reserved.
 # Licensed under the MIT license.
 
-# This cache-initialization file will be used to enable functions when cross-compiling
-# for Android, as check_cxx_source_runs fails for cross-compilers.
+# This cache-initialization file presets the results of the checks for functions and intrinsics
+# when cross-compiling for Android.
 
 set(SEAL_SECURE_ZERO_MEMORY_FOUND_COMPILED "FALSE" CACHE INTERNAL "Result of TRY_COMPILE" FORCE)
 set(SEAL_SECURE_ZERO_MEMORY_FOUND "0" CACHE INTERNAL "Result of TRY_RUN" FORCE)

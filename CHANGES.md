@@ -1,5 +1,10 @@
 # List of Changes
 
+## Version 4.6.1
+
+- Fixed incorrect results of all modular arithmetic when Microsoft SEAL is compiled with MSVC for ARM64. When the `__umulh` intrinsic was used, `util::multiply_uint64` returned the two halves of the 128-bit product in the wrong order. `__umulh` is used by default when building on an ARM64 machine, and when installing from vcpkg for ARM64. The problem was introduced in Microsoft SEAL 4.3.0.
+- Fixed the first CMake configuration failing with a `try_run` error when cross-compiling without `CMAKE_CROSSCOMPILING_EMULATOR`. The checks for intrinsics and `memset_s` now only compile their test programs in that case.
+
 ## Version 4.6.0
 
 - Added `compr_mode_type::bitpack` (`ComprModeType.BitPack` in .NET), a serialization mode that removes the always-zero high-order bits of the 64-bit words in ciphertext and key data, as well as low-order bits that are zero in all of them, such as bits an application has cleared ([PR #758](https://github.com/microsoft/SEAL/pull/758)). For such data it is typically smaller and faster than Zstandard, but it is not a general-purpose compressor: for other data, such as plaintexts, Zstandard can produce much smaller output. Bit-packing requires no external library and is always available, but it is not the default compression mode and performs no integrity checking.

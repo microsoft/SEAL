@@ -85,6 +85,17 @@ macro(seal_install_target target export)
         RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR})
 endmacro()
 
+# Check that a C++ program compiles and runs successfully. A cross-compiled program can be run only with
+# CMAKE_CROSSCOMPILING_EMULATOR, so without one the program is only compiled; check_cxx_source_runs would instead
+# fail the first configuration with a try_run error.
+function(seal_check_cxx_program source result_var)
+    if(CMAKE_CROSSCOMPILING AND NOT CMAKE_CROSSCOMPILING_EMULATOR)
+        check_cxx_source_compiles("${source}" ${result_var})
+    else()
+        check_cxx_source_runs("${source}" ${result_var})
+    endif()
+endfunction()
+
 macro(seal_combine_archives target dependency)
     if(MSVC)
         add_custom_command(TARGET ${target} POST_BUILD

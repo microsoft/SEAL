@@ -83,8 +83,8 @@
 #define SEAL_MULTIPLY_UINT64(operand1, operand2, result128) \
     do                                                      \
     {                                                       \
-        result128[0] = __umulh(operand1, operand2);         \
-        result128[1] = operand1 * operand2;                 \
+        result128[0] = operand1 * operand2;                 \
+        result128[1] = __umulh(operand1, operand2);         \
     } while (false)
 #endif
 #endif

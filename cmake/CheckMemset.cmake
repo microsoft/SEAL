@@ -12,7 +12,7 @@ seal_make_memfn_option(SECURE_ZERO_MEMORY "Use SecureZeroMemory")
 message(STATUS "Using SecureZeroMemory: ${SEAL_USE_SECURE_ZERO_MEMORY}")
 
 # Check for memset_s
-check_cxx_source_runs("
+seal_check_cxx_program("
     #define __STDC_WANT_LIB_EXT1__ 1
     #include <string.h>
     int main(void)
