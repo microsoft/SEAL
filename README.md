@@ -118,10 +118,10 @@ The optional dependencies and their tested versions (other versions may work as 
 | Optional dependency                                    | Tested version | Use                                              |
 | ------------------------------------------------------ | -------------- | ------------------------------------------------ |
 | [Intel HEXL](https://github.com/IntelLabs/hexl)        | 1.2.6          | Acceleration of low-level kernels                |
-| [Microsoft GSL](https://github.com/microsoft/GSL)      | 4.2.2          | API extensions                                   |
+| [Microsoft GSL](https://github.com/microsoft/GSL)      | 5.0.1          | API extensions                                   |
 | [ZLIB](https://github.com/madler/zlib)                 | 1.3.2          | Compressed serialization                         |
 | [Zstandard](https://github.com/facebook/zstd)          | 1.5.7          | Compressed serialization (much faster than ZLIB) |
-| [GoogleTest](https://github.com/google/googletest)     | 1.17.0         | For running tests                                |
+| [GoogleTest](https://github.com/google/googletest)     | 1.18.0         | For running tests                                |
 | [GoogleBenchmark](https://github.com/google/benchmark) | 1.9.5          | For running benchmarks                           |
 
 #### Intel HEXL
