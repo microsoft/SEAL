@@ -1,5 +1,10 @@
 # List of Changes
 
+## Version 4.6.2
+
+- Fixed the CMake configuration failing with "Microsoft GSL: not found" when Microsoft SEAL is built with an installed Microsoft GSL 5 (`SEAL_BUILD_DEPS=OFF`). The CMake package of Microsoft GSL accepts requests only for its own major version, so Microsoft SEAL now requests no version and requires Microsoft GSL 4.0 or newer ([PR #763](https://github.com/microsoft/SEAL/pull/763)).
+- Updated dependency versions: Microsoft GSL to 5.0.1, GoogleTest to 1.18.0.
+
 ## Version 4.6.1
 
 - Fixed incorrect results of all modular arithmetic when Microsoft SEAL is compiled with MSVC for ARM64. When the `__umulh` intrinsic was used, `util::multiply_uint64` returned the two halves of the 128-bit product in the wrong order. `__umulh` is used by default when building on an ARM64 machine, and when installing from vcpkg for ARM64. The problem was introduced in Microsoft SEAL 4.3.0.
