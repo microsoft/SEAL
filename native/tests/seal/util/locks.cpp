@@ -61,9 +61,9 @@ namespace sealtest
 
             ReaderLock lock_;
 
-            volatile bool locked_;
+            std::atomic<bool> locked_;
 
-            volatile bool trying_;
+            std::atomic<bool> trying_;
         };
 
         class Writer
@@ -119,9 +119,9 @@ namespace sealtest
 
             WriterLock lock_;
 
-            volatile bool locked_;
+            std::atomic<bool> locked_;
 
-            volatile bool trying_;
+            std::atomic<bool> trying_;
         };
 
         TEST(ReaderWriterLockerTests, ReaderWriterLockNonBlocking)
