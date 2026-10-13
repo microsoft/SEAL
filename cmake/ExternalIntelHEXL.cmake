@@ -25,9 +25,21 @@ if(NOT hexl_POPULATED)
     mark_as_advanced(FETCHCONTENT_SOURCE_DIR_HEXL)
     mark_as_advanced(FETCHCONTENT_UPDATES_DISCONNECTED_HEXL)
 
+    # Intel HEXL builds google/cpu_features, which requires CMake 3.0. CMake 4 removed compatibility with versions
+    # older than 3.5, so configure Intel HEXL and its dependencies with the policies of CMake 3.5.
+    if(CMAKE_VERSION VERSION_GREATER_EQUAL 4.0 AND NOT DEFINED CMAKE_POLICY_VERSION_MINIMUM)
+        set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
+        set(SEAL_HEXL_POLICY_VERSION_MINIMUM_SET ON)
+    endif()
+
     add_subdirectory(
         ${hexl_SOURCE_DIR}
         ${hexl_SOURCE_DIR}/../hexl-build
         EXCLUDE_FROM_ALL
     )
+
+    if(SEAL_HEXL_POLICY_VERSION_MINIMUM_SET)
+        unset(CMAKE_POLICY_VERSION_MINIMUM)
+        unset(SEAL_HEXL_POLICY_VERSION_MINIMUM_SET)
+    endif()
 endif()
