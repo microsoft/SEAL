@@ -150,9 +150,11 @@ namespace seal
 #define SEAL_IF_CONSTEXPR if
 #endif
 
-// Use [[maybe_unused]] from C++17
+// Use [[maybe_unused]] from C++17, or the equivalent GCC/Clang attribute in C++14
 #ifdef SEAL_USE_MAYBE_UNUSED
 #define SEAL_MAYBE_UNUSED [[maybe_unused]]
+#elif defined(__GNUC__) || defined(__clang__)
+#define SEAL_MAYBE_UNUSED __attribute__((unused))
 #else
 #define SEAL_MAYBE_UNUSED
 #endif
