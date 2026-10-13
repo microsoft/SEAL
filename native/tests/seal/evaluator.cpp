@@ -7291,6 +7291,102 @@ namespace sealtest
             }
         }
     }
+
+    TEST(EvaluatorTest, ModSwitchInPlaceMatchesOutOfPlace)
+    {
+        for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
+        {
+            size_t n = 64;
+            EncryptionParameters parms(scheme);
+            parms.set_poly_modulus_degree(n);
+            parms.set_coeff_modulus(CoeffModulus::Create(n, { 40, 40, 40, 40, 60 }));
+            if (scheme != scheme_type::ckks)
+            {
+                parms.set_plain_modulus(PlainModulus::Batching(n, 20));
+            }
+            SEALContext context(parms, true, sec_level_type::none);
+            KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            Encryptor encryptor(context, pk);
+            Evaluator evaluator(context);
+            Decryptor decryptor(context, keygen.secret_key());
+
+            Plaintext plain("3x^2 + 2");
+            if (scheme == scheme_type::ckks)
+            {
+                CKKSEncoder encoder(context);
+                encoder.encode(1.5, pow(2.0, 60), plain);
+            }
+            Ciphertext encrypted;
+            encryptor.encrypt(plain, encrypted);
+            Ciphertext encrypted3;
+            evaluator.square(encrypted, encrypted3);
+
+            // Modulus switching with scaling (BFV and BGV) or rescaling (CKKS), in place and out of place, of
+            // ciphertexts of sizes 2 and 3 at every level; the in-place results keep the memory pool
+            while (encrypted.parms_id() != context.last_parms_id())
+            {
+                for (auto ct : { &encrypted, &encrypted3 })
+                {
+                    Ciphertext destination;
+                    auto pool = MemoryPoolHandle::New();
+                    Ciphertext in_place(pool);
+                    in_place = *ct;
+                    if (scheme == scheme_type::ckks)
+                    {
+                        evaluator.rescale_to_next(*ct, destination);
+                        evaluator.rescale_to_next_inplace(in_place);
+                    }
+                    else
+                    {
+                        evaluator.mod_switch_to_next(*ct, destination);
+                        evaluator.mod_switch_to_next_inplace(in_place);
+                    }
+                    ASSERT_TRUE(same_ciphertext(destination, in_place));
+                    ASSERT_TRUE(in_place.pool() == pool);
+
+                    // A rejected in-place switch leaves the ciphertext unchanged
+                    Ciphertext copy = *ct;
+                    ASSERT_THROW(evaluator.mod_switch_to_next_inplace(*ct, MemoryPoolHandle()), invalid_argument);
+                    ASSERT_TRUE(same_ciphertext(copy, *ct));
+
+                    // CKKS also switches without scaling, if the scale fits at the next level
+                    if (scheme == scheme_type::ckks && ct == &encrypted)
+                    {
+                        Ciphertext dropped;
+                        evaluator.mod_switch_to_next(*ct, dropped);
+                        evaluator.mod_switch_to_next_inplace(copy);
+                        ASSERT_TRUE(same_ciphertext(dropped, copy));
+                    }
+                    *ct = in_place;
+                }
+
+                Plaintext result;
+                decryptor.decrypt(encrypted, result);
+                if (scheme == scheme_type::ckks)
+                {
+                    if (encrypted.scale() > pow(2.0, 15))
+                    {
+                        CKKSEncoder encoder(context);
+                        vector<double> values;
+                        encoder.decode(result, values);
+                        ASSERT_NEAR(1.5, values[0], 0.001);
+                    }
+                }
+                else
+                {
+                    ASSERT_EQ(plain.to_string(), result.to_string());
+                }
+            }
+
+            // At the last level
+            Ciphertext copy = encrypted;
+            ASSERT_THROW(evaluator.mod_switch_to_next_inplace(encrypted), invalid_argument);
+            ASSERT_TRUE(same_ciphertext(copy, encrypted));
+        }
+    }
+
     TEST(EvaluatorTest, BFVEncryptMultiplySizesDecrypt)
     {
         // Products of ciphertexts of sizes up to 9 (with results up to the maximal size 16) and squares of sizes

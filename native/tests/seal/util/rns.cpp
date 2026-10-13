@@ -1630,5 +1630,182 @@ namespace sealtest
             }
         }
 
+        // The result of divide_and_round_q_last is round(x / q_last) = floor((x + floor(q_last / 2)) / q_last) for the
+        // integer x in [0, q) given by the input; checked in and out of place, in NTT form, and with destination
+        // overlapping input as for compacting a ciphertext in place
+        TEST(RNSToolTest, DivideAndRoundQLast)
+        {
+            auto pool = MemoryManager::GetPool();
+            MemoryPool &mpool = pool;
+            mt19937_64 rng(2026);
+            size_t n = 64;
+            for (auto bit_sizes : { vector<int>{ 40, 50, 60 }, vector<int>{ 30, 30, 60 }, vector<int>{ 60, 60, 30 },
+                                    vector<int>{ 60, 20 } })
+            {
+                RNSBase q(CoeffModulus::Create(n, bit_sizes), pool);
+                size_t q_size = q.size();
+                const Modulus &q_last = q[q_size - 1];
+                RNSTool rns_tool(n, q, Modulus(65537), pool);
+                Pointer<NTTTables> ntt_tables;
+                CreateNTTTables(get_power_of_two(n), vector<Modulus>(q.base(), q.base() + q_size), ntt_tables, pool);
+
+                vector<uint64_t> in = random_rns_poly(q, n, rng);
+                vector<uint64_t> ref((q_size - 1) * n);
+                for (size_t c = 0; c < n; c++)
+                {
+                    vector<uint64_t> x = compose_coeff(q, in.data(), n, c), quotient(q_size + 1), remainder(q_size + 1);
+                    x.push_back(0);
+                    vector<uint64_t> half(q_size + 1), divisor(q_size + 1);
+                    half[0] = q_last.value() >> 1;
+                    divisor[0] = q_last.value();
+                    add_uint(x.data(), half.data(), q_size + 1, x.data());
+                    divide_uint(x.data(), divisor.data(), q_size + 1, quotient.data(), remainder.data(), mpool);
+                    for (size_t i = 0; i + 1 < q_size; i++)
+                    {
+                        ref[i * n + c] = modulo_uint(quotient.data(), quotient.size(), q[i]);
+                    }
+                }
+
+                // NTT form of the input and of the expected result
+                vector<uint64_t> in_ntt = in, ref_ntt = ref;
+                for (size_t i = 0; i < q_size; i++)
+                {
+                    ntt_negacyclic_harvey(in_ntt.data() + i * n, ntt_tables[i]);
+                    if (i + 1 < q_size)
+                    {
+                        ntt_negacyclic_harvey(ref_ntt.data() + i * n, ntt_tables[i]);
+                    }
+                }
+
+                for (bool ntt_form : { false, true })
+                {
+                    const vector<uint64_t> &input = ntt_form ? in_ntt : in;
+                    const vector<uint64_t> &expected = ntt_form ? ref_ntt : ref;
+                    auto divide = [&](ConstRNSIter source, RNSIter destination) {
+                        if (ntt_form)
+                        {
+                            rns_tool.divide_and_round_q_last_ntt(source, ntt_tables.get(), destination, pool);
+                        }
+                        else
+                        {
+                            rns_tool.divide_and_round_q_last(source, destination, pool);
+                        }
+                    };
+
+                    // Out of place
+                    vector<uint64_t> out((q_size - 1) * n);
+                    divide(ConstRNSIter(input.data(), n), RNSIter(out.data(), n));
+                    ASSERT_EQ(expected, out) << "q size " << q_size << ", NTT form " << ntt_form;
+
+                    // In place
+                    vector<uint64_t> buffer = input;
+                    if (ntt_form)
+                    {
+                        rns_tool.divide_and_round_q_last_ntt_inplace(RNSIter(buffer.data(), n), ntt_tables.get(), pool);
+                    }
+                    else
+                    {
+                        rns_tool.divide_and_round_q_last_inplace(RNSIter(buffer.data(), n), pool);
+                    }
+                    ASSERT_TRUE(equal(expected.begin(), expected.end(), buffer.begin()));
+                    buffer = input;
+                    divide(ConstRNSIter(buffer.data(), n), RNSIter(buffer.data(), n));
+                    ASSERT_TRUE(equal(expected.begin(), expected.end(), buffer.begin()));
+
+                    // Component i of destination at component i - 1 of input
+                    buffer.assign((q_size + 1) * n, 0);
+                    copy(input.begin(), input.end(), buffer.data() + n);
+                    divide(ConstRNSIter(buffer.data() + n, n), RNSIter(buffer.data(), n));
+                    ASSERT_TRUE(equal(expected.begin(), expected.end(), buffer.begin()));
+                }
+            }
+        }
+
+        // mod_t_and_divide_q_last_ntt computes (x - delta) / q_last for the integer x in [0, q) given by the input,
+        // where delta = [-x * q_last^(-1)]_t * q_last + [x]_{q_last} is the multiple of t congruent to x modulo q_last;
+        // checked in and out of place, and with destination overlapping input as for compacting a ciphertext in place
+        TEST(RNSToolTest, ModTAndDivideQLastNTT)
+        {
+            auto pool = MemoryManager::GetPool();
+            MemoryPool &mpool = pool;
+            mt19937_64 rng(2027);
+            size_t n = 64;
+            for (auto bit_sizes : { vector<int>{ 40, 50, 60 }, vector<int>{ 30, 30, 60 }, vector<int>{ 60, 60, 30 } })
+            {
+                RNSBase q(CoeffModulus::Create(n, bit_sizes), pool);
+                size_t q_size = q.size();
+                const Modulus &q_last = q[q_size - 1];
+                Pointer<NTTTables> ntt_tables;
+                CreateNTTTables(get_power_of_two(n), vector<Modulus>(q.base(), q.base() + q_size), ntt_tables, pool);
+
+                // t = 2 makes q_last^(-1) mod t equal to 1
+                for (const Modulus &t : { Modulus(2), Modulus(65537), Modulus(uint64_t(1) << 20) })
+                {
+                    RNSTool rns_tool(n, q, t, pool);
+                    vector<uint64_t> in = random_rns_poly(q, n, rng);
+                    vector<uint64_t> ref((q_size - 1) * n);
+                    uint64_t inv_q_last_mod_t = 1;
+                    if (t.value() > 2)
+                    {
+                        ASSERT_TRUE(try_invert_uint_mod(barrett_reduce_64(q_last.value(), t), t, inv_q_last_mod_t));
+                    }
+                    for (size_t c = 0; c < n; c++)
+                    {
+                        vector<uint64_t> x = compose_coeff(q, in.data(), n, c);
+                        uint64_t c_last = in[(q_size - 1) * n + c];
+                        uint64_t k = multiply_uint_mod(
+                            negate_uint_mod(barrett_reduce_64(c_last, t), t), barrett_reduce_64(inv_q_last_mod_t, t),
+                            t);
+
+                        // delta = k * q_last + c_last, and (x - delta) / q_last with its sign
+                        vector<uint64_t> delta(q_size), diff(q_size), quotient(q_size), remainder(q_size),
+                            divisor(q_size);
+                        multiply_uint(&k, 1, q_last.value(), q_size, delta.data());
+                        add_uint(delta.data(), q_size, c_last, delta.data());
+                        bool negative = is_greater_than_uint(delta.data(), x.data(), q_size);
+                        if (negative)
+                        {
+                            sub_uint(delta.data(), x.data(), q_size, diff.data());
+                        }
+                        else
+                        {
+                            sub_uint(x.data(), delta.data(), q_size, diff.data());
+                        }
+                        divisor[0] = q_last.value();
+                        divide_uint(diff.data(), divisor.data(), q_size, quotient.data(), remainder.data(), mpool);
+                        ASSERT_TRUE(is_zero_uint(remainder.data(), q_size));
+                        vector<uint64_t> residues = decompose_signed(q, quotient, negative);
+                        for (size_t i = 0; i + 1 < q_size; i++)
+                        {
+                            ref[i * n + c] = residues[i];
+                        }
+                    }
+                    for (size_t i = 0; i < q_size; i++)
+                    {
+                        ntt_negacyclic_harvey(in.data() + i * n, ntt_tables[i]);
+                        if (i + 1 < q_size)
+                        {
+                            ntt_negacyclic_harvey(ref.data() + i * n, ntt_tables[i]);
+                        }
+                    }
+
+                    vector<uint64_t> out((q_size - 1) * n);
+                    rns_tool.mod_t_and_divide_q_last_ntt(
+                        ConstRNSIter(in.data(), n), ntt_tables.get(), RNSIter(out.data(), n), pool);
+                    ASSERT_EQ(ref, out) << "q size " << q_size << ", t " << t.value();
+
+                    vector<uint64_t> buffer = in;
+                    rns_tool.mod_t_and_divide_q_last_ntt_inplace(RNSIter(buffer.data(), n), ntt_tables.get(), pool);
+                    ASSERT_TRUE(equal(ref.begin(), ref.end(), buffer.begin()));
+
+                    buffer.assign((q_size + 1) * n, 0);
+                    copy(in.begin(), in.end(), buffer.data() + n);
+                    rns_tool.mod_t_and_divide_q_last_ntt(
+                        ConstRNSIter(buffer.data() + n, n), ntt_tables.get(), RNSIter(buffer.data(), n), pool);
+                    ASSERT_TRUE(equal(ref.begin(), ref.end(), buffer.begin()));
+                }
+            }
+        }
+
     } // namespace util
 } // namespace sealtest

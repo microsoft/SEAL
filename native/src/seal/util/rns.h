@@ -284,6 +284,26 @@ namespace seal
                 RNSIter input, ConstNTTTablesIter rns_ntt_tables, MemoryPoolHandle pool) const;
 
             /**
+            Out-of-place versions of divide_and_round_q_last_inplace and divide_and_round_q_last_ntt_inplace: the
+            result, in base q without its last modulus, is written to destination. Component i of destination may
+            coincide with component j <= i of input; in particular, destination may equal input.
+            */
+            void divide_and_round_q_last(ConstRNSIter input, RNSIter destination, MemoryPoolHandle pool) const;
+
+            void divide_and_round_q_last_ntt(
+                ConstRNSIter input, ConstNTTTablesIter rns_ntt_tables, RNSIter destination,
+                MemoryPoolHandle pool) const;
+
+            /**
+            Removes the last modulus of q from a BGV ciphertext component x in NTT form: computes (x - delta) / q_last,
+            where delta is a multiple of t congruent to x modulo q_last. The result is written to destination, with the
+            same rules as for divide_and_round_q_last.
+            */
+            void mod_t_and_divide_q_last_ntt(
+                ConstRNSIter input, ConstNTTTablesIter rns_ntt_tables, RNSIter destination,
+                MemoryPoolHandle pool) const;
+
+            /**
             Shenoy-Kumaresan conversion from Bsk to q
             */
             void fastbconv_sk(ConstRNSIter input, RNSIter destination, MemoryPoolHandle pool) const;
@@ -426,8 +446,7 @@ namespace seal
             // Precomputation for decrypt_scale_and_round and decrypt_modt
             void initialize_decryption();
 
-            // Precomputation for divide_and_round_q_last_inplace, divide_and_round_q_last_ntt_inplace, and
-            // mod_t_and_divide_q_last_ntt_inplace
+            // Precomputation for divide_and_round_q_last, divide_and_round_q_last_ntt, and mod_t_and_divide_q_last_ntt
             void initialize_mod_switch();
 
             /**
@@ -533,8 +552,7 @@ namespace seal
             // prod({t, gamma}) mod q
             Pointer<MultiplyUIntModOperand> prod_t_gamma_mod_q_;
 
-            // Precomputation for divide_and_round_q_last_inplace, divide_and_round_q_last_ntt_inplace, and
-            // mod_t_and_divide_q_last_ntt_inplace
+            // Precomputation for divide_and_round_q_last, divide_and_round_q_last_ntt, and mod_t_and_divide_q_last_ntt
 
             // q[last]^(-1) mod q[i] for i = 0..last-1
             Pointer<MultiplyUIntModOperand> inv_q_last_mod_q_;

@@ -1172,12 +1172,21 @@ namespace seal
 
         void RNSTool::divide_and_round_q_last_inplace(RNSIter input, MemoryPoolHandle pool) const
         {
+            divide_and_round_q_last(input, input, std::move(pool));
+        }
+
+        void RNSTool::divide_and_round_q_last(ConstRNSIter input, RNSIter destination, MemoryPoolHandle pool) const
+        {
 #ifdef SEAL_DEBUG
             if (!input)
             {
                 throw invalid_argument("input cannot be null");
             }
-            if (input.poly_modulus_degree() != coeff_count_)
+            if (!destination)
+            {
+                throw invalid_argument("destination cannot be null");
+            }
+            if (input.poly_modulus_degree() != coeff_count_ || destination.poly_modulus_degree() != coeff_count_)
             {
                 throw invalid_argument("input is not valid for encryption parameters");
             }
@@ -1187,39 +1196,58 @@ namespace seal
             }
 #endif
             size_t base_q_size = base_q_->size();
-            CoeffIter last_input = input[base_q_size - 1];
+            const Modulus &last_modulus = (*base_q_)[base_q_size - 1];
+            uint64_t q_last = last_modulus.value();
+            uint64_t half = q_last >> 1;
 
-            // Add (qi-1)/2 to change from flooring to rounding
-            Modulus last_modulus = (*base_q_)[base_q_size - 1];
-            uint64_t half = last_modulus.value() >> 1;
-            add_poly_scalar_coeffmod(last_input, coeff_count_, half, last_modulus, last_input);
+            // Add (q_last - 1) / 2 to change from flooring to rounding; reduced modulo q_last. The last RNS component
+            // of input is read completely before anything is written to destination.
+            SEAL_ALLOCATE_GET_COEFF_ITER(last, coeff_count_, pool);
+            const uint64_t *last_input = input[base_q_size - 1];
+            for (size_t j = 0; j < coeff_count_; j++)
+            {
+                last[j] = sub_if_ge_uint64(last_input[j] + half, q_last);
+            }
 
-            SEAL_ALLOCATE_GET_COEFF_ITER(temp, coeff_count_, pool);
-            SEAL_ITERATE(iter(input, inv_q_last_mod_q_, base_q_->base()), base_q_size - 1, [&](auto I) {
-                // (ct mod qk) mod qi
-                modulo_poly_coeffs(last_input, coeff_count_, get<2>(I), temp);
+            for (size_t i = 0; i < base_q_size - 1; i++)
+            {
+                const Modulus &qi = (*base_q_)[i];
+                uint64_t q = qi.value();
 
-                // Subtract rounding correction here; the negative sign will turn into a plus in the next subtraction
-                uint64_t half_mod = barrett_reduce_64(half, get<2>(I));
-                sub_poly_scalar_coeffmod(temp, coeff_count_, half_mod, get<2>(I), temp);
-
-                // (ct mod qi) - (ct mod qk) mod qi
-                sub_poly_coeffmod(get<0>(I), temp, coeff_count_, get<2>(I), get<0>(I));
-
-                // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
-                multiply_poly_scalar_coeffmod(get<0>(I), coeff_count_, get<1>(I), get<2>(I), get<0>(I));
-            });
+                // qk^(-1) * ((ct mod qi) - (ct mod qk) + (qk - 1) / 2) mod qi, in a single pass. A multiple of qi that
+                // is at least qk is added so that the argument is nonnegative without reducing (ct mod qk) modulo qi;
+                // the argument is less than qk + 3 * qi < 2^63, and the Shoup multiplication reduces it fully.
+                uint64_t qi_multiple = ((q_last + q - 1) / q) * q;
+                uint64_t addend = qi_multiple + barrett_reduce_64(half, qi);
+                MultiplyUIntModOperand inv_q_last = inv_q_last_mod_q_[i];
+                const uint64_t *in_i = input[i];
+                uint64_t *out_i = destination[i];
+                for (size_t j = 0; j < coeff_count_; j++)
+                {
+                    out_i[j] = multiply_uint_mod(in_i[j] + addend - last[j], inv_q_last, qi);
+                }
+            }
         }
 
         void RNSTool::divide_and_round_q_last_ntt_inplace(
             RNSIter input, ConstNTTTablesIter rns_ntt_tables, MemoryPoolHandle pool) const
+        {
+            divide_and_round_q_last_ntt(input, rns_ntt_tables, input, std::move(pool));
+        }
+
+        void RNSTool::divide_and_round_q_last_ntt(
+            ConstRNSIter input, ConstNTTTablesIter rns_ntt_tables, RNSIter destination, MemoryPoolHandle pool) const
         {
 #ifdef SEAL_DEBUG
             if (!input)
             {
                 throw invalid_argument("input cannot be null");
             }
-            if (input.poly_modulus_degree() != coeff_count_)
+            if (!destination)
+            {
+                throw invalid_argument("destination cannot be null");
+            }
+            if (input.poly_modulus_degree() != coeff_count_ || destination.poly_modulus_degree() != coeff_count_)
             {
                 throw invalid_argument("input is not valid for encryption parameters");
             }
@@ -1233,55 +1261,58 @@ namespace seal
             }
 #endif
             size_t base_q_size = base_q_->size();
-            CoeffIter last_input = input[base_q_size - 1];
+            const Modulus &last_modulus = (*base_q_)[base_q_size - 1];
+            uint64_t q_last = last_modulus.value();
+            uint64_t half = q_last >> 1;
 
-            // Convert to non-NTT form
-            inverse_ntt_negacyclic_harvey(last_input, rns_ntt_tables[base_q_size - 1]);
-
-            // Add (qi-1)/2 to change from flooring to rounding
-            Modulus last_modulus = (*base_q_)[base_q_size - 1];
-            uint64_t half = last_modulus.value() >> 1;
-            add_poly_scalar_coeffmod(last_input, coeff_count_, half, last_modulus, last_input);
+            // Convert the last RNS component to non-NTT form (out of place) and add (q_last - 1) / 2 to change from
+            // flooring to rounding. The last RNS component of input is read completely before anything is written to
+            // destination.
+            SEAL_ALLOCATE_GET_COEFF_ITER(last, coeff_count_, pool);
+            inverse_ntt_negacyclic_harvey(input[base_q_size - 1], rns_ntt_tables[base_q_size - 1], last);
+            for (size_t j = 0; j < coeff_count_; j++)
+            {
+                last[j] = sub_if_ge_uint64(last[j] + half, q_last);
+            }
 
             SEAL_ALLOCATE_GET_COEFF_ITER(temp, coeff_count_, pool);
-            SEAL_ITERATE(iter(input, inv_q_last_mod_q_, base_q_->base(), rns_ntt_tables), base_q_size - 1, [&](auto I) {
-                // (ct mod qk) mod qi
-                if (get<2>(I).value() < last_modulus.value())
+            for (size_t i = 0; i < base_q_size - 1; i++)
+            {
+                const Modulus &qi = (*base_q_)[i];
+                uint64_t q = qi.value();
+
+                // (ct mod qk) mod qi, minus (qk - 1) / 2 mod qi, lazily in [0, 4qi) as ntt_negacyclic_harvey_lazy
+                // requires; the reduction modulo qi is needed only if qk > 3qi.
+                uint64_t neg_half_mod = q - barrett_reduce_64(half, qi);
+                if (q_last > 3 * q)
                 {
-                    modulo_poly_coeffs(last_input, coeff_count_, get<2>(I), temp);
+                    for (size_t j = 0; j < coeff_count_; j++)
+                    {
+                        temp[j] = barrett_reduce_64(last[j], qi) + neg_half_mod;
+                    }
                 }
                 else
                 {
-                    set_uint(last_input, coeff_count_, temp);
+                    for (size_t j = 0; j < coeff_count_; j++)
+                    {
+                        temp[j] = last[j] + neg_half_mod;
+                    }
                 }
 
-                // Lazy subtraction here. ntt_negacyclic_harvey_lazy can take 0 < x < 4*qi input.
-                uint64_t neg_half_mod = get<2>(I).value() - barrett_reduce_64(half, get<2>(I));
+                // This ntt_negacyclic_harvey_lazy results in [0, 4qi).
+                ntt_negacyclic_harvey_lazy(temp, rns_ntt_tables[i]);
 
-                // Note: lambda function parameter must be passed by reference here
-                SEAL_ITERATE(temp, coeff_count_, [&](auto &J) { J += neg_half_mod; });
-#if SEAL_USER_MOD_BIT_COUNT_MAX <= 60
-                // Since SEAL uses at most 60-bit moduli, 8*qi < 2^63.
-                // This ntt_negacyclic_harvey_lazy results in [0, 4*qi).
-                uint64_t qi_lazy = get<2>(I).value() << 2;
-                ntt_negacyclic_harvey_lazy(temp, get<3>(I));
-#else
-                // 2^60 < pi < 2^62, then 4*pi < 2^64, we perfrom one reduction from [0, 4*qi) to [0, 2*qi) after ntt.
-                uint64_t qi_lazy = get<2>(I).value() << 1;
-                ntt_negacyclic_harvey_lazy(temp, get<3>(I));
-
-                // Note: lambda function parameter must be passed by reference here
-                SEAL_ITERATE(temp, coeff_count_, [&](auto &J) {
-                    J -= (qi_lazy & static_cast<uint64_t>(-static_cast<int64_t>(J >= qi_lazy)));
-                });
-#endif
-                // Lazy subtraction again, results in [0, 2*qi_lazy),
-                // The reduction [0, 2*qi_lazy) -> [0, qi) is done implicitly in multiply_poly_scalar_coeffmod.
-                SEAL_ITERATE(iter(get<0>(I), temp), coeff_count_, [&](auto J) { get<0>(J) += qi_lazy - get<1>(J); });
-
-                // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
-                multiply_poly_scalar_coeffmod(get<0>(I), coeff_count_, get<1>(I), get<2>(I), get<0>(I));
-            });
+                // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi, with the argument of the Shoup multiplication in
+                // (0, 5qi) and 5qi < 2^64 since qi has at most 61 bits.
+                uint64_t qi_lazy = q << 2;
+                MultiplyUIntModOperand inv_q_last = inv_q_last_mod_q_[i];
+                const uint64_t *in_i = input[i];
+                uint64_t *out_i = destination[i];
+                for (size_t j = 0; j < coeff_count_; j++)
+                {
+                    out_i[j] = multiply_uint_mod(in_i[j] + qi_lazy - temp[j], inv_q_last, qi);
+                }
+            }
         }
 
         void RNSTool::fastbconv_sk(ConstRNSIter input, RNSIter destination, MemoryPoolHandle pool) const
@@ -1784,46 +1815,104 @@ namespace seal
         void RNSTool::mod_t_and_divide_q_last_ntt_inplace(
             RNSIter input, ConstNTTTablesIter rns_ntt_tables, MemoryPoolHandle pool) const
         {
+            mod_t_and_divide_q_last_ntt(input, rns_ntt_tables, input, std::move(pool));
+        }
+
+        void RNSTool::mod_t_and_divide_q_last_ntt(
+            ConstRNSIter input, ConstNTTTablesIter rns_ntt_tables, RNSIter destination, MemoryPoolHandle pool) const
+        {
+#ifdef SEAL_DEBUG
+            if (!input)
+            {
+                throw invalid_argument("input cannot be null");
+            }
+            if (!destination)
+            {
+                throw invalid_argument("destination cannot be null");
+            }
+            if (input.poly_modulus_degree() != coeff_count_ || destination.poly_modulus_degree() != coeff_count_)
+            {
+                throw invalid_argument("input is not valid for encryption parameters");
+            }
+            if (!rns_ntt_tables)
+            {
+                throw invalid_argument("rns_ntt_tables cannot be null");
+            }
+            if (!pool)
+            {
+                throw invalid_argument("pool is uninitialized");
+            }
+#endif
             size_t modulus_size = base_q_->size();
             const Modulus *curr_modulus = base_q_->base();
-            const Modulus plain_modulus = t_;
+            const Modulus &plain_modulus = t_;
             uint64_t last_modulus_value = curr_modulus[modulus_size - 1].value();
 
-            SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(neg_c_last_mod_t, coeff_count_, pool);
-            // neg_c_last_mod_t = - c_last (mod t)
-            CoeffIter c_last = input[modulus_size - 1];
-            inverse_ntt_negacyclic_harvey(c_last, rns_ntt_tables[modulus_size - 1]);
-            modulo_poly_coeffs(c_last, coeff_count_, plain_modulus, neg_c_last_mod_t);
-            negate_poly_coeffmod(neg_c_last_mod_t, coeff_count_, plain_modulus, neg_c_last_mod_t);
+            // c_last in non-NTT form (out of place). The last RNS component of input is read completely before
+            // anything is written to destination.
+            SEAL_ALLOCATE_GET_COEFF_ITER(c_last, coeff_count_, pool);
+            inverse_ntt_negacyclic_harvey(input[modulus_size - 1], rns_ntt_tables[modulus_size - 1], c_last);
+
+            // neg_c_last_mod_t = - c_last * q_last^(-1) (mod t)
+            SEAL_ALLOCATE_GET_COEFF_ITER(neg_c_last_mod_t, coeff_count_, pool);
             if (inv_q_last_mod_t_ != 1)
             {
-                // neg_c_last_mod_t *= q_last^(-1) (mod t)
-                multiply_poly_scalar_coeffmod(
-                    neg_c_last_mod_t, coeff_count_, inv_q_last_mod_t_, plain_modulus, neg_c_last_mod_t);
+                MultiplyUIntModOperand inv_q_last_t;
+                inv_q_last_t.set(barrett_reduce_64(inv_q_last_mod_t_, plain_modulus), plain_modulus);
+                for (size_t j = 0; j < coeff_count_; j++)
+                {
+                    uint64_t v = negate_uint_mod(barrett_reduce_64(c_last[j], plain_modulus), plain_modulus);
+                    neg_c_last_mod_t[j] = multiply_uint_mod(v, inv_q_last_t, plain_modulus);
+                }
+            }
+            else
+            {
+                for (size_t j = 0; j < coeff_count_; j++)
+                {
+                    neg_c_last_mod_t[j] = negate_uint_mod(barrett_reduce_64(c_last[j], plain_modulus), plain_modulus);
+                }
             }
 
-            SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(delta_mod_q_i, coeff_count_, pool);
+            SEAL_ALLOCATE_GET_COEFF_ITER(delta_mod_q_i, coeff_count_, pool);
+            for (size_t i = 0; i < modulus_size - 1; i++)
+            {
+                const Modulus &qi = curr_modulus[i];
+                uint64_t q = qi.value();
 
-            SEAL_ITERATE(iter(input, curr_modulus, inv_q_last_mod_q_, rns_ntt_tables), modulus_size - 1, [&](auto I) {
-                // delta_mod_q_i = neg_c_last_mod_t (mod q_i)
-                modulo_poly_coeffs(neg_c_last_mod_t, coeff_count_, get<1>(I), delta_mod_q_i);
+                // delta_mod_q_i = neg_c_last_mod_t * q_last + c_last (mod q_i), lazily in [0, 4q_i): the Shoup
+                // multiplication accepts any 64-bit input and gives [0, 2q_i); c_last is reduced only if q_last > 2q_i.
+                MultiplyUIntModOperand q_last_mod_qi;
+                q_last_mod_qi.set(barrett_reduce_64(last_modulus_value, qi), qi);
+                if (last_modulus_value > 2 * q)
+                {
+                    for (size_t j = 0; j < coeff_count_; j++)
+                    {
+                        delta_mod_q_i[j] = multiply_uint_mod_lazy(neg_c_last_mod_t[j], q_last_mod_qi, qi) +
+                                           barrett_reduce_64(c_last[j], qi);
+                    }
+                }
+                else
+                {
+                    for (size_t j = 0; j < coeff_count_; j++)
+                    {
+                        delta_mod_q_i[j] = multiply_uint_mod_lazy(neg_c_last_mod_t[j], q_last_mod_qi, qi) + c_last[j];
+                    }
+                }
 
-                // delta_mod_q_i *= q_last (mod q_i)
-                multiply_poly_scalar_coeffmod(
-                    delta_mod_q_i, coeff_count_, last_modulus_value, get<1>(I), delta_mod_q_i);
+                // This ntt_negacyclic_harvey_lazy results in [0, 4q_i).
+                ntt_negacyclic_harvey_lazy(delta_mod_q_i, rns_ntt_tables[i]);
 
-                // c_i = c_i - c_last - neg_c_last_mod_t * q_last (mod 2q_i)
-                SEAL_ITERATE(iter(delta_mod_q_i, c_last), coeff_count_, [&](auto J) {
-                    get<0>(J) = add_uint_mod(get<0>(J), barrett_reduce_64(get<1>(J), get<1>(I)), get<1>(I));
-                });
-                ntt_negacyclic_harvey(delta_mod_q_i, get<3>(I));
-                SEAL_ITERATE(iter(get<0>(I), delta_mod_q_i), coeff_count_, [&](auto J) {
-                    get<0>(J) = sub_uint_mod(get<0>(J), get<1>(J), get<1>(I));
-                });
-
-                // c_i = c_i * inv_q_last_mod_q_i (mod q_i)
-                multiply_poly_scalar_coeffmod(get<0>(I), coeff_count_, get<2>(I), get<1>(I), get<0>(I));
-            });
+                // c_i = (c_i - delta_mod_q_i) * inv_q_last_mod_q_i (mod q_i), with the argument of the Shoup
+                // multiplication in (0, 5q_i) and 5q_i < 2^64 since q_i has at most 61 bits.
+                uint64_t qi_lazy = q << 2;
+                MultiplyUIntModOperand inv_q_last = inv_q_last_mod_q_[i];
+                const uint64_t *in_i = input[i];
+                uint64_t *out_i = destination[i];
+                for (size_t j = 0; j < coeff_count_; j++)
+                {
+                    out_i[j] = multiply_uint_mod(in_i[j] + qi_lazy - delta_mod_q_i[j], inv_q_last, qi);
+                }
+            }
         }
 
         void RNSTool::decrypt_modt(RNSIter phase, CoeffIter destination, MemoryPoolHandle pool) const

@@ -103,8 +103,6 @@ namespace seal
 
         auto &context_data = *context_.get_context_data(parms_id);
         auto &parms = context_data.parms();
-        size_t coeff_modulus_size = parms.coeff_modulus().size();
-        size_t coeff_count = parms.poly_modulus_degree();
         bool is_ntt_form = false;
 
         if (parms.scheme() == scheme_type::ckks || parms.scheme() == scheme_type::bgv)
@@ -138,25 +136,24 @@ namespace seal
                 Ciphertext temp(safe_pool);
                 util::encrypt_zero_asymmetric(public_key_, context_, prev_parms_id, is_ntt_form, temp);
 
-                // Modulus switching
+                // Modulus switching, writing the result directly to destination
                 SEAL_ITERATE(iter(temp, destination), temp.size(), [&](auto I) {
                     if (parms.scheme() == scheme_type::ckks)
                     {
-                        rns_tool->divide_and_round_q_last_ntt_inplace(
-                            get<0>(I), prev_context_data.small_ntt_tables(), safe_pool);
+                        rns_tool->divide_and_round_q_last_ntt(
+                            get<0>(I), prev_context_data.small_ntt_tables(), get<1>(I), safe_pool);
                     }
                     // bfv switch-to-next
                     else if (parms.scheme() == scheme_type::bfv)
                     {
-                        rns_tool->divide_and_round_q_last_inplace(get<0>(I), safe_pool);
+                        rns_tool->divide_and_round_q_last(get<0>(I), get<1>(I), safe_pool);
                     }
                     // bgv switch-to-next
                     else if (parms.scheme() == scheme_type::bgv)
                     {
-                        rns_tool->mod_t_and_divide_q_last_ntt_inplace(
-                            get<0>(I), prev_context_data.small_ntt_tables(), safe_pool);
+                        rns_tool->mod_t_and_divide_q_last_ntt(
+                            get<0>(I), prev_context_data.small_ntt_tables(), get<1>(I), safe_pool);
                     }
-                    set_poly(get<0>(I), coeff_count, coeff_modulus_size, get<1>(I));
                 });
 
                 destination.parms_id() = parms_id;

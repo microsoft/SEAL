@@ -1207,58 +1207,61 @@ namespace seal
 
         size_t encrypted_size = encrypted.size();
         size_t coeff_count = next_parms.poly_modulus_degree();
-        size_t next_coeff_modulus_size = next_parms.coeff_modulus().size();
-
-        Ciphertext encrypted_copy(pool);
-        encrypted_copy = encrypted;
-
-        switch (next_parms.scheme())
+        auto scheme = next_parms.scheme();
+        if (scheme != scheme_type::bfv && scheme != scheme_type::ckks && scheme != scheme_type::bgv)
         {
-        case scheme_type::bfv:
-            SEAL_ITERATE(iter(encrypted_copy), encrypted_size, [&](auto I) {
-                rns_tool->divide_and_round_q_last_inplace(I, pool);
-            });
-            break;
-
-        case scheme_type::ckks:
-            SEAL_ITERATE(iter(encrypted_copy), encrypted_size, [&](auto I) {
-                rns_tool->divide_and_round_q_last_ntt_inplace(I, context_data.small_ntt_tables(), pool);
-            });
-            break;
-
-        case scheme_type::bgv:
-            SEAL_ITERATE(iter(encrypted_copy), encrypted_size, [&](auto I) {
-                rns_tool->mod_t_and_divide_q_last_ntt_inplace(I, context_data.small_ntt_tables(), pool);
-            });
-            break;
-
-        default:
             throw invalid_argument("unsupported scheme");
         }
 
-        // Copy result to destination
-        destination.resize(context_, next_context_data.parms_id(), encrypted_size);
-        SEAL_ITERATE(iter(encrypted_copy, destination), encrypted_size, [&](auto I) {
-            set_poly(get<0>(I), coeff_count, next_coeff_modulus_size, get<1>(I));
-        });
+        // When switching in place, the result is computed in new memory from the pool of destination, so that
+        // encrypted is unchanged if an exception is thrown
+        bool in_place = (&encrypted == &destination);
+        Ciphertext temp(destination.pool());
+        Ciphertext &result = in_place ? temp : destination;
+        result.resize(context_, next_context_data.parms_id(), encrypted_size);
+
+        // Divide each polynomial by the last modulus
+        for (size_t i = 0; i < encrypted_size; i++)
+        {
+            ConstRNSIter input(encrypted.data(i), coeff_count);
+            RNSIter output(result.data(i), coeff_count);
+            switch (scheme)
+            {
+            case scheme_type::bfv:
+                rns_tool->divide_and_round_q_last(input, output, pool);
+                break;
+
+            case scheme_type::ckks:
+                rns_tool->divide_and_round_q_last_ntt(input, context_data.small_ntt_tables(), output, pool);
+                break;
+
+            default: // scheme_type::bgv
+                rns_tool->mod_t_and_divide_q_last_ntt(input, context_data.small_ntt_tables(), output, pool);
+                break;
+            }
+        }
 
         // Set other attributes
-        destination.is_ntt_form() = encrypted.is_ntt_form();
-        if (next_parms.scheme() == scheme_type::ckks)
+        result.is_ntt_form() = encrypted.is_ntt_form();
+        if (scheme == scheme_type::ckks)
         {
             // Change the scale when using CKKS
-            destination.scale() = destination_scale;
+            result.scale() = destination_scale;
         }
-        else if (next_parms.scheme() == scheme_type::bgv)
+        else if (scheme == scheme_type::bgv)
         {
             // Change the correction factor when using BGV
-            destination.correction_factor() = multiply_uint_mod(
+            result.correction_factor() = multiply_uint_mod(
                 encrypted.correction_factor(), rns_tool->inv_q_last_mod_t(), next_parms.plain_modulus());
+        }
+
+        if (in_place)
+        {
+            destination = std::move(temp);
         }
     }
 
-    void Evaluator::mod_switch_drop_to_next(
-        const Ciphertext &encrypted, Ciphertext &destination, MemoryPoolHandle pool) const
+    void Evaluator::mod_switch_drop_to_next(const Ciphertext &encrypted, Ciphertext &destination) const
     {
         // Assuming at this point encrypted is already validated.
         auto context_data_ptr = context_.get_context_data(encrypted.parms_id());
@@ -1304,18 +1307,20 @@ namespace seal
 
         if (&encrypted == &destination)
         {
-            // Switching in-place so need temporary space
-            SEAL_ALLOCATE_GET_POLY_ITER(temp, encrypted_size, coeff_count, next_coeff_modulus_size, pool);
+            // Switching in place: move the RNS components that remain after the modulus drop to their positions in
+            // the layout of the next level. Polynomial 0 stays where it is, and every other polynomial moves to lower
+            // addresses (possibly overlapping its old position), so no data that is still needed is overwritten and no
+            // temporary space is needed.
+            size_t coeff_modulus_size = context_data_ptr->parms().coeff_modulus().size();
+            PolyIter in_iter(destination.data(), coeff_count, coeff_modulus_size);
+            PolyIter out_iter(destination.data(), coeff_count, next_coeff_modulus_size);
+            for (size_t i = 1; i < encrypted_size; i++)
+            {
+                memmove(out_iter[i], in_iter[i], next_coeff_modulus_size * coeff_count * sizeof(uint64_t));
+            }
 
-            // Copy data over to temp; only copy the RNS components relevant after modulus drop
-            drop_modulus_and_copy(encrypted, temp);
-
-            // Resize destination before writing
+            // Shrinking keeps the data
             destination.resize(context_, next_context_data.parms_id(), encrypted_size);
-
-            // Copy data to destination
-            set_poly_array(temp, encrypted_size, coeff_count, next_coeff_modulus_size, destination.data());
-            // TODO: avoid copying and temporary space allocation
         }
         else
         {
@@ -1393,7 +1398,7 @@ namespace seal
 
         case scheme_type::ckks:
             // Modulus switching without scaling
-            mod_switch_drop_to_next(encrypted, destination, std::move(pool));
+            mod_switch_drop_to_next(encrypted, destination);
             break;
 
         case scheme_type::bgv:
@@ -1582,7 +1587,7 @@ namespace seal
             throw invalid_argument("pool is uninitialized");
         }
 
-        mod_switch_drop_to_next(encrypted, encrypted, std::move(pool));
+        mod_switch_drop_to_next(encrypted, encrypted);
 #ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted.is_transparent())
