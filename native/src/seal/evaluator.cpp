@@ -422,7 +422,6 @@ namespace seal
         size_t base_q_size = parms.coeff_modulus().size();
         size_t encrypted1_size = encrypted1.size();
         size_t encrypted2_size = encrypted2.size();
-        uint64_t plain_modulus = parms.plain_modulus().value();
 
         auto rns_tool = context_data.rns_tool();
         size_t base_Bsk_size = rns_tool->base_Bsk()->size();
@@ -457,7 +456,11 @@ namespace seal
         // (7) Scale the result by q using a divide-and-floor algorithm, switching base to Bsk
         // (8) Use Shenoy-Kumaresan method to convert the result to base q
 
-        // Resize encrypted1 to destination size
+        // If encrypted1 and encrypted2 are the same object (squaring), steps (1)-(3) need to be done only once
+        const bool same_input = (&encrypted1 == &encrypted2);
+
+        // Resize encrypted1 to destination size; this preserves the first encrypted1_size (and encrypted2_size, in
+        // case of aliasing) polynomials
         encrypted1.resize(context_, context_data.parms_id(), dest_size);
 
         // This lambda function takes as input an IterTuple with three components:
@@ -470,19 +473,15 @@ namespace seal
         // RNSIter or ConstRNSIter) and writes the results in base q and base Bsk to the given output
         // iterators.
         auto behz_extend_base_convert_to_ntt = [&](auto I) {
-            // Make copy of input polynomial (in base q) and convert to NTT form
+            // Convert the input polynomial (in base q) to NTT form out of place, keeping the input intact
             // Lazy reduction
-            set_poly(get<0>(I), coeff_count, base_q_size, get<1>(I));
-            ntt_negacyclic_harvey_lazy(get<1>(I), base_q_size, base_q_ntt_tables);
-
-            // Allocate temporary space for a polynomial in the Bsk U {m_tilde} base
-            SEAL_ALLOCATE_GET_RNS_ITER(temp, coeff_count, base_Bsk_m_tilde_size, pool);
+            ntt_negacyclic_harvey_lazy(get<0>(I), base_q_size, base_q_ntt_tables, get<1>(I));
 
             // (1) Convert from base q to base Bsk U {m_tilde}
-            rns_tool->fastbconv_m_tilde(get<0>(I), temp, pool);
-
             // (2) Reduce q-overflows in with Montgomery reduction, switching base to Bsk
-            rns_tool->sm_mrq(temp, get<2>(I), pool);
+            // These are fused together; the result is congruent to calling fastbconv_m_tilde followed by sm_mrq,
+            // and reduced only to [0, 3m) for each prime m in Bsk, which suffices for the lazy NTT below.
+            rns_tool->fastbconv_m_tilde_sm_mrq(get<0>(I), /*lazy_output=*/true, get<2>(I), pool);
 
             // Transform to NTT form in base Bsk
             // Lazy reduction
@@ -498,87 +497,48 @@ namespace seal
         // Perform BEHZ steps (1)-(3) for encrypted1
         SEAL_ITERATE(iter(encrypted1, encrypted1_q, encrypted1_Bsk), encrypted1_size, behz_extend_base_convert_to_ntt);
 
-        // Repeat for encrypted2
-        SEAL_ALLOCATE_GET_POLY_ITER(encrypted2_q, encrypted2_size, coeff_count, base_q_size, pool);
-        SEAL_ALLOCATE_GET_POLY_ITER(encrypted2_Bsk, encrypted2_size, coeff_count, base_Bsk_size, pool);
-
-        SEAL_ITERATE(iter(encrypted2, encrypted2_q, encrypted2_Bsk), encrypted2_size, behz_extend_base_convert_to_ntt);
+        // Repeat for encrypted2, unless it is the same as encrypted1
+        ConstPolyIter encrypted2_q = encrypted1_q;
+        ConstPolyIter encrypted2_Bsk = encrypted1_Bsk;
+        Pointer<uint64_t> encrypted2_q_alloc;
+        Pointer<uint64_t> encrypted2_Bsk_alloc;
+        if (!same_input)
+        {
+            encrypted2_q_alloc = allocate_poly_array(encrypted2_size, coeff_count, base_q_size, pool);
+            encrypted2_Bsk_alloc = allocate_poly_array(encrypted2_size, coeff_count, base_Bsk_size, pool);
+            PolyIter encrypted2_q_iter(encrypted2_q_alloc.get(), coeff_count, base_q_size);
+            PolyIter encrypted2_Bsk_iter(encrypted2_Bsk_alloc.get(), coeff_count, base_Bsk_size);
+            SEAL_ITERATE(
+                iter(encrypted2, encrypted2_q_iter, encrypted2_Bsk_iter), encrypted2_size,
+                behz_extend_base_convert_to_ntt);
+            encrypted2_q = encrypted2_q_iter;
+            encrypted2_Bsk = encrypted2_Bsk_iter;
+        }
 
         // Allocate temporary space for the output of step (4)
-        // We allocate space separately for the base q and the base Bsk components
-        SEAL_ALLOCATE_ZERO_GET_POLY_ITER(temp_dest_q, dest_size, coeff_count, base_q_size, pool);
-        SEAL_ALLOCATE_ZERO_GET_POLY_ITER(temp_dest_Bsk, dest_size, coeff_count, base_Bsk_size, pool);
+        // We allocate space separately for the base q and the base Bsk components. These do not need to be
+        // initialized since behz_tensor_product writes every coefficient.
+        SEAL_ALLOCATE_GET_POLY_ITER(temp_dest_q, dest_size, coeff_count, base_q_size, pool);
+        SEAL_ALLOCATE_GET_POLY_ITER(temp_dest_Bsk, dest_size, coeff_count, base_Bsk_size, pool);
 
-        // Perform BEHZ step (4): dyadic multiplication on arbitrary size ciphertexts
-        SEAL_ITERATE(iter(size_t(0)), dest_size, [&](auto I) {
-            // We iterate over relevant components of encrypted1 and encrypted2 in increasing order for
-            // encrypted1 and reversed (decreasing) order for encrypted2. The bounds for the indices of
-            // the relevant terms are obtained as follows.
-            size_t curr_encrypted1_last = min<size_t>(I, encrypted1_size - 1);
-            size_t curr_encrypted2_first = min<size_t>(I, encrypted2_size - 1);
-            size_t curr_encrypted1_first = I - curr_encrypted2_first;
-            // size_t curr_encrypted2_last = I - curr_encrypted1_last;
+        // Perform BEHZ step (4): dyadic multiplication on arbitrary size ciphertexts, both for base q and base Bsk
+        behz_tensor_product(
+            encrypted1_q, encrypted1_size, encrypted2_q, encrypted2_size, base_q, base_q_size, coeff_count, temp_dest_q,
+            pool);
+        behz_tensor_product(
+            encrypted1_Bsk, encrypted1_size, encrypted2_Bsk, encrypted2_size, base_Bsk, base_Bsk_size, coeff_count,
+            temp_dest_Bsk, pool);
 
-            // The total number of dyadic products is now easy to compute
-            size_t steps = curr_encrypted1_last - curr_encrypted1_first + 1;
-
-            // This lambda function computes the ciphertext product for BFV multiplication. Since we use the BEHZ
-            // approach, the multiplication of individual polynomials is done using a dyadic product where the inputs
-            // are already in NTT form. The arguments of the lambda function are expected to be as follows:
-            //
-            // 1. a ConstPolyIter pointing to the beginning of the first input ciphertext (in NTT form)
-            // 2. a ConstPolyIter pointing to the beginning of the second input ciphertext (in NTT form)
-            // 3. a ConstModulusIter pointing to an array of Modulus elements for the base
-            // 4. the size of the base
-            // 5. a PolyIter pointing to the beginning of the output ciphertext
-            auto behz_ciphertext_product = [&](ConstPolyIter in1_iter, ConstPolyIter in2_iter,
-                                               ConstModulusIter base_iter, size_t base_size, PolyIter out_iter) {
-                // Create a shifted iterator for the first input
-                auto shifted_in1_iter = in1_iter + curr_encrypted1_first;
-
-                // Create a shifted reverse iterator for the second input
-                auto shifted_reversed_in2_iter = reverse_iter(in2_iter + curr_encrypted2_first);
-
-                // Create a shifted iterator for the output
-                auto shifted_out_iter = out_iter[I];
-
-                SEAL_ITERATE(iter(shifted_in1_iter, shifted_reversed_in2_iter), steps, [&](auto J) {
-                    SEAL_ITERATE(iter(J, base_iter, shifted_out_iter), base_size, [&](auto K) {
-                        SEAL_ALLOCATE_GET_COEFF_ITER(temp, coeff_count, pool);
-                        dyadic_product_coeffmod(get<0, 0>(K), get<0, 1>(K), coeff_count, get<1>(K), temp);
-                        add_poly_coeffmod(temp, get<2>(K), coeff_count, get<1>(K), get<2>(K));
-                    });
-                });
-            };
-
-            // Perform the BEHZ ciphertext product both for base q and base Bsk
-            behz_ciphertext_product(encrypted1_q, encrypted2_q, base_q, base_q_size, temp_dest_q);
-            behz_ciphertext_product(encrypted1_Bsk, encrypted2_Bsk, base_Bsk, base_Bsk_size, temp_dest_Bsk);
-        });
-
-        // Perform BEHZ step (5): transform data from NTT form
-        // Lazy reduction here. The following multiply_poly_scalar_coeffmod will correct the value back to [0, p)
-        inverse_ntt_negacyclic_harvey_lazy(temp_dest_q, dest_size, base_q_ntt_tables);
-        inverse_ntt_negacyclic_harvey_lazy(temp_dest_Bsk, dest_size, base_Bsk_ntt_tables);
-
-        // Perform BEHZ steps (6)-(8)
+        // Perform BEHZ steps (5)-(8) one output polynomial at a time
         SEAL_ITERATE(iter(temp_dest_q, temp_dest_Bsk, encrypted1), dest_size, [&](auto I) {
-            // Bring together the base q and base Bsk components into a single allocation
-            SEAL_ALLOCATE_GET_RNS_ITER(temp_q_Bsk, coeff_count, base_q_size + base_Bsk_size, pool);
-
-            // Step (6): multiply base q components by t (plain_modulus)
-            multiply_poly_scalar_coeffmod(get<0>(I), base_q_size, plain_modulus, base_q, temp_q_Bsk);
-
-            multiply_poly_scalar_coeffmod(get<1>(I), base_Bsk_size, plain_modulus, base_Bsk, temp_q_Bsk + base_q_size);
-
-            // Allocate yet another temporary for fast divide-and-floor result in base Bsk
-            SEAL_ALLOCATE_GET_RNS_ITER(temp_Bsk, coeff_count, base_Bsk_size, pool);
-
+            // Step (5): transform data from NTT form
+            // Step (6): multiply by t (plain_modulus)
             // Step (7): divide by q and floor, producing a result in base Bsk
-            rns_tool->fast_floor(temp_q_Bsk, temp_Bsk, pool);
-
             // Step (8): use Shenoy-Kumaresan method to convert the result to base q and write to encrypted1
-            rns_tool->fastbconv_sk(temp_Bsk, get<2>(I), pool);
+            // The scalar multiplications (including the factor 2^64 if the tensor product is in Montgomery form) are
+            // folded into the inverse NTTs.
+            rns_tool->inverse_ntt_multiply_t_fast_floor_fastbconv_sk(
+                get<0>(I), get<1>(I), base_q_ntt_tables, behz_tensor_product_montgomery_form, get<2>(I), pool);
         });
     }
 
@@ -902,141 +862,9 @@ namespace seal
             throw invalid_argument("encrypted cannot be in NTT form");
         }
 
-        // Extract encryption parameters.
-        auto &context_data = *context_.get_context_data(encrypted.parms_id());
-        auto &parms = context_data.parms();
-        size_t coeff_count = parms.poly_modulus_degree();
-        size_t base_q_size = parms.coeff_modulus().size();
-        size_t encrypted_size = encrypted.size();
-        uint64_t plain_modulus = parms.plain_modulus().value();
-
-        auto rns_tool = context_data.rns_tool();
-        size_t base_Bsk_size = rns_tool->base_Bsk()->size();
-        size_t base_Bsk_m_tilde_size = rns_tool->base_Bsk_m_tilde()->size();
-
-        // Optimization implemented currently only for size 2 ciphertexts
-        if (encrypted_size != 2)
-        {
-            bfv_multiply(encrypted, encrypted, std::move(pool));
-            return;
-        }
-
-        // Determine destination.size()
-        size_t dest_size = sub_safe(add_safe(encrypted_size, encrypted_size), size_t(1));
-
-        // Size check
-        if (!product_fits_in(dest_size, coeff_count, base_Bsk_m_tilde_size))
-        {
-            throw logic_error("invalid parameters");
-        }
-
-        // Set up iterators for bases
-        auto base_q = iter(parms.coeff_modulus());
-        auto base_Bsk = iter(rns_tool->base_Bsk()->base());
-
-        // Set up iterators for NTT tables
-        auto base_q_ntt_tables = iter(context_data.small_ntt_tables());
-        auto base_Bsk_ntt_tables = iter(rns_tool->base_Bsk_ntt_tables());
-
-        // Microsoft SEAL uses BEHZ-style RNS multiplication. For details, see Evaluator::bfv_multiply. This function
-        // uses additionally Karatsuba multiplication to reduce the complexity of squaring a size-2 ciphertext, but the
-        // steps are otherwise the same as in Evaluator::bfv_multiply.
-
-        // Resize encrypted to destination size
-        encrypted.resize(context_, context_data.parms_id(), dest_size);
-
-        // This lambda function takes as input an IterTuple with three components:
-        //
-        // 1. (Const)RNSIter to read an input polynomial from
-        // 2. RNSIter for the output in base q
-        // 3. RNSIter for the output in base Bsk
-        //
-        // It performs steps (1)-(3) of the BEHZ multiplication on the given input polynomial (given as an RNSIter
-        // or ConstRNSIter) and writes the results in base q and base Bsk to the given output iterators.
-        auto behz_extend_base_convert_to_ntt = [&](auto I) {
-            // Make copy of input polynomial (in base q) and convert to NTT form
-            // Lazy reduction
-            set_poly(get<0>(I), coeff_count, base_q_size, get<1>(I));
-            ntt_negacyclic_harvey_lazy(get<1>(I), base_q_size, base_q_ntt_tables);
-
-            // Allocate temporary space for a polynomial in the Bsk U {m_tilde} base
-            SEAL_ALLOCATE_GET_RNS_ITER(temp, coeff_count, base_Bsk_m_tilde_size, pool);
-
-            // (1) Convert from base q to base Bsk U {m_tilde}
-            rns_tool->fastbconv_m_tilde(get<0>(I), temp, pool);
-
-            // (2) Reduce q-overflows in with Montgomery reduction, switching base to Bsk
-            rns_tool->sm_mrq(temp, get<2>(I), pool);
-
-            // Transform to NTT form in base Bsk
-            // Lazy reduction
-            ntt_negacyclic_harvey_lazy(get<2>(I), base_Bsk_size, base_Bsk_ntt_tables);
-        };
-
-        // Allocate space for a base q output of behz_extend_base_convert_to_ntt
-        SEAL_ALLOCATE_GET_POLY_ITER(encrypted_q, encrypted_size, coeff_count, base_q_size, pool);
-
-        // Allocate space for a base Bsk output of behz_extend_base_convert_to_ntt
-        SEAL_ALLOCATE_GET_POLY_ITER(encrypted_Bsk, encrypted_size, coeff_count, base_Bsk_size, pool);
-
-        // Perform BEHZ steps (1)-(3)
-        SEAL_ITERATE(iter(encrypted, encrypted_q, encrypted_Bsk), encrypted_size, behz_extend_base_convert_to_ntt);
-
-        // Allocate temporary space for the output of step (4)
-        // We allocate space separately for the base q and the base Bsk components
-        SEAL_ALLOCATE_ZERO_GET_POLY_ITER(temp_dest_q, dest_size, coeff_count, base_q_size, pool);
-        SEAL_ALLOCATE_ZERO_GET_POLY_ITER(temp_dest_Bsk, dest_size, coeff_count, base_Bsk_size, pool);
-
-        // Perform BEHZ step (4): dyadic Karatsuba-squaring on size-2 ciphertexts
-
-        // This lambda function computes the size-2 ciphertext square for BFV multiplication. Since we use the BEHZ
-        // approach, the multiplication of individual polynomials is done using a dyadic product where the inputs
-        // are already in NTT form. The arguments of the lambda function are expected to be as follows:
-        //
-        // 1. a ConstPolyIter pointing to the beginning of the input ciphertext (in NTT form)
-        // 3. a ConstModulusIter pointing to an array of Modulus elements for the base
-        // 4. the size of the base
-        // 5. a PolyIter pointing to the beginning of the output ciphertext
-        auto behz_ciphertext_square = [&](ConstPolyIter in_iter, ConstModulusIter base_iter, size_t base_size,
-                                          PolyIter out_iter) {
-            // Compute c0^2
-            dyadic_product_coeffmod(in_iter[0], in_iter[0], base_size, base_iter, out_iter[0]);
-
-            // Compute 2*c0*c1
-            dyadic_product_coeffmod(in_iter[0], in_iter[1], base_size, base_iter, out_iter[1]);
-            add_poly_coeffmod(out_iter[1], out_iter[1], base_size, base_iter, out_iter[1]);
-
-            // Compute c1^2
-            dyadic_product_coeffmod(in_iter[1], in_iter[1], base_size, base_iter, out_iter[2]);
-        };
-
-        // Perform the BEHZ ciphertext square both for base q and base Bsk
-        behz_ciphertext_square(encrypted_q, base_q, base_q_size, temp_dest_q);
-        behz_ciphertext_square(encrypted_Bsk, base_Bsk, base_Bsk_size, temp_dest_Bsk);
-
-        // Perform BEHZ step (5): transform data from NTT form
-        inverse_ntt_negacyclic_harvey(temp_dest_q, dest_size, base_q_ntt_tables);
-        inverse_ntt_negacyclic_harvey(temp_dest_Bsk, dest_size, base_Bsk_ntt_tables);
-
-        // Perform BEHZ steps (6)-(8)
-        SEAL_ITERATE(iter(temp_dest_q, temp_dest_Bsk, encrypted), dest_size, [&](auto I) {
-            // Bring together the base q and base Bsk components into a single allocation
-            SEAL_ALLOCATE_GET_RNS_ITER(temp_q_Bsk, coeff_count, base_q_size + base_Bsk_size, pool);
-
-            // Step (6): multiply base q components by t (plain_modulus)
-            multiply_poly_scalar_coeffmod(get<0>(I), base_q_size, plain_modulus, base_q, temp_q_Bsk);
-
-            multiply_poly_scalar_coeffmod(get<1>(I), base_Bsk_size, plain_modulus, base_Bsk, temp_q_Bsk + base_q_size);
-
-            // Allocate yet another temporary for fast divide-and-floor result in base Bsk
-            SEAL_ALLOCATE_GET_RNS_ITER(temp_Bsk, coeff_count, base_Bsk_size, pool);
-
-            // Step (7): divide by q and floor, producing a result in base Bsk
-            rns_tool->fast_floor(temp_q_Bsk, temp_Bsk, pool);
-
-            // Step (8): use Shenoy-Kumaresan method to convert the result to base q and write to encrypted1
-            rns_tool->fastbconv_sk(temp_Bsk, get<2>(I), pool);
-        });
+        // bfv_multiply recognizes squaring: BEHZ steps (1)-(3) are done only once, and the dyadic square needs only
+        // about half of the products (three for a size-2 ciphertext)
+        bfv_multiply(encrypted, encrypted, std::move(pool));
     }
 
     void Evaluator::ckks_square(Ciphertext &encrypted, MemoryPoolHandle pool) const

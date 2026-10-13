@@ -3,7 +3,9 @@
 
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"
+#include "seal/util/ntt.h"
 #include "seal/util/numth.h"
+#include "seal/util/polyarithsmallmod.h"
 #include "seal/util/rns.h"
 #include "seal/util/uintarith.h"
 #include "seal/util/uintarithmod.h"
@@ -455,6 +457,18 @@ namespace sealtest
                 }
                 base.compose(value.data(), MemoryManager::GetPool());
                 return value;
+            }
+
+            // Residues modulo the elements of base of the signed multi-precision integer (-1)^negative * magnitude
+            vector<uint64_t> decompose_signed(const RNSBase &base, const vector<uint64_t> &magnitude, bool negative)
+            {
+                vector<uint64_t> residues(base.size());
+                for (size_t i = 0; i < base.size(); i++)
+                {
+                    uint64_t r = modulo_uint(magnitude.data(), magnitude.size(), base[i]);
+                    residues[i] = negative ? negate_uint_mod(r, base[i]) : r;
+                }
+                return residues;
             }
 
             // Random values below q_i in component i, with 0 and q_i - 1 at the first two coefficients
@@ -1104,6 +1118,100 @@ namespace sealtest
             }
         }
 
+        // The fused functions used by BFV multiplication must give the same results as the steps they replace, for
+        // any input: fastbconv_m_tilde_sm_mrq as sm_mrq after fastbconv_m_tilde (up to the lazy output range), and
+        // inverse_ntt_multiply_t_fast_floor_fastbconv_sk as the inverse NTT, multiplication by t, fast_floor, and
+        // fastbconv_sk (for input in standard or Montgomery form)
+        TEST(RNSToolTest, FusedBEHZSteps)
+        {
+            auto pool = MemoryManager::GetPool();
+            mt19937_64 rng(2024);
+
+            // n = 1024 exceeds the block size of the fused functions; 20 primes of 60 bits make the base conversions
+            // from q split q into chunks
+            for (size_t n : { size_t(2), size_t(64), size_t(1024) })
+            {
+                for (auto bit_sizes : { vector<int>{ 30 }, vector<int>{ 40, 50 }, vector<int>{ 60, 60, 60, 59, 58 },
+                                        vector<int>(20, 60) })
+                {
+                    RNSBase q(CoeffModulus::Create(n, bit_sizes), pool);
+                    for (const Modulus &t : { Modulus(65537), Modulus(uint64_t(1) << 20), get_prime(2 * n, 57) })
+                    {
+                        RNSTool rns_tool(n, q, t, pool);
+                        size_t q_size = q.size();
+                        size_t Bsk_size = rns_tool.base_Bsk()->size();
+                        const RNSBase &Bsk = *rns_tool.base_Bsk();
+
+                        // Steps (1)-(2), for any 64-bit input
+                        vector<uint64_t> in_q(q_size * n);
+                        for (size_t i = 0; i < q_size; i++)
+                        {
+                            for (size_t k = 0; k < n; k++)
+                            {
+                                in_q[i * n + k] =
+                                    k % 3 == 0 ? q[i].value() - 1 : (k % 3 == 1 ? rng() : rng() % q[i].value());
+                            }
+                        }
+                        vector<uint64_t> temp((Bsk_size + 1) * n), expected(Bsk_size * n), result(Bsk_size * n);
+                        rns_tool.fastbconv_m_tilde(ConstRNSIter(in_q.data(), n), RNSIter(temp.data(), n), pool);
+                        rns_tool.sm_mrq(ConstRNSIter(temp.data(), n), RNSIter(expected.data(), n), pool);
+                        rns_tool.fastbconv_m_tilde_sm_mrq(
+                            ConstRNSIter(in_q.data(), n), false, RNSIter(result.data(), n), pool);
+                        ASSERT_EQ(expected, result);
+                        rns_tool.fastbconv_m_tilde_sm_mrq(
+                            ConstRNSIter(in_q.data(), n), true, RNSIter(result.data(), n), pool);
+                        for (size_t j = 0; j < Bsk_size; j++)
+                        {
+                            for (size_t k = 0; k < n; k++)
+                            {
+                                uint64_t value = result[j * n + k];
+                                ASSERT_LT(value, 3 * Bsk[j].value());
+                                ASSERT_EQ(expected[j * n + k], value % Bsk[j].value());
+                            }
+                        }
+
+                        // Steps (5)-(8), for NTT-form input in base q U Bsk in [0, 2m)
+                        Pointer<NTTTables> q_ntt_tables;
+                        CreateNTTTables(
+                            get_power_of_two(n), vector<Modulus>(q.base(), q.base() + q_size), q_ntt_tables, pool);
+                        for (bool montgomery : { false, true })
+                        {
+                            vector<uint64_t> in((q_size + Bsk_size) * n), ref_in((q_size + Bsk_size) * n);
+                            for (size_t i = 0; i < q_size + Bsk_size; i++)
+                            {
+                                const Modulus &m = i < q_size ? q[i] : Bsk[i - q_size];
+                                const NTTTables &tables =
+                                    i < q_size ? q_ntt_tables[i] : rns_tool.base_Bsk_ntt_tables()[i - q_size];
+                                for (size_t k = 0; k < n; k++)
+                                {
+                                    in[i * n + k] = k == 0 ? 2 * m.value() - 1 : rng() % (2 * m.value());
+                                }
+
+                                // The input holds c * 2^(-64) mod m in Montgomery form
+                                CoeffIter x(ref_in.data() + i * n);
+                                copy_n(in.data() + i * n, n, ref_in.data() + i * n);
+                                if (montgomery)
+                                {
+                                    multiply_poly_scalar_coeffmod(x, n, two_pow_64_mod(m), m, x);
+                                }
+                                inverse_ntt_negacyclic_harvey(x, tables);
+                                multiply_poly_scalar_coeffmod(x, n, t.value(), m, x);
+                            }
+                            vector<uint64_t> floor_Bsk(Bsk_size * n), expected_q(q_size * n), result_q(q_size * n);
+                            rns_tool.fast_floor(ConstRNSIter(ref_in.data(), n), RNSIter(floor_Bsk.data(), n), pool);
+                            rns_tool.fastbconv_sk(
+                                ConstRNSIter(floor_Bsk.data(), n), RNSIter(expected_q.data(), n), pool);
+                            rns_tool.inverse_ntt_multiply_t_fast_floor_fastbconv_sk(
+                                RNSIter(in.data(), n), RNSIter(in.data() + q_size * n, n), q_ntt_tables.get(),
+                                montgomery, RNSIter(result_q.data(), n), pool);
+                            ASSERT_EQ(expected_q, result_q) << "n " << n << ", q size " << q_size << ", t " << t.value()
+                                                            << ", montgomery " << montgomery;
+                        }
+                    }
+                }
+            }
+        }
+
         TEST(RNSToolTest, ExactScaleAndRound)
         {
             // This function computes [round(t/q * |input|_q)]_t exactly using the gamma-correction technique.
@@ -1394,6 +1502,127 @@ namespace sealtest
                             if (find(q.begin(), q.end(), t) == q.end())
                             {
                                 B_size(n, q, t);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        // Steps (5)-(8) of BEHZ multiplication on extreme inputs: X = sum of 8 negacyclic products of polynomials
+        // with coefficients +-(q - 1) / 2. The output must be floor(t * X / q) - u modulo q for some 0 <= u < |q|
+        // (the fast floor error), which fails if the Shenoy-Kumaresan conversion with the tight base B wraps around.
+        TEST(RNSToolTest, BEHZFloorExactness)
+        {
+            auto pool = MemoryManager::GetPool();
+            MemoryPool &mpool = pool;
+            mt19937_64 rng(2025);
+            for (size_t n : { size_t(2), size_t(16) })
+            {
+                for (auto bit_sizes : { vector<int>{ 60 }, vector<int>{ 60, 60 }, vector<int>{ 30, 30, 30 },
+                                        vector<int>{ 60, 60, 60, 60 } })
+                {
+                    RNSBase q(CoeffModulus::Create(n, bit_sizes), pool);
+                    for (const Modulus &t : { get_prime(2 * n, 59), Modulus(3) })
+                    {
+                        RNSTool rns_tool(n, q, t, pool);
+                        const size_t q_size = q.size();
+                        const RNSBase &Bsk = *rns_tool.base_Bsk();
+                        const size_t Bsk_size = Bsk.size();
+                        Pointer<NTTTables> q_ntt_tables;
+                        CreateNTTTables(
+                            get_power_of_two(n), vector<Modulus>(q.base(), q.base() + q_size), q_ntt_tables, pool);
+
+                        // h = (q - 1) / 2 and h^2
+                        vector<uint64_t> h(q.base_prod(), q.base_prod() + q_size), h2(2 * q_size);
+                        right_shift_uint(h.data(), 1, q_size, h.data());
+                        multiply_uint(h.data(), q_size, h.data(), q_size, h2.size(), h2.data());
+
+                        for (int pattern = 0; pattern < 3; pattern++)
+                        {
+                            // X = m * h^2 with m = sum of 8 negacyclic products of sign vectors: all +1 (pattern 0),
+                            // all -1 times +1 (pattern 1), or random (pattern 2)
+                            vector<int64_t> m(n, 0);
+                            for (int k = 0; k < 8; k++)
+                            {
+                                vector<int64_t> a(n), b(n);
+                                for (size_t i = 0; i < n; i++)
+                                {
+                                    a[i] = pattern == 1 ? -1 : (pattern == 2 && (rng() & 1) ? -1 : 1);
+                                    b[i] = pattern == 2 && (rng() & 1) ? -1 : 1;
+                                }
+                                for (size_t i = 0; i < n; i++)
+                                {
+                                    for (size_t j = 0; j < n; j++)
+                                    {
+                                        int64_t product = a[i] * b[j];
+                                        m[(i + j) % n] += (i + j < n) ? product : -product;
+                                    }
+                                }
+                            }
+
+                            // Input: X modulo every prime of q U Bsk, in NTT form, in standard or Montgomery form
+                            for (bool montgomery : { false, true })
+                            {
+                                vector<uint64_t> in((q_size + Bsk_size) * n);
+                                for (size_t i = 0; i < q_size + Bsk_size; i++)
+                                {
+                                    const Modulus &p = i < q_size ? q[i] : Bsk[i - q_size];
+                                    const NTTTables &tables =
+                                        i < q_size ? q_ntt_tables[i] : rns_tool.base_Bsk_ntt_tables()[i - q_size];
+                                    uint64_t h2_mod_p = modulo_uint(h2.data(), h2.size(), p);
+                                    if (montgomery)
+                                    {
+                                        uint64_t inv_two_pow_64;
+                                        ASSERT_TRUE(try_invert_uint_mod(two_pow_64_mod(p), p, inv_two_pow_64));
+                                        h2_mod_p = multiply_uint_mod(h2_mod_p, inv_two_pow_64, p);
+                                    }
+                                    for (size_t c = 0; c < n; c++)
+                                    {
+                                        uint64_t abs_m = static_cast<uint64_t>(m[c] < 0 ? -m[c] : m[c]);
+                                        uint64_t x = multiply_uint_mod(abs_m, h2_mod_p, p);
+                                        in[i * n + c] = m[c] < 0 ? negate_uint_mod(x, p) : x;
+                                    }
+                                    ntt_negacyclic_harvey(in.data() + i * n, tables);
+                                }
+                                vector<uint64_t> result(q_size * n);
+                                rns_tool.inverse_ntt_multiply_t_fast_floor_fastbconv_sk(
+                                    RNSIter(in.data(), n), RNSIter(in.data() + q_size * n, n), q_ntt_tables.get(),
+                                    montgomery, RNSIter(result.data(), n), pool);
+
+                                for (size_t c = 0; c < n; c++)
+                                {
+                                    // floor(t * X / q), exactly
+                                    uint64_t abs_m = static_cast<uint64_t>(m[c] < 0 ? -m[c] : m[c]);
+                                    size_t width = 2 * q_size + 2;
+                                    vector<uint64_t> numerator(width), temp(width), q_wide(width), quotient(width),
+                                        remainder(width);
+                                    multiply_uint(h2.data(), h2.size(), abs_m, width, temp.data());
+                                    multiply_uint(temp.data(), width, t.value(), width, numerator.data());
+                                    copy_n(q.base_prod(), q_size, q_wide.begin());
+                                    divide_uint(
+                                        numerator.data(), q_wide.data(), width, quotient.data(), remainder.data(),
+                                        mpool);
+                                    if (m[c] < 0 && !is_zero_uint(remainder.data(), width))
+                                    {
+                                        increment_uint(quotient.data(), width, quotient.data());
+                                    }
+                                    vector<uint64_t> floor_mod_q = decompose_signed(q, quotient, m[c] < 0);
+
+                                    bool found = false;
+                                    for (uint64_t u = 0; u < q_size && !found; u++)
+                                    {
+                                        found = true;
+                                        for (size_t i = 0; i < q_size; i++)
+                                        {
+                                            found = found &&
+                                                    result[i * n + c] ==
+                                                        sub_uint_mod(floor_mod_q[i], barrett_reduce_64(u, q[i]), q[i]);
+                                        }
+                                    }
+                                    ASSERT_TRUE(found) << "n " << n << ", q size " << q_size << ", t " << t.value()
+                                                       << ", pattern " << pattern << ", coefficient " << c;
+                                }
                             }
                         }
                     }

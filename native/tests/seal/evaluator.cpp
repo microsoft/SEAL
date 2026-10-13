@@ -8,15 +8,21 @@
 #include "seal/encryptor.h"
 #include "seal/evaluator.h"
 #include "seal/keygenerator.h"
+#include "seal/memorymanager.h"
 #include "seal/modulus.h"
 #include "seal/valcheck.h"
 #include "seal/util/rlwe.h"
+#include "seal/util/rns.h"
+#include "seal/util/uintarith.h"
 #include "seal/util/uintarithsmallmod.h"
+#include "seal/util/uintcore.h"
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <random>
 #include <string>
+#include <utility>
 #include <vector>
 #include "gtest/gtest.h"
 #include "testseed.h"
@@ -7079,6 +7085,286 @@ namespace sealtest
             {
                 double x = input[(i + shift) % slot_count];
                 ASSERT_NEAR(x * x, result[i], 0.001);
+            }
+        }
+    }
+    TEST(EvaluatorTest, BFVEncryptMultiplySizesDecrypt)
+    {
+        // Products of ciphertexts of sizes up to 9 (with results up to the maximal size 16) and squares of sizes
+        // 2 to 8, at two levels. Squares are identical to products with a copy.
+        size_t n = 64;
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(n);
+        parms.set_coeff_modulus(CoeffModulus::Create(n, { 60, 60, 60, 60, 60, 60, 60, 60 }));
+        parms.set_plain_modulus(257);
+        SEALContext context(parms, true, sec_level_type::none);
+        KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
+        Encryptor encryptor(context, pk);
+        Evaluator evaluator(context);
+        Decryptor decryptor(context, keygen.secret_key());
+
+        auto decrypts_to_power_of_two = [&](const Ciphertext &encrypted, size_t exponent) {
+            Plaintext plain;
+            decryptor.decrypt(encrypted, plain);
+            uint64_t expected = 1;
+            for (size_t i = 0; i < exponent; i++)
+            {
+                expected = (expected * 2) % 257;
+            }
+            return plain.significant_coeff_count() <= 1 && plain[0] == expected;
+        };
+
+        Ciphertext two;
+        encryptor.encrypt(Plaintext("2"), two);
+        for (size_t level = 0; level < 2; level++)
+        {
+            // powers[i] has size i + 2 and decrypts to 2^(i + 1)
+            vector<Ciphertext> powers(8);
+            powers[0] = two;
+            for (size_t i = 1; i < powers.size(); i++)
+            {
+                evaluator.multiply(powers[i - 1], two, powers[i]);
+                ASSERT_EQ(i + 2, powers[i].size());
+                ASSERT_TRUE(decrypts_to_power_of_two(powers[i], i + 1));
+            }
+
+            // Products of sizes 2 x 2, 3 x 2, 2 x 3, 8 x 9, and 9 x 8
+            vector<pair<size_t, size_t>> sizes{ { 2, 2 }, { 3, 2 }, { 2, 3 }, { 8, 9 }, { 9, 8 } };
+            for (auto &size : sizes)
+            {
+                Ciphertext product;
+                evaluator.multiply(powers[size.first - 2], powers[size.second - 2], product);
+                ASSERT_EQ(size.first + size.second - 1, product.size());
+                ASSERT_TRUE(decrypts_to_power_of_two(product, size.first + size.second - 2));
+            }
+
+            // Squares, also with multiply and multiply_inplace on the same ciphertext
+            for (size_t size = 2; size <= 8; size++)
+            {
+                const Ciphertext &encrypted = powers[size - 2];
+                Ciphertext square;
+                evaluator.square(encrypted, square);
+                ASSERT_EQ(2 * size - 1, square.size());
+                ASSERT_TRUE(decrypts_to_power_of_two(square, 2 * (size - 1)));
+
+                Ciphertext copy = encrypted;
+                Ciphertext product;
+                evaluator.multiply(encrypted, copy, product);
+                ASSERT_TRUE(same_ciphertext(square, product));
+                evaluator.multiply_inplace(copy, copy);
+                ASSERT_TRUE(same_ciphertext(square, copy));
+            }
+            evaluator.mod_switch_to_next_inplace(two);
+        }
+    }
+
+    namespace
+    {
+        // A signed multiprecision integer with a fixed number of words
+        struct SignedUInt
+        {
+            vector<uint64_t> magnitude;
+
+            bool negative;
+        };
+
+        // Adds the value (with as many words as sum) with the given sign to sum
+        void add_signed(SignedUInt &sum, const uint64_t *value, bool negative)
+        {
+            size_t count = sum.magnitude.size();
+            if (sum.negative == negative)
+            {
+                util::add_uint(sum.magnitude.data(), value, count, sum.magnitude.data());
+            }
+            else if (util::is_greater_than_or_equal_uint(sum.magnitude.data(), value, count))
+            {
+                util::sub_uint(sum.magnitude.data(), value, count, sum.magnitude.data());
+            }
+            else
+            {
+                util::sub_uint(value, sum.magnitude.data(), count, sum.magnitude.data());
+                sum.negative = negative;
+            }
+        }
+    } // namespace
+
+    TEST(EvaluatorTest, BFVMultiplyMatchesExactReference)
+    {
+        // BEHZ multiplication computes floor(t * X / q) - e mod q, where X is the tensor product of the centered
+        // representatives of the ciphertext coefficients and 0 <= e < k for k primes in q (the error of the fast
+        // floor). This requires the auxiliary base Bsk to be large enough, which coefficients of the largest magnitude
+        // (q - 1) / 2 test at the extreme.
+        size_t n = 16;
+        auto pool = MemoryManager::GetPool();
+        vector<uint64_t> plain_moduli{ 2, PlainModulus::Batching(n, 20).value(), (uint64_t(1) << 40) - 87,
+                                       (uint64_t(1) << 60) - 93 };
+        for (auto t : plain_moduli)
+        {
+            EncryptionParameters parms(scheme_type::bfv);
+            parms.set_poly_modulus_degree(n);
+            parms.set_coeff_modulus(CoeffModulus::Create(n, { 60, 60, 60, 60, 60 }));
+            parms.set_plain_modulus(t);
+            SEALContext context(parms, true, sec_level_type::none);
+            ASSERT_TRUE(context.parameters_set());
+            Evaluator evaluator(context);
+            mt19937_64 rng(t);
+
+            auto context_data = context.first_context_data();
+            for (size_t level = 0; level < 2; level++, context_data = context_data->next_context_data())
+            {
+                auto &coeff_modulus = context_data->parms().coeff_modulus();
+                auto &base_q = *context_data->rns_tool()->base_q();
+                size_t k = coeff_modulus.size();
+
+                // Words for the products and the sum of at most 8 of them for n coefficients, times t
+                size_t words = 2 * k + 2;
+                vector<uint64_t> q(words, 0);
+                util::set_uint(base_q.base_prod(), k, q.data());
+
+                // Ciphertexts with centered coefficients (q - 1) / 2 or random ones of magnitude less than
+                // (q - 1) / 2 - q / 2^17; their magnitudes and signs are kept for the reference
+                struct Coefficients
+                {
+                    vector<uint64_t> magnitudes;
+
+                    vector<bool> negative;
+                };
+                auto make = [&](size_t size, bool extreme, Coefficients &coeffs) {
+                    Ciphertext encrypted(context);
+                    encrypted.resize(context, context_data->parms_id(), size);
+                    coeffs.magnitudes.assign(size * n * k, 0);
+                    coeffs.negative.assign(size * n, false);
+                    vector<uint64_t> bound(k);
+                    util::right_shift_uint(base_q.base_prod(), 1, k, bound.data());
+                    vector<uint64_t> margin(k);
+                    util::right_shift_uint(base_q.base_prod(), 17, k, margin.data());
+                    util::sub_uint(bound.data(), margin.data(), k, bound.data());
+                    for (size_t p = 0; p < size; p++)
+                    {
+                        for (size_t l = 0; l < n; l++)
+                        {
+                            uint64_t *magnitude = coeffs.magnitudes.data() + (p * n + l) * k;
+                            vector<uint64_t> value(k);
+                            if (extreme)
+                            {
+                                util::right_shift_uint(base_q.base_prod(), 1, k, magnitude);
+                                util::set_uint(magnitude, k, value.data());
+                            }
+                            else
+                            {
+                                vector<uint64_t> random(k);
+                                generate(random.begin(), random.end(), [&]() { return rng(); });
+                                vector<uint64_t> quotient(k);
+                                util::divide_uint(random.data(), bound.data(), k, quotient.data(), magnitude, pool);
+                                coeffs.negative[p * n + l] = rng() & 1;
+                                if (coeffs.negative[p * n + l])
+                                {
+                                    util::sub_uint(base_q.base_prod(), magnitude, k, value.data());
+                                }
+                                else
+                                {
+                                    util::set_uint(magnitude, k, value.data());
+                                }
+                            }
+                            base_q.decompose(value.data(), pool);
+                            for (size_t i = 0; i < k; i++)
+                            {
+                                encrypted.data(p)[i * n + l] = value[i];
+                            }
+                        }
+                    }
+                    return encrypted;
+                };
+
+                // Checks that result is floor(t * a * b / q) - e mod q with 0 <= e < k
+                auto check = [&](const Ciphertext &result, size_t size1, const Coefficients &a, size_t size2,
+                                 const Coefficients &b) {
+                    vector<uint64_t> product(words);
+                    vector<uint64_t> scaled(words);
+                    vector<uint64_t> quotient(words);
+                    vector<uint64_t> remainder(words);
+                    for (size_t c = 0; c < size1 + size2 - 1; c++)
+                    {
+                        for (size_t l = 0; l < n; l++)
+                        {
+                            SignedUInt sum{ vector<uint64_t>(words, 0), false };
+                            for (size_t i = 0; i < size1; i++)
+                            {
+                                if (c < i || c - i >= size2)
+                                {
+                                    continue;
+                                }
+                                size_t j = c - i;
+
+                                // Negacyclic convolution: coefficient m of a_i times coefficient l - m of b_j
+                                for (size_t m = 0; m < n; m++)
+                                {
+                                    size_t m2 = (l + n - m) % n;
+                                    util::multiply_uint(
+                                        a.magnitudes.data() + (i * n + m) * k, k,
+                                        b.magnitudes.data() + (j * n + m2) * k, k, words, product.data());
+                                    bool negative = a.negative[i * n + m] ^ b.negative[j * n + m2] ^ (m > l);
+                                    add_signed(sum, product.data(), negative);
+                                }
+                            }
+
+                            // floor(t * sum / q)
+                            util::multiply_uint(sum.magnitude.data(), words, t, words, scaled.data());
+                            util::divide_uint(scaled.data(), q.data(), words, quotient.data(), remainder.data(), pool);
+                            if (sum.negative && !util::is_zero_uint(remainder.data(), words))
+                            {
+                                util::increment_uint(quotient.data(), words, quotient.data());
+                            }
+
+                            // The difference must be the same small integer modulo every prime
+                            uint64_t e = 0;
+                            for (size_t i = 0; i < k; i++)
+                            {
+                                uint64_t expected = util::modulo_uint(quotient.data(), words, coeff_modulus[i]);
+                                if (sum.negative)
+                                {
+                                    expected = util::negate_uint_mod(expected, coeff_modulus[i]);
+                                }
+                                uint64_t d = util::sub_uint_mod(expected, result.data(c)[i * n + l], coeff_modulus[i]);
+                                if (i == 0)
+                                {
+                                    e = d;
+                                }
+                                if (d != e || e >= k)
+                                {
+                                    return false;
+                                }
+                            }
+                        }
+                    }
+                    return true;
+                };
+
+                vector<pair<size_t, size_t>> sizes{ { 2, 2 }, { 3, 2 }, { 8, 9 } };
+                for (bool extreme : { true, false })
+                {
+                    for (auto &size : sizes)
+                    {
+                        Coefficients a;
+                        Coefficients b;
+                        Ciphertext encrypted1 = make(size.first, extreme, a);
+                        Ciphertext encrypted2 = make(size.second, extreme, b);
+                        Ciphertext product;
+                        evaluator.multiply(encrypted1, encrypted2, product);
+                        ASSERT_TRUE(check(product, size.first, a, size.second, b));
+                    }
+
+                    // Squares
+                    Coefficients a;
+                    Ciphertext encrypted = make(8, extreme, a);
+                    Ciphertext square;
+                    evaluator.square(encrypted, square);
+                    ASSERT_TRUE(check(square, 8, a, 8, a));
+                    evaluator.multiply_inplace(encrypted, encrypted);
+                    ASSERT_TRUE(check(encrypted, 8, a, 8, a));
+                }
             }
         }
     }

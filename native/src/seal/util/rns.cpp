@@ -859,10 +859,7 @@ namespace seal
                 base_B_size++;
             }
 
-            size_t base_Bsk_size = add_safe(base_B_size, size_t(1));
-            size_t base_Bsk_m_tilde_size = add_safe(base_Bsk_size, size_t(1));
-
-            size_t base_t_gamma_size = 0;
+            size_t base_Bsk_m_tilde_size = add_safe(base_B_size, size_t(2));
 
             // Size check
             if (!product_fits_in(coeff_count_, base_Bsk_m_tilde_size))
@@ -913,13 +910,11 @@ namespace seal
                 base_B_size = tight_B_size;
             }
 
-            base_Bsk_size = add_safe(base_B_size, size_t(1));
-            base_Bsk_m_tilde_size = add_safe(base_Bsk_size, size_t(1));
-
             vector<Modulus> base_B_primes;
             copy_n(baseconv_primes_iter, base_B_size, back_inserter(base_B_primes));
 
-            // Set m_tilde_ to a non-prime value
+            // m_tilde is a power of two (not a prime), so that sm_mrq and fastbconv_m_tilde_sm_mrq can reduce modulo
+            // m_tilde with a mask
             m_tilde_ = uint64_t(1) << 32;
 
             // Populate the base arrays
@@ -931,7 +926,6 @@ namespace seal
             // Set up t-gamma base if t_ is non-zero (using BFV)
             if (!t_.is_zero())
             {
-                base_t_gamma_size = 2;
                 base_t_gamma_ = allocate<RNSBase>(pool_, vector<Modulus>{ t_, gamma_ }, pool_);
             }
 
@@ -939,7 +933,7 @@ namespace seal
             try
             {
                 CreateNTTTables(
-                    coeff_count_power, vector<Modulus>(base_Bsk_->base(), base_Bsk_->base() + base_Bsk_size),
+                    coeff_count_power, vector<Modulus>(base_Bsk_->base(), base_Bsk_->base() + base_Bsk_->size()),
                     base_Bsk_ntt_tables_, pool_);
             }
             catch (const logic_error &)
@@ -947,37 +941,83 @@ namespace seal
                 throw logic_error("invalid rns bases");
             }
 
-            if (!t_.is_zero())
-            {
-                // Set up BaseConvTool for q --> {t}
-                base_q_to_t_conv_ = allocate<BaseConverter>(pool_, *base_q_, RNSBase({ t_ }, pool_), pool_);
-            }
+            initialize_behz_extension();
+            initialize_behz_floor();
+            initialize_decryption();
+            initialize_mod_switch();
+        }
 
-            // Set up BaseConverter for q --> Bsk
-            base_q_to_Bsk_conv_ = allocate<BaseConverter>(pool_, *base_q_, *base_Bsk_, pool_);
+        void RNSTool::initialize_behz_extension()
+        {
+            const size_t base_q_size = base_q_->size();
+            const size_t base_Bsk_size = base_Bsk_->size();
+            uint64_t temp;
 
-            // Set up BaseConverter for q --> {m_tilde}
-            base_q_to_m_tilde_conv_ = allocate<BaseConverter>(pool_, *base_q_, RNSBase({ m_tilde_ }, pool_), pool_);
-
-            // Set up BaseConverter for B --> q
-            base_B_to_q_conv_ = allocate<BaseConverter>(pool_, *base_B_, *base_q_, pool_);
-
-            // Set up BaseConverter for B --> {m_sk}
-            base_B_to_m_sk_conv_ = allocate<BaseConverter>(pool_, *base_B_, RNSBase({ m_sk_ }, pool_), pool_);
-
-            if (base_t_gamma_)
-            {
-                // Set up BaseConverter for q --> {t, gamma}
-                base_q_to_t_gamma_conv_ = allocate<BaseConverter>(pool_, *base_q_, *base_t_gamma_, pool_);
-            }
-
-            // Compute prod(B) mod q
-            prod_B_mod_q_ = allocate_uint(base_q_size, pool_);
-            SEAL_ITERATE(iter(prod_B_mod_q_, base_q_->base()), base_q_size, [&](auto I) {
-                get<0>(I) = modulo_uint(base_B_->base_prod(), base_B_size, get<1>(I));
+            // Compute m_tilde^(-1) mod Bsk
+            inv_m_tilde_mod_Bsk_ = allocate<MultiplyUIntModOperand>(base_Bsk_size, pool_);
+            SEAL_ITERATE(iter(inv_m_tilde_mod_Bsk_, base_Bsk_->base()), base_Bsk_size, [&](auto I) {
+                if (!try_invert_uint_mod(barrett_reduce_64(m_tilde_.value(), get<1>(I)), get<1>(I), temp))
+                {
+                    throw logic_error("invalid rns bases");
+                }
+                get<0>(I).set(temp, get<1>(I));
             });
 
+            // Compute -prod(q)^(-1) mod m_tilde
+            temp = modulo_uint(base_q_->base_prod(), base_q_size, m_tilde_);
+            if (!try_invert_uint_mod(temp, m_tilde_, temp))
+            {
+                throw logic_error("invalid rns bases");
+            }
+            neg_inv_prod_q_mod_m_tilde_.set(negate_uint_mod(temp, m_tilde_), m_tilde_);
+
+            // Compute prod(q) * m_tilde^(-1) mod Bsk
+            prod_q_inv_m_tilde_mod_Bsk_ = allocate<MultiplyUIntModOperand>(base_Bsk_size, pool_);
+            for (size_t i = 0; i < base_Bsk_size; i++)
+            {
+                const Modulus &m = (*base_Bsk_)[i];
+                const uint64_t prod_q_mod_m = modulo_uint(base_q_->base_prod(), base_q_size, m);
+                prod_q_inv_m_tilde_mod_Bsk_[i].set(multiply_uint_mod(prod_q_mod_m, inv_m_tilde_mod_Bsk_[i], m), m);
+            }
+
+            // Set up BaseConverter for q --> Bsk U {m_tilde}, with the input scaled by m_tilde. As mentioned in BEHZ16,
+            // the multiplication by m_tilde (for the Montgomery reduction in sm_mrq) can be merged into the conversion.
+            base_q_to_Bsk_m_tilde_conv_ = allocate<BaseConverter>(
+                pool_, *base_q_, *base_Bsk_m_tilde_, vector<uint64_t>(base_q_size, m_tilde_.value()),
+                vector<uint64_t>(base_Bsk_size + 1, 1), pool_);
+
+            // For fastbconv_m_tilde_sm_mrq, the multiplication by m_tilde^(-1) is merged into the conversion to Bsk as
+            // well. The output modulo m_tilde, r_m_tilde = sum_i y_i * [(q/q_i) * (-prod(q)^(-1))]_{m_tilde}, is
+            // computed from the first-step values y_i of that conversion with native 64-bit arithmetic.
+            vector<uint64_t> obase_scale(base_Bsk_size);
+            for (size_t i = 0; i < base_Bsk_size; i++)
+            {
+                obase_scale[i] = inv_m_tilde_mod_Bsk_[i].operand;
+            }
+            base_q_to_Bsk_mont_conv_ = allocate<BaseConverter>(
+                pool_, *base_q_, *base_Bsk_, vector<uint64_t>(base_q_size, m_tilde_.value()), obase_scale, pool_);
+            m_tilde_row_neg_inv_prod_q_ = allocate_uint(base_q_size, pool_);
+            const uint64_t m_tilde_mask = m_tilde_.value() - 1;
+            for (size_t i = 0; i < base_q_size; i++)
+            {
+                // The low word of the punctured product (q/q_i) determines it modulo m_tilde
+                const uint64_t punctured_prod_low = base_q_->punctured_prod_array()[i * base_q_size];
+                m_tilde_row_neg_inv_prod_q_[i] =
+                    (punctured_prod_low * neg_inv_prod_q_mod_m_tilde_.operand) & m_tilde_mask;
+            }
+        }
+
+        void RNSTool::initialize_behz_floor()
+        {
+            const size_t base_q_size = base_q_->size();
+            const size_t base_B_size = base_B_->size();
+            const size_t base_Bsk_size = base_Bsk_->size();
             uint64_t temp;
+
+            // Set up BaseConverters for q --> Bsk and B --> q U {m_sk}
+            base_q_to_Bsk_conv_ = allocate<BaseConverter>(pool_, *base_q_, *base_Bsk_, pool_);
+            RNSBase base_q_m_sk = base_q_->extend(m_sk_);
+            base_B_to_q_m_sk_conv_ = allocate<BaseConverter>(pool_, *base_B_, base_q_m_sk, pool_);
 
             // Compute prod(q)^(-1) mod Bsk
             inv_prod_q_mod_Bsk_ = allocate<MultiplyUIntModOperand>(base_Bsk_size, pool_);
@@ -999,61 +1039,117 @@ namespace seal
             }
             inv_prod_B_mod_m_sk_.set(temp, m_sk_);
 
-            // Compute m_tilde^(-1) mod Bsk
-            inv_m_tilde_mod_Bsk_ = allocate<MultiplyUIntModOperand>(base_Bsk_size, pool_);
-            SEAL_ITERATE(iter(inv_m_tilde_mod_Bsk_, base_Bsk_->base()), base_Bsk_size, [&](auto I) {
-                if (!try_invert_uint_mod(barrett_reduce_64(m_tilde_.value(), get<1>(I)), get<1>(I), temp))
-                {
-                    throw logic_error("invalid rns bases");
-                }
-                get<0>(I).set(temp, get<1>(I));
-            });
-
-            // Compute prod(q)^(-1) mod m_tilde
-            temp = modulo_uint(base_q_->base_prod(), base_q_size, m_tilde_);
-            if (!try_invert_uint_mod(temp, m_tilde_, temp))
+            // Compute prod(B) mod q
+            prod_B_mod_q_ = allocate<MultiplyUIntModOperand>(base_q_size, pool_);
+            for (size_t i = 0; i < base_q_size; i++)
             {
-                throw logic_error("invalid rns bases");
+                const Modulus &qi = (*base_q_)[i];
+                prod_B_mod_q_[i].set(modulo_uint(base_B_->base_prod(), base_B_size, qi), qi);
             }
-            neg_inv_prod_q_mod_m_tilde_.set(negate_uint_mod(temp, m_tilde_), m_tilde_);
 
-            // Compute prod(q) mod Bsk
-            prod_q_mod_Bsk_ = allocate_uint(base_Bsk_size, pool_);
-            SEAL_ITERATE(iter(prod_q_mod_Bsk_, base_Bsk_->base()), base_Bsk_size, [&](auto I) {
-                get<0>(I) = modulo_uint(base_q_->base_prod(), base_q_size, get<1>(I));
-            });
-
-            if (base_t_gamma_)
+            if (t_.is_zero())
             {
-                // Compute gamma^(-1) mod t
-                if (!try_invert_uint_mod(barrett_reduce_64(gamma_.value(), t_), t_, temp))
+                return;
+            }
+
+            // For inverse_ntt_multiply_t_fast_floor_fastbconv_sk, the inverse NTT scalar in base q is
+            // t * (q/q_i)^(-1) mod q_i, so the converter q --> Bsk of the fast floor is created with input scale
+            // (q/q_i), making its first-step constants 1.
+            intt_scalar_q_ = allocate_uint(mul_safe(size_t(2), base_q_size), pool_);
+            vector<uint64_t> q_punctured_mod_q(base_q_size);
+            for (size_t i = 0; i < base_q_size; i++)
+            {
+                const Modulus &qi = (*base_q_)[i];
+                const uint64_t inv_punctured = base_q_->inv_punctured_prod_mod_base_array()[i].operand;
+                if (!try_invert_uint_mod(inv_punctured, qi, q_punctured_mod_q[i]))
                 {
                     throw logic_error("invalid rns bases");
                 }
-                inv_gamma_mod_t_.set(temp, t_);
+                const uint64_t scalar = multiply_uint_mod(barrett_reduce_64(t_.value(), qi), inv_punctured, qi);
+                intt_scalar_q_[i] = scalar;
+                intt_scalar_q_[base_q_size + i] = multiply_uint_mod(scalar, two_pow_64_mod(qi), qi);
+            }
 
-                // Compute prod({t, gamma}) mod q
-                prod_t_gamma_mod_q_ = allocate<MultiplyUIntModOperand>(base_q_size, pool_);
-                SEAL_ITERATE(iter(prod_t_gamma_mod_q_, base_q_->base()), base_q_size, [&](auto I) {
-                    get<0>(I).set(
-                        multiply_uint_mod((*base_t_gamma_)[0].value(), (*base_t_gamma_)[1].value(), get<1>(I)),
-                        get<1>(I));
-                });
-
-                // Compute -prod(q)^(-1) mod {t, gamma}
-                neg_inv_q_mod_t_gamma_ = allocate<MultiplyUIntModOperand>(base_t_gamma_size, pool_);
-                SEAL_ITERATE(iter(neg_inv_q_mod_t_gamma_, base_t_gamma_->base()), base_t_gamma_size, [&](auto I) {
-                    get<0>(I).operand = modulo_uint(base_q_->base_prod(), base_q_size, get<1>(I));
-                    if (!try_invert_uint_mod(get<0>(I).operand, get<1>(I), get<0>(I).operand))
+            // In base Bsk the inverse NTT scalar is t * prod(q)^(-1) * (prod(B)/b_j)^(-1) mod b_j for b_j in B, and
+            // t * prod(q)^(-1) mod m_sk. The output of the converter q --> Bsk is scaled by the same factors without t,
+            // and the converter B --> q U {m_sk} is created with input scale (prod(B)/b_j), making its first-step
+            // constants 1.
+            intt_scalar_Bsk_ = allocate_uint(mul_safe(size_t(2), base_Bsk_size), pool_);
+            vector<uint64_t> floor_obase_scale(base_Bsk_size);
+            vector<uint64_t> B_punctured_mod_B(base_B_size);
+            for (size_t j = 0; j < base_Bsk_size; j++)
+            {
+                const Modulus &bj = (*base_Bsk_)[j];
+                uint64_t scale = inv_prod_q_mod_Bsk_[j].operand;
+                if (j < base_B_size)
+                {
+                    const uint64_t inv_punctured = base_B_->inv_punctured_prod_mod_base_array()[j].operand;
+                    if (!try_invert_uint_mod(inv_punctured, bj, B_punctured_mod_B[j]))
                     {
                         throw logic_error("invalid rns bases");
                     }
-                    get<0>(I).set(negate_uint_mod(get<0>(I).operand, get<1>(I)), get<1>(I));
-                });
+                    scale = multiply_uint_mod(scale, inv_punctured, bj);
+                }
+                floor_obase_scale[j] = scale;
+                const uint64_t scalar = multiply_uint_mod(barrett_reduce_64(t_.value(), bj), scale, bj);
+                intt_scalar_Bsk_[j] = scalar;
+                intt_scalar_Bsk_[base_Bsk_size + j] = multiply_uint_mod(scalar, two_pow_64_mod(bj), bj);
+            }
+            base_q_to_Bsk_floor_conv_ =
+                allocate<BaseConverter>(pool_, *base_q_, *base_Bsk_, q_punctured_mod_q, floor_obase_scale, pool_);
+            base_B_to_q_m_sk_unit_conv_ = allocate<BaseConverter>(
+                pool_, *base_B_, base_q_m_sk, B_punctured_mod_B, vector<uint64_t>(base_q_size + 1, 1), pool_);
+        }
+
+        void RNSTool::initialize_decryption()
+        {
+            if (t_.is_zero())
+            {
+                return;
             }
 
+            const size_t base_q_size = base_q_->size();
+            const size_t base_t_gamma_size = base_t_gamma_->size();
+            uint64_t temp;
+
+            // Set up BaseConverter for q --> {t}
+            base_q_to_t_conv_ = allocate<BaseConverter>(pool_, *base_q_, RNSBase({ t_ }, pool_), pool_);
+
+            // Set up BaseConverter for q --> {t, gamma}
+            base_q_to_t_gamma_conv_ = allocate<BaseConverter>(pool_, *base_q_, *base_t_gamma_, pool_);
+
+            // Compute gamma^(-1) mod t
+            if (!try_invert_uint_mod(barrett_reduce_64(gamma_.value(), t_), t_, temp))
+            {
+                throw logic_error("invalid rns bases");
+            }
+            inv_gamma_mod_t_.set(temp, t_);
+
+            // Compute prod({t, gamma}) mod q
+            prod_t_gamma_mod_q_ = allocate<MultiplyUIntModOperand>(base_q_size, pool_);
+            SEAL_ITERATE(iter(prod_t_gamma_mod_q_, base_q_->base()), base_q_size, [&](auto I) {
+                get<0>(I).set(
+                    multiply_uint_mod((*base_t_gamma_)[0].value(), (*base_t_gamma_)[1].value(), get<1>(I)), get<1>(I));
+            });
+
+            // Compute -prod(q)^(-1) mod {t, gamma}
+            neg_inv_q_mod_t_gamma_ = allocate<MultiplyUIntModOperand>(base_t_gamma_size, pool_);
+            SEAL_ITERATE(iter(neg_inv_q_mod_t_gamma_, base_t_gamma_->base()), base_t_gamma_size, [&](auto I) {
+                get<0>(I).operand = modulo_uint(base_q_->base_prod(), base_q_size, get<1>(I));
+                if (!try_invert_uint_mod(get<0>(I).operand, get<1>(I), get<0>(I).operand))
+                {
+                    throw logic_error("invalid rns bases");
+                }
+                get<0>(I).set(negate_uint_mod(get<0>(I).operand, get<1>(I)), get<1>(I));
+            });
+        }
+
+        void RNSTool::initialize_mod_switch()
+        {
+            const size_t base_q_size = base_q_->size();
+            uint64_t temp;
+
             // Compute q[last]^(-1) mod q[i] for i = 0..last-1
-            // This is used by modulus switching and rescaling
             inv_q_last_mod_q_ = allocate<MultiplyUIntModOperand>(base_q_size - 1, pool_);
             SEAL_ITERATE(iter(inv_q_last_mod_q_, base_q_->base()), base_q_size - 1, [&](auto I) {
                 if (!try_invert_uint_mod((*base_q_)[base_q_size - 1].value(), get<1>(I), temp))
@@ -1220,48 +1316,62 @@ namespace seal
             size_t base_q_size = base_q_->size();
             size_t base_B_size = base_B_->size();
 
-            // Fast convert B -> q; input is in Bsk but we only use B
-            base_B_to_q_conv_->fast_convert_array(input, destination, pool);
+            // Fast convert B -> q U {m_sk} in a single conversion; input is in Bsk but we only use B
+            SEAL_ALLOCATE_GET_RNS_ITER(temp, coeff_count_, base_q_size + 1, pool);
+            base_B_to_q_m_sk_conv_->fast_convert_array(input, temp, pool);
 
-            // Compute alpha_sk
-            // Fast convert B -> {m_sk}; input is in Bsk but we only use B
-            SEAL_ALLOCATE_GET_COEFF_ITER(temp, coeff_count_, pool);
-            base_B_to_m_sk_conv_->fast_convert_array(input, RNSIter(temp, coeff_count_), pool);
-
-            // Take the m_sk part of input, subtract from temp, and multiply by inv_prod_B_mod_m_sk_
             // Note: input_sk is allocated in input[base_B_size]
-            SEAL_ALLOCATE_GET_COEFF_ITER(alpha_sk, coeff_count_, pool);
-            SEAL_ITERATE(iter(alpha_sk, temp, input[base_B_size]), coeff_count_, [&](auto I) {
+            auto scratch(allocate_uint(mul_safe(size_t(2), coeff_count_), pool));
+            fastbconv_sk_finish(
+                temp[0].ptr(), coeff_count_, input[base_B_size].ptr(), destination[0].ptr(), coeff_count_, coeff_count_,
+                scratch.get());
+        }
+
+        void RNSTool::fastbconv_sk_finish(
+            const uint64_t *conv_q_m_sk, size_t conv_stride, const uint64_t *input_m_sk, uint64_t *destination,
+            size_t destination_stride, size_t count, uint64_t *scratch) const
+        {
+            const size_t base_q_size = base_q_->size();
+
+            // Compute alpha_sk: take the m_sk part of input, subtract from the converted value in
+            // conv_q_m_sk[base_q_size], and multiply by inv_prod_B_mod_m_sk_.
+            //
+            // alpha_sk is not a centered reduction, so we need to apply a correction below: if alpha_sk > m_sk / 2,
+            // it represents the negative value alpha_sk - m_sk. We record the absolute value of the centered
+            // representative in alpha_abs and an all-ones mask in alpha_neg for the negative case. This allows the
+            // per-prime loop below to be branch-free.
+            uint64_t *alpha_abs = scratch;
+            uint64_t *alpha_neg = scratch + count;
+            const uint64_t m_sk_value = m_sk_.value();
+            const uint64_t m_sk_div_2 = m_sk_value >> 1;
+            const uint64_t *conv_m_sk = conv_q_m_sk + base_q_size * conv_stride;
+            const MultiplyUIntModOperand inv_prod_B_mod_m_sk = inv_prod_B_mod_m_sk_;
+            for (size_t k = 0; k < count; k++)
+            {
                 // It is not necessary for the negation to be reduced modulo the small prime
-                get<0>(I) = multiply_uint_mod(get<1>(I) + (m_sk_.value() - get<2>(I)), inv_prod_B_mod_m_sk_, m_sk_);
-            });
+                const uint64_t alpha =
+                    multiply_uint_mod(conv_m_sk[k] + (m_sk_value - input_m_sk[k]), inv_prod_B_mod_m_sk, m_sk_);
+                const uint64_t neg = less_than_mask_uint64(m_sk_div_2, alpha);
+                alpha_abs[k] = alpha ^ ((alpha ^ (m_sk_value - alpha)) & neg);
+                alpha_neg[k] = neg;
+            }
 
-            // alpha_sk is now ready for the Shenoy-Kumaresan conversion; however, note that our
-            // alpha_sk here is not a centered reduction, so we need to apply a correction below.
-            const uint64_t m_sk_div_2 = m_sk_.value() >> 1;
-            SEAL_ITERATE(iter(prod_B_mod_q_, base_q_->base(), destination), base_q_size, [&](auto I) {
-                // Set up the multiplication helpers
-                MultiplyUIntModOperand prod_B_mod_q_elt;
-                prod_B_mod_q_elt.set(get<0>(I), get<1>(I));
-
-                MultiplyUIntModOperand neg_prod_B_mod_q_elt;
-                neg_prod_B_mod_q_elt.set(get<1>(I).value() - get<0>(I), get<1>(I));
-
-                SEAL_ITERATE(iter(alpha_sk, get<2>(I)), coeff_count_, [&](auto J) {
-                    // Correcting alpha_sk since it represents a negative value
-                    if (get<0>(J) > m_sk_div_2)
-                    {
-                        get<1>(J) = multiply_add_uint_mod(
-                            negate_uint_mod(get<0>(J), m_sk_), prod_B_mod_q_elt, get<1>(J), get<1>(I));
-                    }
-                    // No correction needed
-                    else
-                    {
-                        // It is not necessary for the negation to be reduced modulo the small prime
-                        get<1>(J) = multiply_add_uint_mod(get<0>(J), neg_prod_B_mod_q_elt, get<1>(J), get<1>(I));
-                    }
-                });
-            });
+            // For each prime q_i: output = conv + |alpha| * prod(B) if alpha was negative (corrected), and
+            // conv - |alpha| * prod(B) otherwise, modulo q_i. The converted values are already reduced modulo q_i.
+            for (size_t i = 0; i < base_q_size; i++)
+            {
+                const Modulus &qi = base_q_->base()[i];
+                const MultiplyUIntModOperand prod_B_mod_qi = prod_B_mod_q_[i];
+                const uint64_t *conv = conv_q_m_sk + i * conv_stride;
+                uint64_t *dest = destination + i * destination_stride;
+                for (size_t k = 0; k < count; k++)
+                {
+                    const uint64_t correction = multiply_uint_mod(alpha_abs[k], prod_B_mod_qi, qi);
+                    const uint64_t sum = sub_if_ge_uint64(conv[k] + correction, qi.value());
+                    const uint64_t diff = sub_uint_mod(conv[k], correction, qi);
+                    dest[k] = (sum & alpha_neg[k]) | (diff & ~alpha_neg[k]);
+                }
+            }
         }
 
         void RNSTool::sm_mrq(ConstRNSIter input, RNSIter destination, MemoryPoolHandle pool) const
@@ -1297,31 +1407,38 @@ namespace seal
 
             // The last component of the input is mod m_tilde
             ConstCoeffIter input_m_tilde = input[base_Bsk_size];
-            const uint64_t m_tilde_div_2 = m_tilde_.value() >> 1;
+            const uint64_t m_tilde_value = m_tilde_.value();
+            const uint64_t m_tilde_div_2 = m_tilde_value >> 1;
 
-            // Compute r_m_tilde
+            // Compute r_m_tilde; m_tilde is a power of two, so the reduction is a mask
             SEAL_ALLOCATE_GET_COEFF_ITER(r_m_tilde, coeff_count_, pool);
-            multiply_poly_scalar_coeffmod(
-                input_m_tilde, coeff_count_, neg_inv_prod_q_mod_m_tilde_, m_tilde_, r_m_tilde);
+            const uint64_t m_tilde_mask = m_tilde_value - 1;
+            const uint64_t neg_inv_prod_q = neg_inv_prod_q_mod_m_tilde_.operand;
+            SEAL_ITERATE(iter(input_m_tilde, r_m_tilde), coeff_count_, [&](auto I) {
+                get<1>(I) = (get<0>(I) * neg_inv_prod_q) & m_tilde_mask;
+            });
 
             SEAL_ITERATE(
-                iter(input, prod_q_mod_Bsk_, inv_m_tilde_mod_Bsk_, base_Bsk_->base(), destination), base_Bsk_size,
-                [&](auto I) {
-                    MultiplyUIntModOperand prod_q_mod_Bsk_elt;
-                    prod_q_mod_Bsk_elt.set(get<1>(I), get<3>(I));
+                iter(input, prod_q_inv_m_tilde_mod_Bsk_, inv_m_tilde_mod_Bsk_, base_Bsk_->base(), destination),
+                base_Bsk_size, [&](auto I) {
+                    const Modulus &modulus = get<3>(I);
+                    const uint64_t modulus_value = modulus.value();
+                    const uint64_t two_times_modulus_value = modulus_value << 1;
+                    const uint64_t centering_correction = modulus_value - m_tilde_value;
+                    const MultiplyUIntModOperand prod_q_inv_m_tilde_elt = get<1>(I);
+                    const MultiplyUIntModOperand inv_m_tilde_elt = get<2>(I);
                     SEAL_ITERATE(iter(get<0>(I), r_m_tilde, get<4>(I)), coeff_count_, [&](auto J) {
                         // We need centered reduction of r_m_tilde modulo Bsk. Note that m_tilde is chosen
                         // to be a power of two so we have '>=' below.
                         uint64_t temp = get<1>(J);
-                        if (temp >= m_tilde_div_2)
-                        {
-                            temp += get<3>(I).value() - m_tilde_.value();
-                        }
+                        temp += SEAL_COND_SELECT(temp >= m_tilde_div_2, centering_correction, uint64_t(0));
 
-                        // Compute (input + q*r_m_tilde)*m_tilde^(-1) mod Bsk
-                        get<2>(J) = multiply_uint_mod(
-                            multiply_add_uint_mod(temp, prod_q_mod_Bsk_elt, get<0>(J), get<3>(I)), get<2>(I),
-                            get<3>(I));
+                        // Compute (input + q*r_m_tilde)*m_tilde^(-1) mod Bsk as
+                        // input*m_tilde^(-1) + r_m_tilde*(q*m_tilde^(-1)) mod Bsk with two lazy Shoup multiplications;
+                        // the sum is in [0, 4*modulus), which fits in 63 bits
+                        uint64_t sum = multiply_uint_mod_lazy(get<0>(J), inv_m_tilde_elt, modulus) +
+                                       multiply_uint_mod_lazy(temp, prod_q_inv_m_tilde_elt, modulus);
+                        get<2>(J) = sub_if_ge_uint64(sub_if_ge_uint64(sum, two_times_modulus_value), modulus_value);
                     });
                 });
         }
@@ -1400,22 +1517,208 @@ namespace seal
             Ensure: Output in Bsk U {m_tilde}
             */
 
-            size_t base_q_size = base_q_->size();
-            size_t base_Bsk_size = base_Bsk_->size();
+            // We need to multiply the input with m_tilde mod q to facilitate Montgomery reduction in the next step of
+            // multiplication. As mentioned in BEHZ16, this multiplication is merged into the base conversion: the
+            // converter's constants are scaled by m_tilde. We convert to Bsk U {m_tilde} in a single conversion.
+            base_q_to_Bsk_m_tilde_conv_->fast_convert_array(input, destination, pool);
+        }
 
-            // We need to multiply first the input with m_tilde mod q
-            // This is to facilitate Montgomery reduction in the next step of multiplication
-            // This is NOT an ideal approach: as mentioned in BEHZ16, multiplication by
-            // m_tilde can be easily merge into the base conversion operation; however, then
-            // we could not use the BaseConverter as below without modifications.
-            SEAL_ALLOCATE_GET_RNS_ITER(temp, coeff_count_, base_q_size, pool);
-            multiply_poly_scalar_coeffmod(input, base_q_size, m_tilde_.value(), base_q_->base(), temp);
+        void RNSTool::fastbconv_m_tilde_sm_mrq(
+            ConstRNSIter input, bool lazy_output, RNSIter destination, MemoryPoolHandle pool) const
+        {
+#ifdef SEAL_DEBUG
+            if (input == nullptr)
+            {
+                throw invalid_argument("input cannot be null");
+            }
+            if (input.poly_modulus_degree() != coeff_count_)
+            {
+                throw invalid_argument("input is not valid for encryption parameters");
+            }
+            if (!destination)
+            {
+                throw invalid_argument("destination cannot be null");
+            }
+            if (destination.poly_modulus_degree() != coeff_count_)
+            {
+                throw invalid_argument("destination is not valid for encryption parameters");
+            }
+            if (!pool)
+            {
+                throw invalid_argument("pool is uninitialized");
+            }
+#endif
+            const size_t base_q_size = base_q_->size();
+            const size_t base_Bsk_size = base_Bsk_->size();
 
-            // Now convert to Bsk
-            base_q_to_Bsk_conv_->fast_convert_array(temp, destination, pool);
+            // The conversion and the Montgomery reduction are computed one block of coefficients at a time, so that
+            // the converted values stay in cache. Scratch space for one block: the conversion's first-step values
+            // (base_q_size rows) and its output in Bsk U {m_tilde} (base_Bsk_size + 1 rows).
+            const size_t block_size = min(BaseConverter::max_block_size, coeff_count_);
+            auto scratch(allocate_uint(mul_safe(block_size, base_q_size + base_Bsk_size + 1), pool));
+            uint64_t *conv_temp = scratch.get();
+            uint64_t *conv_out = conv_temp + block_size * base_q_size;
 
-            // Finally convert to {m_tilde}
-            base_q_to_m_tilde_conv_->fast_convert_array(temp, destination + base_Bsk_size, pool);
+            const uint64_t m_tilde_value = m_tilde_.value();
+            const uint64_t m_tilde_div_2 = m_tilde_value >> 1;
+            const uint64_t m_tilde_mask = m_tilde_value - 1;
+            const uint64_t *m_tilde_row = m_tilde_row_neg_inv_prod_q_.get();
+
+            for (size_t start = 0; start < coeff_count_; start += block_size)
+            {
+                const size_t count = min(block_size, coeff_count_ - start);
+
+                // Convert [input * m_tilde]_q to Bsk, with the output multiplied by m_tilde^(-1): for each prime m in
+                // Bsk this gives [input * m_tilde]_q * m_tilde^(-1) mod m.
+                base_q_to_Bsk_mont_conv_->fast_convert_block(
+                    input[0].ptr() + start, coeff_count_, count, false, conv_out, count, conv_temp);
+
+                // r_m_tilde (as in sm_mrq) from the first-step values y_i = [input_i * m_tilde * (q/q_i)^(-1)]_{q_i}
+                // in conv_temp (see BaseConverter::fast_convert_block), as
+                // sum_i y_i * [(q/q_i) * (-prod(q)^(-1))]_{m_tilde}, exactly modulo m_tilde, which divides 2^64
+                uint64_t *r_m_tilde = conv_out + base_Bsk_size * count;
+                for (size_t k = 0; k < count; k++)
+                {
+                    r_m_tilde[k] = conv_temp[k] * m_tilde_row[0];
+                }
+                for (size_t i = 1; i < base_q_size; i++)
+                {
+                    const uint64_t *y = conv_temp + i * count;
+                    const uint64_t c = m_tilde_row[i];
+                    for (size_t k = 0; k < count; k++)
+                    {
+                        r_m_tilde[k] += y[k] * c;
+                    }
+                }
+                for (size_t k = 0; k < count; k++)
+                {
+                    r_m_tilde[k] &= m_tilde_mask;
+                }
+
+                // Compute (temp_m + q * r_m_tilde * m_tilde^(-1)) mod m for each m in Bsk, where r_m_tilde is
+                // centered. Note that m_tilde is chosen to be a power of two so we have '>=' below.
+                for (size_t j = 0; j < base_Bsk_size; j++)
+                {
+                    const Modulus &modulus = base_Bsk_->base()[j];
+                    const uint64_t modulus_value = modulus.value();
+                    const uint64_t two_times_modulus_value = modulus_value << 1;
+                    const uint64_t centering_correction = modulus_value - m_tilde_value;
+                    const MultiplyUIntModOperand prod_q_inv_m_tilde_elt = prod_q_inv_m_tilde_mod_Bsk_[j];
+                    const uint64_t *conv = conv_out + j * count;
+                    uint64_t *dest = destination[j].ptr() + start;
+                    for (size_t k = 0; k < count; k++)
+                    {
+                        uint64_t r = r_m_tilde[k];
+                        r += SEAL_COND_SELECT(r >= m_tilde_div_2, centering_correction, uint64_t(0));
+                        // conv[k] is fully reduced, so the sum is in [0, 3 * modulus)
+                        const uint64_t sum = conv[k] + multiply_uint_mod_lazy(r, prod_q_inv_m_tilde_elt, modulus);
+                        dest[k] = lazy_output
+                                      ? sum
+                                      : sub_if_ge_uint64(sub_if_ge_uint64(sum, two_times_modulus_value), modulus_value);
+                    }
+                }
+            }
+        }
+
+        void RNSTool::inverse_ntt_multiply_t_fast_floor_fastbconv_sk(
+            RNSIter input_q, RNSIter input_Bsk, ConstNTTTablesIter base_q_ntt_tables, bool input_montgomery_form,
+            RNSIter destination, MemoryPoolHandle pool) const
+        {
+#ifdef SEAL_DEBUG
+            if (!input_q || !input_Bsk)
+            {
+                throw invalid_argument("input cannot be null");
+            }
+            if (input_q.poly_modulus_degree() != coeff_count_ || input_Bsk.poly_modulus_degree() != coeff_count_)
+            {
+                throw invalid_argument("input is not valid for encryption parameters");
+            }
+            if (!base_q_ntt_tables)
+            {
+                throw invalid_argument("base_q_ntt_tables cannot be null");
+            }
+            if (!destination)
+            {
+                throw invalid_argument("destination cannot be null");
+            }
+            if (destination.poly_modulus_degree() != coeff_count_)
+            {
+                throw invalid_argument("destination is not valid for encryption parameters");
+            }
+            if (!pool)
+            {
+                throw invalid_argument("pool is uninitialized");
+            }
+#endif
+            if (!base_q_to_Bsk_floor_conv_)
+            {
+                throw logic_error("plain modulus is not set");
+            }
+
+            const size_t base_q_size = base_q_->size();
+            const size_t base_B_size = base_B_->size();
+            const size_t base_Bsk_size = base_Bsk_->size();
+            const uint64_t *scalar_q = intt_scalar_q_.get() + (input_montgomery_form ? base_q_size : 0);
+            const uint64_t *scalar_Bsk = intt_scalar_Bsk_.get() + (input_montgomery_form ? base_Bsk_size : 0);
+
+            // Inverse NTT in base q, scaled by t * (q/q_i)^(-1) (times 2^64 for Montgomery-form input): the output is
+            // [t * x * (q/q_i)^(-1)]_{q_i}, exactly what the fast floor's conversion q -> Bsk computes in its first
+            // step after the multiplication by t. Its converter therefore has first-step constants 1.
+            for (size_t i = 0; i < base_q_size; i++)
+            {
+                inverse_ntt_negacyclic_harvey_scaled(input_q[i], scalar_q[i], base_q_ntt_tables[i], input_q[i]);
+            }
+
+            // Inverse NTT in base Bsk, scaled by t * prod(q)^(-1) * (prod(B)/b_j)^(-1) for b_j in B, and by
+            // t * prod(q)^(-1) for m_sk (times 2^64 for Montgomery-form input)
+            for (size_t j = 0; j < base_Bsk_size; j++)
+            {
+                inverse_ntt_negacyclic_harvey_scaled(
+                    input_Bsk[j], scalar_Bsk[j], base_Bsk_ntt_tables_[j], input_Bsk[j]);
+            }
+
+            // The rest is computed one block of coefficients at a time, so that all intermediate values stay in
+            // cache. Scratch space for one block: the conversions' first-step values (max(|q|, |B|) rows), the fast
+            // floor output in Bsk (|Bsk| rows), the Shenoy-Kumaresan conversion output in q U {m_sk} (|q| + 1 rows),
+            // and two rows for the Shenoy-Kumaresan correction, where |.| is the number of primes in a base.
+            const size_t block_size = min(BaseConverter::max_block_size, coeff_count_);
+            const size_t conv_temp_rows = max(base_q_size, base_B_size);
+            auto scratch(
+                allocate_uint(mul_safe(block_size, conv_temp_rows + base_Bsk_size + base_q_size + 1 + 2), pool));
+            uint64_t *conv_temp = scratch.get();
+            uint64_t *floor_Bsk = conv_temp + block_size * conv_temp_rows;
+            uint64_t *conv_q_m_sk = floor_Bsk + block_size * base_Bsk_size;
+            uint64_t *finish_scratch = conv_q_m_sk + block_size * (base_q_size + 1);
+
+            for (size_t start = 0; start < coeff_count_; start += block_size)
+            {
+                const size_t count = min(block_size, coeff_count_ - start);
+
+                // Fast floor: convert [t * x]_q -> Bsk, with the output scaled by the same factors as above (without t)
+                base_q_to_Bsk_floor_conv_->fast_convert_block(
+                    input_q[0].ptr() + start, coeff_count_, count, true, floor_Bsk, count, conv_temp);
+
+                // Subtract: for b_j in B this yields [z_j * (prod(B)/b_j)^(-1)]_{b_j}, where z is the fast floor
+                // output, i.e., exactly what the Shenoy-Kumaresan conversion B -> q U {m_sk} computes in its first
+                // step (its converter has first-step constants 1); for m_sk it yields z_{m_sk}.
+                for (size_t j = 0; j < base_Bsk_size; j++)
+                {
+                    const Modulus &modulus = base_Bsk_->base()[j];
+                    const uint64_t *y = input_Bsk[j].ptr() + start;
+                    uint64_t *z = floor_Bsk + j * count;
+                    for (size_t k = 0; k < count; k++)
+                    {
+                        z[k] = sub_uint_mod(y[k], z[k], modulus);
+                    }
+                }
+
+                // Shenoy-Kumaresan conversion from Bsk to q
+                base_B_to_q_m_sk_unit_conv_->fast_convert_block(
+                    floor_Bsk, count, count, true, conv_q_m_sk, count, conv_temp);
+                fastbconv_sk_finish(
+                    conv_q_m_sk, count, floor_Bsk + base_B_size * count, destination[0].ptr() + start, coeff_count_,
+                    count, finish_scratch);
+            }
         }
 
         void RNSTool::decrypt_scale_and_round(ConstRNSIter input, CoeffIter destination, MemoryPoolHandle pool) const
@@ -1527,6 +1830,230 @@ namespace seal
         {
             // Use exact base convension rather than convert the base through the compose API
             base_q_to_t_conv_->exact_convert_array(phase, destination, pool);
+        }
+
+        namespace
+        {
+#ifndef SEAL_USE_INTEL_HEXL
+            // Number of products of inputs reduced to [0, 2p), each below 4p^2, that are summed before a reduction
+            constexpr size_t behz_lazy_product_count = 2;
+
+            // Returns sum_{s < count} in1[s][l] * in2[s][l] * 2^(-64) mod p, fully reduced, for inputs in [0, 4p)
+            SEAL_NODISCARD SEAL_FORCE_INLINE uint64_t behz_dot_product(
+                const uint64_t *const *in1, const uint64_t *const *in2, size_t count, size_t l,
+                const DyadicMontgomeryReducer &reducer, const Modulus &modulus)
+            {
+                uint64_t result = 0;
+                for (size_t s = 0; s < count; s += behz_lazy_product_count)
+                {
+                    const size_t chunk_end = min<size_t>(count, s + behz_lazy_product_count);
+                    unsigned long long acc[2]{ 0, 0 };
+                    for (size_t u = s; u < chunk_end; u++)
+                    {
+                        unsigned long long prod[2];
+                        multiply_uint64(reducer.reduce_input(in1[u][l]), reducer.reduce_input(in2[u][l]), prod);
+                        add_uint128(prod, acc, acc);
+                    }
+                    result = sub_if_ge_uint64(result + reducer.reduce(acc[0], acc[1]), modulus.value());
+                }
+                return result;
+            }
+#endif
+
+            /**
+            Computes the BEHZ square of a size-2 ciphertext for one RNS base, with all polynomials in NTT form:
+
+                out[0] = in[0]^2, out[1] = 2 * in[0] * in[1], out[2] = in[1]^2.
+
+            The input coefficients can be lazily reduced to [0, 4 * modulus), and every modulus must have at most
+            SEAL_MOD_BIT_COUNT_MAX bits. The outputs are fully reduced. If behz_tensor_product_montgomery_form is true,
+            the outputs are multiplied by 2^(-64).
+            */
+            void behz_tensor_square_size2(
+                ConstPolyIter in, ConstModulusIter base, size_t base_size, size_t coeff_count, PolyIter out)
+            {
+#ifdef SEAL_USE_INTEL_HEXL
+                (void)coeff_count;
+
+                // Compute c0^2
+                dyadic_product_coeffmod(in[0], in[0], base_size, base, out[0]);
+
+                // Compute 2*c0*c1
+                dyadic_product_coeffmod(in[0], in[1], base_size, base, out[1]);
+                add_poly_coeffmod(out[1], out[1], base_size, base, out[1]);
+
+                // Compute c1^2
+                dyadic_product_coeffmod(in[1], in[1], base_size, base, out[2]);
+#else
+                for (size_t j = 0; j < base_size; j++)
+                {
+                    const DyadicMontgomeryReducer reducer(base[j]);
+                    const uint64_t *a0 = in[0][j];
+                    const uint64_t *a1 = in[1][j];
+                    uint64_t *c0 = out[0][j];
+                    uint64_t *c1 = out[1][j];
+                    uint64_t *c2 = out[2][j];
+                    for (size_t l = 0; l < coeff_count; l++)
+                    {
+                        // With inputs reduced to [0, 2 * modulus), 2 * x0 is below 2^63 and the product 2 * x0 * x1 is
+                        // below 8 * modulus^2.
+                        const uint64_t x0 = reducer.reduce_input(a0[l]);
+                        const uint64_t x1 = reducer.reduce_input(a1[l]);
+                        unsigned long long p0[2], p1[2], p2[2];
+                        multiply_uint64(x0, x0, p0);
+                        multiply_uint64(x0 << 1, x1, p1);
+                        multiply_uint64(x1, x1, p2);
+                        c0[l] = reducer.reduce(p0[0], p0[1]);
+                        c1[l] = reducer.reduce(p1[0], p1[1]);
+                        c2[l] = reducer.reduce(p2[0], p2[1]);
+                    }
+                }
+#endif
+            }
+        } // namespace
+
+        void behz_tensor_product(
+            ConstPolyIter in1, size_t in1_size, ConstPolyIter in2, size_t in2_size, ConstModulusIter base,
+            size_t base_size, size_t coeff_count, PolyIter out, MemoryPoolHandle pool)
+        {
+            // The caller passes the same iterators for in1 and in2 when squaring
+            const bool is_square = in1_size == in2_size && in1[0][0].ptr() == in2[0][0].ptr();
+            if (is_square && in1_size == 2)
+            {
+                behz_tensor_square_size2(in1, base, base_size, coeff_count, out);
+                return;
+            }
+
+            size_t dest_size = in1_size + in2_size - 1;
+#ifdef SEAL_USE_INTEL_HEXL
+            // Use the (HEXL-accelerated) dyadic product, accumulating with modular additions
+            SEAL_ALLOCATE_GET_COEFF_ITER(temp, coeff_count, pool);
+            for (size_t k = 0; k < dest_size; k++)
+            {
+                size_t in1_last = min<size_t>(k, in1_size - 1);
+                size_t in2_first = min<size_t>(k, in2_size - 1);
+                size_t in1_first = k - in2_first;
+                for (size_t j = 0; j < base_size; j++)
+                {
+                    dyadic_product_coeffmod(in1[in1_first][j], in2[in2_first][j], coeff_count, base[j], out[k][j]);
+                    for (size_t i = in1_first + 1; i <= in1_last; i++)
+                    {
+                        dyadic_product_coeffmod(in1[i][j], in2[k - i][j], coeff_count, base[j], temp);
+                        add_poly_coeffmod(temp, out[k][j], coeff_count, base[j], out[k][j]);
+                    }
+                }
+            }
+#else
+            (void)pool;
+            if (in1_size == 2 && in2_size == 2)
+            {
+                // Karatsuba: out[1] = (a0 + a1)(b0 + b1) - a0 * b0 - a1 * b1 = a0 * b1 + a1 * b0 exactly as integers.
+                // With inputs reduced to [0, 2 * modulus), the sums are below 4 * modulus < 2^63, their product is
+                // below 16 * modulus^2 < 2^128, and out[1] is below 8 * modulus^2.
+                for (size_t j = 0; j < base_size; j++)
+                {
+                    const DyadicMontgomeryReducer reducer(base[j]);
+                    const uint64_t *a0 = in1[0][j];
+                    const uint64_t *a1 = in1[1][j];
+                    const uint64_t *b0 = in2[0][j];
+                    const uint64_t *b1 = in2[1][j];
+                    uint64_t *c0 = out[0][j];
+                    uint64_t *c1 = out[1][j];
+                    uint64_t *c2 = out[2][j];
+                    for (size_t l = 0; l < coeff_count; l++)
+                    {
+                        const uint64_t x0 = reducer.reduce_input(a0[l]);
+                        const uint64_t x1 = reducer.reduce_input(a1[l]);
+                        const uint64_t y0 = reducer.reduce_input(b0[l]);
+                        const uint64_t y1 = reducer.reduce_input(b1[l]);
+                        unsigned long long p0[2], p2[2], pm[2];
+                        multiply_uint64(x0, y0, p0);
+                        multiply_uint64(x1, y1, p2);
+                        multiply_uint64(x0 + x1, y0 + y1, pm);
+                        unsigned char borrow = sub_uint64(pm[0], p0[0], pm);
+                        pm[1] = pm[1] - p0[1] - borrow;
+                        borrow = sub_uint64(pm[0], p2[0], pm);
+                        pm[1] = pm[1] - p2[1] - borrow;
+                        c0[l] = reducer.reduce(p0[0], p0[1]);
+                        c1[l] = reducer.reduce(pm[0], pm[1]);
+                        c2[l] = reducer.reduce(p2[0], p2[1]);
+                    }
+                }
+                return;
+            }
+
+            if (is_square)
+            {
+                // out[k] = 2 * sum_{i < k - i} in[i] * in[k - i] + (k even ? in[k / 2]^2 : 0)
+                const uint64_t *cross1_ptrs[SEAL_CIPHERTEXT_SIZE_MAX];
+                const uint64_t *cross2_ptrs[SEAL_CIPHERTEXT_SIZE_MAX];
+                for (size_t k = 0; k < dest_size; k++)
+                {
+                    // The indices i of the cross terms satisfy i_first <= i < (k + 1) / 2
+                    const size_t i_first = k >= in1_size ? k - (in1_size - 1) : 0;
+                    const size_t i_end = (k + 1) / 2;
+                    const size_t cross_count = i_end > i_first ? i_end - i_first : 0;
+                    const bool has_square = !(k & 1);
+                    for (size_t j = 0; j < base_size; j++)
+                    {
+                        const Modulus &modulus = base[j];
+                        const DyadicMontgomeryReducer reducer(modulus);
+                        for (size_t s = 0; s < cross_count; s++)
+                        {
+                            cross1_ptrs[s] = in1[i_first + s][j];
+                            cross2_ptrs[s] = in1[k - i_first - s][j];
+                        }
+                        const uint64_t *square_ptr =
+                            has_square ? static_cast<const uint64_t *>(in1[k / 2][j]) : nullptr;
+                        uint64_t *dest = out[k][j];
+                        for (size_t l = 0; l < coeff_count; l++)
+                        {
+                            uint64_t cross =
+                                behz_dot_product(cross1_ptrs, cross2_ptrs, cross_count, l, reducer, modulus);
+                            uint64_t result = sub_if_ge_uint64(cross + cross, modulus.value());
+                            if (has_square)
+                            {
+                                const uint64_t x = reducer.reduce_input(square_ptr[l]);
+                                unsigned long long prod[2];
+                                multiply_uint64(x, x, prod);
+                                result = sub_if_ge_uint64(result + reducer.reduce(prod[0], prod[1]), modulus.value());
+                            }
+                            dest[l] = result;
+                        }
+                    }
+                }
+                return;
+            }
+
+            const uint64_t *in1_ptrs[SEAL_CIPHERTEXT_SIZE_MAX];
+            const uint64_t *in2_ptrs[SEAL_CIPHERTEXT_SIZE_MAX];
+            for (size_t k = 0; k < dest_size; k++)
+            {
+                size_t in1_last = min<size_t>(k, in1_size - 1);
+                size_t in2_first = min<size_t>(k, in2_size - 1);
+                size_t in1_first = k - in2_first;
+                size_t term_count = in1_last - in1_first + 1;
+                if (term_count > SEAL_CIPHERTEXT_SIZE_MAX)
+                {
+                    throw logic_error("invalid ciphertext size");
+                }
+                for (size_t j = 0; j < base_size; j++)
+                {
+                    const Modulus &modulus = base[j];
+                    const DyadicMontgomeryReducer reducer(modulus);
+                    for (size_t s = 0; s < term_count; s++)
+                    {
+                        in1_ptrs[s] = in1[in1_first + s][j];
+                        in2_ptrs[s] = in2[in2_first - s][j];
+                    }
+                    uint64_t *dest = out[k][j];
+                    for (size_t l = 0; l < coeff_count; l++)
+                    {
+                        dest[l] = behz_dot_product(in1_ptrs, in2_ptrs, term_count, l, reducer, modulus);
+                    }
+                }
+            }
+#endif
         }
     } // namespace util
 } // namespace seal
