@@ -7,6 +7,8 @@
 #include "seal/util/uintcore.h"
 #include <cstddef>
 #include <cstdint>
+#include <random>
+#include <vector>
 #include "gtest/gtest.h"
 
 using namespace seal;
@@ -878,6 +880,54 @@ namespace sealtest
                 ASSERT_EQ(8ULL, result[1][1][1]);
                 ASSERT_EQ(7ULL, result[1][1][2]);
                 ASSERT_EQ(1ULL, result[1][1][3]);
+            }
+        }
+
+        namespace
+        {
+            vector<Modulus> kernel_test_moduli()
+            {
+                return { Modulus(2),
+                         Modulus(3),
+                         Modulus(4),
+                         Modulus(65537),
+                         Modulus(uint64_t(1) << 32),
+                         Modulus(0xffffffffffc0001ULL),
+                         Modulus(0x1fffffffffe00001ULL),
+                         Modulus((uint64_t(1) << 61) - 1) };
+            }
+
+            const vector<size_t> kernel_test_sizes{ 1, 2, 7, 64, 1001 };
+
+            // Extreme and random values less than bound (any 64-bit values if bound is zero)
+            vector<uint64_t> kernel_test_operand(size_t n, uint64_t bound, mt19937_64 &rng)
+            {
+                vector<uint64_t> values(n);
+                for (size_t i = 0; i < n; i++)
+                {
+                    uint64_t x = (i % 4 == 0) ? ~uint64_t(0) : (i % 4 == 1 ? 0 : rng());
+                    values[i] = bound ? (i % 4 == 0 ? bound - 1 : x % bound) : x;
+                }
+                return values;
+            }
+        } // namespace
+
+        TEST(PolyArithSmallMod, ModuloPolyCoeffsRandom)
+        {
+            mt19937_64 rng(31337);
+            for (const Modulus &modulus : kernel_test_moduli())
+            {
+                for (size_t n : kernel_test_sizes)
+                {
+                    vector<uint64_t> a = kernel_test_operand(n, 0, rng), out(n);
+                    modulo_poly_coeffs(a.data(), n, modulus, out.data());
+                    for (size_t i = 0; i < n; i++)
+                    {
+                        ASSERT_EQ(a[i] % modulus.value(), out[i]);
+                    }
+                    modulo_poly_coeffs(a.data(), n, modulus, a.data());
+                    ASSERT_EQ(out, a);
+                }
             }
         }
     } // namespace util

@@ -33,11 +33,17 @@ namespace seal
 #endif
 
 #ifdef SEAL_USE_INTEL_HEXL
-            intel::hexl::EltwiseReduceMod(result, poly, coeff_count, modulus.value(), modulus.value(), 1);
-#else
+            // Intel HEXL reduces arbitrary 64-bit input correctly only for moduli of at least 14 bits: its AVX512-IFMA
+            // kernel requires the input to be less than 2^(50 + bit count of the modulus), and it reads the
+            // input_mod_factor values 2 and 4 as bounds on the input. Smaller moduli use the code below.
+            if (modulus.bit_count() >= 14)
+            {
+                intel::hexl::EltwiseReduceMod(result, poly, coeff_count, modulus.value(), modulus.value(), 1);
+                return;
+            }
+#endif
             SEAL_ITERATE(
                 iter(poly, result), coeff_count, [&](auto I) { get<1>(I) = barrett_reduce_64(get<0>(I), modulus); });
-#endif
         }
 
         void add_poly_coeffmod(
