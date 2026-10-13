@@ -511,20 +511,21 @@ if(SEAL_BUILD_SEAL_C)
         message(FATAL_ERROR "SEAL_C requires `SEAL_BUILD_DEPS=ON`")
     endif()
 
-    # Preconditions that don't depend on the config:
-    if(UNIX AND SEAL_USE_INTEL_HEXL AND NOT SEAL_BUILD_STATIC_SEAL_C)
-        # Emit warning at build-time only for Debug
-        add_custom_command(TARGET sealc POST_BUILD
-            COMMAND $<$<CONFIG:Debug>:${CMAKE_COMMAND}> -E cmake_echo_color --yellow --bold
-                    "[SEAL WARNING] SEAL_C (shared) cannot find Address Sanitizer (libasan) enabled by Intel HEXL in Debug "
-                    "mode on Unix-like systems. SEALNet does not work. Preload libasan for downstream applications."
-            COMMAND_EXPAND_LISTS)
-    endif()
-
     if(SEAL_BUILD_STATIC_SEAL_C)
         add_library(sealc STATIC)
     else()
         add_library(sealc SHARED)
+    endif()
+
+    # Preconditions that don't depend on the config:
+    if(UNIX AND SEAL_USE_INTEL_HEXL AND NOT SEAL_BUILD_STATIC_SEAL_C)
+        # Emit warning at build-time only for Debug; in other configurations the whole command expands to nothing
+        string(CONCAT SEAL_C_WARNING
+            "[SEAL WARNING] SEAL_C (shared) cannot find Address Sanitizer (libasan) enabled by Intel HEXL in Debug "
+            "mode on Unix-like systems. SEALNet does not work. Preload libasan for downstream applications.")
+        add_custom_command(TARGET sealc POST_BUILD
+            COMMAND "$<$<CONFIG:Debug>:${CMAKE_COMMAND};-E;cmake_echo_color;--yellow;--bold;${SEAL_C_WARNING}>"
+            COMMAND_EXPAND_LISTS VERBATIM)
     endif()
 
     # Add source files to library and header files to install
