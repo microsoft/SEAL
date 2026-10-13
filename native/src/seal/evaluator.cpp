@@ -11,6 +11,7 @@
 #include "seal/util/uintarith.h"
 #include <algorithm>
 #include <cmath>
+#include <cstring>
 #include <functional>
 
 using namespace std;
@@ -116,6 +117,92 @@ namespace seal
             }
             return make_tuple(multiply_uint_mod(e1, factor1, plain_modulus), e1, e2);
         }
+
+        // Throws if encrypted is not in the NTT form required by scheme
+        void validate_ntt_form(const Ciphertext &encrypted, scheme_type scheme)
+        {
+            if (scheme == scheme_type::bfv && encrypted.is_ntt_form())
+            {
+                throw invalid_argument("BFV encrypted cannot be in NTT form");
+            }
+            if (scheme == scheme_type::ckks && !encrypted.is_ntt_form())
+            {
+                throw invalid_argument("CKKS encrypted must be in NTT form");
+            }
+            if (scheme == scheme_type::bgv && !encrypted.is_ntt_form())
+            {
+                throw invalid_argument("BGV encrypted must be in NTT form");
+            }
+        }
+
+        // Throws if key_vector cannot key switch a polynomial with decomp_modulus_size RNS components. There is a key
+        // for every RNS component at the first level, so key_vector may be longer than decomp_modulus_size.
+        void validate_kswitch_key_vector(
+            const vector<PublicKey> &key_vector, size_t decomp_modulus_size, const SEALContext &context)
+        {
+            if (key_vector.size() < decomp_modulus_size)
+            {
+                throw invalid_argument("kswitch_keys inner dimension is too small");
+            }
+            for (auto &each_key : key_vector)
+            {
+                if (!is_metadata_valid_for(each_key, context) || !is_buffer_valid(each_key))
+                {
+                    throw invalid_argument("kswitch_keys is not valid for encryption parameters");
+                }
+            }
+        }
+
+        // Throws if Evaluator::apply_galois_inplace cannot apply galois_elt to encrypted with galois_keys
+        void validate_galois(
+            const SEALContext &context, const Ciphertext &encrypted, uint32_t galois_elt, const GaloisKeys &galois_keys)
+        {
+            if (!is_metadata_valid_for(encrypted, context) || !is_buffer_valid(encrypted))
+            {
+                throw invalid_argument("encrypted is not valid for encryption parameters");
+            }
+
+            // Don't validate all of galois_keys but just check the parms_id.
+            if (galois_keys.parms_id() != context.key_parms_id())
+            {
+                throw invalid_argument("galois_keys is not valid for encryption parameters");
+            }
+
+            auto &parms = context.get_context_data(encrypted.parms_id())->parms();
+            size_t coeff_count = parms.poly_modulus_degree();
+            size_t coeff_modulus_size = parms.coeff_modulus().size();
+
+            // Size check
+            if (!product_fits_in(coeff_count, coeff_modulus_size))
+            {
+                throw logic_error("invalid parameters");
+            }
+
+            // Check if Galois key is generated or not.
+            if (!galois_keys.has_key(galois_elt))
+            {
+                throw invalid_argument("Galois key not present");
+            }
+
+            uint64_t m = mul_safe(static_cast<uint64_t>(coeff_count), uint64_t(2));
+            if (!(galois_elt & 1) || unsigned_geq(galois_elt, m))
+            {
+                throw invalid_argument("Galois element is not valid");
+            }
+            if (encrypted.size() != 2)
+            {
+                throw invalid_argument("encrypted size must be 2");
+            }
+            validate_ntt_form(encrypted, parms.scheme());
+
+            if (!context.using_keyswitching())
+            {
+                throw logic_error("keyswitching is not supported by the context");
+            }
+            validate_kswitch_key_vector(
+                galois_keys.data(GaloisKeys::get_index(galois_elt)), coeff_modulus_size, context);
+        }
+
     } // namespace
 
     Evaluator::Evaluator(const SEALContext &context) : context_(context)
@@ -998,8 +1085,7 @@ namespace seal
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
         }
-        // The early return below skips switch_key_inplace, which is what would otherwise
-        // validate the ciphertext, so check it here.
+        // The key switching below does not validate the ciphertext, so check it here.
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
@@ -1030,14 +1116,39 @@ namespace seal
         // Calculate number of relinearize_one_step calls needed
         size_t relins_needed = encrypted_size - destination_size;
 
-        // Step I key switches component encrypted_size - 1 - I, which multiplies the same power of the secret key, and
+        // Verify the key switching parameters and keys before encrypted is modified
+        auto &parms = context_data_ptr->parms();
+        size_t coeff_count = parms.poly_modulus_degree();
+        size_t decomp_modulus_size = parms.coeff_modulus().size();
+        if (!context_.using_keyswitching())
+        {
+            throw logic_error("keyswitching is not supported by the context");
+        }
+        if (!pool)
+        {
+            throw invalid_argument("pool is uninitialized");
+        }
+        validate_ntt_form(encrypted, parms.scheme());
+        if (!product_fits_in(coeff_count, decomp_modulus_size + 1, size_t(2)))
+        {
+            throw logic_error("invalid parameters");
+        }
+        for (size_t i = 0; i < relins_needed; i++)
+        {
+            validate_kswitch_key_vector(
+                relin_keys.data(RelinKeys::get_index(encrypted_size - 1 - i)), decomp_modulus_size, context_);
+        }
+
+        // Step i key switches component encrypted_size - 1 - i, which multiplies the same power of the secret key, and
         // adds the result to the first two components
-        SEAL_ITERATE(iter(size_t(0)), relins_needed, [&](auto I) {
-            size_t key_power = encrypted_size - 1 - I;
-            this->switch_key_inplace(
-                encrypted, iter(encrypted)[key_power], static_cast<const KSwitchKeys &>(relin_keys),
-                RelinKeys::get_index(key_power), pool);
-        });
+        uint64_t *outputs[2]{ encrypted.data(0), encrypted.data(1) };
+        for (size_t i = 0; i < relins_needed; i++)
+        {
+            size_t key_power = encrypted_size - 1 - i;
+            switch_key(
+                encrypted.parms_id(), ConstRNSIter(encrypted.data(key_power), coeff_count),
+                relin_keys.data(RelinKeys::get_index(key_power)), outputs, outputs, pool);
+        }
 
         // Put the output of final relinearization into destination.
         // Prepare destination only at this point because we are resizing down
@@ -2268,133 +2379,46 @@ namespace seal
     void Evaluator::apply_galois_inplace(
         Ciphertext &encrypted, uint32_t galois_elt, const GaloisKeys &galois_keys, MemoryPoolHandle pool) const
     {
-        // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
-        {
-            throw invalid_argument("encrypted is not valid for encryption parameters");
-        }
-
-        // Don't validate all of galois_keys but just check the parms_id.
-        if (galois_keys.parms_id() != context_.key_parms_id())
-        {
-            throw invalid_argument("galois_keys is not valid for encryption parameters");
-        }
+        // Verify parameters; encrypted is not modified before all checks have passed
+        validate_galois(context_, encrypted, galois_elt, galois_keys);
 
         auto &context_data = *context_.get_context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
         size_t coeff_modulus_size = coeff_modulus.size();
-        size_t encrypted_size = encrypted.size();
         // Use key_context_data where permutation tables exist since previous runs.
         auto galois_tool = context_.key_context_data()->galois_tool();
 
-        // Size check
-        if (!product_fits_in(coeff_count, coeff_modulus_size))
-        {
-            throw logic_error("invalid parameters");
-        }
-
-        // Check if Galois key is generated or not.
-        if (!galois_keys.has_key(galois_elt))
-        {
-            throw invalid_argument("Galois key not present");
-        }
-
-        uint64_t m = mul_safe(static_cast<uint64_t>(coeff_count), uint64_t(2));
-
-        // Verify parameters
-        if (!(galois_elt & 1) || unsigned_geq(galois_elt, m))
-        {
-            throw invalid_argument("Galois element is not valid");
-        }
-        if (encrypted_size != 2)
-        {
-            throw invalid_argument("encrypted size must be 2");
-        }
-
-        // The NTT form must match the scheme. This precondition is also enforced by the
-        // switch_key_inplace call below, but verify it here before mutating the operand.
-        auto scheme = parms.scheme();
-        if (scheme == scheme_type::bfv && encrypted.is_ntt_form())
-        {
-            throw invalid_argument("BFV encrypted cannot be in NTT form");
-        }
-        if (scheme == scheme_type::ckks && !encrypted.is_ntt_form())
-        {
-            throw invalid_argument("CKKS encrypted must be in NTT form");
-        }
-        if (scheme == scheme_type::bgv && !encrypted.is_ntt_form())
-        {
-            throw invalid_argument("BGV encrypted must be in NTT form");
-        }
-
-        // The selected key material is also validated by the switch_key_inplace call below, but
-        // verify it here before mutating the operand.
-        if (!context_.using_keyswitching())
-        {
-            throw logic_error("keyswitching is not supported by the context");
-        }
-        auto &key_vector = galois_keys.data(GaloisKeys::get_index(galois_elt));
-        if (key_vector.size() < coeff_modulus_size)
-        {
-            throw invalid_argument("kswitch_keys inner dimension is too small");
-        }
-        for (auto &each_key : key_vector)
-        {
-            if (!is_metadata_valid_for(each_key, context_) || !is_buffer_valid(each_key))
-            {
-                throw invalid_argument("kswitch_keys is not valid for encryption parameters");
-            }
-        }
-
         SEAL_ALLOCATE_GET_RNS_ITER(temp, coeff_count, coeff_modulus_size, pool);
 
-        // DO NOT CHANGE EXECUTION ORDER OF FOLLOWING SECTION
-        // BEGIN: Apply Galois for each ciphertext
-        // Execution order is sensitive, since apply_galois is not inplace!
+        // Apply the Galois automorphism to both polynomials without copies: galois(c1), the key-switching target,
+        // goes to temp first; c1 is then free and receives galois(c0). The key switching adds its first component to
+        // galois(c0) (read from c1) and writes the sum to c0, and then writes its second component to c1.
+        // Execution order is sensitive, since apply_galois is not in place.
+        auto encrypted_iter = iter(encrypted);
         if (parms.scheme() == scheme_type::bfv)
         {
-            // !!! DO NOT CHANGE EXECUTION ORDER!!!
-
-            // First transform encrypted.data(0)
-            auto encrypted_iter = iter(encrypted);
-            galois_tool->apply_galois(encrypted_iter[0], coeff_modulus_size, galois_elt, coeff_modulus, temp);
-
-            // Copy result to encrypted.data(0)
-            set_poly(temp, coeff_count, coeff_modulus_size, encrypted.data(0));
-
-            // Next transform encrypted.data(1)
             galois_tool->apply_galois(encrypted_iter[1], coeff_modulus_size, galois_elt, coeff_modulus, temp);
+            galois_tool->apply_galois(
+                encrypted_iter[0], coeff_modulus_size, galois_elt, coeff_modulus, encrypted_iter[1]);
         }
         else if (parms.scheme() == scheme_type::ckks || parms.scheme() == scheme_type::bgv)
         {
-            // !!! DO NOT CHANGE EXECUTION ORDER!!!
-
-            // First transform encrypted.data(0)
-            auto encrypted_iter = iter(encrypted);
-            galois_tool->apply_galois_ntt(encrypted_iter[0], coeff_modulus_size, galois_elt, temp);
-
-            // Copy result to encrypted.data(0)
-            set_poly(temp, coeff_count, coeff_modulus_size, encrypted.data(0));
-
-            // Next transform encrypted.data(1)
             galois_tool->apply_galois_ntt(encrypted_iter[1], coeff_modulus_size, galois_elt, temp);
+            galois_tool->apply_galois_ntt(encrypted_iter[0], coeff_modulus_size, galois_elt, encrypted_iter[1]);
         }
         else
         {
             throw logic_error("scheme not implemented");
         }
 
-        // Wipe encrypted.data(1)
-        set_zero_poly(coeff_count, coeff_modulus_size, encrypted.data(1));
-
-        // END: Apply Galois for each ciphertext
-        // REORDERING IS SAFE NOW
-
-        // Calculate (temp * galois_key[0], temp * galois_key[1]) + (ct[0], 0)
-        switch_key_inplace(
-            encrypted, temp, static_cast<const KSwitchKeys &>(galois_keys), GaloisKeys::get_index(galois_elt), pool);
+        // Calculate (temp * galois_key[0], temp * galois_key[1]) + (galois(ct[0]), 0)
+        const uint64_t *addends[2]{ encrypted.data(1), nullptr };
+        uint64_t *outputs[2]{ encrypted.data(0), encrypted.data(1) };
+        switch_key(
+            encrypted.parms_id(), temp, galois_keys.data(GaloisKeys::get_index(galois_elt)), addends, outputs,
+            std::move(pool));
 #ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
         // Transparent ciphertext output is not allowed.
         if (encrypted.is_transparent())
@@ -2461,315 +2485,490 @@ namespace seal
         }
     }
 
-    void Evaluator::switch_key_inplace(
-        Ciphertext &encrypted, ConstRNSIter target_iter, const KSwitchKeys &kswitch_keys, size_t kswitch_keys_index,
-        MemoryPoolHandle pool) const
+    namespace
     {
-        auto parms_id = encrypted.parms_id();
-        auto &context_data = *context_.get_context_data(parms_id);
-        auto &parms = context_data.parms();
-        auto &key_context_data = *context_.key_context_data();
-        auto &key_parms = key_context_data.parms();
-        auto scheme = parms.scheme();
+        // Key switching keys are public keys, which have two components
+        constexpr size_t kswitch_key_component_count = 2;
 
-        // Verify parameters.
-        if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
-        {
-            throw invalid_argument("encrypted is not valid for encryption parameters");
-        }
-        if (!target_iter)
-        {
-            throw invalid_argument("target_iter");
-        }
-        if (!context_.using_keyswitching())
-        {
-            throw logic_error("keyswitching is not supported by the context");
-        }
+        // Number of products a * b with a < 4q and b < q (q has at most SEAL_USER_MOD_BIT_COUNT_MAX bits) that can be
+        // added to a 128-bit accumulator holding a value less than q without overflow. With 60-bit moduli this is 63.
+        constexpr size_t kswitch_lazy_summand_bound =
+            (static_cast<size_t>(SEAL_MULTIPLY_ACCUMULATE_USER_MOD_MAX) >> 2) - 1;
+        static_assert(kswitch_lazy_summand_bound >= 2, "kswitch_lazy_summand_bound is too small");
 
-        // Don't validate all of kswitch_keys but just check the parms_id.
-        if (kswitch_keys.parms_id() != context_.key_parms_id())
-        {
-            throw invalid_argument("parameter mismatch");
-        }
+        // Number of coefficients processed at a time by kswitch_dot_product; the 128-bit accumulators for one block of
+        // two key components (16 KB) fit in L1 cache
+        constexpr size_t kswitch_block_size = 512;
 
-        if (kswitch_keys_index >= kswitch_keys.data().size())
-        {
-            throw out_of_range("kswitch_keys_index");
-        }
-        if (!pool)
-        {
-            throw invalid_argument("pool is uninitialized");
-        }
-        if (scheme == scheme_type::bfv && encrypted.is_ntt_form())
-        {
-            throw invalid_argument("BFV encrypted cannot be in NTT form");
-        }
-        if (scheme == scheme_type::ckks && !encrypted.is_ntt_form())
-        {
-            throw invalid_argument("CKKS encrypted must be in NTT form");
-        }
-        if (scheme == scheme_type::bgv && !encrypted.is_ntt_form())
-        {
-            throw invalid_argument("BGV encrypted must be in NTT form");
-        }
+        // Number of words needed for the accumulators of kswitch_dot_product: two per coefficient and key component
+        constexpr size_t kswitch_acc_scratch_size = 2 * kswitch_key_component_count * kswitch_block_size;
 
-        // Extract encryption parameters.
-        size_t coeff_count = parms.poly_modulus_degree();
-        size_t decomp_modulus_size = parms.coeff_modulus().size();
-        auto &key_modulus = key_parms.coeff_modulus();
-        size_t key_modulus_size = key_modulus.size();
-        size_t rns_modulus_size = decomp_modulus_size + 1;
-        auto key_ntt_tables = iter(key_context_data.small_ntt_tables());
-        auto modswitch_factors = key_context_data.rns_tool()->inv_q_last_mod_q();
-
-        // Size check
-        if (!product_fits_in(coeff_count, rns_modulus_size, size_t(2)))
+        // Computes for both key components k the fully reduced dot products
+        //     out[k][l] = (sum_{j < digit_count} digits[j][l] * keys[2 * j + k][l]) mod modulus,  l < coeff_count.
+        // Requires digits[j][l] < 4 * modulus and keys[..][l] < modulus. acc_scratch must hold
+        // kswitch_acc_scratch_size words.
+        void kswitch_dot_product(
+            size_t coeff_count, size_t digit_count, const uint64_t *const *digits, const uint64_t *const *keys,
+            const Modulus &modulus, uint64_t *const *out, unsigned long long *acc_scratch)
         {
-            throw logic_error("invalid parameters");
-        }
-
-        // Prepare input. Use the checked accessor so an empty key slot throws rather than
-        // dereferencing key_vector[0] through a null pointer.
-        auto &key_vector = kswitch_keys.data(kswitch_keys_index);
-        // The loop below indexes key_vector up to decomp_modulus_size; reject an inner vector
-        // that is too short (e.g. from unsafe_load) before it drives an out-of-bounds read. Keys
-        // are sized to the top-level modulus count, so a valid lower-level ciphertext has
-        // key_vector.size() >= decomp_modulus_size; use >=, not ==.
-        if (key_vector.size() < decomp_modulus_size)
-        {
-            throw invalid_argument("kswitch_keys inner dimension is too small");
-        }
-        size_t key_component_count = key_vector[0].data().size();
-
-        // Check only the used component in KSwitchKeys.
-        for (auto &each_key : key_vector)
-        {
-            if (!is_metadata_valid_for(each_key, context_) || !is_buffer_valid(each_key))
+            unsigned long long *acc[kswitch_key_component_count];
+            for (size_t k = 0; k < kswitch_key_component_count; k++)
             {
-                throw invalid_argument("kswitch_keys is not valid for encryption parameters");
+                acc[k] = acc_scratch + 2 * k * kswitch_block_size;
+            }
+
+            // Constants for the Barrett reductions
+            const uint64_t mod_value = modulus.value();
+            const uint64_t two_pow_64_mod_value = two_pow_64_mod(modulus);
+            const uint64_t const_ratio_0 = modulus.const_ratio()[0];
+            const uint64_t const_ratio_1 = modulus.const_ratio()[1];
+
+            for (size_t l0 = 0; l0 < coeff_count; l0 += kswitch_block_size)
+            {
+                const size_t block_size = min(kswitch_block_size, coeff_count - l0);
+                for (size_t k = 0; k < kswitch_key_component_count; k++)
+                {
+                    fill_n(acc[k], 2 * block_size, 0ULL);
+                }
+
+                for (size_t j = 0; j < digit_count;)
+                {
+                    // At most kswitch_lazy_summand_bound products are accumulated between reductions
+                    const size_t j_end = min(digit_count, j + kswitch_lazy_summand_bound);
+
+                    // Two digits at a time
+                    for (; j + 2 <= j_end; j += 2)
+                    {
+                        const uint64_t *d0 = digits[j] + l0;
+                        const uint64_t *d1 = digits[j + 1] + l0;
+                        const uint64_t *b0[kswitch_key_component_count];
+                        const uint64_t *b1[kswitch_key_component_count];
+                        for (size_t k = 0; k < kswitch_key_component_count; k++)
+                        {
+                            b0[k] = keys[j * kswitch_key_component_count + k] + l0;
+                            b1[k] = keys[(j + 1) * kswitch_key_component_count + k] + l0;
+                        }
+                        for (size_t l = 0; l < block_size; l++)
+                        {
+                            for (size_t k = 0; k < kswitch_key_component_count; k++)
+                            {
+                                multiply_add_uint64(d0[l], b0[k][l], d1[l], b1[k][l], acc[k] + 2 * l);
+                            }
+                        }
+                    }
+
+                    // Remaining single digit
+                    if (j < j_end)
+                    {
+                        const uint64_t *d0 = digits[j] + l0;
+                        const uint64_t *b0[kswitch_key_component_count];
+                        for (size_t k = 0; k < kswitch_key_component_count; k++)
+                        {
+                            b0[k] = keys[j * kswitch_key_component_count + k] + l0;
+                        }
+                        for (size_t l = 0; l < block_size; l++)
+                        {
+                            for (size_t k = 0; k < kswitch_key_component_count; k++)
+                            {
+                                multiply_add_uint64(d0[l], b0[k][l], acc[k] + 2 * l);
+                            }
+                        }
+                        j++;
+                    }
+
+                    // Reduce the accumulators if more digits follow
+                    if (j < digit_count)
+                    {
+                        for (size_t k = 0; k < kswitch_key_component_count; k++)
+                        {
+                            for (size_t l = 0; l < block_size; l++)
+                            {
+                                unsigned long long *a = acc[k] + 2 * l;
+                                a[0] = barrett_reduce_128_precomputed(
+                                    a[0], a[1], mod_value, two_pow_64_mod_value, const_ratio_0, const_ratio_1);
+                                a[1] = 0;
+                            }
+                        }
+                    }
+                }
+
+                for (size_t k = 0; k < kswitch_key_component_count; k++)
+                {
+                    uint64_t *o = out[k] + l0;
+                    const unsigned long long *a = acc[k];
+                    for (size_t l = 0; l < block_size; l++)
+                    {
+                        o[l] = barrett_reduce_128_precomputed(
+                            a[2 * l], a[2 * l + 1], mod_value, two_pow_64_mod_value, const_ratio_0, const_ratio_1);
+                    }
+                }
             }
         }
 
-        // Create a copy of target_iter
-        SEAL_ALLOCATE_GET_RNS_ITER(t_target, coeff_count, decomp_modulus_size, pool);
-        set_uint(target_iter, decomp_modulus_size * coeff_count, t_target);
-
-        // In CKKS or BGV, t_target is in NTT form; switch back to normal form
-        if (scheme == scheme_type::ckks || scheme == scheme_type::bgv)
+        // Writes out[l] = x(l) + addend[l] mod modulus, or out[l] = x(l) if addend is null, for l < coeff_count; x(l)
+        // must be fully reduced and addend[l] less than modulus. out may be identical to addend.
+        template <typename F>
+        SEAL_FORCE_INLINE void kswitch_write_rns_component(
+            size_t coeff_count, const uint64_t *addend, const Modulus &modulus, uint64_t *out, F x)
         {
-            inverse_ntt_negacyclic_harvey(t_target, decomp_modulus_size, key_ntt_tables);
+            if (addend)
+            {
+                const uint64_t p = modulus.value();
+                for (size_t l = 0; l < coeff_count; l++)
+                {
+                    out[l] = sub_if_ge_uint64(x(l) + addend[l], p);
+                }
+            }
+            else
+            {
+                for (size_t l = 0; l < coeff_count; l++)
+                {
+                    out[l] = x(l);
+                }
+            }
         }
 
-        // Temporary result
-        auto t_poly_prod(allocate_zero_poly_array(key_component_count, coeff_count, rns_modulus_size, pool));
+        // The functions kswitch_mod_down_bfv, kswitch_mod_down_ckks, and kswitch_mod_down_bgv compute one RNS
+        // component modulo qi of the key-switched result divided by the special prime qk. Their input is the RNS
+        // component prod modulo qi (NTT form, fully reduced) and the special-prime part t_last (coefficient form, less
+        // than qk). They write the result plus addend (if not null) to out, which may be identical to prod or addend.
 
-        SEAL_ITERATE(iter(size_t(0)), rns_modulus_size, [&](auto I) {
-            size_t key_index = (I == decomp_modulus_size ? key_modulus_size - 1 : I);
+        // BFV: out = addend + qk^(-1) * (prod - (t_last mod qi + fix)) mod qi in coefficient form; prod is overwritten
+        // by its inverse NTT. t_last is reduced modulo qi only if reduce_t_last.
+        void kswitch_mod_down_bfv(
+            size_t coeff_count, uint64_t *prod, const uint64_t *t_last, uint64_t fix, bool reduce_t_last,
+            const Modulus &qi_mod, const MultiplyUIntModOperand &inv_qk, const NTTTables &ntt_tables,
+            const uint64_t *addend, uint64_t *out)
+        {
+            // prod to coefficient form, in [0, 2qi)
+            inverse_ntt_negacyclic_harvey_lazy(CoeffIter(prod), ntt_tables);
 
-            // The NTT outputs below are in [0, 4q) and the key coefficients in [0, q), so with q of at most 60 bits a
-            // product is less than 2^122. Up to lazy_reduction_summand_bound of them can be added to a reduced value
-            // without overflowing 128 bits; the accumulator is reduced after every lazy_reduction_summand_bound
-            // products.
-            size_t lazy_reduction_summand_bound = (size_t(SEAL_MULTIPLY_ACCUMULATE_USER_MOD_MAX) >> 2) - 1;
-            size_t lazy_reduction_counter = lazy_reduction_summand_bound;
-
-            // Allocate memory for a lazy accumulator (128-bit coefficients)
-            auto t_poly_lazy(allocate_zero_poly_array(key_component_count, coeff_count, 2, pool));
-
-            // Semantic misuse of PolyIter; this is really pointing to the data for a single RNS factor
-            PolyIter accumulator_iter(t_poly_lazy.get(), 2, coeff_count);
-
-            // Multiply with keys and perform lazy reduction on product's coefficients
-            SEAL_ITERATE(iter(size_t(0)), decomp_modulus_size, [&](auto J) {
-                SEAL_ALLOCATE_GET_COEFF_ITER(t_ntt, coeff_count, pool);
-                ConstCoeffIter t_operand;
-
-                // RNS-NTT form exists in input
-                if ((scheme == scheme_type::ckks || scheme == scheme_type::bgv) && (I == J))
-                {
-                    t_operand = target_iter[J];
-                }
-                // Perform RNS-NTT conversion
-                else
-                {
-                    // No need to perform RNS conversion (modular reduction)
-                    if (key_modulus[J] <= key_modulus[key_index])
-                    {
-                        set_uint(t_target[J], coeff_count, t_ntt);
-                    }
-                    // Perform RNS conversion (modular reduction)
-                    else
-                    {
-                        modulo_poly_coeffs(t_target[J], coeff_count, key_modulus[key_index], t_ntt);
-                    }
-                    // NTT conversion lazy outputs in [0, 4q)
-                    ntt_negacyclic_harvey_lazy(t_ntt, key_ntt_tables[key_index]);
-                    t_operand = t_ntt;
-                }
-
-                // Multiply with keys and modular accumulate products in a lazy fashion
-                bool reduce = !--lazy_reduction_counter;
-                SEAL_ITERATE(iter(key_vector[J].data(), accumulator_iter), key_component_count, [&](auto K) {
-                    if (reduce)
-                    {
-                        SEAL_ITERATE(iter(t_operand, get<0>(K)[key_index], get<1>(K)), coeff_count, [&](auto L) {
-                            unsigned long long qword[2]{ 0, 0 };
-                            multiply_uint64(get<0>(L), get<1>(L), qword);
-
-                            // Accumulate product of t_operand and t_key_acc to t_poly_lazy and reduce
-                            add_uint128(qword, get<2>(L).ptr(), qword);
-                            get<2>(L)[0] = barrett_reduce_128(qword, key_modulus[key_index]);
-                            get<2>(L)[1] = 0;
-                        });
-                    }
-                    else
-                    {
-                        // Same as above but no reduction
-                        SEAL_ITERATE(iter(t_operand, get<0>(K)[key_index], get<1>(K)), coeff_count, [&](auto L) {
-                            unsigned long long qword[2]{ 0, 0 };
-                            multiply_uint64(get<0>(L), get<1>(L), qword);
-                            add_uint128(qword, get<2>(L).ptr(), qword);
-                            get<2>(L)[0] = qword[0];
-                            get<2>(L)[1] = qword[1];
-                        });
-                    }
-                });
-
-                if (reduce)
-                {
-                    lazy_reduction_counter = lazy_reduction_summand_bound;
-                }
-            });
-
-            // PolyIter pointing to the destination t_poly_prod, shifted to the appropriate modulus
-            PolyIter t_poly_prod_iter(t_poly_prod.get() + (I * coeff_count), coeff_count, rns_modulus_size);
-
-            // Final modular reduction
-            SEAL_ITERATE(iter(accumulator_iter, t_poly_prod_iter), key_component_count, [&](auto K) {
-                if (lazy_reduction_counter == lazy_reduction_summand_bound)
-                {
-                    SEAL_ITERATE(iter(get<0>(K), *get<1>(K)), coeff_count, [&](auto L) {
-                        get<1>(L) = static_cast<uint64_t>(*get<0>(L));
-                    });
-                }
-                else
-                {
-                    // Same as above except need to still do reduction
-                    SEAL_ITERATE(iter(get<0>(K), *get<1>(K)), coeff_count, [&](auto L) {
-                        get<1>(L) = barrett_reduce_128(get<0>(L).ptr(), key_modulus[key_index]);
-                    });
-                }
-            });
-        });
-        // Accumulated products are now stored in t_poly_prod
-
-        // Perform modulus switching with scaling
-        PolyIter t_poly_prod_iter(t_poly_prod.get(), coeff_count, rns_modulus_size);
-        SEAL_ITERATE(iter(encrypted, t_poly_prod_iter), key_component_count, [&](auto I) {
-            if (scheme == scheme_type::bgv)
+            // t_last mod qi + fix is in [1, 2qi], so the argument of the Shoup multiplication is in (0, 4qi)
+            const uint64_t qi_lazy = qi_mod.value() << 1;
+            if (reduce_t_last)
             {
-                const Modulus &plain_modulus = parms.plain_modulus();
-                // qk is the special prime
-                uint64_t qk = key_modulus[key_modulus_size - 1].value();
-                uint64_t qk_inv_qp = context_.key_context_data()->rns_tool()->inv_q_last_mod_t();
-
-                // Lazy reduction; this needs to be then reduced mod qi
-                CoeffIter t_last(get<1>(I)[decomp_modulus_size]);
-                inverse_ntt_negacyclic_harvey(t_last, key_ntt_tables[key_modulus_size - 1]);
-
-                SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(k, coeff_count, pool);
-                modulo_poly_coeffs(t_last, coeff_count, plain_modulus, k);
-                negate_poly_coeffmod(k, coeff_count, plain_modulus, k);
-                if (qk_inv_qp != 1)
-                {
-                    multiply_poly_scalar_coeffmod(k, coeff_count, qk_inv_qp, plain_modulus, k);
-                }
-
-                SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(delta, coeff_count, pool);
-                SEAL_ALLOCATE_ZERO_GET_COEFF_ITER(c_mod_qi, coeff_count, pool);
-                SEAL_ITERATE(iter(I, key_modulus, modswitch_factors, key_ntt_tables), decomp_modulus_size, [&](auto J) {
-                    // delta = k mod q_i
-                    modulo_poly_coeffs(k, coeff_count, get<1>(J), delta);
-                    // delta = k * q_k mod q_i
-                    multiply_poly_scalar_coeffmod(delta, coeff_count, qk, get<1>(J), delta);
-
-                    // c mod q_i
-                    modulo_poly_coeffs(t_last, coeff_count, get<1>(J), c_mod_qi);
-                    // delta = c + k * q_k mod q_i
-                    // c_{i} = c_{i} - delta mod q_i
-                    SEAL_ITERATE(iter(delta, c_mod_qi), coeff_count, [&](auto K) {
-                        get<0>(K) = add_uint_mod(get<0>(K), get<1>(K), get<1>(J));
-                    });
-                    ntt_negacyclic_harvey(delta, get<3>(J));
-                    SEAL_ITERATE(iter(delta, get<0, 1>(J)), coeff_count, [&](auto K) {
-                        get<1>(K) = sub_uint_mod(get<1>(K), get<0>(K), get<1>(J));
-                    });
-
-                    multiply_poly_scalar_coeffmod(get<0, 1>(J), coeff_count, get<2>(J), get<1>(J), get<0, 1>(J));
-
-                    add_poly_coeffmod(get<0, 1>(J), get<0, 0>(J), coeff_count, get<1>(J), get<0, 0>(J));
+                kswitch_write_rns_component(coeff_count, addend, qi_mod, out, [&](size_t l) {
+                    uint64_t t = barrett_reduce_64(t_last[l], qi_mod) + fix;
+                    return multiply_uint_mod(prod[l] + qi_lazy - t, inv_qk, qi_mod);
                 });
             }
             else
             {
-                // Lazy reduction; this needs to be then reduced mod qi
-                CoeffIter t_last(get<1>(I)[decomp_modulus_size]);
-                inverse_ntt_negacyclic_harvey_lazy(t_last, key_ntt_tables[key_modulus_size - 1]);
-
-                // Add (p-1)/2 to change from flooring to rounding.
-                uint64_t qk = key_modulus[key_modulus_size - 1].value();
-                uint64_t qk_half = qk >> 1;
-                SEAL_ITERATE(t_last, coeff_count, [&](auto &J) {
-                    J = barrett_reduce_64(J + qk_half, key_modulus[key_modulus_size - 1]);
-                });
-
-                SEAL_ITERATE(iter(I, key_modulus, key_ntt_tables, modswitch_factors), decomp_modulus_size, [&](auto J) {
-                    SEAL_ALLOCATE_GET_COEFF_ITER(t_ntt, coeff_count, pool);
-
-                    // (ct mod 4qk) mod qi
-                    uint64_t qi = get<1>(J).value();
-                    if (qk > qi)
-                    {
-                        // This cannot be spared. NTT only tolerates input that is less than 4*modulus (i.e. qk <=4*qi).
-                        modulo_poly_coeffs(t_last, coeff_count, get<1>(J), t_ntt);
-                    }
-                    else
-                    {
-                        set_uint(t_last, coeff_count, t_ntt);
-                    }
-
-                    // Lazy substraction, results in [0, 2*qi), since fix is in [0, qi].
-                    uint64_t fix = qi - barrett_reduce_64(qk_half, get<1>(J));
-                    SEAL_ITERATE(t_ntt, coeff_count, [fix](auto &K) { K += fix; });
-
-                    uint64_t qi_lazy = qi << 1; // some multiples of qi
-                    if (scheme == scheme_type::ckks)
-                    {
-                        // This ntt_negacyclic_harvey_lazy results in [0, 4*qi).
-                        ntt_negacyclic_harvey_lazy(t_ntt, get<2>(J));
-#if SEAL_USER_MOD_BIT_COUNT_MAX > 60
-                        // Reduce from [0, 4qi) to [0, 2qi)
-                        SEAL_ITERATE(
-                            t_ntt, coeff_count, [&](auto &K) { K -= SEAL_COND_SELECT(K >= qi_lazy, qi_lazy, 0); });
-#else
-                        // Since SEAL uses at most 60bit moduli, 8*qi < 2^63.
-                        qi_lazy = qi << 2;
-#endif
-                    }
-                    else if (scheme == scheme_type::bfv)
-                    {
-                        inverse_ntt_negacyclic_harvey_lazy(get<0, 1>(J), get<2>(J));
-                    }
-
-                    // ((ct mod qi) - (ct mod qk)) mod qi with output in [0, 2 * qi_lazy)
-                    SEAL_ITERATE(
-                        iter(get<0, 1>(J), t_ntt), coeff_count, [&](auto K) { get<0>(K) += qi_lazy - get<1>(K); });
-
-                    // qk^(-1) * ((ct mod qi) - (ct mod qk)) mod qi
-                    multiply_poly_scalar_coeffmod(get<0, 1>(J), coeff_count, get<3>(J), get<1>(J), get<0, 1>(J));
-                    add_poly_coeffmod(get<0, 1>(J), get<0, 0>(J), coeff_count, get<1>(J), get<0, 0>(J));
+                kswitch_write_rns_component(coeff_count, addend, qi_mod, out, [&](size_t l) {
+                    return multiply_uint_mod(prod[l] + qi_lazy - (t_last[l] + fix), inv_qk, qi_mod);
                 });
             }
-        });
+        }
+
+        // CKKS: out = addend + qk^(-1) * (prod - NTT(t_last mod qi + fix)) mod qi in NTT form. t_last is reduced modulo
+        // qi only if reduce_t_last. t_ntt is scratch space for one RNS component.
+        void kswitch_mod_down_ckks(
+            size_t coeff_count, const uint64_t *prod, const uint64_t *t_last, uint64_t fix, bool reduce_t_last,
+            const Modulus &qi_mod, const MultiplyUIntModOperand &inv_qk, const NTTTables &ntt_tables, uint64_t *t_ntt,
+            const uint64_t *addend, uint64_t *out)
+        {
+            if (reduce_t_last)
+            {
+                for (size_t l = 0; l < coeff_count; l++)
+                {
+                    t_ntt[l] = barrett_reduce_64(t_last[l], qi_mod) + fix;
+                }
+            }
+            else
+            {
+                for (size_t l = 0; l < coeff_count; l++)
+                {
+                    t_ntt[l] = t_last[l] + fix;
+                }
+            }
+
+            // This ntt_negacyclic_harvey_lazy results in [0, 4qi)
+            ntt_negacyclic_harvey_lazy(CoeffIter(t_ntt), ntt_tables);
+
+            // The argument of the Shoup multiplication is in (0, 5qi), and 5qi < 2^64 since qi has at most 61 bits
+            const uint64_t qi_lazy = qi_mod.value() << 2;
+            kswitch_write_rns_component(coeff_count, addend, qi_mod, out, [&](size_t l) {
+                return multiply_uint_mod(prod[l] + qi_lazy - t_ntt[l], inv_qk, qi_mod);
+            });
+        }
+
+        // BGV: out = addend + qk^(-1) * (prod - NTT(delta)) mod qi in NTT form, where delta = t_last + corr * qk.
+        // t_last is reduced modulo qi only if reduce_t_last. t_delta is scratch space for one RNS component.
+        void kswitch_mod_down_bgv(
+            size_t coeff_count, const uint64_t *prod, const uint64_t *t_last, const uint64_t *corr,
+            const MultiplyUIntModOperand &qk_mod_qi, bool reduce_t_last, const Modulus &qi_mod,
+            const MultiplyUIntModOperand &inv_qk, const NTTTables &ntt_tables, uint64_t *t_delta,
+            const uint64_t *addend, uint64_t *out)
+        {
+            // delta is computed lazily in [0, 4qi), as ntt_negacyclic_harvey_lazy requires: the Shoup multiplication
+            // accepts any 64-bit input and gives [0, 2qi), and t_last (less than qk) is reduced if qk > 2qi
+            if (reduce_t_last)
+            {
+                for (size_t l = 0; l < coeff_count; l++)
+                {
+                    t_delta[l] =
+                        multiply_uint_mod_lazy(corr[l], qk_mod_qi, qi_mod) + barrett_reduce_64(t_last[l], qi_mod);
+                }
+            }
+            else
+            {
+                for (size_t l = 0; l < coeff_count; l++)
+                {
+                    t_delta[l] = multiply_uint_mod_lazy(corr[l], qk_mod_qi, qi_mod) + t_last[l];
+                }
+            }
+            ntt_negacyclic_harvey_lazy(CoeffIter(t_delta), ntt_tables);
+
+            // delta is in [0, 4qi)
+            const uint64_t qi_lazy = qi_mod.value() << 2;
+            kswitch_write_rns_component(coeff_count, addend, qi_mod, out, [&](size_t l) {
+                return multiply_uint_mod(prod[l] + qi_lazy - t_delta[l], inv_qk, qi_mod);
+            });
+        }
+
+        // Divides the key-switched result by the special prime qk = key_modulus.back(), with rounding (BFV and CKKS) or
+        // preserving the plaintext (BGV), and writes key component k of the quotient plus addends[k] (if not null) to
+        // outputs[k], in the form of the ciphertexts of the scheme. Key component k is given in NTT form, fully
+        // reduced: its RNS components for the primes of parms_id at prods[k] and for qk at t_lasts[k]; both are
+        // overwritten. outputs[k] may be identical to prods[k] or addends[k], and outputs[1] to addends[0].
+        void kswitch_mod_down(
+            const SEALContext &context, parms_id_type parms_id, uint64_t *const *prods, uint64_t *const *t_lasts,
+            const uint64_t *const *addends, uint64_t *const *outputs, MemoryPoolHandle pool)
+        {
+            auto &parms = context.get_context_data(parms_id)->parms();
+            auto &key_context_data = *context.key_context_data();
+            auto scheme = parms.scheme();
+            size_t coeff_count = parms.poly_modulus_degree();
+            size_t decomp_modulus_size = parms.coeff_modulus().size();
+            auto &key_modulus = key_context_data.parms().coeff_modulus();
+            auto key_ntt_tables = key_context_data.small_ntt_tables();
+            auto rns_tool = key_context_data.rns_tool();
+            auto modswitch_factors = rns_tool->inv_q_last_mod_q();
+            uint64_t qk = key_modulus.back().value();
+            uint64_t qk_half = qk >> 1;
+
+            // Scratch space: one RNS component for CKKS; two for BGV
+            Pointer<uint64_t> t_scratch;
+            if (scheme == scheme_type::ckks)
+            {
+                t_scratch = allocate_uint(coeff_count, pool);
+            }
+            else if (scheme == scheme_type::bgv)
+            {
+                t_scratch = allocate_poly(coeff_count, 2, pool);
+            }
+
+            // Per-modulus constants. BFV and CKKS: fix = -qk_half mod qi, in [1, qi], undoes modulo qi the qk_half
+            // added to t_last below. BGV: qk mod qi as a multiplication operand.
+            auto fixes(allocate<uint64_t>(decomp_modulus_size, pool));
+            auto qk_mod_q(allocate<MultiplyUIntModOperand>(decomp_modulus_size, pool));
+            for (size_t i = 0; i < decomp_modulus_size; i++)
+            {
+                const Modulus &qi_mod = key_modulus[i];
+                if (scheme == scheme_type::bgv)
+                {
+                    qk_mod_q[i].set(barrett_reduce_64(qk, qi_mod), qi_mod);
+                }
+                else
+                {
+                    fixes[i] = qi_mod.value() - barrett_reduce_64(qk_half, qi_mod);
+                }
+            }
+
+            // BGV: qk^(-1) mod t
+            uint64_t qk_inv_qp = 1;
+            MultiplyUIntModOperand qk_inv_qp_op;
+            if (scheme == scheme_type::bgv)
+            {
+                qk_inv_qp = rns_tool->inv_q_last_mod_t();
+                qk_inv_qp_op.set(barrett_reduce_64(qk_inv_qp, parms.plain_modulus()), parms.plain_modulus());
+            }
+
+            for (size_t k = 0; k < kswitch_key_component_count; k++)
+            {
+                // Fully reduced inverse NTT of the special-prime part
+                uint64_t *t_last = t_lasts[k];
+                inverse_ntt_negacyclic_harvey(CoeffIter(t_last), key_ntt_tables[key_modulus.size() - 1]);
+
+                if (scheme == scheme_type::bgv)
+                {
+                    // corr = -(t_last mod t) * qk^(-1) mod t, so that delta = t_last + corr * qk is divisible by t
+                    const Modulus &plain_modulus = parms.plain_modulus();
+                    uint64_t *corr = t_scratch.get() + coeff_count;
+                    for (size_t l = 0; l < coeff_count; l++)
+                    {
+                        uint64_t v = negate_uint_mod(barrett_reduce_64(t_last[l], plain_modulus), plain_modulus);
+                        corr[l] = (qk_inv_qp != 1) ? multiply_uint_mod(v, qk_inv_qp_op, plain_modulus) : v;
+                    }
+                }
+                else
+                {
+                    // Add (qk - 1) / 2 to change from flooring to rounding; the result is reduced modulo qk
+                    for (size_t l = 0; l < coeff_count; l++)
+                    {
+                        t_last[l] = sub_if_ge_uint64(t_last[l] + qk_half, qk);
+                    }
+                }
+
+                for (size_t i = 0; i < decomp_modulus_size; i++)
+                {
+                    const Modulus &qi_mod = key_modulus[i];
+                    uint64_t qi = qi_mod.value();
+                    uint64_t *prod = prods[k] + i * coeff_count;
+                    const uint64_t *addend = addends[k] ? addends[k] + i * coeff_count : nullptr;
+                    uint64_t *out = outputs[k] + i * coeff_count;
+                    switch (scheme)
+                    {
+                    case scheme_type::bfv:
+                        kswitch_mod_down_bfv(
+                            coeff_count, prod, t_last, fixes[i], qk > qi, qi_mod, modswitch_factors[i],
+                            key_ntt_tables[i], addend, out);
+                        break;
+
+                    case scheme_type::ckks:
+                        kswitch_mod_down_ckks(
+                            coeff_count, prod, t_last, fixes[i], qk > qi, qi_mod, modswitch_factors[i],
+                            key_ntt_tables[i], t_scratch.get(), addend, out);
+                        break;
+
+                    default: // scheme_type::bgv
+                        kswitch_mod_down_bgv(
+                            coeff_count, prod, t_last, t_scratch.get() + coeff_count, qk_mod_q[i], qk > 2 * qi, qi_mod,
+                            modswitch_factors[i], key_ntt_tables[i], t_scratch.get(), addend, out);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Writes to t_ntt the digit t_src (coefficient form, values less than src_mod) in lazy NTT form modulo key_mod
+        // (values in [0, 4 * key_mod)). The out-of-place lazy NTT accepts inputs in [0, 4 * key_mod), so the digit is
+        // reduced modulo key_mod (on the fly) only if src_mod > 4 * key_mod; this does not overflow since key_mod has
+        // at most 61 bits.
+        inline void kswitch_prepare_digit(
+            const uint64_t *t_src, const Modulus &src_mod, const Modulus &key_mod, const NTTTables &ntt_tables,
+            uint64_t *t_ntt)
+        {
+            bool reduce_input = src_mod.value() > (key_mod.value() << 2);
+            ntt_negacyclic_harvey_lazy(ConstCoeffIter(t_src), ntt_tables, reduce_input, CoeffIter(t_ntt));
+        }
+
+        // Writes the digits for the output RNS modulus with index i (key_index into key_modulus) to t_digits and points
+        // digit_ptrs to them: digit j is RNS component j of the target t_target (coefficient form) in lazy NTT form
+        // modulo key_modulus[key_index]. If ntt_target is not null (CKKS and BGV), the target is also available in NTT
+        // form there, and digit i is read from it directly.
+        void kswitch_prepare_digits(
+            size_t i, size_t key_index, size_t coeff_count, size_t decomp_modulus_size,
+            const vector<Modulus> &key_modulus, const NTTTables &ntt_tables, const uint64_t *t_target,
+            const uint64_t *ntt_target, uint64_t *t_digits, const uint64_t **digit_ptrs)
+        {
+            for (size_t j = 0; j < decomp_modulus_size; j++)
+            {
+                if (ntt_target && j == i)
+                {
+                    digit_ptrs[j] = ntt_target + j * coeff_count;
+                    continue;
+                }
+
+                uint64_t *t_ntt = t_digits + j * coeff_count;
+                kswitch_prepare_digit(
+                    t_target + j * coeff_count, key_modulus[j], key_modulus[key_index], ntt_tables, t_ntt);
+                digit_ptrs[j] = t_ntt;
+            }
+        }
+
+        // Points key_ptrs[2 * j + k] to RNS component key_index of component k of key j, for j < decomp_modulus_size
+        void kswitch_set_key_ptrs(
+            size_t key_index, size_t coeff_count, size_t decomp_modulus_size, const vector<PublicKey> &key_vector,
+            const uint64_t **key_ptrs)
+        {
+            for (size_t j = 0; j < decomp_modulus_size; j++)
+            {
+                for (size_t k = 0; k < kswitch_key_component_count; k++)
+                {
+                    key_ptrs[j * kswitch_key_component_count + k] =
+                        key_vector[j].data().data(k) + key_index * coeff_count;
+                }
+            }
+        }
+
+        // Returns the RNS components of target, which is in the form of the ciphertexts of scheme, in coefficient form:
+        // target itself for BFV, or its inverse NTT, written to t_copy, for CKKS and BGV
+        const uint64_t *kswitch_target_to_coeff_form(
+            ConstRNSIter target, size_t decomp_modulus_size, scheme_type scheme, ConstNTTTablesIter ntt_tables,
+            Pointer<uint64_t> &t_copy, MemoryPoolHandle pool)
+        {
+            if (scheme == scheme_type::bfv)
+            {
+                return target;
+            }
+            size_t coeff_count = target.poly_modulus_degree();
+            t_copy = allocate_poly(coeff_count, decomp_modulus_size, pool);
+
+            // Out-of-place inverse NTT, fully reduced
+            inverse_ntt_negacyclic_harvey(target, decomp_modulus_size, ntt_tables, RNSIter(t_copy.get(), coeff_count));
+            return t_copy.get();
+        }
+    } // namespace
+
+    void Evaluator::switch_key(
+        parms_id_type parms_id, ConstRNSIter target_iter, const vector<PublicKey> &key_vector,
+        const uint64_t *const *addends, uint64_t *const *outputs, MemoryPoolHandle pool) const
+    {
+        // Assuming at this point the inputs are validated.
+        auto &parms = context_.get_context_data(parms_id)->parms();
+        auto scheme = parms.scheme();
+        auto &key_context_data = *context_.key_context_data();
+        auto &key_modulus = key_context_data.parms().coeff_modulus();
+        size_t key_modulus_size = key_modulus.size();
+        auto key_ntt_tables = iter(key_context_data.small_ntt_tables());
+        size_t coeff_count = parms.poly_modulus_degree();
+        size_t decomp_modulus_size = parms.coeff_modulus().size();
+        size_t rns_modulus_size = decomp_modulus_size + 1;
+
+        // Digits in coefficient form. In BFV, target_iter is used directly; it is read only before outputs are written.
+        Pointer<uint64_t> t_target_copy;
+        const uint64_t *t_target =
+            kswitch_target_to_coeff_form(target_iter, decomp_modulus_size, scheme, key_ntt_tables, t_target_copy, pool);
+        const uint64_t *ntt_target =
+            (scheme == scheme_type::bfv) ? nullptr : static_cast<const uint64_t *>(target_iter);
+
+        // Accumulated products (NTT form, fully reduced); layout [key component][RNS modulus][coeff]. Every
+        // coefficient is written by the dot products below, so no zero-initialization is needed.
+        auto t_poly_prod(allocate_poly_array(kswitch_key_component_count, coeff_count, rns_modulus_size, pool));
+        uint64_t *prods[kswitch_key_component_count];
+        uint64_t *t_lasts[kswitch_key_component_count];
+        for (size_t k = 0; k < kswitch_key_component_count; k++)
+        {
+            prods[k] = t_poly_prod.get() + k * rns_modulus_size * coeff_count;
+            t_lasts[k] = prods[k] + decomp_modulus_size * coeff_count;
+        }
+
+        // NTT-form digits for the current output modulus, and pointer tables for the dot products
+        auto t_digits(allocate_poly(coeff_count, decomp_modulus_size, pool));
+        auto digit_ptrs(allocate<const uint64_t *>(decomp_modulus_size, pool));
+        auto key_ptrs(allocate<const uint64_t *>(mul_safe(decomp_modulus_size, kswitch_key_component_count), pool));
+        auto acc_scratch(allocate<unsigned long long>(kswitch_acc_scratch_size, pool));
+
+        for (size_t i = 0; i < rns_modulus_size; i++)
+        {
+            size_t key_index = (i == decomp_modulus_size ? key_modulus_size - 1 : i);
+
+            // Prepare all digits modulo key_modulus[key_index] in NTT form
+            kswitch_prepare_digits(
+                i, key_index, coeff_count, decomp_modulus_size, key_modulus, key_ntt_tables[key_index], t_target,
+                ntt_target, t_digits.get(), digit_ptrs.get());
+            kswitch_set_key_ptrs(key_index, coeff_count, decomp_modulus_size, key_vector, key_ptrs.get());
+
+            // Multiply with keys and accumulate; outputs are fully reduced modulo key_modulus[key_index]
+            uint64_t *out_ptrs[kswitch_key_component_count]{ prods[0] + i * coeff_count, prods[1] + i * coeff_count };
+            kswitch_dot_product(
+                coeff_count, decomp_modulus_size, digit_ptrs.get(), key_ptrs.get(), key_modulus[key_index], out_ptrs,
+                acc_scratch.get());
+        }
+
+        // Perform modulus switching with scaling
+        kswitch_mod_down(context_, parms_id, prods, t_lasts, addends, outputs, std::move(pool));
     }
+
 } // namespace seal

@@ -2632,7 +2632,7 @@ namespace sealtest
         ASSERT_EQ(2ULL, control.size());
 
         // Stamp the seed marker into the used key slot. is_buffer_valid delegates through
-        // PublicKey to Ciphertext, so switch_key_inplace rejects the seeded key entry.
+        // PublicKey to Ciphertext, so relinearization rejects the seeded key entry.
         auto &slot = rlk.data()[RelinKeys::get_index(2)];
         slot[0].data().data(1)[0] = 0xFFFFFFFFFFFFFFFFULL;
         ASSERT_TRUE(slot[0].data().contains_seed());
@@ -6252,7 +6252,68 @@ namespace sealtest
                    a.dyn_array().size() == b.dyn_array().size() &&
                    equal(a.dyn_array().cbegin(), a.dyn_array().cend(), b.dyn_array().cbegin());
         }
+
+        // Rotates with rotate_rows (BFV, BGV) or rotate_vector (CKKS)
+        void rotate(
+            const Evaluator &evaluator, scheme_type scheme, const Ciphertext &encrypted, int steps,
+            const GaloisKeys &galois_keys, Ciphertext &destination)
+        {
+            if (scheme == scheme_type::ckks)
+            {
+                evaluator.rotate_vector(encrypted, steps, galois_keys, destination);
+            }
+            else
+            {
+                evaluator.rotate_rows(encrypted, steps, galois_keys, destination);
+            }
+        }
+
+        // Returns encryption parameters for rotation tests: the coefficient modulus primes have different sizes, so
+        // that some digits are reduced before the NTT in key switching and some not
+        EncryptionParameters rotation_parms(scheme_type scheme)
+        {
+            size_t n = 64;
+            EncryptionParameters parms(scheme);
+            parms.set_poly_modulus_degree(n);
+            parms.set_coeff_modulus(CoeffModulus::Create(n, { 40, 30, 50, 60 }));
+            if (scheme != scheme_type::ckks)
+            {
+                parms.set_plain_modulus(PlainModulus::Batching(n, 17));
+            }
+            return parms;
+        }
     } // namespace
+
+    TEST(EvaluatorTest, ApplyGaloisValidatesOnlyItsInput)
+    {
+        // Validation does not range-check the coefficients of a ciphertext. Here galois(c0) has the value 2^64 - 1 at
+        // index 0 (the seed marker), which apply_galois_inplace writes to c1 before the key switching; the input must
+        // still be accepted. Debug builds instead reject the out-of-range coefficients in the arithmetic.
+#ifndef SEAL_DEBUG
+        for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
+        {
+            SEALContext context(rotation_parms(scheme), true, sec_level_type::none);
+            KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            GaloisKeys glk;
+            keygen.create_galois_keys(vector<int>{ 1, -1 }, glk);
+
+            Encryptor encryptor(context, pk);
+            Evaluator evaluator(context);
+
+            Ciphertext encrypted;
+            encryptor.encrypt_zero(encrypted);
+            size_t n = encrypted.poly_modulus_degree();
+            fill_n(encrypted.data(0), n, numeric_limits<uint64_t>::max());
+            ASSERT_TRUE(is_metadata_valid_for(encrypted, context) && is_buffer_valid(encrypted));
+
+            Ciphertext destination;
+            ASSERT_NO_THROW(rotate(evaluator, scheme, encrypted, 1, glk, destination));
+        }
+#endif
+    }
+
     TEST(EvaluatorTest, BGVEncryptModSwitchToNextDecrypt)
     {
         {
@@ -7024,6 +7085,40 @@ namespace sealtest
         }
     }
 
+    TEST(EvaluatorTest, RelinearizeValidatesKeysBeforeMutating)
+    {
+        // Relinearization of a ciphertext of size 4 key switches component 3 with the key for the power 3 before
+        // component 2 with the key for the power 2. If the latter key is invalid, relinearization must throw before it
+        // modifies the ciphertext.
+        size_t n = 64;
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(n);
+        parms.set_coeff_modulus(CoeffModulus::Create(n, { 60, 60, 60, 60 }));
+        parms.set_plain_modulus(PlainModulus::Batching(n, 20));
+        SEALContext context(parms, true, sec_level_type::none);
+        KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
+        RelinKeys rlk;
+        keygen.create_relin_keys(rlk);
+        rlk.data().push_back(create_relin_key(context, keygen.secret_key(), 3));
+
+        Encryptor encryptor(context, pk);
+        Evaluator evaluator(context);
+        Ciphertext encrypted;
+        encryptor.encrypt(Plaintext("3x^2 + 2"), encrypted);
+        Ciphertext encrypted3;
+        evaluator.square(encrypted, encrypted3);
+        evaluator.multiply_inplace(encrypted3, encrypted);
+        ASSERT_EQ(4ULL, encrypted3.size());
+
+        // Truncate the key for the power 2 to a single PublicKey
+        rlk.data()[RelinKeys::get_index(2)].resize(1);
+        Ciphertext encrypted3_copy = encrypted3;
+        ASSERT_THROW(evaluator.relinearize_inplace(encrypted3, rlk), invalid_argument);
+        ASSERT_TRUE(same_ciphertext(encrypted3, encrypted3_copy));
+    }
+
     TEST(EvaluatorTest, KeySwitchingManyPrimes)
     {
         // With 199 decomposition primes of 60 bits, the 128-bit accumulators of key switching must be reduced
@@ -7085,6 +7180,114 @@ namespace sealtest
             {
                 double x = input[(i + shift) % slot_count];
                 ASSERT_NEAR(x * x, result[i], 0.001);
+            }
+        }
+    }
+
+    TEST(EvaluatorTest, KeySwitchingMixedPrimeSizes)
+    {
+        // Key switching reduces a digit modulo a smaller prime only if the digit is too large for the NTT, and the
+        // special-prime part modulo a smaller prime only if the division by the special prime requires it. Primes of
+        // different sizes, with a special prime that is the largest prime or not, run both paths of each.
+        size_t n = 64;
+        for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
+        {
+            for (auto &bit_sizes : vector<vector<int>>{ { 40, 30, 50, 60 }, { 60, 40, 60 } })
+            {
+                EncryptionParameters parms(scheme);
+                parms.set_poly_modulus_degree(n);
+                parms.set_coeff_modulus(CoeffModulus::Create(n, bit_sizes));
+                if (scheme != scheme_type::ckks)
+                {
+                    parms.set_plain_modulus(PlainModulus::Batching(n, 17));
+                }
+                SEALContext context(parms, true, sec_level_type::none);
+                KeyGenerator keygen(context);
+                PublicKey pk;
+                keygen.create_public_key(pk);
+                RelinKeys rlk;
+                keygen.create_relin_keys(rlk);
+                GaloisKeys glk;
+                keygen.create_galois_keys(vector<int>{ 1 }, glk);
+
+                Encryptor encryptor(context, pk);
+                Evaluator evaluator(context);
+                Decryptor decryptor(context, keygen.secret_key());
+
+                // Slot i holds i (BFV, BGV) or i / 8 (CKKS)
+                size_t slot_count = (scheme == scheme_type::ckks) ? n / 2 : n;
+                Plaintext plain;
+                if (scheme == scheme_type::ckks)
+                {
+                    vector<double> input(slot_count);
+                    for (size_t i = 0; i < slot_count; i++)
+                    {
+                        input[i] = static_cast<double>(i) / 8;
+                    }
+                    CKKSEncoder encoder(context);
+                    encoder.encode(input, pow(2.0, 20), plain);
+                }
+                else
+                {
+                    vector<uint64_t> input(slot_count);
+                    for (size_t i = 0; i < slot_count; i++)
+                    {
+                        input[i] = i;
+                    }
+                    BatchEncoder encoder(context);
+                    encoder.encode(input, plain);
+                }
+                Ciphertext encrypted;
+                encryptor.encrypt(plain, encrypted);
+
+                // Squares and relinearizes, and rotates by one step, at the first two levels
+                for (int level = 0; level < 2; level++)
+                {
+                    if (level > 0)
+                    {
+                        evaluator.mod_switch_to_next_inplace(encrypted);
+                    }
+                    Ciphertext squared;
+                    evaluator.square(encrypted, squared);
+                    evaluator.relinearize_inplace(squared, rlk);
+                    Ciphertext rotated;
+                    rotate(evaluator, scheme, encrypted, 1, glk, rotated);
+
+                    Plaintext squared_plain;
+                    Plaintext rotated_plain;
+                    decryptor.decrypt(squared, squared_plain);
+                    decryptor.decrypt(rotated, rotated_plain);
+                    if (scheme == scheme_type::ckks)
+                    {
+                        CKKSEncoder encoder(context);
+                        vector<double> squared_result;
+                        vector<double> rotated_result;
+                        encoder.decode(squared_plain, squared_result);
+                        encoder.decode(rotated_plain, rotated_result);
+                        for (size_t i = 0; i < slot_count; i++)
+                        {
+                            double x = static_cast<double>(i) / 8;
+                            ASSERT_NEAR(x * x, squared_result[i], 0.01);
+                            ASSERT_NEAR(static_cast<double>((i + 1) % slot_count) / 8, rotated_result[i], 0.01);
+                        }
+                    }
+                    else
+                    {
+                        // The two rows of slots rotate separately
+                        BatchEncoder encoder(context);
+                        uint64_t t = parms.plain_modulus().value();
+                        size_t row_size = slot_count / 2;
+                        vector<uint64_t> squared_result;
+                        vector<uint64_t> rotated_result;
+                        encoder.decode(squared_plain, squared_result);
+                        encoder.decode(rotated_plain, rotated_result);
+                        for (size_t i = 0; i < slot_count; i++)
+                        {
+                            ASSERT_EQ((i * i) % t, squared_result[i]);
+                            ASSERT_EQ(i - i % row_size + (i + 1) % row_size, rotated_result[i]);
+                        }
+                    }
+                }
             }
         }
     }

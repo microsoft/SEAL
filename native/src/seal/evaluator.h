@@ -1381,9 +1381,12 @@ namespace seal
             apply_galois_inplace(encrypted, galois_tool->get_elt_from_step(0), galois_keys, std::move(pool));
         }
 
-        void switch_key_inplace(
-            Ciphertext &encrypted, util::ConstRNSIter target_iter, const KSwitchKeys &kswitch_keys,
-            std::size_t key_index, MemoryPoolHandle pool = MemoryManager::GetPool()) const;
+        // Key switches target_iter, a polynomial at level parms_id in the form of the ciphertexts of the scheme, with
+        // the validated key_vector, and writes component k of the result plus addends[k] (if not null) to outputs[k]
+        // for k = 0, 1; outputs[k] may be identical to addends[k], and outputs[1] to addends[0].
+        void switch_key(
+            parms_id_type parms_id, util::ConstRNSIter target_iter, const std::vector<PublicKey> &key_vector,
+            const std::uint64_t *const *addends, std::uint64_t *const *outputs, MemoryPoolHandle pool) const;
 
         void multiply_plain_normal(Ciphertext &encrypted, const Plaintext &plain, MemoryPoolHandle pool) const;
 
