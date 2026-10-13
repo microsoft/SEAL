@@ -119,6 +119,16 @@ namespace seal
             }
 
             /**
+            Returns the permutation table used by apply_galois_ntt for the given Galois element, i.e., applying the
+            automorphism to an operand in NTT form sets result[i] = operand[table[i]] for i < coeff_count. The table
+            is generated on first use and remains valid for the lifetime of the GaloisTool.
+
+            @param[in] galois_elt The Galois element
+            @throws std::invalid_argument if the Galois element is not valid
+            */
+            SEAL_NODISCARD const std::uint32_t *get_permutation_table_ntt(std::uint32_t galois_elt) const;
+
+            /**
             Compute the Galois element corresponding to a given rotation step.
             */
             SEAL_NODISCARD std::uint32_t get_elt_from_step(int step) const;

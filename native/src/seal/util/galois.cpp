@@ -213,11 +213,21 @@ namespace seal
                 throw invalid_argument("Galois element is not valid");
             }
 #endif
-            generate_table_ntt(galois_elt, permutation_tables_[GetIndexFromElt(galois_elt)]);
-            auto table = iter(permutation_tables_[GetIndexFromElt(galois_elt)]);
+            auto table = iter(get_permutation_table_ntt(galois_elt));
 
             // Perform permutation.
             SEAL_ITERATE(iter(table, result), coeff_count_, [&](auto I) { get<1>(I) = operand[get<0>(I)]; });
+        }
+
+        const uint32_t *GaloisTool::get_permutation_table_ntt(uint32_t galois_elt) const
+        {
+            if (!(galois_elt & 1) || (galois_elt >= 2 * (uint64_t(1) << coeff_count_power_)))
+            {
+                throw invalid_argument("Galois element is not valid");
+            }
+            auto &table = permutation_tables_[GetIndexFromElt(galois_elt)];
+            generate_table_ntt(galois_elt, table);
+            return table.get();
         }
     } // namespace util
 } // namespace seal

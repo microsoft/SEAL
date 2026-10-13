@@ -11,6 +11,7 @@
 #include "seal/memorymanager.h"
 #include "seal/modulus.h"
 #include "seal/valcheck.h"
+#include "seal/util/ntt.h"
 #include "seal/util/rlwe.h"
 #include "seal/util/rns.h"
 #include "seal/util/uintarith.h"
@@ -20,6 +21,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <memory>
 #include <random>
 #include <string>
 #include <utility>
@@ -6268,6 +6270,21 @@ namespace sealtest
             }
         }
 
+        void rotate(
+            const Evaluator &evaluator, scheme_type scheme, const Ciphertext &encrypted, const vector<int> &steps,
+            const GaloisKeys &galois_keys, vector<Ciphertext> &destinations,
+            MemoryPoolHandle pool = MemoryManager::GetPool())
+        {
+            if (scheme == scheme_type::ckks)
+            {
+                evaluator.rotate_vector(encrypted, steps, galois_keys, destinations, std::move(pool));
+            }
+            else
+            {
+                evaluator.rotate_rows(encrypted, steps, galois_keys, destinations, std::move(pool));
+            }
+        }
+
         // Returns encryption parameters for rotation tests: the coefficient modulus primes have different sizes, so
         // that some digits are reduced before the NTT in key switching and some not
         EncryptionParameters rotation_parms(scheme_type scheme)
@@ -6284,11 +6301,417 @@ namespace sealtest
         }
     } // namespace
 
+    TEST(EvaluatorTest, BFVBGVEncryptRotateRowsMultipleStepsDecrypt)
+    {
+        for (auto scheme : { scheme_type::bfv, scheme_type::bgv })
+        {
+            SEALContext context(rotation_parms(scheme), true, sec_level_type::none);
+            KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            GaloisKeys glk;
+            keygen.create_galois_keys(vector<int>{ 1, -1, 3, 8 }, glk);
+
+            Encryptor encryptor(context, pk);
+            Evaluator evaluator(context);
+            Decryptor decryptor(context, keygen.secret_key());
+            BatchEncoder batch_encoder(context);
+
+            size_t row_size = batch_encoder.slot_count() / 2;
+            uint64_t plain_modulus = context.first_context_data()->parms().plain_modulus().value();
+            vector<uint64_t> plain_vec(batch_encoder.slot_count());
+            for (size_t i = 0; i < plain_vec.size(); i++)
+            {
+                plain_vec[i] = (i * 37 + 11) % plain_modulus;
+            }
+            Plaintext plain;
+            batch_encoder.encode(plain_vec, plain);
+            Ciphertext encrypted;
+            encryptor.encrypt(plain, encrypted);
+
+            // Steps with their own keys, zero, repeated, and composed (9 = 8 + 1) steps, and single steps
+            vector<vector<int>> step_lists{ { 1, -1, 3, 0, 9, 1, -1 }, { 3 }, { 9 }, { 0, 0 }, { -1, 8 } };
+            while (true)
+            {
+                for (auto &steps : step_lists)
+                {
+                    vector<Ciphertext> destinations;
+                    evaluator.rotate_rows(encrypted, steps, glk, destinations);
+                    ASSERT_EQ(steps.size(), destinations.size());
+                    for (size_t i = 0; i < steps.size(); i++)
+                    {
+                        Ciphertext expected;
+                        evaluator.rotate_rows(encrypted, steps[i], glk, expected);
+                        ASSERT_TRUE(same_ciphertext(expected, destinations[i]));
+
+                        Plaintext plain_result;
+                        decryptor.decrypt(destinations[i], plain_result);
+                        vector<uint64_t> result;
+                        batch_encoder.decode(plain_result, result);
+                        size_t shift = static_cast<size_t>(steps[i] + static_cast<int>(row_size)) % row_size;
+                        for (size_t j = 0; j < row_size; j++)
+                        {
+                            ASSERT_EQ(plain_vec[(j + shift) % row_size], result[j]);
+                            ASSERT_EQ(plain_vec[row_size + (j + shift) % row_size], result[row_size + j]);
+                        }
+                    }
+                }
+                if (encrypted.parms_id() == context.last_parms_id())
+                {
+                    break;
+                }
+                evaluator.mod_switch_to_next_inplace(encrypted);
+            }
+        }
+    }
+
+    TEST(EvaluatorTest, CKKSEncryptRotateVectorMultipleStepsDecrypt)
+    {
+        SEALContext context(rotation_parms(scheme_type::ckks), true, sec_level_type::none);
+        KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
+        GaloisKeys glk;
+        keygen.create_galois_keys(vector<int>{ 1, -2, 4 }, glk);
+
+        Encryptor encryptor(context, pk);
+        Evaluator evaluator(context);
+        Decryptor decryptor(context, keygen.secret_key());
+        CKKSEncoder encoder(context);
+
+        size_t slot_count = encoder.slot_count();
+        vector<complex<double>> input(slot_count);
+        for (size_t i = 0; i < slot_count; i++)
+        {
+            input[i] = complex<double>(static_cast<double>(i % 7) - 3.0, static_cast<double>(i % 3));
+        }
+        Plaintext plain;
+        encoder.encode(input, pow(2.0, 25), plain);
+        Ciphertext encrypted;
+        encryptor.encrypt(plain, encrypted);
+
+        // Steps with their own keys, zero, repeated, and composed (5 = 4 + 1) steps, and single steps
+        vector<vector<int>> step_lists{ { 1, -2, 4, 0, 5, 1 }, { 4 }, { 5 }, { 0 } };
+        while (true)
+        {
+            for (auto &steps : step_lists)
+            {
+                vector<Ciphertext> destinations;
+                evaluator.rotate_vector(encrypted, steps, glk, destinations);
+                ASSERT_EQ(steps.size(), destinations.size());
+                for (size_t i = 0; i < steps.size(); i++)
+                {
+                    Ciphertext expected;
+                    evaluator.rotate_vector(encrypted, steps[i], glk, expected);
+                    ASSERT_TRUE(same_ciphertext(expected, destinations[i]));
+
+                    Plaintext plain_result;
+                    decryptor.decrypt(destinations[i], plain_result);
+                    vector<complex<double>> result;
+                    encoder.decode(plain_result, result);
+                    size_t shift = static_cast<size_t>(steps[i] + static_cast<int>(slot_count)) % slot_count;
+                    for (size_t j = 0; j < slot_count; j++)
+                    {
+                        ASSERT_NEAR(input[(j + shift) % slot_count].real(), result[j].real(), 0.01);
+                        ASSERT_NEAR(input[(j + shift) % slot_count].imag(), result[j].imag(), 0.01);
+                    }
+                }
+            }
+            if (encrypted.parms_id() == context.last_parms_id())
+            {
+                break;
+            }
+            evaluator.mod_switch_to_next_inplace(encrypted);
+        }
+    }
+
+    TEST(EvaluatorTest, RotateMultipleStepsZeroDigits)
+    {
+        // Hoisted rotations recompute the digits that have a zero coefficient (in coefficient form) for each
+        // rotation. The results must be identical to those of single-step rotations, also when a digit is zero.
+        for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
+        {
+            SEALContext context(rotation_parms(scheme), true, sec_level_type::none);
+            KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            GaloisKeys glk;
+            keygen.create_galois_keys(vector<int>{ 1, -1, 3 }, glk);
+
+            Encryptor encryptor(context, pk);
+            Evaluator evaluator(context);
+
+            Ciphertext encrypted;
+            encryptor.encrypt_zero(encrypted);
+            vector<int> steps{ 1, -1, 3 };
+            for (size_t level = 0; level < 2; level++)
+            {
+                // Digit 0 has some zero coefficients, digit 1 has none, and digit 2 (if any) is zero
+                Ciphertext crafted = encrypted;
+                size_t n = crafted.poly_modulus_degree();
+                auto ntt_tables = context.get_context_data(crafted.parms_id())->small_ntt_tables();
+                for (size_t j = 0; j < crafted.coeff_modulus_size(); j++)
+                {
+                    util::CoeffIter digit(crafted.data(1) + j * n);
+                    if (crafted.is_ntt_form())
+                    {
+                        util::inverse_ntt_negacyclic_harvey(digit, ntt_tables[j]);
+                    }
+                    for (size_t l = 0; l < n; l++)
+                    {
+                        if ((j == 0 && l % 5 == 0) || j == 2)
+                        {
+                            digit[l] = 0;
+                        }
+                    }
+                    if (crafted.is_ntt_form())
+                    {
+                        util::ntt_negacyclic_harvey(digit, ntt_tables[j]);
+                    }
+                }
+
+                vector<Ciphertext> destinations;
+                rotate(evaluator, scheme, crafted, steps, glk, destinations);
+                ASSERT_EQ(steps.size(), destinations.size());
+                for (size_t i = 0; i < steps.size(); i++)
+                {
+                    Ciphertext expected;
+                    rotate(evaluator, scheme, crafted, steps[i], glk, expected);
+                    ASSERT_TRUE(same_ciphertext(expected, destinations[i]));
+                }
+                evaluator.mod_switch_to_next_inplace(encrypted);
+            }
+        }
+    }
+
+    TEST(EvaluatorTest, RotateMultipleStepsDestinations)
+    {
+        for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
+        {
+            SEALContext context(rotation_parms(scheme), true, sec_level_type::none);
+            KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            GaloisKeys glk;
+            keygen.create_galois_keys(vector<int>{ 1, 8, -1 }, glk);
+
+            Encryptor encryptor(context, pk);
+            Evaluator evaluator(context);
+
+            Ciphertext encrypted;
+            Ciphertext other;
+            encryptor.encrypt_zero(encrypted);
+            encryptor.encrypt_zero(other);
+
+            // Steps with their own keys, zero, and a composed (9 = 8 + 1) step
+            vector<int> steps{ 1, 8, 0, 9, -1 };
+            vector<Ciphertext> expected(steps.size());
+            for (size_t i = 0; i < steps.size(); i++)
+            {
+                rotate(evaluator, scheme, encrypted, steps[i], glk, expected[i]);
+            }
+
+            // Existing elements keep their memory pools and, if large enough, their memory; new elements use pool
+            auto pool = MemoryPoolHandle::New();
+            auto destination_pool = MemoryPoolHandle::New();
+            vector<Ciphertext> destinations;
+            destinations.emplace_back(context, encrypted.parms_id(), 2, destination_pool);
+            destinations.emplace_back(destination_pool);
+            destinations[0].resize(context, encrypted.parms_id(), 2);
+            const uint64_t *buffer = destinations[0].data();
+            rotate(evaluator, scheme, encrypted, steps, glk, destinations, pool);
+            ASSERT_EQ(steps.size(), destinations.size());
+            ASSERT_TRUE(destinations[0].pool() == destination_pool);
+            ASSERT_EQ(buffer, destinations[0].data());
+            ASSERT_TRUE(destinations[1].pool() == destination_pool);
+            for (size_t i = 0; i < steps.size(); i++)
+            {
+                ASSERT_TRUE(i < 2 || destinations[i].pool() == pool);
+                ASSERT_TRUE(same_ciphertext(expected[i], destinations[i]));
+            }
+
+            // All other memory is allocated from pool
+            {
+                MMProfGuard guard(make_unique<MMProfFixed>(MemoryPoolHandle::New()));
+                rotate(evaluator, scheme, encrypted, steps, glk, destinations, pool);
+                ASSERT_EQ(0ULL, MemoryManager::GetPool().alloc_byte_count());
+            }
+            ASSERT_TRUE(pool.alloc_byte_count() > 0);
+            for (size_t i = 0; i < steps.size(); i++)
+            {
+                ASSERT_TRUE(same_ciphertext(expected[i], destinations[i]));
+            }
+
+            // destinations shrinks to steps.size()
+            rotate(evaluator, scheme, encrypted, vector<int>{ 8 }, glk, destinations, pool);
+            ASSERT_EQ(1ULL, destinations.size());
+            ASSERT_TRUE(destinations[0].pool() == destination_pool);
+            ASSERT_TRUE(same_ciphertext(expected[1], destinations[0]));
+
+            // encrypted may be any element of destinations, which may grow or shrink
+            vector<vector<int>> step_lists{ steps, { -1, 1 } };
+            for (auto &alias_steps : step_lists)
+            {
+                for (size_t alias = 0; alias < 3; alias++)
+                {
+                    vector<Ciphertext> aliased{ other, other, other };
+                    aliased[alias] = encrypted;
+                    rotate(evaluator, scheme, aliased[alias], alias_steps, glk, aliased);
+                    ASSERT_EQ(alias_steps.size(), aliased.size());
+                    for (size_t i = 0; i < alias_steps.size(); i++)
+                    {
+                        Ciphertext alias_expected;
+                        rotate(evaluator, scheme, encrypted, alias_steps[i], glk, alias_expected);
+                        ASSERT_TRUE(same_ciphertext(alias_expected, aliased[i]));
+                    }
+                }
+            }
+
+            // No steps
+            rotate(evaluator, scheme, encrypted, vector<int>{}, glk, destinations);
+            ASSERT_TRUE(destinations.empty());
+        }
+    }
+
+    TEST(EvaluatorTest, RotateMultipleStepsValidatesBeforeWork)
+    {
+        for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
+        {
+            SEALContext context(rotation_parms(scheme), true, sec_level_type::none);
+            KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            GaloisKeys glk;
+            keygen.create_galois_keys(vector<int>{ 1, -1, 8 }, glk);
+            RelinKeys rlk;
+            keygen.create_relin_keys(rlk);
+
+            Encryptor encryptor(context, pk);
+            Evaluator evaluator(context);
+
+            Ciphertext encrypted;
+            encryptor.encrypt_zero(encrypted);
+            const Ciphertext encrypted_copy = encrypted;
+
+            Ciphertext other;
+            encryptor.encrypt_zero(other);
+            vector<Ciphertext> destinations{ other, other };
+            const vector<Ciphertext> destinations_copy = destinations;
+            const uint64_t *buffer = destinations[0].data();
+
+            // Every rejected input leaves destinations and encrypted unchanged; a single-step rotation by each step
+            // count that makes the multi-step rotation throw also throws
+            auto unchanged = [&]() {
+                return destinations.size() == 2 && same_ciphertext(destinations[0], destinations_copy[0]) &&
+                       same_ciphertext(destinations[1], destinations_copy[1]) && destinations[0].data() == buffer &&
+                       same_ciphertext(encrypted, encrypted_copy);
+            };
+
+            // Each step list fails only at its last step, after steps with keys and a composed step (9 = 8 + 1)
+            int half = static_cast<int>(encrypted.poly_modulus_degree() / 2);
+            vector<int> invalid_steps{ 2, 5, half, -half, numeric_limits<int>::min() };
+            for (int invalid_step : invalid_steps)
+            {
+                ASSERT_THROW(
+                    rotate(evaluator, scheme, encrypted, vector<int>{ 1, 9, invalid_step }, glk, destinations),
+                    invalid_argument);
+                ASSERT_TRUE(unchanged());
+                Ciphertext single;
+                ASSERT_THROW(rotate(evaluator, scheme, encrypted, invalid_step, glk, single), invalid_argument);
+            }
+
+            // Invalid ciphertexts
+            Ciphertext size3;
+            evaluator.square(encrypted, size3);
+            ASSERT_THROW(rotate(evaluator, scheme, size3, vector<int>{ 1, -1 }, glk, destinations), invalid_argument);
+            ASSERT_TRUE(unchanged());
+            Ciphertext wrong_form = encrypted;
+            wrong_form.is_ntt_form() = !wrong_form.is_ntt_form();
+            ASSERT_THROW(
+                rotate(evaluator, scheme, wrong_form, vector<int>{ 1, -1 }, glk, destinations), invalid_argument);
+            ASSERT_TRUE(unchanged());
+            Ciphertext wrong_scale = encrypted;
+            wrong_scale.scale() = 0.0;
+            ASSERT_THROW(
+                rotate(evaluator, scheme, wrong_scale, vector<int>{ 1, -1 }, glk, destinations), invalid_argument);
+            ASSERT_TRUE(unchanged());
+            Ciphertext seed_marker = encrypted;
+            seed_marker.data(1)[0] = numeric_limits<uint64_t>::max();
+            ASSERT_THROW(
+                rotate(evaluator, scheme, seed_marker, vector<int>{ 1, -1 }, glk, destinations), invalid_argument);
+            ASSERT_TRUE(unchanged());
+
+            // A rotation by zero steps only copies, so it accepts a size-3 ciphertext, as rotate_rows does
+            vector<Ciphertext> copies;
+            rotate(evaluator, scheme, size3, vector<int>{ 0 }, glk, copies);
+            ASSERT_TRUE(same_ciphertext(size3, copies[0]));
+
+            // Invalid keys
+            GaloisKeys wrong_level = glk;
+            wrong_level.parms_id() = context.first_parms_id();
+            ASSERT_THROW(
+                rotate(evaluator, scheme, encrypted, vector<int>{ 1, -1 }, wrong_level, destinations),
+                invalid_argument);
+            ASSERT_TRUE(unchanged());
+            uint32_t galois_elt = context.key_context_data()->galois_tool()->get_elt_from_step(1);
+            GaloisKeys short_key = glk;
+            short_key.data()[GaloisKeys::get_index(galois_elt)].resize(1);
+            ASSERT_THROW(
+                rotate(evaluator, scheme, encrypted, vector<int>{ -1, 1 }, short_key, destinations), invalid_argument);
+            ASSERT_TRUE(unchanged());
+            ASSERT_THROW(
+                rotate(evaluator, scheme, encrypted, vector<int>{ -1, 9 }, short_key, destinations), invalid_argument);
+            ASSERT_TRUE(unchanged());
+            GaloisKeys invalid_key = glk;
+            invalid_key.data()[GaloisKeys::get_index(galois_elt)][0].data().resize(context, context.key_parms_id(), 3);
+            ASSERT_THROW(
+                rotate(evaluator, scheme, encrypted, vector<int>{ -1, 1 }, invalid_key, destinations),
+                invalid_argument);
+            ASSERT_TRUE(unchanged());
+
+            // Uninitialized pool
+            ASSERT_THROW(
+                rotate(evaluator, scheme, encrypted, vector<int>{ 1, -1 }, glk, destinations, MemoryPoolHandle()),
+                invalid_argument);
+            ASSERT_TRUE(unchanged());
+
+            // Wrong scheme
+            if (scheme == scheme_type::ckks)
+            {
+                ASSERT_THROW(evaluator.rotate_rows(encrypted, vector<int>{ 1 }, glk, destinations), logic_error);
+            }
+            else
+            {
+                ASSERT_THROW(evaluator.rotate_vector(encrypted, vector<int>{ 1 }, glk, destinations), logic_error);
+            }
+            ASSERT_TRUE(unchanged());
+        }
+
+        // Parameters that do not support batching
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(64);
+        parms.set_coeff_modulus(CoeffModulus::Create(64, { 40, 40 }));
+        parms.set_plain_modulus(1 << 6);
+        SEALContext context(parms, false, sec_level_type::none);
+        KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
+        GaloisKeys glk;
+        keygen.create_galois_keys(vector<uint32_t>{ 3 }, glk);
+        Encryptor encryptor(context, pk);
+        Evaluator evaluator(context);
+        Ciphertext encrypted;
+        encryptor.encrypt_zero(encrypted);
+        vector<Ciphertext> destinations;
+        ASSERT_THROW(evaluator.rotate_rows(encrypted, vector<int>{ 1 }, glk, destinations), logic_error);
+    }
+
     TEST(EvaluatorTest, ApplyGaloisValidatesOnlyItsInput)
     {
         // Validation does not range-check the coefficients of a ciphertext. Here galois(c0) has the value 2^64 - 1 at
         // index 0 (the seed marker), which apply_galois_inplace writes to c1 before the key switching; the input must
-        // still be accepted. Debug builds instead reject the out-of-range coefficients in the arithmetic.
+        // still be accepted, as it is when it is rotated in several steps. Debug builds instead reject the
+        // out-of-range coefficients in the arithmetic.
 #ifndef SEAL_DEBUG
         for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
         {
@@ -6310,6 +6733,8 @@ namespace sealtest
 
             Ciphertext destination;
             ASSERT_NO_THROW(rotate(evaluator, scheme, encrypted, 1, glk, destination));
+            vector<Ciphertext> destinations;
+            ASSERT_NO_THROW(rotate(evaluator, scheme, encrypted, vector<int>{ 1, -1 }, glk, destinations));
         }
 #endif
     }
@@ -7154,14 +7579,17 @@ namespace sealtest
         Ciphertext encrypted;
         encryptor.encrypt(plain, encrypted);
 
-        // Squares and relinearizes, and rotates by one step to the left and right
+        // Squares and relinearizes, and rotates by one step to the left and right, singly and together
         evaluator.square_inplace(encrypted);
         evaluator.relinearize_inplace(encrypted, rlk);
         vector<int> steps{ 1, -1 };
-        vector<Ciphertext> rotated(steps.size());
+        vector<Ciphertext> rotated;
+        evaluator.rotate_vector(encrypted, steps, glk, rotated);
         for (size_t s = 0; s < steps.size(); s++)
         {
-            evaluator.rotate_vector(encrypted, steps[s], glk, rotated[s]);
+            Ciphertext expected;
+            evaluator.rotate_vector(encrypted, steps[s], glk, expected);
+            ASSERT_TRUE(same_ciphertext(expected, rotated[s]));
         }
 
         vector<double> result;

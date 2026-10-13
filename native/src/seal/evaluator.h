@@ -1123,6 +1123,53 @@ namespace seal
         }
 
         /**
+        Rotates plaintext matrix rows cyclically by several step counts. When batching is used with the BFV/BGV scheme,
+        this function rotates the encrypted plaintext matrix rows cyclically to the left (steps[i] > 0) or to the right
+        (steps[i] < 0) and writes the i-th result to destinations[i]. For valid ciphertexts, the results are identical
+        to those of rotate_rows, but rotations by step counts with their own Galois keys share most of the key switching
+        work. Since the size of the batched matrix is 2-by-(N/2), where N is the degree of the polynomial modulus, every
+        number of steps to rotate must have absolute value at most N/2-1. Dynamic memory allocations in the process are
+        allocated from the memory pool pointed to by the given MemoryPoolHandle. Besides the results, the temporary
+        memory needed is about that of 2 + steps.size() / L ciphertexts, where L is the number of primes in the
+        coefficient modulus of encrypted.
+
+        The destinations vector is resized to steps.size(); its existing elements keep their memory pools, and new
+        elements use the given pool. The ciphertext encrypted may be an element of destinations. All inputs are
+        validated before any work is done; if an exception is thrown later (e.g., if a result is transparent),
+        destinations may be partially overwritten.
+
+        @param[in] encrypted The ciphertext to rotate
+        @param[in] steps The numbers of steps to rotate (positive left, negative right)
+        @param[in] galois_keys The Galois keys
+        @param[out] destinations The ciphertexts to overwrite with the rotated results
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::logic_error if scheme is not scheme_type::bfv or scheme_type::bgv
+        @throws std::logic_error if the encryption parameters do not support batching
+        @throws std::invalid_argument if encrypted or galois_keys is not valid for
+        the encryption parameters
+        @throws std::invalid_argument if galois_keys do not correspond to the top
+        level parameters in the current context
+        @throws std::invalid_argument if encrypted is in NTT form (BFV) or not in NTT form (BGV)
+        @throws std::invalid_argument if encrypted has size larger than 2
+        @throws std::invalid_argument if a number of steps has too big absolute value
+        @throws std::invalid_argument if necessary Galois keys are not present
+        @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if keyswitching is not supported by the context
+        @throws std::logic_error if result ciphertext is transparent
+        */
+        inline void rotate_rows(
+            const Ciphertext &encrypted, const std::vector<int> &steps, const GaloisKeys &galois_keys,
+            std::vector<Ciphertext> &destinations, MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        {
+            auto scheme = context_.key_context_data()->parms().scheme();
+            if (scheme != scheme_type::bfv && scheme != scheme_type::bgv)
+            {
+                throw std::logic_error("unsupported scheme");
+            }
+            rotate_many_internal(encrypted, steps, galois_keys, destinations, std::move(pool));
+        }
+
+        /**
         Rotates plaintext matrix columns cyclically. When batching is used with the BFV scheme, this function rotates
         the encrypted plaintext matrix columns cyclically. Since the size of the batched matrix is 2-by-(N/2), where N
         is the degree of the polynomial modulus, this means simply swapping the two rows. Dynamic memory allocations in
@@ -1258,6 +1305,51 @@ namespace seal
         }
 
         /**
+        Rotates plaintext vector cyclically by several step counts. When using the CKKS scheme, this function rotates
+        the encrypted plaintext vector cyclically to the left (steps[i] > 0) or to the right (steps[i] < 0) and writes
+        the i-th result to destinations[i]. For valid ciphertexts, the results are identical to those of rotate_vector,
+        but rotations by step counts with their own Galois keys share most of the key switching work. Since the size of
+        the batched matrix is 2-by-(N/2), where N is the degree of the polynomial modulus, every number of steps to
+        rotate must have absolute value at most N/2-1. Dynamic memory allocations in the process are allocated from the
+        memory pool pointed to by the given MemoryPoolHandle. Besides the results, the temporary memory needed is about
+        that of 2 + steps.size() / L ciphertexts, where L is the number of primes in the coefficient modulus of
+        encrypted.
+
+        The destinations vector is resized to steps.size(); its existing elements keep their memory pools, and new
+        elements use the given pool. The ciphertext encrypted may be an element of destinations. All inputs are
+        validated before any work is done; if an exception is thrown later (e.g., if a result is transparent),
+        destinations may be partially overwritten.
+
+        @param[in] encrypted The ciphertext to rotate
+        @param[in] steps The numbers of steps to rotate (positive left, negative right)
+        @param[in] galois_keys The Galois keys
+        @param[out] destinations The ciphertexts to overwrite with the rotated results
+        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
+        @throws std::logic_error if scheme is not scheme_type::ckks
+        @throws std::invalid_argument if encrypted or galois_keys is not valid for
+        the encryption parameters
+        @throws std::invalid_argument if galois_keys do not correspond to the top
+        level parameters in the current context
+        @throws std::invalid_argument if encrypted is not in NTT form
+        @throws std::invalid_argument if encrypted has size larger than 2
+        @throws std::invalid_argument if a number of steps has too big absolute value
+        @throws std::invalid_argument if necessary Galois keys are not present
+        @throws std::invalid_argument if pool is uninitialized
+        @throws std::logic_error if keyswitching is not supported by the context
+        @throws std::logic_error if result ciphertext is transparent
+        */
+        inline void rotate_vector(
+            const Ciphertext &encrypted, const std::vector<int> &steps, const GaloisKeys &galois_keys,
+            std::vector<Ciphertext> &destinations, MemoryPoolHandle pool = MemoryManager::GetPool()) const
+        {
+            if (context_.key_context_data()->parms().scheme() != scheme_type::ckks)
+            {
+                throw std::logic_error("unsupported scheme");
+            }
+            rotate_many_internal(encrypted, steps, galois_keys, destinations, std::move(pool));
+        }
+
+        /**
         Complex conjugates plaintext slot values. When using the CKKS scheme, this function complex conjugates all
         values in the underlying plaintext. Dynamic memory allocations in the process are allocated from the memory pool
         pointed to by the given MemoryPoolHandle.
@@ -1357,6 +1449,14 @@ namespace seal
 
         void rotate_internal(
             Ciphertext &encrypted, int steps, const GaloisKeys &galois_keys, MemoryPoolHandle pool) const;
+
+        void rotate_many_internal(
+            const Ciphertext &encrypted, const std::vector<int> &steps, const GaloisKeys &galois_keys,
+            std::vector<Ciphertext> &destinations, MemoryPoolHandle pool) const;
+
+        void apply_galois_hoisted(
+            const Ciphertext &encrypted, const std::vector<std::uint32_t> &galois_elts, const GaloisKeys &galois_keys,
+            const std::vector<Ciphertext *> &destinations, MemoryPoolHandle pool) const;
 
         inline void conjugate_internal(
             Ciphertext &encrypted, const GaloisKeys &galois_keys, MemoryPoolHandle pool) const

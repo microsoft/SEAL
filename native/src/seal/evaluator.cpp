@@ -2554,12 +2554,15 @@ namespace seal
         constexpr size_t kswitch_acc_scratch_size = 2 * kswitch_key_component_count * kswitch_block_size;
 
         // Computes for both key components k the fully reduced dot products
-        //     out[k][l] = (sum_{j < digit_count} digits[j][l] * keys[2 * j + k][l]) mod modulus,  l < coeff_count.
-        // Requires digits[j][l] < 4 * modulus and keys[..][l] < modulus. acc_scratch must hold
-        // kswitch_acc_scratch_size words.
+        //     out[k][l] = (sum_{j < digit_count} x_j[l] * keys[2 * j + k][l]) mod modulus,  l < coeff_count,
+        // where x_j[l] = digits[j][l] or, with ApplyPermutation, x_j[l] = digits[j][perm[l]] + corrections[j][l]; the
+        // latter applies a Galois automorphism to hoisted NTT-form digits. Requires x_j[l] < 4 * modulus and
+        // keys[..][l] < modulus. acc_scratch must hold kswitch_acc_scratch_size words.
+        template <bool ApplyPermutation>
         void kswitch_dot_product(
-            size_t coeff_count, size_t digit_count, const uint64_t *const *digits, const uint64_t *const *keys,
-            const Modulus &modulus, uint64_t *const *out, unsigned long long *acc_scratch)
+            size_t coeff_count, size_t digit_count, const uint64_t *const *digits, const uint32_t *perm,
+            const uint64_t *const *corrections, const uint64_t *const *keys, const Modulus &modulus,
+            uint64_t *const *out, unsigned long long *acc_scratch)
         {
             unsigned long long *acc[kswitch_key_component_count];
             for (size_t k = 0; k < kswitch_key_component_count; k++)
@@ -2581,6 +2584,11 @@ namespace seal
                     fill_n(acc[k], 2 * block_size, 0ULL);
                 }
 
+                // Without ApplyPermutation the digits are read at the block offset; with it, they are read through the
+                // block's entries of the permutation table
+                const size_t digit_offset = ApplyPermutation ? 0 : l0;
+                const uint32_t *p = ApplyPermutation ? perm + l0 : nullptr;
+
                 for (size_t j = 0; j < digit_count;)
                 {
                     // At most kswitch_lazy_summand_bound products are accumulated between reductions
@@ -2589,8 +2597,10 @@ namespace seal
                     // Two digits at a time
                     for (; j + 2 <= j_end; j += 2)
                     {
-                        const uint64_t *d0 = digits[j] + l0;
-                        const uint64_t *d1 = digits[j + 1] + l0;
+                        const uint64_t *d0 = digits[j] + digit_offset;
+                        const uint64_t *d1 = digits[j + 1] + digit_offset;
+                        const uint64_t *f0 = ApplyPermutation ? corrections[j] + l0 : nullptr;
+                        const uint64_t *f1 = ApplyPermutation ? corrections[j + 1] + l0 : nullptr;
                         const uint64_t *b0[kswitch_key_component_count];
                         const uint64_t *b1[kswitch_key_component_count];
                         for (size_t k = 0; k < kswitch_key_component_count; k++)
@@ -2600,9 +2610,11 @@ namespace seal
                         }
                         for (size_t l = 0; l < block_size; l++)
                         {
+                            const uint64_t x0 = ApplyPermutation ? d0[p[l]] + f0[l] : d0[l];
+                            const uint64_t x1 = ApplyPermutation ? d1[p[l]] + f1[l] : d1[l];
                             for (size_t k = 0; k < kswitch_key_component_count; k++)
                             {
-                                multiply_add_uint64(d0[l], b0[k][l], d1[l], b1[k][l], acc[k] + 2 * l);
+                                multiply_add_uint64(x0, b0[k][l], x1, b1[k][l], acc[k] + 2 * l);
                             }
                         }
                     }
@@ -2610,7 +2622,8 @@ namespace seal
                     // Remaining single digit
                     if (j < j_end)
                     {
-                        const uint64_t *d0 = digits[j] + l0;
+                        const uint64_t *d0 = digits[j] + digit_offset;
+                        const uint64_t *f0 = ApplyPermutation ? corrections[j] + l0 : nullptr;
                         const uint64_t *b0[kswitch_key_component_count];
                         for (size_t k = 0; k < kswitch_key_component_count; k++)
                         {
@@ -2618,9 +2631,10 @@ namespace seal
                         }
                         for (size_t l = 0; l < block_size; l++)
                         {
+                            const uint64_t x0 = ApplyPermutation ? d0[p[l]] + f0[l] : d0[l];
                             for (size_t k = 0; k < kswitch_key_component_count; k++)
                             {
-                                multiply_add_uint64(d0[l], b0[k][l], acc[k] + 2 * l);
+                                multiply_add_uint64(x0, b0[k][l], acc[k] + 2 * l);
                             }
                         }
                         j++;
@@ -2927,6 +2941,78 @@ namespace seal
             }
         }
 
+        // Hoisting for the output RNS modulus with index i (key_index into key_modulus, q = key_modulus[key_index]).
+        // A Galois automorphism permutes the slots of NTT-form values, so the digits of an automorphism of the target
+        // could be obtained by permuting the digits D_j computed by kswitch_prepare_digits. Key switching after
+        // apply_galois, however, uses the digits [galois(c)]_{q_j}, lifted from [0, q_j), whereas applying galois to
+        // the lifted digit [c]_{q_j} gives -x in place of q_j - x wherever the automorphism negates a coefficient x.
+        // For x != 0 the difference is q_j exactly at the negated positions, i.e., q_j * (1 - galois(1)) / 2 with 1 the
+        // all-ones polynomial. This function therefore writes D_j - F_j to t_digits and F_j to t_corrections, where
+        // F_j = (q_j * 2^(-1) mod q) * NTT(1), so that permute(D_j - F_j) + F_j as read by kswitch_dot_product is the
+        // exact digit of the automorphism. Digit i needs no correction (q_i = 0 modulo q). A digit with a zero
+        // coefficient (0 maps to 0, not q_j) must instead be recomputed for each automorphism, so for such a digit
+        // j != i the caller sets digit_ptrs[j]. Every correction pointer is set, to t_zero if there is no correction.
+        void kswitch_hoist_digits(
+            size_t i, size_t key_index, size_t coeff_count, size_t decomp_modulus_size,
+            const vector<Modulus> &key_modulus, const NTTTables &ntt_tables, const uint64_t *t_target,
+            const uint64_t *ntt_target, const vector<uint8_t> &digit_has_zero, const uint64_t *t_zero,
+            uint64_t *t_ones_ntt, uint64_t *t_digits, uint64_t *t_corrections, const uint64_t **digit_ptrs,
+            const uint64_t **correction_ptrs)
+        {
+            const Modulus &key_mod = key_modulus[key_index];
+            const uint64_t q = key_mod.value();
+            const uint64_t two_q = q << 1;
+
+            // NTT of the all-ones polynomial modulo q
+            fill_n(t_ones_ntt, coeff_count, uint64_t(1));
+            ntt_negacyclic_harvey(CoeffIter(t_ones_ntt), ntt_tables);
+            const uint64_t inv2 = (q + 1) >> 1; // 2^(-1) mod q
+
+            for (size_t j = 0; j < decomp_modulus_size; j++)
+            {
+                correction_ptrs[j] = t_zero;
+                if (j == i)
+                {
+                    // The digit stays in [0, 4q) and needs no correction
+                    if (ntt_target)
+                    {
+                        digit_ptrs[j] = ntt_target + j * coeff_count;
+                    }
+                    else
+                    {
+                        kswitch_prepare_digit(
+                            t_target + j * coeff_count, key_modulus[j], key_mod, ntt_tables,
+                            t_digits + j * coeff_count);
+                        digit_ptrs[j] = t_digits + j * coeff_count;
+                    }
+                    continue;
+                }
+                if (digit_has_zero[j])
+                {
+                    continue;
+                }
+
+                uint64_t *d = t_digits + j * coeff_count;
+                uint64_t *f = t_corrections + j * coeff_count;
+                kswitch_prepare_digit(t_target + j * coeff_count, key_modulus[j], key_mod, ntt_tables, d);
+                MultiplyUIntModOperand factor;
+                factor.set(
+                    multiply_uint_mod(barrett_reduce_64(key_modulus[j].value(), key_mod), inv2, key_mod), key_mod);
+                for (size_t l = 0; l < coeff_count; l++)
+                {
+                    // Reduce the lazy NTT output to [0, q), as sub_uint_mod requires. Then d[l] and f[l] are both in
+                    // [0, q), so the value d[perm[l]] + f[l] read by kswitch_dot_product is below 2q, within its
+                    // [0, 4q) input bound.
+                    uint64_t fl = multiply_uint_mod(t_ones_ntt[l], factor, key_mod);
+                    uint64_t dl = sub_if_ge_uint64(sub_if_ge_uint64(d[l], two_q), q);
+                    d[l] = sub_uint_mod(dl, fl, key_mod);
+                    f[l] = fl;
+                }
+                digit_ptrs[j] = d;
+                correction_ptrs[j] = f;
+            }
+        }
+
         // Points key_ptrs[2 * j + k] to RNS component key_index of component k of key j, for j < decomp_modulus_size
         void kswitch_set_key_ptrs(
             size_t key_index, size_t coeff_count, size_t decomp_modulus_size, const vector<PublicKey> &key_vector,
@@ -3012,13 +3098,299 @@ namespace seal
 
             // Multiply with keys and accumulate; outputs are fully reduced modulo key_modulus[key_index]
             uint64_t *out_ptrs[kswitch_key_component_count]{ prods[0] + i * coeff_count, prods[1] + i * coeff_count };
-            kswitch_dot_product(
-                coeff_count, decomp_modulus_size, digit_ptrs.get(), key_ptrs.get(), key_modulus[key_index], out_ptrs,
-                acc_scratch.get());
+            kswitch_dot_product<false>(
+                coeff_count, decomp_modulus_size, digit_ptrs.get(), nullptr, nullptr, key_ptrs.get(),
+                key_modulus[key_index], out_ptrs, acc_scratch.get());
         }
 
         // Perform modulus switching with scaling
         kswitch_mod_down(context_, parms_id, prods, t_lasts, addends, outputs, std::move(pool));
     }
 
+    void Evaluator::apply_galois_hoisted(
+        const Ciphertext &encrypted, const vector<uint32_t> &galois_elts, const GaloisKeys &galois_keys,
+        const vector<Ciphertext *> &destinations, MemoryPoolHandle pool) const
+    {
+        // Assuming at this point the inputs are validated and the destinations are distinct from encrypted.
+        auto parms_id = encrypted.parms_id();
+        auto &parms = context_.get_context_data(parms_id)->parms();
+        auto &coeff_modulus = parms.coeff_modulus();
+        auto scheme = parms.scheme();
+        auto &key_context_data = *context_.key_context_data();
+        auto &key_modulus = key_context_data.parms().coeff_modulus();
+        size_t key_modulus_size = key_modulus.size();
+        auto key_ntt_tables = iter(key_context_data.small_ntt_tables());
+        size_t coeff_count = parms.poly_modulus_degree();
+        size_t decomp_modulus_size = coeff_modulus.size();
+        size_t rns_modulus_size = decomp_modulus_size + 1;
+        size_t elt_count = galois_elts.size();
+        // Use key_context_data where permutation tables exist since previous runs.
+        auto galois_tool = key_context_data.galois_tool();
+
+        // The key-switched RNS components for the primes of encrypted are written directly to the destinations
+        for (auto destination : destinations)
+        {
+            destination->resize(context_, parms_id, 2);
+            destination->is_ntt_form() = encrypted.is_ntt_form();
+            destination->scale() = encrypted.scale();
+            destination->correction_factor() = encrypted.correction_factor();
+        }
+
+        // Digits (RNS components) of encrypted.data(1) in coefficient form
+        ConstRNSIter target_iter(encrypted.data(1), coeff_count);
+        Pointer<uint64_t> t_target_copy;
+        const uint64_t *t_target =
+            kswitch_target_to_coeff_form(target_iter, decomp_modulus_size, scheme, key_ntt_tables, t_target_copy, pool);
+        const uint64_t *ntt_target = (scheme == scheme_type::bfv) ? nullptr : encrypted.data(1);
+
+        // Digits with a zero coefficient are recomputed for each automorphism (see kswitch_hoist_digits)
+        vector<uint8_t> digit_has_zero(decomp_modulus_size);
+        bool any_digit_has_zero = false;
+        for (size_t j = 0; j < decomp_modulus_size; j++)
+        {
+            const uint64_t *digit = t_target + j * coeff_count;
+            digit_has_zero[j] = any_of(digit, digit + coeff_count, [](uint64_t x) { return !x; });
+            any_digit_has_zero = any_digit_has_zero || digit_has_zero[j];
+        }
+
+        // Scratch space for the hoisted digits and their corrections for one output modulus, the key-switched RNS
+        // components for the special prime (layout [automorphism][key component][coeff]), and pointer tables
+        auto t_digits(allocate_poly(coeff_count, decomp_modulus_size, pool));
+        auto t_corrections(allocate_poly(coeff_count, decomp_modulus_size, pool));
+        auto t_ones_ntt(allocate_uint(coeff_count, pool));
+        auto t_zero(allocate_zero_uint(coeff_count, pool));
+        auto t_lasts(allocate_poly_array(elt_count, coeff_count, kswitch_key_component_count, pool));
+        auto digit_ptrs(allocate<const uint64_t *>(decomp_modulus_size, pool));
+        auto correction_ptrs(allocate<const uint64_t *>(decomp_modulus_size, pool));
+        auto key_ptrs(allocate<const uint64_t *>(mul_safe(decomp_modulus_size, kswitch_key_component_count), pool));
+        auto acc_scratch(allocate<unsigned long long>(kswitch_acc_scratch_size, pool));
+
+        // Scratch space for recomputing digits with a zero coefficient: one in coefficient form and in NTT form, and
+        // all of them stored for the permuted read
+        Pointer<uint64_t> t_exact;
+        Pointer<uint64_t> t_exact_scattered;
+        if (any_digit_has_zero)
+        {
+            t_exact = allocate_poly(coeff_count, 2, pool);
+            t_exact_scattered = allocate_poly(coeff_count, decomp_modulus_size, pool);
+        }
+
+        // The key switching keys and permutation tables of the automorphisms
+        vector<const vector<PublicKey> *> key_vectors(elt_count);
+        vector<const uint32_t *> perms(elt_count);
+        for (size_t e = 0; e < elt_count; e++)
+        {
+            key_vectors[e] = &galois_keys.data(GaloisKeys::get_index(galois_elts[e]));
+            perms[e] = galois_tool->get_permutation_table_ntt(galois_elts[e]);
+        }
+
+        for (size_t i = 0; i < rns_modulus_size; i++)
+        {
+            size_t key_index = (i == decomp_modulus_size ? key_modulus_size - 1 : i);
+            const Modulus &key_mod = key_modulus[key_index];
+            const NTTTables &ntt_tables = key_ntt_tables[key_index];
+
+            // The digits modulo key_mod are computed once and used for all automorphisms
+            kswitch_hoist_digits(
+                i, key_index, coeff_count, decomp_modulus_size, key_modulus, ntt_tables, t_target, ntt_target,
+                digit_has_zero, t_zero.get(), t_ones_ntt.get(), t_digits.get(), t_corrections.get(), digit_ptrs.get(),
+                correction_ptrs.get());
+
+            for (size_t e = 0; e < elt_count; e++)
+            {
+                const uint32_t *perm = perms[e];
+
+                // Digits with a zero coefficient, except digit i, which is exact: the exact NTT-form digits
+                // [galois(c1)]_{q_j}, as in switch_key, stored such that the permuted read in the dot product
+                // recovers them
+                for (size_t j = 0; j < decomp_modulus_size; j++)
+                {
+                    if (!digit_has_zero[j] || j == i)
+                    {
+                        continue;
+                    }
+                    uint64_t *t_exact_coeff = t_exact.get();
+                    uint64_t *t_exact_ntt = t_exact.get() + coeff_count;
+                    uint64_t *t_scattered = t_exact_scattered.get() + j * coeff_count;
+                    galois_tool->apply_galois(
+                        ConstCoeffIter(t_target + j * coeff_count), galois_elts[e], key_modulus[j],
+                        CoeffIter(t_exact_coeff));
+                    kswitch_prepare_digit(t_exact_coeff, key_modulus[j], key_mod, ntt_tables, t_exact_ntt);
+                    for (size_t l = 0; l < coeff_count; l++)
+                    {
+                        t_scattered[perm[l]] = t_exact_ntt[l];
+                    }
+                    digit_ptrs[j] = t_scattered;
+                }
+
+                // The automorphism is applied to the hoisted digits on the fly by a permuted read plus correction
+                kswitch_set_key_ptrs(key_index, coeff_count, decomp_modulus_size, *key_vectors[e], key_ptrs.get());
+                uint64_t *out_ptrs[kswitch_key_component_count];
+                for (size_t k = 0; k < kswitch_key_component_count; k++)
+                {
+                    out_ptrs[k] = (i < decomp_modulus_size)
+                                      ? destinations[e]->data(k) + i * coeff_count
+                                      : t_lasts.get() + (e * kswitch_key_component_count + k) * coeff_count;
+                }
+                kswitch_dot_product<true>(
+                    coeff_count, decomp_modulus_size, digit_ptrs.get(), perm, correction_ptrs.get(), key_ptrs.get(),
+                    key_mod, out_ptrs, acc_scratch.get());
+            }
+        }
+
+        // Divide by the special prime and add galois(c0), computed in t_digits, which is no longer needed
+        for (size_t e = 0; e < elt_count; e++)
+        {
+            Ciphertext &destination = *destinations[e];
+            RNSIter galois_c0(t_digits.get(), coeff_count);
+            if (scheme == scheme_type::bfv)
+            {
+                galois_tool->apply_galois(
+                    ConstRNSIter(encrypted.data(0), coeff_count), decomp_modulus_size, galois_elts[e], coeff_modulus,
+                    galois_c0);
+            }
+            else
+            {
+                galois_tool->apply_galois_ntt(
+                    ConstRNSIter(encrypted.data(0), coeff_count), decomp_modulus_size, galois_elts[e], galois_c0);
+            }
+
+            uint64_t *prods[kswitch_key_component_count]{ destination.data(0), destination.data(1) };
+            uint64_t *t_last_ptrs[kswitch_key_component_count]{
+                t_lasts.get() + e * kswitch_key_component_count * coeff_count,
+                t_lasts.get() + (e * kswitch_key_component_count + 1) * coeff_count
+            };
+            const uint64_t *addends[kswitch_key_component_count]{ galois_c0, nullptr };
+            kswitch_mod_down(context_, parms_id, prods, t_last_ptrs, addends, prods, pool);
+#ifdef SEAL_THROW_ON_TRANSPARENT_CIPHERTEXT
+            // Transparent ciphertext output is not allowed.
+            if (destination.is_transparent())
+            {
+                throw logic_error("result ciphertext is transparent");
+            }
+#endif
+        }
+    }
+
+    void Evaluator::rotate_many_internal(
+        const Ciphertext &encrypted, const vector<int> &steps, const GaloisKeys &galois_keys,
+        vector<Ciphertext> &destinations, MemoryPoolHandle pool) const
+    {
+        auto context_data_ptr = context_.get_context_data(encrypted.parms_id());
+        if (!context_data_ptr)
+        {
+            throw invalid_argument("encrypted is not valid for encryption parameters");
+        }
+        if (!context_data_ptr->qualifiers().using_batching)
+        {
+            throw logic_error("encryption parameters do not support batching");
+        }
+        if (galois_keys.parms_id() != context_.key_parms_id())
+        {
+            throw invalid_argument("galois_keys is not valid for encryption parameters");
+        }
+        if (!pool)
+        {
+            throw invalid_argument("pool is uninitialized");
+        }
+
+        // Verify all steps and the keys they need before any work is done, as rotate_internal would for each step.
+        // Steps with their own Galois key are hoisted together; other nonzero steps are composed of several rotations.
+        size_t coeff_count = context_data_ptr->parms().poly_modulus_degree();
+        auto galois_tool = context_data_ptr->galois_tool();
+        vector<uint32_t> hoisted_elts;
+        vector<size_t> hoisted_indices;
+        vector<size_t> composed_indices;
+        for (size_t i = 0; i < steps.size(); i++)
+        {
+            if (steps[i] == 0)
+            {
+                continue;
+            }
+            uint32_t galois_elt = galois_tool->get_elt_from_step(steps[i]);
+            if (galois_keys.has_key(galois_elt))
+            {
+                validate_galois(context_, encrypted, galois_elt, galois_keys);
+                hoisted_elts.push_back(galois_elt);
+                hoisted_indices.push_back(i);
+                continue;
+            }
+
+            vector<int> naf_steps = naf(steps[i]);
+            if (naf_steps.size() == 1)
+            {
+                throw invalid_argument("Galois key not present");
+            }
+            for (int naf_step : naf_steps)
+            {
+                // A NAF term of size coeff_count / 2 corresponds to no rotation and is skipped
+                if (safe_cast<size_t>(abs(naf_step)) == (coeff_count >> 1))
+                {
+                    continue;
+                }
+                uint32_t naf_elt = galois_tool->get_elt_from_step(naf_step);
+                if (!galois_keys.has_key(naf_elt))
+                {
+                    throw invalid_argument("Galois key not present");
+                }
+                validate_galois(context_, encrypted, naf_elt, galois_keys);
+            }
+            composed_indices.push_back(i);
+        }
+
+        // encrypted may be an element of destinations; if so, it is copied before destinations is modified
+        const Ciphertext *source = &encrypted;
+        Ciphertext encrypted_copy(pool);
+        for (const auto &destination : destinations)
+        {
+            if (&destination == &encrypted)
+            {
+                encrypted_copy = encrypted;
+                source = &encrypted_copy;
+                break;
+            }
+        }
+
+        // Existing elements of destinations keep their memory pools; new elements use pool
+        while (destinations.size() > steps.size())
+        {
+            destinations.pop_back();
+        }
+        destinations.reserve(steps.size());
+        while (destinations.size() < steps.size())
+        {
+            destinations.emplace_back(pool);
+        }
+
+        // Steps that are zero or composed of several rotations are done as in rotate_internal
+        for (size_t i = 0; i < steps.size(); i++)
+        {
+            if (steps[i] == 0)
+            {
+                destinations[i] = *source;
+            }
+        }
+        for (auto i : composed_indices)
+        {
+            destinations[i] = *source;
+            rotate_internal(destinations[i], steps[i], galois_keys, pool);
+        }
+
+        if (hoisted_elts.size() == 1)
+        {
+            // Hoisting does not pay off for a single rotation
+            Ciphertext &destination = destinations[hoisted_indices[0]];
+            destination = *source;
+            apply_galois_inplace(destination, hoisted_elts[0], galois_keys, std::move(pool));
+        }
+        else if (hoisted_elts.size() > 1)
+        {
+            vector<Ciphertext *> hoisted_destinations(hoisted_indices.size());
+            for (size_t i = 0; i < hoisted_indices.size(); i++)
+            {
+                hoisted_destinations[i] = &destinations[hoisted_indices[i]];
+            }
+            apply_galois_hoisted(*source, hoisted_elts, galois_keys, hoisted_destinations, std::move(pool));
+        }
+    }
 } // namespace seal
