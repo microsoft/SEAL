@@ -956,6 +956,47 @@ namespace seal
             // Base case; nothing to do
         }
 
+        /**
+        Adds operand1 * operand2 to the 128-bit value accumulator (low word first), modulo 2^128.
+        */
+        SEAL_FORCE_INLINE void multiply_add_uint64(
+            std::uint64_t operand1, std::uint64_t operand2, unsigned long long *accumulator)
+        {
+#ifdef SEAL_USE___INT128
+            uint128_t sum = (static_cast<uint128_t>(accumulator[1]) << 64) | accumulator[0];
+            sum += static_cast<uint128_t>(operand1) * operand2;
+            accumulator[0] = static_cast<unsigned long long>(sum);
+            accumulator[1] = static_cast<unsigned long long>(sum >> 64);
+#else
+            unsigned long long product[2];
+            multiply_uint64(operand1, operand2, product);
+            add_uint128(product, accumulator, accumulator);
+#endif
+        }
+
+        /**
+        Adds operand1 * operand2 + operand3 * operand4 to the 128-bit value accumulator (low word first), modulo 2^128.
+        */
+        SEAL_FORCE_INLINE void multiply_add_uint64(
+            std::uint64_t operand1, std::uint64_t operand2, std::uint64_t operand3, std::uint64_t operand4,
+            unsigned long long *accumulator)
+        {
+#ifdef SEAL_USE___INT128
+            uint128_t sum = (static_cast<uint128_t>(accumulator[1]) << 64) | accumulator[0];
+            sum += static_cast<uint128_t>(operand1) * operand2;
+            sum += static_cast<uint128_t>(operand3) * operand4;
+            accumulator[0] = static_cast<unsigned long long>(sum);
+            accumulator[1] = static_cast<unsigned long long>(sum >> 64);
+#else
+            unsigned long long product1[2];
+            unsigned long long product2[2];
+            multiply_uint64(operand1, operand2, product1);
+            multiply_uint64(operand3, operand4, product2);
+            add_uint128(product1, accumulator, accumulator);
+            add_uint128(product2, accumulator, accumulator);
+#endif
+        }
+
         void divide_uint_inplace(
             std::uint64_t *numerator, const std::uint64_t *denominator, std::size_t uint64_count,
             std::uint64_t *quotient, MemoryPool &pool);

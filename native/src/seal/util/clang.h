@@ -13,6 +13,9 @@
 // Read in config.h
 #include "seal/util/config.h"
 
+// As in gcc.h; without always_inline, clang may decline to inline small helpers in hot loops
+#define SEAL_FORCE_INLINE inline __attribute__((always_inline))
+
 #ifdef SEAL_USE_ALIGNED_ALLOC
 #ifdef _WIN32
 // The Windows C runtime provides no std::aligned_alloc; _aligned_malloc results must be
