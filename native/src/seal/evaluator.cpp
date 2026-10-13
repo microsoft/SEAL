@@ -2138,8 +2138,24 @@ namespace seal
             SEAL_ITERATE(iter(I, temp_iter, coeff_modulus, ntt_tables), coeff_modulus_size, [&](auto J) {
                 // Lazy reduction
                 ntt_negacyclic_harvey_lazy(get<0>(J), get<3>(J));
+#ifdef SEAL_USE_INTEL_HEXL
                 dyadic_product_coeffmod(get<0>(J), get<1>(J), coeff_count, get<2>(J), get<0>(J));
                 inverse_ntt_negacyclic_harvey(get<0>(J), get<3>(J));
+#else
+                // Dyadic product with Montgomery reduction, giving x * y * 2^(-64) mod p: the inputs are in [0, 4p)
+                // (lazy NTT output) and [0, p) (fully reduced NTT), so the product is below 4p^2 < p * 2^64. The
+                // factor 2^64 is folded into the scalar of the inverse NTT, whose output is fully reduced.
+                const DyadicMontgomeryReducer reducer(get<2>(J));
+                uint64_t *x = get<0>(J);
+                const uint64_t *y = get<1>(J);
+                for (size_t l = 0; l < coeff_count; l++)
+                {
+                    unsigned long long prod[2];
+                    multiply_uint64(x[l], y[l], prod);
+                    x[l] = reducer.reduce(prod[0], prod[1]);
+                }
+                inverse_ntt_negacyclic_harvey_scaled(get<0>(J), two_pow_64_mod(get<2>(J)), get<3>(J), get<0>(J));
+#endif
             });
         });
 
@@ -2180,10 +2196,39 @@ namespace seal
             throw logic_error("invalid parameters");
         }
 
+#ifdef SEAL_USE_INTEL_HEXL
+        // Intel HEXL's dyadic product has no faster form for a shared operand, so multiply each ciphertext component
         ConstRNSIter plain_ntt_iter(plain_ntt.data(), coeff_count);
         SEAL_ITERATE(iter(encrypted_ntt), encrypted_ntt_size, [&](auto I) {
             dyadic_product_coeffmod(I, plain_ntt_iter, coeff_modulus_size, coeff_modulus, I);
         });
+#else
+        // Multiply the ciphertext components by the plaintext, one RNS component at a time. Pairs of ciphertext
+        // components share the plaintext operand, which dyadic_product_shared_coeffmod requires to be reduced. The
+        // plaintext data is not validated (e.g., after unsafe_load), so an unreduced component falls back to separate
+        // dyadic products.
+        SEAL_ITERATE(iter(coeff_modulus, size_t(0)), coeff_modulus_size, [&](auto I) {
+            const Modulus &modulus = get<0>(I);
+            const size_t offset = get<1>(I) * coeff_count;
+            ConstCoeffIter plain(plain_ntt.data() + offset);
+
+            size_t poly_index = 0;
+            if (!any_value_at_least(plain_ntt.data() + offset, coeff_count, modulus.value()))
+            {
+                for (; poly_index + 2 <= encrypted_ntt_size; poly_index += 2)
+                {
+                    CoeffIter c0(encrypted_ntt.data(poly_index) + offset);
+                    CoeffIter c1(encrypted_ntt.data(poly_index + 1) + offset);
+                    dyadic_product_shared_coeffmod(c0, c1, plain, coeff_count, modulus, c0, c1);
+                }
+            }
+            for (; poly_index < encrypted_ntt_size; poly_index++)
+            {
+                CoeffIter c(encrypted_ntt.data(poly_index) + offset);
+                dyadic_product_coeffmod(c, plain, coeff_count, modulus, c);
+            }
+        });
+#endif
 
         // Set the scale
         encrypted_ntt.scale() *= plain_ntt.scale();

@@ -184,5 +184,36 @@ namespace seal
 #endif
             set_uint(poly, util::mul_safe(poly_count, coeff_count, coeff_uint64_count), result);
         }
+
+        /**
+        Returns true if any of the count values at ptr is at least bound. The values are compared in branch-free
+        blocks, with an early exit after each block.
+        */
+        SEAL_NODISCARD inline bool any_value_at_least(
+            const std::uint64_t *ptr, std::size_t count, std::uint64_t bound) noexcept
+        {
+            constexpr std::size_t block = 64;
+            std::size_t i = 0;
+            for (; i + block <= count; i += block)
+            {
+                std::uint64_t found = 0;
+                for (std::size_t k = 0; k < block; k++)
+                {
+                    found |= static_cast<std::uint64_t>(ptr[i + k] >= bound);
+                }
+                if (found)
+                {
+                    return true;
+                }
+            }
+            for (; i < count; i++)
+            {
+                if (ptr[i] >= bound)
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
     } // namespace util
 } // namespace seal

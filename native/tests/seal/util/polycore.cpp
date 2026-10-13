@@ -4,6 +4,8 @@
 #include "seal/util/polycore.h"
 #include "seal/util/uintarith.h"
 #include <cstdint>
+#include <limits>
+#include <vector>
 #include "gtest/gtest.h"
 
 using namespace seal::util;
@@ -198,6 +200,34 @@ namespace sealtest
             {
                 ASSERT_EQ(ptr2[i], ptr3[i]);
             }
+        }
+
+        TEST(PolyCore, AnyValueAtLeast)
+        {
+            // Counts below, at, and above the block size of 64, with a single value at least the bound at every
+            // position: in a full block (at its start, inside, and at its end) and in the remainder
+            uint64_t bound = 1000;
+            ASSERT_FALSE(any_value_at_least(nullptr, 0, bound));
+            for (size_t count : { 1, 63, 64, 65, 128, 200 })
+            {
+                vector<uint64_t> values(count, bound - 1);
+                ASSERT_FALSE(any_value_at_least(values.data(), count, bound));
+                for (size_t i = 0; i < count; i++)
+                {
+                    for (uint64_t value : { bound, bound + 1, numeric_limits<uint64_t>::max() })
+                    {
+                        values[i] = value;
+                        ASSERT_TRUE(any_value_at_least(values.data(), count, bound)) << count << " " << i;
+                        ASSERT_FALSE(any_value_at_least(values.data(), i, bound)) << count << " " << i;
+                    }
+                    values[i] = bound - 1;
+                }
+            }
+
+            // Every value is at least 0, and none is at least 2^64 - 1 unless it equals it
+            vector<uint64_t> values{ 0, 1, 2 };
+            ASSERT_TRUE(any_value_at_least(values.data(), values.size(), 0));
+            ASSERT_FALSE(any_value_at_least(values.data(), values.size(), numeric_limits<uint64_t>::max()));
         }
     } // namespace util
 } // namespace sealtest

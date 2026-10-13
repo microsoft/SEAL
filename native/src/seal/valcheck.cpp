@@ -11,6 +11,7 @@
 #include "seal/valcheck.h"
 #include "seal/util/common.h"
 #include "seal/util/defines.h"
+#include "seal/util/polycore.h"
 #include <cmath>
 
 using namespace std;
@@ -293,13 +294,11 @@ namespace seal
             {
                 uint64_t modulus = coeff_modulus[j].value();
                 size_t poly_modulus_degree = parms.poly_modulus_degree();
-                for (; poly_modulus_degree--; ptr++)
+                if (any_value_at_least(ptr, poly_modulus_degree, modulus))
                 {
-                    if (*ptr >= modulus)
-                    {
-                        return false;
-                    }
+                    return false;
                 }
+                ptr += poly_modulus_degree;
             }
         }
         else
@@ -308,12 +307,9 @@ namespace seal
             uint64_t modulus = parms.plain_modulus().value();
             const Plaintext::pt_coeff_type *ptr = in.data();
             auto size = in.coeff_count();
-            for (size_t k = 0; k < size; k++, ptr++)
+            if (any_value_at_least(ptr, size, modulus))
             {
-                if (*ptr >= modulus)
-                {
-                    return false;
-                }
+                return false;
             }
         }
 
@@ -342,13 +338,11 @@ namespace seal
             {
                 uint64_t modulus = coeff_modulus[j].value();
                 auto poly_modulus_degree = in.poly_modulus_degree();
-                for (; poly_modulus_degree--; ptr++)
+                if (any_value_at_least(ptr, poly_modulus_degree, modulus))
                 {
-                    if (*ptr >= modulus)
-                    {
-                        return false;
-                    }
+                    return false;
                 }
+                ptr += poly_modulus_degree;
             }
         }
 
@@ -374,13 +368,11 @@ namespace seal
         {
             uint64_t modulus = coeff_modulus[j].value();
             size_t poly_modulus_degree = parms.poly_modulus_degree();
-            for (; poly_modulus_degree--; ptr++)
+            if (any_value_at_least(ptr, poly_modulus_degree, modulus))
             {
-                if (*ptr >= modulus)
-                {
-                    return false;
-                }
+                return false;
             }
+            ptr += poly_modulus_degree;
         }
 
         return true;
@@ -408,13 +400,11 @@ namespace seal
             {
                 uint64_t modulus = coeff_modulus[j].value();
                 auto poly_modulus_degree = in.data().poly_modulus_degree();
-                for (; poly_modulus_degree--; ptr++)
+                if (any_value_at_least(ptr, poly_modulus_degree, modulus))
                 {
-                    if (*ptr >= modulus)
-                    {
-                        return false;
-                    }
+                    return false;
                 }
+                ptr += poly_modulus_degree;
             }
         }
 

@@ -7667,4 +7667,56 @@ namespace sealtest
             }
         }
     }
+
+    TEST(EvaluatorTest, MultiplyPlainNTTUnreducedPlaintext)
+    {
+        // The data of a plaintext is not validated, so an NTT-form plaintext may hold unreduced representatives (e.g.,
+        // after unsafe_load); the products must be the same as for the reduced plaintext
+        EncryptionParameters parms(scheme_type::bfv);
+        parms.set_poly_modulus_degree(128);
+        parms.set_plain_modulus(1 << 6);
+        parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40 }));
+        SEALContext context(parms, false, sec_level_type::none);
+        KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
+        Encryptor encryptor(context, pk);
+        Evaluator evaluator(context);
+
+        auto &coeff_modulus = context.first_context_data()->parms().coeff_modulus();
+        size_t coeff_count = parms.poly_modulus_degree();
+        Plaintext plain_ntt("Fx^10 + Ex^9 + 1x^4 + 5");
+        evaluator.transform_to_ntt_inplace(plain_ntt, context.first_parms_id());
+
+        Ciphertext encrypted;
+        encryptor.encrypt(Plaintext("1x^3 + 2x^1 + 3"), encrypted);
+        for (size_t size : { size_t(2), size_t(3) })
+        {
+            Ciphertext operand = encrypted;
+            if (size == 3)
+            {
+                evaluator.square_inplace(operand);
+            }
+            evaluator.transform_to_ntt_inplace(operand);
+            Ciphertext expected;
+            evaluator.multiply_plain(operand, plain_ntt, expected);
+
+            // Unreduced representatives in the second RNS component only, and then in both
+            for (size_t first : { size_t(1), size_t(0) })
+            {
+                Plaintext unreduced = plain_ntt;
+                for (size_t i = first; i < coeff_modulus.size(); i++)
+                {
+                    for (size_t j = 0; j < coeff_count; j += 2)
+                    {
+                        unreduced.data()[i * coeff_count + j] += coeff_modulus[i].value();
+                    }
+                }
+                Ciphertext result;
+                evaluator.multiply_plain(operand, unreduced, result);
+                ASSERT_EQ(expected.size(), result.size());
+                ASSERT_TRUE(equal(expected.data(), expected.data() + expected.dyn_array().size(), result.data()));
+            }
+        }
+    }
 } // namespace sealtest
