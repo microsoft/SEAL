@@ -8,7 +8,7 @@ Microsoft SEAL is an easy-to-use open-source ([MIT licensed](LICENSE)) homomorph
 Microsoft SEAL is written in modern standard C++ and is easy to compile and run in many different environments.
 For more information about the Microsoft SEAL project, see [sealcrypto.org](https://www.microsoft.com/en-us/research/project/microsoft-seal).
 
-This document pertains to Microsoft SEAL version 4.6.
+This document pertains to Microsoft SEAL version 4.7.
 Users of previous versions of the library should look at the [list of changes](CHANGES.md).
 
 ## Contents
@@ -367,7 +367,7 @@ cmake -P cmake/ios_xcframework.cmake
 cmake -DBUILD_TYPE=Debug -DOUTPUT_DIR=./out -P cmake/ios_xcframework.cmake
 ```
 
-This configures and builds for both device (`iphoneos`) and simulator (`iphonesimulator`), installs both, and creates `libseal-4.6.xcframework` and `libsealc-4.6.xcframework`.
+This configures and builds for both device (`iphoneos`) and simulator (`iphonesimulator`), installs both, and creates `libseal-4.7.xcframework` and `libsealc-4.7.xcframework`.
 Both slices target `arm64`.
 Intermediate build files are placed in `out/ios-xcframework/` by default; override with `-DWORK_DIR=<path>`.
 
@@ -404,25 +404,25 @@ cmake --install $D/build-simulator --config Release --prefix $D/install-simulato
 # Stage headers per slice. XCFramework requires separate header trees because
 # generated files (e.g. config.h) can differ between device and simulator.
 mkdir -p $D/staging/device $D/staging/simulator
-rsync -a $D/install-device/include/SEAL-4.6/    $D/staging/device/
-rsync -a $D/install-simulator/include/SEAL-4.6/ $D/staging/simulator/
+rsync -a $D/install-device/include/SEAL-4.7/    $D/staging/device/
+rsync -a $D/install-simulator/include/SEAL-4.7/ $D/staging/simulator/
 
 # xcodebuild refuses to overwrite an existing .xcframework output.
-rm -rf libseal-4.6.xcframework libsealc-4.6.xcframework
+rm -rf libseal-4.7.xcframework libsealc-4.7.xcframework
 
 # Create the XCFrameworks.
 xcodebuild -create-xcframework                          \
-    -library $D/install-device/lib/libseal-4.6.a        \
+    -library $D/install-device/lib/libseal-4.7.a        \
     -headers $D/staging/device                          \
-    -library $D/install-simulator/lib/libseal-4.6.a     \
+    -library $D/install-simulator/lib/libseal-4.7.a     \
     -headers $D/staging/simulator                       \
-    -output  libseal-4.6.xcframework
+    -output  libseal-4.7.xcframework
 xcodebuild -create-xcframework                          \
-    -library $D/install-device/lib/libsealc-4.6.a       \
+    -library $D/install-device/lib/libsealc-4.7.a       \
     -headers $D/staging/device                          \
-    -library $D/install-simulator/lib/libsealc-4.6.a    \
+    -library $D/install-simulator/lib/libsealc-4.7.a    \
     -headers $D/staging/simulator                       \
-    -output  libsealc-4.6.xcframework
+    -output  libsealc-4.7.xcframework
 ```
 
 </details>
@@ -472,7 +472,7 @@ emcc \
  -Wall \
  -flto \
  -O3 \
- build/lib/libseal-4.6.a \
+ build/lib/libseal-4.7.a \
  --bind \
  -o "build/bin/seal_wasm.js" \
  -s WASM=1 \
@@ -536,7 +536,7 @@ It is very easy to link your own applications and libraries with Microsoft SEAL 
 Simply add the following to your `CMakeLists.txt`:
 
 ```PowerShell
-find_package(SEAL 4.6 REQUIRED)
+find_package(SEAL 4.7 REQUIRED)
 target_link_libraries(<your target> SEAL::seal)
 ```
 
@@ -618,6 +618,19 @@ For contributing to Microsoft SEAL, please see [CONTRIBUTING.md](CONTRIBUTING.md
 ## Citing Microsoft SEAL
 
 To cite Microsoft SEAL in academic papers, please use the following BibTeX entries.
+
+### Version 4.7
+
+```tex
+    @misc{sealcrypto,
+        title = {{M}icrosoft {SEAL} (release 4.7)},
+        howpublished = {\url{https://github.com/Microsoft/SEAL}},
+        month = oct,
+        year = 2026,
+        note = {Microsoft Research, Redmond, WA.},
+        key = {SEAL}
+    }
+```
 
 ### Version 4.6
 
