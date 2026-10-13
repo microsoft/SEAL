@@ -537,20 +537,15 @@ namespace seal
 
             // Precomputation for decrypt_scale_and_round and decrypt_modt (only if t is non-zero)
 
-            // Base converter: q --> {t, gamma}
-            Pointer<BaseConverter> base_q_to_t_gamma_conv_;
+            // Base converter: q --> {t, gamma}, with the input scaled by [t * gamma]_q and the output by
+            // -prod(q)^(-1) mod {t, gamma}
+            Pointer<BaseConverter> base_q_to_t_gamma_scaled_conv_;
 
             // Base converter: q --> t
             Pointer<BaseConverter> base_q_to_t_conv_;
 
             // gamma^(-1) mod t
             MultiplyUIntModOperand inv_gamma_mod_t_;
-
-            // -prod(q)^(-1) mod {t, gamma}
-            Pointer<MultiplyUIntModOperand> neg_inv_q_mod_t_gamma_;
-
-            // prod({t, gamma}) mod q
-            Pointer<MultiplyUIntModOperand> prod_t_gamma_mod_q_;
 
             // Precomputation for divide_and_round_q_last, divide_and_round_q_last_ntt, and mod_t_and_divide_q_last_ntt
 

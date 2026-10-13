@@ -1109,14 +1109,10 @@ namespace seal
             }
 
             const size_t base_q_size = base_q_->size();
-            const size_t base_t_gamma_size = base_t_gamma_->size();
             uint64_t temp;
 
             // Set up BaseConverter for q --> {t}
             base_q_to_t_conv_ = allocate<BaseConverter>(pool_, *base_q_, RNSBase({ t_ }, pool_), pool_);
-
-            // Set up BaseConverter for q --> {t, gamma}
-            base_q_to_t_gamma_conv_ = allocate<BaseConverter>(pool_, *base_q_, *base_t_gamma_, pool_);
 
             // Compute gamma^(-1) mod t
             if (!try_invert_uint_mod(barrett_reduce_64(gamma_.value(), t_), t_, temp))
@@ -1125,23 +1121,26 @@ namespace seal
             }
             inv_gamma_mod_t_.set(temp, t_);
 
-            // Compute prod({t, gamma}) mod q
-            prod_t_gamma_mod_q_ = allocate<MultiplyUIntModOperand>(base_q_size, pool_);
-            SEAL_ITERATE(iter(prod_t_gamma_mod_q_, base_q_->base()), base_q_size, [&](auto I) {
-                get<0>(I).set(
-                    multiply_uint_mod((*base_t_gamma_)[0].value(), (*base_t_gamma_)[1].value(), get<1>(I)), get<1>(I));
-            });
-
-            // Compute -prod(q)^(-1) mod {t, gamma}
-            neg_inv_q_mod_t_gamma_ = allocate<MultiplyUIntModOperand>(base_t_gamma_size, pool_);
-            SEAL_ITERATE(iter(neg_inv_q_mod_t_gamma_, base_t_gamma_->base()), base_t_gamma_size, [&](auto I) {
-                get<0>(I).operand = modulo_uint(base_q_->base_prod(), base_q_size, get<1>(I));
-                if (!try_invert_uint_mod(get<0>(I).operand, get<1>(I), get<0>(I).operand))
+            // Set up BaseConverter for q --> {t, gamma}, with the input scaled by [t * gamma]_q and the output by
+            // -prod(q)^(-1) mod {t, gamma}
+            vector<uint64_t> ibase_scale(base_q_size);
+            for (size_t i = 0; i < base_q_size; i++)
+            {
+                ibase_scale[i] = multiply_uint_mod(t_.value(), gamma_.value(), (*base_q_)[i]);
+            }
+            vector<uint64_t> obase_scale(base_t_gamma_->size());
+            for (size_t j = 0; j < base_t_gamma_->size(); j++)
+            {
+                const Modulus &m = (*base_t_gamma_)[j];
+                temp = modulo_uint(base_q_->base_prod(), base_q_size, m);
+                if (!try_invert_uint_mod(temp, m, temp))
                 {
                     throw logic_error("invalid rns bases");
                 }
-                get<0>(I).set(negate_uint_mod(get<0>(I).operand, get<1>(I)), get<1>(I));
-            });
+                obase_scale[j] = negate_uint_mod(temp, m);
+            }
+            base_q_to_t_gamma_scaled_conv_ =
+                allocate<BaseConverter>(pool_, *base_q_, *base_t_gamma_, ibase_scale, obase_scale, pool_);
         }
 
         void RNSTool::initialize_mod_switch()
@@ -1772,44 +1771,39 @@ namespace seal
                 throw invalid_argument("pool is uninitialized");
             }
 #endif
-            size_t base_q_size = base_q_->size();
             size_t base_t_gamma_size = base_t_gamma_->size();
 
-            // Compute |gamma * t|_qi * ct(s)
-            SEAL_ALLOCATE_GET_RNS_ITER(temp, coeff_count_, base_q_size, pool);
-            SEAL_ITERATE(iter(input, prod_t_gamma_mod_q_, base_q_->base(), temp), base_q_size, [&](auto I) {
-                multiply_poly_scalar_coeffmod(get<0>(I), coeff_count_, get<1>(I), get<2>(I), get<3>(I));
-            });
-
-            // Make another temp destination to get the poly in mod {t, gamma}
+            // Compute -prod(q)^(-1) * (fast base conversion of |gamma * t|_qi * ct(s) from q to {t, gamma}); the
+            // multiplications by |gamma * t|_qi and by -prod(q)^(-1) mod {t, gamma} are folded into the constants of
+            // base_q_to_t_gamma_scaled_conv_
             SEAL_ALLOCATE_GET_RNS_ITER(temp_t_gamma, coeff_count_, base_t_gamma_size, pool);
-
-            // Convert from q to {t, gamma}
-            base_q_to_t_gamma_conv_->fast_convert_array(temp, temp_t_gamma, pool);
-
-            // Multiply by -prod(q)^(-1) mod {t, gamma}
-            SEAL_ITERATE(
-                iter(temp_t_gamma, neg_inv_q_mod_t_gamma_, base_t_gamma_->base(), temp_t_gamma), base_t_gamma_size,
-                [&](auto I) {
-                    multiply_poly_scalar_coeffmod(get<0>(I), coeff_count_, get<1>(I), get<2>(I), get<3>(I));
-                });
+            base_q_to_t_gamma_scaled_conv_->fast_convert_array(input, temp_t_gamma, pool);
 
             // Need to correct values in temp_t_gamma (gamma component only) which are
             // larger than floor(gamma/2)
-            uint64_t gamma_div_2 = (*base_t_gamma_)[1].value() >> 1;
+            const uint64_t gamma_value = gamma_.value();
+            const uint64_t gamma_div_2 = (*base_t_gamma_)[1].value() >> 1;
+            // Local copies: stores to destination could otherwise alias the modulus constants
+            const Modulus t = t_;
+            const MultiplyUIntModOperand inv_gamma_mod_t = inv_gamma_mod_t_;
 
             // Now compute the subtraction to remove error and perform final multiplication by
             // gamma inverse mod t
-            SEAL_ITERATE(iter(temp_t_gamma[0], temp_t_gamma[1], destination), coeff_count_, [&](auto I) {
-                uint64_t gamma_component = get<1>(I);
-                uint64_t add_result =
-                    add_uint_mod(get<0>(I), barrett_reduce_64(gamma_.value() - gamma_component, t_), t_);
-                uint64_t sub_result = sub_uint_mod(get<0>(I), barrett_reduce_64(gamma_component, t_), t_);
-                get<2>(I) = SEAL_COND_SELECT(gamma_component > gamma_div_2, add_result, sub_result);
+            const uint64_t *t_component = temp_t_gamma[0].ptr();
+            const uint64_t *gamma_component_ptr = temp_t_gamma[1].ptr();
+            uint64_t *dst = destination.ptr();
+            for (size_t c = 0; c < coeff_count_; c++)
+            {
+                const uint64_t gamma_component = gamma_component_ptr[c];
+                const uint64_t add_result =
+                    sub_if_ge_uint64(t_component[c] + barrett_reduce_64(gamma_value - gamma_component, t), t.value());
+                const uint64_t sub_result = sub_uint_mod(t_component[c], barrett_reduce_64(gamma_component, t), t);
+                const uint64_t use_add = less_than_mask_uint64(gamma_div_2, gamma_component);
+                const uint64_t r = (add_result & use_add) | (sub_result & ~use_add);
 
                 // Perform final multiplication by gamma inverse mod t
-                get<2>(I) = multiply_uint_mod(get<2>(I), inv_gamma_mod_t_, t_);
-            });
+                dst[c] = multiply_uint_mod(r, inv_gamma_mod_t, t);
+            }
         }
 
         void RNSTool::mod_t_and_divide_q_last_ntt_inplace(

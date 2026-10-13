@@ -231,16 +231,31 @@ namespace seal
             for (size_t i = 0; i < coeff_modulus_size; i++)
             {
                 ntt_negacyclic_harvey(u.get() + i * coeff_count, ntt_tables[i]);
-                for (size_t j = 0; j < encrypted_size; j++)
+
+                // Two public key components at a time, sharing u
+                size_t j = 0;
+                for (; j + 2 <= encrypted_size; j += 2)
+                {
+                    dyadic_product_shared_coeffmod(
+                        public_key.data().data(j) + i * coeff_count, public_key.data().data(j + 1) + i * coeff_count,
+                        u.get() + i * coeff_count, coeff_count, coeff_modulus[i], destination.data(j) + i * coeff_count,
+                        destination.data(j + 1) + i * coeff_count);
+                }
+
+                // The remaining public key component, if any
+                for (; j < encrypted_size; j++)
                 {
                     dyadic_product_coeffmod(
                         u.get() + i * coeff_count, public_key.data().data(j) + i * coeff_count, coeff_count,
                         coeff_modulus[i], destination.data(j) + i * coeff_count);
+                }
 
-                    // Addition with e_0, e_1 is in non-NTT form
-                    if (!is_ntt_form)
+                // Addition with e_0, e_1 is in non-NTT form
+                if (!is_ntt_form)
+                {
+                    for (size_t k = 0; k < encrypted_size; k++)
                     {
-                        inverse_ntt_negacyclic_harvey(destination.data(j) + i * coeff_count, ntt_tables[i]);
+                        inverse_ntt_negacyclic_harvey(destination.data(k) + i * coeff_count, ntt_tables[i]);
                     }
                 }
             }

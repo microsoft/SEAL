@@ -1807,5 +1807,56 @@ namespace sealtest
             }
         }
 
+        // decrypt_scale_and_round computes round(t * x / q) mod t, and decrypt_modt the centered representative of x
+        // modulo q reduced modulo t, for the integer x in [0, q) given by the input (random, so that rounding errors
+        // of the approximate methods do not occur in practice)
+        TEST(RNSToolTest, DecryptRandom)
+        {
+            auto pool = MemoryManager::GetPool();
+            MemoryPool &mpool = pool;
+            mt19937_64 rng(2028);
+            size_t n = 1024;
+            for (auto bit_sizes : { vector<int>{ 50 }, vector<int>{ 40, 50, 60 }, vector<int>(20, 60) })
+            {
+                RNSBase q(CoeffModulus::Create(n, bit_sizes), pool);
+                size_t q_size = q.size();
+                for (const Modulus &t :
+                     { Modulus(2), Modulus(65537), Modulus(uint64_t(1) << 20), get_prime(2 * n, 59) })
+                {
+                    RNSTool rns_tool(n, q, t, pool);
+                    vector<uint64_t> in = random_rns_poly(q, n, rng);
+                    vector<uint64_t> scaled(n), modt(n);
+                    rns_tool.decrypt_scale_and_round(ConstRNSIter(in.data(), n), CoeffIter(scaled.data()), pool);
+                    rns_tool.decrypt_modt(RNSIter(in.data(), n), CoeffIter(modt.data()), pool);
+                    uint64_t q_mod_t = modulo_uint(q.base_prod(), q_size, t);
+                    for (size_t c = 0; c < n; c++)
+                    {
+                        vector<uint64_t> x = compose_coeff(q, in.data(), n, c);
+
+                        // floor((2 * t * x + q) / (2 * q)) mod t
+                        size_t width = q_size + 2;
+                        vector<uint64_t> numerator(width), q2(width), quotient(width), remainder(width);
+                        multiply_uint(x.data(), q_size, 2 * t.value(), width, numerator.data());
+                        copy_n(q.base_prod(), q_size, q2.begin());
+                        add_uint(numerator.data(), q2.data(), width, numerator.data());
+                        left_shift_uint(q2.data(), 1, width, q2.data());
+                        divide_uint(numerator.data(), q2.data(), width, quotient.data(), remainder.data(), mpool);
+                        ASSERT_EQ(modulo_uint(quotient.data(), width, t), scaled[c]) << "c " << c;
+
+                        // x - q if 2 * x > q
+                        uint64_t expected = modulo_uint(x.data(), q_size, t);
+                        vector<uint64_t> twice_x(x), q_wide(width);
+                        twice_x.resize(width);
+                        left_shift_uint(twice_x.data(), 1, width, twice_x.data());
+                        copy_n(q.base_prod(), q_size, q_wide.begin());
+                        if (is_greater_than_uint(twice_x.data(), q_wide.data(), width))
+                        {
+                            expected = sub_uint_mod(expected, q_mod_t, t);
+                        }
+                        ASSERT_EQ(expected, modt[c]) << "c " << c;
+                    }
+                }
+            }
+        }
     } // namespace util
 } // namespace sealtest
