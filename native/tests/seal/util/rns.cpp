@@ -800,14 +800,11 @@ namespace sealtest
                 // ((m_tilde, 2*m_tilde), (m_tilde, 2*m_tilde)) before reduction to target base.
                 uint64_t temp = ((2 * m_tilde) % 3) * 5 + ((4 * m_tilde) % 5) * 3;
 
-                ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[0].value(), out[0]);
-                ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[0].value(), out[1]);
-                ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[1].value(), out[2]);
-                ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[1].value(), out[3]);
-                ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[2].value(), out[4]);
-                ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[2].value(), out[5]);
-                ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[3].value(), out[6]);
-                ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[3].value(), out[7]);
+                for (size_t j = 0; j < rns_tool->base_Bsk_m_tilde()->size(); j++)
+                {
+                    ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[j].value(), out[2 * j]);
+                    ASSERT_EQ(temp % (*rns_tool->base_Bsk_m_tilde())[j].value(), out[2 * j + 1]);
+                }
             }
         }
 
@@ -888,39 +885,35 @@ namespace sealtest
                     ASSERT_EQ(0, val);
                 }
 
-                // Input base is Bsk U {m_tilde}, in this case consisting of 6 primes.
+                // Input base is Bsk U {m_tilde}, with m_tilde as the last element.
                 // m_tilde is always smaller than the primes in Bsk (SEAL_INTERNAL_MOD_BIT_COUNT (61) bits).
                 // Set the length-2 array to have values 1*m_tilde and 2*m_tilde.
-                in[0] = rns_tool->m_tilde().value();
-                in[1] = 2 * rns_tool->m_tilde().value();
-                in[2] = rns_tool->m_tilde().value();
-                in[3] = 2 * rns_tool->m_tilde().value();
-                in[4] = rns_tool->m_tilde().value();
-                in[5] = 2 * rns_tool->m_tilde().value();
+                size_t base_Bsk_size = rns_tool->base_Bsk()->size();
+                for (size_t j = 0; j < base_Bsk_size; j++)
+                {
+                    in[2 * j] = rns_tool->m_tilde().value();
+                    in[2 * j + 1] = 2 * rns_tool->m_tilde().value();
+                }
 
                 // Modulo m_tilde
-                in[6] = 0;
-                in[7] = 0;
+                in[2 * base_Bsk_size] = 0;
+                in[2 * base_Bsk_size + 1] = 0;
 
                 // This should simply get rid of the m_tilde factor
                 rns_tool->sm_mrq(in_iter, out_iter, pool);
 
-                ASSERT_EQ(1, out[0]);
-                ASSERT_EQ(2, out[1]);
-                ASSERT_EQ(1, out[2]);
-                ASSERT_EQ(2, out[3]);
-                ASSERT_EQ(1, out[4]);
-                ASSERT_EQ(2, out[5]);
+                for (size_t j = 0; j < base_Bsk_size; j++)
+                {
+                    ASSERT_EQ(1, out[2 * j]);
+                    ASSERT_EQ(2, out[2 * j + 1]);
+                }
 
                 // Next add a multiple of q to the input and see if it is reduced properly
-                in[0] = 15;
-                in[1] = 30;
-                in[2] = 15;
-                in[3] = 30;
-                in[4] = 15;
-                in[5] = 30;
-                in[6] = 15;
-                in[7] = 30;
+                for (size_t j = 0; j <= base_Bsk_size; j++)
+                {
+                    in[2 * j] = 15;
+                    in[2 * j + 1] = 30;
+                }
 
                 rns_tool->sm_mrq(in_iter, out_iter, pool);
                 for (auto val : out)
@@ -929,14 +922,11 @@ namespace sealtest
                 }
 
                 // Now with a multiple of m_tilde + multiple of q
-                in[0] = 2 * rns_tool->m_tilde().value() + 15;
-                in[1] = 2 * rns_tool->m_tilde().value() + 30;
-                in[2] = 2 * rns_tool->m_tilde().value() + 15;
-                in[3] = 2 * rns_tool->m_tilde().value() + 30;
-                in[4] = 2 * rns_tool->m_tilde().value() + 15;
-                in[5] = 2 * rns_tool->m_tilde().value() + 30;
-                in[6] = 2 * rns_tool->m_tilde().value() + 15;
-                in[7] = 2 * rns_tool->m_tilde().value() + 30;
+                for (size_t j = 0; j <= base_Bsk_size; j++)
+                {
+                    in[2 * j] = 2 * rns_tool->m_tilde().value() + 15;
+                    in[2 * j + 1] = 2 * rns_tool->m_tilde().value() + 30;
+                }
 
                 rns_tool->sm_mrq(in_iter, out_iter, pool);
                 for (auto val : out)
@@ -1017,47 +1007,36 @@ namespace sealtest
                     ASSERT_EQ(0, val);
                 }
 
-                // The size of q U Bsk is now 5. We set the input to multiples of 15 an divide by 15 (i.e., q).
-                in[0] = 15;
-                in[1] = 30;
-                in[2] = 15;
-                in[3] = 30;
-                in[4] = 15;
-                in[5] = 30;
-                in[6] = 15;
-                in[7] = 30;
-                in[8] = 15;
-                in[9] = 30;
+                // The input base is q U Bsk. We set the input to multiples of 15 an divide by 15 (i.e., q).
+                size_t in_base_size = rns_tool->base_q()->size() + rns_tool->base_Bsk()->size();
+                for (size_t j = 0; j < in_base_size; j++)
+                {
+                    in[2 * j] = 15;
+                    in[2 * j + 1] = 30;
+                }
 
                 // We get an exact result in this case
                 rns_tool->fast_floor(in_iter, out_iter, pool);
-                ASSERT_EQ(1ULL, out[0]);
-                ASSERT_EQ(2ULL, out[1]);
-                ASSERT_EQ(1ULL, out[2]);
-                ASSERT_EQ(2ULL, out[3]);
-                ASSERT_EQ(1ULL, out[4]);
-                ASSERT_EQ(2ULL, out[5]);
+                for (size_t j = 0; j < rns_tool->base_Bsk()->size(); j++)
+                {
+                    ASSERT_EQ(1ULL, out[2 * j]);
+                    ASSERT_EQ(2ULL, out[2 * j + 1]);
+                }
 
                 // Now a case where the floor really shows up
-                in[0] = 21;
-                in[1] = 32;
-                in[2] = 21;
-                in[3] = 32;
-                in[4] = 21;
-                in[5] = 32;
-                in[6] = 21;
-                in[7] = 32;
-                in[8] = 21;
-                in[9] = 32;
+                for (size_t j = 0; j < in_base_size; j++)
+                {
+                    in[2 * j] = 21;
+                    in[2 * j + 1] = 32;
+                }
 
                 // The result is not exact but differs at most by 1
                 rns_tool->fast_floor(in_iter, out_iter, pool);
-                ASSERT_TRUE(fabs(1ULL - out[0]) <= 1);
-                ASSERT_TRUE(fabs(2ULL - out[1]) <= 1);
-                ASSERT_TRUE(fabs(1ULL - out[2]) <= 1);
-                ASSERT_TRUE(fabs(2ULL - out[3]) <= 1);
-                ASSERT_TRUE(fabs(1ULL - out[4]) <= 1);
-                ASSERT_TRUE(fabs(2ULL - out[5]) <= 1);
+                for (size_t j = 0; j < rns_tool->base_Bsk()->size(); j++)
+                {
+                    ASSERT_TRUE(fabs(1ULL - out[2 * j]) <= 1);
+                    ASSERT_TRUE(fabs(2ULL - out[2 * j + 1]) <= 1);
+                }
             }
         }
 
@@ -1111,13 +1090,11 @@ namespace sealtest
                     ASSERT_EQ(0, val);
                 }
 
-                // The size of Bsk is 3
-                in[0] = 1;
-                in[1] = 2;
-                in[2] = 1;
-                in[3] = 2;
-                in[4] = 1;
-                in[5] = 2;
+                for (size_t j = 0; j < rns_tool->base_Bsk()->size(); j++)
+                {
+                    in[2 * j] = 1;
+                    in[2 * j + 1] = 2;
+                }
 
                 rns_tool->fastbconv_sk(in_iter, out_iter, pool);
                 ASSERT_EQ(1ULL, out[0]);
@@ -1345,6 +1322,83 @@ namespace sealtest
             inverse_ntt_negacyclic_harvey(in.data(), ntt[0]);
             ASSERT_TRUE((53ULL + 2ULL - in[0]) % 53ULL <= 1);
             ASSERT_TRUE((53ULL + 3ULL - in[1]) % 53ULL <= 1);
+        }
+
+        namespace
+        {
+            // Number of bits of the product of the given values
+            int product_bit_count(const vector<uint64_t> &values)
+            {
+                vector<uint64_t> product{ 1 };
+                for (uint64_t value : values)
+                {
+                    vector<uint64_t> next(product.size() + 1);
+                    multiply_uint(product.data(), product.size(), value, next.size(), next.data());
+                    product.swap(next);
+                }
+                return get_significant_bit_count_uint(product.data(), product.size());
+            }
+        } // namespace
+
+        // B is the shortest prefix of the base conversion primes with
+        // bits(prod(B) * m_sk) - 1 >= 5 + bits(t) + log2(n) + bits(q), and never longer than with the rule of SEAL
+        // 4.6.2. (The requirement is always met with the old rule, so the logic_error thrown otherwise is unreachable.)
+        TEST(RNSToolTest, TightBskSize)
+        {
+            auto pool = MemoryManager::GetPool();
+            auto B_size = [&](size_t n, const vector<Modulus> &q_primes, const Modulus &t) {
+                RNSBase q(q_primes, pool);
+                RNSTool rns_tool(n, q, t, pool);
+                const RNSBase &B = *rns_tool.base_B();
+                int q_bit_count = get_significant_bit_count_uint(q.base_prod(), q.size());
+                int required_bit_count = 5 + t.bit_count() + get_power_of_two(n) + q_bit_count;
+                int q_size = static_cast<int>(q.size());
+                size_t old_B_size = q.size() + (32 + t.bit_count() + q_bit_count >= 61 * q_size + 61 ? 1 : 0);
+                EXPECT_LE(B.size(), old_B_size);
+
+                vector<uint64_t> values{ rns_tool.m_sk().value() };
+                for (size_t i = 0; i < B.size(); i++)
+                {
+                    values.push_back(B[i].value());
+                }
+                EXPECT_GE(product_bit_count(values) - 1, required_bit_count);
+                values.pop_back();
+                if (B.size() > 1)
+                {
+                    EXPECT_LT(product_bit_count(values) - 1, required_bit_count);
+                }
+                return B.size();
+            };
+
+            // Default BFV parameters with a 20-bit plain modulus
+            ASSERT_EQ(size_t(2), B_size(4096, CoeffModulus::BFVDefault(4096), PlainModulus::Batching(4096, 20)));
+            ASSERT_EQ(size_t(4), B_size(8192, CoeffModulus::BFVDefault(8192), PlainModulus::Batching(8192, 20)));
+            ASSERT_EQ(size_t(15), B_size(32768, CoeffModulus::BFVDefault(32768), PlainModulus::Batching(32768, 20)));
+
+            // A sweep over degrees, plain moduli (including zero), and sizes of q
+            for (size_t n : { size_t(2), size_t(64), size_t(4096) })
+            {
+                for (int t_bit_count : { 0, 2, 20, 40, 60 })
+                {
+                    Modulus t =
+                        t_bit_count == 0 ? Modulus(0) : (t_bit_count == 2 ? Modulus(3) : get_prime(2 * n, t_bit_count));
+                    for (int q_bit_count : { 20, 50, 60 })
+                    {
+                        for (size_t q_size : { size_t(1), size_t(2), size_t(5), size_t(17) })
+                        {
+                            if (q_bit_count == 20 && q_size > 1)
+                            {
+                                continue;
+                            }
+                            auto q = get_primes(2 * n, q_bit_count, q_size);
+                            if (find(q.begin(), q.end(), t) == q.end())
+                            {
+                                B_size(n, q, t);
+                            }
+                        }
+                    }
+                }
+            }
         }
 
     } // namespace util

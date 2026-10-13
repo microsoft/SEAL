@@ -876,6 +876,46 @@ namespace seal
             auto baseconv_primes_iter = baseconv_primes.cbegin();
             m_sk_ = *baseconv_primes_iter++;
             gamma_ = *baseconv_primes_iter++;
+
+            // The rule above is conservative, since it assumes that the primes in q are as large as those in B. Shrink
+            // B to the shortest prefix that provably suffices. Let k be the number of primes in q, and let q also
+            // denote their product. sm_mrq outputs coefficients |a| <= q * (1/2 + k / m_tilde), and an output
+            // polynomial of the tensor product is a sum of at most 8 products of two such polynomials (the output size
+            // is at most SEAL_CIPHERTEXT_SIZE_MAX = 16, so the smaller input size is at most 8). Its coefficients X
+            // satisfy |X| <= 8 * n * q^2 * (1/2 + k / m_tilde)^2, and fast_floor outputs y = floor(t * X / q) - u with
+            // 0 <= u < k, so |y| < 2.01 * t * n * q. None of this depends on B. The Shenoy-Kumaresan conversion of y
+            // is exact if |y| < prod(B) * (m_sk / 2 - |B| - 2), where |B| is the number of primes in B; this holds with
+            // a margin of almost a factor 8 if 32 * t * n * q <= prod(B) * m_sk, i.e., if
+            //   bits(prod(B) * m_sk) - 1 >= 5 + bits(t) + log2(n) + bits(q).
+            // The output of the multiplication then does not depend on B.
+            static_assert(SEAL_CIPHERTEXT_SIZE_MAX <= 16, "the size of B below assumes at most 8 products");
+            {
+                const int required_bit_count = 5 + t_.bit_count() + coeff_count_power + total_coeff_bit_count;
+                vector<uint64_t> B_m_sk_prod{ m_sk_.value() };
+                auto sufficient = [&]() {
+                    return get_significant_bit_count_uint(B_m_sk_prod.data(), B_m_sk_prod.size()) - 1 >=
+                           required_bit_count;
+                };
+                size_t tight_B_size = 0;
+                do
+                {
+                    vector<uint64_t> next(B_m_sk_prod.size() + 1);
+                    multiply_uint(
+                        B_m_sk_prod.data(), B_m_sk_prod.size(),
+                        baseconv_primes_iter[safe_cast<ptrdiff_t>(tight_B_size)].value(), next.size(), next.data());
+                    B_m_sk_prod.swap(next);
+                    tight_B_size++;
+                } while (tight_B_size < base_B_size && !sufficient());
+                if (!sufficient())
+                {
+                    throw logic_error("invalid rns bases");
+                }
+                base_B_size = tight_B_size;
+            }
+
+            base_Bsk_size = add_safe(base_B_size, size_t(1));
+            base_Bsk_m_tilde_size = add_safe(base_Bsk_size, size_t(1));
+
             vector<Modulus> base_B_primes;
             copy_n(baseconv_primes_iter, base_B_size, back_inserter(base_B_primes));
 
