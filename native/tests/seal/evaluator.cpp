@@ -14,6 +14,7 @@
 #include <cstdint>
 #include <limits>
 #include <string>
+#include <vector>
 #include "gtest/gtest.h"
 #include "testseed.h"
 
@@ -6837,5 +6838,69 @@ namespace sealtest
             encrypted.data(),
             encrypted.data() + encrypted.size() * encrypted.coeff_modulus_size() * encrypted.poly_modulus_degree());
         ASSERT_TRUE(before == after_second);
+    }
+    TEST(EvaluatorTest, KeySwitchingManyPrimes)
+    {
+        // With 199 decomposition primes of 60 bits, the 128-bit accumulators of key switching must be reduced
+        // between groups of products; this regression test fails if they overflow instead. The accumulation does not
+        // depend on the scheme, and creating contexts with this many primes is slow, so only CKKS is tested.
+        size_t n = 16;
+        EncryptionParameters parms(scheme_type::ckks);
+        parms.set_poly_modulus_degree(n);
+        parms.set_coeff_modulus(CoeffModulus::Create(n, vector<int>(200, 60)));
+        SEALContext context(parms, false, sec_level_type::none);
+        ASSERT_TRUE(context.parameters_set());
+        KeyGenerator keygen(context);
+        PublicKey pk;
+        keygen.create_public_key(pk);
+        RelinKeys rlk;
+        keygen.create_relin_keys(rlk);
+        GaloisKeys glk;
+        keygen.create_galois_keys(vector<int>{ 1, -1 }, glk);
+
+        Encryptor encryptor(context, pk);
+        Evaluator evaluator(context);
+        Decryptor decryptor(context, keygen.secret_key());
+        CKKSEncoder encoder(context);
+
+        size_t slot_count = encoder.slot_count();
+        vector<double> input(slot_count);
+        for (size_t i = 0; i < slot_count; i++)
+        {
+            input[i] = 0.5 * static_cast<double>(i + 1);
+        }
+        Plaintext plain;
+        encoder.encode(input, pow(2.0, 40), plain);
+        Ciphertext encrypted;
+        encryptor.encrypt(plain, encrypted);
+
+        // Squares and relinearizes, and rotates by one step to the left and right
+        evaluator.square_inplace(encrypted);
+        evaluator.relinearize_inplace(encrypted, rlk);
+        vector<int> steps{ 1, -1 };
+        vector<Ciphertext> rotated(steps.size());
+        for (size_t s = 0; s < steps.size(); s++)
+        {
+            evaluator.rotate_vector(encrypted, steps[s], glk, rotated[s]);
+        }
+
+        vector<double> result;
+        decryptor.decrypt(encrypted, plain);
+        encoder.decode(plain, result);
+        for (size_t i = 0; i < slot_count; i++)
+        {
+            ASSERT_NEAR(input[i] * input[i], result[i], 0.001);
+        }
+        for (size_t s = 0; s < steps.size(); s++)
+        {
+            decryptor.decrypt(rotated[s], plain);
+            encoder.decode(plain, result);
+            size_t shift = static_cast<size_t>(steps[s] + static_cast<int>(slot_count)) % slot_count;
+            for (size_t i = 0; i < slot_count; i++)
+            {
+                double x = input[(i + shift) % slot_count];
+                ASSERT_NEAR(x * x, result[i], 0.001);
+            }
+        }
     }
 } // namespace sealtest

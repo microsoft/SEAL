@@ -2731,8 +2731,11 @@ namespace seal
         SEAL_ITERATE(iter(size_t(0)), rns_modulus_size, [&](auto I) {
             size_t key_index = (I == decomp_modulus_size ? key_modulus_size - 1 : I);
 
-            // Product of two numbers is up to 60 + 60 = 120 bits, so we can sum up to 256 of them without reduction.
-            size_t lazy_reduction_summand_bound = size_t(SEAL_MULTIPLY_ACCUMULATE_USER_MOD_MAX);
+            // The NTT outputs below are in [0, 4q) and the key coefficients in [0, q), so with q of at most 60 bits a
+            // product is less than 2^122. Up to lazy_reduction_summand_bound of them can be added to a reduced value
+            // without overflowing 128 bits; the accumulator is reduced after every lazy_reduction_summand_bound
+            // products.
+            size_t lazy_reduction_summand_bound = (size_t(SEAL_MULTIPLY_ACCUMULATE_USER_MOD_MAX) >> 2) - 1;
             size_t lazy_reduction_counter = lazy_reduction_summand_bound;
 
             // Allocate memory for a lazy accumulator (128-bit coefficients)
@@ -2770,8 +2773,9 @@ namespace seal
                 }
 
                 // Multiply with keys and modular accumulate products in a lazy fashion
+                bool reduce = !--lazy_reduction_counter;
                 SEAL_ITERATE(iter(key_vector[J].data(), accumulator_iter), key_component_count, [&](auto K) {
-                    if (!lazy_reduction_counter)
+                    if (reduce)
                     {
                         SEAL_ITERATE(iter(t_operand, get<0>(K)[key_index], get<1>(K)), coeff_count, [&](auto L) {
                             unsigned long long qword[2]{ 0, 0 };
@@ -2796,7 +2800,7 @@ namespace seal
                     }
                 });
 
-                if (!--lazy_reduction_counter)
+                if (reduce)
                 {
                     lazy_reduction_counter = lazy_reduction_summand_bound;
                 }
