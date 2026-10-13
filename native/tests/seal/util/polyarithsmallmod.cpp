@@ -4,6 +4,7 @@
 #include "seal/util/defines.h"
 #include "seal/util/polyarithsmallmod.h"
 #include "seal/util/polycore.h"
+#include "seal/util/uintarithsmallmod.h"
 #include "seal/util/uintcore.h"
 #include <cstddef>
 #include <cstdint>
@@ -899,6 +900,18 @@ namespace sealtest
 
             const vector<size_t> kernel_test_sizes{ 1, 2, 7, 64, 1001 };
 
+            // Bound on the operands that may be lazily reduced (zero for none); Intel HEXL requires them to be less
+            // than 4 * modulus
+            uint64_t lazy_operand_bound(const Modulus &modulus)
+            {
+#ifdef SEAL_USE_INTEL_HEXL
+                return modulus.value() << 2;
+#else
+                (void)modulus;
+                return 0;
+#endif
+            }
+
             // Extreme and random values less than bound (any 64-bit values if bound is zero)
             vector<uint64_t> kernel_test_operand(size_t n, uint64_t bound, mt19937_64 &rng)
             {
@@ -909,6 +922,14 @@ namespace sealtest
                     values[i] = bound ? (i % 4 == 0 ? bound - 1 : x % bound) : x;
                 }
                 return values;
+            }
+
+            // x * y mod modulus; barrett_reduce_128 is checked in UIntArithSmallMod.BarrettReduce128Random
+            uint64_t reference_multiply_mod(uint64_t x, uint64_t y, const Modulus &modulus)
+            {
+                unsigned long long z[2];
+                multiply_uint64(x, y, z);
+                return barrett_reduce_128(z, modulus);
             }
         } // namespace
 
@@ -929,6 +950,142 @@ namespace sealtest
                     ASSERT_EQ(out, a);
                 }
             }
+        }
+
+        TEST(PolyArithSmallMod, MultiplyPolyScalarCoeffModRandom)
+        {
+            mt19937_64 rng(31338);
+            for (const Modulus &modulus : kernel_test_moduli())
+            {
+                uint64_t p = modulus.value();
+                for (size_t n : kernel_test_sizes)
+                {
+                    vector<uint64_t> a = kernel_test_operand(n, lazy_operand_bound(modulus), rng), out(n);
+                    for (uint64_t scalar : { uint64_t(0), uint64_t(1), p - 1, ~uint64_t(0), uint64_t(rng()) })
+                    {
+                        multiply_poly_scalar_coeffmod(a.data(), n, scalar, modulus, out.data());
+                        for (size_t i = 0; i < n; i++)
+                        {
+                            ASSERT_EQ(reference_multiply_mod(a[i], scalar % p, modulus), out[i]);
+                        }
+                        vector<uint64_t> in_place = a;
+                        multiply_poly_scalar_coeffmod(in_place.data(), n, scalar, modulus, in_place.data());
+                        ASSERT_EQ(out, in_place);
+                    }
+                }
+            }
+        }
+
+        TEST(PolyArithSmallMod, DyadicProductCoeffModRandom)
+        {
+            mt19937_64 rng(31339);
+            for (const Modulus &modulus : kernel_test_moduli())
+            {
+                for (size_t n : kernel_test_sizes)
+                {
+                    vector<uint64_t> a = kernel_test_operand(n, lazy_operand_bound(modulus), rng);
+                    vector<uint64_t> b = kernel_test_operand(n, lazy_operand_bound(modulus), rng);
+                    vector<uint64_t> ref(n), out(n);
+                    for (size_t i = 0; i < n; i++)
+                    {
+                        ref[i] = reference_multiply_mod(a[i], b[i], modulus);
+                    }
+                    dyadic_product_coeffmod(a.data(), b.data(), n, modulus, out.data());
+                    ASSERT_EQ(ref, out);
+
+                    // The result may alias either operand
+                    out = a;
+                    dyadic_product_coeffmod(out.data(), b.data(), n, modulus, out.data());
+                    ASSERT_EQ(ref, out);
+                    out = b;
+                    dyadic_product_coeffmod(a.data(), out.data(), n, modulus, out.data());
+                    ASSERT_EQ(ref, out);
+                }
+            }
+        }
+
+        TEST(PolyArithSmallMod, DyadicProductAddCoeffMod)
+        {
+            mt19937_64 rng(31340);
+            for (const Modulus &modulus : kernel_test_moduli())
+            {
+                uint64_t p = modulus.value();
+                for (size_t n : kernel_test_sizes)
+                {
+                    vector<uint64_t> a = kernel_test_operand(n, lazy_operand_bound(modulus), rng);
+                    vector<uint64_t> b = kernel_test_operand(n, p, rng);
+                    vector<uint64_t> c = kernel_test_operand(n, p, rng);
+                    vector<uint64_t> ref(n), out(n);
+                    for (size_t i = 0; i < n; i++)
+                    {
+                        ref[i] = (reference_multiply_mod(a[i], b[i], modulus) + c[i]) % p;
+                    }
+                    dyadic_product_add_coeffmod(a.data(), b.data(), c.data(), n, modulus, out.data());
+                    ASSERT_EQ(ref, out);
+
+                    // The result may alias operand1 or operand2
+                    out = a;
+                    dyadic_product_add_coeffmod(out.data(), b.data(), c.data(), n, modulus, out.data());
+                    ASSERT_EQ(ref, out);
+                    out = b;
+                    dyadic_product_add_coeffmod(a.data(), out.data(), c.data(), n, modulus, out.data());
+                    ASSERT_EQ(ref, out);
+                }
+            }
+#ifdef SEAL_DEBUG
+            // operand2 and addend must be reduced
+            Modulus modulus(65537);
+            vector<uint64_t> a{ 1, 2 }, b{ 3, 4 }, c{ 5, 6 }, out(2);
+            ASSERT_NO_THROW(dyadic_product_add_coeffmod(a.data(), b.data(), c.data(), 2, modulus, out.data()));
+            b[1] = modulus.value();
+            ASSERT_THROW(
+                dyadic_product_add_coeffmod(a.data(), b.data(), c.data(), 2, modulus, out.data()), invalid_argument);
+            b[1] = 4;
+            c[0] = modulus.value();
+            ASSERT_THROW(
+                dyadic_product_add_coeffmod(a.data(), b.data(), c.data(), 2, modulus, out.data()), invalid_argument);
+#endif
+        }
+
+        TEST(PolyArithSmallMod, DyadicProductSharedCoeffMod)
+        {
+            mt19937_64 rng(31341);
+            for (const Modulus &modulus : kernel_test_moduli())
+            {
+                uint64_t p = modulus.value();
+                for (size_t n : kernel_test_sizes)
+                {
+                    vector<uint64_t> a1 = kernel_test_operand(n, lazy_operand_bound(modulus), rng);
+                    vector<uint64_t> a2 = kernel_test_operand(n, lazy_operand_bound(modulus), rng);
+                    vector<uint64_t> b = kernel_test_operand(n, p, rng);
+                    vector<uint64_t> ref1(n), ref2(n), out1(n), out2(n);
+                    for (size_t i = 0; i < n; i++)
+                    {
+                        ref1[i] = reference_multiply_mod(a1[i], b[i], modulus);
+                        ref2[i] = reference_multiply_mod(a2[i], b[i], modulus);
+                    }
+                    dyadic_product_shared_coeffmod(
+                        a1.data(), a2.data(), b.data(), n, modulus, out1.data(), out2.data());
+                    ASSERT_EQ(ref1, out1);
+                    ASSERT_EQ(ref2, out2);
+
+                    // result1 may alias operand1, and result2 operand2
+                    out1 = a1;
+                    out2 = a2;
+                    dyadic_product_shared_coeffmod(
+                        out1.data(), out2.data(), b.data(), n, modulus, out1.data(), out2.data());
+                    ASSERT_EQ(ref1, out1);
+                    ASSERT_EQ(ref2, out2);
+                }
+            }
+#ifdef SEAL_DEBUG
+            // shared must be reduced
+            Modulus modulus(65537);
+            vector<uint64_t> a1{ 1, 2 }, a2{ 3, 4 }, b{ 5, modulus.value() }, out1(2), out2(2);
+            ASSERT_THROW(
+                dyadic_product_shared_coeffmod(a1.data(), a2.data(), b.data(), 2, modulus, out1.data(), out2.data()),
+                invalid_argument);
+#endif
         }
     } // namespace util
 } // namespace sealtest
