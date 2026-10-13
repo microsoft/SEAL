@@ -1442,6 +1442,79 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
+        /// Rotates plaintext matrix rows cyclically by each of several step counts.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// When batching is used with the BFV or BGV scheme, this function rotates the encrypted plaintext matrix rows
+        /// cyclically to the left (steps &gt; 0) or to the right (steps &lt; 0) by each of the given step counts, and
+        /// writes the results to the destinations parameter. The results are identical to those of calling RotateRows
+        /// for each step count, i.e., destinations[i] is the same ciphertext that RotateRows(encrypted, steps[i],
+        /// galoisKeys, destination) would produce, but rotating one ciphertext by several step counts at once is
+        /// faster, because the most expensive part of key switching (decomposing the ciphertext and transforming it
+        /// to NTT form) is computed only once and shared by all rotations whose step counts have their own Galois
+        /// keys. Since the size of the batched matrix is 2-by-(N/2), where N is the degree of the polynomial modulus,
+        /// the number of steps to rotate must have absolute value at most N/2-1. Dynamic memory allocations in the
+        /// process are allocated from the memory pool pointed to by the given MemoryPoolHandle.
+        /// </para>
+        /// <para>
+        /// The destinations parameter must contain one ciphertext for each step count, and the ciphertext at index i
+        /// is overwritten with the result of the rotation by the step count at index i. The input ciphertext may also
+        /// be one of the destinations. If an exception is thrown, the destinations are left unchanged.
+        /// </para>
+        /// </remarks>
+        /// <param name="encrypted">The ciphertext to rotate</param>
+        /// <param name="steps">The numbers of steps to rotate (positive left, negative right)</param>
+        /// <param name="galoisKeys">The Galois keys</param>
+        /// <param name="destinations">The ciphertexts to overwrite with the rotated results, one for each step
+        /// count</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentNullException">if encrypted, steps, galoisKeys, or destinations is null</exception>
+        /// <exception cref="ArgumentException">if the number of destinations is not equal to the number of step
+        /// counts</exception>
+        /// <exception cref="ArgumentException">if destinations contains null</exception>
+        /// <exception cref="InvalidOperationException">if the encryption parameters do not support batching</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.BFV or SchemeType.BGV</exception>
+        /// <exception cref="ArgumentException">if encrypted or galoisKeys is not valid for the encryption
+        /// parameters</exception>
+        /// <exception cref="ArgumentException">if galoisKeys do not correspond to the top level parameters in the
+        /// current context</exception>
+        /// <exception cref="ArgumentException">if encrypted is in NTT form (SchemeType.BFV) or not in NTT form
+        /// (SchemeType.BGV)</exception>
+        /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
+        /// <exception cref="ArgumentException">if a step count has too big absolute value</exception>
+        /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
+        public void RotateRows(Ciphertext encrypted, IEnumerable<int> steps, GaloisKeys galoisKeys,
+            IList<Ciphertext> destinations, MemoryPoolHandle pool = null)
+        {
+            if (null == encrypted)
+                throw new ArgumentNullException(nameof(encrypted));
+            if (null == steps)
+                throw new ArgumentNullException(nameof(steps));
+            if (null == galoisKeys)
+                throw new ArgumentNullException(nameof(galoisKeys));
+            if (null == destinations)
+                throw new ArgumentNullException(nameof(destinations));
+
+            int[] stepsArr = steps.ToArray();
+            if (destinations.Count != stepsArr.Length)
+                throw new ArgumentException("Number of destinations does not match number of step counts");
+            if (destinations.Any(c => null == c))
+                throw new ArgumentException("Destinations cannot contain null");
+            if (!ContextUsingKeyswitching)
+                throw new InvalidOperationException("Keyswitching is not supported by the context");
+
+            IntPtr[] destarray = destinations.Select(c => c.NativePtr).ToArray();
+            IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
+            NativeMethods.Evaluator_RotateRowsMany(
+                NativePtr, encrypted.NativePtr, (ulong)stepsArr.Length, stepsArr,
+                galoisKeys.NativePtr, destarray, poolPtr);
+        }
+
+        /// <summary>
         /// Rotates plaintext matrix columns cyclically.
         /// </summary>
         /// <remarks>
@@ -1595,6 +1668,77 @@ namespace Microsoft.Research.SEAL
             NativeMethods.Evaluator_RotateVector(
                 NativePtr, encrypted.NativePtr, steps, galoisKeys.NativePtr,
                 destination.NativePtr, poolPtr);
+        }
+
+        /// <summary>
+        /// Rotates plaintext vector cyclically by each of several step counts.
+        /// </summary>
+        /// <remarks>
+        /// <para>
+        /// When using the CKKS scheme, this function rotates the encrypted plaintext vector cyclically to the left
+        /// (steps &gt; 0) or to the right (steps &lt; 0) by each of the given step counts, and writes the results to
+        /// the destinations parameter. The results are identical to those of calling RotateVector for each step
+        /// count, i.e., destinations[i] is the same ciphertext that RotateVector(encrypted, steps[i], galoisKeys,
+        /// destination) would produce, but rotating one ciphertext by several step counts at once is faster, because
+        /// the most expensive part of key switching (decomposing the ciphertext and transforming it to NTT form) is
+        /// computed only once and shared by all rotations whose step counts have their own Galois keys. Since the size
+        /// of the batched matrix is 2-by-(N/2), where N is the degree of the polynomial modulus, the number of steps
+        /// to rotate must have absolute value at most N/2-1. Dynamic memory allocations in the process are allocated
+        /// from the memory pool pointed to by the given MemoryPoolHandle.
+        /// </para>
+        /// <para>
+        /// The destinations parameter must contain one ciphertext for each step count, and the ciphertext at index i
+        /// is overwritten with the result of the rotation by the step count at index i. The input ciphertext may also
+        /// be one of the destinations. If an exception is thrown, the destinations are left unchanged.
+        /// </para>
+        /// </remarks>
+        /// <param name="encrypted">The ciphertext to rotate</param>
+        /// <param name="steps">The numbers of steps to rotate (positive left, negative right)</param>
+        /// <param name="galoisKeys">The Galois keys</param>
+        /// <param name="destinations">The ciphertexts to overwrite with the rotated results, one for each step
+        /// count</param>
+        /// <param name="pool">The MemoryPoolHandle pointing to a valid memory pool</param>
+        /// <exception cref="ArgumentNullException">if encrypted, steps, galoisKeys, or destinations is null</exception>
+        /// <exception cref="ArgumentException">if the number of destinations is not equal to the number of step
+        /// counts</exception>
+        /// <exception cref="ArgumentException">if destinations contains null</exception>
+        /// <exception cref="InvalidOperationException">if scheme is not SchemeType.CKKS</exception>
+        /// <exception cref="ArgumentException">if encrypted or galoisKeys is not valid for the encryption
+        /// parameters</exception>
+        /// <exception cref="ArgumentException">if galoisKeys do not correspond to the top level parameters in the
+        /// current context</exception>
+        /// <exception cref="ArgumentException">if encrypted is not in NTT form</exception>
+        /// <exception cref="ArgumentException">if encrypted has size larger than 2</exception>
+        /// <exception cref="ArgumentException">if a step count has too big absolute value</exception>
+        /// <exception cref="ArgumentException">if necessary Galois keys are not present</exception>
+        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
+        /// <exception cref="InvalidOperationException">if keyswitching is not supported by the context</exception>
+        /// <exception cref="InvalidOperationException">if result ciphertext is transparent</exception>
+        public void RotateVector(Ciphertext encrypted, IEnumerable<int> steps, GaloisKeys galoisKeys,
+            IList<Ciphertext> destinations, MemoryPoolHandle pool = null)
+        {
+            if (null == encrypted)
+                throw new ArgumentNullException(nameof(encrypted));
+            if (null == steps)
+                throw new ArgumentNullException(nameof(steps));
+            if (null == galoisKeys)
+                throw new ArgumentNullException(nameof(galoisKeys));
+            if (null == destinations)
+                throw new ArgumentNullException(nameof(destinations));
+
+            int[] stepsArr = steps.ToArray();
+            if (destinations.Count != stepsArr.Length)
+                throw new ArgumentException("Number of destinations does not match number of step counts");
+            if (destinations.Any(c => null == c))
+                throw new ArgumentException("Destinations cannot contain null");
+            if (!ContextUsingKeyswitching)
+                throw new InvalidOperationException("Keyswitching is not supported by the context");
+
+            IntPtr[] destarray = destinations.Select(c => c.NativePtr).ToArray();
+            IntPtr poolPtr = pool?.NativePtr ?? IntPtr.Zero;
+            NativeMethods.Evaluator_RotateVectorMany(
+                NativePtr, encrypted.NativePtr, (ulong)stepsArr.Length, stepsArr,
+                galoisKeys.NativePtr, destarray, poolPtr);
         }
 
         /// <summary>

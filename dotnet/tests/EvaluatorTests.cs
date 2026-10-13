@@ -2013,6 +2013,114 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void RotateRowsManyTest()
+        {
+            foreach (SchemeType scheme in new SchemeType[] { SchemeType.BFV, SchemeType.BGV })
+            {
+                EncryptionParameters parms = new EncryptionParameters(scheme)
+                {
+                    PolyModulusDegree = 64,
+                    PlainModulus = new Modulus(257),
+                    CoeffModulus = CoeffModulus.Create(64, new int[] { 40, 40, 40 })
+                };
+                SEALContext context = new SEALContext(parms,
+                    expandModChain: false,
+                    secLevel: SecLevelType.None);
+                KeyGenerator keygen = new KeyGenerator(context);
+                keygen.CreateGaloisKeys(new int[] { 1, -1, 3, 8 }, out GaloisKeys galoisKeys);
+                keygen.CreatePublicKey(out PublicKey publicKey);
+
+                Encryptor encryptor = new Encryptor(context, publicKey);
+                Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
+                Evaluator evaluator = new Evaluator(context);
+                BatchEncoder encoder = new BatchEncoder(context);
+
+                int rowSize = (int)encoder.SlotCount / 2;
+                List<ulong> vec = new List<ulong>();
+                for (int i = 0; i < 2 * rowSize; i++)
+                {
+                    vec.Add((ulong)((i * 37 + 11) % 257));
+                }
+
+                Plaintext plain = new Plaintext();
+                encoder.Encode(vec, plain);
+                Ciphertext encrypted = new Ciphertext();
+                encryptor.Encrypt(plain, encrypted);
+
+                // Includes zero, a repeated step, and a step without its own key (9 = 8 + 1)
+                int[] steps = new int[] { 1, -1, 3, 0, 9, 1 };
+                Ciphertext[] destinations = new Ciphertext[steps.Length];
+                for (int i = 0; i < destinations.Length; i++)
+                {
+                    destinations[i] = new Ciphertext();
+                }
+                evaluator.RotateRows(encrypted, steps, galoisKeys, destinations);
+
+                Ciphertext expected = new Ciphertext();
+                Plaintext plaindest = new Plaintext();
+                List<ulong> result = new List<ulong>();
+                for (int i = 0; i < steps.Length; i++)
+                {
+                    evaluator.RotateRows(encrypted, steps[i], galoisKeys, expected);
+                    Assert.IsTrue(AreCiphertextsEqual(expected, destinations[i]));
+
+                    decryptor.Decrypt(destinations[i], plaindest);
+                    encoder.Decode(plaindest, result);
+                    for (int j = 0; j < rowSize; j++)
+                    {
+                        int k = ((j + steps[i]) % rowSize + rowSize) % rowSize;
+                        Assert.AreEqual(vec[k], result[j]);
+                        Assert.AreEqual(vec[rowSize + k], result[rowSize + j]);
+                    }
+                }
+
+                // The destinations can be any list, and are overwritten also when they already hold ciphertexts
+                List<int> stepsList = new List<int> { 3, -1 };
+                List<Ciphertext> destinationsList = new List<Ciphertext> { destinations[0], destinations[1] };
+                evaluator.RotateRows(encrypted, stepsList, galoisKeys, destinationsList, MemoryManager.GetPool());
+                for (int i = 0; i < stepsList.Count; i++)
+                {
+                    evaluator.RotateRows(encrypted, stepsList[i], galoisKeys, expected);
+                    Assert.IsTrue(AreCiphertextsEqual(expected, destinationsList[i]));
+                }
+
+                // The input may be one of the destinations
+                Ciphertext aliased = new Ciphertext(encrypted);
+                Ciphertext other = new Ciphertext();
+                evaluator.RotateRows(aliased, stepsList, galoisKeys, new Ciphertext[] { aliased, other });
+                evaluator.RotateRows(encrypted, stepsList[0], galoisKeys, expected);
+                Assert.IsTrue(AreCiphertextsEqual(expected, aliased));
+                evaluator.RotateRows(encrypted, stepsList[1], galoisKeys, expected);
+                Assert.IsTrue(AreCiphertextsEqual(expected, other));
+
+                evaluator.RotateRows(encrypted, new int[] { }, galoisKeys, new Ciphertext[] { });
+
+                // Rejected calls leave the destinations unchanged
+                Ciphertext[] copies = destinations.Select(c => new Ciphertext(c)).ToArray();
+                Ciphertext[] withNull = (Ciphertext[])destinations.Clone();
+                withNull[withNull.Length - 1] = null;
+                Ciphertext disposed = new Ciphertext();
+                disposed.Dispose();
+
+                Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateRows(encrypted, steps, galoisKeys, destinations.Take(steps.Length - 1).ToArray()));
+                Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateRows(encrypted, steps.Take(steps.Length - 1), galoisKeys, destinations));
+                Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateRows(encrypted, steps, galoisKeys, withNull));
+                Utilities.AssertThrows<ObjectDisposedException>(() => evaluator.RotateRows(encrypted, stepsList, galoisKeys, new Ciphertext[] { destinations[0], disposed }));
+
+                // A step without a Galois key for it or for the steps that compose it (5 = 4 + 1)
+                Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateRows(encrypted, new int[] { 1, -1, 5 }, galoisKeys, destinations.Take(3).ToArray()));
+                Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateRows(encrypted, new int[] { 1, rowSize }, galoisKeys, destinations.Take(2).ToArray()));
+                Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateRows(new Ciphertext(), steps, galoisKeys, destinations));
+                Utilities.AssertThrows<InvalidOperationException>(() => evaluator.RotateVector(encrypted, steps, galoisKeys, destinations));
+
+                for (int i = 0; i < destinations.Length; i++)
+                {
+                    Assert.IsTrue(AreCiphertextsEqual(copies[i], destinations[i]));
+                }
+            }
+        }
+
+        [TestMethod]
         public void RelinearizeTest()
         {
             {
@@ -2174,6 +2282,112 @@ namespace SEALNetTest
             {
                 Assert.AreEqual(input[(i + shift) % slotSize].Real, Math.Round(output[i].Real), delta: 0.1);
                 Assert.AreEqual(input[(i + shift) % slotSize].Imaginary, Math.Round(output[i].Imaginary), delta: 0.1);
+            }
+        }
+
+        [TestMethod]
+        public void RotateVectorManyTest()
+        {
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.CKKS)
+            {
+                PolyModulusDegree = 64,
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 50, 40, 40, 50 })
+            };
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                secLevel: SecLevelType.None);
+            KeyGenerator keygen = new KeyGenerator(context);
+            keygen.CreateGaloisKeys(new int[] { 1, -2, 4 }, out GaloisKeys galoisKeys);
+            keygen.CreatePublicKey(out PublicKey publicKey);
+
+            Encryptor encryptor = new Encryptor(context, publicKey);
+            Decryptor decryptor = new Decryptor(context, keygen.SecretKey);
+            Evaluator evaluator = new Evaluator(context);
+            CKKSEncoder encoder = new CKKSEncoder(context);
+
+            const double delta = 1ul << 30;
+
+            int slotSize = (int)encoder.SlotCount;
+            List<Complex> input = new List<Complex>();
+            for (int i = 0; i < slotSize; i++)
+            {
+                input.Add(new Complex(i % 7 - 3, i % 3));
+            }
+
+            Plaintext plain = new Plaintext();
+            encoder.Encode(input, context.FirstParmsId, delta, plain);
+            Ciphertext encrypted = new Ciphertext();
+            encryptor.Encrypt(plain, encrypted);
+
+            // Includes zero and a step without its own key (5 = 4 + 1)
+            int[] steps = new int[] { 1, -2, 4, 0, 5 };
+            Ciphertext[] destinations = new Ciphertext[steps.Length];
+            for (int i = 0; i < destinations.Length; i++)
+            {
+                destinations[i] = new Ciphertext();
+            }
+            evaluator.RotateVector(encrypted, steps, galoisKeys, destinations);
+
+            Ciphertext expected = new Ciphertext();
+            Plaintext plaindest = new Plaintext();
+            List<Complex> output = new List<Complex>();
+            for (int i = 0; i < steps.Length; i++)
+            {
+                evaluator.RotateVector(encrypted, steps[i], galoisKeys, expected);
+                Assert.IsTrue(AreCiphertextsEqual(expected, destinations[i]));
+
+                decryptor.Decrypt(destinations[i], plaindest);
+                encoder.Decode(plaindest, output);
+                for (int j = 0; j < slotSize; j++)
+                {
+                    int k = ((j + steps[i]) % slotSize + slotSize) % slotSize;
+                    Assert.AreEqual(input[k].Real, output[j].Real, delta: 0.1);
+                    Assert.AreEqual(input[k].Imaginary, output[j].Imaginary, delta: 0.1);
+                }
+            }
+
+            // The destinations can be any list, and are overwritten also when they already hold ciphertexts
+            List<int> stepsList = new List<int> { 4, -2 };
+            List<Ciphertext> destinationsList = new List<Ciphertext> { destinations[0], destinations[1] };
+            evaluator.RotateVector(encrypted, stepsList, galoisKeys, destinationsList, MemoryManager.GetPool());
+            for (int i = 0; i < stepsList.Count; i++)
+            {
+                evaluator.RotateVector(encrypted, stepsList[i], galoisKeys, expected);
+                Assert.IsTrue(AreCiphertextsEqual(expected, destinationsList[i]));
+            }
+
+            // The input may be one of the destinations
+            Ciphertext aliased = new Ciphertext(encrypted);
+            Ciphertext other = new Ciphertext();
+            evaluator.RotateVector(aliased, stepsList, galoisKeys, new Ciphertext[] { aliased, other });
+            evaluator.RotateVector(encrypted, stepsList[0], galoisKeys, expected);
+            Assert.IsTrue(AreCiphertextsEqual(expected, aliased));
+            evaluator.RotateVector(encrypted, stepsList[1], galoisKeys, expected);
+            Assert.IsTrue(AreCiphertextsEqual(expected, other));
+
+            evaluator.RotateVector(encrypted, new int[] { }, galoisKeys, new Ciphertext[] { });
+
+            // Rejected calls leave the destinations unchanged
+            Ciphertext[] copies = destinations.Select(c => new Ciphertext(c)).ToArray();
+            Ciphertext[] withNull = (Ciphertext[])destinations.Clone();
+            withNull[0] = null;
+            Ciphertext disposed = new Ciphertext();
+            disposed.Dispose();
+
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateVector(encrypted, steps, galoisKeys, destinations.Take(steps.Length - 1).ToArray()));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateVector(encrypted, steps.Take(steps.Length - 1), galoisKeys, destinations));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateVector(encrypted, steps, galoisKeys, withNull));
+            Utilities.AssertThrows<ObjectDisposedException>(() => evaluator.RotateVector(encrypted, stepsList, galoisKeys, new Ciphertext[] { destinations[0], disposed }));
+
+            // A step without a Galois key for it or for the steps that compose it (3 = 4 - 1)
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateVector(encrypted, new int[] { 1, -2, 3 }, galoisKeys, destinations.Take(3).ToArray()));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateVector(encrypted, new int[] { 1, slotSize }, galoisKeys, destinations.Take(2).ToArray()));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateVector(new Ciphertext(), steps, galoisKeys, destinations));
+            Utilities.AssertThrows<InvalidOperationException>(() => evaluator.RotateRows(encrypted, steps, galoisKeys, destinations));
+
+            for (int i = 0; i < destinations.Length; i++)
+            {
+                Assert.IsTrue(AreCiphertextsEqual(copies[i], destinations[i]));
             }
         }
 
@@ -2396,12 +2610,25 @@ namespace SEALNetTest
                 Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateRowsInplace(null, 1, galoisKeys));
                 Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateRowsInplace(encrypted1, 1, galoisKeys, pool));
 
+                Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateRows(encrypted1, new int[] { 1 }, galoisKeys, null));
+                Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateRows(encrypted1, new int[] { 1 }, null, new Ciphertext[] { encrypted2 }));
+                Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateRows(encrypted1, null, galoisKeys, new Ciphertext[] { encrypted2 }));
+                Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateRows(null, new int[] { 1 }, galoisKeys, new Ciphertext[] { encrypted2 }));
+                Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateRows(encrypted1, new int[] { 1 }, galoisKeys, new Ciphertext[] { encrypted2, encrypted3 }));
+                Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateRows(encrypted1, new int[] { 1 }, galoisKeys, new Ciphertext[] { null }));
+                Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateRows(encrypted1, new int[] { 1 }, galoisKeys, new Ciphertext[] { encrypted2 }, pool));
+
                 Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVector(encrypted1, 1, galoisKeys, null));
                 Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVector(encrypted1, 1, null, encrypted2));
                 Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVector(null, 1, galoisKeys, encrypted2));
 
                 Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVectorInplace(encrypted1, 1, null));
                 Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVectorInplace(null, 1, galoisKeys));
+
+                Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVector(encrypted1, new int[] { 1 }, galoisKeys, null));
+                Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVector(encrypted1, new int[] { 1 }, null, new Ciphertext[] { encrypted2 }));
+                Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVector(encrypted1, null, galoisKeys, new Ciphertext[] { encrypted2 }));
+                Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVector(null, new int[] { 1 }, galoisKeys, new Ciphertext[] { encrypted2 }));
 
                 Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Square(encrypted1, null));
                 Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Square(null, encrypted2));
@@ -2612,12 +2839,25 @@ namespace SEALNetTest
                 Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateRowsInplace(null, 1, galoisKeys));
                 Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateRowsInplace(encrypted1, 1, galoisKeys, pool));
 
+                Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateRows(encrypted1, new int[] { 1 }, galoisKeys, null));
+                Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateRows(encrypted1, new int[] { 1 }, null, new Ciphertext[] { encrypted2 }));
+                Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateRows(encrypted1, null, galoisKeys, new Ciphertext[] { encrypted2 }));
+                Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateRows(null, new int[] { 1 }, galoisKeys, new Ciphertext[] { encrypted2 }));
+                Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateRows(encrypted1, new int[] { 1 }, galoisKeys, new Ciphertext[] { encrypted2, encrypted3 }));
+                Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateRows(encrypted1, new int[] { 1 }, galoisKeys, new Ciphertext[] { null }));
+                Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateRows(encrypted1, new int[] { 1 }, galoisKeys, new Ciphertext[] { encrypted2 }, pool));
+
                 Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVector(encrypted1, 1, galoisKeys, null));
                 Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVector(encrypted1, 1, null, encrypted2));
                 Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVector(null, 1, galoisKeys, encrypted2));
 
                 Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVectorInplace(encrypted1, 1, null));
                 Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVectorInplace(null, 1, galoisKeys));
+
+                Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVector(encrypted1, new int[] { 1 }, galoisKeys, null));
+                Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVector(encrypted1, new int[] { 1 }, null, new Ciphertext[] { encrypted2 }));
+                Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVector(encrypted1, null, galoisKeys, new Ciphertext[] { encrypted2 }));
+                Utilities.AssertThrows<ArgumentNullException>(() => evaluator.RotateVector(null, new int[] { 1 }, galoisKeys, new Ciphertext[] { encrypted2 }));
 
                 Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Square(encrypted1, null));
                 Utilities.AssertThrows<ArgumentNullException>(() => evaluator.Square(null, encrypted2));
@@ -2680,6 +2920,27 @@ namespace SEALNetTest
             while (en1.MoveNext() && en2.MoveNext())
             {
                 if (!en1.Current.Equals(en2.Current))
+                    return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Returns true if the two given ciphertexts have the same metadata and data, false otherwise
+        /// </summary>
+        private static bool AreCiphertextsEqual(Ciphertext cipher1, Ciphertext cipher2)
+        {
+            if (cipher1.ParmsId != cipher2.ParmsId || cipher1.IsNTTForm != cipher2.IsNTTForm ||
+                cipher1.Size != cipher2.Size || cipher1.PolyModulusDegree != cipher2.PolyModulusDegree ||
+                cipher1.CoeffModulusSize != cipher2.CoeffModulusSize || cipher1.Scale != cipher2.Scale ||
+                cipher1.CorrectionFactor != cipher2.CorrectionFactor)
+                return false;
+
+            ulong ulongCount = cipher1.Size * cipher1.PolyModulusDegree * cipher1.CoeffModulusSize;
+            for (ulong i = 0; i < ulongCount; i++)
+            {
+                if (cipher1[i] != cipher2[i])
                     return false;
             }
 

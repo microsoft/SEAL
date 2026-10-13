@@ -72,10 +72,16 @@ SEAL_C_FUNC Evaluator_ApplyGalois(
 SEAL_C_FUNC Evaluator_RotateRows(
     void *thisptr, void *encrypted, int steps, void *galoisKeys, void *destination, void *pool);
 
+SEAL_C_FUNC Evaluator_RotateRowsMany(
+    void *thisptr, void *encrypted, uint64_t count, int *steps, void *galois_keys, void **destinations, void *pool);
+
 SEAL_C_FUNC Evaluator_RotateColumns(void *thisptr, void *encrypted, void *galois_keys, void *destination, void *pool);
 
 SEAL_C_FUNC Evaluator_RotateVector(
     void *thisptr, void *encrypted, int steps, void *galois_keys, void *destination, void *pool);
+
+SEAL_C_FUNC Evaluator_RotateVectorMany(
+    void *thisptr, void *encrypted, uint64_t count, int *steps, void *galois_keys, void **destinations, void *pool);
 
 SEAL_C_FUNC Evaluator_ComplexConjugate(
     void *thisptr, void *encrypted, void *galois_keys, void *destination, void *pool);

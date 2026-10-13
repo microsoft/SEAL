@@ -4,6 +4,7 @@
 // STD
 #include <algorithm>
 #include <iterator>
+#include <utility>
 
 // SEALNet
 #include "seal/c/evaluator.h"
@@ -571,6 +572,49 @@ SEAL_C_FUNC Evaluator_RotateRows(
     SEAL_C_CATCH_ALL
 }
 
+SEAL_C_FUNC Evaluator_RotateRowsMany(
+    void *thisptr, void *encrypted, uint64_t count, int *steps, void *galois_keys, void **destinations, void *pool)
+{
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
+    IfNullRet(eval, E_POINTER);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    IfNullRet(encrypted_ptr, E_POINTER);
+    IfNullRet(steps, E_POINTER);
+    GaloisKeys *galois_keys_ptr = FromVoid<GaloisKeys>(galois_keys);
+    IfNullRet(galois_keys_ptr, E_POINTER);
+    IfNullRet(destinations, E_POINTER);
+
+    Ciphertext **destinations_pp = reinterpret_cast<Ciphertext **>(destinations);
+
+    try
+    {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
+        vector<int> steps_vec;
+        steps_vec.reserve(count);
+        copy_n(steps, count, back_inserter(steps_vec));
+
+        // The results are written to new ciphertexts with the memory pools of the destinations, and are moved to the
+        // destinations only after all rotations have succeeded. Hence the destinations are unchanged if an error is
+        // returned, and encrypted may be one of the destinations.
+        vector<Ciphertext> results;
+        results.reserve(count);
+        for (uint64_t i = 0; i < count; i++)
+        {
+            IfNullRet(destinations_pp[i], E_POINTER);
+            results.emplace_back(destinations_pp[i]->pool());
+        }
+
+        eval->rotate_rows(*encrypted_ptr, steps_vec, *galois_keys_ptr, results, *pool_ptr);
+        for (uint64_t i = 0; i < count; i++)
+        {
+            *destinations_pp[i] = std::move(results[i]);
+        }
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
+}
+
 SEAL_C_FUNC Evaluator_RotateColumns(void *thisptr, void *encrypted, void *galois_keys, void *destination, void *pool)
 {
     Evaluator *eval = FromVoid<Evaluator>(thisptr);
@@ -609,6 +653,49 @@ SEAL_C_FUNC Evaluator_RotateVector(
         unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
 
         eval->rotate_vector(*encrypted_ptr, steps, *galois_keys_ptr, *destination_ptr, *pool_ptr);
+        return S_OK;
+    }
+    SEAL_C_CATCH_ALL
+}
+
+SEAL_C_FUNC Evaluator_RotateVectorMany(
+    void *thisptr, void *encrypted, uint64_t count, int *steps, void *galois_keys, void **destinations, void *pool)
+{
+    Evaluator *eval = FromVoid<Evaluator>(thisptr);
+    IfNullRet(eval, E_POINTER);
+    Ciphertext *encrypted_ptr = FromVoid<Ciphertext>(encrypted);
+    IfNullRet(encrypted_ptr, E_POINTER);
+    IfNullRet(steps, E_POINTER);
+    GaloisKeys *galois_keys_ptr = FromVoid<GaloisKeys>(galois_keys);
+    IfNullRet(galois_keys_ptr, E_POINTER);
+    IfNullRet(destinations, E_POINTER);
+
+    Ciphertext **destinations_pp = reinterpret_cast<Ciphertext **>(destinations);
+
+    try
+    {
+        unique_ptr<MemoryPoolHandle> pool_ptr = MemHandleFromVoid(pool);
+
+        vector<int> steps_vec;
+        steps_vec.reserve(count);
+        copy_n(steps, count, back_inserter(steps_vec));
+
+        // The results are written to new ciphertexts with the memory pools of the destinations, and are moved to the
+        // destinations only after all rotations have succeeded. Hence the destinations are unchanged if an error is
+        // returned, and encrypted may be one of the destinations.
+        vector<Ciphertext> results;
+        results.reserve(count);
+        for (uint64_t i = 0; i < count; i++)
+        {
+            IfNullRet(destinations_pp[i], E_POINTER);
+            results.emplace_back(destinations_pp[i]->pool());
+        }
+
+        eval->rotate_vector(*encrypted_ptr, steps_vec, *galois_keys_ptr, results, *pool_ptr);
+        for (uint64_t i = 0; i < count; i++)
+        {
+            *destinations_pp[i] = std::move(results[i]);
+        }
         return S_OK;
     }
     SEAL_C_CATCH_ALL

@@ -24,6 +24,28 @@
 
 namespace sealtest
 {
+    namespace
+    {
+        // The uncompressed serialization of a ciphertext, which covers both its metadata and its data; empty on error
+        std::vector<uint8_t> SaveCiphertext(void *cipher)
+        {
+            constexpr uint8_t compr_mode_none = 0;
+            int64_t size = 0;
+            if (S_OK != Ciphertext_SaveSize(cipher, compr_mode_none, &size))
+            {
+                return {};
+            }
+            std::vector<uint8_t> buffer(static_cast<size_t>(size));
+            int64_t out_bytes = 0;
+            if (S_OK != Ciphertext_Save(cipher, buffer.data(), buffer.size(), compr_mode_none, &out_bytes))
+            {
+                return {};
+            }
+            buffer.resize(static_cast<size_t>(out_bytes));
+            return buffer;
+        }
+    } // namespace
+
     // Every C export must translate C++ exceptions into an HRESULT rather than let them
     // cross the extern "C" boundary. Plaintext::to_string() (reached through
     // Plaintext_ToString) throws invalid_argument for an NTT-form plaintext; the export
@@ -725,5 +747,415 @@ namespace sealtest
         EXPECT_EQ(4ULL, coeff_count);
 
         EXPECT_EQ(S_OK, Plaintext_Destroy(plain));
+    }
+
+    TEST(CAbiEvaluatorTest, RotateRowsManyMatchesRotateRows)
+    {
+        constexpr uint8_t bfv_scheme = 0x1;
+        constexpr uint8_t bgv_scheme = 0x3;
+        constexpr int sec_level_none = 0;
+        constexpr uint64_t poly_modulus_degree = 64;
+        constexpr uint64_t plain_modulus = 257;
+        constexpr uint64_t oversized_count = uint64_t(1) << 62;
+
+        for (uint8_t scheme : { bfv_scheme, bgv_scheme })
+        {
+            void *parms = nullptr;
+            ASSERT_EQ(S_OK, EncParams_Create1(scheme, &parms));
+            ASSERT_EQ(S_OK, EncParams_SetPolyModulusDegree(parms, poly_modulus_degree));
+            ASSERT_EQ(S_OK, EncParams_SetPlainModulus2(parms, plain_modulus));
+
+            int bit_sizes[]{ 40, 40, 40 };
+            void *coeffs[3]{};
+            ASSERT_EQ(S_OK, CoeffModulus_Create1(poly_modulus_degree, 3, bit_sizes, coeffs));
+            ASSERT_EQ(S_OK, EncParams_SetCoeffModulus(parms, 3, coeffs));
+            for (void *coeff : coeffs)
+            {
+                ASSERT_EQ(S_OK, Modulus_Destroy(coeff));
+            }
+
+            void *context = nullptr;
+            ASSERT_EQ(S_OK, SEALContext_Create(parms, true, sec_level_none, &context));
+            void *keygen = nullptr;
+            ASSERT_EQ(S_OK, KeyGenerator_Create1(context, &keygen));
+            void *public_key = nullptr;
+            ASSERT_EQ(S_OK, KeyGenerator_CreatePublicKey(keygen, false, &public_key));
+            int key_steps[]{ 1, -1, 3, 8 };
+            void *galois_keys = nullptr;
+            ASSERT_EQ(S_OK, KeyGenerator_CreateGaloisKeysFromSteps(keygen, 4, key_steps, false, &galois_keys));
+
+            void *encryptor = nullptr;
+            ASSERT_EQ(S_OK, Encryptor_Create(context, public_key, nullptr, &encryptor));
+            void *evaluator = nullptr;
+            ASSERT_EQ(S_OK, Evaluator_Create(context, &evaluator));
+            void *encoder = nullptr;
+            ASSERT_EQ(S_OK, BatchEncoder_Create(context, &encoder));
+
+            uint64_t slot_count = 0;
+            ASSERT_EQ(S_OK, BatchEncoder_GetSlotCount(encoder, &slot_count));
+            std::vector<uint64_t> values(slot_count);
+            for (uint64_t i = 0; i < slot_count; i++)
+            {
+                values[i] = (i * 37 + 11) % plain_modulus;
+            }
+            void *plain = nullptr;
+            ASSERT_EQ(S_OK, Plaintext_Create1(nullptr, &plain));
+            ASSERT_EQ(S_OK, BatchEncoder_Encode1(encoder, slot_count, values.data(), plain));
+            void *encrypted = nullptr;
+            ASSERT_EQ(S_OK, Ciphertext_Create1(nullptr, &encrypted));
+            ASSERT_EQ(S_OK, Encryptor_Encrypt(encryptor, plain, encrypted, nullptr));
+
+            // Includes zero, a repeated step, and a step without its own key (9 = 8 + 1)
+            int steps[]{ 1, -1, 3, 0, 9, 1 };
+            constexpr uint64_t count = 6;
+            std::vector<void *> destinations(count);
+            for (void *&destination : destinations)
+            {
+                ASSERT_EQ(S_OK, Ciphertext_Create1(nullptr, &destination));
+            }
+            ASSERT_EQ(
+                S_OK, Evaluator_RotateRowsMany(
+                          evaluator, encrypted, count, steps, galois_keys, destinations.data(), nullptr));
+
+            void *expected = nullptr;
+            ASSERT_EQ(S_OK, Ciphertext_Create1(nullptr, &expected));
+            for (uint64_t i = 0; i < count; i++)
+            {
+                ASSERT_EQ(S_OK, Evaluator_RotateRows(evaluator, encrypted, steps[i], galois_keys, expected, nullptr));
+                EXPECT_EQ(SaveCiphertext(expected), SaveCiphertext(destinations[i]));
+            }
+
+            // Destinations that already hold ciphertexts are overwritten, and only count of them are written.
+            std::vector<std::vector<uint8_t>> before;
+            for (void *destination : destinations)
+            {
+                before.push_back(SaveCiphertext(destination));
+            }
+            void *pool = nullptr;
+            ASSERT_EQ(S_OK, MemoryPoolHandle_New(false, &pool));
+            int two_steps[]{ 3, -1 };
+            ASSERT_EQ(
+                S_OK,
+                Evaluator_RotateRowsMany(evaluator, encrypted, 2, two_steps, galois_keys, destinations.data(), pool));
+            for (uint64_t i = 0; i < 2; i++)
+            {
+                ASSERT_EQ(
+                    S_OK, Evaluator_RotateRows(evaluator, encrypted, two_steps[i], galois_keys, expected, nullptr));
+                EXPECT_EQ(SaveCiphertext(expected), SaveCiphertext(destinations[i]));
+            }
+            for (uint64_t i = 2; i < count; i++)
+            {
+                EXPECT_EQ(before[i], SaveCiphertext(destinations[i]));
+            }
+
+            // The input may be one of the destinations, and is overwritten only after all rotations are computed.
+            void *aliased = nullptr;
+            ASSERT_EQ(S_OK, Ciphertext_Create2(encrypted, &aliased));
+            void *other = nullptr;
+            ASSERT_EQ(S_OK, Ciphertext_Create1(nullptr, &other));
+            void *aliasing_destinations[]{ aliased, other };
+            ASSERT_EQ(
+                S_OK, Evaluator_RotateRowsMany(
+                          evaluator, aliased, 2, two_steps, galois_keys, aliasing_destinations, nullptr));
+            ASSERT_EQ(S_OK, Evaluator_RotateRows(evaluator, encrypted, two_steps[0], galois_keys, expected, nullptr));
+            EXPECT_EQ(SaveCiphertext(expected), SaveCiphertext(aliased));
+            ASSERT_EQ(S_OK, Evaluator_RotateRows(evaluator, encrypted, two_steps[1], galois_keys, expected, nullptr));
+            EXPECT_EQ(SaveCiphertext(expected), SaveCiphertext(other));
+
+            // No steps is not an error.
+            EXPECT_EQ(
+                S_OK,
+                Evaluator_RotateRowsMany(evaluator, encrypted, 0, steps, galois_keys, destinations.data(), nullptr));
+
+            // Every rejected call leaves the destinations unchanged.
+            before.clear();
+            for (void *destination : destinations)
+            {
+                before.push_back(SaveCiphertext(destination));
+            }
+            auto destinations_unchanged = [&]() {
+                for (uint64_t i = 0; i < count; i++)
+                {
+                    if (before[i] != SaveCiphertext(destinations[i]))
+                    {
+                        return false;
+                    }
+                }
+                return true;
+            };
+
+            void **dests = destinations.data();
+            EXPECT_EQ(
+                E_POINTER, Evaluator_RotateRowsMany(nullptr, encrypted, count, steps, galois_keys, dests, nullptr));
+            EXPECT_EQ(
+                E_POINTER, Evaluator_RotateRowsMany(evaluator, nullptr, count, steps, galois_keys, dests, nullptr));
+            EXPECT_EQ(
+                E_POINTER, Evaluator_RotateRowsMany(evaluator, encrypted, count, nullptr, galois_keys, dests, nullptr));
+            EXPECT_EQ(
+                E_POINTER, Evaluator_RotateRowsMany(evaluator, encrypted, 0, nullptr, galois_keys, dests, nullptr));
+            EXPECT_EQ(E_POINTER, Evaluator_RotateRowsMany(evaluator, encrypted, count, steps, nullptr, dests, nullptr));
+            EXPECT_EQ(
+                E_POINTER, Evaluator_RotateRowsMany(evaluator, encrypted, count, steps, galois_keys, nullptr, nullptr));
+            EXPECT_EQ(
+                E_POINTER, Evaluator_RotateRowsMany(evaluator, encrypted, 0, steps, galois_keys, nullptr, nullptr));
+
+            std::vector<void *> trailing_null(destinations);
+            trailing_null.back() = nullptr;
+            EXPECT_EQ(
+                E_POINTER, Evaluator_RotateRowsMany(
+                               evaluator, encrypted, count, steps, galois_keys, trailing_null.data(), nullptr));
+            std::vector<void *> leading_null(destinations);
+            leading_null.front() = nullptr;
+            EXPECT_EQ(
+                E_POINTER, Evaluator_RotateRowsMany(
+                               evaluator, encrypted, count, steps, galois_keys, leading_null.data(), nullptr));
+
+            EXPECT_EQ(
+                COR_E_INVALIDOPERATION,
+                Evaluator_RotateRowsMany(evaluator, encrypted, oversized_count, steps, galois_keys, dests, nullptr));
+            EXPECT_EQ(
+                COR_E_INVALIDOPERATION,
+                Evaluator_RotateVectorMany(evaluator, encrypted, count, steps, galois_keys, dests, nullptr));
+
+            // A step without a Galois key for it or for the steps that compose it (5 = 4 + 1)
+            int missing_key_steps[]{ 1, -1, 5 };
+            EXPECT_EQ(
+                E_INVALIDARG,
+                Evaluator_RotateRowsMany(evaluator, encrypted, 3, missing_key_steps, galois_keys, dests, nullptr));
+            int too_large_steps[]{ 1, static_cast<int>(poly_modulus_degree / 2) };
+            EXPECT_EQ(
+                E_INVALIDARG,
+                Evaluator_RotateRowsMany(evaluator, encrypted, 2, too_large_steps, galois_keys, dests, nullptr));
+            void *empty = nullptr;
+            ASSERT_EQ(S_OK, Ciphertext_Create1(nullptr, &empty));
+            EXPECT_EQ(
+                E_INVALIDARG, Evaluator_RotateRowsMany(evaluator, empty, count, steps, galois_keys, dests, nullptr));
+            void *size3 = nullptr;
+            ASSERT_EQ(S_OK, Ciphertext_Create1(nullptr, &size3));
+            ASSERT_EQ(S_OK, Evaluator_Square(evaluator, encrypted, size3, nullptr));
+            EXPECT_EQ(
+                E_INVALIDARG, Evaluator_RotateRowsMany(evaluator, size3, count, steps, galois_keys, dests, nullptr));
+
+            EXPECT_TRUE(destinations_unchanged());
+
+            EXPECT_EQ(S_OK, Ciphertext_Destroy(size3));
+            EXPECT_EQ(S_OK, Ciphertext_Destroy(empty));
+            EXPECT_EQ(S_OK, Ciphertext_Destroy(other));
+            EXPECT_EQ(S_OK, Ciphertext_Destroy(aliased));
+            EXPECT_EQ(S_OK, MemoryPoolHandle_Destroy(pool));
+            EXPECT_EQ(S_OK, Ciphertext_Destroy(expected));
+            for (void *destination : destinations)
+            {
+                EXPECT_EQ(S_OK, Ciphertext_Destroy(destination));
+            }
+            EXPECT_EQ(S_OK, Ciphertext_Destroy(encrypted));
+            EXPECT_EQ(S_OK, Plaintext_Destroy(plain));
+            EXPECT_EQ(S_OK, BatchEncoder_Destroy(encoder));
+            EXPECT_EQ(S_OK, Evaluator_Destroy(evaluator));
+            EXPECT_EQ(S_OK, Encryptor_Destroy(encryptor));
+            EXPECT_EQ(S_OK, KSwitchKeys_Destroy(galois_keys));
+            EXPECT_EQ(S_OK, PublicKey_Destroy(public_key));
+            EXPECT_EQ(S_OK, KeyGenerator_Destroy(keygen));
+            EXPECT_EQ(S_OK, SEALContext_Destroy(context));
+            EXPECT_EQ(S_OK, EncParams_Destroy(parms));
+        }
+    }
+
+    TEST(CAbiEvaluatorTest, RotateVectorManyMatchesRotateVector)
+    {
+        constexpr uint8_t ckks_scheme = 0x2;
+        constexpr int sec_level_none = 0;
+        constexpr uint64_t poly_modulus_degree = 64;
+        constexpr uint64_t oversized_count = uint64_t(1) << 62;
+
+        void *parms = nullptr;
+        ASSERT_EQ(S_OK, EncParams_Create1(ckks_scheme, &parms));
+        ASSERT_EQ(S_OK, EncParams_SetPolyModulusDegree(parms, poly_modulus_degree));
+
+        int bit_sizes[]{ 50, 40, 40, 50 };
+        void *coeffs[4]{};
+        ASSERT_EQ(S_OK, CoeffModulus_Create1(poly_modulus_degree, 4, bit_sizes, coeffs));
+        ASSERT_EQ(S_OK, EncParams_SetCoeffModulus(parms, 4, coeffs));
+        for (void *coeff : coeffs)
+        {
+            ASSERT_EQ(S_OK, Modulus_Destroy(coeff));
+        }
+
+        void *context = nullptr;
+        ASSERT_EQ(S_OK, SEALContext_Create(parms, true, sec_level_none, &context));
+        void *keygen = nullptr;
+        ASSERT_EQ(S_OK, KeyGenerator_Create1(context, &keygen));
+        void *public_key = nullptr;
+        ASSERT_EQ(S_OK, KeyGenerator_CreatePublicKey(keygen, false, &public_key));
+        int key_steps[]{ 1, -2, 4 };
+        void *galois_keys = nullptr;
+        ASSERT_EQ(S_OK, KeyGenerator_CreateGaloisKeysFromSteps(keygen, 3, key_steps, false, &galois_keys));
+
+        void *encryptor = nullptr;
+        ASSERT_EQ(S_OK, Encryptor_Create(context, public_key, nullptr, &encryptor));
+        void *evaluator = nullptr;
+        ASSERT_EQ(S_OK, Evaluator_Create(context, &evaluator));
+        void *encoder = nullptr;
+        ASSERT_EQ(S_OK, CKKSEncoder_Create(context, &encoder));
+
+        uint64_t slot_count = 0;
+        ASSERT_EQ(S_OK, CKKSEncoder_SlotCount(encoder, &slot_count));
+        std::vector<double> values(slot_count);
+        for (uint64_t i = 0; i < slot_count; i++)
+        {
+            values[i] = static_cast<double>(i % 7) - 3.0;
+        }
+        uint64_t parms_id[4]{};
+        ASSERT_EQ(S_OK, SEALContext_FirstParmsId(context, parms_id));
+        void *plain = nullptr;
+        ASSERT_EQ(S_OK, Plaintext_Create1(nullptr, &plain));
+        ASSERT_EQ(
+            S_OK, CKKSEncoder_Encode1(encoder, slot_count, values.data(), parms_id, 1073741824.0, plain, nullptr));
+        void *encrypted = nullptr;
+        ASSERT_EQ(S_OK, Ciphertext_Create1(nullptr, &encrypted));
+        ASSERT_EQ(S_OK, Encryptor_Encrypt(encryptor, plain, encrypted, nullptr));
+
+        // Includes zero and a step without its own key (5 = 4 + 1)
+        int steps[]{ 1, -2, 4, 0, 5 };
+        constexpr uint64_t count = 5;
+        std::vector<void *> destinations(count);
+        for (void *&destination : destinations)
+        {
+            ASSERT_EQ(S_OK, Ciphertext_Create1(nullptr, &destination));
+        }
+        ASSERT_EQ(
+            S_OK,
+            Evaluator_RotateVectorMany(evaluator, encrypted, count, steps, galois_keys, destinations.data(), nullptr));
+
+        void *expected = nullptr;
+        ASSERT_EQ(S_OK, Ciphertext_Create1(nullptr, &expected));
+        for (uint64_t i = 0; i < count; i++)
+        {
+            ASSERT_EQ(S_OK, Evaluator_RotateVector(evaluator, encrypted, steps[i], galois_keys, expected, nullptr));
+            EXPECT_EQ(SaveCiphertext(expected), SaveCiphertext(destinations[i]));
+        }
+
+        // Destinations that already hold ciphertexts are overwritten, and only count of them are written.
+        std::vector<std::vector<uint8_t>> before;
+        for (void *destination : destinations)
+        {
+            before.push_back(SaveCiphertext(destination));
+        }
+        void *pool = nullptr;
+        ASSERT_EQ(S_OK, MemoryPoolHandle_New(false, &pool));
+        int two_steps[]{ 4, -2 };
+        ASSERT_EQ(
+            S_OK,
+            Evaluator_RotateVectorMany(evaluator, encrypted, 2, two_steps, galois_keys, destinations.data(), pool));
+        for (uint64_t i = 0; i < 2; i++)
+        {
+            ASSERT_EQ(S_OK, Evaluator_RotateVector(evaluator, encrypted, two_steps[i], galois_keys, expected, nullptr));
+            EXPECT_EQ(SaveCiphertext(expected), SaveCiphertext(destinations[i]));
+        }
+        for (uint64_t i = 2; i < count; i++)
+        {
+            EXPECT_EQ(before[i], SaveCiphertext(destinations[i]));
+        }
+
+        // The input may be one of the destinations, and is overwritten only after all rotations are computed.
+        void *aliased = nullptr;
+        ASSERT_EQ(S_OK, Ciphertext_Create2(encrypted, &aliased));
+        void *other = nullptr;
+        ASSERT_EQ(S_OK, Ciphertext_Create1(nullptr, &other));
+        void *aliasing_destinations[]{ aliased, other };
+        ASSERT_EQ(
+            S_OK,
+            Evaluator_RotateVectorMany(evaluator, aliased, 2, two_steps, galois_keys, aliasing_destinations, nullptr));
+        ASSERT_EQ(S_OK, Evaluator_RotateVector(evaluator, encrypted, two_steps[0], galois_keys, expected, nullptr));
+        EXPECT_EQ(SaveCiphertext(expected), SaveCiphertext(aliased));
+        ASSERT_EQ(S_OK, Evaluator_RotateVector(evaluator, encrypted, two_steps[1], galois_keys, expected, nullptr));
+        EXPECT_EQ(SaveCiphertext(expected), SaveCiphertext(other));
+
+        // No steps is not an error.
+        EXPECT_EQ(
+            S_OK,
+            Evaluator_RotateVectorMany(evaluator, encrypted, 0, steps, galois_keys, destinations.data(), nullptr));
+
+        // Every rejected call leaves the destinations unchanged.
+        before.clear();
+        for (void *destination : destinations)
+        {
+            before.push_back(SaveCiphertext(destination));
+        }
+        auto destinations_unchanged = [&]() {
+            for (uint64_t i = 0; i < count; i++)
+            {
+                if (before[i] != SaveCiphertext(destinations[i]))
+                {
+                    return false;
+                }
+            }
+            return true;
+        };
+
+        void **dests = destinations.data();
+        EXPECT_EQ(E_POINTER, Evaluator_RotateVectorMany(nullptr, encrypted, count, steps, galois_keys, dests, nullptr));
+        EXPECT_EQ(E_POINTER, Evaluator_RotateVectorMany(evaluator, nullptr, count, steps, galois_keys, dests, nullptr));
+        EXPECT_EQ(
+            E_POINTER, Evaluator_RotateVectorMany(evaluator, encrypted, count, nullptr, galois_keys, dests, nullptr));
+        EXPECT_EQ(E_POINTER, Evaluator_RotateVectorMany(evaluator, encrypted, 0, nullptr, galois_keys, dests, nullptr));
+        EXPECT_EQ(E_POINTER, Evaluator_RotateVectorMany(evaluator, encrypted, count, steps, nullptr, dests, nullptr));
+        EXPECT_EQ(
+            E_POINTER, Evaluator_RotateVectorMany(evaluator, encrypted, count, steps, galois_keys, nullptr, nullptr));
+        EXPECT_EQ(E_POINTER, Evaluator_RotateVectorMany(evaluator, encrypted, 0, steps, galois_keys, nullptr, nullptr));
+
+        std::vector<void *> trailing_null(destinations);
+        trailing_null.back() = nullptr;
+        EXPECT_EQ(
+            E_POINTER,
+            Evaluator_RotateVectorMany(evaluator, encrypted, count, steps, galois_keys, trailing_null.data(), nullptr));
+        std::vector<void *> leading_null(destinations);
+        leading_null.front() = nullptr;
+        EXPECT_EQ(
+            E_POINTER,
+            Evaluator_RotateVectorMany(evaluator, encrypted, count, steps, galois_keys, leading_null.data(), nullptr));
+
+        EXPECT_EQ(
+            COR_E_INVALIDOPERATION,
+            Evaluator_RotateVectorMany(evaluator, encrypted, oversized_count, steps, galois_keys, dests, nullptr));
+        EXPECT_EQ(
+            COR_E_INVALIDOPERATION,
+            Evaluator_RotateRowsMany(evaluator, encrypted, count, steps, galois_keys, dests, nullptr));
+
+        // A step without a Galois key for it or for the steps that compose it (3 = 4 - 1)
+        int missing_key_steps[]{ 1, -2, 3 };
+        EXPECT_EQ(
+            E_INVALIDARG,
+            Evaluator_RotateVectorMany(evaluator, encrypted, 3, missing_key_steps, galois_keys, dests, nullptr));
+        int too_large_steps[]{ 1, static_cast<int>(poly_modulus_degree / 2) };
+        EXPECT_EQ(
+            E_INVALIDARG,
+            Evaluator_RotateVectorMany(evaluator, encrypted, 2, too_large_steps, galois_keys, dests, nullptr));
+        void *empty = nullptr;
+        ASSERT_EQ(S_OK, Ciphertext_Create1(nullptr, &empty));
+        EXPECT_EQ(
+            E_INVALIDARG, Evaluator_RotateVectorMany(evaluator, empty, count, steps, galois_keys, dests, nullptr));
+
+        EXPECT_TRUE(destinations_unchanged());
+
+        EXPECT_EQ(S_OK, Ciphertext_Destroy(empty));
+        EXPECT_EQ(S_OK, Ciphertext_Destroy(other));
+        EXPECT_EQ(S_OK, Ciphertext_Destroy(aliased));
+        EXPECT_EQ(S_OK, MemoryPoolHandle_Destroy(pool));
+        EXPECT_EQ(S_OK, Ciphertext_Destroy(expected));
+        for (void *destination : destinations)
+        {
+            EXPECT_EQ(S_OK, Ciphertext_Destroy(destination));
+        }
+        EXPECT_EQ(S_OK, Ciphertext_Destroy(encrypted));
+        EXPECT_EQ(S_OK, Plaintext_Destroy(plain));
+        EXPECT_EQ(S_OK, CKKSEncoder_Destroy(encoder));
+        EXPECT_EQ(S_OK, Evaluator_Destroy(evaluator));
+        EXPECT_EQ(S_OK, Encryptor_Destroy(encryptor));
+        EXPECT_EQ(S_OK, KSwitchKeys_Destroy(galois_keys));
+        EXPECT_EQ(S_OK, PublicKey_Destroy(public_key));
+        EXPECT_EQ(S_OK, KeyGenerator_Destroy(keygen));
+        EXPECT_EQ(S_OK, SEALContext_Destroy(context));
+        EXPECT_EQ(S_OK, EncParams_Destroy(parms));
     }
 } // namespace sealtest
