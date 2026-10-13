@@ -1194,14 +1194,13 @@ namespace seal
         // Calculate number of relinearize_one_step calls needed
         size_t relins_needed = encrypted_size - destination_size;
 
-        // Iterator pointing to the last component of encrypted
-        auto encrypted_iter = iter(encrypted);
-        encrypted_iter += encrypted_size - 1;
-
+        // Step I key switches component encrypted_size - 1 - I, which multiplies the same power of the secret key, and
+        // adds the result to the first two components
         SEAL_ITERATE(iter(size_t(0)), relins_needed, [&](auto I) {
+            size_t key_power = encrypted_size - 1 - I;
             this->switch_key_inplace(
-                encrypted, *encrypted_iter, static_cast<const KSwitchKeys &>(relin_keys),
-                RelinKeys::get_index(encrypted_size - 1 - I), pool);
+                encrypted, iter(encrypted)[key_power], static_cast<const KSwitchKeys &>(relin_keys),
+                RelinKeys::get_index(key_power), pool);
         });
 
         // Put the output of final relinearization into destination.

@@ -10,6 +10,8 @@
 #include "seal/keygenerator.h"
 #include "seal/modulus.h"
 #include "seal/valcheck.h"
+#include "seal/util/rlwe.h"
+#include "seal/util/uintarithsmallmod.h"
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -6839,6 +6841,118 @@ namespace sealtest
             encrypted.data() + encrypted.size() * encrypted.coeff_modulus_size() * encrypted.poly_modulus_degree());
         ASSERT_TRUE(before == after_second);
     }
+    namespace
+    {
+        // Returns a key switching key for the secret key raised to power, as KeyGenerator creates for
+        // relinearization keys; KeyGenerator creates keys only for the power 2 through its public interface.
+        vector<PublicKey> create_relin_key(const SEALContext &context, const SecretKey &secret_key, size_t power)
+        {
+            auto &key_context_data = *context.key_context_data();
+            auto &key_modulus = key_context_data.parms().coeff_modulus();
+            size_t coeff_count = key_context_data.parms().poly_modulus_degree();
+            size_t decomp_mod_count = context.first_context_data()->parms().coeff_modulus().size();
+
+            // The power of the secret key in NTT form
+            const uint64_t *s = secret_key.data().data();
+            vector<uint64_t> s_power(s, s + key_modulus.size() * coeff_count);
+            for (size_t p = 1; p < power; p++)
+            {
+                for (size_t i = 0; i < key_modulus.size(); i++)
+                {
+                    for (size_t l = 0; l < coeff_count; l++)
+                    {
+                        uint64_t &x = s_power[i * coeff_count + l];
+                        x = util::multiply_uint_mod(x, s[i * coeff_count + l], key_modulus[i]);
+                    }
+                }
+            }
+
+            // Encryptions of zero with (special prime mod q_i) times the power added to RNS component i
+            vector<PublicKey> key(decomp_mod_count);
+            for (size_t i = 0; i < decomp_mod_count; i++)
+            {
+                util::encrypt_zero_symmetric(secret_key, context, context.key_parms_id(), true, false, key[i].data());
+                uint64_t factor = util::barrett_reduce_64(key_modulus.back().value(), key_modulus[i]);
+                uint64_t *c0 = key[i].data().data(0) + i * coeff_count;
+                for (size_t l = 0; l < coeff_count; l++)
+                {
+                    uint64_t x = util::multiply_uint_mod(s_power[i * coeff_count + l], factor, key_modulus[i]);
+                    c0[l] = util::add_uint_mod(c0[l], x, key_modulus[i]);
+                }
+            }
+            return key;
+        }
+    } // namespace
+
+    TEST(EvaluatorTest, RelinearizeSizeFourCiphertext)
+    {
+        // Relinearization keys for the powers 2 and 3 of the secret key relinearize a ciphertext of size 4
+        for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
+        {
+            size_t n = 64;
+            EncryptionParameters parms(scheme);
+            parms.set_poly_modulus_degree(n);
+            parms.set_coeff_modulus(CoeffModulus::Create(n, { 60, 60, 60, 60 }));
+            if (scheme != scheme_type::ckks)
+            {
+                parms.set_plain_modulus(PlainModulus::Batching(n, 20));
+            }
+            SEALContext context(parms, true, sec_level_type::none);
+            KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            RelinKeys rlk;
+            keygen.create_relin_keys(rlk);
+            rlk.data().push_back(create_relin_key(context, keygen.secret_key(), 3));
+            ASSERT_EQ(2ULL, rlk.size());
+            ASSERT_TRUE(is_valid_for(rlk, context));
+
+            Encryptor encryptor(context, pk);
+            Evaluator evaluator(context);
+            Decryptor decryptor(context, keygen.secret_key());
+
+            Plaintext plain("3x^2 + 2");
+            if (scheme == scheme_type::ckks)
+            {
+                CKKSEncoder encoder(context);
+                encoder.encode(1.25, pow(2.0, 25), plain);
+            }
+            Ciphertext encrypted;
+            encryptor.encrypt(plain, encrypted);
+            Ciphertext encrypted3;
+            evaluator.square(encrypted, encrypted3);
+            evaluator.multiply_inplace(encrypted3, encrypted);
+            ASSERT_EQ(4ULL, encrypted3.size());
+
+            Ciphertext relinearized;
+            evaluator.relinearize(encrypted3, rlk, relinearized);
+            ASSERT_EQ(2ULL, relinearized.size());
+
+            Plaintext expected;
+            Plaintext result;
+            decryptor.decrypt(encrypted3, expected);
+            decryptor.decrypt(relinearized, result);
+            if (scheme == scheme_type::ckks)
+            {
+                CKKSEncoder encoder(context);
+                vector<double> expected_values;
+                vector<double> result_values;
+                encoder.decode(expected, expected_values);
+                encoder.decode(result, result_values);
+                for (size_t i = 0; i < result_values.size(); i++)
+                {
+                    ASSERT_NEAR(1.953125, expected_values[i], 0.001);
+                    ASSERT_NEAR(1.953125, result_values[i], 0.001);
+                }
+            }
+            else
+            {
+                ASSERT_EQ(expected.to_string(), result.to_string());
+                ASSERT_EQ("1Bx^6 + 36x^4 + 24x^2 + 8", result.to_string());
+            }
+        }
+    }
+
     TEST(EvaluatorTest, KeySwitchingManyPrimes)
     {
         // With 199 decomposition primes of 60 bits, the 128-bit accumulators of key switching must be reduced
