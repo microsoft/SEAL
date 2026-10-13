@@ -257,10 +257,13 @@ namespace seal
             // -p_j^(-1) mod 2^64 for odd p_j, and 0 for even p_j
             Pointer<std::uint64_t> obase_neg_inv_mod_2_64_;
 
-            // End indices of a partition of [0, ibase_size()) into chunks in which the sum of (q_i - 1) is less than
-            // 2^64, so that a dot product over a chunk is less than p_j * 2^64 (the input bound of Montgomery
-            // reduction)
-            std::vector<std::size_t> ibase_chunk_ends_;
+            // End indices of a partition of [0, ibase_size()) into ibase_chunk_count_ chunks in which the sum of
+            // (q_i - 1) is less than 2^64, so that a dot product over a chunk is less than p_j * 2^64 (the input bound
+            // of Montgomery reduction). This is not a std::vector, because Pointer<BaseConverter> requires a
+            // standard-layout type, and std::vector is not one in MSVC Debug builds.
+            Pointer<std::size_t> ibase_chunk_ends_;
+
+            std::size_t ibase_chunk_count_ = 0;
         };
 
         class RNSTool

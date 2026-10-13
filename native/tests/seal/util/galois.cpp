@@ -171,10 +171,10 @@ namespace sealtest
                 }
             }
 
-            ASSERT_THROW(auto t = galois_tool->get_permutation_table_ntt(0), invalid_argument);
-            ASSERT_THROW(auto t = galois_tool->get_permutation_table_ntt(2), invalid_argument);
-            ASSERT_THROW(auto t = galois_tool->get_permutation_table_ntt(16), invalid_argument);
-            ASSERT_THROW(auto t = galois_tool->get_permutation_table_ntt(17), invalid_argument);
+            ASSERT_THROW(static_cast<void>(galois_tool->get_permutation_table_ntt(0)), invalid_argument);
+            ASSERT_THROW(static_cast<void>(galois_tool->get_permutation_table_ntt(2)), invalid_argument);
+            ASSERT_THROW(static_cast<void>(galois_tool->get_permutation_table_ntt(16)), invalid_argument);
+            ASSERT_THROW(static_cast<void>(galois_tool->get_permutation_table_ntt(17)), invalid_argument);
         }
     } // namespace util
 } // namespace sealtest

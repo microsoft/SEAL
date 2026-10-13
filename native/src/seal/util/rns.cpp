@@ -534,14 +534,14 @@ namespace seal
             }
 
             // For c in [0, count), computes dst[c] = sum_i rows[i * stride + c] * row[i] mod p, one chunk of the input
-            // base at a time (chunk_ends holds the end index of each chunk). neg_inv_p is -p^(-1) mod 2^64 if row is in
-            // Montgomery form, and 0 otherwise.
+            // base at a time (chunk_ends holds the end index of each of the chunk_count chunks). neg_inv_p is -p^(-1)
+            // mod 2^64 if row is in Montgomery form, and 0 otherwise.
             void base_convert_row(
-                const uint64_t *rows, size_t stride, size_t count, const vector<size_t> &chunk_ends,
+                const uint64_t *rows, size_t stride, size_t count, const size_t *chunk_ends, size_t chunk_count,
                 const uint64_t *row, const Modulus &p, uint64_t neg_inv_p, uint64_t *dst)
             {
                 size_t ib_begin = 0;
-                for (size_t chunk = 0; chunk < chunk_ends.size(); chunk++)
+                for (size_t chunk = 0; chunk < chunk_count; chunk++)
                 {
                     const size_t ib_end = chunk_ends[chunk];
                     if (neg_inv_p)
@@ -636,8 +636,9 @@ namespace seal
             for (size_t j = 0; j < obase_size; j++)
             {
                 base_convert_row(
-                    rows, count, count, ibase_chunk_ends_, conv_matrix_.get() + j * ibase_size, obase_.base()[j],
-                    obase_neg_inv_mod_2_64_[j], out + j * out_stride);
+                    rows, count, count, ibase_chunk_ends_.get(), ibase_chunk_count_,
+                    conv_matrix_.get() + j * ibase_size, obase_.base()[j], obase_neg_inv_mod_2_64_[j],
+                    out + j * out_stride);
             }
         }
 
@@ -697,8 +698,8 @@ namespace seal
                 // Sum modulo p (as in fast_convert_array)
                 uint64_t *dst = out.ptr() + block_start;
                 base_convert_row(
-                    temp.get(), block_size, block_count, ibase_chunk_ends_, conv_matrix_.get(), p,
-                    obase_neg_inv_mod_2_64_[0], dst);
+                    temp.get(), block_size, block_count, ibase_chunk_ends_.get(), ibase_chunk_count_,
+                    conv_matrix_.get(), p, obase_neg_inv_mod_2_64_[0], dst);
 
                 // Round v and subtract v * [q]_p mod p
                 for (size_t c = 0; c < block_count; c++)
@@ -788,8 +789,10 @@ namespace seal
             }
 
             // Partition ibase so that the sum of (q_i - 1) over each chunk is less than 2^64. Every ibase element is
-            // less than 2^61, so each chunk has at least 8 elements (except possibly the last one).
-            ibase_chunk_ends_.clear();
+            // less than 2^61, so each chunk has at least 8 elements (except possibly the last one), and there are at
+            // most ibase_size chunks.
+            ibase_chunk_ends_ = allocate<size_t>(ibase_size, pool_);
+            ibase_chunk_count_ = 0;
             uint64_t chunk_sum = 0;
             for (size_t i = 0; i < ibase_size; i++)
             {
@@ -798,7 +801,7 @@ namespace seal
                 if (add_uint64(chunk_sum, term, &new_sum))
                 {
                     // Overflow: close the current chunk before element i
-                    ibase_chunk_ends_.push_back(i);
+                    ibase_chunk_ends_[ibase_chunk_count_++] = i;
                     chunk_sum = term;
                 }
                 else
@@ -806,7 +809,7 @@ namespace seal
                     chunk_sum = new_sum;
                 }
             }
-            ibase_chunk_ends_.push_back(ibase_size);
+            ibase_chunk_ends_[ibase_chunk_count_++] = ibase_size;
         }
 
         RNSTool::RNSTool(
