@@ -12,6 +12,7 @@
 #include "seal/valcheck.h"
 #include "seal/util/rlwe.h"
 #include "seal/util/uintarithsmallmod.h"
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
@@ -6235,6 +6236,17 @@ namespace sealtest
         ASSERT_TRUE((plain_vec == vector<uint64_t>{ 2, 3, 4, 1, 6, 7, 8, 5 }));
     }
 
+    namespace
+    {
+        // Returns true if a and b have the same metadata and data
+        bool same_ciphertext(const Ciphertext &a, const Ciphertext &b)
+        {
+            return a.parms_id() == b.parms_id() && a.size() == b.size() && a.is_ntt_form() == b.is_ntt_form() &&
+                   a.scale() == b.scale() && a.correction_factor() == b.correction_factor() &&
+                   a.dyn_array().size() == b.dyn_array().size() &&
+                   equal(a.dyn_array().cbegin(), a.dyn_array().cend(), b.dyn_array().cbegin());
+        }
+    } // namespace
     TEST(EvaluatorTest, BGVEncryptModSwitchToNextDecrypt)
     {
         {
@@ -6841,6 +6853,59 @@ namespace sealtest
             encrypted.data() + encrypted.size() * encrypted.coeff_modulus_size() * encrypted.poly_modulus_degree());
         ASSERT_TRUE(before == after_second);
     }
+
+    TEST(EvaluatorTest, MultiplyRejectsSizeZeroCiphertext)
+    {
+        for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
+        {
+            EncryptionParameters parms(scheme);
+            parms.set_poly_modulus_degree(64);
+            parms.set_coeff_modulus(CoeffModulus::Create(64, { 40, 40, 40 }));
+            if (scheme != scheme_type::ckks)
+            {
+                parms.set_plain_modulus(PlainModulus::Batching(64, 20));
+            }
+            SEALContext context(parms, true, sec_level_type::none);
+            KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            RelinKeys rlk;
+            keygen.create_relin_keys(rlk);
+            Encryptor encryptor(context, pk);
+            Evaluator evaluator(context);
+
+            // A ciphertext of size 0 is valid, but it cannot be multiplied
+            Ciphertext empty;
+            empty.resize(context, context.first_parms_id(), 0);
+            empty.is_ntt_form() = (scheme != scheme_type::bfv);
+            ASSERT_TRUE(is_valid_for(empty, context));
+
+            Ciphertext encrypted;
+            encryptor.encrypt_zero(encrypted);
+            Ciphertext encrypted3;
+            evaluator.square(encrypted, encrypted3);
+            const Ciphertext encrypted3_copy = encrypted3;
+
+            Ciphertext destination;
+            ASSERT_THROW(evaluator.multiply(empty, encrypted3, destination), invalid_argument);
+            ASSERT_THROW(evaluator.multiply(encrypted3, empty, destination), invalid_argument);
+            ASSERT_THROW(evaluator.multiply(empty, empty, destination), invalid_argument);
+            ASSERT_THROW(evaluator.multiply_inplace(encrypted3, empty), invalid_argument);
+            ASSERT_TRUE(same_ciphertext(encrypted3, encrypted3_copy));
+            ASSERT_THROW(evaluator.square(empty, destination), invalid_argument);
+            Ciphertext empty_copy = empty;
+            ASSERT_THROW(evaluator.square_inplace(empty_copy), invalid_argument);
+            ASSERT_TRUE(same_ciphertext(empty, empty_copy));
+            if (scheme != scheme_type::ckks)
+            {
+                ASSERT_THROW(evaluator.exponentiate(empty, 2, rlk, destination), invalid_argument);
+                ASSERT_THROW(
+                    evaluator.multiply_many(vector<Ciphertext>{ empty, encrypted }, rlk, destination),
+                    invalid_argument);
+            }
+        }
+    }
+
     namespace
     {
         // Returns a key switching key for the secret key raised to power, as KeyGenerator creates for

@@ -376,6 +376,10 @@ namespace seal
         {
             throw invalid_argument("encrypted1 and encrypted2 parameter mismatch");
         }
+        if (encrypted1.size() < SEAL_CIPHERTEXT_SIZE_MIN || encrypted2.size() < SEAL_CIPHERTEXT_SIZE_MIN)
+        {
+            throw invalid_argument("encrypted1 and encrypted2 must have size at least 2");
+        }
 
         auto context_data_ptr = context_.first_context_data();
         switch (context_data_ptr->parms().scheme())
@@ -858,6 +862,10 @@ namespace seal
         if (!is_metadata_valid_for(encrypted, context_) || !is_buffer_valid(encrypted))
         {
             throw invalid_argument("encrypted is not valid for encryption parameters");
+        }
+        if (encrypted.size() < SEAL_CIPHERTEXT_SIZE_MIN)
+        {
+            throw invalid_argument("encrypted must have size at least 2");
         }
 
         auto context_data_ptr = context_.first_context_data();
