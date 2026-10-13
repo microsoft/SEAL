@@ -6,10 +6,12 @@
 #include "seal/context.h"
 #include "seal/decryptor.h"
 #include "seal/encryptor.h"
+#include "seal/evaluator.h"
 #include "seal/keygenerator.h"
 #include "seal/modulus.h"
 #include <cstddef>
 #include <cstdint>
+#include <vector>
 #include "gtest/gtest.h"
 #include "testseed.h"
 
@@ -1050,6 +1052,79 @@ namespace sealtest
             ASSERT_EQ(ct.parms_id(), next_parms);
             decryptor.decrypt(ct, pt);
             ASSERT_TRUE(pt.is_zero());
+        }
+    }
+
+    TEST(EncryptorTest, EncryptAtEveryLevelDecrypt)
+    {
+        // Public key encryption at a level encrypts zero one level higher and switches it down
+        for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
+        {
+            size_t n = 64;
+            EncryptionParameters parms(scheme);
+            parms.set_poly_modulus_degree(n);
+            parms.set_coeff_modulus(CoeffModulus::Create(n, { 40, 40, 40, 40, 60 }));
+            if (scheme != scheme_type::ckks)
+            {
+                parms.set_plain_modulus(PlainModulus::Batching(n, 20));
+            }
+            SEALContext context(parms, true, sec_level_type::none);
+            KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+
+            Encryptor encryptor(context, pk, keygen.secret_key());
+            Evaluator evaluator(context);
+            Decryptor decryptor(context, keygen.secret_key());
+
+            for (auto context_data = context.first_context_data(); context_data;
+                 context_data = context_data->next_context_data())
+            {
+                auto parms_id = context_data->parms_id();
+                for (bool symmetric : { false, true })
+                {
+                    Ciphertext encrypted;
+                    Plaintext plain;
+                    if (scheme == scheme_type::ckks)
+                    {
+                        CKKSEncoder encoder(context);
+                        encoder.encode(1.5, parms_id, pow(2.0, 30), plain);
+                        if (symmetric)
+                        {
+                            encryptor.encrypt_symmetric(plain, encrypted);
+                        }
+                        else
+                        {
+                            encryptor.encrypt(plain, encrypted);
+                        }
+                        ASSERT_TRUE(encrypted.parms_id() == parms_id);
+
+                        decryptor.decrypt(encrypted, plain);
+                        vector<double> result;
+                        encoder.decode(plain, result);
+                        for (auto value : result)
+                        {
+                            ASSERT_NEAR(1.5, value, 0.001);
+                        }
+                    }
+                    else
+                    {
+                        if (symmetric)
+                        {
+                            encryptor.encrypt_zero_symmetric(parms_id, encrypted);
+                        }
+                        else
+                        {
+                            encryptor.encrypt_zero(parms_id, encrypted);
+                        }
+                        ASSERT_TRUE(encrypted.parms_id() == parms_id);
+
+                        evaluator.add_plain_inplace(encrypted, Plaintext("3x^2 + 2"));
+                        decryptor.decrypt(encrypted, plain);
+                        ASSERT_EQ("3x^2 + 2", plain.to_string());
+                    }
+                }
+            }
         }
     }
 } // namespace sealtest

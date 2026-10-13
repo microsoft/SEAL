@@ -130,8 +130,12 @@ namespace seal
                 auto &prev_parms_id = prev_context_data.parms_id();
                 auto rns_tool = prev_context_data.rns_tool();
 
+                // The zero encryption masks the plaintext, so we use a fresh memory pool with `clear_on_destruction'
+                // enabled for it and for the temporaries of the modulus switching
+                MemoryPoolHandle safe_pool = MemoryManager::GetPool(mm_prof_opt::mm_force_new, true);
+
                 // Zero encryption without modulus switching
-                Ciphertext temp(pool);
+                Ciphertext temp(safe_pool);
                 util::encrypt_zero_asymmetric(public_key_, context_, prev_parms_id, is_ntt_form, temp);
 
                 // Modulus switching
@@ -139,18 +143,18 @@ namespace seal
                     if (parms.scheme() == scheme_type::ckks)
                     {
                         rns_tool->divide_and_round_q_last_ntt_inplace(
-                            get<0>(I), prev_context_data.small_ntt_tables(), pool);
+                            get<0>(I), prev_context_data.small_ntt_tables(), safe_pool);
                     }
                     // bfv switch-to-next
                     else if (parms.scheme() == scheme_type::bfv)
                     {
-                        rns_tool->divide_and_round_q_last_inplace(get<0>(I), pool);
+                        rns_tool->divide_and_round_q_last_inplace(get<0>(I), safe_pool);
                     }
                     // bgv switch-to-next
                     else if (parms.scheme() == scheme_type::bgv)
                     {
                         rns_tool->mod_t_and_divide_q_last_ntt_inplace(
-                            get<0>(I), prev_context_data.small_ntt_tables(), pool);
+                            get<0>(I), prev_context_data.small_ntt_tables(), safe_pool);
                     }
                     set_poly(get<0>(I), coeff_count, coeff_modulus_size, get<1>(I));
                 });
