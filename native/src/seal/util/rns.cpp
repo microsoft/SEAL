@@ -399,21 +399,181 @@ namespace seal
             }
         }
 
+        // Required for C++14 compliance: static constexpr member variables are not necessarily inlined so need to
+        // ensure symbol is created.
+        SEAL_CONSTEXPR_MEMBER_DEF constexpr size_t BaseConverter::max_block_size;
+
         void BaseConverter::fast_convert(ConstCoeffIter in, CoeffIter out, MemoryPoolHandle pool) const
         {
             size_t ibase_size = ibase_.size();
             size_t obase_size = obase_.size();
 
             SEAL_ALLOCATE_GET_COEFF_ITER(temp, ibase_size, pool);
-            SEAL_ITERATE(
-                iter(temp, in, ibase_.inv_punctured_prod_mod_base_array(), ibase_.base()), ibase_size,
-                [&](auto I) { get<0>(I) = multiply_uint_mod(get<1>(I), get<2>(I), get<3>(I)); });
+            SEAL_ITERATE(iter(temp, in, scaled_inv_punctured_prod_.get(), ibase_.base()), ibase_size, [&](auto I) {
+                get<0>(I) = multiply_uint_mod(get<1>(I), get<2>(I), get<3>(I));
+            });
 
             // for (size_t j = 0; j < obase_size; j++)
             SEAL_ITERATE(iter(out, base_change_matrix_, obase_.base()), obase_size, [&](auto I) {
                 get<0>(I) = dot_product_mod(temp, get<1>(I).get(), ibase_size, get<2>(I));
             });
         }
+
+        namespace
+        {
+            // Computes the first step of a fast base conversion for one input component: dst[c] = [src[c] * ipp]_{q_i}
+            // for c in [0, count), with only a reduction if ipp is 1
+            void base_convert_first_step(
+                const uint64_t *src, size_t count, const MultiplyUIntModOperand ipp, const Modulus &qi, uint64_t *dst)
+            {
+                if (ipp.operand == 1)
+                {
+                    for (size_t c = 0; c < count; c++)
+                    {
+                        dst[c] = barrett_reduce_64(src[c], qi);
+                    }
+                }
+                else
+                {
+                    for (size_t c = 0; c < count; c++)
+                    {
+                        dst[c] = multiply_uint_mod(src[c], ipp, qi);
+                    }
+                }
+            }
+
+            // For c in [0, count), computes sum_{i in [ib_begin, ib_end)} rows[i * stride + c] * row[i] mod p, reducing
+            // the 128-bit sum with Montgomery reduction (Montgomery) or Barrett reduction, and stores it to dst[c] or,
+            // if Accumulate, adds it to dst[c] modulo p. Each sum must be less than p * 2^64.
+            template <bool Montgomery, bool Accumulate>
+            void base_convert_block_row(
+                const uint64_t *rows, size_t stride, size_t count, size_t ib_begin, size_t ib_end, const uint64_t *row,
+                const Modulus &modulus, uint64_t neg_inv_p, uint64_t *dst)
+            {
+                const uint64_t p = modulus.value();
+                auto reduce = [&](uint64_t lo, uint64_t hi) -> uint64_t {
+                    SEAL_IF_CONSTEXPR(Montgomery)
+                    {
+                        return montgomery_reduce_128(lo, hi, p, neg_inv_p);
+                    }
+                    else
+                    {
+                        unsigned long long z[2]{ lo, hi };
+                        return barrett_reduce_128(z, modulus);
+                    }
+                };
+                auto store = [&](uint64_t *d, uint64_t value) {
+                    SEAL_IF_CONSTEXPR(Accumulate)
+                    {
+                        *d = sub_if_ge_uint64(value + *d, p);
+                    }
+                    else
+                    {
+                        *d = value;
+                    }
+                };
+
+                size_t c = 0;
+#ifdef SEAL_USE___INT128
+                // Independent accumulators hide the add-with-carry latency
+                for (; c + 8 <= count; c += 8)
+                {
+                    uint128_t a0 = 0, a1 = 0, a2 = 0, a3 = 0, a4 = 0, a5 = 0, a6 = 0, a7 = 0;
+                    const uint64_t *t = rows + ib_begin * stride + c;
+                    for (size_t i = ib_begin; i < ib_end; i++, t += stride)
+                    {
+                        const uint128_t w = row[i];
+                        a0 += w * t[0];
+                        a1 += w * t[1];
+                        a2 += w * t[2];
+                        a3 += w * t[3];
+                        a4 += w * t[4];
+                        a5 += w * t[5];
+                        a6 += w * t[6];
+                        a7 += w * t[7];
+                    }
+                    store(dst + c, reduce(static_cast<uint64_t>(a0), static_cast<uint64_t>(a0 >> 64)));
+                    store(dst + c + 1, reduce(static_cast<uint64_t>(a1), static_cast<uint64_t>(a1 >> 64)));
+                    store(dst + c + 2, reduce(static_cast<uint64_t>(a2), static_cast<uint64_t>(a2 >> 64)));
+                    store(dst + c + 3, reduce(static_cast<uint64_t>(a3), static_cast<uint64_t>(a3 >> 64)));
+                    store(dst + c + 4, reduce(static_cast<uint64_t>(a4), static_cast<uint64_t>(a4 >> 64)));
+                    store(dst + c + 5, reduce(static_cast<uint64_t>(a5), static_cast<uint64_t>(a5 >> 64)));
+                    store(dst + c + 6, reduce(static_cast<uint64_t>(a6), static_cast<uint64_t>(a6 >> 64)));
+                    store(dst + c + 7, reduce(static_cast<uint64_t>(a7), static_cast<uint64_t>(a7 >> 64)));
+                }
+                for (; c + 4 <= count; c += 4)
+                {
+                    uint128_t a0 = 0, a1 = 0, a2 = 0, a3 = 0;
+                    const uint64_t *t = rows + ib_begin * stride + c;
+                    for (size_t i = ib_begin; i < ib_end; i++, t += stride)
+                    {
+                        const uint128_t w = row[i];
+                        a0 += w * t[0];
+                        a1 += w * t[1];
+                        a2 += w * t[2];
+                        a3 += w * t[3];
+                    }
+                    store(dst + c, reduce(static_cast<uint64_t>(a0), static_cast<uint64_t>(a0 >> 64)));
+                    store(dst + c + 1, reduce(static_cast<uint64_t>(a1), static_cast<uint64_t>(a1 >> 64)));
+                    store(dst + c + 2, reduce(static_cast<uint64_t>(a2), static_cast<uint64_t>(a2 >> 64)));
+                    store(dst + c + 3, reduce(static_cast<uint64_t>(a3), static_cast<uint64_t>(a3 >> 64)));
+                }
+#endif
+                for (; c < count; c++)
+                {
+                    unsigned long long acc[2]{ 0, 0 };
+                    const uint64_t *t = rows + ib_begin * stride + c;
+                    for (size_t i = ib_begin; i < ib_end; i++, t += stride)
+                    {
+                        unsigned long long prod[2];
+                        multiply_uint64(*t, row[i], prod);
+                        add_uint128(prod, acc, acc);
+                    }
+                    store(dst + c, reduce(acc[0], acc[1]));
+                }
+            }
+
+            // For c in [0, count), computes dst[c] = sum_i rows[i * stride + c] * row[i] mod p, one chunk of the input
+            // base at a time (chunk_ends holds the end index of each chunk). neg_inv_p is -p^(-1) mod 2^64 if row is in
+            // Montgomery form, and 0 otherwise.
+            void base_convert_row(
+                const uint64_t *rows, size_t stride, size_t count, const vector<size_t> &chunk_ends,
+                const uint64_t *row, const Modulus &p, uint64_t neg_inv_p, uint64_t *dst)
+            {
+                size_t ib_begin = 0;
+                for (size_t chunk = 0; chunk < chunk_ends.size(); chunk++)
+                {
+                    const size_t ib_end = chunk_ends[chunk];
+                    if (neg_inv_p)
+                    {
+                        if (chunk)
+                        {
+                            base_convert_block_row<true, true>(
+                                rows, stride, count, ib_begin, ib_end, row, p, neg_inv_p, dst);
+                        }
+                        else
+                        {
+                            base_convert_block_row<true, false>(
+                                rows, stride, count, ib_begin, ib_end, row, p, neg_inv_p, dst);
+                        }
+                    }
+                    else
+                    {
+                        if (chunk)
+                        {
+                            base_convert_block_row<false, true>(
+                                rows, stride, count, ib_begin, ib_end, row, p, neg_inv_p, dst);
+                        }
+                        else
+                        {
+                            base_convert_block_row<false, false>(
+                                rows, stride, count, ib_begin, ib_end, row, p, neg_inv_p, dst);
+                        }
+                    }
+                    ib_begin = ib_end;
+                }
+            }
+        } // namespace
 
         void BaseConverter::fast_convert_array(ConstRNSIter in, RNSIter out, MemoryPoolHandle pool) const
         {
@@ -423,122 +583,134 @@ namespace seal
                 throw invalid_argument("in and out are incompatible");
             }
 #endif
-            size_t ibase_size = ibase_.size();
-            size_t obase_size = obase_.size();
-            size_t count = in.poly_modulus_degree();
+            const size_t ibase_size = ibase_.size();
+            const size_t count = in.poly_modulus_degree();
 
-            // Note that the stride size is ibase_size
-            SEAL_ALLOCATE_GET_STRIDE_ITER(temp, uint64_t, count, ibase_size, pool);
+            // Converting a block of coefficients at a time keeps the first-step values in cache
+            const size_t block_size = min(max_block_size, count);
+            auto temp(allocate_uint(mul_safe(block_size, ibase_size), pool));
+            for (size_t block_start = 0; block_start < count; block_start += block_size)
+            {
+                fast_convert_block(
+                    in[0].ptr() + block_start, count, min(block_size, count - block_start), false,
+                    out[0].ptr() + block_start, count, temp.get());
+            }
+        }
 
-            SEAL_ITERATE(
-                iter(in, ibase_.inv_punctured_prod_mod_base_array(), ibase_.base(), size_t(0)), ibase_size,
-                [&](auto I) {
-                    // The current ibase index
-                    size_t ibase_index = get<3>(I);
+        void BaseConverter::fast_convert_block(
+            const uint64_t *in, size_t in_stride, size_t count, bool input_reduced, uint64_t *out, size_t out_stride,
+            uint64_t *temp) const
+        {
+            const size_t ibase_size = ibase_.size();
+            const size_t obase_size = obase_.size();
 
-                    if (get<1>(I).operand == 1)
+            // Step 1: row i of temp holds [in_i * a_i * (q/q_i)^(-1)]_{q_i}. If all constants are 1 and the input is
+            // reduced, this is the identity: a compact input block is then used as is, and otherwise its rows are only
+            // copied into temp (reading many rows that are a large power of two apart in the dot products below would
+            // cause cache conflicts).
+            const uint64_t *rows = temp;
+            if (input_reduced && unit_first_step_)
+            {
+                if (in_stride == count)
+                {
+                    rows = in;
+                }
+                else
+                {
+                    for (size_t i = 0; i < ibase_size; i++)
                     {
-                        // No multiplication needed
-                        SEAL_ITERATE(iter(get<0>(I), temp), count, [&](auto J) {
-                            // Reduce modulo ibase element
-                            get<1>(J)[ibase_index] = barrett_reduce_64(get<0>(J), get<2>(I));
-                        });
+                        copy_n(in + i * in_stride, count, temp + i * count);
                     }
-                    else
-                    {
-                        // Multiplication needed
-                        SEAL_ITERATE(iter(get<0>(I), temp), count, [&](auto J) {
-                            // Multiply coefficient of in with ibase_.inv_punctured_prod_mod_base_array_ element
-                            get<1>(J)[ibase_index] = multiply_uint_mod(get<0>(J), get<1>(I), get<2>(I));
-                        });
-                    }
-                });
+                }
+            }
+            else
+            {
+                for (size_t i = 0; i < ibase_size; i++)
+                {
+                    base_convert_first_step(
+                        in + i * in_stride, count, scaled_inv_punctured_prod_[i], ibase_.base()[i], temp + i * count);
+                }
+            }
 
-            SEAL_ITERATE(iter(out, base_change_matrix_, obase_.base()), obase_size, [&](auto I) {
-                SEAL_ITERATE(iter(get<0>(I), temp), count, [&](auto J) {
-                    // Compute the base conversion sum modulo obase element
-                    get<0>(J) = dot_product_mod(get<1>(J), get<1>(I).get(), ibase_size, get<2>(I));
-                });
-            });
+            // Step 2: out_j = sum_i temp_i * [b_j * (q/q_i)]_{p_j} mod p_j
+            for (size_t j = 0; j < obase_size; j++)
+            {
+                base_convert_row(
+                    rows, count, count, ibase_chunk_ends_, conv_matrix_.get() + j * ibase_size, obase_.base()[j],
+                    obase_neg_inv_mod_2_64_[j], out + j * out_stride);
+            }
         }
 
         // See "An Improved RNS Variant of the BFV Homomorphic Encryption Scheme" (CT-RSA 2019) for details
         void BaseConverter::exact_convert_array(ConstRNSIter in, CoeffIter out, MemoryPoolHandle pool) const
         {
-            size_t ibase_size = ibase_.size();
-            size_t obase_size = obase_.size();
-            size_t count = in.poly_modulus_degree();
+            const size_t ibase_size = ibase_.size();
+            const size_t obase_size = obase_.size();
+            const size_t count = in.poly_modulus_degree();
 
             if (obase_size != 1)
             {
                 throw invalid_argument("out base in exact_convert_array must be one.");
             }
+            if (is_scaled_)
+            {
+                throw logic_error("exact_convert_array does not support scaling");
+            }
 
-            // Note that the stride size is ibase_size
-            SEAL_ALLOCATE_GET_STRIDE_ITER(temp, uint64_t, count, ibase_size, pool);
+            // Blocked as in fast_convert_array. For each coefficient, v is summed over i in increasing order, so its
+            // rounding does not depend on the blocking.
+            const size_t block_size = min(max_block_size, count);
+            auto temp(allocate_uint(mul_safe(block_size, ibase_size), pool));
+            auto v_acc(allocate<double_t>(block_size, pool));
 
-            // The iterator storing v
-            SEAL_ALLOCATE_GET_STRIDE_ITER(v, double_t, count, ibase_size, pool);
+            const Modulus *ibase_mods = ibase_.base();
+            const MultiplyUIntModOperand *inv_punctured_prod = ibase_.inv_punctured_prod_mod_base_array();
+            const Modulus &p = obase_.base()[0];
 
-            // Aggregated rounded v
-            SEAL_ALLOCATE_GET_PTR_ITER(aggregated_rounded_v, uint64_t, count, pool);
+            // [q]_p for the correction term v * [q]_p
+            MultiplyUIntModOperand q_mod_p;
+            q_mod_p.set(modulo_uint(ibase_.base_prod(), ibase_size, p), p);
 
-            // Calculate [x_{i} * \hat{q_{i}}]_{q_{i}}
-            SEAL_ITERATE(
-                iter(in, ibase_.inv_punctured_prod_mod_base_array(), ibase_.base(), size_t(0)), ibase_size,
-                [&](auto I) {
-                    // The current ibase index
-                    size_t ibase_index = get<3>(I);
-                    double_t divisor = static_cast<double_t>(get<2>(I).value());
-
-                    if (get<1>(I).operand == 1)
-                    {
-                        // No multiplication needed
-                        SEAL_ITERATE(iter(get<0>(I), temp, v), count, [&](auto J) {
-                            // Reduce modulo ibase element
-                            get<1>(J)[ibase_index] = barrett_reduce_64(get<0>(J), get<2>(I));
-                            double_t dividend = static_cast<double_t>(get<1>(J)[ibase_index]);
-                            get<2>(J)[ibase_index] = dividend / divisor;
-                        });
-                    }
-                    else
-                    {
-                        // Multiplication needed
-                        SEAL_ITERATE(iter(get<0>(I), temp, v), count, [&](auto J) {
-                            // Multiply coefficient of in with ibase_.inv_punctured_prod_mod_base_array_ element
-                            get<1>(J)[ibase_index] = multiply_uint_mod(get<0>(J), get<1>(I), get<2>(I));
-                            double_t dividend = static_cast<double_t>(get<1>(J)[ibase_index]);
-                            get<2>(J)[ibase_index] = dividend / divisor;
-                        });
-                    }
-                });
-
-            // Aggrate v and rounding
-            SEAL_ITERATE(iter(v, aggregated_rounded_v), count, [&](auto I) {
-                // Otherwise a memory space of the last execution will be used.
-                double_t aggregated_v = 0.0;
-                for (size_t i = 0; i < ibase_size; ++i)
+            for (size_t block_start = 0; block_start < count; block_start += block_size)
+            {
+                const size_t block_count = min(block_size, count - block_start);
+                double_t *acc = v_acc.get();
+                for (size_t c = 0; c < block_count; c++)
                 {
-                    aggregated_v += get<0>(I)[i];
+                    acc[c] = 0.0;
                 }
-                aggregated_v += 0.5;
-                get<1>(I) = static_cast<uint64_t>(aggregated_v);
-            });
 
-            auto p = obase_.base()[0];
-            auto q_mod_p = modulo_uint(ibase_.base_prod(), ibase_size, p);
-            auto base_change_matrix_first = base_change_matrix_[0].get();
-            // Final multiplication
-            SEAL_ITERATE(iter(out, temp, aggregated_rounded_v), count, [&](auto J) {
-                // Compute the base conversion sum modulo obase element
-                auto sum_mod_obase = dot_product_mod(get<1>(J), base_change_matrix_first, ibase_size, p);
-                // Minus v*[q]_{p} mod p
-                auto v_q_mod_p = multiply_uint_mod(get<2>(J), q_mod_p, p);
-                get<0>(J) = sub_uint_mod(sum_mod_obase, v_q_mod_p, p);
-            });
+                // Calculate [x_{i} * \hat{q_{i}}]_{q_{i}} and accumulate v = sum_i [x_i * \hat{q_i}]_{q_i} / q_i
+                for (size_t i = 0; i < ibase_size; i++)
+                {
+                    uint64_t *t = temp.get() + i * block_size;
+                    base_convert_first_step(
+                        in[i].ptr() + block_start, block_count, inv_punctured_prod[i], ibase_mods[i], t);
+                    const double_t divisor = static_cast<double_t>(ibase_mods[i].value());
+                    for (size_t c = 0; c < block_count; c++)
+                    {
+                        const double_t dividend = static_cast<double_t>(t[c]);
+                        acc[c] += dividend / divisor;
+                    }
+                }
+
+                // Sum modulo p (as in fast_convert_array)
+                uint64_t *dst = out.ptr() + block_start;
+                base_convert_row(
+                    temp.get(), block_size, block_count, ibase_chunk_ends_, conv_matrix_.get(), p,
+                    obase_neg_inv_mod_2_64_[0], dst);
+
+                // Round v and subtract v * [q]_p mod p
+                for (size_t c = 0; c < block_count; c++)
+                {
+                    const uint64_t aggregated_rounded_v = static_cast<uint64_t>(acc[c] + 0.5);
+                    const uint64_t v_q_mod_p = multiply_uint_mod(aggregated_rounded_v, q_mod_p, p);
+                    dst[c] = sub_uint_mod(dst[c], v_q_mod_p, p);
+                }
+            }
         }
 
-        void BaseConverter::initialize()
+        void BaseConverter::initialize(const uint64_t *ibase_scale, const uint64_t *obase_scale)
         {
             // Verify that the size is not too large
             if (!product_fits_in(ibase_.size(), obase_.size()))
@@ -546,19 +718,95 @@ namespace seal
                 throw logic_error("invalid parameters");
             }
 
+            is_scaled_ = ibase_scale || obase_scale;
+
+            // Inverse punctured products of the ibase, optionally multiplied by the input scaling factors
+            scaled_inv_punctured_prod_ = allocate<MultiplyUIntModOperand>(ibase_.size(), pool_);
+            SEAL_ITERATE(
+                iter(scaled_inv_punctured_prod_, ibase_.inv_punctured_prod_mod_base_array(), ibase_.base(), size_t(0)),
+                ibase_.size(), [&](auto I) {
+                    get<0>(I) = get<1>(I);
+                    if (ibase_scale)
+                    {
+                        uint64_t scale = barrett_reduce_64(ibase_scale[get<3>(I)], get<2>(I));
+                        get<0>(I).set(multiply_uint_mod(scale, get<1>(I), get<2>(I)), get<2>(I));
+                    }
+                });
+            unit_first_step_ = all_of(
+                scaled_inv_punctured_prod_.get(), scaled_inv_punctured_prod_.get() + ibase_.size(),
+                [](const MultiplyUIntModOperand &op) { return op.operand == 1; });
+
             // Create the base-change matrix rows
             base_change_matrix_ = allocate<Pointer<uint64_t>>(obase_.size(), pool_);
 
-            SEAL_ITERATE(iter(base_change_matrix_, obase_.base()), obase_.size(), [&](auto I) {
+            SEAL_ITERATE(iter(base_change_matrix_, obase_.base(), size_t(0)), obase_.size(), [&](auto I) {
                 // Create the base-change matrix columns
                 get<0>(I) = allocate_uint(ibase_.size(), pool_);
+
+                // Output scaling factor for this row (if any)
+                MultiplyUIntModOperand scale;
+                if (obase_scale)
+                {
+                    scale.set(barrett_reduce_64(obase_scale[get<2>(I)], get<1>(I)), get<1>(I));
+                }
 
                 StrideIter<const uint64_t *> ibase_punctured_prod_array(ibase_.punctured_prod_array(), ibase_.size());
                 SEAL_ITERATE(iter(get<0>(I), ibase_punctured_prod_array), ibase_.size(), [&](auto J) {
                     // Base-change matrix contains the punctured products of ibase elements modulo the obase
                     get<0>(J) = modulo_uint(get<1>(J), ibase_.size(), get<1>(I));
+                    if (obase_scale)
+                    {
+                        get<0>(J) = multiply_uint_mod(get<0>(J), scale, get<1>(I));
+                    }
                 });
             });
+
+            // Row-major copy of base_change_matrix_ for fast_convert_block, in Montgomery form for odd obase elements
+            size_t ibase_size = ibase_.size();
+            size_t obase_size = obase_.size();
+            conv_matrix_ = allocate_uint(mul_safe(ibase_size, obase_size), pool_);
+            obase_neg_inv_mod_2_64_ = allocate_uint(obase_size, pool_);
+            for (size_t j = 0; j < obase_size; j++)
+            {
+                const Modulus &p = obase_[j];
+                uint64_t *row = conv_matrix_.get() + j * ibase_size;
+                if (p.value() & 1)
+                {
+                    obase_neg_inv_mod_2_64_[j] = neg_inv_mod_2_64(p.value());
+                    MultiplyUIntModOperand two_pow_64;
+                    two_pow_64.set(two_pow_64_mod(p), p);
+                    for (size_t i = 0; i < ibase_size; i++)
+                    {
+                        row[i] = multiply_uint_mod(base_change_matrix_[j][i], two_pow_64, p);
+                    }
+                }
+                else
+                {
+                    obase_neg_inv_mod_2_64_[j] = 0;
+                    copy_n(base_change_matrix_[j].get(), ibase_size, row);
+                }
+            }
+
+            // Partition ibase so that the sum of (q_i - 1) over each chunk is less than 2^64. Every ibase element is
+            // less than 2^61, so each chunk has at least 8 elements (except possibly the last one).
+            ibase_chunk_ends_.clear();
+            uint64_t chunk_sum = 0;
+            for (size_t i = 0; i < ibase_size; i++)
+            {
+                uint64_t term = ibase_[i].value() - 1;
+                unsigned long long new_sum;
+                if (add_uint64(chunk_sum, term, &new_sum))
+                {
+                    // Overflow: close the current chunk before element i
+                    ibase_chunk_ends_.push_back(i);
+                    chunk_sum = term;
+                }
+                else
+                {
+                    chunk_sum = new_sum;
+                }
+            }
+            ibase_chunk_ends_.push_back(ibase_size);
         }
 
         RNSTool::RNSTool(

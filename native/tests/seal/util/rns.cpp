@@ -2,10 +2,15 @@
 // Licensed under the MIT license.
 
 #include "seal/memorymanager.h"
+#include "seal/modulus.h"
 #include "seal/util/numth.h"
 #include "seal/util/rns.h"
+#include "seal/util/uintarith.h"
 #include "seal/util/uintarithmod.h"
 #include "seal/util/uintarithsmallmod.h"
+#include "seal/util/uintcore.h"
+#include <algorithm>
+#include <random>
 #include <stdexcept>
 #include <vector>
 #include "gtest/gtest.h"
@@ -434,6 +439,276 @@ namespace sealtest
             {
                 BaseConverter bct(RNSBase({ 2, 3 }, pool), RNSBase({ 3, 4, 5 }, pool), pool);
                 bct_test(bct, { 0, 1, 1, 0, 1, 2 }, { 0, 1, 2, 0, 3, 1, 0, 2, 0 });
+            }
+        }
+
+        namespace
+        {
+            // The integer in [0, prod(base)) with residues poly[i * n + c] for the elements of base, as size()
+            // words
+            vector<uint64_t> compose_coeff(const RNSBase &base, const uint64_t *poly, size_t n, size_t c)
+            {
+                vector<uint64_t> value(base.size());
+                for (size_t i = 0; i < base.size(); i++)
+                {
+                    value[i] = poly[i * n + c];
+                }
+                base.compose(value.data(), MemoryManager::GetPool());
+                return value;
+            }
+
+            // Random values below q_i in component i, with 0 and q_i - 1 at the first two coefficients
+            vector<uint64_t> random_rns_poly(const RNSBase &base, size_t n, mt19937_64 &rng)
+            {
+                vector<uint64_t> poly(base.size() * n);
+                for (size_t i = 0; i < base.size(); i++)
+                {
+                    for (size_t c = 0; c < n; c++)
+                    {
+                        uint64_t q = base[i].value();
+                        poly[i * n + c] = c == 0 ? 0 : (c == 1 ? q - 1 : rng() % q);
+                    }
+                }
+                return poly;
+            }
+        } // namespace
+
+        TEST(BaseConverterTest, ConvertArrayScaled)
+        {
+            // A scaled converter must give the same output as the unscaled converter applied to the input multiplied
+            // by the input scaling factors, followed by multiplication by the output scaling factors.
+            auto pool = MemoryManager::GetPool();
+            mt19937_64 rng(4241);
+            size_t count = 16;
+            RNSBase ibase(CoeffModulus::Create(64, { 30, 40, 50, 60 }), pool);
+            RNSBase obase(CoeffModulus::Create(64, { 31, 41, 51, 60, 59 }), pool);
+            vector<uint64_t> ibase_scale{ 1, 12345, uint64_t(1) << 32, ibase[3].value() - 1 };
+            vector<uint64_t> obase_scale{ 3, 1, uint64_t(1) << 40, obase[3].value() - 2, 1 };
+            BaseConverter bct(ibase, obase, pool);
+            BaseConverter bct_scaled(ibase, obase, ibase_scale, obase_scale, pool);
+
+            vector<uint64_t> in(count * ibase.size()), in_scaled(count * ibase.size());
+            vector<uint64_t> out(count * obase.size()), out_scaled(count * obase.size());
+            for (size_t i = 0; i < ibase.size(); i++)
+            {
+                for (size_t k = 0; k < count; k++)
+                {
+                    // The scaled converter accepts any 64-bit input
+                    uint64_t value = k == 0 ? ~uint64_t(0) : (k == 1 ? ibase[i].value() - 1 : rng());
+                    in[i * count + k] = value;
+                    in_scaled[i * count + k] = multiply_uint_mod(
+                        barrett_reduce_64(value, ibase[i]), barrett_reduce_64(ibase_scale[i], ibase[i]), ibase[i]);
+                }
+            }
+            bct.fast_convert_array(ConstRNSIter(in_scaled.data(), count), RNSIter(out.data(), count), pool);
+            bct_scaled.fast_convert_array(ConstRNSIter(in.data(), count), RNSIter(out_scaled.data(), count), pool);
+            for (size_t j = 0; j < obase.size(); j++)
+            {
+                for (size_t k = 0; k < count; k++)
+                {
+                    ASSERT_EQ(
+                        multiply_uint_mod(out[j * count + k], barrett_reduce_64(obase_scale[j], obase[j]), obase[j]),
+                        out_scaled[j * count + k]);
+                }
+            }
+
+            // Scaling is not supported by exact conversion
+            BaseConverter bct_exact(ibase, RNSBase({ obase[0] }, pool), ibase_scale, { 1 }, pool);
+            vector<uint64_t> exact_out(count);
+            ASSERT_THROW(
+                bct_exact.exact_convert_array(ConstRNSIter(in.data(), count), CoeffIter(exact_out.data()), pool),
+                logic_error);
+            ASSERT_THROW(BaseConverter(ibase, obase, { 1 }, obase_scale, pool), invalid_argument);
+        }
+
+        // Compares fast_convert_array (blocked, Montgomery-reduced) with a straightforward reference implementation
+        // (per-coefficient dot_product_mod) on random and edge-case inputs, for odd and even output moduli, small and
+        // large bases (the latter forcing the input base to be split into several chunks), and coefficient counts
+        // that are not multiples of the internal unrolling factors or block size. Also checks the allowed aliasing
+        // of input and output.
+        TEST(BaseConverterTest, ConvertArrayMatchesReference)
+        {
+            auto pool = MemoryManager::GetPool();
+            mt19937_64 rng(4242);
+
+            auto reference = [&](const RNSBase &ibase, const RNSBase &obase, const vector<uint64_t> &in, size_t count,
+                                 const vector<uint64_t> &ibase_scale, const vector<uint64_t> &obase_scale) {
+                size_t ibase_size = ibase.size();
+                size_t obase_size = obase.size();
+                vector<vector<uint64_t>> rows(obase_size, vector<uint64_t>(ibase_size));
+                for (size_t j = 0; j < obase_size; j++)
+                {
+                    for (size_t i = 0; i < ibase_size; i++)
+                    {
+                        rows[j][i] = modulo_uint(ibase.punctured_prod_array() + i * ibase_size, ibase_size, obase[j]);
+                    }
+                }
+                vector<uint64_t> out(obase_size * count);
+                vector<uint64_t> temp(ibase_size);
+                for (size_t c = 0; c < count; c++)
+                {
+                    for (size_t i = 0; i < ibase_size; i++)
+                    {
+                        MultiplyUIntModOperand ipp = ibase.inv_punctured_prod_mod_base_array()[i];
+                        uint64_t x = in[i * count + c];
+                        if (!ibase_scale.empty())
+                        {
+                            // [x * a_i]_{q_i}, then the usual first step
+                            x = multiply_uint_mod(x, barrett_reduce_64(ibase_scale[i], ibase[i]), ibase[i]);
+                        }
+                        temp[i] =
+                            (ipp.operand == 1) ? barrett_reduce_64(x, ibase[i]) : multiply_uint_mod(x, ipp, ibase[i]);
+                    }
+                    for (size_t j = 0; j < obase_size; j++)
+                    {
+                        out[j * count + c] = dot_product_mod(temp.data(), rows[j].data(), ibase_size, obase[j]);
+                        if (!obase_scale.empty())
+                        {
+                            out[j * count + c] = multiply_uint_mod(
+                                out[j * count + c], barrett_reduce_64(obase_scale[j], obase[j]), obase[j]);
+                        }
+                    }
+                }
+                return out;
+            };
+
+            auto run = [&](const vector<Modulus> &ibase_mods, const vector<Modulus> &obase_mods, bool scaled) {
+                RNSBase ibase(ibase_mods, pool);
+                RNSBase obase(obase_mods, pool);
+                vector<uint64_t> ibase_scale, obase_scale;
+                if (scaled)
+                {
+                    // Arbitrary 64-bit factors (including 0 and 1), reduced by the converter
+                    for (size_t i = 0; i < ibase.size(); i++)
+                    {
+                        ibase_scale.push_back(i == 0 ? 1 : (i == 1 ? 0 : rng()));
+                    }
+                    for (size_t j = 0; j < obase.size(); j++)
+                    {
+                        obase_scale.push_back(j == 0 ? uint64_t(1) << 32 : rng());
+                    }
+                }
+                Pointer<BaseConverter> bct_ptr =
+                    scaled ? allocate<BaseConverter>(pool, ibase, obase, ibase_scale, obase_scale, pool)
+                           : allocate<BaseConverter>(pool, ibase, obase, pool);
+                const BaseConverter &bct = *bct_ptr;
+                const vector<size_t> counts{ 1, 2, 3, 4, 5, 7, 8, 9, 15, 16, 17, 255, 256, 257, 511, 512, 513, 1027 };
+                for (size_t count : counts)
+                {
+                    for (int pattern = 0; pattern < 5; pattern++)
+                    {
+                        vector<uint64_t> in(ibase.size() * count);
+                        for (size_t i = 0; i < ibase.size(); i++)
+                        {
+                            uint64_t q = ibase[i].value();
+                            for (size_t c = 0; c < count; c++)
+                            {
+                                uint64_t &x = in[i * count + c];
+                                switch (pattern)
+                                {
+                                case 0:
+                                    x = 0;
+                                    break;
+                                case 1:
+                                    x = q - 1;
+                                    break;
+                                case 2:
+                                    x = (c & 1) ? q - 1 : 0;
+                                    break;
+                                case 3:
+                                    // Unreduced input; fast_convert_array reduces any 64-bit input
+                                    x = rng();
+                                    break;
+                                default:
+                                    x = rng() % q;
+                                    break;
+                                }
+                            }
+                        }
+                        vector<uint64_t> ref = reference(ibase, obase, in, count, ibase_scale, obase_scale);
+                        vector<uint64_t> out(obase.size() * count, 0xDEADBEEF);
+                        bct.fast_convert_array(ConstRNSIter(in.data(), count), RNSIter(out.data(), count), pool);
+                        ASSERT_EQ(ref, out) << "ibase size " << ibase.size() << ", obase size " << obase.size()
+                                            << ", count " << count << ", pattern " << pattern << ", scaled " << scaled;
+
+                        // in and out may overlap at equal coefficient indices: identical, or shifted by one component
+                        size_t size = max(ibase.size(), obase.size()) + 1;
+                        for (size_t shift : { size_t(0), size_t(1) })
+                        {
+                            vector<uint64_t> buffer(size * count);
+                            copy(in.begin(), in.end(), buffer.data() + shift * count);
+                            bct.fast_convert_array(
+                                ConstRNSIter(buffer.data() + shift * count, count), RNSIter(buffer.data(), count),
+                                pool);
+                            ASSERT_TRUE(equal(ref.begin(), ref.end(), buffer.begin())) << "shift " << shift;
+                        }
+                    }
+                }
+            };
+
+            // Typical BFV shapes: q of 36..60-bit primes to Bsk of 61-bit primes and back, plus even m_tilde
+            auto q = get_primes(uint64_t(1) << 15, 50, 5);
+            auto q60 = get_primes(uint64_t(1) << 15, 60, 3);
+            q.insert(q.end(), q60.begin(), q60.end());
+            auto bsk = get_primes(uint64_t(1) << 15, 61, 9);
+            run(q, bsk, false);
+            run(q, bsk, true);
+            run(bsk, q, false);
+            run(bsk, q, true);
+            run(q, { Modulus(uint64_t(1) << 32) }, false);
+            run(q, { Modulus(uint64_t(1) << 32) }, true);
+            run(q, { Modulus(65537), Modulus(uint64_t(1) << 20), Modulus(3), bsk[0] }, false);
+            run(q, { Modulus(65537), Modulus(uint64_t(1) << 20), Modulus(3), bsk[0] }, true);
+
+            // Many 61-bit input primes: the sum of the input moduli exceeds 2^64, so the input base is split
+            auto big = get_primes(uint64_t(1) << 15, 61, 20);
+            run(big, { bsk[0], q[0], Modulus(uint64_t(1) << 32), Modulus(17) }, false);
+            run(big, { bsk[0], q[0], Modulus(uint64_t(1) << 32), Modulus(17) }, true);
+
+            // Single input modulus (inv_punctured_prod == 1) and tiny moduli
+            run({ bsk[1] }, { bsk[0], q[0] }, false);
+            run({ bsk[1] }, { bsk[0], q[0] }, true);
+            run({ Modulus(2), Modulus(3), Modulus(5) }, { Modulus(7), Modulus(8), Modulus(11) }, false);
+            run({ Modulus(2), Modulus(3), Modulus(5) }, { Modulus(7), Modulus(8), Modulus(11) }, true);
+        }
+
+        // exact_convert_array computes the centered representative of the input modulo prod(ibase), reduced modulo
+        // the output modulus
+        TEST(BaseConverterTest, ExactConvertArray)
+        {
+            auto pool = MemoryManager::GetPool();
+            mt19937_64 rng(4243);
+            auto q = get_primes(uint64_t(1) << 15, 50, 5);
+            auto big = get_primes(uint64_t(1) << 15, 61, 20);
+            for (auto ibase_mods : { vector<Modulus>{ q[0] }, q, big })
+            {
+                RNSBase ibase(ibase_mods, pool);
+                for (const Modulus &p : { Modulus(65537), Modulus(uint64_t(1) << 20), Modulus(2), big[0] })
+                {
+                    BaseConverter bct(ibase, RNSBase({ p }, pool), pool);
+                    uint64_t q_mod_p = modulo_uint(ibase.base_prod(), ibase.size(), p);
+                    for (size_t count : { size_t(1), size_t(2), size_t(511), size_t(512), size_t(513), size_t(1027) })
+                    {
+                        vector<uint64_t> in = random_rns_poly(ibase, count, rng), out(count);
+                        bct.exact_convert_array(ConstRNSIter(in.data(), count), CoeffIter(out.data()), pool);
+                        for (size_t c = 0; c < count; c++)
+                        {
+                            vector<uint64_t> x = compose_coeff(ibase, in.data(), count, c);
+                            uint64_t expected = modulo_uint(x.data(), x.size(), p);
+
+                            // x - q if x > q / 2
+                            vector<uint64_t> twice_x(x.size() + 1), q_wide(x.size() + 1);
+                            left_shift_uint(x.data(), 1, x.size(), twice_x.data());
+                            twice_x.back() = x.back() >> 63;
+                            copy_n(ibase.base_prod(), ibase.size(), q_wide.begin());
+                            if (is_greater_than_uint(twice_x.data(), q_wide.data(), twice_x.size()))
+                            {
+                                expected = sub_uint_mod(expected, q_mod_p, p);
+                            }
+                            ASSERT_EQ(expected, out[c]) << "count " << count << ", c " << c;
+                        }
+                    }
+                }
             }
         }
 
@@ -1071,5 +1346,6 @@ namespace sealtest
             ASSERT_TRUE((53ULL + 2ULL - in[0]) % 53ULL <= 1);
             ASSERT_TRUE((53ULL + 3ULL - in[1]) % 53ULL <= 1);
         }
+
     } // namespace util
 } // namespace sealtest

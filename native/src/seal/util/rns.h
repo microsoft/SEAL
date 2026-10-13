@@ -137,7 +137,35 @@ namespace seal
                     throw std::invalid_argument("pool is uninitialized");
                 }
 
-                initialize();
+                initialize(nullptr, nullptr);
+            }
+
+            /**
+            Creates a BaseConverter for a scaled fast base conversion. With ibase = {q_1, ..., q_k} (with product q)
+            and obase = {p_1, ..., p_l}, fast_convert and fast_convert_array compute
+
+                out_j = [ (sum_i [in_i * a_i * (q/q_i)^(-1)]_{q_i} * (q/q_i)) * b_j ]_{p_j},
+
+            where a_i = ibase_scale[i] and b_j = obase_scale[j]. With all factors equal to 1 this is the usual fast
+            base conversion. Scaling is not supported by exact_convert_array.
+
+            @throws std::invalid_argument if the sizes of ibase_scale or obase_scale do not match the bases
+            */
+            BaseConverter(
+                const RNSBase &ibase, const RNSBase &obase, const std::vector<std::uint64_t> &ibase_scale,
+                const std::vector<std::uint64_t> &obase_scale, MemoryPoolHandle pool)
+                : pool_(std::move(pool)), ibase_(ibase, pool_), obase_(obase, pool_)
+            {
+                if (!pool_)
+                {
+                    throw std::invalid_argument("pool is uninitialized");
+                }
+                if (ibase_scale.size() != ibase_.size() || obase_scale.size() != obase_.size())
+                {
+                    throw std::invalid_argument("scale size mismatch");
+                }
+
+                initialize(ibase_scale.data(), obase_scale.data());
             }
 
             SEAL_NODISCARD inline std::size_t ibase_size() const noexcept
@@ -162,12 +190,18 @@ namespace seal
 
             void fast_convert(ConstCoeffIter in, CoeffIter out, MemoryPoolHandle pool) const;
 
+            /**
+            Converts every coefficient of in. The input coefficients may be any 64-bit values. in and out may overlap
+            only at equal coefficient indices; for example, they may be identical or disjoint.
+            */
             void fast_convert_array(ConstRNSIter in, RNSIter out, MemoryPoolHandle pool) const;
 
             // The exact base convertion function, only supports obase size of 1.
             void exact_convert_array(ConstRNSIter in, CoeffIter out, MemoryPoolHandle) const;
 
         private:
+            friend class RNSTool;
+
             BaseConverter(const BaseConverter &copy) = delete;
 
             BaseConverter(BaseConverter &&source) = delete;
@@ -176,7 +210,25 @@ namespace seal
 
             BaseConverter &operator=(BaseConverter &&assign) = delete;
 
-            void initialize();
+            void initialize(const std::uint64_t *ibase_scale, const std::uint64_t *obase_scale);
+
+            /**
+            Converts count coefficients, reading ibase component i from in + i * in_stride and writing obase component
+            j to out + j * out_stride. The output equals the corresponding coefficients of fast_convert_array. out
+            must not overlap in or temp.
+
+            @param[in] input_reduced True if every input coefficient is already reduced modulo its ibase element
+            @param[out] temp Scratch space for count * ibase_size() values. On return, row i (at temp + i * count)
+            holds [in_i * a_i * (q/q_i)^(-1)]_{q_i}, unless input_reduced is true, the first step is the identity, and
+            in_stride equals count.
+            */
+            void fast_convert_block(
+                const std::uint64_t *in, std::size_t in_stride, std::size_t count, bool input_reduced,
+                std::uint64_t *out, std::size_t out_stride, std::uint64_t *temp) const;
+
+            // Number of coefficients converted at a time; a block of first-step values (ibase_size() rows) then stays
+            // in cache for typical base sizes
+            static constexpr std::size_t max_block_size = 512;
 
             MemoryPoolHandle pool_;
 
@@ -184,7 +236,31 @@ namespace seal
 
             RNSBase obase_;
 
+            // Whether this converter was created with input or output scaling factors
+            bool is_scaled_ = false;
+
+            // Whether all constants of the first step (the inverse punctured products times the input scaling factors)
+            // are 1
+            bool unit_first_step_ = false;
+
+            // a_i * (q/q_i)^(-1) mod q_i, where a_i are the input scaling factors (all 1 if not scaled)
+            Pointer<MultiplyUIntModOperand> scaled_inv_punctured_prod_;
+
+            // b_j * (q/q_i) mod p_j, where b_j are the output scaling factors (all 1 if not scaled)
             Pointer<Pointer<std::uint64_t>> base_change_matrix_;
+
+            // Row-major copy of base_change_matrix_ used by fast_convert_block. Rows for odd p_j are multiplied by
+            // 2^64 mod p_j, so that dot products can be reduced with a Montgomery reduction instead of a Barrett
+            // reduction.
+            Pointer<std::uint64_t> conv_matrix_;
+
+            // -p_j^(-1) mod 2^64 for odd p_j, and 0 for even p_j
+            Pointer<std::uint64_t> obase_neg_inv_mod_2_64_;
+
+            // End indices of a partition of [0, ibase_size()) into chunks in which the sum of (q_i - 1) is less than
+            // 2^64, so that a dot product over a chunk is less than p_j * 2^64 (the input bound of Montgomery
+            // reduction)
+            std::vector<std::size_t> ibase_chunk_ends_;
         };
 
         class RNSTool
