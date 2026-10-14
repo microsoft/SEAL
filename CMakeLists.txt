@@ -631,6 +631,15 @@ if(UNIX OR APPLE)
     # A pkg-config file can have only one Requires field
     list(JOIN SEAL_PKGCONFIG_REQUIRES ", " SEAL_PKGCONFIG_REQUIRES_STRING)
 
+    # The install directories relative to the prefix, unless they are absolute
+    foreach(dir LIBDIR INCLUDEDIR)
+        if(IS_ABSOLUTE "${CMAKE_INSTALL_${dir}}")
+            set(SEAL_PKGCONFIG_${dir} "${CMAKE_INSTALL_${dir}}")
+        else()
+            set(SEAL_PKGCONFIG_${dir} "\${prefix}/${CMAKE_INSTALL_${dir}}")
+        endif()
+    endforeach()
+
     # Microsoft GSL headers carried with SEAL_BUILD_DEPS=ON are in seal/thirdparty
     set(SEAL_PKGCONFIG_THIRDPARTY_CFLAGS)
     if(SEAL_BUILD_DEPS AND SEAL_USE_MSGSL)

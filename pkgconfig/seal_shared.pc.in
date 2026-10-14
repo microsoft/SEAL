@@ -2,8 +2,8 @@
 # Licensed under the MIT license.
 
 prefix=@CMAKE_INSTALL_PREFIX@
-libdir=${prefix}/lib
-includedir=${prefix}/@SEAL_INCLUDES_INSTALL_DIR@
+libdir=@SEAL_PKGCONFIG_LIBDIR@
+includedir=@SEAL_PKGCONFIG_INCLUDEDIR@
 
 Name: Microsoft SEAL
 Version: @SEAL_VERSION_MAJOR@.@SEAL_VERSION_MINOR@
