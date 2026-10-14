@@ -2,24 +2,40 @@
 
 ## Version 4.7.0
 
-- Improved the performance of BFV multiplication, key switching (relinearization and rotations), modulus switching, rescaling, encryption, decryption, `Evaluator::multiply_plain`, and the NTT.
+### Breaking Changes
+
+- The install directories and library names no longer contain the version number: headers go to `include/seal`, the CMake package to `lib/cmake/SEAL`, and the static libraries are `libseal.a` and `libsealc.a` (`seal.lib` and `sealc.lib` with MSVC). Different versions can no longer be installed side by side. With `SEAL_BUILD_DEPS=ON`, the Microsoft GSL headers go to `include/seal/thirdparty`.
+- Removed the CMake option `SEAL_AVOID_BRANCHING`. Conditional selections in critical functions are now always written without branches, in inline assembly with GCC and Clang on x86-64 and AArch64.
+- Removed the macro `SEAL_COND_SELECT`, which `util::select_uint64` replaces.
+
+### Performance Improvements
+
+- Improved performance throughout the library, for example in BFV multiplication, key switching (relinearization and rotations), modulus switching, rescaling, encryption, decryption, `Evaluator::multiply_plain`, and the NTT.
 - These improvements do not change any results: given the same randomness, keys, ciphertexts, and decryptions are identical to those of Microsoft SEAL 4.6.2, except where the bugs listed below are fixed. Noise growth and the choice of encryption parameters are unchanged.
+
+### New Features
+
 - Added `Evaluator::rotate_rows` and `Evaluator::rotate_vector` overloads that rotate a ciphertext by several steps at once. Steps that have their own Galois keys share work, which is faster than separate rotations, and the results are the same. Added `Evaluator_RotateRowsMany` and `Evaluator_RotateVectorMany` to the C API, and `Evaluator.RotateRows` and `Evaluator.RotateVector` overloads to the .NET wrapper.
+- Added functions to `seal::util`, such as out-of-place NTTs.
+
+### Bug Fixes
+
 - Fixed key switching (relinearization, rotations, and `Evaluator::apply_galois`), which could give incorrect results with more than 65 coefficient modulus primes.
 - Fixed `Evaluator::relinearize` for ciphertexts of size greater than 3, which need relinearization keys that `KeyGenerator` does not create.
 - Fixed `Evaluator::multiply` and `Evaluator::square` to throw `std::invalid_argument` for a ciphertext of size 0. Multiplying one by a ciphertext of size 3 or more could dereference a null pointer, and squaring one threw `std::logic_error`.
 - Fixed `Evaluator::multiply`, `Evaluator::square`, `Evaluator::relinearize`, `Evaluator::add_plain`, `Evaluator::sub_plain`, `Evaluator::apply_galois`, and the functions for modulus switching, rotation, and conjugation to throw `std::invalid_argument` for an uninitialized memory pool, as documented, instead of `std::logic_error` or no exception.
 - Fixed `util::modulo_poly_coeffs` with Intel HEXL, which could return incorrect results for moduli of less than 14 bits and corrupt memory for the moduli 2 and 4. This could affect BGV with plaintext moduli of less than 14 bits.
-- Public-key encryption now also erases its intermediate encryption of zero from memory.
-- Removed the CMake option `SEAL_AVOID_BRANCHING` and the macro `SEAL_COND_SELECT`, which `util::select_uint64` replaces. Conditional selections in critical functions are now always written without branches, in inline assembly with GCC and Clang on x86-64 and AArch64. This includes lifting plaintext coefficients to the coefficient modulus when the plain modulus is larger than one of the coefficient modulus primes, which branched even with the option.
-- The install directories and library names no longer contain the version number: headers go to `include/seal`, the CMake package to `lib/cmake/SEAL`, and the static libraries are `libseal.a` and `libsealc.a` (`seal.lib` and `sealc.lib` with MSVC). Different versions can no longer be installed side by side. With `SEAL_BUILD_DEPS=ON`, the Microsoft GSL headers go to `include/seal/thirdparty`.
 - Fixed the CMake configuration with CMake 4 when Microsoft SEAL downloads and builds Intel HEXL.
 - Fixed the CMake configuration on Unix-like systems when the shared SEAL_C library is built with Intel HEXL.
 - Fixed the CMake configuration building dependencies outside the build directory when their sources are given with `FETCHCONTENT_SOURCE_DIR_<name>`.
 - Fixed the pkg-config files pointing to `lib` when the libraries are installed to another directory, such as `lib64`.
 - Fixed unused parameter warnings in C++14 builds with GCC and Clang.
 - Fixed building as C++17 with the debug mode of libstdc++ (`_GLIBCXX_DEBUG`): comparisons of `util::ReverseIter` did not compile.
-- Added functions to `seal::util`, such as out-of-place NTTs.
+
+### Other Changes
+
+- Lifting plaintext coefficients to the coefficient modulus no longer branches when the plain modulus is larger than one of the coefficient modulus primes, which it did even with `SEAL_AVOID_BRANCHING`.
+- Public-key encryption now also erases its intermediate encryption of zero from memory.
 
 ## Version 4.6.2
 
