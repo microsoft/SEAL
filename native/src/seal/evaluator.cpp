@@ -1107,6 +1107,10 @@ namespace seal
         {
             throw invalid_argument("not enough relinearization keys");
         }
+        if (!pool)
+        {
+            throw invalid_argument("pool is uninitialized");
+        }
 
         // If encrypted is already at the desired level, return
         if (destination_size == encrypted_size)
@@ -1125,10 +1129,6 @@ namespace seal
         if (!context_.using_keyswitching())
         {
             throw logic_error("keyswitching is not supported by the context");
-        }
-        if (!pool)
-        {
-            throw invalid_argument("pool is uninitialized");
         }
         validate_ntt_form(encrypted, parms.scheme());
         if (!product_fits_in(coeff_count, decomp_modulus_size + 1, size_t(2)))
@@ -1436,6 +1436,10 @@ namespace seal
         {
             throw invalid_argument("cannot switch to higher level modulus");
         }
+        if (!pool)
+        {
+            throw invalid_argument("pool is uninitialized");
+        }
 
         while (encrypted.parms_id() != parms_id)
         {
@@ -1615,6 +1619,10 @@ namespace seal
         if (context_data_ptr->chain_index() < target_context_data_ptr->chain_index())
         {
             throw invalid_argument("cannot switch to higher level modulus");
+        }
+        if (!pool)
+        {
+            throw invalid_argument("pool is uninitialized");
         }
 
         while (encrypted.parms_id() != parms_id)

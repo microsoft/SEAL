@@ -6800,6 +6800,8 @@ namespace sealtest
             KeyGenerator keygen(context);
             PublicKey pk;
             keygen.create_public_key(pk);
+            RelinKeys rlk;
+            keygen.create_relin_keys(rlk);
             GaloisKeys glk;
             keygen.create_galois_keys(glk);
 
@@ -6827,6 +6829,13 @@ namespace sealtest
             };
             check([&](MemoryPoolHandle pool) { evaluator.multiply(encrypted, encrypted, destination, pool); });
             check([&](MemoryPoolHandle pool) { evaluator.square(encrypted, destination, pool); });
+            check([&](MemoryPoolHandle pool) { evaluator.relinearize(encrypted, rlk, destination, pool); });
+            check([&](MemoryPoolHandle pool) {
+                evaluator.mod_switch_to(encrypted, encrypted.parms_id(), destination, pool);
+            });
+            check([&](MemoryPoolHandle pool) {
+                evaluator.mod_reduce_to(encrypted, encrypted.parms_id(), destination, pool);
+            });
             check([&](MemoryPoolHandle pool) { evaluator.add_plain(encrypted, plain, destination, pool); });
             check([&](MemoryPoolHandle pool) { evaluator.sub_plain(encrypted, plain, destination, pool); });
             check([&](MemoryPoolHandle pool) { evaluator.apply_galois(encrypted, 3, glk, destination, pool); });
