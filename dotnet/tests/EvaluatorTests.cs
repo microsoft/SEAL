@@ -2443,6 +2443,38 @@ namespace SEALNetTest
         }
 
         [TestMethod]
+        public void UninitializedPoolTest()
+        {
+            EncryptionParameters parms = new EncryptionParameters(SchemeType.BFV)
+            {
+                PolyModulusDegree = 64,
+                PlainModulus = new Modulus(65537ul),
+                CoeffModulus = CoeffModulus.Create(64, new int[] { 40, 40 })
+            };
+            SEALContext context = new SEALContext(parms,
+                expandModChain: false,
+                secLevel: SecLevelType.None);
+            KeyGenerator keygen = new KeyGenerator(context);
+            keygen.CreatePublicKey(out PublicKey publicKey);
+            keygen.CreateGaloisKeys(out GaloisKeys galoisKeys);
+
+            Encryptor encryptor = new Encryptor(context, publicKey);
+            Evaluator evaluator = new Evaluator(context);
+
+            Ciphertext encrypted = new Ciphertext();
+            encryptor.Encrypt(new Plaintext("1x^1 + 2"), encrypted);
+            Ciphertext destination = new Ciphertext();
+            MemoryPoolHandle pool = new MemoryPoolHandle();
+
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.Multiply(encrypted, encrypted, destination, pool));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.Square(encrypted, destination, pool));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.ApplyGalois(encrypted, 3, galoisKeys, destination, pool));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateRows(encrypted, 0, galoisKeys, destination, pool));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateRows(encrypted, 1, galoisKeys, destination, pool));
+            Utilities.AssertThrows<ArgumentException>(() => evaluator.RotateColumns(encrypted, galoisKeys, destination, pool));
+        }
+
+        [TestMethod]
         public void ExceptionsTest()
         {
             {

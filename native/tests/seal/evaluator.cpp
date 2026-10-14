@@ -20,6 +20,7 @@
 #include <algorithm>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <limits>
 #include <memory>
 #include <random>
@@ -6257,15 +6258,15 @@ namespace sealtest
 
         void rotate(
             const Evaluator &evaluator, scheme_type scheme, const Ciphertext &encrypted, int steps,
-            const GaloisKeys &galois_keys, Ciphertext &destination)
+            const GaloisKeys &galois_keys, Ciphertext &destination, MemoryPoolHandle pool = MemoryManager::GetPool())
         {
             if (scheme == scheme_type::ckks)
             {
-                evaluator.rotate_vector(encrypted, steps, galois_keys, destination);
+                evaluator.rotate_vector(encrypted, steps, galois_keys, destination, std::move(pool));
             }
             else
             {
-                evaluator.rotate_rows(encrypted, steps, galois_keys, destination);
+                evaluator.rotate_rows(encrypted, steps, galois_keys, destination, std::move(pool));
             }
         }
 
@@ -6738,6 +6739,63 @@ namespace sealtest
             ASSERT_NO_THROW(rotate(evaluator, scheme, encrypted, vector<int>{ 1, -1 }, glk, destinations));
         }
 #endif
+    }
+
+    TEST(EvaluatorTest, UninitializedPool)
+    {
+        // Each call succeeds with a valid pool, and throws std::invalid_argument with an uninitialized one, also if it
+        // would not allocate from it
+        for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
+        {
+            SEALContext context(rotation_parms(scheme), true, sec_level_type::none);
+            KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            GaloisKeys glk;
+            keygen.create_galois_keys(glk);
+
+            Encryptor encryptor(context, pk);
+            Evaluator evaluator(context);
+
+            Plaintext plain;
+            if (scheme == scheme_type::ckks)
+            {
+                CKKSEncoder encoder(context);
+                encoder.encode(1.5, pow(2.0, 20), plain);
+            }
+            else
+            {
+                BatchEncoder encoder(context);
+                encoder.encode(vector<uint64_t>{ 1, 2, 3 }, plain);
+            }
+            Ciphertext encrypted;
+            encryptor.encrypt(plain, encrypted);
+
+            Ciphertext destination;
+            auto check = [](const function<void(MemoryPoolHandle)> &call) {
+                ASSERT_NO_THROW(call(MemoryManager::GetPool()));
+                ASSERT_THROW(call(MemoryPoolHandle()), invalid_argument);
+            };
+            check([&](MemoryPoolHandle pool) { evaluator.multiply(encrypted, encrypted, destination, pool); });
+            check([&](MemoryPoolHandle pool) { evaluator.square(encrypted, destination, pool); });
+            check([&](MemoryPoolHandle pool) { evaluator.add_plain(encrypted, plain, destination, pool); });
+            check([&](MemoryPoolHandle pool) { evaluator.sub_plain(encrypted, plain, destination, pool); });
+            check([&](MemoryPoolHandle pool) { evaluator.apply_galois(encrypted, 3, glk, destination, pool); });
+            for (int steps : { 0, 1, 3 })
+            {
+                check([&](MemoryPoolHandle pool) {
+                    rotate(evaluator, scheme, encrypted, steps, glk, destination, pool);
+                });
+            }
+            if (scheme == scheme_type::ckks)
+            {
+                check([&](MemoryPoolHandle pool) { evaluator.complex_conjugate(encrypted, glk, destination, pool); });
+            }
+            else
+            {
+                check([&](MemoryPoolHandle pool) { evaluator.rotate_columns(encrypted, glk, destination, pool); });
+            }
+        }
     }
 
     TEST(EvaluatorTest, BGVEncryptModSwitchToNextDecrypt)

@@ -8,6 +8,7 @@
 - Fixed incorrect results from key switching (relinearization, rotations, and `Evaluator::apply_galois`) with more than 64 coefficient modulus primes.
 - Fixed `Evaluator::relinearize` for ciphertexts of size greater than 3, which need relinearization keys that `KeyGenerator` does not create.
 - Fixed `Evaluator::multiply` and `Evaluator::square` to throw `std::invalid_argument` for a ciphertext of size 0 instead of dereferencing a null pointer.
+- Fixed `Evaluator::multiply`, `Evaluator::square`, `Evaluator::add_plain`, `Evaluator::sub_plain`, `Evaluator::apply_galois`, and the rotation and conjugation functions to throw `std::invalid_argument` for an uninitialized memory pool, as documented, instead of `std::logic_error` or no exception.
 - Fixed `util::modulo_poly_coeffs` with Intel HEXL returning incorrect results for moduli of less than 14 bits, and corrupting memory for the moduli 2 and 4. This affected BGV with plaintext moduli of less than 14 bits.
 - Public-key encryption now also erases its intermediate encryption of zero from memory.
 - Removed the CMake option `SEAL_AVOID_BRANCHING`. Conditional selections in critical functions are now always branch-free, using inline assembly with GCC and Clang on x86-64 and AArch64.

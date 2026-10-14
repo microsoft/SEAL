@@ -465,6 +465,10 @@ namespace seal
         {
             throw invalid_argument("encrypted1 and encrypted2 must have size at least 2");
         }
+        if (!pool)
+        {
+            throw invalid_argument("pool is uninitialized");
+        }
 
         auto context_data_ptr = context_.first_context_data();
         switch (context_data_ptr->parms().scheme())
@@ -907,6 +911,10 @@ namespace seal
         if (encrypted.size() < SEAL_CIPHERTEXT_SIZE_MIN)
         {
             throw invalid_argument("encrypted must have size at least 2");
+        }
+        if (!pool)
+        {
+            throw invalid_argument("pool is uninitialized");
         }
 
         auto context_data_ptr = context_.first_context_data();
@@ -1794,6 +1802,11 @@ namespace seal
             }
         }
 
+        if (!pool)
+        {
+            throw invalid_argument("pool is uninitialized");
+        }
+
         // Extract encryption parameters.
         auto &coeff_modulus = parms.coeff_modulus();
         size_t coeff_count = parms.poly_modulus_degree();
@@ -1900,6 +1913,11 @@ namespace seal
             {
                 throw invalid_argument("BGV plain cannot be in NTT form");
             }
+        }
+
+        if (!pool)
+        {
+            throw invalid_argument("pool is uninitialized");
         }
 
         // Extract encryption parameters.
@@ -2416,6 +2434,10 @@ namespace seal
     {
         // Verify parameters.
         validate_galois(context_, encrypted, galois_elt, galois_keys);
+        if (!pool)
+        {
+            throw invalid_argument("pool is uninitialized");
+        }
 
         auto &context_data = *context_.get_context_data(encrypted.parms_id());
         auto &parms = context_data.parms();
@@ -2475,6 +2497,10 @@ namespace seal
         if (galois_keys.parms_id() != context_.key_parms_id())
         {
             throw invalid_argument("galois_keys is not valid for encryption parameters");
+        }
+        if (!pool)
+        {
+            throw invalid_argument("pool is uninitialized");
         }
 
         // Is there anything to do?
