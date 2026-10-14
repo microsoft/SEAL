@@ -17,6 +17,7 @@
 - Fixed the CMake configuration on Unix-like systems when the shared SEAL_C library is built with Intel HEXL.
 - Fixed the CMake configuration building dependencies outside the build directory when their sources are given with `FETCHCONTENT_SOURCE_DIR_<name>`.
 - Fixed unused parameter warnings in C++14 builds with GCC and Clang.
+- Fixed building as C++17 with the debug mode of libstdc++ (`_GLIBCXX_DEBUG`): comparisons of `util::ReverseIter` did not compile.
 - Added functions to `seal::util`, such as out-of-place NTTs.
 
 ## Version 4.6.2

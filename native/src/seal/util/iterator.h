@@ -1751,19 +1751,19 @@ namespace seal
             SEAL_NODISCARD inline difference_type operator-(const self_type &b) const
             {
                 // Note the reversed order
-                return static_cast<SEALIter>(*b) - static_cast<SEALIter>(*this);
+                return static_cast<SEALIter>(b) - static_cast<SEALIter>(*this);
             }
 
             SEAL_NODISCARD inline bool operator<(const self_type &compare) const noexcept
             {
                 // Note the reversed order
-                return static_cast<SEALIter>(*this) > static_cast<SEALIter>(*compare);
+                return static_cast<SEALIter>(*this) > static_cast<SEALIter>(compare);
             }
 
             SEAL_NODISCARD inline bool operator>(const self_type &compare) const noexcept
             {
                 // Note the reversed order
-                return static_cast<SEALIter>(*this) < static_cast<SEALIter>(*compare);
+                return static_cast<SEALIter>(*this) < static_cast<SEALIter>(compare);
             }
 
             SEAL_NODISCARD inline bool operator<=(const self_type &compare) const noexcept
@@ -1777,7 +1777,9 @@ namespace seal
                 return !(*this < compare);
             }
 
-            SEAL_NODISCARD inline reference operator->() const noexcept
+            // Returns what SEALIter::operator* returns, which is a value for IterTuple
+            SEAL_NODISCARD inline auto operator->() const noexcept
+                -> decltype(std::declval<const SEALIter &>().operator*())
             {
                 return **this;
             }
@@ -2185,7 +2187,7 @@ namespace seal
                 return static_cast<bool>(first_);
             }
 
-            SEAL_NODISCARD inline reference operator->() const noexcept
+            SEAL_NODISCARD inline value_type operator->() const noexcept
             {
                 return **this;
             }

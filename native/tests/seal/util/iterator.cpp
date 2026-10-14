@@ -641,5 +641,32 @@ namespace sealtest
             ASSERT_TRUE(u <= s);
             ASSERT_FALSE(u <= s - 1);
         }
+
+        TEST(IteratorTest, ReverseIterCompare)
+        {
+            // Iterators other than SeqIter, whose elements are not their positions
+            vector<uint64_t> data(6);
+            RNSIter rns(data.data(), 2);
+            ReverseIter<RNSIter> a(rns + 2);
+            ReverseIter<RNSIter> b(rns);
+            ASSERT_TRUE(b == a + 2);
+            ASSERT_EQ(2, b - a);
+            ASSERT_EQ(-2, a - b);
+            ASSERT_TRUE(a < b);
+            ASSERT_FALSE(b < a);
+            ASSERT_TRUE(b > a);
+            ASSERT_FALSE(a > b);
+            ASSERT_TRUE(a <= b && b >= a && a <= a && a >= a);
+            ASSERT_TRUE(a.operator->() == *a);
+
+            auto c = reverse_iter(rns + 2, rns + 2);
+            auto d = reverse_iter(rns, rns);
+            ASSERT_EQ(2, d - c);
+            ASSERT_TRUE(c < d);
+            ASSERT_TRUE(d > c);
+            ASSERT_TRUE(get<0>(c.operator->()) == get<0>(*c));
+            IterTuple<RNSIter> single(rns);
+            ASSERT_TRUE(get<0>(single.operator->()) == get<0>(*single));
+        }
     } // namespace util
 } // namespace sealtest
