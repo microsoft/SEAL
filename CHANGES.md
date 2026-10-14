@@ -14,6 +14,7 @@
 - Removed the CMake option `SEAL_AVOID_BRANCHING`. Conditional selections in critical functions are now always written without branches, in inline assembly with GCC and Clang on x86-64 and AArch64.
 - Fixed the CMake configuration with CMake 4 when Microsoft SEAL downloads and builds Intel HEXL.
 - Fixed the CMake configuration on Unix-like systems when the shared SEAL_C library is built with Intel HEXL.
+- Fixed the CMake configuration building dependencies outside the build directory when their sources are given with `FETCHCONTENT_SOURCE_DIR_<name>`.
 - Fixed unused parameter warnings in C++14 builds with GCC and Clang.
 - Added functions to `seal::util`, such as out-of-place NTTs.
 

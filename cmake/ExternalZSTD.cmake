@@ -29,6 +29,6 @@ if(NOT zstd_POPULATED)
 
     add_subdirectory(
         ${zstd_SOURCE_DIR}/build/cmake
-        ${zstd_SOURCE_DIR}/../zstd-build
+        ${zstd_BINARY_DIR}
         EXCLUDE_FROM_ALL)
 endif()
