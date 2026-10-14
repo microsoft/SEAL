@@ -572,18 +572,17 @@ namespace seal
         }
 
         /**
-        Computes result[i] = (operand1[i] * operand2[i] + addend[i]) mod modulus, fully reduced. operand2[i] and
-        addend[i] must be less than modulus; operand1[i] may be any 64-bit value (less than 4 * modulus with Intel
-        HEXL). result may alias operand1 or operand2, but not addend.
+        Computes result[i] = (operand1[i] * operand2[i] + addend[i]) mod modulus for reduced operand2 and addend and any
+        64-bit operand1 (less than 4 * modulus with Intel HEXL). result may alias operand1 or operand2, but not addend.
         */
         void dyadic_product_add_coeffmod(
             ConstCoeffIter operand1, ConstCoeffIter operand2, ConstCoeffIter addend, std::size_t coeff_count,
             const Modulus &modulus, CoeffIter result);
 
         /**
-        Computes result1[i] = operand1[i] * shared[i] mod modulus and result2[i] = operand2[i] * shared[i] mod modulus,
-        fully reduced. shared[i] must be less than modulus; operand1[i] and operand2[i] may be any 64-bit values (less
-        than 4 * modulus with Intel HEXL). result1 may alias operand1, and result2 may alias operand2.
+        Computes result1[i] = operand1[i] * shared[i] mod modulus and result2[i] = operand2[i] * shared[i] mod modulus
+        for reduced shared and any 64-bit operand1 and operand2 (less than 4 * modulus with Intel HEXL). result1 may
+        alias operand1, and result2 operand2.
         */
         void dyadic_product_shared_coeffmod(
             ConstCoeffIter operand1, ConstCoeffIter operand2, ConstCoeffIter shared, std::size_t coeff_count,

@@ -6246,7 +6246,7 @@ namespace sealtest
 
     namespace
     {
-        // Returns true if a and b have the same metadata and data
+        // Same metadata and data
         bool same_ciphertext(const Ciphertext &a, const Ciphertext &b)
         {
             return a.parms_id() == b.parms_id() && a.size() == b.size() && a.is_ntt_form() == b.is_ntt_form() &&
@@ -6255,7 +6255,6 @@ namespace sealtest
                    equal(a.dyn_array().cbegin(), a.dyn_array().cend(), b.dyn_array().cbegin());
         }
 
-        // Rotates with rotate_rows (BFV, BGV) or rotate_vector (CKKS)
         void rotate(
             const Evaluator &evaluator, scheme_type scheme, const Ciphertext &encrypted, int steps,
             const GaloisKeys &galois_keys, Ciphertext &destination)
@@ -6285,8 +6284,7 @@ namespace sealtest
             }
         }
 
-        // Returns encryption parameters for rotation tests: the coefficient modulus primes have different sizes, so
-        // that some digits are reduced before the NTT in key switching and some not
+        // Mixed prime sizes, so that key switching reduces only some digits before the NTT
         EncryptionParameters rotation_parms(scheme_type scheme)
         {
             size_t n = 64;
@@ -6329,7 +6327,7 @@ namespace sealtest
             Ciphertext encrypted;
             encryptor.encrypt(plain, encrypted);
 
-            // Steps with their own keys, zero, repeated, and composed (9 = 8 + 1) steps, and single steps
+            // Zero, repeated, and composed (9 = 8 + 1) steps
             vector<vector<int>> step_lists{ { 1, -1, 3, 0, 9, 1, -1 }, { 3 }, { 9 }, { 0, 0 }, { -1, 8 } };
             while (true)
             {
@@ -6390,7 +6388,7 @@ namespace sealtest
         Ciphertext encrypted;
         encryptor.encrypt(plain, encrypted);
 
-        // Steps with their own keys, zero, repeated, and composed (5 = 4 + 1) steps, and single steps
+        // Zero, repeated, and composed (5 = 4 + 1) steps
         vector<vector<int>> step_lists{ { 1, -2, 4, 0, 5, 1 }, { 4 }, { 5 }, { 0 } };
         while (true)
         {
@@ -6427,8 +6425,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, RotateMultipleStepsZeroDigits)
     {
-        // Hoisted rotations recompute the digits that have a zero coefficient (in coefficient form) for each
-        // rotation. The results must be identical to those of single-step rotations, also when a digit is zero.
+        // Hoisted rotations recompute digits with zero coefficients
         for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
         {
             SEALContext context(rotation_parms(scheme), true, sec_level_type::none);
@@ -6446,7 +6443,7 @@ namespace sealtest
             vector<int> steps{ 1, -1, 3 };
             for (size_t level = 0; level < 2; level++)
             {
-                // Digit 0 has some zero coefficients, digit 1 has none, and digit 2 (if any) is zero
+                // Zero some coefficients of digit 0 and all of digit 2 (if any)
                 Ciphertext crafted = encrypted;
                 size_t n = crafted.poly_modulus_degree();
                 auto ntt_tables = context.get_context_data(crafted.parms_id())->small_ntt_tables();
@@ -6479,6 +6476,7 @@ namespace sealtest
                     rotate(evaluator, scheme, crafted, steps[i], glk, expected);
                     ASSERT_TRUE(same_ciphertext(expected, destinations[i]));
                 }
+
                 evaluator.mod_switch_to_next_inplace(encrypted);
             }
         }
@@ -6503,7 +6501,7 @@ namespace sealtest
             encryptor.encrypt_zero(encrypted);
             encryptor.encrypt_zero(other);
 
-            // Steps with their own keys, zero, and a composed (9 = 8 + 1) step
+            // Zero and composed (9 = 8 + 1) steps
             vector<int> steps{ 1, 8, 0, 9, -1 };
             vector<Ciphertext> expected(steps.size());
             for (size_t i = 0; i < steps.size(); i++)
@@ -6511,7 +6509,7 @@ namespace sealtest
                 rotate(evaluator, scheme, encrypted, steps[i], glk, expected[i]);
             }
 
-            // Existing elements keep their memory pools and, if large enough, their memory; new elements use pool
+            // Existing elements keep their pools, and memory if large enough; new ones use pool
             auto pool = MemoryPoolHandle::New();
             auto destination_pool = MemoryPoolHandle::New();
             vector<Ciphertext> destinations;
@@ -6519,6 +6517,7 @@ namespace sealtest
             destinations.emplace_back(destination_pool);
             destinations[0].resize(context, encrypted.parms_id(), 2);
             const uint64_t *buffer = destinations[0].data();
+
             rotate(evaluator, scheme, encrypted, steps, glk, destinations, pool);
             ASSERT_EQ(steps.size(), destinations.size());
             ASSERT_TRUE(destinations[0].pool() == destination_pool);
@@ -6530,7 +6529,7 @@ namespace sealtest
                 ASSERT_TRUE(same_ciphertext(expected[i], destinations[i]));
             }
 
-            // All other memory is allocated from pool
+            // Temporary memory comes from pool
             {
                 MMProfGuard guard(make_unique<MMProfFixed>(MemoryPoolHandle::New()));
                 rotate(evaluator, scheme, encrypted, steps, glk, destinations, pool);
@@ -6542,13 +6541,12 @@ namespace sealtest
                 ASSERT_TRUE(same_ciphertext(expected[i], destinations[i]));
             }
 
-            // destinations shrinks to steps.size()
             rotate(evaluator, scheme, encrypted, vector<int>{ 8 }, glk, destinations, pool);
             ASSERT_EQ(1ULL, destinations.size());
             ASSERT_TRUE(destinations[0].pool() == destination_pool);
             ASSERT_TRUE(same_ciphertext(expected[1], destinations[0]));
 
-            // encrypted may be any element of destinations, which may grow or shrink
+            // encrypted may be any element of destinations
             vector<vector<int>> step_lists{ steps, { -1, 1 } };
             for (auto &alias_steps : step_lists)
             {
@@ -6567,7 +6565,6 @@ namespace sealtest
                 }
             }
 
-            // No steps
             rotate(evaluator, scheme, encrypted, vector<int>{}, glk, destinations);
             ASSERT_TRUE(destinations.empty());
         }
@@ -6599,15 +6596,13 @@ namespace sealtest
             const vector<Ciphertext> destinations_copy = destinations;
             const uint64_t *buffer = destinations[0].data();
 
-            // Every rejected input leaves destinations and encrypted unchanged; a single-step rotation by each step
-            // count that makes the multi-step rotation throw also throws
             auto unchanged = [&]() {
                 return destinations.size() == 2 && same_ciphertext(destinations[0], destinations_copy[0]) &&
                        same_ciphertext(destinations[1], destinations_copy[1]) && destinations[0].data() == buffer &&
                        same_ciphertext(encrypted, encrypted_copy);
             };
 
-            // Each step list fails only at its last step, after steps with keys and a composed step (9 = 8 + 1)
+            // Steps without keys or out of range, after valid steps (9 = 8 + 1)
             int half = static_cast<int>(encrypted.poly_modulus_degree() / 2);
             vector<int> invalid_steps{ 2, 5, half, -half, numeric_limits<int>::min() };
             for (int invalid_step : invalid_steps)
@@ -6616,6 +6611,7 @@ namespace sealtest
                     rotate(evaluator, scheme, encrypted, vector<int>{ 1, 9, invalid_step }, glk, destinations),
                     invalid_argument);
                 ASSERT_TRUE(unchanged());
+
                 Ciphertext single;
                 ASSERT_THROW(rotate(evaluator, scheme, encrypted, invalid_step, glk, single), invalid_argument);
             }
@@ -6625,23 +6621,26 @@ namespace sealtest
             evaluator.square(encrypted, size3);
             ASSERT_THROW(rotate(evaluator, scheme, size3, vector<int>{ 1, -1 }, glk, destinations), invalid_argument);
             ASSERT_TRUE(unchanged());
+
             Ciphertext wrong_form = encrypted;
             wrong_form.is_ntt_form() = !wrong_form.is_ntt_form();
             ASSERT_THROW(
                 rotate(evaluator, scheme, wrong_form, vector<int>{ 1, -1 }, glk, destinations), invalid_argument);
             ASSERT_TRUE(unchanged());
+
             Ciphertext wrong_scale = encrypted;
             wrong_scale.scale() = 0.0;
             ASSERT_THROW(
                 rotate(evaluator, scheme, wrong_scale, vector<int>{ 1, -1 }, glk, destinations), invalid_argument);
             ASSERT_TRUE(unchanged());
+
             Ciphertext seed_marker = encrypted;
             seed_marker.data(1)[0] = numeric_limits<uint64_t>::max();
             ASSERT_THROW(
                 rotate(evaluator, scheme, seed_marker, vector<int>{ 1, -1 }, glk, destinations), invalid_argument);
             ASSERT_TRUE(unchanged());
 
-            // A rotation by zero steps only copies, so it accepts a size-3 ciphertext, as rotate_rows does
+            // Zero steps only copy, so a size-3 ciphertext is accepted
             vector<Ciphertext> copies;
             rotate(evaluator, scheme, size3, vector<int>{ 0 }, glk, copies);
             ASSERT_TRUE(same_ciphertext(size3, copies[0]));
@@ -6653,6 +6652,7 @@ namespace sealtest
                 rotate(evaluator, scheme, encrypted, vector<int>{ 1, -1 }, wrong_level, destinations),
                 invalid_argument);
             ASSERT_TRUE(unchanged());
+
             uint32_t galois_elt = context.key_context_data()->galois_tool()->get_elt_from_step(1);
             GaloisKeys short_key = glk;
             short_key.data()[GaloisKeys::get_index(galois_elt)].resize(1);
@@ -6662,6 +6662,7 @@ namespace sealtest
             ASSERT_THROW(
                 rotate(evaluator, scheme, encrypted, vector<int>{ -1, 9 }, short_key, destinations), invalid_argument);
             ASSERT_TRUE(unchanged());
+
             GaloisKeys invalid_key = glk;
             invalid_key.data()[GaloisKeys::get_index(galois_elt)][0].data().resize(context, context.key_parms_id(), 3);
             ASSERT_THROW(
@@ -6687,19 +6688,22 @@ namespace sealtest
             ASSERT_TRUE(unchanged());
         }
 
-        // Parameters that do not support batching
+        // Parameters without batching
         EncryptionParameters parms(scheme_type::bfv);
         parms.set_poly_modulus_degree(64);
         parms.set_coeff_modulus(CoeffModulus::Create(64, { 40, 40 }));
         parms.set_plain_modulus(1 << 6);
+
         SEALContext context(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
         PublicKey pk;
         keygen.create_public_key(pk);
         GaloisKeys glk;
         keygen.create_galois_keys(vector<uint32_t>{ 3 }, glk);
+
         Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
+
         Ciphertext encrypted;
         encryptor.encrypt_zero(encrypted);
         vector<Ciphertext> destinations;
@@ -6708,10 +6712,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, ApplyGaloisValidatesOnlyItsInput)
     {
-        // Validation does not range-check the coefficients of a ciphertext. Here galois(c0) has the value 2^64 - 1 at
-        // index 0 (the seed marker), which apply_galois_inplace writes to c1 before the key switching; the input must
-        // still be accepted, as it is when it is rotated in several steps. Debug builds instead reject the
-        // out-of-range coefficients in the arithmetic.
+        // c0 holds 2^64 - 1, so that the intermediate c1 = galois(c0) has the seed marker
 #ifndef SEAL_DEBUG
         for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
         {
@@ -7357,16 +7358,17 @@ namespace sealtest
             {
                 parms.set_plain_modulus(PlainModulus::Batching(64, 20));
             }
+
             SEALContext context(parms, true, sec_level_type::none);
             KeyGenerator keygen(context);
             PublicKey pk;
             keygen.create_public_key(pk);
             RelinKeys rlk;
             keygen.create_relin_keys(rlk);
+
             Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
 
-            // A ciphertext of size 0 is valid, but it cannot be multiplied
             Ciphertext empty;
             empty.resize(context, context.first_parms_id(), 0);
             empty.is_ntt_form() = (scheme != scheme_type::bfv);
@@ -7384,10 +7386,12 @@ namespace sealtest
             ASSERT_THROW(evaluator.multiply(empty, empty, destination), invalid_argument);
             ASSERT_THROW(evaluator.multiply_inplace(encrypted3, empty), invalid_argument);
             ASSERT_TRUE(same_ciphertext(encrypted3, encrypted3_copy));
+
             ASSERT_THROW(evaluator.square(empty, destination), invalid_argument);
             Ciphertext empty_copy = empty;
             ASSERT_THROW(evaluator.square_inplace(empty_copy), invalid_argument);
             ASSERT_TRUE(same_ciphertext(empty, empty_copy));
+
             if (scheme != scheme_type::ckks)
             {
                 ASSERT_THROW(evaluator.exponentiate(empty, 2, rlk, destination), invalid_argument);
@@ -7400,8 +7404,7 @@ namespace sealtest
 
     namespace
     {
-        // Returns a key switching key for the secret key raised to power, as KeyGenerator creates for
-        // relinearization keys; KeyGenerator creates keys only for the power 2 through its public interface.
+        // Relinearization key for s^power, created as in KeyGenerator
         vector<PublicKey> create_relin_key(const SEALContext &context, const SecretKey &secret_key, size_t power)
         {
             auto &key_context_data = *context.key_context_data();
@@ -7409,7 +7412,7 @@ namespace sealtest
             size_t coeff_count = key_context_data.parms().poly_modulus_degree();
             size_t decomp_mod_count = context.first_context_data()->parms().coeff_modulus().size();
 
-            // The power of the secret key in NTT form
+            // s^power in NTT form
             const uint64_t *s = secret_key.data().data();
             vector<uint64_t> s_power(s, s + key_modulus.size() * coeff_count);
             for (size_t p = 1; p < power; p++)
@@ -7424,7 +7427,7 @@ namespace sealtest
                 }
             }
 
-            // Encryptions of zero with (special prime mod q_i) times the power added to RNS component i
+            // Encryptions of zero with special prime * s^power added to component i of c0
             vector<PublicKey> key(decomp_mod_count);
             for (size_t i = 0; i < decomp_mod_count; i++)
             {
@@ -7443,7 +7446,6 @@ namespace sealtest
 
     TEST(EvaluatorTest, RelinearizeSizeFourCiphertext)
     {
-        // Relinearization keys for the powers 2 and 3 of the secret key relinearize a ciphertext of size 4
         for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
         {
             size_t n = 64;
@@ -7454,6 +7456,7 @@ namespace sealtest
             {
                 parms.set_plain_modulus(PlainModulus::Batching(n, 20));
             }
+
             SEALContext context(parms, true, sec_level_type::none);
             KeyGenerator keygen(context);
             PublicKey pk;
@@ -7512,14 +7515,13 @@ namespace sealtest
 
     TEST(EvaluatorTest, RelinearizeValidatesKeysBeforeMutating)
     {
-        // Relinearization of a ciphertext of size 4 key switches component 3 with the key for the power 3 before
-        // component 2 with the key for the power 2. If the latter key is invalid, relinearization must throw before it
-        // modifies the ciphertext.
+        // Relinearization uses the key for s^3 before the invalid key for s^2
         size_t n = 64;
         EncryptionParameters parms(scheme_type::bfv);
         parms.set_poly_modulus_degree(n);
         parms.set_coeff_modulus(CoeffModulus::Create(n, { 60, 60, 60, 60 }));
         parms.set_plain_modulus(PlainModulus::Batching(n, 20));
+
         SEALContext context(parms, true, sec_level_type::none);
         KeyGenerator keygen(context);
         PublicKey pk;
@@ -7530,6 +7532,7 @@ namespace sealtest
 
         Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
+
         Ciphertext encrypted;
         encryptor.encrypt(Plaintext("3x^2 + 2"), encrypted);
         Ciphertext encrypted3;
@@ -7537,7 +7540,6 @@ namespace sealtest
         evaluator.multiply_inplace(encrypted3, encrypted);
         ASSERT_EQ(4ULL, encrypted3.size());
 
-        // Truncate the key for the power 2 to a single PublicKey
         rlk.data()[RelinKeys::get_index(2)].resize(1);
         Ciphertext encrypted3_copy = encrypted3;
         ASSERT_THROW(evaluator.relinearize_inplace(encrypted3, rlk), invalid_argument);
@@ -7546,13 +7548,12 @@ namespace sealtest
 
     TEST(EvaluatorTest, KeySwitchingManyPrimes)
     {
-        // With 199 decomposition primes of 60 bits, the 128-bit accumulators of key switching must be reduced
-        // between groups of products; this regression test fails if they overflow instead. The accumulation does not
-        // depend on the scheme, and creating contexts with this many primes is slow, so only CKKS is tested.
+        // More 60-bit digits (199) than 128-bit accumulators can sum unreduced
         size_t n = 16;
         EncryptionParameters parms(scheme_type::ckks);
         parms.set_poly_modulus_degree(n);
         parms.set_coeff_modulus(CoeffModulus::Create(n, vector<int>(200, 60)));
+
         SEALContext context(parms, false, sec_level_type::none);
         ASSERT_TRUE(context.parameters_set());
         KeyGenerator keygen(context);
@@ -7579,7 +7580,6 @@ namespace sealtest
         Ciphertext encrypted;
         encryptor.encrypt(plain, encrypted);
 
-        // Squares and relinearizes, and rotates by one step to the left and right, singly and together
         evaluator.square_inplace(encrypted);
         evaluator.relinearize_inplace(encrypted, rlk);
         vector<int> steps{ 1, -1 };
@@ -7599,6 +7599,7 @@ namespace sealtest
         {
             ASSERT_NEAR(input[i] * input[i], result[i], 0.001);
         }
+
         for (size_t s = 0; s < steps.size(); s++)
         {
             decryptor.decrypt(rotated[s], plain);
@@ -7614,9 +7615,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, KeySwitchingMixedPrimeSizes)
     {
-        // Key switching reduces a digit modulo a smaller prime only if the digit is too large for the NTT, and the
-        // special-prime part modulo a smaller prime only if the division by the special prime requires it. Primes of
-        // different sizes, with a special prime that is the largest prime or not, run both paths of each.
+        // Key switching reduces only some digits before the NTT, and in BGV only some special-prime parts
         size_t n = 64;
         for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
         {
@@ -7629,6 +7628,7 @@ namespace sealtest
                 {
                     parms.set_plain_modulus(PlainModulus::Batching(n, 17));
                 }
+
                 SEALContext context(parms, true, sec_level_type::none);
                 KeyGenerator keygen(context);
                 PublicKey pk;
@@ -7642,7 +7642,6 @@ namespace sealtest
                 Evaluator evaluator(context);
                 Decryptor decryptor(context, keygen.secret_key());
 
-                // Slot i holds i (BFV, BGV) or i / 8 (CKKS)
                 size_t slot_count = (scheme == scheme_type::ckks) ? n / 2 : n;
                 Plaintext plain;
                 if (scheme == scheme_type::ckks)
@@ -7668,13 +7667,13 @@ namespace sealtest
                 Ciphertext encrypted;
                 encryptor.encrypt(plain, encrypted);
 
-                // Squares and relinearizes, and rotates by one step, at the first two levels
                 for (int level = 0; level < 2; level++)
                 {
                     if (level > 0)
                     {
                         evaluator.mod_switch_to_next_inplace(encrypted);
                     }
+
                     Ciphertext squared;
                     evaluator.square(encrypted, squared);
                     evaluator.relinearize_inplace(squared, rlk);
@@ -7701,7 +7700,7 @@ namespace sealtest
                     }
                     else
                     {
-                        // The two rows of slots rotate separately
+                        // Rows rotate separately
                         BatchEncoder encoder(context);
                         uint64_t t = parms.plain_modulus().value();
                         size_t row_size = slot_count / 2;
@@ -7732,10 +7731,12 @@ namespace sealtest
             {
                 parms.set_plain_modulus(PlainModulus::Batching(n, 20));
             }
+
             SEALContext context(parms, true, sec_level_type::none);
             KeyGenerator keygen(context);
             PublicKey pk;
             keygen.create_public_key(pk);
+
             Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
             Decryptor decryptor(context, keygen.secret_key());
@@ -7751,8 +7752,7 @@ namespace sealtest
             Ciphertext encrypted3;
             evaluator.square(encrypted, encrypted3);
 
-            // Modulus switching with scaling (BFV and BGV) or rescaling (CKKS), in place and out of place, of
-            // ciphertexts of sizes 2 and 3 at every level; the in-place results keep the memory pool
+            // Sizes 2 and 3 at every level
             while (encrypted.parms_id() != context.last_parms_id())
             {
                 for (auto ct : { &encrypted, &encrypted3 })
@@ -7761,6 +7761,7 @@ namespace sealtest
                     auto pool = MemoryPoolHandle::New();
                     Ciphertext in_place(pool);
                     in_place = *ct;
+
                     if (scheme == scheme_type::ckks)
                     {
                         evaluator.rescale_to_next(*ct, destination);
@@ -7774,12 +7775,12 @@ namespace sealtest
                     ASSERT_TRUE(same_ciphertext(destination, in_place));
                     ASSERT_TRUE(in_place.pool() == pool);
 
-                    // A rejected in-place switch leaves the ciphertext unchanged
+                    // A rejected switch changes nothing
                     Ciphertext copy = *ct;
                     ASSERT_THROW(evaluator.mod_switch_to_next_inplace(*ct, MemoryPoolHandle()), invalid_argument);
                     ASSERT_TRUE(same_ciphertext(copy, *ct));
 
-                    // CKKS also switches without scaling, if the scale fits at the next level
+                    // CKKS without rescaling (only the scale of encrypted fits the next level)
                     if (scheme == scheme_type::ckks && ct == &encrypted)
                     {
                         Ciphertext dropped;
@@ -7787,6 +7788,7 @@ namespace sealtest
                         evaluator.mod_switch_to_next_inplace(copy);
                         ASSERT_TRUE(same_ciphertext(dropped, copy));
                     }
+
                     *ct = in_place;
                 }
 
@@ -7817,17 +7819,18 @@ namespace sealtest
 
     TEST(EvaluatorTest, BFVEncryptMultiplySizesDecrypt)
     {
-        // Products of ciphertexts of sizes up to 9 (with results up to the maximal size 16) and squares of sizes
-        // 2 to 8, at two levels. Squares are identical to products with a copy.
+        // Results up to the maximal size 16
         size_t n = 64;
         EncryptionParameters parms(scheme_type::bfv);
         parms.set_poly_modulus_degree(n);
         parms.set_coeff_modulus(CoeffModulus::Create(n, { 60, 60, 60, 60, 60, 60, 60, 60 }));
         parms.set_plain_modulus(257);
+
         SEALContext context(parms, true, sec_level_type::none);
         KeyGenerator keygen(context);
         PublicKey pk;
         keygen.create_public_key(pk);
+
         Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
         Decryptor decryptor(context, keygen.secret_key());
@@ -7857,7 +7860,6 @@ namespace sealtest
                 ASSERT_TRUE(decrypts_to_power_of_two(powers[i], i + 1));
             }
 
-            // Products of sizes 2 x 2, 3 x 2, 2 x 3, 8 x 9, and 9 x 8
             vector<pair<size_t, size_t>> sizes{ { 2, 2 }, { 3, 2 }, { 2, 3 }, { 8, 9 }, { 9, 8 } };
             for (auto &size : sizes)
             {
@@ -7867,7 +7869,7 @@ namespace sealtest
                 ASSERT_TRUE(decrypts_to_power_of_two(product, size.first + size.second - 2));
             }
 
-            // Squares, also with multiply and multiply_inplace on the same ciphertext
+            // Squares equal products with a copy and with itself
             for (size_t size = 2; size <= 8; size++)
             {
                 const Ciphertext &encrypted = powers[size - 2];
@@ -7889,7 +7891,6 @@ namespace sealtest
 
     namespace
     {
-        // A signed multiprecision integer with a fixed number of words
         struct SignedUInt
         {
             vector<uint64_t> magnitude;
@@ -7897,7 +7898,7 @@ namespace sealtest
             bool negative;
         };
 
-        // Adds the value (with as many words as sum) with the given sign to sum
+        // value has as many words as sum
         void add_signed(SignedUInt &sum, const uint64_t *value, bool negative)
         {
             size_t count = sum.magnitude.size();
@@ -7919,10 +7920,7 @@ namespace sealtest
 
     TEST(EvaluatorTest, BFVMultiplyMatchesExactReference)
     {
-        // BEHZ multiplication computes floor(t * X / q) - e mod q, where X is the tensor product of the centered
-        // representatives of the ciphertext coefficients and 0 <= e < k for k primes in q (the error of the fast
-        // floor). This requires the auxiliary base Bsk to be large enough, which coefficients of the largest magnitude
-        // (q - 1) / 2 test at the extreme.
+        // Coefficients (q - 1) / 2 test that Bsk is large enough
         size_t n = 16;
         auto pool = MemoryManager::GetPool();
         vector<uint64_t> plain_moduli{ 2, PlainModulus::Batching(n, 20).value(), (uint64_t(1) << 40) - 87,
@@ -7933,6 +7931,7 @@ namespace sealtest
             parms.set_poly_modulus_degree(n);
             parms.set_coeff_modulus(CoeffModulus::Create(n, { 60, 60, 60, 60, 60 }));
             parms.set_plain_modulus(t);
+
             SEALContext context(parms, true, sec_level_type::none);
             ASSERT_TRUE(context.parameters_set());
             Evaluator evaluator(context);
@@ -7945,13 +7944,11 @@ namespace sealtest
                 auto &base_q = *context_data->rns_tool()->base_q();
                 size_t k = coeff_modulus.size();
 
-                // Words for the products and the sum of at most 8 of them for n coefficients, times t
+                // Fits t times a sum of 8 * n products
                 size_t words = 2 * k + 2;
                 vector<uint64_t> q(words, 0);
                 util::set_uint(base_q.base_prod(), k, q.data());
 
-                // Ciphertexts with centered coefficients (q - 1) / 2 or random ones of magnitude less than
-                // (q - 1) / 2 - q / 2^17; their magnitudes and signs are kept for the reference
                 struct Coefficients
                 {
                     vector<uint64_t> magnitudes;
@@ -7963,11 +7960,14 @@ namespace sealtest
                     encrypted.resize(context, context_data->parms_id(), size);
                     coeffs.magnitudes.assign(size * n * k, 0);
                     coeffs.negative.assign(size * n, false);
+
+                    // Bound (q - 1) / 2 - q / 2^17, so that BEHZ uses centered representatives
                     vector<uint64_t> bound(k);
                     util::right_shift_uint(base_q.base_prod(), 1, k, bound.data());
                     vector<uint64_t> margin(k);
                     util::right_shift_uint(base_q.base_prod(), 17, k, margin.data());
                     util::sub_uint(bound.data(), margin.data(), k, bound.data());
+
                     for (size_t p = 0; p < size; p++)
                     {
                         for (size_t l = 0; l < n; l++)
@@ -8005,13 +8005,14 @@ namespace sealtest
                     return encrypted;
                 };
 
-                // Checks that result is floor(t * a * b / q) - e mod q with 0 <= e < k
+                // result = floor(t * a * b / q) - e mod q with 0 <= e < k
                 auto check = [&](const Ciphertext &result, size_t size1, const Coefficients &a, size_t size2,
                                  const Coefficients &b) {
                     vector<uint64_t> product(words);
                     vector<uint64_t> scaled(words);
                     vector<uint64_t> quotient(words);
                     vector<uint64_t> remainder(words);
+
                     for (size_t c = 0; c < size1 + size2 - 1; c++)
                     {
                         for (size_t l = 0; l < n; l++)
@@ -8025,7 +8026,7 @@ namespace sealtest
                                 }
                                 size_t j = c - i;
 
-                                // Negacyclic convolution: coefficient m of a_i times coefficient l - m of b_j
+                                // Negacyclic convolution
                                 for (size_t m = 0; m < n; m++)
                                 {
                                     size_t m2 = (l + n - m) % n;
@@ -8045,7 +8046,7 @@ namespace sealtest
                                 util::increment_uint(quotient.data(), words, quotient.data());
                             }
 
-                            // The difference must be the same small integer modulo every prime
+                            // Same e < k modulo every prime
                             uint64_t e = 0;
                             for (size_t i = 0; i < k; i++)
                             {
@@ -8083,7 +8084,6 @@ namespace sealtest
                         ASSERT_TRUE(check(product, size.first, a, size.second, b));
                     }
 
-                    // Squares
                     Coefficients a;
                     Ciphertext encrypted = make(8, extreme, a);
                     Ciphertext square;
@@ -8098,16 +8098,17 @@ namespace sealtest
 
     TEST(EvaluatorTest, MultiplyPlainNTTUnreducedPlaintext)
     {
-        // The data of a plaintext is not validated, so an NTT-form plaintext may hold unreduced representatives (e.g.,
-        // after unsafe_load); the products must be the same as for the reduced plaintext
+        // Unreduced plaintext data, as after unsafe_load, gives the same products
         EncryptionParameters parms(scheme_type::bfv);
         parms.set_poly_modulus_degree(128);
         parms.set_plain_modulus(1 << 6);
         parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40 }));
+
         SEALContext context(parms, false, sec_level_type::none);
         KeyGenerator keygen(context);
         PublicKey pk;
         keygen.create_public_key(pk);
+
         Encryptor encryptor(context, pk);
         Evaluator evaluator(context);
 
@@ -8126,10 +8127,11 @@ namespace sealtest
                 evaluator.square_inplace(operand);
             }
             evaluator.transform_to_ntt_inplace(operand);
+
             Ciphertext expected;
             evaluator.multiply_plain(operand, plain_ntt, expected);
 
-            // Unreduced representatives in the second RNS component only, and then in both
+            // Unreduced in the second component only, then in both
             for (size_t first : { size_t(1), size_t(0) })
             {
                 Plaintext unreduced = plain_ntt;
@@ -8140,6 +8142,7 @@ namespace sealtest
                         unreduced.data()[i * coeff_count + j] += coeff_modulus[i].value();
                     }
                 }
+
                 Ciphertext result;
                 evaluator.multiply_plain(operand, unreduced, result);
                 ASSERT_EQ(expected.size(), result.size());

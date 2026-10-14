@@ -33,16 +33,14 @@ namespace seal
 #endif
 
 #ifdef SEAL_USE_INTEL_HEXL
-            // Intel HEXL reduces arbitrary 64-bit input correctly only for moduli of at least 14 bits: its AVX512-IFMA
-            // kernel requires the input to be less than 2^(50 + bit count of the modulus), and it reads the
-            // input_mod_factor values 2 and 4 as bounds on the input. Smaller moduli use the code below.
+            // Intel HEXL reduces arbitrary 64-bit input correctly only modulo moduli of at least 14 bits
             if (modulus.bit_count() >= 14)
             {
                 intel::hexl::EltwiseReduceMod(result, poly, coeff_count, modulus.value(), modulus.value(), 1);
                 return;
             }
 #endif
-            // Local copies: stores to result could otherwise alias the modulus constants
+            // Local copies, since result may alias modulus
             const uint64_t modulus_value = modulus.value();
             const uint64_t const_ratio_1 = modulus.const_ratio()[1];
             const uint64_t *in = poly.ptr();
@@ -231,7 +229,7 @@ namespace seal
 #ifdef SEAL_USE_INTEL_HEXL
             intel::hexl::EltwiseFMAMod(&result[0], &poly[0], scalar.operand, nullptr, coeff_count, modulus.value(), 8);
 #else
-            // Local copies: stores to result could otherwise alias the modulus constants
+            // Local copies, since result may alias modulus
             const uint64_t modulus_value = modulus.value();
             const uint64_t *in = poly.ptr();
             uint64_t *out = result.ptr();
@@ -273,11 +271,12 @@ namespace seal
 #ifdef SEAL_USE_INTEL_HEXL
             intel::hexl::EltwiseMultMod(&result[0], &operand1[0], &operand2[0], coeff_count, modulus.value(), 4);
 #else
-            // Local copies: stores to result could otherwise alias the modulus constants
+            // Local copies, since result may alias modulus
             const uint64_t modulus_value = modulus.value();
             const uint64_t const_ratio_0 = modulus.const_ratio()[0];
             const uint64_t const_ratio_1 = modulus.const_ratio()[1];
             const uint64_t r64 = two_pow_64_mod(modulus);
+
             const uint64_t *op1 = operand1.ptr();
             const uint64_t *op2 = operand2.ptr();
             uint64_t *res = result.ptr();
@@ -293,9 +292,8 @@ namespace seal
 #ifndef SEAL_USE_INTEL_HEXL
         namespace
         {
-            // Returns w with W - 1 <= w <= W for the Shoup quotient W = floor(b * 2^64 / p) of b < p, computed from
-            // the Barrett ratio floor(2^128 / p) = ratio_hi * 2^64 + ratio_lo. A Shoup multiplication by b with
-            // quotient w gives a result in [0, 3p) for any 64-bit input.
+            // Returns floor(b * 2^64 / p) or one less, for b < p, given floor(2^128 / p) = ratio_hi * 2^64 + ratio_lo.
+            // A Shoup multiplication by b with this quotient gives a result in [0, 3p).
             SEAL_NODISCARD SEAL_FORCE_INLINE uint64_t
             shoup_quotient_from_ratio(uint64_t b, uint64_t ratio_lo, uint64_t ratio_hi) noexcept
             {
@@ -351,20 +349,22 @@ namespace seal
             intel::hexl::EltwiseMultMod(&result[0], &operand1[0], &operand2[0], coeff_count, modulus.value(), 4);
             intel::hexl::EltwiseAddMod(&result[0], &result[0], &addend[0], coeff_count, modulus.value());
 #else
-            // Local copies: stores to result could otherwise alias the modulus constants
+            // Local copies, since result may alias modulus
             const uint64_t modulus_value = modulus.value();
             const uint64_t two_modulus_value = modulus_value << 1;
             const uint64_t const_ratio_0 = modulus.const_ratio()[0];
             const uint64_t const_ratio_1 = modulus.const_ratio()[1];
+
             const uint64_t *a = operand1.ptr();
             const uint64_t *b = operand2.ptr();
             const uint64_t *c = addend.ptr();
             uint64_t *r = result.ptr();
             for (size_t i = 0; i < coeff_count; i++)
             {
-                // The Shoup product is in [0, 3p), so the sum is in [0, 4p)
                 const uint64_t bi = b[i];
                 const uint64_t w = shoup_quotient_from_ratio(bi, const_ratio_0, const_ratio_1);
+
+                // The Shoup product is in [0, 3p), so the sum is in [0, 4p)
                 const uint64_t x = a[i];
                 unsigned long long q;
                 multiply_uint64_hw64(x, w, &q);
@@ -419,11 +419,12 @@ namespace seal
             intel::hexl::EltwiseMultMod(&result1[0], &operand1[0], &shared[0], coeff_count, modulus.value(), 4);
             intel::hexl::EltwiseMultMod(&result2[0], &operand2[0], &shared[0], coeff_count, modulus.value(), 4);
 #else
-            // Local copies: stores to result1 and result2 could otherwise alias the modulus constants
+            // Local copies, since result1 and result2 may alias modulus
             const uint64_t modulus_value = modulus.value();
             const uint64_t two_modulus_value = modulus_value << 1;
             const uint64_t const_ratio_0 = modulus.const_ratio()[0];
             const uint64_t const_ratio_1 = modulus.const_ratio()[1];
+
             const uint64_t *a1 = operand1.ptr();
             const uint64_t *a2 = operand2.ptr();
             const uint64_t *b = shared.ptr();
@@ -431,9 +432,11 @@ namespace seal
             uint64_t *r2 = result2.ptr();
             for (size_t i = 0; i < coeff_count; i++)
             {
-                // Two Shoup products in [0, 3p) with the same quotient
+                // One Shoup quotient for both products
                 const uint64_t bi = b[i];
                 const uint64_t w = shoup_quotient_from_ratio(bi, const_ratio_0, const_ratio_1);
+
+                // Shoup products in [0, 3p)
                 const uint64_t x1 = a1[i];
                 const uint64_t x2 = a2[i];
                 unsigned long long q1, q2;
@@ -441,6 +444,7 @@ namespace seal
                 multiply_uint64_hw64(x2, w, &q2);
                 const uint64_t s1 = x1 * bi - static_cast<uint64_t>(q1) * modulus_value;
                 const uint64_t s2 = x2 * bi - static_cast<uint64_t>(q2) * modulus_value;
+
                 r1[i] = sub_if_ge_uint64(sub_if_ge_uint64(s1, two_modulus_value), modulus_value);
                 r2[i] = sub_if_ge_uint64(sub_if_ge_uint64(s2, two_modulus_value), modulus_value);
             }

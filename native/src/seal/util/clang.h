@@ -13,7 +13,7 @@
 // Read in config.h
 #include "seal/util/config.h"
 
-// As in gcc.h; without always_inline, clang may decline to inline small helpers in hot loops
+// Force inline
 #define SEAL_FORCE_INLINE inline __attribute__((always_inline))
 
 #ifdef SEAL_USE_ALIGNED_ALLOC

@@ -15,8 +15,6 @@ namespace seal
 {
     namespace util
     {
-        // Lazy reductions in this file, and in the NTT and RNS kernels built on it, keep values in [0, 4 * modulus),
-        // which fits in 64 bits only for moduli less than 2^62
         static_assert(SEAL_MOD_BIT_COUNT_MAX <= 61, "lazy reductions require moduli of at most 61 bits");
 
         /*
@@ -48,8 +46,7 @@ namespace seal
         }
 
         /**
-        Returns x - y + m if x < y, and x - y otherwise (modulo 2^64), without a branch. The condition is the borrow
-        of the subtraction itself, which saves the comparison of less_than_mask_uint64.
+        Returns x - y + m if x < y, and x - y otherwise (modulo 2^64), without a branch.
         */
         SEAL_NODISCARD SEAL_FORCE_INLINE std::uint64_t sub_add_if_lt_uint64(
             std::uint64_t x, std::uint64_t y, std::uint64_t m) noexcept
@@ -257,14 +254,12 @@ namespace seal
         }
 
         /**
-        Returns (hi * 2^64 + lo) mod p. With 2^64 = ratio_hi * p + r64 the input is congruent to hi * r64 + lo; the
-        first term is reduced to [0, 2p) with a Shoup multiplication whose quotient is ratio_lo = floor(r64 * 2^64 / p),
-        the second with a 64-bit Barrett reduction, and the sum is fully reduced with two conditional subtractions.
+        Returns (hi * 2^64 + lo) mod p.
         Correctness: p must be less than 2^62.
 
         @param[in] r64 2^64 mod p (see two_pow_64_mod)
-        @param[in] ratio_lo The low word of floor(2^128 / p), i.e., modulus.const_ratio()[0]
-        @param[in] ratio_hi The high word of floor(2^128 / p), i.e., modulus.const_ratio()[1]
+        @param[in] ratio_lo modulus.const_ratio()[0], which equals floor(r64 * 2^64 / p)
+        @param[in] ratio_hi modulus.const_ratio()[1], which equals floor(2^64 / p)
         */
         SEAL_NODISCARD SEAL_FORCE_INLINE std::uint64_t barrett_reduce_128_precomputed(
             std::uint64_t lo, std::uint64_t hi, std::uint64_t p, std::uint64_t r64, std::uint64_t ratio_lo,
@@ -273,7 +268,8 @@ namespace seal
             unsigned long long q_hi, q_lo;
             multiply_uint64_hw64(hi, ratio_lo, &q_hi);
             multiply_uint64_hw64(lo, ratio_hi, &q_lo);
-            // hi * r64 mod p in [0, 2p) plus lo mod p in [0, 2p)
+
+            // hi * r64 and lo, each reduced to [0, 2p)
             std::uint64_t r = (hi * r64 - q_hi * p) + (lo - q_lo * p);
             const std::uint64_t two_p = p << 1;
             return sub_if_ge_uint64(sub_if_ge_uint64(r, two_p), p);
@@ -284,7 +280,7 @@ namespace seal
         */
         SEAL_NODISCARD inline std::uint64_t two_pow_64_mod(const Modulus &modulus)
         {
-            // floor(2^128 / p) has high word floor(2^64 / p), so 2^64 mod p = 2^64 - floor(2^64 / p) * p
+            // const_ratio()[1] = floor(2^64 / p)
             return static_cast<std::uint64_t>(0) - modulus.const_ratio()[1] * modulus.value();
         }
 
@@ -293,8 +289,7 @@ namespace seal
         */
         SEAL_NODISCARD inline std::uint64_t neg_inv_mod_2_64(std::uint64_t p) noexcept
         {
-            // Newton iteration: p * p = 1 mod 8, so p is the inverse to 3 bits, and each step doubles the number of
-            // correct bits
+            // Newton iteration; p is its own inverse modulo 8, and each step doubles the number of correct bits
             std::uint64_t inv = p;
             for (int i = 0; i < 5; i++)
             {
@@ -311,8 +306,7 @@ namespace seal
         SEAL_NODISCARD SEAL_FORCE_INLINE std::uint64_t montgomery_reduce_128(
             std::uint64_t lo, std::uint64_t hi, std::uint64_t p, std::uint64_t neg_inv_p) noexcept
         {
-            // With m = lo * (-p^(-1)) mod 2^64, the input plus m * p is divisible by 2^64: the low words add to zero
-            // modulo 2^64, with a carry exactly when lo != 0. The quotient is less than 2p.
+            // r = (hi * 2^64 + lo + m * p) / 2^64 < 2p; the low words sum to 2^64 if lo != 0, and to 0 otherwise
             std::uint64_t m = lo * neg_inv_p;
             unsigned long long u;
             multiply_uint64_hw64(m, p, &u);
@@ -321,11 +315,9 @@ namespace seal
         }
 
         /**
-        Montgomery reduction modulo an odd p of at most 61 bits for dyadic products of NTT-form polynomials:
-        reduce(lo, hi) returns (hi * 2^64 + lo) * 2^(-64) mod p, fully reduced, for hi * 2^64 + lo < p * 2^64. Inputs
-        from ntt_negacyclic_harvey_lazy (in [0, 4p)) are first reduced to [0, 2p) with reduce_input; then every product,
-        and every sum of two products, is below 8p^2 < p * 2^64. Callers fold the factor 2^64 into a later constant
-        multiplication, such as the scalar of an inverse NTT.
+        Montgomery reduction of dyadic products modulo an odd p of at most 61 bits. A product of two outputs of
+        reduce_input, or a sum of two such products, is a valid input to reduce. Callers fold the factor 2^64 into a
+        later constant multiplication.
         */
         class DyadicMontgomeryReducer
         {

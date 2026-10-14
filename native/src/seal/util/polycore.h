@@ -186,8 +186,7 @@ namespace seal
         }
 
         /**
-        Returns true if any of the count values at ptr is at least bound. The values are compared in branch-free
-        blocks, with an early exit after each block.
+        Returns true if any of the count values at ptr is at least bound. Branch-free in blocks of 64 for vectorization.
         */
         SEAL_NODISCARD inline bool any_value_at_least(
             const std::uint64_t *ptr, std::size_t count, std::uint64_t bound) noexcept
@@ -206,6 +205,7 @@ namespace seal
                     return true;
                 }
             }
+
             for (; i < count; i++)
             {
                 if (ptr[i] >= bound)

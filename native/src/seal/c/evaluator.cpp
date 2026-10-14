@@ -594,9 +594,7 @@ SEAL_C_FUNC Evaluator_RotateRowsMany(
         steps_vec.reserve(count);
         copy_n(steps, count, back_inserter(steps_vec));
 
-        // The results are written to new ciphertexts with the memory pools of the destinations, and are moved to the
-        // destinations only after all rotations have succeeded. Hence the destinations are unchanged if an error is
-        // returned, and encrypted may be one of the destinations.
+        // Results use the memory pools of the destinations and are moved to them only on success.
         vector<Ciphertext> results;
         results.reserve(count);
         for (uint64_t i = 0; i < count; i++)
@@ -680,9 +678,7 @@ SEAL_C_FUNC Evaluator_RotateVectorMany(
         steps_vec.reserve(count);
         copy_n(steps, count, back_inserter(steps_vec));
 
-        // The results are written to new ciphertexts with the memory pools of the destinations, and are moved to the
-        // destinations only after all rotations have succeeded. Hence the destinations are unchanged if an error is
-        // returned, and encrypted may be one of the destinations.
+        // Results use the memory pools of the destinations and are moved to them only on success.
         vector<Ciphertext> results;
         results.reserve(count);
         for (uint64_t i = 0; i < count; i++)

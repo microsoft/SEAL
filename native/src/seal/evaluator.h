@@ -1106,7 +1106,7 @@ namespace seal
         the encryption parameters
         @throws std::invalid_argument if galois_keys do not correspond to the top
         level parameters in the current context
-        @throws std::invalid_argument if encrypted is in NTT form
+        @throws std::invalid_argument if encrypted is not in the default NTT form
         @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if steps has too big absolute value
         @throws std::invalid_argument if necessary Galois keys are not present
@@ -1123,20 +1123,12 @@ namespace seal
         }
 
         /**
-        Rotates plaintext matrix rows cyclically by several step counts. When batching is used with the BFV/BGV scheme,
-        this function rotates the encrypted plaintext matrix rows cyclically to the left (steps[i] > 0) or to the right
-        (steps[i] < 0) and writes the i-th result to destinations[i]. For valid ciphertexts, the results are identical
-        to those of rotate_rows, but rotations by step counts with their own Galois keys share most of the key switching
-        work. Since the size of the batched matrix is 2-by-(N/2), where N is the degree of the polynomial modulus, every
-        number of steps to rotate must have absolute value at most N/2-1. Dynamic memory allocations in the process are
-        allocated from the memory pool pointed to by the given MemoryPoolHandle. Besides the results, the temporary
-        memory needed is about that of 2 + steps.size() / L ciphertexts, where L is the number of primes in the
-        coefficient modulus of encrypted.
-
-        The destinations vector is resized to steps.size(); its existing elements keep their memory pools, and new
-        elements use the given pool. The ciphertext encrypted may be an element of destinations. All inputs are
-        validated before any work is done; if an exception is thrown later (e.g., if a result is transparent),
-        destinations may be partially overwritten.
+        Rotates plaintext matrix rows cyclically by several step counts. Resizes destinations to steps.size() and
+        overwrites destinations[i] with the rotation by steps[i], identical to rotate_rows for valid ciphertexts. Every
+        element of steps must have absolute value at most N/2-1, where N is the degree of the polynomial modulus. The
+        ciphertext encrypted may be an element of destinations. New elements of destinations and dynamic memory
+        allocations use the given pool. Exceptions for invalid inputs leave destinations unchanged; others (e.g., for a
+        transparent result) may leave destinations partially overwritten.
 
         @param[in] encrypted The ciphertext to rotate
         @param[in] steps The numbers of steps to rotate (positive left, negative right)
@@ -1149,9 +1141,9 @@ namespace seal
         the encryption parameters
         @throws std::invalid_argument if galois_keys do not correspond to the top
         level parameters in the current context
-        @throws std::invalid_argument if encrypted is in NTT form (BFV) or not in NTT form (BGV)
+        @throws std::invalid_argument if encrypted is not in the default NTT form
         @throws std::invalid_argument if encrypted has size larger than 2
-        @throws std::invalid_argument if a number of steps has too big absolute value
+        @throws std::invalid_argument if an element of steps has too big absolute value
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
         @throws std::logic_error if keyswitching is not supported by the context
@@ -1185,7 +1177,7 @@ namespace seal
         the encryption parameters
         @throws std::invalid_argument if galois_keys do not correspond to the top
         level parameters in the current context
-        @throws std::invalid_argument if encrypted is in NTT form
+        @throws std::invalid_argument if encrypted is not in the default NTT form
         @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
@@ -1221,7 +1213,7 @@ namespace seal
         the encryption parameters
         @throws std::invalid_argument if galois_keys do not correspond to the top
         level parameters in the current context
-        @throws std::invalid_argument if encrypted is in NTT form
+        @throws std::invalid_argument if encrypted is not in the default NTT form
         @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
@@ -1288,7 +1280,7 @@ namespace seal
         the encryption parameters
         @throws std::invalid_argument if galois_keys do not correspond to the top
         level parameters in the current context
-        @throws std::invalid_argument if encrypted is in NTT form
+        @throws std::invalid_argument if encrypted is not in the default NTT form
         @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if steps has too big absolute value
         @throws std::invalid_argument if necessary Galois keys are not present
@@ -1305,20 +1297,12 @@ namespace seal
         }
 
         /**
-        Rotates plaintext vector cyclically by several step counts. When using the CKKS scheme, this function rotates
-        the encrypted plaintext vector cyclically to the left (steps[i] > 0) or to the right (steps[i] < 0) and writes
-        the i-th result to destinations[i]. For valid ciphertexts, the results are identical to those of rotate_vector,
-        but rotations by step counts with their own Galois keys share most of the key switching work. Since the size of
-        the batched matrix is 2-by-(N/2), where N is the degree of the polynomial modulus, every number of steps to
-        rotate must have absolute value at most N/2-1. Dynamic memory allocations in the process are allocated from the
-        memory pool pointed to by the given MemoryPoolHandle. Besides the results, the temporary memory needed is about
-        that of 2 + steps.size() / L ciphertexts, where L is the number of primes in the coefficient modulus of
-        encrypted.
-
-        The destinations vector is resized to steps.size(); its existing elements keep their memory pools, and new
-        elements use the given pool. The ciphertext encrypted may be an element of destinations. All inputs are
-        validated before any work is done; if an exception is thrown later (e.g., if a result is transparent),
-        destinations may be partially overwritten.
+        Rotates plaintext vector cyclically by several step counts. Resizes destinations to steps.size() and overwrites
+        destinations[i] with the rotation by steps[i], identical to rotate_vector for valid ciphertexts. Every element
+        of steps must have absolute value at most N/2-1, where N is the degree of the polynomial modulus. The ciphertext
+        encrypted may be an element of destinations. New elements of destinations and dynamic memory allocations use the
+        given pool. Exceptions for invalid inputs leave destinations unchanged; others (e.g., for a transparent result)
+        may leave destinations partially overwritten.
 
         @param[in] encrypted The ciphertext to rotate
         @param[in] steps The numbers of steps to rotate (positive left, negative right)
@@ -1330,9 +1314,9 @@ namespace seal
         the encryption parameters
         @throws std::invalid_argument if galois_keys do not correspond to the top
         level parameters in the current context
-        @throws std::invalid_argument if encrypted is not in NTT form
+        @throws std::invalid_argument if encrypted is not in the default NTT form
         @throws std::invalid_argument if encrypted has size larger than 2
-        @throws std::invalid_argument if a number of steps has too big absolute value
+        @throws std::invalid_argument if an element of steps has too big absolute value
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
         @throws std::logic_error if keyswitching is not supported by the context
@@ -1363,7 +1347,7 @@ namespace seal
         the encryption parameters
         @throws std::invalid_argument if galois_keys do not correspond to the top
         level parameters in the current context
-        @throws std::invalid_argument if encrypted is in NTT form
+        @throws std::invalid_argument if encrypted is not in the default NTT form
         @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
@@ -1395,7 +1379,7 @@ namespace seal
         the encryption parameters
         @throws std::invalid_argument if galois_keys do not correspond to the top
         level parameters in the current context
-        @throws std::invalid_argument if encrypted is in NTT form
+        @throws std::invalid_argument if encrypted is not in the default NTT form
         @throws std::invalid_argument if encrypted has size larger than 2
         @throws std::invalid_argument if necessary Galois keys are not present
         @throws std::invalid_argument if pool is uninitialized
@@ -1481,9 +1465,8 @@ namespace seal
             apply_galois_inplace(encrypted, galois_tool->get_elt_from_step(0), galois_keys, std::move(pool));
         }
 
-        // Key switches target_iter, a polynomial at level parms_id in the form of the ciphertexts of the scheme, with
-        // the validated key_vector, and writes component k of the result plus addends[k] (if not null) to outputs[k]
-        // for k = 0, 1; outputs[k] may be identical to addends[k], and outputs[1] to addends[0].
+        // Key switches target_iter with the validated key_vector and writes component k of the result plus addends[k]
+        // (if not null) to outputs[k], all in NTT form for CKKS and BGV. outputs[k] may equal addends[j] for j <= k.
         void switch_key(
             parms_id_type parms_id, util::ConstRNSIter target_iter, const std::vector<PublicKey> &key_vector,
             const std::uint64_t *const *addends, std::uint64_t *const *outputs, MemoryPoolHandle pool) const;

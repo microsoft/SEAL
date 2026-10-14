@@ -446,8 +446,7 @@ namespace sealtest
 
         namespace
         {
-            // The integer in [0, prod(base)) with residues poly[i * n + c] for the elements of base, as size()
-            // words
+            // Coefficient c of poly as an integer in [0, prod(base))
             vector<uint64_t> compose_coeff(const RNSBase &base, const uint64_t *poly, size_t n, size_t c)
             {
                 vector<uint64_t> value(base.size());
@@ -459,7 +458,7 @@ namespace sealtest
                 return value;
             }
 
-            // Residues modulo the elements of base of the signed multi-precision integer (-1)^negative * magnitude
+            // Residues of magnitude, negated if negative
             vector<uint64_t> decompose_signed(const RNSBase &base, const vector<uint64_t> &magnitude, bool negative)
             {
                 vector<uint64_t> residues(base.size());
@@ -471,7 +470,7 @@ namespace sealtest
                 return residues;
             }
 
-            // Random values below q_i in component i, with 0 and q_i - 1 at the first two coefficients
+            // Random, except 0 and base[i] - 1 at coefficients 0 and 1
             vector<uint64_t> random_rns_poly(const RNSBase &base, size_t n, mt19937_64 &rng)
             {
                 vector<uint64_t> poly(base.size() * n);
@@ -487,10 +486,9 @@ namespace sealtest
             }
         } // namespace
 
+        // Equals the unscaled conversion of the scaled input, times the output factors
         TEST(BaseConverterTest, ConvertArrayScaled)
         {
-            // A scaled converter must give the same output as the unscaled converter applied to the input multiplied
-            // by the input scaling factors, followed by multiplication by the output scaling factors.
             auto pool = MemoryManager::GetPool();
             mt19937_64 rng(4241);
             size_t count = 16;
@@ -507,13 +505,14 @@ namespace sealtest
             {
                 for (size_t k = 0; k < count; k++)
                 {
-                    // The scaled converter accepts any 64-bit input
+                    // Any 64-bit input
                     uint64_t value = k == 0 ? ~uint64_t(0) : (k == 1 ? ibase[i].value() - 1 : rng());
                     in[i * count + k] = value;
                     in_scaled[i * count + k] = multiply_uint_mod(
                         barrett_reduce_64(value, ibase[i]), barrett_reduce_64(ibase_scale[i], ibase[i]), ibase[i]);
                 }
             }
+
             bct.fast_convert_array(ConstRNSIter(in_scaled.data(), count), RNSIter(out.data(), count), pool);
             bct_scaled.fast_convert_array(ConstRNSIter(in.data(), count), RNSIter(out_scaled.data(), count), pool);
             for (size_t j = 0; j < obase.size(); j++)
@@ -526,20 +525,17 @@ namespace sealtest
                 }
             }
 
-            // Scaling is not supported by exact conversion
+            // No scaling in exact conversion
             BaseConverter bct_exact(ibase, RNSBase({ obase[0] }, pool), ibase_scale, { 1 }, pool);
             vector<uint64_t> exact_out(count);
             ASSERT_THROW(
                 bct_exact.exact_convert_array(ConstRNSIter(in.data(), count), CoeffIter(exact_out.data()), pool),
                 logic_error);
+
+            // Wrong number of scaling factors
             ASSERT_THROW(BaseConverter(ibase, obase, { 1 }, obase_scale, pool), invalid_argument);
         }
 
-        // Compares fast_convert_array (blocked, Montgomery-reduced) with a straightforward reference implementation
-        // (per-coefficient dot_product_mod) on random and edge-case inputs, for odd and even output moduli, small and
-        // large bases (the latter forcing the input base to be split into several chunks), and coefficient counts
-        // that are not multiples of the internal unrolling factors or block size. Also checks the allowed aliasing
-        // of input and output.
         TEST(BaseConverterTest, ConvertArrayMatchesReference)
         {
             auto pool = MemoryManager::GetPool();
@@ -549,6 +545,8 @@ namespace sealtest
                                  const vector<uint64_t> &ibase_scale, const vector<uint64_t> &obase_scale) {
                 size_t ibase_size = ibase.size();
                 size_t obase_size = obase.size();
+
+                // rows[j][i] = (prod(ibase) / ibase[i]) mod obase[j]
                 vector<vector<uint64_t>> rows(obase_size, vector<uint64_t>(ibase_size));
                 for (size_t j = 0; j < obase_size; j++)
                 {
@@ -557,6 +555,7 @@ namespace sealtest
                         rows[j][i] = modulo_uint(ibase.punctured_prod_array() + i * ibase_size, ibase_size, obase[j]);
                     }
                 }
+
                 vector<uint64_t> out(obase_size * count);
                 vector<uint64_t> temp(ibase_size);
                 for (size_t c = 0; c < count; c++)
@@ -567,12 +566,12 @@ namespace sealtest
                         uint64_t x = in[i * count + c];
                         if (!ibase_scale.empty())
                         {
-                            // [x * a_i]_{q_i}, then the usual first step
                             x = multiply_uint_mod(x, barrett_reduce_64(ibase_scale[i], ibase[i]), ibase[i]);
                         }
                         temp[i] =
                             (ipp.operand == 1) ? barrett_reduce_64(x, ibase[i]) : multiply_uint_mod(x, ipp, ibase[i]);
                     }
+
                     for (size_t j = 0; j < obase_size; j++)
                     {
                         out[j * count + c] = dot_product_mod(temp.data(), rows[j].data(), ibase_size, obase[j]);
@@ -592,7 +591,7 @@ namespace sealtest
                 vector<uint64_t> ibase_scale, obase_scale;
                 if (scaled)
                 {
-                    // Arbitrary 64-bit factors (including 0 and 1), reduced by the converter
+                    // Unreduced factors
                     for (size_t i = 0; i < ibase.size(); i++)
                     {
                         ibase_scale.push_back(i == 0 ? 1 : (i == 1 ? 0 : rng()));
@@ -602,10 +601,13 @@ namespace sealtest
                         obase_scale.push_back(j == 0 ? uint64_t(1) << 32 : rng());
                     }
                 }
+
                 Pointer<BaseConverter> bct_ptr =
                     scaled ? allocate<BaseConverter>(pool, ibase, obase, ibase_scale, obase_scale, pool)
                            : allocate<BaseConverter>(pool, ibase, obase, pool);
                 const BaseConverter &bct = *bct_ptr;
+
+                // Counts around the unrolling factors and the block size
                 const vector<size_t> counts{ 1, 2, 3, 4, 5, 7, 8, 9, 15, 16, 17, 255, 256, 257, 511, 512, 513, 1027 };
                 for (size_t count : counts)
                 {
@@ -630,7 +632,7 @@ namespace sealtest
                                     x = (c & 1) ? q - 1 : 0;
                                     break;
                                 case 3:
-                                    // Unreduced input; fast_convert_array reduces any 64-bit input
+                                    // Unreduced input
                                     x = rng();
                                     break;
                                 default:
@@ -639,13 +641,14 @@ namespace sealtest
                                 }
                             }
                         }
+
                         vector<uint64_t> ref = reference(ibase, obase, in, count, ibase_scale, obase_scale);
                         vector<uint64_t> out(obase.size() * count, 0xDEADBEEF);
                         bct.fast_convert_array(ConstRNSIter(in.data(), count), RNSIter(out.data(), count), pool);
                         ASSERT_EQ(ref, out) << "ibase size " << ibase.size() << ", obase size " << obase.size()
                                             << ", count " << count << ", pattern " << pattern << ", scaled " << scaled;
 
-                        // in and out may overlap at equal coefficient indices: identical, or shifted by one component
+                        // Overlapping in and out
                         size_t size = max(ibase.size(), obase.size()) + 1;
                         for (size_t shift : { size_t(0), size_t(1) })
                         {
@@ -660,7 +663,7 @@ namespace sealtest
                 }
             };
 
-            // Typical BFV shapes: q of 36..60-bit primes to Bsk of 61-bit primes and back, plus even m_tilde
+            // BEHZ conversions and mixed moduli
             auto q = get_primes(uint64_t(1) << 15, 50, 5);
             auto q60 = get_primes(uint64_t(1) << 15, 60, 3);
             q.insert(q.end(), q60.begin(), q60.end());
@@ -674,7 +677,7 @@ namespace sealtest
             run(q, { Modulus(65537), Modulus(uint64_t(1) << 20), Modulus(3), bsk[0] }, false);
             run(q, { Modulus(65537), Modulus(uint64_t(1) << 20), Modulus(3), bsk[0] }, true);
 
-            // Many 61-bit input primes: the sum of the input moduli exceeds 2^64, so the input base is split
+            // Input moduli with a sum above 2^64
             auto big = get_primes(uint64_t(1) << 15, 61, 20);
             run(big, { bsk[0], q[0], Modulus(uint64_t(1) << 32), Modulus(17) }, false);
             run(big, { bsk[0], q[0], Modulus(uint64_t(1) << 32), Modulus(17) }, true);
@@ -686,14 +689,14 @@ namespace sealtest
             run({ Modulus(2), Modulus(3), Modulus(5) }, { Modulus(7), Modulus(8), Modulus(11) }, true);
         }
 
-        // exact_convert_array computes the centered representative of the input modulo prod(ibase), reduced modulo
-        // the output modulus
+        // Centered representative modulo prod(ibase), reduced modulo p
         TEST(BaseConverterTest, ExactConvertArray)
         {
             auto pool = MemoryManager::GetPool();
             mt19937_64 rng(4243);
             auto q = get_primes(uint64_t(1) << 15, 50, 5);
             auto big = get_primes(uint64_t(1) << 15, 61, 20);
+
             for (auto ibase_mods : { vector<Modulus>{ q[0] }, q, big })
             {
                 RNSBase ibase(ibase_mods, pool);
@@ -710,7 +713,7 @@ namespace sealtest
                             vector<uint64_t> x = compose_coeff(ibase, in.data(), count, c);
                             uint64_t expected = modulo_uint(x.data(), x.size(), p);
 
-                            // x - q if x > q / 2
+                            // x - prod(ibase) if 2 * x > prod(ibase)
                             vector<uint64_t> twice_x(x.size() + 1), q_wide(x.size() + 1);
                             left_shift_uint(x.data(), 1, x.size(), twice_x.data());
                             twice_x.back() = x.back() >> 63;
@@ -899,7 +902,7 @@ namespace sealtest
                     ASSERT_EQ(0, val);
                 }
 
-                // Input base is Bsk U {m_tilde}, with m_tilde as the last element.
+                // Input base is Bsk U {m_tilde}.
                 // m_tilde is always smaller than the primes in Bsk (SEAL_INTERNAL_MOD_BIT_COUNT (61) bits).
                 // Set the length-2 array to have values 1*m_tilde and 2*m_tilde.
                 size_t base_Bsk_size = rns_tool->base_Bsk()->size();
@@ -1021,7 +1024,7 @@ namespace sealtest
                     ASSERT_EQ(0, val);
                 }
 
-                // The input base is q U Bsk. We set the input to multiples of 15 an divide by 15 (i.e., q).
+                // The input base is q U Bsk. We set the input to multiples of 15 and divide by 15 (i.e., q).
                 size_t in_base_size = rns_tool->base_q()->size() + rns_tool->base_Bsk()->size();
                 for (size_t j = 0; j < in_base_size; j++)
                 {
@@ -1118,17 +1121,13 @@ namespace sealtest
             }
         }
 
-        // The fused functions used by BFV multiplication must give the same results as the steps they replace, for
-        // any input: fastbconv_m_tilde_sm_mrq as sm_mrq after fastbconv_m_tilde (up to the lazy output range), and
-        // inverse_ntt_multiply_t_fast_floor_fastbconv_sk as the inverse NTT, multiplication by t, fast_floor, and
-        // fastbconv_sk (for input in standard or Montgomery form)
+        // Fused functions match the unfused steps
         TEST(RNSToolTest, FusedBEHZSteps)
         {
             auto pool = MemoryManager::GetPool();
             mt19937_64 rng(2024);
 
-            // n = 1024 exceeds the block size of the fused functions; 20 primes of 60 bits make the base conversions
-            // from q split q into chunks
+            // n = 1024 and 20 primes of 60 bits exceed the block and chunk sizes
             for (size_t n : { size_t(2), size_t(64), size_t(1024) })
             {
                 for (auto bit_sizes : { vector<int>{ 30 }, vector<int>{ 40, 50 }, vector<int>{ 60, 60, 60, 59, 58 },
@@ -1152,12 +1151,16 @@ namespace sealtest
                                     k % 3 == 0 ? q[i].value() - 1 : (k % 3 == 1 ? rng() : rng() % q[i].value());
                             }
                         }
+
                         vector<uint64_t> temp((Bsk_size + 1) * n), expected(Bsk_size * n), result(Bsk_size * n);
                         rns_tool.fastbconv_m_tilde(ConstRNSIter(in_q.data(), n), RNSIter(temp.data(), n), pool);
                         rns_tool.sm_mrq(ConstRNSIter(temp.data(), n), RNSIter(expected.data(), n), pool);
+
                         rns_tool.fastbconv_m_tilde_sm_mrq(
                             ConstRNSIter(in_q.data(), n), false, RNSIter(result.data(), n), pool);
                         ASSERT_EQ(expected, result);
+
+                        // Lazy output
                         rns_tool.fastbconv_m_tilde_sm_mrq(
                             ConstRNSIter(in_q.data(), n), true, RNSIter(result.data(), n), pool);
                         for (size_t j = 0; j < Bsk_size; j++)
@@ -1170,7 +1173,7 @@ namespace sealtest
                             }
                         }
 
-                        // Steps (5)-(8), for NTT-form input in base q U Bsk in [0, 2m)
+                        // Steps (5)-(8), for NTT-form input in [0, 2m)
                         Pointer<NTTTables> q_ntt_tables;
                         CreateNTTTables(
                             get_power_of_two(n), vector<Modulus>(q.base(), q.base() + q_size), q_ntt_tables, pool);
@@ -1187,7 +1190,7 @@ namespace sealtest
                                     in[i * n + k] = k == 0 ? 2 * m.value() - 1 : rng() % (2 * m.value());
                                 }
 
-                                // The input holds c * 2^(-64) mod m in Montgomery form
+                                // ref_in = t * INTT(c), where in holds c (times 2^(-64) if montgomery)
                                 CoeffIter x(ref_in.data() + i * n);
                                 copy_n(in.data() + i * n, n, ref_in.data() + i * n);
                                 if (montgomery)
@@ -1197,10 +1200,12 @@ namespace sealtest
                                 inverse_ntt_negacyclic_harvey(x, tables);
                                 multiply_poly_scalar_coeffmod(x, n, t.value(), m, x);
                             }
+
                             vector<uint64_t> floor_Bsk(Bsk_size * n), expected_q(q_size * n), result_q(q_size * n);
                             rns_tool.fast_floor(ConstRNSIter(ref_in.data(), n), RNSIter(floor_Bsk.data(), n), pool);
                             rns_tool.fastbconv_sk(
                                 ConstRNSIter(floor_Bsk.data(), n), RNSIter(expected_q.data(), n), pool);
+
                             rns_tool.inverse_ntt_multiply_t_fast_floor_fastbconv_sk(
                                 RNSIter(in.data(), n), RNSIter(in.data() + q_size * n, n), q_ntt_tables.get(),
                                 montgomery, RNSIter(result_q.data(), n), pool);
@@ -1434,7 +1439,6 @@ namespace sealtest
 
         namespace
         {
-            // Number of bits of the product of the given values
             int product_bit_count(const vector<uint64_t> &values)
             {
                 vector<uint64_t> product{ 1 };
@@ -1449,15 +1453,10 @@ namespace sealtest
             }
         } // namespace
 
-        // B is the shortest prefix of the base conversion primes with
-        // bits(prod(B) * m_sk) - 1 >= 5 + bits(t) + log2(n) + bits(prod(q)), and never longer than with the rule of
-        // SEAL 4.6.2. (The requirement is always met with the old rule, so the logic_error thrown otherwise is
-        // unreachable.)
         TEST(RNSToolTest, TightBskSize)
         {
             auto pool = MemoryManager::GetPool();
 
-            // Checks the size of B for the given parameters and returns it
             auto B_size = [&](size_t n, const vector<Modulus> &q_primes, const Modulus &t) {
                 RNSBase q(q_primes, pool);
                 RNSTool rns_tool(n, q, t, pool);
@@ -1478,7 +1477,7 @@ namespace sealtest
                 }
                 EXPECT_GE(product_bit_count(values) - 1, required_bit_count);
 
-                // B without its last prime does not satisfy the bound, unless B has only one prime (the minimum)
+                // B is shortest, but has at least one prime
                 values.pop_back();
                 if (B.size() > 1)
                 {
@@ -1488,12 +1487,10 @@ namespace sealtest
                 return B.size();
             };
 
-            // Default BFV parameters with a 20-bit plain modulus
             ASSERT_EQ(size_t(2), B_size(4096, CoeffModulus::BFVDefault(4096), PlainModulus::Batching(4096, 20)));
             ASSERT_EQ(size_t(4), B_size(8192, CoeffModulus::BFVDefault(8192), PlainModulus::Batching(8192, 20)));
             ASSERT_EQ(size_t(15), B_size(32768, CoeffModulus::BFVDefault(32768), PlainModulus::Batching(32768, 20)));
 
-            // A sweep over degrees, plain moduli (including zero), and sizes of q
             for (size_t n : { size_t(2), size_t(64), size_t(4096) })
             {
                 for (int t_bit_count : { 0, 2, 20, 40, 60 })
@@ -1505,14 +1502,13 @@ namespace sealtest
                     {
                         for (size_t q_size : { size_t(1), size_t(2), size_t(5), size_t(17) })
                         {
-                            // There are only 8 primes of 20 bits congruent to 1 modulo 2 * 4096, so a q of 20-bit
-                            // primes has only one prime
+                            // Too few 20-bit primes for n = 4096
                             if (q_bit_count == 20 && q_size > 1)
                             {
                                 continue;
                             }
 
-                            // RNSTool requires the plain modulus to be coprime to q
+                            // t must be coprime to q
                             auto q = get_primes(2 * n, q_bit_count, q_size);
                             if (find(q.begin(), q.end(), t) == q.end())
                             {
@@ -1524,14 +1520,13 @@ namespace sealtest
             }
         }
 
-        // Steps (5)-(8) of BEHZ multiplication on extreme inputs: X = sum of 8 negacyclic products of polynomials
-        // with coefficients +-(q - 1) / 2. The output must be floor(t * X / q) - u modulo q for some 0 <= u < |q|
-        // (the fast floor error), which fails if the Shenoy-Kumaresan conversion with the tight base B wraps around.
+        // B suffices for steps (5)-(8) of BEHZ multiplication on extreme inputs
         TEST(RNSToolTest, BEHZFloorExactness)
         {
             auto pool = MemoryManager::GetPool();
             MemoryPool &mpool = pool;
             mt19937_64 rng(2025);
+
             for (size_t n : { size_t(2), size_t(16) })
             {
                 for (auto bit_sizes : { vector<int>{ 60 }, vector<int>{ 60, 60 }, vector<int>{ 30, 30, 30 },
@@ -1548,15 +1543,14 @@ namespace sealtest
                         CreateNTTTables(
                             get_power_of_two(n), vector<Modulus>(q.base(), q.base() + q_size), q_ntt_tables, pool);
 
-                        // h = (q - 1) / 2 and h^2
+                        // h = (prod(q) - 1) / 2 and h^2
                         vector<uint64_t> h(q.base_prod(), q.base_prod() + q_size), h2(2 * q_size);
                         right_shift_uint(h.data(), 1, q_size, h.data());
                         multiply_uint(h.data(), q_size, h.data(), q_size, h2.size(), h2.data());
 
                         for (int pattern = 0; pattern < 3; pattern++)
                         {
-                            // X = m * h^2 with m = sum of 8 negacyclic products of sign vectors: all +1 (pattern 0),
-                            // all -1 times +1 (pattern 1), or random (pattern 2)
+                            // X = m * h^2 with m a sum of 8 negacyclic products of sign vectors
                             vector<int64_t> m(n, 0);
                             for (int k = 0; k < 8; k++)
                             {
@@ -1576,7 +1570,7 @@ namespace sealtest
                                 }
                             }
 
-                            // Input: X modulo every prime of q U Bsk, in NTT form, in standard or Montgomery form
+                            // X in NTT form
                             for (bool montgomery : { false, true })
                             {
                                 vector<uint64_t> in((q_size + Bsk_size) * n);
@@ -1600,6 +1594,7 @@ namespace sealtest
                                     }
                                     ntt_negacyclic_harvey(in.data() + i * n, tables);
                                 }
+
                                 vector<uint64_t> result(q_size * n);
                                 rns_tool.inverse_ntt_multiply_t_fast_floor_fastbconv_sk(
                                     RNSIter(in.data(), n), RNSIter(in.data() + q_size * n, n), q_ntt_tables.get(),
@@ -1607,7 +1602,7 @@ namespace sealtest
 
                                 for (size_t c = 0; c < n; c++)
                                 {
-                                    // floor(t * X / q), exactly
+                                    // floor(t * X / prod(q)), exactly
                                     uint64_t abs_m = static_cast<uint64_t>(m[c] < 0 ? -m[c] : m[c]);
                                     size_t width = 2 * q_size + 2;
                                     vector<uint64_t> numerator(width), temp(width), q_wide(width), quotient(width),
@@ -1624,6 +1619,7 @@ namespace sealtest
                                     }
                                     vector<uint64_t> floor_mod_q = decompose_signed(q, quotient, m[c] < 0);
 
+                                    // Up to the fast floor error u < q_size
                                     bool found = false;
                                     for (uint64_t u = 0; u < q_size && !found; u++)
                                     {
@@ -1645,15 +1641,14 @@ namespace sealtest
             }
         }
 
-        // The result of divide_and_round_q_last is round(x / q_last) = floor((x + floor(q_last / 2)) / q_last) for the
-        // integer x in [0, q) given by the input; checked in and out of place, in NTT form, and with destination
-        // overlapping input as for compacting a ciphertext in place
+        // round(x / q_last) for x in [0, prod(q))
         TEST(RNSToolTest, DivideAndRoundQLast)
         {
             auto pool = MemoryManager::GetPool();
             MemoryPool &mpool = pool;
             mt19937_64 rng(2026);
             size_t n = 64;
+
             for (auto bit_sizes : { vector<int>{ 40, 50, 60 }, vector<int>{ 30, 30, 60 }, vector<int>{ 60, 60, 30 },
                                     vector<int>{ 60, 20 } })
             {
@@ -1665,6 +1660,7 @@ namespace sealtest
                 CreateNTTTables(get_power_of_two(n), vector<Modulus>(q.base(), q.base() + q_size), ntt_tables, pool);
 
                 vector<uint64_t> in = random_rns_poly(q, n, rng);
+
                 vector<uint64_t> ref((q_size - 1) * n);
                 for (size_t c = 0; c < n; c++)
                 {
@@ -1681,7 +1677,6 @@ namespace sealtest
                     }
                 }
 
-                // NTT form of the input and of the expected result
                 vector<uint64_t> in_ntt = in, ref_ntt = ref;
                 for (size_t i = 0; i < q_size; i++)
                 {
@@ -1712,7 +1707,7 @@ namespace sealtest
                     divide(ConstRNSIter(input.data(), n), RNSIter(out.data(), n));
                     ASSERT_EQ(expected, out) << "q size " << q_size << ", NTT form " << ntt_form;
 
-                    // In place
+                    // In-place functions
                     vector<uint64_t> buffer = input;
                     if (ntt_form)
                     {
@@ -1723,11 +1718,13 @@ namespace sealtest
                         rns_tool.divide_and_round_q_last_inplace(RNSIter(buffer.data(), n), pool);
                     }
                     ASSERT_TRUE(equal(expected.begin(), expected.end(), buffer.begin()));
+
+                    // destination equal to input
                     buffer = input;
                     divide(ConstRNSIter(buffer.data(), n), RNSIter(buffer.data(), n));
                     ASSERT_TRUE(equal(expected.begin(), expected.end(), buffer.begin()));
 
-                    // Component i of destination at component i - 1 of input
+                    // destination one component below input
                     buffer.assign((q_size + 1) * n, 0);
                     copy(input.begin(), input.end(), buffer.data() + n);
                     divide(ConstRNSIter(buffer.data() + n, n), RNSIter(buffer.data(), n));
@@ -1736,15 +1733,13 @@ namespace sealtest
             }
         }
 
-        // mod_t_and_divide_q_last_ntt computes (x - delta) / q_last for the integer x in [0, q) given by the input,
-        // where delta = [-x * q_last^(-1)]_t * q_last + [x]_{q_last} is the multiple of t congruent to x modulo q_last;
-        // checked in and out of place, and with destination overlapping input as for compacting a ciphertext in place
         TEST(RNSToolTest, ModTAndDivideQLastNTT)
         {
             auto pool = MemoryManager::GetPool();
             MemoryPool &mpool = pool;
             mt19937_64 rng(2027);
             size_t n = 64;
+
             for (auto bit_sizes : { vector<int>{ 40, 50, 60 }, vector<int>{ 30, 30, 60 }, vector<int>{ 60, 60, 30 } })
             {
                 RNSBase q(CoeffModulus::Create(n, bit_sizes), pool);
@@ -1753,11 +1748,12 @@ namespace sealtest
                 Pointer<NTTTables> ntt_tables;
                 CreateNTTTables(get_power_of_two(n), vector<Modulus>(q.base(), q.base() + q_size), ntt_tables, pool);
 
-                // t = 2 makes q_last^(-1) mod t equal to 1
+                // t = 2 gives q_last^(-1) mod t = 1
                 for (const Modulus &t : { Modulus(2), Modulus(65537), Modulus(uint64_t(1) << 20) })
                 {
                     RNSTool rns_tool(n, q, t, pool);
                     vector<uint64_t> in = random_rns_poly(q, n, rng);
+
                     vector<uint64_t> ref((q_size - 1) * n);
                     uint64_t inv_q_last_mod_t = 1;
                     if (t.value() > 2)
@@ -1767,12 +1763,14 @@ namespace sealtest
                     for (size_t c = 0; c < n; c++)
                     {
                         vector<uint64_t> x = compose_coeff(q, in.data(), n, c);
+
+                        // c_last = [x]_{q_last} and k = [-c_last * q_last^(-1)]_t
                         uint64_t c_last = in[(q_size - 1) * n + c];
                         uint64_t k = multiply_uint_mod(
                             negate_uint_mod(barrett_reduce_64(c_last, t), t), barrett_reduce_64(inv_q_last_mod_t, t),
                             t);
 
-                        // delta = k * q_last + c_last, and (x - delta) / q_last with its sign
+                        // (x - delta) / q_last with delta = k * q_last + c_last
                         vector<uint64_t> delta(q_size), diff(q_size), quotient(q_size), remainder(q_size),
                             divisor(q_size);
                         multiply_uint(&k, 1, q_last.value(), q_size, delta.data());
@@ -1795,6 +1793,7 @@ namespace sealtest
                             ref[i * n + c] = residues[i];
                         }
                     }
+
                     for (size_t i = 0; i < q_size; i++)
                     {
                         ntt_negacyclic_harvey(in.data() + i * n, ntt_tables[i]);
@@ -1804,15 +1803,18 @@ namespace sealtest
                         }
                     }
 
+                    // Out of place
                     vector<uint64_t> out((q_size - 1) * n);
                     rns_tool.mod_t_and_divide_q_last_ntt(
                         ConstRNSIter(in.data(), n), ntt_tables.get(), RNSIter(out.data(), n), pool);
                     ASSERT_EQ(ref, out) << "q size " << q_size << ", t " << t.value();
 
+                    // In place
                     vector<uint64_t> buffer = in;
                     rns_tool.mod_t_and_divide_q_last_ntt_inplace(RNSIter(buffer.data(), n), ntt_tables.get(), pool);
                     ASSERT_TRUE(equal(ref.begin(), ref.end(), buffer.begin()));
 
+                    // destination one component below input
                     buffer.assign((q_size + 1) * n, 0);
                     copy(in.begin(), in.end(), buffer.data() + n);
                     rns_tool.mod_t_and_divide_q_last_ntt(
@@ -1822,15 +1824,14 @@ namespace sealtest
             }
         }
 
-        // decrypt_scale_and_round computes round(t * x / q) mod t, and decrypt_modt the centered representative of x
-        // modulo q reduced modulo t, for the integer x in [0, q) given by the input (random, so that rounding errors
-        // of the approximate methods do not occur in practice)
+        // Random x, where the approximations are exact in practice
         TEST(RNSToolTest, DecryptRandom)
         {
             auto pool = MemoryManager::GetPool();
             MemoryPool &mpool = pool;
             mt19937_64 rng(2028);
             size_t n = 1024;
+
             for (auto bit_sizes : { vector<int>{ 50 }, vector<int>{ 40, 50, 60 }, vector<int>(20, 60) })
             {
                 RNSBase q(CoeffModulus::Create(n, bit_sizes), pool);
@@ -1843,12 +1844,13 @@ namespace sealtest
                     vector<uint64_t> scaled(n), modt(n);
                     rns_tool.decrypt_scale_and_round(ConstRNSIter(in.data(), n), CoeffIter(scaled.data()), pool);
                     rns_tool.decrypt_modt(RNSIter(in.data(), n), CoeffIter(modt.data()), pool);
+
                     uint64_t q_mod_t = modulo_uint(q.base_prod(), q_size, t);
                     for (size_t c = 0; c < n; c++)
                     {
                         vector<uint64_t> x = compose_coeff(q, in.data(), n, c);
 
-                        // floor((2 * t * x + q) / (2 * q)) mod t
+                        // round(t * x / prod(q)) mod t
                         size_t width = q_size + 2;
                         vector<uint64_t> numerator(width), q2(width), quotient(width), remainder(width);
                         multiply_uint(x.data(), q_size, 2 * t.value(), width, numerator.data());
@@ -1858,7 +1860,7 @@ namespace sealtest
                         divide_uint(numerator.data(), q2.data(), width, quotient.data(), remainder.data(), mpool);
                         ASSERT_EQ(modulo_uint(quotient.data(), width, t), scaled[c]) << "c " << c;
 
-                        // x - q if 2 * x > q
+                        // x - prod(q) if 2 * x > prod(q)
                         uint64_t expected = modulo_uint(x.data(), q_size, t);
                         vector<uint64_t> twice_x(x), q_wide(width);
                         twice_x.resize(width);

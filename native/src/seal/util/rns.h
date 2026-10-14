@@ -141,15 +141,11 @@ namespace seal
             }
 
             /**
-            Creates a BaseConverter for a scaled fast base conversion. With ibase = {q_1, ..., q_k} (with product q)
-            and obase = {p_1, ..., p_l}, fast_convert and fast_convert_array compute
+            Fast conversions compute out_j = [sum_i [in_i * a_i * (q/q_i)^(-1)]_{q_i} * (q/q_i) * b_j]_{p_j} for ibase
+            q_i with product q, obase p_j, a_i = ibase_scale[i], and b_j = obase_scale[j]. exact_convert_array does not
+            support scaling.
 
-                out_j = [ (sum_i [in_i * a_i * (q/q_i)^(-1)]_{q_i} * (q/q_i)) * b_j ]_{p_j},
-
-            where a_i = ibase_scale[i] and b_j = obase_scale[j]. With all factors equal to 1 this is the usual fast
-            base conversion. Scaling is not supported by exact_convert_array.
-
-            @throws std::invalid_argument if the sizes of ibase_scale or obase_scale do not match the bases
+            @throws std::invalid_argument on a scale size mismatch or an uninitialized pool
             */
             BaseConverter(
                 const RNSBase &ibase, const RNSBase &obase, const std::vector<std::uint64_t> &ibase_scale,
@@ -191,8 +187,7 @@ namespace seal
             void fast_convert(ConstCoeffIter in, CoeffIter out, MemoryPoolHandle pool) const;
 
             /**
-            Converts every coefficient of in. The input coefficients may be any 64-bit values. in and out may overlap
-            only at equal coefficient indices; for example, they may be identical or disjoint.
+            Input coefficients may be any 64-bit values. in and out may overlap only at equal coefficient indices.
             */
             void fast_convert_array(ConstRNSIter in, RNSIter out, MemoryPoolHandle pool) const;
 
@@ -213,21 +208,15 @@ namespace seal
             void initialize(const std::uint64_t *ibase_scale, const std::uint64_t *obase_scale);
 
             /**
-            Converts count coefficients, reading ibase component i from in + i * in_stride and writing obase component
-            j to out + j * out_stride. The output equals the corresponding coefficients of fast_convert_array. out
-            must not overlap in or temp.
-
-            @param[in] input_reduced True if every input coefficient is already reduced modulo its ibase element
-            @param[out] temp Scratch space for count * ibase_size() values. On return, row i (at temp + i * count)
-            holds [in_i * a_i * (q/q_i)^(-1)]_{q_i}, unless input_reduced is true, the first step is the identity, and
-            in_stride equals count.
+            Converts count coefficients, with component strides in_stride and out_stride. Set input_reduced only if all
+            in_i < q_i; out must then not overlap in. out must not overlap temp (count * ibase_size() values), whose row
+            i receives [in_i * a_i * (q/q_i)^(-1)]_{q_i} if input_reduced is false.
             */
             void fast_convert_block(
                 const std::uint64_t *in, std::size_t in_stride, std::size_t count, bool input_reduced,
                 std::uint64_t *out, std::size_t out_stride, std::uint64_t *temp) const;
 
-            // Number of coefficients converted at a time; a block of first-step values (ibase_size() rows) then stays
-            // in cache for typical base sizes
+            // Maximum block size, in coefficients
             static constexpr std::size_t max_block_size = 512;
 
             MemoryPoolHandle pool_;
@@ -236,31 +225,26 @@ namespace seal
 
             RNSBase obase_;
 
-            // Whether this converter was created with input or output scaling factors
+            // True if created with scaling factors
             bool is_scaled_ = false;
 
-            // Whether all constants of the first step (the inverse punctured products times the input scaling factors)
-            // are 1
+            // True if all scaled_inv_punctured_prod_ are 1
             bool unit_first_step_ = false;
 
-            // a_i * (q/q_i)^(-1) mod q_i, where a_i are the input scaling factors (all 1 if not scaled)
+            // a_i * (q/q_i)^(-1) mod q_i for input scales a_i
             Pointer<MultiplyUIntModOperand> scaled_inv_punctured_prod_;
 
-            // b_j * (q/q_i) mod p_j, where b_j are the output scaling factors (all 1 if not scaled)
+            // [j][i] = b_j * (q/q_i) mod p_j for output scales b_j
             Pointer<Pointer<std::uint64_t>> base_change_matrix_;
 
-            // Row-major copy of base_change_matrix_ used by fast_convert_block. Rows for odd p_j are multiplied by
-            // 2^64 mod p_j, so that dot products can be reduced with a Montgomery reduction instead of a Barrett
-            // reduction.
+            // Row-major copy of base_change_matrix_, with rows for odd p_j in Montgomery form
             Pointer<std::uint64_t> conv_matrix_;
 
             // -p_j^(-1) mod 2^64 for odd p_j, and 0 for even p_j
             Pointer<std::uint64_t> obase_neg_inv_mod_2_64_;
 
-            // End indices of a partition of [0, ibase_size()) into ibase_chunk_count_ chunks in which the sum of
-            // (q_i - 1) is less than 2^64, so that a dot product over a chunk is less than p_j * 2^64 (the input bound
-            // of Montgomery reduction). This is not a std::vector, because Pointer<BaseConverter> requires a
-            // standard-layout type, and std::vector is not one in MSVC Debug builds.
+            // Chunk ends of ibase, with sum(q_i - 1) < 2^64 per chunk. Not a std::vector, which is not standard-layout
+            // in MSVC Debug builds.
             Pointer<std::size_t> ibase_chunk_ends_;
 
             std::size_t ibase_chunk_count_ = 0;
@@ -287,9 +271,8 @@ namespace seal
                 RNSIter input, ConstNTTTablesIter rns_ntt_tables, MemoryPoolHandle pool) const;
 
             /**
-            Out-of-place versions of divide_and_round_q_last_inplace and divide_and_round_q_last_ntt_inplace: the
-            result, in base q without its last modulus, is written to destination. Component i of destination may
-            coincide with component j <= i of input; in particular, destination may equal input.
+            Out-of-place versions of the functions above, with the result in q without its last prime. Component i of
+            destination may coincide with component j <= i of input.
             */
             void divide_and_round_q_last(ConstRNSIter input, RNSIter destination, MemoryPoolHandle pool) const;
 
@@ -298,9 +281,8 @@ namespace seal
                 MemoryPoolHandle pool) const;
 
             /**
-            Removes the last modulus of q from a BGV ciphertext component x in NTT form: computes (x - delta) / q_last,
-            where delta is a multiple of t congruent to x modulo q_last. The result is written to destination, with the
-            same rules as for divide_and_round_q_last.
+            Computes (x - delta) / q_last for a BGV ciphertext polynomial x in NTT form, where delta is a multiple of t
+            congruent to x modulo q_last. Aliasing as for divide_and_round_q_last.
             */
             void mod_t_and_divide_q_last_ntt(
                 ConstRNSIter input, ConstNTTTablesIter rns_ntt_tables, RNSIter destination,
@@ -327,19 +309,16 @@ namespace seal
             void fastbconv_m_tilde(ConstRNSIter input, RNSIter destination, MemoryPoolHandle pool) const;
 
             /**
-            Steps (1)-(2) of BEHZ multiplication (see Evaluator::bfv_multiply): fastbconv_m_tilde followed by sm_mrq,
-            from base q to base Bsk. The input may hold any 64-bit values. If lazy_output is true, each output
-            coefficient is only reduced to [0, 3m) for its prime m in Bsk, which suffices as input to
-            ntt_negacyclic_harvey_lazy.
+            fastbconv_m_tilde and sm_mrq (BEHZ steps (1)-(2) in Evaluator::bfv_multiply) for any 64-bit input. With
+            lazy_output, the output is in [0, 3m) for each prime m in Bsk.
             */
             void fastbconv_m_tilde_sm_mrq(
                 ConstRNSIter input, bool lazy_output, RNSIter destination, MemoryPoolHandle pool) const;
 
             /**
-            Steps (5)-(8) of BEHZ multiplication (see Evaluator::bfv_multiply): inverse NTT of the input in base
-            q U Bsk, multiplication by t, fast_floor, and fastbconv_sk to base q. input_q and input_Bsk are in NTT form
-            with every coefficient in [0, 2m) for its prime m, and are overwritten. If input_montgomery_form is true,
-            the input holds c * 2^(-64) mod m, and the result is computed for c.
+            Inverse NTT, multiplication by t, fast_floor, and fastbconv_sk (BEHZ steps (5)-(8) in
+            Evaluator::bfv_multiply). input_q and input_Bsk, in NTT form in [0, 2m) for each prime m, are overwritten.
+            With input_montgomery_form, they hold c * 2^(-64) mod m, and the result is for c.
             */
             void inverse_ntt_multiply_t_fast_floor_fastbconv_sk(
                 RNSIter input_q, RNSIter input_Bsk, ConstNTTTablesIter base_q_ntt_tables, bool input_montgomery_form,
@@ -453,10 +432,9 @@ namespace seal
             void initialize_mod_switch();
 
             /**
-            Final step of the Shenoy-Kumaresan conversion from Bsk to q, for count coefficients: given the fast base
-            conversion of the B part of the input to q U {m_sk} (component i at conv_q_m_sk + i * conv_stride, fully
-            reduced) and the m_sk part of the input (input_m_sk), writes component i of the output to
-            destination + i * destination_stride. scratch must hold 2 * count values.
+            Final step of fastbconv_sk for count coefficients, from the fully reduced conversion conv_q_m_sk of the B
+            part to q U {m_sk} and the m_sk part input_m_sk. Rows are conv_stride and destination_stride apart; scratch
+            holds 2 * count values.
             */
             void fastbconv_sk_finish(
                 const std::uint64_t *conv_q_m_sk, std::size_t conv_stride, const std::uint64_t *input_m_sk,
@@ -488,15 +466,15 @@ namespace seal
 
             Modulus gamma_;
 
-            // Precomputation for fastbconv_m_tilde, sm_mrq, and fastbconv_m_tilde_sm_mrq
+            // Set by initialize_behz_extension
 
-            // Base converter: q --> Bsk U {m_tilde}, with the input scaled by m_tilde
+            // Base converter: q --> Bsk U {m_tilde}, with input scales m_tilde
             Pointer<BaseConverter> base_q_to_Bsk_m_tilde_conv_;
 
-            // Base converter: q --> Bsk, with the input scaled by m_tilde and the output by m_tilde^(-1)
+            // Base converter: q --> Bsk, with input scales m_tilde and output scales m_tilde^(-1)
             Pointer<BaseConverter> base_q_to_Bsk_mont_conv_;
 
-            // (q/q_i) * (-prod(q)^(-1)) mod m_tilde
+            // (prod(q)/q_i) * (-prod(q)^(-1)) mod m_tilde
             Pointer<std::uint64_t> m_tilde_row_neg_inv_prod_q_;
 
             // -prod(q)^(-1) mod m_tilde
@@ -508,7 +486,7 @@ namespace seal
             // prod(q) * m_tilde^(-1) mod Bsk
             Pointer<MultiplyUIntModOperand> prod_q_inv_m_tilde_mod_Bsk_;
 
-            // Precomputation for fast_floor, fastbconv_sk, and inverse_ntt_multiply_t_fast_floor_fastbconv_sk
+            // Set by initialize_behz_floor; the scaled converters and inverse NTT scalars only if t is non-zero
 
             // Base converter: q --> Bsk
             Pointer<BaseConverter> base_q_to_Bsk_conv_;
@@ -516,15 +494,14 @@ namespace seal
             // Base converter: B --> q U {m_sk}
             Pointer<BaseConverter> base_B_to_q_m_sk_conv_;
 
-            // Base converter: q --> Bsk, with the input scaled by (q/q_i) and the output by
-            // prod(q)^(-1) * (prod(B)/b_j)^(-1) for b_j in B and by prod(q)^(-1) for m_sk (only if t is non-zero)
+            // Base converter: q --> Bsk, with input scales prod(q)/q_i and output scales s_j, which are
+            // prod(q)^(-1) * (prod(B)/b_j)^(-1) for b_j in B and prod(q)^(-1) for m_sk
             Pointer<BaseConverter> base_q_to_Bsk_floor_conv_;
 
-            // Base converter: B --> q U {m_sk}, with the input scaled by (prod(B)/b_j) (only if t is non-zero)
+            // Base converter: B --> q U {m_sk}, with input scales prod(B)/b_j
             Pointer<BaseConverter> base_B_to_q_m_sk_unit_conv_;
 
-            // Inverse NTT scalars in base q and in base Bsk; the second half of each array includes the factor 2^64 for
-            // input in Montgomery form (only if t is non-zero)
+            // Inverse NTT scalars t * (prod(q)/q_i)^(-1) in q and t * s_j in Bsk, followed by the same times 2^64
             Pointer<std::uint64_t> intt_scalar_q_;
 
             Pointer<std::uint64_t> intt_scalar_Bsk_;
@@ -538,10 +515,9 @@ namespace seal
             // prod(B) mod q
             Pointer<MultiplyUIntModOperand> prod_B_mod_q_;
 
-            // Precomputation for decrypt_scale_and_round and decrypt_modt (only if t is non-zero)
+            // Set by initialize_decryption if t is non-zero
 
-            // Base converter: q --> {t, gamma}, with the input scaled by [t * gamma]_q and the output by
-            // -prod(q)^(-1) mod {t, gamma}
+            // Base converter: q --> {t, gamma}, with input scales [t * gamma]_q and output scales -prod(q)^(-1)
             Pointer<BaseConverter> base_q_to_t_gamma_scaled_conv_;
 
             // Base converter: q --> t
@@ -550,7 +526,7 @@ namespace seal
             // gamma^(-1) mod t
             MultiplyUIntModOperand inv_gamma_mod_t_;
 
-            // Precomputation for divide_and_round_q_last, divide_and_round_q_last_ntt, and mod_t_and_divide_q_last_ntt
+            // Set by initialize_mod_switch
 
             // q[last]^(-1) mod q[i] for i = 0..last-1
             Pointer<MultiplyUIntModOperand> inv_q_last_mod_q_;
@@ -561,24 +537,17 @@ namespace seal
         };
 
 #ifdef SEAL_USE_INTEL_HEXL
-        // With Intel HEXL, behz_tensor_product uses HEXL's dyadic products and outputs standard representatives
+        // HEXL's dyadic products output standard representatives
         constexpr bool behz_tensor_product_montgomery_form = false;
 #else
-        // behz_tensor_product outputs c * 2^(-64) mod p (Montgomery form); the factor 2^64 is folded into the scalar of
-        // the subsequent inverse NTT (see RNSTool::inverse_ntt_multiply_t_fast_floor_fastbconv_sk)
+        // behz_tensor_product outputs c * 2^(-64) mod p (see RNSTool::inverse_ntt_multiply_t_fast_floor_fastbconv_sk)
         constexpr bool behz_tensor_product_montgomery_form = true;
 #endif
 
         /**
-        Computes the BEHZ ciphertext tensor product for one RNS base, with all polynomials in NTT form:
-
-            out[k] = sum_{i + j = k} in1[i] * in2[j],  k = 0, ..., in1_size + in2_size - 2.
-
-        The input coefficients can be lazily reduced to [0, 4 * modulus) (as output by ntt_negacyclic_harvey_lazy),
-        and every modulus must have at most SEAL_MOD_BIT_COUNT_MAX bits. Every output coefficient is written exactly
-        once and is fully reduced, so the output does not need to be initialized. If
-        behz_tensor_product_montgomery_form is true, the output is out[k] * 2^(-64) instead (fully reduced). Passing
-        the same iterators for in1 and in2 computes a square with about half of the products.
+        Computes out[k] = sum_{i + j = k} in1[i] * in2[j] in NTT form for one RNS base of moduli with at most
+        SEAL_MOD_BIT_COUNT_MAX bits, from inputs in [0, 4 * modulus). out is overwritten and fully reduced, times
+        2^(-64) if behz_tensor_product_montgomery_form is true. Pass the same in1 and in2 to square.
         */
         void behz_tensor_product(
             ConstPolyIter in1, std::size_t in1_size, ConstPolyIter in2, std::size_t in2_size, ConstModulusIter base,

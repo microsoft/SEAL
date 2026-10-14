@@ -900,8 +900,7 @@ namespace sealtest
 
             const vector<size_t> kernel_test_sizes{ 1, 2, 7, 64, 1001 };
 
-            // Bound on the operands that may be lazily reduced (zero for none); Intel HEXL requires them to be less
-            // than 4 * modulus
+            // Bound on unreduced operands
             uint64_t lazy_operand_bound(const Modulus &modulus)
             {
 #ifdef SEAL_USE_INTEL_HEXL
@@ -912,7 +911,7 @@ namespace sealtest
 #endif
             }
 
-            // Extreme and random values less than bound (any 64-bit values if bound is zero)
+            // Extreme and random values less than bound, or any if bound is zero
             vector<uint64_t> kernel_test_operand(size_t n, uint64_t bound, mt19937_64 &rng)
             {
                 vector<uint64_t> values(n);
@@ -924,7 +923,6 @@ namespace sealtest
                 return values;
             }
 
-            // x * y mod modulus; barrett_reduce_128 is checked in UIntArithSmallMod.BarrettReduce128Random
             uint64_t reference_multiply_mod(uint64_t x, uint64_t y, const Modulus &modulus)
             {
                 unsigned long long z[2];
@@ -946,6 +944,7 @@ namespace sealtest
                     {
                         ASSERT_EQ(a[i] % modulus.value(), out[i]);
                     }
+
                     modulo_poly_coeffs(a.data(), n, modulus, a.data());
                     ASSERT_EQ(out, a);
                 }
@@ -970,6 +969,7 @@ namespace sealtest
                             ASSERT_EQ((a[i] + scalar) % p, sum[i]);
                             ASSERT_EQ((a[i] + p - scalar) % p, diff[i]);
                         }
+
                         vector<uint64_t> in_place = a;
                         add_poly_scalar_coeffmod(in_place.data(), n, scalar, modulus, in_place.data());
                         ASSERT_EQ(sum, in_place);
@@ -997,6 +997,7 @@ namespace sealtest
                         {
                             ASSERT_EQ(reference_multiply_mod(a[i], scalar % p, modulus), out[i]);
                         }
+
                         vector<uint64_t> in_place = a;
                         multiply_poly_scalar_coeffmod(in_place.data(), n, scalar, modulus, in_place.data());
                         ASSERT_EQ(out, in_place);
@@ -1019,6 +1020,7 @@ namespace sealtest
                     {
                         ref[i] = reference_multiply_mod(a[i], b[i], modulus);
                     }
+
                     dyadic_product_coeffmod(a.data(), b.data(), n, modulus, out.data());
                     ASSERT_EQ(ref, out);
 
@@ -1049,6 +1051,7 @@ namespace sealtest
                     {
                         ref[i] = (reference_multiply_mod(a[i], b[i], modulus) + c[i]) % p;
                     }
+
                     dyadic_product_add_coeffmod(a.data(), b.data(), c.data(), n, modulus, out.data());
                     ASSERT_EQ(ref, out);
 
@@ -1066,9 +1069,11 @@ namespace sealtest
             Modulus modulus(65537);
             vector<uint64_t> a{ 1, 2 }, b{ 3, 4 }, c{ 5, 6 }, out(2);
             ASSERT_NO_THROW(dyadic_product_add_coeffmod(a.data(), b.data(), c.data(), 2, modulus, out.data()));
+
             b[1] = modulus.value();
             ASSERT_THROW(
                 dyadic_product_add_coeffmod(a.data(), b.data(), c.data(), 2, modulus, out.data()), invalid_argument);
+
             b[1] = 4;
             c[0] = modulus.value();
             ASSERT_THROW(
@@ -1093,6 +1098,7 @@ namespace sealtest
                         ref1[i] = reference_multiply_mod(a1[i], b[i], modulus);
                         ref2[i] = reference_multiply_mod(a2[i], b[i], modulus);
                     }
+
                     dyadic_product_shared_coeffmod(
                         a1.data(), a2.data(), b.data(), n, modulus, out1.data(), out2.data());
                     ASSERT_EQ(ref1, out1);

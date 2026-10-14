@@ -204,10 +204,10 @@ namespace sealtest
 
         TEST(PolyCore, AnyValueAtLeast)
         {
-            // Counts below, at, and above the block size of 64, with a single value at least the bound at every
-            // position: in a full block (at its start, inside, and at its end) and in the remainder
             uint64_t bound = 1000;
             ASSERT_FALSE(any_value_at_least(nullptr, 0, bound));
+
+            // Counts around the block size, with one value at least bound at each position
             for (size_t count : { size_t(1), size_t(63), size_t(64), size_t(65), size_t(128), size_t(200) })
             {
                 vector<uint64_t> values(count, bound - 1);
@@ -224,7 +224,7 @@ namespace sealtest
                 }
             }
 
-            // Every value is at least 0, and none is at least 2^64 - 1 unless it equals it
+            // Bounds 0 and 2^64 - 1
             vector<uint64_t> values{ 0, 1, 2 };
             ASSERT_TRUE(any_value_at_least(values.data(), values.size(), 0));
             ASSERT_FALSE(any_value_at_least(values.data(), values.size(), numeric_limits<uint64_t>::max()));

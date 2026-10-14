@@ -238,18 +238,21 @@ namespace sealtest
                                                          { 0, p - 1 },
                                                          { ~uint64_t(0), p - 1 },
                                                          { 0, p } };
-                // Products of (lazily reduced) operands
+
+                // Squares of the largest values in [0, p), [0, 2p), and [0, 4p)
                 for (uint64_t a : { p - 1, 2 * p - 1, 4 * p - 1 })
                 {
                     unsigned long long z[2];
                     multiply_uint64(a, a, z);
                     inputs.emplace_back(z[0], z[1]);
                 }
+
                 for (int i = 0; i < 300; i++)
                 {
                     inputs.emplace_back(rng(), rng());
                     inputs.emplace_back(rng(), rng() % p);
                 }
+
                 for (auto &in : inputs)
                 {
                     uint64_t input[2]{ in.first, in.second };
@@ -308,20 +311,22 @@ namespace sealtest
 
         TEST(UIntArithSmallMod, BranchFreeHelpersRandom)
         {
-            // The branch-free helpers are written in assembly on some platforms and with integer arithmetic on others;
-            // compare them with plain C++ on random values, on values close to each other, and with arguments that
-            // are the same variable
+            // Compare with plain C++ on random values and on values close to each other
             mt19937_64 rng(5);
             for (int i = 0; i < 100000; i++)
             {
                 uint64_t x = rng();
                 uint64_t y = (i & 1) ? rng() : x + (rng() % 5) - 2;
                 bool c = (rng() & 1) != 0;
+
                 ASSERT_EQ(x >= y ? x - y : x, sub_if_ge_uint64(x, y));
                 ASSERT_EQ(x < y ? ~uint64_t(0) : uint64_t(0), less_than_mask_uint64(x, y));
                 ASSERT_EQ(c ? x : y, select_uint64(c, x, y));
+
                 uint64_t m = rng();
                 ASSERT_EQ(x < y ? x - y + m : x - y, sub_add_if_lt_uint64(x, y, m));
+
+                // The same variable as two arguments checks the register constraints of the inline assembly
                 ASSERT_EQ(0ULL, sub_add_if_lt_uint64(x, x, m));
                 ASSERT_EQ(x < y ? x - y + x : x - y, sub_add_if_lt_uint64(x, y, x));
                 ASSERT_EQ(x < y ? x : x - y, sub_add_if_lt_uint64(x, y, y));
@@ -334,6 +339,8 @@ namespace sealtest
         TEST(UIntArithSmallMod, MontgomeryReduce128)
         {
             mt19937_64 rng(779);
+
+            // Odd moduli of up to 63 bits
             vector<uint64_t> moduli{ 3,
                                      5,
                                      65537,
@@ -345,6 +352,7 @@ namespace sealtest
             {
                 moduli.push_back((rng() >> (64 - k)) | (uint64_t(1) << (k - 1)) | 1);
             }
+
             for (uint64_t p : moduli)
             {
                 const uint64_t neg_inv_p = neg_inv_mod_2_64(p);
@@ -357,6 +365,7 @@ namespace sealtest
                 {
                     inputs.emplace_back(rng(), rng() % p);
                 }
+
                 for (auto &in : inputs)
                 {
                     uint64_t r = montgomery_reduce_128(in.first, in.second, p, neg_inv_p);

@@ -128,15 +128,14 @@ namespace seal
                 auto &prev_parms_id = prev_context_data.parms_id();
                 auto rns_tool = prev_context_data.rns_tool();
 
-                // The zero encryption masks the plaintext, so we use a fresh memory pool with `clear_on_destruction'
-                // enabled for it and for the temporaries of the modulus switching
+                // Fresh pool with `clear_on_destruction', as the zero encryption masks the plaintext
                 MemoryPoolHandle safe_pool = MemoryManager::GetPool(mm_prof_opt::mm_force_new, true);
 
                 // Zero encryption without modulus switching
                 Ciphertext temp(safe_pool);
                 util::encrypt_zero_asymmetric(public_key_, context_, prev_parms_id, is_ntt_form, temp);
 
-                // Modulus switching, writing the result directly to destination
+                // Modulus switching
                 SEAL_ITERATE(iter(temp, destination), temp.size(), [&](auto I) {
                     if (parms.scheme() == scheme_type::ckks)
                     {

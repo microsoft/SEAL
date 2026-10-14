@@ -347,8 +347,7 @@ namespace seal
             {
                 SEAL_ITERATE(
                     iter(c0, c1, secret_key_array, coeff_modulus, destination), coeff_modulus_size, [&](auto I) {
-                        // put < c_1 * s > + c_0 mod q in destination; note that destination is in the same (NTT) form
-                        // as encrypted
+                        // put < c_1 * s > + c_0 mod q in destination
                         dyadic_product_add_coeffmod(get<1>(I), get<2>(I), get<0>(I), coeff_count, get<3>(I), get<4>(I));
                     });
             }
@@ -357,7 +356,7 @@ namespace seal
                 SEAL_ITERATE(
                     iter(c0, c1, secret_key_array, coeff_modulus, ntt_tables, destination), coeff_modulus_size,
                     [&](auto I) {
-                        // Transform c_1 to NTT form, writing the result to destination
+                        // Transform c_1 to NTT form
                         ntt_negacyclic_harvey_lazy(get<1>(I), get<4>(I), get<5>(I));
                         // put < c_1 * s > mod q in destination
                         dyadic_product_coeffmod(get<5>(I), get<2>(I), coeff_count, get<3>(I), get<5>(I));

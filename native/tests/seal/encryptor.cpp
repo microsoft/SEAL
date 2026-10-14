@@ -1057,7 +1057,6 @@ namespace sealtest
 
     TEST(EncryptorTest, EncryptAtEveryLevelDecrypt)
     {
-        // Public key encryption at a level encrypts zero one level higher and switches it down
         for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
         {
             size_t n = 64;
@@ -1068,6 +1067,7 @@ namespace sealtest
             {
                 parms.set_plain_modulus(PlainModulus::Batching(n, 20));
             }
+
             SEALContext context(parms, true, sec_level_type::none);
             KeyGenerator keygen(context);
             PublicKey pk;

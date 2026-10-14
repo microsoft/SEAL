@@ -337,9 +337,8 @@ namespace seal
         }
 
         /**
-        Out-of-place version of ntt_negacyclic_harvey_lazy; the output is in [0, 4q). If reduce_input is false, operand
-        must be in [0, 4q); otherwise it may hold any 64-bit values, which are reduced modulo q. operand and result
-        must be identical or disjoint.
+        Out-of-place ntt_negacyclic_harvey_lazy: operand in [0, 4q) (any 64-bit values if reduce_input), output in
+        [0, 4q). operand and result must be identical or disjoint.
         */
         void ntt_negacyclic_harvey_lazy(
             ConstCoeffIter operand, const NTTTables &tables, bool reduce_input, CoeffIter result);
@@ -372,8 +371,8 @@ namespace seal
         }
 
         /**
-        Out-of-place version of inverse_ntt_negacyclic_harvey; operand must be in [0, 2q), and the output is fully
-        reduced. operand and result must be identical or disjoint.
+        Out-of-place inverse_ntt_negacyclic_harvey: operand in [0, 2q), output in [0, q). operand and result must be
+        identical or disjoint.
         */
         void inverse_ntt_negacyclic_harvey(ConstCoeffIter operand, const NTTTables &tables, CoeffIter result);
 
@@ -400,9 +399,8 @@ namespace seal
         }
 
         /**
-        Computes result = INTT(operand) * scalar mod q, fully reduced, at the cost of one inverse NTT (scalar is folded
-        into the multiplication by n^(-1)). operand must be in [0, 2q); scalar may be any 64-bit value. operand and
-        result must be identical or disjoint.
+        Out-of-place inverse_ntt_negacyclic_harvey times scalar (any 64-bit value) modulo q: operand in [0, 2q), output
+        in [0, q). operand and result must be identical or disjoint.
         */
         void inverse_ntt_negacyclic_harvey_scaled(
             ConstCoeffIter operand, std::uint64_t scalar, const NTTTables &tables, CoeffIter result);

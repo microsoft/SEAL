@@ -957,7 +957,7 @@ namespace seal
         }
 
         /**
-        Adds operand1 * operand2 to the 128-bit value accumulator (low word first), modulo 2^128.
+        Adds operand1 * operand2 to the 128-bit accumulator (low word first), modulo 2^128.
         */
         SEAL_FORCE_INLINE void multiply_add_uint64(
             std::uint64_t operand1, std::uint64_t operand2, unsigned long long *accumulator)
@@ -975,7 +975,7 @@ namespace seal
         }
 
         /**
-        Adds operand1 * operand2 + operand3 * operand4 to the 128-bit value accumulator (low word first), modulo 2^128.
+        Adds operand1 * operand2 + operand3 * operand4 to the 128-bit accumulator (low word first), modulo 2^128.
         */
         SEAL_FORCE_INLINE void multiply_add_uint64(
             std::uint64_t operand1, std::uint64_t operand2, std::uint64_t operand3, std::uint64_t operand4,

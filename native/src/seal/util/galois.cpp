@@ -225,6 +225,7 @@ namespace seal
             {
                 throw invalid_argument("Galois element is not valid");
             }
+
             auto &table = permutation_tables_[GetIndexFromElt(galois_elt)];
             generate_table_ntt(galois_elt, table);
             return table.get();

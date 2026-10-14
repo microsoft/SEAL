@@ -144,7 +144,7 @@ namespace sealtest
             SEALContext context(parms, false, sec_level_type::none);
             auto galois_tool = context.key_context_data()->galois_tool();
 
-            // The table of apply_galois_ntt for the Galois element 3, as in ApplyGaloisNTT
+            // As in ApplyGaloisNTT
             const uint32_t *table = galois_tool->get_permutation_table_ntt(3);
             uint32_t table_true[8]{ 4, 5, 7, 6, 1, 0, 2, 3 };
             for (size_t i = 0; i < 8; i++)
@@ -152,13 +152,13 @@ namespace sealtest
                 ASSERT_EQ(table_true[i], table[i]);
             }
 
-            // For every Galois element, the table is a permutation that apply_galois_ntt applies, and it is generated
-            // only once
+            // Cached permutations, as applied by apply_galois_ntt
             uint64_t in[8]{ 9, 10, 11, 12, 13, 14, 15, 16 };
             for (uint32_t galois_elt = 1; galois_elt < 16; galois_elt += 2)
             {
                 table = galois_tool->get_permutation_table_ntt(galois_elt);
                 ASSERT_EQ(table, galois_tool->get_permutation_table_ntt(galois_elt));
+
                 uint64_t out[8];
                 galois_tool->apply_galois_ntt(in, galois_elt, out);
                 vector<bool> seen(8, false);
