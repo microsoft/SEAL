@@ -208,7 +208,7 @@ namespace sealtest
             // position: in a full block (at its start, inside, and at its end) and in the remainder
             uint64_t bound = 1000;
             ASSERT_FALSE(any_value_at_least(nullptr, 0, bound));
-            for (size_t count : { 1, 63, 64, 65, 128, 200 })
+            for (size_t count : { size_t(1), size_t(63), size_t(64), size_t(65), size_t(128), size_t(200) })
             {
                 vector<uint64_t> values(count, bound - 1);
                 ASSERT_FALSE(any_value_at_least(values.data(), count, bound));
