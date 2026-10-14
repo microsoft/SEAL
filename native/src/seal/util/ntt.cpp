@@ -235,7 +235,7 @@ namespace seal
 #ifndef SEAL_USE_INTEL_HEXL
         namespace
         {
-            // The lazy outputs of these kernels match NTTTables::ntt_handler() bit for bit
+            // For inputs in range, the lazy outputs of these kernels match NTTTables::ntt_handler() bit for bit
 
             // multiply_uint_mod_lazy with p by value
             SEAL_FORCE_INLINE uint64_t ntt_mul_root(uint64_t y, const MultiplyUIntModOperand &w, uint64_t p)
@@ -270,7 +270,7 @@ namespace seal
                 uint64_t &x, uint64_t &y, const MultiplyUIntModOperand &s, const MultiplyUIntModOperand &ws, uint64_t p,
                 uint64_t two_p)
             {
-                uint64_t u = sub_if_ge_uint64(x, two_p);
+                uint64_t u = x;
                 uint64_t v = y;
                 uint64_t t = sub_if_ge_uint64(u + v, two_p);
                 x = ntt_mul_root(t, s, p);
@@ -385,7 +385,7 @@ namespace seal
                 uint64x2_t &x, uint64x2_t &y, const MultiplyUIntModOperand &s, const MultiplyUIntModOperand &ws,
                 uint64_t p, uint64x2_t vtwo_p)
             {
-                uint64x2_t u = ntt_vsub_if_ge(x, vtwo_p);
+                uint64x2_t u = x;
                 uint64x2_t v = y;
                 uint64x2_t t = ntt_vsub_if_ge(vaddq_u64(u, v), vtwo_p);
                 x = ntt_vmul_root(t, s, s, p);

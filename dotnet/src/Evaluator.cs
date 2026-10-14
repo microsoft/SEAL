@@ -555,7 +555,6 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="ArgumentException">if plain is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if plain is already at lowest level</exception>
         /// <exception cref="ArgumentException">if the scale is too large for the new encryption parameters</exception>
-        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public void ModSwitchToNext(Plaintext plain, Plaintext destination)
         {
             if (null == plain)

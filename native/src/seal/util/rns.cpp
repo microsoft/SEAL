@@ -1794,8 +1794,10 @@ namespace seal
 #endif
             size_t modulus_size = base_q_->size();
             const Modulus *curr_modulus = base_q_->base();
-            const Modulus &plain_modulus = t_;
             uint64_t last_modulus_value = curr_modulus[modulus_size - 1].value();
+
+            // Local copy, since neg_c_last_mod_t may alias t_
+            const Modulus plain_modulus = t_;
 
             SEAL_ALLOCATE_GET_COEFF_ITER(c_last, coeff_count_, pool);
             inverse_ntt_negacyclic_harvey(input[modulus_size - 1], rns_ntt_tables[modulus_size - 1], c_last);

@@ -565,7 +565,7 @@ namespace seal
             ntt_negacyclic_harvey_lazy(get<0>(I), base_q_size, base_q_ntt_tables, get<1>(I));
 
             // (1) Convert from base q to base Bsk U {m_tilde}
-            // (2) Reduce q-overflows in with Montgomery reduction, switching base to Bsk
+            // (2) Remove extra multiples of q with Montgomery reduction, giving the base Bsk part
             // Output in [0, 3m) for each prime m of Bsk, as the lazy NTT allows
             rns_tool->fastbconv_m_tilde_sm_mrq(get<0>(I), /*lazy_output=*/true, get<2>(I), pool);
 
@@ -1114,7 +1114,7 @@ namespace seal
             return;
         }
 
-        // Calculate number of relinearize_one_step calls needed
+        // Each relinearization step removes one component
         size_t relins_needed = encrypted_size - destination_size;
 
         auto &parms = context_data_ptr->parms();

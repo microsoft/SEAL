@@ -171,10 +171,10 @@ namespace seal
             // Inverse of coeff_count_ modulo modulus_.
             MultiplyUIntModOperand inv_degree_modulo_;
 
-            // Holds 1~(n-1)-th powers of root_ in bit-reversed order, the 0-th power is left unset.
+            // Holds 1~(n-1)-th powers of root_ in bit-reversed order, the 0-th power is at index 0.
             Pointer<MultiplyUIntModOperand> root_powers_;
 
-            // Holds 1~(n-1)-th powers of inv_root_ in scrambled order, the 0-th power is left unset.
+            // Holds 1~(n-1)-th powers of inv_root_ in scrambled order, the 0-th power is at index 0.
             Pointer<MultiplyUIntModOperand> inv_root_powers_;
 
             ModArithLazy mod_arith_lazy_;
@@ -404,8 +404,5 @@ namespace seal
         */
         void inverse_ntt_negacyclic_harvey_scaled(
             ConstCoeffIter operand, std::uint64_t scalar, const NTTTables &tables, CoeffIter result);
-
-        void ntt_negacyclic_harvey_new(CoeffIter operand, const NTTTables &tables);
-        void inverse_ntt_negacyclic_harvey_new(CoeffIter operand, const NTTTables &tables);
     } // namespace util
 } // namespace seal

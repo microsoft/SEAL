@@ -450,13 +450,11 @@ namespace seal
         result in the destination parameter.
 
         @param[in] plain The plaintext to be switched to a smaller modulus
-        @param[in] pool The MemoryPoolHandle pointing to a valid memory pool
         @param[out] destination The plaintext to overwrite with the modulus switched result
         @throws std::invalid_argument if plain is not in NTT form
         @throws std::invalid_argument if plain is not valid for the encryption parameters
         @throws std::invalid_argument if plain is already at lowest level
         @throws std::invalid_argument if the scale is too large for the new encryption parameters
-        @throws std::invalid_argument if pool is uninitialized
         */
         inline void mod_switch_to_next(const Plaintext &plain, Plaintext &destination) const
         {

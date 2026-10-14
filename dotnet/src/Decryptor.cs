@@ -61,16 +61,13 @@ namespace Microsoft.Research.SEAL
         }
 
         /// <summary>
-        /// Decrypts a Ciphertext and stores the result in the destination parameter. Dynamic
-        /// memory allocations in the process are allocated from the memory pool pointed to by
-        /// the given MemoryPoolHandle.
+        /// Decrypts a Ciphertext and stores the result in the destination parameter.
         /// </summary>
         /// <param name="encrypted">The ciphertext to decrypt</param>
         /// <param name="destination">The plaintext to overwrite with the decrypted ciphertext</param>
         /// <exception cref="ArgumentNullException">if either encrypted or destination are null</exception>
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is not in the default NTT form</exception>
-        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public void Decrypt(Ciphertext encrypted, Plaintext destination)
         {
             if (null == encrypted)
@@ -84,9 +81,7 @@ namespace Microsoft.Research.SEAL
         /// <summary>
         /// Computes the invariant noise budget (in bits) of a ciphertext. The invariant noise
         /// budget measures the amount of room there is for the noise to grow while ensuring
-        /// correct decryptions. Dynamic memory allocations in the process are allocated from
-        /// the memory pool pointed to by the given MemoryPoolHandle. This function works only
-        /// with the BFV and BGV schemes.
+        /// correct decryptions. This function works only with the BFV and BGV schemes.
         /// </summary>
         /// <remarks>
         /// <para>
@@ -119,7 +114,6 @@ namespace Microsoft.Research.SEAL
         /// <exception cref="InvalidOperationException">if the scheme is not BFV or BGV</exception>
         /// <exception cref="ArgumentException">if encrypted is not valid for the encryption parameters</exception>
         /// <exception cref="ArgumentException">if encrypted is in NTT form</exception>
-        /// <exception cref="ArgumentException">if pool is uninitialized</exception>
         public int InvariantNoiseBudget(Ciphertext encrypted)
         {
             if (null == encrypted)
