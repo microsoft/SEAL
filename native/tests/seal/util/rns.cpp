@@ -1444,37 +1444,47 @@ namespace sealtest
                     multiply_uint(product.data(), product.size(), value, next.size(), next.data());
                     product.swap(next);
                 }
+
                 return get_significant_bit_count_uint(product.data(), product.size());
             }
         } // namespace
 
         // B is the shortest prefix of the base conversion primes with
-        // bits(prod(B) * m_sk) - 1 >= 5 + bits(t) + log2(n) + bits(q), and never longer than with the rule of SEAL
-        // 4.6.2. (The requirement is always met with the old rule, so the logic_error thrown otherwise is unreachable.)
+        // bits(prod(B) * m_sk) - 1 >= 5 + bits(t) + log2(n) + bits(prod(q)), and never longer than with the rule of
+        // SEAL 4.6.2. (The requirement is always met with the old rule, so the logic_error thrown otherwise is
+        // unreachable.)
         TEST(RNSToolTest, TightBskSize)
         {
             auto pool = MemoryManager::GetPool();
+
+            // Checks the size of B for the given parameters and returns it
             auto B_size = [&](size_t n, const vector<Modulus> &q_primes, const Modulus &t) {
                 RNSBase q(q_primes, pool);
                 RNSTool rns_tool(n, q, t, pool);
                 const RNSBase &B = *rns_tool.base_B();
+
+                // B is never larger than with the rule of SEAL 4.6.2
                 int q_bit_count = get_significant_bit_count_uint(q.base_prod(), q.size());
-                int required_bit_count = 5 + t.bit_count() + get_power_of_two(n) + q_bit_count;
                 int q_size = static_cast<int>(q.size());
                 size_t old_B_size = q.size() + (32 + t.bit_count() + q_bit_count >= 61 * q_size + 61 ? 1 : 0);
                 EXPECT_LE(B.size(), old_B_size);
 
+                // B satisfies the bound
+                int required_bit_count = 5 + t.bit_count() + get_power_of_two(n) + q_bit_count;
                 vector<uint64_t> values{ rns_tool.m_sk().value() };
                 for (size_t i = 0; i < B.size(); i++)
                 {
                     values.push_back(B[i].value());
                 }
                 EXPECT_GE(product_bit_count(values) - 1, required_bit_count);
+
+                // B without its last prime does not satisfy the bound, unless B has only one prime (the minimum)
                 values.pop_back();
                 if (B.size() > 1)
                 {
                     EXPECT_LT(product_bit_count(values) - 1, required_bit_count);
                 }
+
                 return B.size();
             };
 
@@ -1490,14 +1500,19 @@ namespace sealtest
                 {
                     Modulus t =
                         t_bit_count == 0 ? Modulus(0) : (t_bit_count == 2 ? Modulus(3) : get_prime(2 * n, t_bit_count));
+
                     for (int q_bit_count : { 20, 50, 60 })
                     {
                         for (size_t q_size : { size_t(1), size_t(2), size_t(5), size_t(17) })
                         {
+                            // There are only 8 primes of 20 bits congruent to 1 modulo 2 * 4096, so a q of 20-bit
+                            // primes has only one prime
                             if (q_bit_count == 20 && q_size > 1)
                             {
                                 continue;
                             }
+
+                            // RNSTool requires the plain modulus to be coprime to q
                             auto q = get_primes(2 * n, q_bit_count, q_size);
                             if (find(q.begin(), q.end(), t) == q.end())
                             {

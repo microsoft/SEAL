@@ -877,25 +877,40 @@ namespace seal
             m_sk_ = *baseconv_primes_iter++;
             gamma_ = *baseconv_primes_iter++;
 
-            // The rule above is conservative, since it assumes that the primes in q are as large as those in B. Shrink
-            // B to the shortest prefix that provably suffices. Let k be the number of primes in q, and let q also
-            // denote their product. sm_mrq outputs coefficients |a| <= q * (1/2 + k / m_tilde), and an output
-            // polynomial of the tensor product is a sum of at most 8 products of two such polynomials (the output size
-            // is at most SEAL_CIPHERTEXT_SIZE_MAX = 16, so the smaller input size is at most 8). Its coefficients X
-            // satisfy |X| <= 8 * n * q^2 * (1/2 + k / m_tilde)^2, and fast_floor outputs y = floor(t * X / q) - u with
-            // 0 <= u < k, so |y| < 2.01 * t * n * q. None of this depends on B. The Shenoy-Kumaresan conversion of y
-            // is exact if |y| < prod(B) * (m_sk / 2 - |B| - 2), where |B| is the number of primes in B; this holds with
-            // a margin of almost a factor 8 if 32 * t * n * q <= prod(B) * m_sk, i.e., if
-            //   bits(prod(B) * m_sk) - 1 >= 5 + bits(t) + log2(n) + bits(q).
-            // The output of the multiplication then does not depend on B.
+            // The base_B_size computed above is needed only if the primes in q have about 60 bits; otherwise B often
+            // needs fewer primes. For example, with CoeffModulus::BFVDefault(8192) and a 20-bit plain modulus, 4 primes
+            // suffice instead of 5. Below, B is reduced to the shortest prefix of the sampled primes with which BFV
+            // multiplication (see Evaluator::bfv_multiply) is still exact. The bound follows the steps of the BEHZ
+            // multiplication, where k is the number of primes in q, n is poly_modulus_degree, and t is the plain
+            // modulus:
+            //
+            // - Steps (1)-(2), fastbconv_m_tilde and sm_mrq, replace each input coefficient by an integer a that is
+            //   congruent to it modulo prod(q), with |a| <= prod(q) * (1/2 + k / m_tilde).
+            // - Step (4), the tensor product: an output polynomial is a sum of at most 8 products of two input
+            //   polynomials, since the output size is at most SEAL_CIPHERTEXT_SIZE_MAX = 16, so the smaller input size
+            //   is at most 8. Each coefficient of a product of two polynomials is a sum of n products of coefficients,
+            //   so the output coefficients X satisfy |X| <= 8 * n * prod(q)^2 * (1/2 + k / m_tilde)^2.
+            // - Steps (6)-(7), fast_floor, compute y = floor(t * X / prod(q)) - u with 0 <= u < k. Since m_tilde = 2^32
+            //   and k < prod(q), this gives |y| < t * |X| / prod(q) + k < 3 * t * n * prod(q).
+            // - Step (8), the Shenoy-Kumaresan conversion of y from Bsk to q, is exact if
+            //   |y| < prod(B) * (m_sk / 2 - |B| - 2), where |B| is the number of primes in B.
+            //
+            // None of a, X, and y depend on B. The condition of step (8) holds, with a margin of more than a factor 5,
+            // if 32 * t * n * prod(q) <= prod(B) * m_sk, which is guaranteed if
+            //   bits(prod(B) * m_sk) - 1 >= 5 + bits(t) + log2(n) + bits(prod(q)).
+            // The conversion is then exact, and since y does not depend on B, neither does the result.
             static_assert(SEAL_CIPHERTEXT_SIZE_MAX <= 16, "the size of B below assumes at most 8 products");
             {
                 const int required_bit_count = 5 + t_.bit_count() + coeff_count_power + total_coeff_bit_count;
+
+                // prod(B) * m_sk for the current prefix B of the sampled primes
                 vector<uint64_t> B_m_sk_prod{ m_sk_.value() };
                 auto sufficient = [&]() {
                     return get_significant_bit_count_uint(B_m_sk_prod.data(), B_m_sk_prod.size()) - 1 >=
                            required_bit_count;
                 };
+
+                // Add primes to B until the bound holds, but use at most the base_B_size primes computed above
                 size_t tight_B_size = 0;
                 do
                 {
@@ -906,10 +921,13 @@ namespace seal
                     B_m_sk_prod.swap(next);
                     tight_B_size++;
                 } while (tight_B_size < base_B_size && !sufficient());
+
+                // The base_B_size primes computed above always satisfy the bound, so this should never happen
                 if (!sufficient())
                 {
                     throw logic_error("invalid rns bases");
                 }
+
                 base_B_size = tight_B_size;
             }
 
