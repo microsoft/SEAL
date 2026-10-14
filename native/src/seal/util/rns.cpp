@@ -2019,6 +2019,10 @@ namespace seal
                     const size_t i_end = (k + 1) / 2;
                     const size_t cross_count = i_end > i_first ? i_end - i_first : 0;
                     const bool has_square = !(k & 1);
+                    if (cross_count > SEAL_CIPHERTEXT_SIZE_MAX)
+                    {
+                        throw logic_error("invalid ciphertext size");
+                    }
 
                     for (size_t j = 0; j < base_size; j++)
                     {

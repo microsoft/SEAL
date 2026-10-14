@@ -52,6 +52,21 @@ namespace sealtest
             }
         }
 
+        TEST(NTTTablesTest, InvalidCoeffCountPower)
+        {
+            MemoryPoolHandle pool = MemoryPoolHandle::Global();
+            Pointer<NTTTables> tables;
+
+            // The modulus supports NTT sizes up to 2 * SEAL_POLY_MOD_DEGREE_MAX
+            int max_power = get_power_of_two(SEAL_POLY_MOD_DEGREE_MAX);
+            Modulus modulus(get_prime(uint64_t(2) << (max_power + 1), 60));
+            for (int coeff_count_power : { -1, 0, max_power + 1 })
+            {
+                ASSERT_THROW(tables = allocate<NTTTables>(pool, coeff_count_power, modulus, pool), invalid_argument);
+                ASSERT_THROW(CreateNTTTables(coeff_count_power, { modulus }, tables, pool), invalid_argument);
+            }
+        }
+
         TEST(NTTTablesTest, NTTPrimitiveRootsTest)
         {
             MemoryPoolHandle pool = MemoryPoolHandle::Global();

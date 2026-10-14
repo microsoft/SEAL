@@ -376,6 +376,15 @@ namespace sealtest
             }
         }
 
+#ifdef SEAL_DEBUG
+        TEST(UIntArithSmallMod, MontgomeryRequiresOddModulus)
+        {
+            ASSERT_THROW(static_cast<void>(neg_inv_mod_2_64(4)), invalid_argument);
+            ASSERT_THROW(DyadicMontgomeryReducer{ Modulus(4) }, invalid_argument);
+            ASSERT_NO_THROW(DyadicMontgomeryReducer{ Modulus((uint64_t(1) << 61) - 1) });
+        }
+#endif
+
         TEST(UIntArithSmallMod, MultiplyUIntMod)
         {
             Modulus mod(2);

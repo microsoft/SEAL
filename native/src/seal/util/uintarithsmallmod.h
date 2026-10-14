@@ -287,8 +287,14 @@ namespace seal
         /**
         Returns -p^(-1) mod 2^64 for odd p.
         */
-        SEAL_NODISCARD inline std::uint64_t neg_inv_mod_2_64(std::uint64_t p) noexcept
+        SEAL_NODISCARD inline std::uint64_t neg_inv_mod_2_64(std::uint64_t p)
         {
+#ifdef SEAL_DEBUG
+            if (!(p & 1))
+            {
+                throw std::invalid_argument("p");
+            }
+#endif
             // Newton iteration; p is its own inverse modulo 8, and each step doubles the number of correct bits
             std::uint64_t inv = p;
             for (int i = 0; i < 5; i++)

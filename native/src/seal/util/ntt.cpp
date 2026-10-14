@@ -878,13 +878,11 @@ namespace seal
 
         void NTTTables::initialize(int coeff_count_power, const Modulus &modulus)
         {
-#ifdef SEAL_DEBUG
             if ((coeff_count_power < get_power_of_two(SEAL_POLY_MOD_DEGREE_MIN)) ||
                 coeff_count_power > get_power_of_two(SEAL_POLY_MOD_DEGREE_MAX))
             {
                 throw invalid_argument("coeff_count_power out of range");
             }
-#endif
             coeff_count_power_ = coeff_count_power;
             coeff_count_ = size_t(1) << coeff_count_power_;
             modulus_ = modulus;
