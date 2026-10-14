@@ -3,7 +3,7 @@
 
 # Build XCFrameworks for iOS (device + simulator).
 #
-# Produces libseal-<maj>.<min>.xcframework and libsealc-<maj>.<min>.xcframework,
+# Produces libseal.xcframework and libsealc.xcframework,
 # each containing two arm64 slices: one for iOS device (iphoneos) and one for
 # the iOS simulator on Apple Silicon (iphonesimulator).
 #
@@ -14,7 +14,7 @@
 #   commands; the consumer's link step pulls our .o files into their final
 #   binary. Required because iOS App Store policy disallows dlopen of
 #   arbitrary user dynamic code.
-# - zlib/zstd are merged into libseal-<ver>.a via seal_combine_archives, so
+# - zlib/zstd are merged into libseal.a via seal_combine_archives, so
 #   consumers don't need to link them separately.
 #
 # Usage (from project root):
@@ -53,18 +53,6 @@ if(NOT DEFINED WORK_DIR)
 endif()
 get_filename_component(WORK_DIR "${WORK_DIR}" ABSOLUTE)
 
-# Extract SEAL version from CMakeLists.txt
-
-file(READ "${SOURCE_DIR}/CMakeLists.txt" _cmakelists_content)
-string(REGEX MATCH "project\\(SEAL VERSION ([0-9]+)\\.([0-9]+)"
-    _ignored "${_cmakelists_content}")
-if(NOT CMAKE_MATCH_1 OR NOT CMAKE_MATCH_2)
-    message(FATAL_ERROR
-        "Failed to parse SEAL version from ${SOURCE_DIR}/CMakeLists.txt.")
-endif()
-set(SEAL_VERSION_MM "${CMAKE_MATCH_1}.${CMAKE_MATCH_2}")
-
-message(STATUS "SEAL version: ${SEAL_VERSION_MM}")
 message(STATUS "Build type:   ${BUILD_TYPE}")
 message(STATUS "Work dir:     ${WORK_DIR}")
 message(STATUS "Output dir:   ${OUTPUT_DIR}")
@@ -77,12 +65,11 @@ set(INSTALL_DEVICE    "${WORK_DIR}/install-device")
 set(INSTALL_SIMULATOR "${WORK_DIR}/install-simulator")
 set(XCF_STAGING "${WORK_DIR}/staging")
 
-set(INCLUDE_SUBDIR "SEAL-${SEAL_VERSION_MM}")
-set(LIBSEAL_NAME   "libseal-${SEAL_VERSION_MM}.a")
-set(LIBSEALC_NAME  "libsealc-${SEAL_VERSION_MM}.a")
+set(LIBSEAL_NAME   "libseal.a")
+set(LIBSEALC_NAME  "libsealc.a")
 
-set(LIBSEAL_XCF  "${OUTPUT_DIR}/libseal-${SEAL_VERSION_MM}.xcframework")
-set(LIBSEALC_XCF "${OUTPUT_DIR}/libsealc-${SEAL_VERSION_MM}.xcframework")
+set(LIBSEAL_XCF  "${OUTPUT_DIR}/libseal.xcframework")
+set(LIBSEALC_XCF "${OUTPUT_DIR}/libsealc.xcframework")
 
 # Common CMake configure arguments
 
@@ -179,9 +166,9 @@ foreach(_slice IN ITEMS "${INSTALL_DEVICE}" "${INSTALL_SIMULATOR}")
                 "Expected install artifact not found: ${_slice}/lib/${_libname}")
         endif()
     endforeach()
-    if(NOT IS_DIRECTORY "${_slice}/include/${INCLUDE_SUBDIR}")
+    if(NOT IS_DIRECTORY "${_slice}/include/seal")
         message(FATAL_ERROR
-            "Expected include directory not found: ${_slice}/include/${INCLUDE_SUBDIR}")
+            "Expected include directory not found: ${_slice}/include/seal")
     endif()
 endforeach()
 
@@ -189,23 +176,28 @@ endforeach()
 #
 # xcodebuild -create-xcframework requires a separate -headers tree per slice
 # because generated files (e.g. config.h) can differ between device and
-# simulator. We copy the entire SEAL-<ver>/ include tree, which bundles both
-# the SEAL headers and the Microsoft.GSL headers that SEAL's public API
-# references.
+# simulator. Each tree holds the SEAL headers and, at its top level, the
+# Microsoft.GSL headers that SEAL's public API references, which SEAL installs
+# in include/seal/thirdparty.
 
 file(REMOVE_RECURSE "${XCF_STAGING}")
-file(MAKE_DIRECTORY "${XCF_STAGING}/device" "${XCF_STAGING}/simulator")
+foreach(_slice IN ITEMS device simulator)
+    if(_slice STREQUAL "device")
+        set(_include "${INSTALL_DEVICE}/include")
+    else()
+        set(_include "${INSTALL_SIMULATOR}/include")
+    endif()
+    file(MAKE_DIRECTORY "${XCF_STAGING}/${_slice}")
+    file(COPY "${_include}/seal" DESTINATION "${XCF_STAGING}/${_slice}"
+        PATTERN "thirdparty" EXCLUDE)
 
-# file(COPY) copies each listed item as a subdirectory of DESTINATION. To place
-# the *contents* of the include tree directly under staging/{device,simulator},
-# glob the top-level entries and copy them individually.
-file(GLOB _device_items "${INSTALL_DEVICE}/include/${INCLUDE_SUBDIR}/*")
-file(GLOB _sim_items    "${INSTALL_SIMULATOR}/include/${INCLUDE_SUBDIR}/*")
-if(NOT _device_items OR NOT _sim_items)
-    message(FATAL_ERROR "Include tree appears empty; nothing to stage.")
-endif()
-file(COPY ${_device_items} DESTINATION "${XCF_STAGING}/device")
-file(COPY ${_sim_items}    DESTINATION "${XCF_STAGING}/simulator")
+    # file(COPY) copies each listed item as a subdirectory of DESTINATION, so
+    # glob the entries of thirdparty to place them at the top level.
+    file(GLOB _thirdparty_items "${_include}/seal/thirdparty/*")
+    if(_thirdparty_items)
+        file(COPY ${_thirdparty_items} DESTINATION "${XCF_STAGING}/${_slice}")
+    endif()
+endforeach()
 
 # Create XCFrameworks
 #

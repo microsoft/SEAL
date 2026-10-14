@@ -34,12 +34,6 @@ macro(seal_set_version target)
     set_target_properties(${target} PROPERTIES VERSION ${SEAL_VERSION})
 endmacro()
 
-# Set the library filename to reflect version
-macro(seal_set_version_filename target)
-    set_target_properties(${target} PROPERTIES
-        OUTPUT_NAME ${target}-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
-endmacro()
-
 # Set the SOVERSION property
 macro(seal_set_soversion target)
     set_target_properties(${target} PROPERTIES

@@ -154,9 +154,12 @@ else()
     set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 endif()
 
-# Install
-set(SEAL_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
-set(SEAL_INCLUDES_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR}/SEAL-${SEAL_VERSION_MAJOR}.${SEAL_VERSION_MINOR})
+# Install. The install directories and library names have no version number, so different versions of Microsoft SEAL
+# cannot be installed side by side. Headers of carried dependencies go to seal/thirdparty, where they cannot overwrite
+# other installations.
+set(SEAL_CONFIG_INSTALL_DIR ${CMAKE_INSTALL_LIBDIR}/cmake/SEAL)
+set(SEAL_INCLUDES_INSTALL_DIR ${CMAKE_INSTALL_INCLUDEDIR})
+set(SEAL_THIRDPARTY_INCLUDES_INSTALL_DIR ${SEAL_INCLUDES_INSTALL_DIR}/seal/thirdparty)
 
 # pkg-config
 set(SEAL_PKGCONFIG_IN_DIR ${CMAKE_CURRENT_LIST_DIR}/pkgconfig)
@@ -349,7 +352,6 @@ install(
 # Build only a static library
 if(NOT BUILD_SHARED_LIBS)
     add_library(seal STATIC ${SEAL_SOURCE_FILES})
-    seal_set_version_filename(seal)
     seal_set_language(seal)
     seal_set_include_directories(seal)
     if(CMAKE_CONFIGURATION_TYPES)
@@ -362,7 +364,9 @@ if(NOT BUILD_SHARED_LIBS)
 
     if(SEAL_USE_MSGSL)
         if(SEAL_BUILD_DEPS)
-            target_include_directories(seal PUBLIC $<BUILD_INTERFACE:${msgsl_SOURCE_DIR}/include>)
+            target_include_directories(seal PUBLIC
+                $<BUILD_INTERFACE:${msgsl_SOURCE_DIR}/include>
+                $<INSTALL_INTERFACE:${SEAL_THIRDPARTY_INCLUDES_INSTALL_DIR}>)
         else()
             target_link_libraries(seal PUBLIC Microsoft.GSL::GSL)
         endif()
@@ -428,7 +432,9 @@ else()
 
     if(SEAL_USE_MSGSL)
         if(SEAL_BUILD_DEPS)
-            target_include_directories(seal_shared PUBLIC $<BUILD_INTERFACE:${msgsl_SOURCE_DIR}/include>)
+            target_include_directories(seal_shared PUBLIC
+                $<BUILD_INTERFACE:${msgsl_SOURCE_DIR}/include>
+                $<INSTALL_INTERFACE:${SEAL_THIRDPARTY_INCLUDES_INSTALL_DIR}>)
         else()
             target_link_libraries(seal_shared PUBLIC Microsoft.GSL::GSL)
         endif()
@@ -524,9 +530,7 @@ if(SEAL_BUILD_SEAL_C)
     # Add source files to library and header files to install
     add_subdirectory(${SEAL_INCLUDES_DIR}/seal/c)
     seal_set_version(sealc)
-    if(SEAL_BUILD_STATIC_SEAL_C)
-        seal_set_version_filename(sealc)
-    else()
+    if(NOT SEAL_BUILD_STATIC_SEAL_C)
         seal_set_soversion(sealc)
     endif()
     seal_set_language(sealc)
@@ -590,7 +594,7 @@ if(SEAL_BUILD_DEPS)
     if(SEAL_USE_MSGSL)
         install(
             DIRECTORY ${msgsl_SOURCE_DIR}/include/gsl
-            DESTINATION ${SEAL_INCLUDES_INSTALL_DIR})
+            DESTINATION ${SEAL_THIRDPARTY_INCLUDES_INSTALL_DIR})
     endif()
 endif()
 
@@ -626,6 +630,12 @@ if(UNIX OR APPLE)
     endif()
     # A pkg-config file can have only one Requires field
     list(JOIN SEAL_PKGCONFIG_REQUIRES ", " SEAL_PKGCONFIG_REQUIRES_STRING)
+
+    # Microsoft GSL headers carried with SEAL_BUILD_DEPS=ON are in seal/thirdparty
+    set(SEAL_PKGCONFIG_THIRDPARTY_CFLAGS)
+    if(SEAL_BUILD_DEPS AND SEAL_USE_MSGSL)
+        set(SEAL_PKGCONFIG_THIRDPARTY_CFLAGS " -I\${includedir}/seal/thirdparty")
+    endif()
 
     # Create the pkg-config file
     if(TARGET seal)

@@ -12,4 +12,4 @@ Description: An easy-to-use homomorphic encryption library
 Requires: @SEAL_PKGCONFIG_REQUIRES_STRING@
 
 Libs: -L${libdir} -lseal
-Cflags: @SEAL_LANG_FLAG@ -I${includedir}
+Cflags: @SEAL_LANG_FLAG@ -I${includedir}@SEAL_PKGCONFIG_THIRDPARTY_CFLAGS@

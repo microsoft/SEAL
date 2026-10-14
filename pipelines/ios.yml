@@ -37,8 +37,8 @@ steps:
       mkdir -p $BUILD_SOURCESDIRECTORY/lib/iossimulator
 
       echo Copying arm64 libraries from build-simulator/lib/${{ parameters.configuration }}/
-      cp build-simulator/lib/${{ parameters.configuration }}/libseal-*.a $BUILD_SOURCESDIRECTORY/lib/iossimulator/libseal.a
-      cp build-simulator/lib/${{ parameters.configuration }}/libsealc-*.a $BUILD_SOURCESDIRECTORY/lib/iossimulator/libsealc.a
+      cp build-simulator/lib/${{ parameters.configuration }}/libseal.a $BUILD_SOURCESDIRECTORY/lib/iossimulator/libseal.a
+      cp build-simulator/lib/${{ parameters.configuration }}/libsealc.a $BUILD_SOURCESDIRECTORY/lib/iossimulator/libsealc.a
 
       echo Architectures for iossimulator/libseal.a
       lipo -info $BUILD_SOURCESDIRECTORY/lib/iossimulator/libseal.a
@@ -53,8 +53,8 @@ steps:
       mkdir -p $BUILD_SOURCESDIRECTORY/lib/ios
 
       echo Copying arm64 libraries from build-device/lib/${{ parameters.configuration }}/
-      cp build-device/lib/${{ parameters.configuration }}/libseal-*.a $BUILD_SOURCESDIRECTORY/lib/ios/libseal.a
-      cp build-device/lib/${{ parameters.configuration }}/libsealc-*.a $BUILD_SOURCESDIRECTORY/lib/ios/libsealc.a
+      cp build-device/lib/${{ parameters.configuration }}/libseal.a $BUILD_SOURCESDIRECTORY/lib/ios/libseal.a
+      cp build-device/lib/${{ parameters.configuration }}/libsealc.a $BUILD_SOURCESDIRECTORY/lib/ios/libsealc.a
   displayName: 'Build SEAL for iOS (arm64)'
 
 - task: CopyFiles@2

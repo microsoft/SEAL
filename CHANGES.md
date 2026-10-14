@@ -12,6 +12,7 @@
 - Fixed `util::modulo_poly_coeffs` with Intel HEXL returning incorrect results for moduli of less than 14 bits, and corrupting memory for the moduli 2 and 4. This affected BGV with plaintext moduli of less than 14 bits.
 - Public-key encryption now also erases its intermediate encryption of zero from memory.
 - Removed the CMake option `SEAL_AVOID_BRANCHING`. Conditional selections in critical functions are now always written without branches, in inline assembly with GCC and Clang on x86-64 and AArch64.
+- The install directories and library names no longer contain the version number: headers go to `include/seal`, the CMake package to `lib/cmake/SEAL`, and the static libraries are `libseal.a` and `libsealc.a`. Different versions can no longer be installed side by side. With `SEAL_BUILD_DEPS=ON`, the Microsoft GSL headers go to `include/seal/thirdparty`.
 - Fixed the CMake configuration with CMake 4 when Microsoft SEAL downloads and builds Intel HEXL.
 - Fixed the CMake configuration on Unix-like systems when the shared SEAL_C library is built with Intel HEXL.
 - Fixed the CMake configuration building dependencies outside the build directory when their sources are given with `FETCHCONTENT_SOURCE_DIR_<name>`.

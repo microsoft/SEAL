@@ -310,7 +310,7 @@ You can select the menu option `File / Open / Folder...` and navigate to the fol
 After opening the folder, Visual Studio will detect that this is a CMake-based project and will enable the menu command `Project / CMake settings for SEAL`.
 This will open the CMake settings editor that provides a user interface where you can create different configurations and set different CMake options.
 
-After the build completes, the output static library `seal-<version>.lib` can be found in `build\lib\` or `build\lib\Release\`.
+After the build completes, the output static library `seal.lib` can be found in `build\lib\` or `build\lib\Release\`.
 When linking with applications, using CMake as is explained in [Linking with Microsoft SEAL through CMake](#linking-with-microsoft-seal-through-cmake) is highly recommended.
 Alternatively, you need to add `native\src\` (full path) and `build\native\src\` as include directories to locate the Microsoft SEAL header files.
 
@@ -367,7 +367,7 @@ cmake -P cmake/ios_xcframework.cmake
 cmake -DBUILD_TYPE=Debug -DOUTPUT_DIR=./out -P cmake/ios_xcframework.cmake
 ```
 
-This configures and builds for both device (`iphoneos`) and simulator (`iphonesimulator`), installs both, and creates `libseal-4.7.xcframework` and `libsealc-4.7.xcframework`.
+This configures and builds for both device (`iphoneos`) and simulator (`iphonesimulator`), installs both, and creates `libseal.xcframework` and `libsealc.xcframework`.
 Both slices target `arm64`.
 Intermediate build files are placed in `out/ios-xcframework/` by default; override with `-DWORK_DIR=<path>`.
 
@@ -403,26 +403,29 @@ cmake --install $D/build-simulator --config Release --prefix $D/install-simulato
 
 # Stage headers per slice. XCFramework requires separate header trees because
 # generated files (e.g. config.h) can differ between device and simulator.
+# The Microsoft GSL headers in seal/thirdparty go to the top level.
 mkdir -p $D/staging/device $D/staging/simulator
-rsync -a $D/install-device/include/SEAL-4.7/    $D/staging/device/
-rsync -a $D/install-simulator/include/SEAL-4.7/ $D/staging/simulator/
+rsync -a --exclude thirdparty $D/install-device/include/    $D/staging/device/
+rsync -a --exclude thirdparty $D/install-simulator/include/ $D/staging/simulator/
+rsync -a $D/install-device/include/seal/thirdparty/    $D/staging/device/
+rsync -a $D/install-simulator/include/seal/thirdparty/ $D/staging/simulator/
 
 # xcodebuild refuses to overwrite an existing .xcframework output.
-rm -rf libseal-4.7.xcframework libsealc-4.7.xcframework
+rm -rf libseal.xcframework libsealc.xcframework
 
 # Create the XCFrameworks.
 xcodebuild -create-xcframework                          \
-    -library $D/install-device/lib/libseal-4.7.a        \
+    -library $D/install-device/lib/libseal.a            \
     -headers $D/staging/device                          \
-    -library $D/install-simulator/lib/libseal-4.7.a     \
+    -library $D/install-simulator/lib/libseal.a         \
     -headers $D/staging/simulator                       \
-    -output  libseal-4.7.xcframework
+    -output  libseal.xcframework
 xcodebuild -create-xcframework                          \
-    -library $D/install-device/lib/libsealc-4.7.a       \
+    -library $D/install-device/lib/libsealc.a           \
     -headers $D/staging/device                          \
-    -library $D/install-simulator/lib/libsealc-4.7.a    \
+    -library $D/install-simulator/lib/libsealc.a        \
     -headers $D/staging/simulator                       \
-    -output  libsealc-4.7.xcframework
+    -output  libsealc.xcframework
 ```
 
 </details>
@@ -472,7 +475,7 @@ emcc \
  -Wall \
  -flto \
  -O3 \
- build/lib/libseal-4.7.a \
+ build/lib/libseal.a \
  --bind \
  -o "build/bin/seal_wasm.js" \
  -s WASM=1 \
