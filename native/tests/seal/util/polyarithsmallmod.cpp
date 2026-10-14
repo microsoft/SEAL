@@ -952,6 +952,35 @@ namespace sealtest
             }
         }
 
+        TEST(PolyArithSmallMod, AddSubPolyScalarCoeffModRandom)
+        {
+            mt19937_64 rng(31339);
+            for (const Modulus &modulus : kernel_test_moduli())
+            {
+                uint64_t p = modulus.value();
+                for (size_t n : kernel_test_sizes)
+                {
+                    vector<uint64_t> a = kernel_test_operand(n, p, rng), sum(n), diff(n);
+                    for (uint64_t scalar : { uint64_t(0), uint64_t(1), p - 1, uint64_t(rng()) % p })
+                    {
+                        add_poly_scalar_coeffmod(a.data(), n, scalar, modulus, sum.data());
+                        sub_poly_scalar_coeffmod(a.data(), n, scalar, modulus, diff.data());
+                        for (size_t i = 0; i < n; i++)
+                        {
+                            ASSERT_EQ((a[i] + scalar) % p, sum[i]);
+                            ASSERT_EQ((a[i] + p - scalar) % p, diff[i]);
+                        }
+                        vector<uint64_t> in_place = a;
+                        add_poly_scalar_coeffmod(in_place.data(), n, scalar, modulus, in_place.data());
+                        ASSERT_EQ(sum, in_place);
+                        in_place = a;
+                        sub_poly_scalar_coeffmod(in_place.data(), n, scalar, modulus, in_place.data());
+                        ASSERT_EQ(diff, in_place);
+                    }
+                }
+            }
+        }
+
         TEST(PolyArithSmallMod, MultiplyPolyScalarCoeffModRandom)
         {
             mt19937_64 rng(31338);
