@@ -23,6 +23,7 @@
 #include <functional>
 #include <limits>
 #include <memory>
+#include <new>
 #include <random>
 #include <string>
 #include <utility>
@@ -35,6 +36,19 @@ using namespace std;
 
 namespace sealtest
 {
+    namespace
+    {
+        // Public-key encryption returns a transparent ciphertext, which evaluation rejects, if it samples u = 0. With
+        // n = 8, this has probability 3^(-8).
+        void encrypt_nontransparent(const Encryptor &encryptor, const Plaintext &plain, Ciphertext &destination)
+        {
+            do
+            {
+                encryptor.encrypt(plain, destination);
+            } while (destination.is_transparent());
+        }
+    } // namespace
+
     TEST(EvaluatorTest, BFVEncryptNegateDecrypt)
     {
         EncryptionParameters parms(scheme_type::bfv);
@@ -4369,7 +4383,7 @@ namespace sealtest
 
             encoder.encode(input, context.first_parms_id(), delta, plain);
             int shift = 1;
-            encryptor.encrypt(plain, encrypted);
+            encrypt_nontransparent(encryptor, plain, encrypted);
             evaluator.rotate_vector_inplace(encrypted, shift, glk);
             decryptor.decrypt(encrypted, plain);
             encoder.decode(plain, output);
@@ -4381,7 +4395,7 @@ namespace sealtest
 
             encoder.encode(input, context.first_parms_id(), delta, plain);
             shift = 2;
-            encryptor.encrypt(plain, encrypted);
+            encrypt_nontransparent(encryptor, plain, encrypted);
             evaluator.rotate_vector_inplace(encrypted, shift, glk);
             decryptor.decrypt(encrypted, plain);
             encoder.decode(plain, output);
@@ -4393,7 +4407,7 @@ namespace sealtest
 
             encoder.encode(input, context.first_parms_id(), delta, plain);
             shift = 3;
-            encryptor.encrypt(plain, encrypted);
+            encrypt_nontransparent(encryptor, plain, encrypted);
             evaluator.rotate_vector_inplace(encrypted, shift, glk);
             decryptor.decrypt(encrypted, plain);
             encoder.decode(plain, output);
@@ -4404,7 +4418,7 @@ namespace sealtest
             }
 
             encoder.encode(input, context.first_parms_id(), delta, plain);
-            encryptor.encrypt(plain, encrypted);
+            encrypt_nontransparent(encryptor, plain, encrypted);
             evaluator.complex_conjugate_inplace(encrypted, glk);
             decryptor.decrypt(encrypted, plain);
             encoder.decode(plain, output);
@@ -4523,7 +4537,7 @@ namespace sealtest
 
             encoder.encode(input, context.first_parms_id(), delta, plain);
             int shift = 1;
-            encryptor.encrypt(plain, encrypted);
+            encrypt_nontransparent(encryptor, plain, encrypted);
             evaluator.rescale_to_next_inplace(encrypted);
             evaluator.rotate_vector_inplace(encrypted, shift, glk);
             decryptor.decrypt(encrypted, plain);
@@ -4536,7 +4550,7 @@ namespace sealtest
 
             encoder.encode(input, context.first_parms_id(), delta, plain);
             shift = 2;
-            encryptor.encrypt(plain, encrypted);
+            encrypt_nontransparent(encryptor, plain, encrypted);
             evaluator.rescale_to_next_inplace(encrypted);
             evaluator.rotate_vector_inplace(encrypted, shift, glk);
             decryptor.decrypt(encrypted, plain);
@@ -4549,7 +4563,7 @@ namespace sealtest
 
             encoder.encode(input, context.first_parms_id(), delta, plain);
             shift = 3;
-            encryptor.encrypt(plain, encrypted);
+            encrypt_nontransparent(encryptor, plain, encrypted);
             evaluator.rescale_to_next_inplace(encrypted);
             evaluator.rotate_vector_inplace(encrypted, shift, glk);
             decryptor.decrypt(encrypted, plain);
@@ -4561,7 +4575,7 @@ namespace sealtest
             }
 
             encoder.encode(input, context.first_parms_id(), delta, plain);
-            encryptor.encrypt(plain, encrypted);
+            encrypt_nontransparent(encryptor, plain, encrypted);
             evaluator.rescale_to_next_inplace(encrypted);
             evaluator.complex_conjugate_inplace(encrypted, glk);
             decryptor.decrypt(encrypted, plain);
@@ -5540,7 +5554,7 @@ namespace sealtest
 
         Plaintext plain("1");
         Ciphertext encrypted;
-        encryptor.encrypt(plain, encrypted);
+        encrypt_nontransparent(encryptor, plain, encrypted);
         evaluator.apply_galois_inplace(encrypted, 1, glk);
         decryptor.decrypt(encrypted, plain);
         ASSERT_TRUE("1" == plain.to_string());
@@ -5555,7 +5569,7 @@ namespace sealtest
         ASSERT_TRUE("1" == plain.to_string());
 
         plain = "1x^1";
-        encryptor.encrypt(plain, encrypted);
+        encrypt_nontransparent(encryptor, plain, encrypted);
         evaluator.apply_galois_inplace(encrypted, 1, glk);
         decryptor.decrypt(encrypted, plain);
         ASSERT_TRUE("1x^1" == plain.to_string());
@@ -5570,7 +5584,7 @@ namespace sealtest
         ASSERT_TRUE("1x^1" == plain.to_string());
 
         plain = "1x^2";
-        encryptor.encrypt(plain, encrypted);
+        encrypt_nontransparent(encryptor, plain, encrypted);
         evaluator.apply_galois_inplace(encrypted, 1, glk);
         decryptor.decrypt(encrypted, plain);
         ASSERT_TRUE("1x^2" == plain.to_string());
@@ -5585,7 +5599,7 @@ namespace sealtest
         ASSERT_TRUE("1x^2" == plain.to_string());
 
         plain = "1x^3 + 2x^2 + 1x^1 + 1";
-        encryptor.encrypt(plain, encrypted);
+        encrypt_nontransparent(encryptor, plain, encrypted);
         evaluator.apply_galois_inplace(encrypted, 1, glk);
         decryptor.decrypt(encrypted, plain);
         ASSERT_TRUE("1x^3 + 2x^2 + 1x^1 + 1" == plain.to_string());
@@ -5704,7 +5718,7 @@ namespace sealtest
         vector<uint64_t> plain_vec{ 1, 2, 3, 4, 5, 6, 7, 8 };
         batch_encoder.encode(plain_vec, plain);
         Ciphertext encrypted;
-        encryptor.encrypt(plain, encrypted);
+        encrypt_nontransparent(encryptor, plain, encrypted);
 
         evaluator.rotate_columns_inplace(encrypted, glk);
         decryptor.decrypt(encrypted, plain);
@@ -6247,6 +6261,40 @@ namespace sealtest
 
     namespace
     {
+        // Allocates from a new pool, but throws std::bad_alloc once fail_after allocations have been made
+        class FailingPool : public util::MemoryPool
+        {
+        public:
+            explicit FailingPool(size_t fail_after) : fail_after_(fail_after)
+            {}
+
+            util::Pointer<seal_byte> get_for_byte_count(size_t byte_count) override
+            {
+                if (count_++ >= fail_after_)
+                {
+                    throw bad_alloc();
+                }
+                return static_cast<util::MemoryPool &>(pool_).get_for_byte_count(byte_count);
+            }
+
+            size_t pool_count() const override
+            {
+                return pool_.pool_count();
+            }
+
+            size_t alloc_byte_count() const override
+            {
+                return pool_.alloc_byte_count();
+            }
+
+        private:
+            MemoryPoolHandle pool_ = MemoryPoolHandle::New();
+
+            size_t fail_after_;
+
+            size_t count_ = 0;
+        };
+
         // Same metadata and data
         bool same_ciphertext(const Ciphertext &a, const Ciphertext &b)
         {
@@ -6444,7 +6492,7 @@ namespace sealtest
             vector<int> steps{ 1, -1, 3 };
             for (size_t level = 0; level < 2; level++)
             {
-                // Zero some coefficients of digit 0 and all of digit 2 (if any)
+                // Zero some coefficients of digit 0 and all of digit 2 (if any), and none of digit 1
                 Ciphertext crafted = encrypted;
                 size_t n = crafted.poly_modulus_degree();
                 auto ntt_tables = context.get_context_data(crafted.parms_id())->small_ntt_tables();
@@ -6460,6 +6508,10 @@ namespace sealtest
                         if ((j == 0 && l % 5 == 0) || j == 2)
                         {
                             digit[l] = 0;
+                        }
+                        else if (j == 1 && digit[l] == 0)
+                        {
+                            digit[l] = 1;
                         }
                     }
                     if (crafted.is_ntt_form())
@@ -6531,12 +6583,13 @@ namespace sealtest
             }
 
             // Temporary memory comes from pool
+            auto temp_pool = MemoryPoolHandle::New();
             {
                 MMProfGuard guard(make_unique<MMProfFixed>(MemoryPoolHandle::New()));
-                rotate(evaluator, scheme, encrypted, steps, glk, destinations, pool);
+                rotate(evaluator, scheme, encrypted, steps, glk, destinations, temp_pool);
                 ASSERT_EQ(0ULL, MemoryManager::GetPool().alloc_byte_count());
             }
-            ASSERT_TRUE(pool.alloc_byte_count() > 0);
+            ASSERT_TRUE(temp_pool.alloc_byte_count() > 0);
             for (size_t i = 0; i < steps.size(); i++)
             {
                 ASSERT_TRUE(same_ciphertext(expected[i], destinations[i]));
@@ -6581,8 +6634,6 @@ namespace sealtest
             keygen.create_public_key(pk);
             GaloisKeys glk;
             keygen.create_galois_keys(vector<int>{ 1, -1, 8 }, glk);
-            RelinKeys rlk;
-            keygen.create_relin_keys(rlk);
 
             Encryptor encryptor(context, pk);
             Evaluator evaluator(context);
@@ -6714,7 +6765,6 @@ namespace sealtest
     TEST(EvaluatorTest, ApplyGaloisValidatesOnlyItsInput)
     {
         // c0 holds 2^64 - 1, so that the intermediate c1 = galois(c0) has the seed marker
-#ifndef SEAL_DEBUG
         for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
         {
             SEALContext context(rotation_parms(scheme), true, sec_level_type::none);
@@ -6738,7 +6788,6 @@ namespace sealtest
             vector<Ciphertext> destinations;
             ASSERT_NO_THROW(rotate(evaluator, scheme, encrypted, vector<int>{ 1, -1 }, glk, destinations));
         }
-#endif
     }
 
     TEST(EvaluatorTest, UninitializedPool)
@@ -7673,11 +7722,12 @@ namespace sealtest
 
     TEST(EvaluatorTest, KeySwitchingMixedPrimeSizes)
     {
-        // Key switching reduces only some digits before the NTT, and in BGV only some special-prime parts
+        // Key switching reduces only some digits before the NTT, and only some special-prime parts (in BFV and CKKS
+        // only with { 60, 40, 59 }, where the special prime is not the largest prime)
         size_t n = 64;
         for (auto scheme : { scheme_type::bfv, scheme_type::bgv, scheme_type::ckks })
         {
-            for (auto &bit_sizes : vector<vector<int>>{ { 40, 30, 50, 60 }, { 60, 40, 60 } })
+            for (auto &bit_sizes : vector<vector<int>>{ { 40, 30, 50, 60 }, { 60, 40, 60 }, { 60, 40, 59 } })
             {
                 EncryptionParameters parms(scheme);
                 parms.set_poly_modulus_degree(n);
@@ -7837,6 +7887,32 @@ namespace sealtest
                     Ciphertext copy = *ct;
                     ASSERT_THROW(evaluator.mod_switch_to_next_inplace(*ct, MemoryPoolHandle()), invalid_argument);
                     ASSERT_TRUE(same_ciphertext(copy, *ct));
+
+                    // Nor does a switch that fails at any allocation from pool
+                    size_t failures = 0;
+                    for (size_t fail_after = 0;; fail_after++)
+                    {
+                        MemoryPoolHandle failing_pool(make_shared<FailingPool>(fail_after));
+                        Ciphertext attempt = *ct;
+                        try
+                        {
+                            if (scheme == scheme_type::ckks)
+                            {
+                                evaluator.rescale_to_next_inplace(attempt, failing_pool);
+                            }
+                            else
+                            {
+                                evaluator.mod_switch_to_next_inplace(attempt, failing_pool);
+                            }
+                            break;
+                        }
+                        catch (const bad_alloc &)
+                        {
+                            failures++;
+                            ASSERT_TRUE(same_ciphertext(copy, attempt));
+                        }
+                    }
+                    ASSERT_GT(failures, size_t(0));
 
                     // CKKS without rescaling (only the scale of encrypted fits the next level)
                     if (scheme == scheme_type::ckks && ct == &encrypted)

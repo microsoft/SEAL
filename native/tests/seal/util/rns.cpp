@@ -978,7 +978,7 @@ namespace sealtest
                     ASSERT_EQ(0, val);
                 }
 
-                // The size of q U Bsk is 3. We set the input to have values 15 and 5, and divide by 3 (i.e., q).
+                // The size of q U Bsk is 3. We set the input to have values 15 and 3, and divide by 3 (i.e., q).
                 in[0] = 15;
                 in[1] = 3;
                 in[2] = 15;
@@ -1228,8 +1228,8 @@ namespace sealtest
             ASSERT_NO_THROW(
                 rns_tool = allocate<RNSTool>(pool, poly_modulus_degree, RNSBase({ 5, 7 }, pool), plain_t, pool));
 
-            vector<uint64_t> in(poly_modulus_degree * rns_tool->base_Bsk()->size());
-            vector<uint64_t> out(poly_modulus_degree * rns_tool->base_q()->size());
+            vector<uint64_t> in(poly_modulus_degree * rns_tool->base_q()->size());
+            vector<uint64_t> out(poly_modulus_degree);
             set_zero_uint(in.size(), in.data());
             ConstRNSIter in_iter(in.data(), poly_modulus_degree);
             CoeffIter out_iter(out.data());
@@ -1239,7 +1239,7 @@ namespace sealtest
                 ASSERT_EQ(0, val);
             }
 
-            // The size of Bsk is 2. Both values here are multiples of 35 (i.e., q).
+            // The size of q is 2. Both values here are multiples of 35 (i.e., q).
             // Skip tests exceeding input bound when using HEXL in DEBUG mode
 #if !defined(SEAL_DEBUG) || !defined(SEAL_USE_INTEL_HEXL)
             in[0] = 35;

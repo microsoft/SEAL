@@ -343,6 +343,10 @@ namespace sealtest
                     ntt_negacyclic_harvey_lazy(ConstCoeffIter(in.data()), tables, true, CoeffIter(in.data()));
                     ASSERT_EQ(out, in);
 
+                    modulo_poly_coeffs(ref.data(), n, modulus, ref.data());
+                    modulo_poly_coeffs(out.data(), n, modulus, out.data());
+                    ASSERT_EQ(ref, out);
+
                     // Inverse, input in [0, 2p)
                     fill_ntt_input(in, 3, 2 * p, rng);
                     in[n - 1] = 2 * p - 1;
@@ -376,6 +380,35 @@ namespace sealtest
                     }
                 }
             }
+        }
+
+        TEST(NTTTablesTest, OutOfPlaceNTTRNS)
+        {
+            MemoryPoolHandle pool = MemoryPoolHandle::Global();
+            mt19937_64 rng(1234);
+            int log_n = 6;
+            size_t n = size_t(1) << log_n;
+            vector<Modulus> moduli = get_primes(uint64_t(2) << log_n, 40, 3);
+            Pointer<NTTTables> tables;
+            CreateNTTTables(log_n, moduli, tables, pool);
+            vector<uint64_t> in(3 * n), ref(3 * n), out(3 * n);
+            for (size_t i = 0; i < 3; i++)
+            {
+                for (size_t c = 0; c < n; c++)
+                {
+                    in[i * n + c] = rng() % (4 * moduli[i].value());
+                }
+            }
+            vector<uint64_t> in_copy = in;
+
+            ref = in;
+            ntt_negacyclic_harvey_lazy(RNSIter(ref.data(), n), 3, tables.get());
+            ntt_negacyclic_harvey_lazy(ConstRNSIter(in.data(), n), 3, tables.get(), RNSIter(out.data(), n));
+            ASSERT_EQ(in_copy, in);
+            ASSERT_EQ(ref, out);
+
+            ntt_negacyclic_harvey_lazy(ConstRNSIter(in.data(), n), 3, tables.get(), RNSIter(in.data(), n));
+            ASSERT_EQ(ref, in);
         }
 
         TEST(NTTTablesTest, OutOfPlaceInverseNTTRNS)
