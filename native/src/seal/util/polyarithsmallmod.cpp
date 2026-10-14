@@ -93,7 +93,7 @@ namespace seal
                 }
 #endif
                 std::uint64_t sum = get<0>(I) + get<1>(I);
-                get<2>(I) = SEAL_COND_SELECT(sum >= modulus_value, sum - modulus_value, sum);
+                get<2>(I) = select_uint64(sum >= modulus_value, sum - modulus_value, sum);
             });
 #endif
         }

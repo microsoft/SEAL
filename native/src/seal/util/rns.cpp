@@ -1433,7 +1433,7 @@ namespace seal
                         // We need centered reduction of r_m_tilde modulo Bsk. Note that m_tilde is chosen
                         // to be a power of two so we have '>=' below.
                         uint64_t temp = get<1>(J);
-                        temp += SEAL_COND_SELECT(temp >= m_tilde_div_2, centering_correction, uint64_t(0));
+                        temp += select_uint64(temp >= m_tilde_div_2, centering_correction, uint64_t(0));
 
                         // (input + prod(q) * r_m_tilde) * m_tilde^(-1) mod Bsk, lazily in [0, 4 * modulus)
                         uint64_t sum = multiply_uint_mod_lazy(get<0>(J), inv_m_tilde_elt, modulus) +
@@ -1601,7 +1601,7 @@ namespace seal
                     for (size_t k = 0; k < count; k++)
                     {
                         uint64_t r = r_m_tilde[k];
-                        r += SEAL_COND_SELECT(r >= m_tilde_div_2, centering_correction, uint64_t(0));
+                        r += select_uint64(r >= m_tilde_div_2, centering_correction, uint64_t(0));
 
                         // In [0, 3 * modulus)
                         const uint64_t sum = conv[k] + multiply_uint_mod_lazy(r, prod_q_inv_m_tilde_elt, modulus);

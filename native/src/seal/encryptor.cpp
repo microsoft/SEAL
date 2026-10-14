@@ -293,7 +293,7 @@ namespace seal
                 SEAL_ITERATE(helper_iter, coeff_modulus_size, [&](auto I) {
                     SEAL_ITERATE(iter(*plain_iter, get<0>(I)), plain_coeff_count, [&](auto J) {
                         get<1>(J) =
-                            SEAL_COND_SELECT(get<0>(J) >= plain_upper_half_threshold, get<0>(J) + get<1>(I), get<0>(J));
+                            select_uint64(get<0>(J) >= plain_upper_half_threshold, get<0>(J) + get<1>(I), get<0>(J));
                     });
                 });
             }

@@ -310,6 +310,3 @@ namespace seal
 #elif (defined(__GNUC__) || defined(__clang__)) && defined(__aarch64__)
 #define SEAL_BRANCH_FREE_ASM_AARCH64
 #endif
-
-// Conditionally select the former if true and the latter if false, without a branch (see util::select_uint64)
-#define SEAL_COND_SELECT(cond, if_true, if_false) ::seal::util::select_uint64((cond), (if_true), (if_false))
