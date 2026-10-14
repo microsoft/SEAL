@@ -320,6 +320,11 @@ namespace sealtest
                 ASSERT_EQ(x >= y ? x - y : x, sub_if_ge_uint64(x, y));
                 ASSERT_EQ(x < y ? ~uint64_t(0) : uint64_t(0), less_than_mask_uint64(x, y));
                 ASSERT_EQ(c ? x : y, select_uint64(c, x, y));
+                uint64_t m = rng();
+                ASSERT_EQ(x < y ? x - y + m : x - y, sub_add_if_lt_uint64(x, y, m));
+                ASSERT_EQ(0ULL, sub_add_if_lt_uint64(x, x, m));
+                ASSERT_EQ(x < y ? x - y + x : x - y, sub_add_if_lt_uint64(x, y, x));
+                ASSERT_EQ(x < y ? x : x - y, sub_add_if_lt_uint64(x, y, y));
                 ASSERT_EQ(0ULL, sub_if_ge_uint64(x, x));
                 ASSERT_EQ(0ULL, less_than_mask_uint64(x, x));
                 ASSERT_EQ(x, select_uint64(c, x, x));

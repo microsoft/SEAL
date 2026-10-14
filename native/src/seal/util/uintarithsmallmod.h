@@ -48,6 +48,31 @@ namespace seal
         }
 
         /**
+        Returns x - y + m if x < y, and x - y otherwise (modulo 2^64), without a branch. The condition is the borrow
+        of the subtraction itself, which saves the comparison of less_than_mask_uint64.
+        */
+        SEAL_NODISCARD SEAL_FORCE_INLINE std::uint64_t sub_add_if_lt_uint64(
+            std::uint64_t x, std::uint64_t y, std::uint64_t m) noexcept
+        {
+#if defined(SEAL_BRANCH_FREE_ASM_X86_64)
+            std::uint64_t d = x;
+            std::uint64_t mask;
+            __asm__("subq %[y], %[d]\n\tsbbq %[r], %[r]" : [d] "+r"(d), [r] "=&r"(mask) : [y] "r"(y) : "cc");
+            return d + (m & mask);
+#elif defined(SEAL_BRANCH_FREE_ASM_AARCH64)
+            std::uint64_t d;
+            std::uint64_t t;
+            __asm__("subs %[d], %[x], %[y]\n\tcsel %[t], %[m], xzr, lo"
+                    : [d] "=&r"(d), [t] "=r"(t)
+                    : [x] "r"(x), [y] "r"(y), [m] "r"(m)
+                    : "cc");
+            return d + t;
+#else
+            return x - y + (m & less_than_mask_uint64(x, y));
+#endif
+        }
+
+        /**
         Returns x - m if x >= m, and x otherwise, without a branch.
         */
         SEAL_NODISCARD SEAL_FORCE_INLINE std::uint64_t sub_if_ge_uint64(std::uint64_t x, std::uint64_t m) noexcept
@@ -228,7 +253,7 @@ namespace seal
                 throw std::out_of_range("operand2");
             }
 #endif
-            return operand1 - operand2 + (modulus.value() & less_than_mask_uint64(operand1, operand2));
+            return sub_add_if_lt_uint64(operand1, operand2, modulus.value());
         }
 
         /**
