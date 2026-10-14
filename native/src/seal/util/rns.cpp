@@ -872,35 +872,32 @@ namespace seal
             // exact (its input is less than 3 * t * n * prod(q) in absolute value), so the result does not depend on B;
             // base_B_size above suffices even for 60-bit primes in q.
             static_assert(SEAL_CIPHERTEXT_SIZE_MAX <= 16, "the size of B below assumes at most 8 products");
+            const int required_bit_count = 5 + t_.bit_count() + coeff_count_power + total_coeff_bit_count;
+
+            vector<uint64_t> B_m_sk_prod{ m_sk_.value() };
+            auto sufficient = [&]() {
+                return get_significant_bit_count_uint(B_m_sk_prod.data(), B_m_sk_prod.size()) - 1 >= required_bit_count;
+            };
+
+            // Grow B until the bound holds
+            size_t tight_B_size = 0;
+            do
             {
-                const int required_bit_count = 5 + t_.bit_count() + coeff_count_power + total_coeff_bit_count;
+                vector<uint64_t> next(B_m_sk_prod.size() + 1);
+                multiply_uint(
+                    B_m_sk_prod.data(), B_m_sk_prod.size(),
+                    baseconv_primes_iter[safe_cast<ptrdiff_t>(tight_B_size)].value(), next.size(), next.data());
+                B_m_sk_prod.swap(next);
+                tight_B_size++;
+            } while (tight_B_size < base_B_size && !sufficient());
 
-                vector<uint64_t> B_m_sk_prod{ m_sk_.value() };
-                auto sufficient = [&]() {
-                    return get_significant_bit_count_uint(B_m_sk_prod.data(), B_m_sk_prod.size()) - 1 >=
-                           required_bit_count;
-                };
-
-                // Grow B until the bound holds
-                size_t tight_B_size = 0;
-                do
-                {
-                    vector<uint64_t> next(B_m_sk_prod.size() + 1);
-                    multiply_uint(
-                        B_m_sk_prod.data(), B_m_sk_prod.size(),
-                        baseconv_primes_iter[safe_cast<ptrdiff_t>(tight_B_size)].value(), next.size(), next.data());
-                    B_m_sk_prod.swap(next);
-                    tight_B_size++;
-                } while (tight_B_size < base_B_size && !sufficient());
-
-                // Unreachable: base_B_size primes always satisfy the bound
-                if (!sufficient())
-                {
-                    throw logic_error("invalid rns bases");
-                }
-
-                base_B_size = tight_B_size;
+            // Unreachable: base_B_size primes always satisfy the bound
+            if (!sufficient())
+            {
+                throw logic_error("invalid rns bases");
             }
+
+            base_B_size = tight_B_size;
 
             vector<Modulus> base_B_primes;
             copy_n(baseconv_primes_iter, base_B_size, back_inserter(base_B_primes));
