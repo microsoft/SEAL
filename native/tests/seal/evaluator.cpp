@@ -8293,4 +8293,141 @@ namespace sealtest
             }
         }
     }
+
+    TEST(EvaluatorTest, PlainOperationsWithLargePlainModulus)
+    {
+        // With a plain modulus larger than a coefficient modulus prime, lifting a plaintext coefficient to the
+        // coefficient modulus adds a multi-precision integer, in BGV encryption and in plaintext operations
+        for (scheme_type scheme : { scheme_type::bfv, scheme_type::bgv })
+        {
+            const size_t n = 128;
+            EncryptionParameters parms(scheme);
+            parms.set_poly_modulus_degree(n);
+            parms.set_coeff_modulus(CoeffModulus::Create(n, { 25, 60, 60, 60 }));
+            parms.set_plain_modulus(PlainModulus::Batching(n, 30));
+            SEALContext context(parms, false, sec_level_type::none);
+            ASSERT_TRUE(context.parameters_set());
+            ASSERT_FALSE(context.first_context_data()->qualifiers().using_fast_plain_lift);
+            const Modulus &t = context.first_context_data()->parms().plain_modulus();
+
+            KeyGenerator keygen(context);
+            PublicKey pk;
+            keygen.create_public_key(pk);
+            Encryptor encryptor(context, pk, keygen.secret_key());
+            Decryptor decryptor(context, keygen.secret_key());
+            Evaluator evaluator(context);
+
+            // Coefficients in both halves of [0, t)
+            mt19937_64 rng(scheme == scheme_type::bfv ? 17 : 19);
+            vector<uint64_t> a(n);
+            vector<uint64_t> b(n);
+            for (size_t i = 0; i < n; i++)
+            {
+                a[i] = rng() % t.value();
+                b[i] = rng() % t.value();
+            }
+            Plaintext plain_a(n);
+            Plaintext plain_b(n);
+            copy(a.begin(), a.end(), plain_a.data());
+            copy(b.begin(), b.end(), plain_b.data());
+
+            vector<uint64_t> sum(n);
+            vector<uint64_t> difference(n);
+            vector<uint64_t> product(n, 0);
+            for (size_t i = 0; i < n; i++)
+            {
+                sum[i] = util::add_uint_mod(a[i], b[i], t);
+                difference[i] = util::sub_uint_mod(a[i], b[i], t);
+                for (size_t j = 0; j < n; j++)
+                {
+                    // Negacyclic: x^n = -1
+                    uint64_t term = util::multiply_uint_mod(a[i], b[j], t);
+                    size_t k = (i + j) % n;
+                    product[k] =
+                        i + j < n ? util::add_uint_mod(product[k], term, t) : util::sub_uint_mod(product[k], term, t);
+                }
+            }
+
+            auto decrypt = [&](const Ciphertext &encrypted) {
+                Plaintext plain;
+                decryptor.decrypt(encrypted, plain);
+                vector<uint64_t> coeffs(n, 0);
+                copy_n(plain.data(), min(n, plain.coeff_count()), coeffs.begin());
+                return coeffs;
+            };
+
+            // transform_to_ntt lifts the coefficients in the upper half of [0, t) to v - t modulo each prime
+            {
+                auto &context_data = *context.first_context_data();
+                auto &coeff_modulus = context_data.parms().coeff_modulus();
+                Plaintext plain_b_ntt;
+                evaluator.transform_to_ntt(plain_b, context.first_parms_id(), plain_b_ntt);
+                ASSERT_EQ(n * coeff_modulus.size(), plain_b_ntt.coeff_count());
+                for (size_t i = 0; i < coeff_modulus.size(); i++)
+                {
+                    const Modulus &q = coeff_modulus[i];
+                    const uint64_t t_mod_q = util::barrett_reduce_64(t.value(), q);
+                    vector<uint64_t> expected(n);
+                    for (size_t j = 0; j < n; j++)
+                    {
+                        const uint64_t v = util::barrett_reduce_64(b[j], q);
+                        expected[j] =
+                            b[j] >= context_data.plain_upper_half_threshold() ? util::sub_uint_mod(v, t_mod_q, q) : v;
+                    }
+                    util::ntt_negacyclic_harvey(expected.data(), context_data.small_ntt_tables()[i]);
+                    ASSERT_TRUE(equal(expected.begin(), expected.end(), plain_b_ntt.data() + i * n)) << "prime " << i;
+                }
+            }
+
+            for (bool symmetric : { false, true })
+            {
+                Ciphertext encrypted;
+                if (symmetric)
+                {
+                    encryptor.encrypt_symmetric(plain_a, encrypted);
+                }
+                else
+                {
+                    encryptor.encrypt(plain_a, encrypted);
+                }
+                ASSERT_EQ(a, decrypt(encrypted));
+
+                Ciphertext result;
+                evaluator.add_plain(encrypted, plain_b, result);
+                ASSERT_EQ(sum, decrypt(result));
+                evaluator.sub_plain(encrypted, plain_b, result);
+                ASSERT_EQ(difference, decrypt(result));
+                evaluator.multiply_plain(encrypted, plain_b, result);
+                ASSERT_EQ(product, decrypt(result));
+
+                // With the ciphertext in coefficient form, multiply_plain lifts the plaintext itself, and gives the
+                // same product as with the plaintext transformed to NTT form first
+                Ciphertext encrypted_ntt = encrypted;
+                Ciphertext encrypted_coeff = encrypted;
+                if (encrypted.is_ntt_form())
+                {
+                    evaluator.transform_from_ntt_inplace(encrypted_coeff);
+                }
+                else
+                {
+                    evaluator.transform_to_ntt_inplace(encrypted_ntt);
+                }
+                Plaintext plain_b_ntt;
+                evaluator.transform_to_ntt(plain_b, encrypted_ntt.parms_id(), plain_b_ntt);
+                Ciphertext product_ntt;
+                evaluator.multiply_plain(encrypted_ntt, plain_b_ntt, product_ntt);
+                evaluator.transform_from_ntt_inplace(product_ntt);
+                Ciphertext product_coeff;
+                evaluator.multiply_plain(encrypted_coeff, plain_b, product_coeff);
+                ASSERT_EQ(product_ntt.dyn_array().size(), product_coeff.dyn_array().size());
+                ASSERT_TRUE(equal(
+                    product_ntt.data(), product_ntt.data() + product_ntt.dyn_array().size(), product_coeff.data()));
+                if (scheme == scheme_type::bgv)
+                {
+                    evaluator.transform_to_ntt_inplace(product_coeff);
+                }
+                ASSERT_EQ(product, decrypt(product_coeff));
+            }
+        }
+    }
 } // namespace sealtest

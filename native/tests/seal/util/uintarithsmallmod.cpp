@@ -336,6 +336,56 @@ namespace sealtest
             }
         }
 
+        TEST(UIntArithSmallMod, AddIfGeUInt)
+        {
+            const uint64_t max = ~uint64_t(0);
+
+            // Compare with add_uint on random values and on values close to the threshold. Words equal to max make
+            // carries run through several words.
+            mt19937_64 rng(13);
+            for (size_t count = 1; count <= 5; count++)
+            {
+                for (int i = 0; i < 20000; i++)
+                {
+                    uint64_t x = (i % 3) ? rng() : max - (rng() % 3);
+                    uint64_t threshold = (i & 1) ? rng() : x + (rng() % 5) - 2;
+                    vector<uint64_t> y(count);
+                    for (auto &word : y)
+                    {
+                        word = (rng() % 4) ? rng() : max;
+                    }
+
+                    vector<uint64_t> expected(count, 0);
+                    if (x >= threshold)
+                    {
+                        add_uint(y.data(), count, x, expected.data());
+                    }
+                    else
+                    {
+                        expected[0] = x;
+                    }
+
+                    // Every word of the result is written
+                    vector<uint64_t> result(count, 0xA5A5A5A5A5A5A5A5ULL);
+                    add_if_ge_uint(x, threshold, y.data(), count, result.data());
+                    ASSERT_EQ(expected, result) << "x = " << x << ", threshold = " << threshold;
+                }
+            }
+
+            uint64_t y[3]{ max, max, max };
+            uint64_t result[3]{ 1, 1, 1 };
+            add_if_ge_uint(1, 1, y, 3, result);
+            ASSERT_EQ(vector<uint64_t>({ 0, 0, 0 }), vector<uint64_t>(result, result + 3));
+            add_if_ge_uint(5, 6, y, 3, result);
+            ASSERT_EQ(vector<uint64_t>({ 5, 0, 0 }), vector<uint64_t>(result, result + 3));
+            add_if_ge_uint(max, max, y, 3, result);
+            ASSERT_EQ(vector<uint64_t>({ max - 1, 0, 0 }), vector<uint64_t>(result, result + 3));
+
+            uint64_t one[2]{ 1, 0 };
+            add_if_ge_uint(max, 0, one, 2, result);
+            ASSERT_EQ(vector<uint64_t>({ 0, 1 }), vector<uint64_t>(result, result + 2));
+        }
+
         TEST(UIntArithSmallMod, MontgomeryReduce128)
         {
             mt19937_64 rng(779);

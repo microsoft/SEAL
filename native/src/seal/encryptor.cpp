@@ -270,15 +270,9 @@ namespace seal
                 SEAL_ALLOCATE_ZERO_GET_RNS_ITER(temp, coeff_modulus_size, coeff_count, pool);
 
                 SEAL_ITERATE(iter(plain_copy.data(), temp), plain_coeff_count, [&](auto I) {
-                    auto plain_value = get<0>(I);
-                    if (plain_value >= plain_upper_half_threshold)
-                    {
-                        add_uint(plain_upper_half_increment, coeff_modulus_size, plain_value, get<1>(I));
-                    }
-                    else
-                    {
-                        *get<1>(I) = plain_value;
-                    }
+                    add_if_ge_uint(
+                        get<0>(I), plain_upper_half_threshold, plain_upper_half_increment, coeff_modulus_size,
+                        get<1>(I));
                 });
 
                 context_data.rns_tool()->base_q()->decompose_array(temp, coeff_count, pool);

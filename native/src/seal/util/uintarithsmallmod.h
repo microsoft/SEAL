@@ -114,6 +114,26 @@ namespace seal
         }
 
         /**
+        Writes x + y to result if x >= threshold, and x otherwise, without a branch. Here y and result have
+        uint64_count words, which must be at least one, and the carry out of the last word is discarded.
+        */
+        SEAL_FORCE_INLINE void add_if_ge_uint(
+            std::uint64_t x, std::uint64_t threshold, const std::uint64_t *y, std::size_t uint64_count,
+            std::uint64_t *result) noexcept
+        {
+            const std::uint64_t mask = ~less_than_mask_uint64(x, threshold);
+            std::uint64_t sum = x + (y[0] & mask);
+            std::uint64_t carry = less_than_mask_uint64(sum, x) & 1;
+            result[0] = sum;
+            for (std::size_t i = 1; i < uint64_count; i++)
+            {
+                sum = (y[i] & mask) + carry;
+                carry = less_than_mask_uint64(sum, carry) & 1;
+                result[i] = sum;
+            }
+        }
+
+        /**
         Returns (operand++) mod modulus.
         Correctness: operand must be at most (2 * modulus -2) for correctness.
         */
