@@ -57,7 +57,7 @@ namespace seal
 
             inline std::uint64_t guard(const std::uint64_t &a) const
             {
-                return SEAL_COND_SELECT(a >= two_times_modulus_, a - two_times_modulus_, a);
+                return sub_if_ge_uint64(a, two_times_modulus_);
             }
 
         private:

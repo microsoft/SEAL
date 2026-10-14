@@ -295,19 +295,34 @@ namespace sealtest
             ASSERT_EQ(max, less_than_mask_uint64((uint64_t(1) << 63) - 1, uint64_t(1) << 63));
         }
 
+        TEST(UIntArithSmallMod, SelectUInt64)
+        {
+            const uint64_t max = ~uint64_t(0);
+            ASSERT_EQ(1ULL, select_uint64(true, 1, 2));
+            ASSERT_EQ(2ULL, select_uint64(false, 1, 2));
+            ASSERT_EQ(max, select_uint64(true, max, 0));
+            ASSERT_EQ(0ULL, select_uint64(false, max, 0));
+            ASSERT_EQ(0ULL, select_uint64(true, 0, max));
+            ASSERT_EQ(max, select_uint64(false, 0, max));
+        }
+
         TEST(UIntArithSmallMod, BranchFreeHelpersRandom)
         {
-            // sub_if_ge_uint64 and less_than_mask_uint64 are written in assembly on some platforms; compare them with
-            // plain C++ on random values, on values close to each other, and with both arguments the same variable
+            // The branch-free helpers are written in assembly on some platforms and with integer arithmetic on others;
+            // compare them with plain C++ on random values, on values close to each other, and with arguments that
+            // are the same variable
             mt19937_64 rng(5);
             for (int i = 0; i < 100000; i++)
             {
                 uint64_t x = rng();
                 uint64_t y = (i & 1) ? rng() : x + (rng() % 5) - 2;
+                bool c = (rng() & 1) != 0;
                 ASSERT_EQ(x >= y ? x - y : x, sub_if_ge_uint64(x, y));
                 ASSERT_EQ(x < y ? ~uint64_t(0) : uint64_t(0), less_than_mask_uint64(x, y));
+                ASSERT_EQ(c ? x : y, select_uint64(c, x, y));
                 ASSERT_EQ(0ULL, sub_if_ge_uint64(x, x));
                 ASSERT_EQ(0ULL, less_than_mask_uint64(x, x));
+                ASSERT_EQ(x, select_uint64(c, x, x));
             }
         }
 

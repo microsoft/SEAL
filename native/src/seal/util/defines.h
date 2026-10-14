@@ -304,11 +304,12 @@ namespace seal
     auto SEAL_JOIN(_seal_temp_alloc_, __LINE__)(seal::util::allocate_zero_uint(poly_modulus_degree, pool)); \
     seal::util::CoeffIter name(SEAL_JOIN(_seal_temp_alloc_, __LINE__).get());
 
-// Conditionally select the former if true and the latter if false.
-// This is a temporary solution that generates constant-time code with all compilers on all platforms.
-#ifndef SEAL_AVOID_BRANCHING
-#define SEAL_COND_SELECT(cond, if_true, if_false) (cond ? if_true : if_false)
-#else
-#define SEAL_COND_SELECT(cond, if_true, if_false) \
-    ((if_false) ^ ((~static_cast<uint64_t>(cond) + 1) & ((if_true) ^ (if_false))))
+// Platforms on which the branch-free functions in uintarithsmallmod.h use inline assembly
+#if (defined(__GNUC__) || defined(__clang__)) && defined(__x86_64__)
+#define SEAL_BRANCH_FREE_ASM_X86_64
+#elif (defined(__GNUC__) || defined(__clang__)) && defined(__aarch64__)
+#define SEAL_BRANCH_FREE_ASM_AARCH64
 #endif
+
+// Conditionally select the former if true and the latter if false, without a branch (see util::select_uint64)
+#define SEAL_COND_SELECT(cond, if_true, if_false) ::seal::util::select_uint64((cond), (if_true), (if_false))

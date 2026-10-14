@@ -19,19 +19,44 @@ namespace seal
         // which fits in 64 bits only for moduli less than 2^62
         static_assert(SEAL_MOD_BIT_COUNT_MAX <= 61, "lazy reductions require moduli of at most 61 bits");
 
+        /*
+        Branch-free primitives, for conditions that are unpredictable or depend on secret data. With GCC and Clang on
+        x86-64 and AArch64 they are written in inline assembly, since compilers may turn a conditional selection, even
+        one written with a mask, into a branch. Elsewhere they use integer arithmetic.
+        */
+
         /**
-        Returns x - m if x >= m, and x otherwise. In the lazy reductions that use this function, x >= m about half of
-        the time in no predictable pattern, so a branch would be mispredicted often. With GCC and Clang on x86-64 and
-        AArch64, the subtraction and the conditional move are therefore written in assembly: compilers, notably GCC,
-        otherwise sometimes emit a branch.
+        Returns 2^64 - 1 if x < y, and 0 otherwise, without a branch.
+        */
+        SEAL_NODISCARD SEAL_FORCE_INLINE std::uint64_t less_than_mask_uint64(std::uint64_t x, std::uint64_t y) noexcept
+        {
+#if defined(SEAL_BRANCH_FREE_ASM_X86_64)
+            std::uint64_t mask;
+            __asm__("cmpq %[y], %[x]\n\tsbbq %[r], %[r]" : [r] "=r"(mask) : [x] "r"(x), [y] "r"(y) : "cc");
+            return mask;
+#elif defined(SEAL_BRANCH_FREE_ASM_AARCH64)
+            std::uint64_t mask;
+            __asm__("cmp %[x], %[y]\n\tcsetm %[r], lo" : [r] "=r"(mask) : [x] "r"(x), [y] "r"(y) : "cc");
+            return mask;
+#elif defined(_MSC_VER) && defined(SEAL_USE__SUBBORROW_U64)
+            unsigned long long diff;
+            return std::uint64_t(0) - static_cast<std::uint64_t>(_subborrow_u64(0, x, y, &diff));
+#else
+            // Borrow of x - y from the most significant bits, without a comparison
+            return std::uint64_t(0) - (((~x & y) | (~(x ^ y) & (x - y))) >> 63);
+#endif
+        }
+
+        /**
+        Returns x - m if x >= m, and x otherwise, without a branch.
         */
         SEAL_NODISCARD SEAL_FORCE_INLINE std::uint64_t sub_if_ge_uint64(std::uint64_t x, std::uint64_t m) noexcept
         {
-#if (defined(__GNUC__) || defined(__clang__)) && !defined(SEAL_AVOID_BRANCHING) && defined(__x86_64__)
+#if defined(SEAL_BRANCH_FREE_ASM_X86_64)
             std::uint64_t t = x;
             __asm__("subq %[m], %[t]\n\tcmovbq %[x], %[t]" : [t] "+&r"(t) : [m] "r"(m), [x] "r"(x) : "cc");
             return t;
-#elif (defined(__GNUC__) || defined(__clang__)) && !defined(SEAL_AVOID_BRANCHING) && defined(__aarch64__)
+#elif defined(SEAL_BRANCH_FREE_ASM_AARCH64)
             std::uint64_t t;
             __asm__("subs %[t], %[x], %[m]\n\tcsel %[t], %[x], %[t], lo"
                     : [t] "=&r"(t)
@@ -39,27 +64,30 @@ namespace seal
                     : "cc");
             return t;
 #else
-            return SEAL_COND_SELECT(x >= m, x - m, x);
+            return x - (m & ~less_than_mask_uint64(x, m));
 #endif
         }
 
         /**
-        Returns 2^64 - 1 if x < y, and 0 otherwise. Like sub_if_ge_uint64, this is written in assembly with GCC and
-        Clang on x86-64 and AArch64, so that selections made with the mask, such as (a & mask) | (b & ~mask), have no
-        branch.
+        Returns if_true if cond is true, and if_false otherwise, without a branch.
         */
-        SEAL_NODISCARD SEAL_FORCE_INLINE std::uint64_t less_than_mask_uint64(std::uint64_t x, std::uint64_t y) noexcept
+        SEAL_NODISCARD SEAL_FORCE_INLINE std::uint64_t select_uint64(
+            bool cond, std::uint64_t if_true, std::uint64_t if_false) noexcept
         {
-#if (defined(__GNUC__) || defined(__clang__)) && !defined(SEAL_AVOID_BRANCHING) && defined(__x86_64__)
-            std::uint64_t mask;
-            __asm__("cmpq %[y], %[x]\n\tsbbq %[r], %[r]" : [r] "=r"(mask) : [x] "r"(x), [y] "r"(y) : "cc");
-            return mask;
-#elif (defined(__GNUC__) || defined(__clang__)) && !defined(SEAL_AVOID_BRANCHING) && defined(__aarch64__)
-            std::uint64_t mask;
-            __asm__("cmp %[x], %[y]\n\tcsetm %[r], lo" : [r] "=r"(mask) : [x] "r"(x), [y] "r"(y) : "cc");
-            return mask;
+#if defined(SEAL_BRANCH_FREE_ASM_X86_64)
+            std::uint64_t r = if_false;
+            __asm__("testb %[c], %[c]\n\tcmovneq %[t], %[r]" : [r] "+r"(r) : [c] "q"(cond), [t] "r"(if_true) : "cc");
+            return r;
+#elif defined(SEAL_BRANCH_FREE_ASM_AARCH64)
+            std::uint64_t r;
+            __asm__("cmp %w[c], #0\n\tcsel %[r], %[t], %[f], ne"
+                    : [r] "=r"(r)
+                    : [c] "r"(static_cast<std::uint32_t>(cond)), [t] "r"(if_true), [f] "r"(if_false)
+                    : "cc");
+            return r;
 #else
-            return std::uint64_t(0) - static_cast<std::uint64_t>(x < y);
+            const std::uint64_t mask = std::uint64_t(0) - static_cast<std::uint64_t>(cond);
+            return if_false ^ ((if_true ^ if_false) & mask);
 #endif
         }
 
@@ -173,8 +201,7 @@ namespace seal
             }
 #endif
             // Sum of operands modulo Modulus can never wrap around 2^64
-            operand1 += operand2;
-            return SEAL_COND_SELECT(operand1 >= modulus.value(), operand1 - modulus.value(), operand1);
+            return sub_if_ge_uint64(operand1 + operand2, modulus.value());
         }
 
         /**
@@ -201,9 +228,7 @@ namespace seal
                 throw std::out_of_range("operand2");
             }
 #endif
-            unsigned long long temp;
-            std::int64_t borrow = static_cast<std::int64_t>(SEAL_SUB_BORROW_UINT64(operand1, operand2, 0, &temp));
-            return static_cast<std::uint64_t>(temp) + (modulus.value() & static_cast<std::uint64_t>(-borrow));
+            return operand1 - operand2 + (modulus.value() & less_than_mask_uint64(operand1, operand2));
         }
 
         /**
