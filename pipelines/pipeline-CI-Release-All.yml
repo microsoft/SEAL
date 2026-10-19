@@ -1,6 +1,21 @@
 # This defines a pipeline to build on Windows, Linux, and macOS in Release mode.
 
-trigger: none
+trigger:
+  batch: true
+  branches:
+    include:
+    - main
+  paths:
+    exclude:
+    - 'tools/*'
+    - LICENSE
+    - NOTICE
+    - CHANGES.md
+    - CODE_OF_CONDUCT.md
+    - CONTRIBUTING.md
+    - ISSUES.md
+    - README.md
+    - SECURITY.md
 
 stages:
   - stage: build
