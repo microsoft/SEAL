@@ -898,7 +898,9 @@ namespace sealtest
                          Modulus((uint64_t(1) << 61) - 1) };
             }
 
+            // The dyadic products need at least one coefficient; the other functions also accept none
             const vector<size_t> kernel_test_sizes{ 1, 2, 7, 64, 1001 };
+            const vector<size_t> kernel_test_sizes_with_zero{ 0, 1, 2, 7, 64, 1001 };
 
             // Bound on unreduced operands
             uint64_t lazy_operand_bound(const Modulus &modulus)
@@ -936,7 +938,7 @@ namespace sealtest
             mt19937_64 rng(31337);
             for (const Modulus &modulus : kernel_test_moduli())
             {
-                for (size_t n : kernel_test_sizes)
+                for (size_t n : kernel_test_sizes_with_zero)
                 {
                     vector<uint64_t> a = kernel_test_operand(n, 0, rng), out(n);
                     modulo_poly_coeffs(a.data(), n, modulus, out.data());
@@ -957,7 +959,7 @@ namespace sealtest
             for (const Modulus &modulus : kernel_test_moduli())
             {
                 uint64_t p = modulus.value();
-                for (size_t n : kernel_test_sizes)
+                for (size_t n : kernel_test_sizes_with_zero)
                 {
                     vector<uint64_t> a = kernel_test_operand(n, p, rng), sum(n), diff(n);
                     for (uint64_t scalar : { uint64_t(0), uint64_t(1), p - 1, uint64_t(rng()) % p })
@@ -981,13 +983,68 @@ namespace sealtest
             }
         }
 
+        TEST(PolyArithSmallMod, AddSubNegatePolyCoeffModRandom)
+        {
+            // Every length up to 70 covers every remainder of the vector loops
+            vector<size_t> sizes;
+            for (size_t n = 0; n <= 70; n++)
+            {
+                sizes.push_back(n);
+            }
+            sizes.push_back(1001);
+
+            mt19937_64 rng(31340);
+            for (const Modulus &modulus : kernel_test_moduli())
+            {
+                const uint64_t p = modulus.value();
+                for (size_t n : sizes)
+                {
+                    const vector<uint64_t> a = kernel_test_operand(n, p, rng);
+                    vector<uint64_t> b = kernel_test_operand(n, p, rng);
+                    for (size_t i = 0; i < n; i += 3)
+                    {
+                        // Sums equal to p, and equal operands
+                        b[i] = (i % 2) ? (p - a[i]) % p : a[i];
+                    }
+
+                    vector<uint64_t> sum(n), diff(n), neg(n);
+                    add_poly_coeffmod(a.data(), b.data(), n, modulus, sum.data());
+                    sub_poly_coeffmod(a.data(), b.data(), n, modulus, diff.data());
+                    negate_poly_coeffmod(a.data(), n, modulus, neg.data());
+                    for (size_t i = 0; i < n; i++)
+                    {
+                        ASSERT_EQ((a[i] + b[i]) % p, sum[i]);
+                        ASSERT_EQ((a[i] + p - b[i]) % p, diff[i]);
+                        ASSERT_EQ((p - a[i]) % p, neg[i]);
+                    }
+
+                    // The result may be either operand
+                    vector<uint64_t> in_place = a;
+                    add_poly_coeffmod(in_place.data(), b.data(), n, modulus, in_place.data());
+                    ASSERT_EQ(sum, in_place);
+                    in_place = b;
+                    add_poly_coeffmod(a.data(), in_place.data(), n, modulus, in_place.data());
+                    ASSERT_EQ(sum, in_place);
+                    in_place = a;
+                    sub_poly_coeffmod(in_place.data(), b.data(), n, modulus, in_place.data());
+                    ASSERT_EQ(diff, in_place);
+                    in_place = b;
+                    sub_poly_coeffmod(a.data(), in_place.data(), n, modulus, in_place.data());
+                    ASSERT_EQ(diff, in_place);
+                    in_place = a;
+                    negate_poly_coeffmod(in_place.data(), n, modulus, in_place.data());
+                    ASSERT_EQ(neg, in_place);
+                }
+            }
+        }
+
         TEST(PolyArithSmallMod, MultiplyPolyScalarCoeffModRandom)
         {
             mt19937_64 rng(31338);
             for (const Modulus &modulus : kernel_test_moduli())
             {
                 uint64_t p = modulus.value();
-                for (size_t n : kernel_test_sizes)
+                for (size_t n : kernel_test_sizes_with_zero)
                 {
                     vector<uint64_t> a = kernel_test_operand(n, lazy_operand_bound(modulus), rng), out(n);
                     for (uint64_t scalar : { uint64_t(0), uint64_t(1), p - 1, ~uint64_t(0), uint64_t(rng()) })

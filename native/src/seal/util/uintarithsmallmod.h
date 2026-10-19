@@ -96,13 +96,18 @@ namespace seal
         SEAL_NODISCARD SEAL_FORCE_INLINE std::uint64_t select_uint64(
             bool cond, std::uint64_t if_true, std::uint64_t if_false) noexcept
         {
+            // The assembly tests only the lowest bit of the condition, since the other bits of a bool in a register
+            // may be arbitrary
 #if defined(SEAL_BRANCH_FREE_ASM_X86_64)
             std::uint64_t r = if_false;
-            __asm__("testb %[c], %[c]\n\tcmovneq %[t], %[r]" : [r] "+r"(r) : [c] "q"(cond), [t] "r"(if_true) : "cc");
+            __asm__("testl $1, %[c]\n\tcmovneq %[t], %[r]"
+                    : [r] "+r"(r)
+                    : [c] "r"(static_cast<std::uint32_t>(cond)), [t] "r"(if_true)
+                    : "cc");
             return r;
 #elif defined(SEAL_BRANCH_FREE_ASM_AARCH64)
             std::uint64_t r;
-            __asm__("cmp %w[c], #0\n\tcsel %[r], %[t], %[f], ne"
+            __asm__("tst %w[c], #1\n\tcsel %[r], %[t], %[f], ne"
                     : [r] "=r"(r)
                     : [c] "r"(static_cast<std::uint32_t>(cond)), [t] "r"(if_true), [f] "r"(if_false)
                     : "cc");

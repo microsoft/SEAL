@@ -8,6 +8,13 @@
 #ifdef SEAL_USE_INTEL_HEXL
 #include "hexl/hexl.hpp"
 #endif
+#if defined(SEAL_USE_INTRIN) && defined(__aarch64__) && defined(__ARM_NEON) && !defined(_MSC_VER)
+#define SEAL_POLY_ARITH_USE_SIMD
+#include <arm_neon.h>
+#elif defined(SEAL_USE_INTRIN) && (defined(__x86_64__) || defined(_M_X64))
+#define SEAL_POLY_ARITH_USE_SIMD
+#include <immintrin.h>
+#endif
 
 using namespace std;
 
@@ -15,6 +22,229 @@ namespace seal
 {
     namespace util
     {
+        namespace
+        {
+#ifdef SEAL_POLY_ARITH_USE_SIMD
+            /*
+            Modular addition, subtraction, and negation of vectors of 64-bit integers less than a modulus m of at most
+            61 bits. The selections are vector operations, so they have no branches.
+            */
+#if defined(__aarch64__)
+            struct SIMD
+            {
+                using vec = uint64x2_t;
+                static constexpr size_t lanes = 2;
+
+                static vec load(const uint64_t *p)
+                {
+                    return vld1q_u64(p);
+                }
+
+                static void store(uint64_t *p, vec x)
+                {
+                    vst1q_u64(p, x);
+                }
+
+                static vec set1(uint64_t x)
+                {
+                    return vdupq_n_u64(x);
+                }
+
+                static vec add_mod(vec a, vec b, vec m)
+                {
+                    const vec s = vaddq_u64(a, b);
+                    return vbslq_u64(vcltq_u64(s, m), s, vsubq_u64(s, m));
+                }
+
+                static vec sub_mod(vec a, vec b, vec m)
+                {
+                    return vaddq_u64(vsubq_u64(a, b), vandq_u64(vcltq_u64(a, b), m));
+                }
+
+                static vec negate_mod(vec a, vec m)
+                {
+                    return vandq_u64(vsubq_u64(m, a), vtstq_u64(a, a));
+                }
+            };
+#elif defined(__AVX512F__)
+            // In add_mod and sub_mod, the candidate that is not the result either is the result plus m or has wrapped
+            // around 2^64, so the result is the smaller candidate
+            struct SIMD
+            {
+                using vec = __m512i;
+                static constexpr size_t lanes = 8;
+
+                static vec load(const uint64_t *p)
+                {
+                    return _mm512_loadu_si512(p);
+                }
+
+                static void store(uint64_t *p, vec x)
+                {
+                    _mm512_storeu_si512(p, x);
+                }
+
+                static vec set1(uint64_t x)
+                {
+                    return _mm512_set1_epi64(static_cast<long long>(x));
+                }
+
+                static vec add_mod(vec a, vec b, vec m)
+                {
+                    const vec s = _mm512_add_epi64(a, b);
+                    return _mm512_min_epu64(s, _mm512_sub_epi64(s, m));
+                }
+
+                static vec sub_mod(vec a, vec b, vec m)
+                {
+                    const vec d = _mm512_sub_epi64(a, b);
+                    return _mm512_min_epu64(d, _mm512_add_epi64(d, m));
+                }
+
+                static vec negate_mod(vec a, vec m)
+                {
+                    return _mm512_maskz_sub_epi64(_mm512_test_epi64_mask(a, a), m, a);
+                }
+            };
+#elif defined(__AVX2__)
+            // All values are less than 2^63, so signed comparisons are correct
+            struct SIMD
+            {
+                using vec = __m256i;
+                static constexpr size_t lanes = 4;
+
+                static vec load(const uint64_t *p)
+                {
+                    return _mm256_loadu_si256(reinterpret_cast<const __m256i *>(p));
+                }
+
+                static void store(uint64_t *p, vec x)
+                {
+                    _mm256_storeu_si256(reinterpret_cast<__m256i *>(p), x);
+                }
+
+                static vec set1(uint64_t x)
+                {
+                    return _mm256_set1_epi64x(static_cast<long long>(x));
+                }
+
+                static vec add_mod(vec a, vec b, vec m)
+                {
+                    const vec s = _mm256_add_epi64(a, b);
+                    return _mm256_blendv_epi8(_mm256_sub_epi64(s, m), s, _mm256_cmpgt_epi64(m, s));
+                }
+
+                static vec sub_mod(vec a, vec b, vec m)
+                {
+                    return _mm256_add_epi64(_mm256_sub_epi64(a, b), _mm256_and_si256(_mm256_cmpgt_epi64(b, a), m));
+                }
+
+                static vec negate_mod(vec a, vec m)
+                {
+                    return _mm256_andnot_si256(_mm256_cmpeq_epi64(a, _mm256_setzero_si256()), _mm256_sub_epi64(m, a));
+                }
+            };
+#else
+            // SSE2 has no 64-bit comparisons; for x and y less than 2^63, x - y has its most significant bit set
+            // exactly when x < y
+            struct SIMD
+            {
+                using vec = __m128i;
+                static constexpr size_t lanes = 2;
+
+                static vec load(const uint64_t *p)
+                {
+                    return _mm_loadu_si128(reinterpret_cast<const __m128i *>(p));
+                }
+
+                static void store(uint64_t *p, vec x)
+                {
+                    _mm_storeu_si128(reinterpret_cast<__m128i *>(p), x);
+                }
+
+                static vec set1(uint64_t x)
+                {
+                    return _mm_set1_epi64x(static_cast<long long>(x));
+                }
+
+                // Returns 2^64 - 1 in the lanes whose most significant bit is set, and 0 in the others
+                static vec sign_mask(vec x)
+                {
+                    return _mm_srai_epi32(_mm_shuffle_epi32(x, _MM_SHUFFLE(3, 3, 1, 1)), 31);
+                }
+
+                static vec add_mod(vec a, vec b, vec m)
+                {
+                    const vec t = _mm_sub_epi64(_mm_add_epi64(a, b), m);
+                    return _mm_add_epi64(t, _mm_and_si128(sign_mask(t), m));
+                }
+
+                static vec sub_mod(vec a, vec b, vec m)
+                {
+                    const vec d = _mm_sub_epi64(a, b);
+                    return _mm_add_epi64(d, _mm_and_si128(sign_mask(d), m));
+                }
+
+                static vec negate_mod(vec a, vec m)
+                {
+                    return _mm_and_si128(_mm_sub_epi64(m, a), sign_mask(_mm_sub_epi64(_mm_setzero_si128(), a)));
+                }
+            };
+#endif
+
+            // Calls f(i) for i = 0, lanes, 2 * lanes, ... while a whole vector remains, two calls per iteration, and
+            // returns the number of coefficients done
+            template <typename F>
+            size_t for_each_vector(size_t coeff_count, F &&f)
+            {
+                size_t i = 0;
+                for (; i + 2 * SIMD::lanes <= coeff_count; i += 2 * SIMD::lanes)
+                {
+                    f(i);
+                    f(i + SIMD::lanes);
+                }
+                if (i + SIMD::lanes <= coeff_count)
+                {
+                    f(i);
+                    i += SIMD::lanes;
+                }
+                return i;
+            }
+
+            // Each returns the number of coefficients done; the caller does the rest. result may be an operand, but
+            // must not otherwise overlap one. With Intel HEXL, addition and subtraction use Intel HEXL instead.
+#ifndef SEAL_USE_INTEL_HEXL
+            size_t add_poly_coeffmod_simd(
+                const uint64_t *operand1, const uint64_t *operand2, size_t coeff_count, uint64_t modulus,
+                uint64_t *result)
+            {
+                const SIMD::vec m = SIMD::set1(modulus);
+                return for_each_vector(coeff_count, [&](size_t i) {
+                    SIMD::store(result + i, SIMD::add_mod(SIMD::load(operand1 + i), SIMD::load(operand2 + i), m));
+                });
+            }
+
+            size_t sub_poly_coeffmod_simd(
+                const uint64_t *operand1, const uint64_t *operand2, size_t coeff_count, uint64_t modulus,
+                uint64_t *result)
+            {
+                const SIMD::vec m = SIMD::set1(modulus);
+                return for_each_vector(coeff_count, [&](size_t i) {
+                    SIMD::store(result + i, SIMD::sub_mod(SIMD::load(operand1 + i), SIMD::load(operand2 + i), m));
+                });
+            }
+#endif
+
+            size_t negate_poly_coeffmod_simd(
+                const uint64_t *poly, size_t coeff_count, uint64_t modulus, uint64_t *result)
+            {
+                const SIMD::vec m = SIMD::set1(modulus);
+                return for_each_vector(
+                    coeff_count, [&](size_t i) { SIMD::store(result + i, SIMD::negate_mod(SIMD::load(poly + i), m)); });
+            }
+#endif
+        } // namespace
+
         void modulo_poly_coeffs(ConstCoeffIter poly, std::size_t coeff_count, const Modulus &modulus, CoeffIter result)
         {
 #ifdef SEAL_DEBUG
@@ -33,8 +263,9 @@ namespace seal
 #endif
 
 #ifdef SEAL_USE_INTEL_HEXL
-            // Intel HEXL reduces arbitrary 64-bit input correctly only modulo moduli of at least 14 bits
-            if (modulus.bit_count() >= 14)
+            // Intel HEXL reduces arbitrary 64-bit input correctly only modulo moduli of at least 14 bits, and it does
+            // not accept empty input
+            if (modulus.bit_count() >= 14 && coeff_count > 0)
             {
                 intel::hexl::EltwiseReduceMod(result, poly, coeff_count, modulus.value(), modulus.value(), 1);
                 return;
@@ -78,23 +309,37 @@ namespace seal
             const uint64_t modulus_value = modulus.value();
 
 #ifdef SEAL_USE_INTEL_HEXL
-            intel::hexl::EltwiseAddMod(&result[0], &operand1[0], &operand2[0], coeff_count, modulus_value);
+            // Intel HEXL does not accept empty input
+            if (coeff_count > 0)
+            {
+                intel::hexl::EltwiseAddMod(&result[0], &operand1[0], &operand2[0], coeff_count, modulus_value);
+            }
 #else
-
-            SEAL_ITERATE(iter(operand1, operand2, result), coeff_count, [&](auto I) {
 #ifdef SEAL_DEBUG
-                if (get<0>(I) >= modulus_value)
+            for (size_t i = 0; i < coeff_count; i++)
+            {
+                if (operand1[i] >= modulus_value)
                 {
                     throw std::invalid_argument("operand1");
                 }
-                if (get<1>(I) >= modulus_value)
+                if (operand2[i] >= modulus_value)
                 {
                     throw std::invalid_argument("operand2");
                 }
+            }
 #endif
-                std::uint64_t sum = get<0>(I) + get<1>(I);
-                get<2>(I) = select_uint64(sum >= modulus_value, sum - modulus_value, sum);
-            });
+            const uint64_t *op1 = operand1.ptr();
+            const uint64_t *op2 = operand2.ptr();
+            uint64_t *res = result.ptr();
+            size_t i = 0;
+#ifdef SEAL_POLY_ARITH_USE_SIMD
+            i = add_poly_coeffmod_simd(op1, op2, coeff_count, modulus_value, res);
+#endif
+            for (; i < coeff_count; i++)
+            {
+                const uint64_t sum = op1[i] + op2[i];
+                res[i] = select_uint64(sum >= modulus_value, sum - modulus_value, sum);
+            }
 #endif
         }
 
@@ -123,24 +368,79 @@ namespace seal
 
             const uint64_t modulus_value = modulus.value();
 #ifdef SEAL_USE_INTEL_HEXL
-            intel::hexl::EltwiseSubMod(result, operand1, operand2, coeff_count, modulus_value);
+            // Intel HEXL does not accept empty input
+            if (coeff_count > 0)
+            {
+                intel::hexl::EltwiseSubMod(result, operand1, operand2, coeff_count, modulus_value);
+            }
 #else
-            SEAL_ITERATE(iter(operand1, operand2, result), coeff_count, [&](auto I) {
 #ifdef SEAL_DEBUG
-                if (get<0>(I) >= modulus_value)
+            for (size_t i = 0; i < coeff_count; i++)
+            {
+                if (operand1[i] >= modulus_value)
                 {
                     throw std::invalid_argument("operand1");
                 }
-                if (get<1>(I) >= modulus_value)
+                if (operand2[i] >= modulus_value)
                 {
                     throw std::invalid_argument("operand2");
                 }
+            }
 #endif
+            const uint64_t *op1 = operand1.ptr();
+            const uint64_t *op2 = operand2.ptr();
+            uint64_t *res = result.ptr();
+            size_t i = 0;
+#ifdef SEAL_POLY_ARITH_USE_SIMD
+            i = sub_poly_coeffmod_simd(op1, op2, coeff_count, modulus_value, res);
+#endif
+            for (; i < coeff_count; i++)
+            {
                 unsigned long long temp_result;
-                std::int64_t borrow = sub_uint64(get<0>(I), get<1>(I), &temp_result);
-                get<2>(I) = temp_result + (modulus_value & static_cast<std::uint64_t>(-borrow));
-            });
+                std::int64_t borrow = sub_uint64(op1[i], op2[i], &temp_result);
+                res[i] = temp_result + (modulus_value & static_cast<std::uint64_t>(-borrow));
+            }
 #endif
+        }
+
+        void negate_poly_coeffmod(
+            ConstCoeffIter poly, std::size_t coeff_count, const Modulus &modulus, CoeffIter result)
+        {
+#ifdef SEAL_DEBUG
+            if (!poly && coeff_count > 0)
+            {
+                throw std::invalid_argument("poly");
+            }
+            if (modulus.is_zero())
+            {
+                throw std::invalid_argument("modulus");
+            }
+            if (!result && coeff_count > 0)
+            {
+                throw std::invalid_argument("result");
+            }
+#endif
+            const uint64_t modulus_value = modulus.value();
+#ifdef SEAL_DEBUG
+            for (size_t i = 0; i < coeff_count; i++)
+            {
+                if (poly[i] >= modulus_value)
+                {
+                    throw std::out_of_range("poly");
+                }
+            }
+#endif
+            const uint64_t *in = poly.ptr();
+            uint64_t *out = result.ptr();
+            size_t i = 0;
+#ifdef SEAL_POLY_ARITH_USE_SIMD
+            i = negate_poly_coeffmod_simd(in, coeff_count, modulus_value, out);
+#endif
+            for (; i < coeff_count; i++)
+            {
+                const std::int64_t non_zero = (in[i] != 0);
+                out[i] = (modulus_value - in[i]) & static_cast<std::uint64_t>(-non_zero);
+            }
         }
 
         void add_poly_scalar_coeffmod(
@@ -166,7 +466,11 @@ namespace seal
 #endif
 
 #ifdef SEAL_USE_INTEL_HEXL
-            intel::hexl::EltwiseAddMod(result, poly, scalar, coeff_count, modulus.value());
+            // Intel HEXL does not accept empty input
+            if (coeff_count > 0)
+            {
+                intel::hexl::EltwiseAddMod(result, poly, scalar, coeff_count, modulus.value());
+            }
 #else
             SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
                 const uint64_t x = get<0>(I);
@@ -198,7 +502,11 @@ namespace seal
 #endif
 
 #ifdef SEAL_USE_INTEL_HEXL
-            intel::hexl::EltwiseSubMod(result, poly, scalar, coeff_count, modulus.value());
+            // Intel HEXL does not accept empty input
+            if (coeff_count > 0)
+            {
+                intel::hexl::EltwiseSubMod(result, poly, scalar, coeff_count, modulus.value());
+            }
 #else
             SEAL_ITERATE(iter(poly, result), coeff_count, [&](auto I) {
                 const uint64_t x = get<0>(I);
@@ -227,7 +535,12 @@ namespace seal
 #endif
 
 #ifdef SEAL_USE_INTEL_HEXL
-            intel::hexl::EltwiseFMAMod(&result[0], &poly[0], scalar.operand, nullptr, coeff_count, modulus.value(), 8);
+            // Intel HEXL does not accept empty input
+            if (coeff_count > 0)
+            {
+                intel::hexl::EltwiseFMAMod(
+                    &result[0], &poly[0], scalar.operand, nullptr, coeff_count, modulus.value(), 8);
+            }
 #else
             // Local copies, since result may alias modulus
             const uint64_t modulus_value = modulus.value();

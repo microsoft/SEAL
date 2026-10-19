@@ -1,5 +1,13 @@
 # List of Changes
 
+## Version 4.7.1
+
+- Vectorized modular addition, subtraction, and negation of polynomials, which speeds up for example `Evaluator::add`, `Evaluator::sub`, and `Evaluator::negate`. This uses NEON on AArch64, except with MSVC, and on x86-64 AVX-512 or AVX2 when the compiler targets them, for example with `-march=native`, and SSE2 otherwise. It requires `SEAL_USE_INTRIN=ON`, the default. With Intel HEXL, addition and subtraction still use Intel HEXL. The results do not change.
+- Fixed `util::select_uint64` on x86-64 with Clang, which could return `if_true` when the condition was false but not computed by a comparison. The calls in the library were not affected.
+- Fixed `util::modulo_poly_coeffs`, `util::add_poly_coeffmod`, `util::sub_poly_coeffmod`, `util::add_poly_scalar_coeffmod`, `util::sub_poly_scalar_coeffmod`, and `util::multiply_poly_scalar_coeffmod` with Intel HEXL for polynomials with no coefficients, which Intel HEXL rejected in Debug builds.
+- Microsoft SEAL no longer uses the intrinsic `_subborrow_u64` with GCC before 7.2, which can lose the borrow between calls with optimizations enabled.
+- Noted in README.md that Intel HEXL improves performance only on processors with AVX-512, and makes most operations slower on others.
+
 ## Version 4.7.0
 
 ### Breaking Changes

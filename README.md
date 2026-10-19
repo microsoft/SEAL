@@ -127,7 +127,11 @@ The optional dependencies and their tested versions (other versions may work as 
 #### Intel HEXL
 
 Intel HEXL is a library providing efficient implementations of cryptographic primitives common in homomorphic encryption.
-The acceleration is particularly evident on Intel processors with the Intel AVX512-IFMA52 instruction set.
+
+**Note:** Intel HEXL improves performance only on processors with AVX-512.
+On processors without AVX-512, most operations are slower with Intel HEXL than without it, so enable it only when the target processors have AVX-512.
+
+On processors with AVX-512, the acceleration is greatest with the AVX512-IFMA52 instruction set and coefficient modulus primes of at most 50 bits, such as those of `CoeffModulus::BFVDefault` for all values of `poly_modulus_degree` except 2048 and 32768.
 
 #### Microsoft GSL
 
@@ -501,7 +505,7 @@ The following options can be used with CMake to configure the build. The default
 | SEAL_BUILD_TESTS       | ON / **OFF**                                                 | Build the tests to check that Microsoft SEAL works correctly.                                                                                                                                          |
 | SEAL_BUILD_BENCH       | ON / **OFF**                                                 | Build the performance benchmark.                                                                                                                                                                       |
 | SEAL_BUILD_DEPS        | **ON** / OFF                                                 | Set to `ON` to automatically download and build [optional dependencies](#optional-dependencies); otherwise CMake will attempt to locate pre-installed dependencies.                                    |
-| SEAL_USE_INTEL_HEXL    | ON / **OFF**                                                 | Set to `ON` to use Intel HEXL for low-level kernels.                                                                                                                                            |
+| SEAL_USE_INTEL_HEXL    | ON / **OFF**                                                 | Set to `ON` to use Intel HEXL for low-level kernels. This improves performance only on processors with AVX-512; see [Intel HEXL](#intel-hexl).                                                         |
 | SEAL_USE_MSGSL         | **ON** / OFF                                                 | Build with Microsoft GSL support.                                                                                                                                                                      |
 | SEAL_USE_ZLIB          | **ON** / OFF                                                 | Build with ZLIB support.                                                                                                                                                                               |
 | SEAL_USE_ZSTD          | **ON** / OFF                                                 | Build with Zstandard support.                                                                                                                                                                          |
