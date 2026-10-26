@@ -42,8 +42,7 @@ namespace sealtest
                 }
             }
 
-            // Rounding to the nearest integer keeps the standard deviation close to noise_standard_deviation;
-            // truncating toward zero would lower it to about 2.83.
+            // Confirm the sampled standard deviation matches global_variables::noise_standard_deviation
             double standard_deviation = sqrt(sum_of_squares / (16 * 4096));
             ASSERT_NEAR(global_variables::noise_standard_deviation, standard_deviation, 0.1);
         }
