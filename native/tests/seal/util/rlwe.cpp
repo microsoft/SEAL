@@ -5,9 +5,9 @@
 #include "seal/modulus.h"
 #include "seal/randomgen.h"
 #include "seal/util/rlwe.h"
-#include "seal/util/uintarithsmallmod.h"
 #include <cstddef>
 #include <cstdint>
+#include <limits>
 #include <memory>
 #include <utility>
 #include <vector>
@@ -57,22 +57,23 @@ namespace sealtest
             EncryptionParameters parms(scheme_type::bfv);
             parms.set_poly_modulus_degree(64);
             parms.set_coeff_modulus(CoeffModulus::Create(64, { 60 }));
-            const Modulus &modulus = parms.coeff_modulus()[0];
+            uint64_t q = parms.coeff_modulus()[0].value();
 
-            // Largest multiple of the modulus that fits in 64 bits; [0, threshold) holds only complete
-            // residue classes, so every value below it must be accepted and every value from it rejected
-            uint64_t max_random = static_cast<uint64_t>(0xFFFFFFFFFFFFFFFFULL);
-            uint64_t threshold = max_random - barrett_reduce_64(max_random, modulus);
+            // Compute the largest multiple of q that fits in 64 bits. We want sampling to reject anything >=
+            // this threshold and accept anything below it.
+            uint64_t max_multiple = (numeric_limits<uint64_t>::max() / q) * q;
 
-            // The first 64 words are the bulk draw; rejected words are replaced from word 64 onwards
+            // sample_poly_uniform will draw words[0..63] and apply rejection sampling;
+            // rejected words are replaced from words[64] onwards.
             vector<uint64_t> words(128, 1);
-            words[0] = threshold - 1;
-            words[1] = threshold;
+            words[0] = max_multiple - 1;
+            words[1] = max_multiple;
             words[64] = 12345;
 
+            // words[0] should be accepted; words[1] should be rejected and replaced with the value in words[64].
             vector<uint64_t> poly(64);
             sample_poly_uniform(make_shared<ScriptedRandomGenerator>(words), parms, poly.data());
-            ASSERT_EQ(modulus.value() - 1, poly[0]);
+            ASSERT_EQ(q - 1, poly[0]);
             ASSERT_EQ(12345ULL, poly[1]);
         }
     } // namespace util
