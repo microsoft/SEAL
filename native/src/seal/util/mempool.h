@@ -120,7 +120,7 @@ namespace seal
             // Returns the total number of items allocated
             SEAL_NODISCARD inline std::size_t item_count() const noexcept override
             {
-                return item_count_;
+                return item_count_.load(std::memory_order_relaxed);
             }
 
             MemoryPoolItem *get() override;
@@ -149,11 +149,11 @@ namespace seal
 
             const std::size_t item_byte_count_;
 
-            volatile std::size_t item_count_;
+            std::atomic<std::size_t> item_count_;
 
             std::vector<allocation> allocs_;
 
-            MemoryPoolItem *volatile first_item_;
+            MemoryPoolItem *first_item_;
         };
 
         class MemoryPoolHeadST : public MemoryPoolHead

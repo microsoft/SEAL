@@ -7,6 +7,7 @@
 - Loading no longer interprets arbitrary data as a Microsoft SEAL 3.4 header, and accepts Microsoft SEAL 3.x headers only from versions 3.4 through 3.7.
 - Fixed `Evaluator::mod_switch_to_inplace` for plaintexts to throw `std::invalid_argument` for an invalid plaintext, as documented, also when the plaintext is already at the target level.
 - Fixed `CKKSEncoder::encode` for a single `double` to accept the same scales as the other overloads. It also accepted subnormal scales and scales one bit larger than the others allow.
+- Fixed a data race when the allocation statistics of a thread-safe memory pool, such as `MemoryPoolHandle::alloc_byte_count`, are read while other threads allocate from it.
 
 ## Version 4.7.1
 
