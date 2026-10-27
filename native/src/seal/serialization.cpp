@@ -222,8 +222,9 @@ namespace seal
                 new_header.compr_mode = header_3_4.compr_mode;
                 new_header.size = header_3_4.size;
 
-                // Now validate the new header and discard if still not valid; something else is probably wrong
-                if (IsValidHeader(new_header))
+                // Now validate the new header and discard if still not valid; something else is probably wrong. A
+                // Microsoft SEAL 3.4 header starts with the magic number followed by a zero byte.
+                if (header_3_4.magic == seal_magic && header_3_4.zero_byte == 0x00 && IsValidHeader(new_header))
                 {
                     header = new_header;
                 }

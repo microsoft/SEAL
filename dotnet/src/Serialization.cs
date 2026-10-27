@@ -254,8 +254,9 @@ namespace Microsoft.Research.SEAL
                 newHeader.ComprMode = header_3_4.ComprMode;
                 newHeader.Size = header_3_4.Size;
 
-                // Now validate the new header and discard if still not valid; something else is probably wrong
-                if (IsValidHeader(newHeader))
+                // Now validate the new header and discard if still not valid; something else is probably wrong. A
+                // Microsoft SEAL 3.4 header starts with the magic number followed by a zero byte.
+                if (header_3_4.Magic == SEALMagic && header_3_4.ZeroByte == 0 && IsValidHeader(newHeader))
                 {
                     header.Set(newHeader);
                 }

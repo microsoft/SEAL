@@ -459,6 +459,17 @@ namespace sealtest
         }
     }
 
+    TEST(SerializationTest, LegacyVersionCompatibility)
+    {
+        Serialization::SEALHeader header;
+        header.version_major = 3;
+        for (int minor = 0; minor <= 0xFF; minor++)
+        {
+            header.version_minor = static_cast<uint8_t>(minor);
+            ASSERT_EQ(minor >= 4 && minor <= 7, Serialization::IsCompatibleVersion(header));
+        }
+    }
+
 #ifdef SEAL_USE_ZSTD
     TEST(SerializationTest, ZstdWindowLimit)
     {
@@ -591,32 +602,46 @@ namespace sealtest
                 invalid_argument);
         }
     }
-    /*
-        TEST(SerializationTest, SEALHeaderUpgrade)
+    TEST(SerializationTest, SEALHeaderUpgrade)
+    {
+        legacy_headers::SEALHeader_3_4 header_3_4;
+        header_3_4.compr_mode = Serialization::compr_mode_default;
+        header_3_4.size = 0xF3F3;
+
         {
-            legacy_headers::SEALHeader_3_4 header_3_4;
-            header_3_4.compr_mode = Serialization::compr_mode_default;
-            header_3_4.size = 0xF3F3;
-
-            {
-                Serialization::SEALHeader header;
-                Serialization::LoadHeader(
-                    reinterpret_cast<const seal_byte *>(&header_3_4), sizeof(legacy_headers::SEALHeader_3_4), header);
-                ASSERT_TRUE(Serialization::IsValidHeader(header));
-                ASSERT_EQ(header_3_4.compr_mode, header.compr_mode);
-                ASSERT_EQ(header_3_4.size, header.size);
-            }
-            {
-                Serialization::SEALHeader header;
-                Serialization::LoadHeader(
-                    reinterpret_cast<const seal_byte *>(&header_3_4), sizeof(legacy_headers::SEALHeader_3_4), header,
-                    false);
-
-                // No upgrade requested
-                ASSERT_FALSE(Serialization::IsValidHeader(header));
-            }
+            Serialization::SEALHeader header;
+            Serialization::LoadHeader(
+                reinterpret_cast<const seal_byte *>(&header_3_4), sizeof(legacy_headers::SEALHeader_3_4), header);
+            ASSERT_TRUE(Serialization::IsValidHeader(header));
+            ASSERT_EQ(3, header.version_major);
+            ASSERT_EQ(4, header.version_minor);
+            ASSERT_EQ(header_3_4.compr_mode, header.compr_mode);
+            ASSERT_EQ(header_3_4.size, header.size);
         }
-    */
+        {
+            Serialization::SEALHeader header;
+            Serialization::LoadHeader(
+                reinterpret_cast<const seal_byte *>(&header_3_4), sizeof(legacy_headers::SEALHeader_3_4), header,
+                false);
+
+            // No upgrade requested
+            ASSERT_FALSE(Serialization::IsValidHeader(header));
+        }
+
+        // Data without the magic number and zero byte of a 3.4 header is not upgraded
+        legacy_headers::SEALHeader_3_4 bad_magic = header_3_4;
+        bad_magic.magic = 0x1234;
+        legacy_headers::SEALHeader_3_4 bad_zero_byte = header_3_4;
+        bad_zero_byte.zero_byte = 0x01;
+        for (const auto &bad : { bad_magic, bad_zero_byte })
+        {
+            Serialization::SEALHeader header;
+            Serialization::LoadHeader(
+                reinterpret_cast<const seal_byte *>(&bad), sizeof(legacy_headers::SEALHeader_3_4), header);
+            ASSERT_FALSE(Serialization::IsValidHeader(header));
+        }
+    }
+
     TEST(SerializationTest, SaveLoadToStream)
     {
         test_struct st{ 3, ~0, 3.14159 }, st2;

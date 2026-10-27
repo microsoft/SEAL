@@ -206,8 +206,8 @@ namespace seal
                 return false;
             }
 
-            // Support Microsoft SEAL 3.4 and above
-            if (header.version_major == 3 && header.version_minor >= 4)
+            // Support Microsoft SEAL 3.4 through 3.7, the last 3.x release
+            if (header.version_major == 3 && header.version_minor >= 4 && header.version_minor <= 7)
             {
                 return true;
             }
