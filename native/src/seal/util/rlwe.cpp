@@ -118,7 +118,9 @@ namespace seal
             for (size_t j = 0; j < coeff_modulus_size; j++)
             {
                 auto &modulus = coeff_modulus[j];
-                uint64_t max_multiple = max_random - barrett_reduce_64(max_random, modulus) - 1;
+
+                // The largest multiple of modulus that fits in 64 bits
+                uint64_t max_multiple = max_random - barrett_reduce_64(max_random, modulus);
                 transform(destination, destination + coeff_count, destination, [&](uint64_t rand) {
                     // This ensures uniform distribution
                     while (rand >= max_multiple)
