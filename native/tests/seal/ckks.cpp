@@ -318,6 +318,29 @@ namespace sealtest
             invalid_argument);
     }
 
+    TEST(CKKSEncoderTest, CKKSSingleValueScaleValidation)
+    {
+        EncryptionParameters parms(scheme_type::ckks);
+        parms.set_poly_modulus_degree(8);
+        parms.set_coeff_modulus(CoeffModulus::Create(8, { 40, 40, 40 }));
+        SEALContext context(parms, false, sec_level_type::none);
+        CKKSEncoder encoder(context);
+
+        vector<double> values(encoder.slot_count(), 0.25);
+        Plaintext plain;
+        int total_bit_count = context.first_context_data()->total_coeff_modulus_bit_count();
+
+        // The single-value and vector overloads accept and reject the same scales
+        double largest_scale = ldexp(1.0, total_bit_count - 2);
+        ASSERT_NO_THROW(encoder.encode(values, largest_scale, plain));
+        ASSERT_NO_THROW(encoder.encode(0.25, largest_scale, plain));
+        for (double scale : { ldexp(1.0, total_bit_count - 1), numeric_limits<double>::denorm_min() })
+        {
+            ASSERT_THROW(encoder.encode(values, scale, plain), invalid_argument);
+            ASSERT_THROW(encoder.encode(0.25, scale, plain), invalid_argument);
+        }
+    }
+
     TEST(CKKSEncoderTest, CKKSEncoderEncodeIntegerSignedTest)
     {
         {

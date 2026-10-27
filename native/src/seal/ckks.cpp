@@ -98,9 +98,9 @@ namespace seal
             throw logic_error("invalid parameters");
         }
 
-        // Check that scale is positive and not too large
-        if (!isfinite(scale) || scale <= 0 ||
-            (static_cast<int>(log2(scale)) >= context_data.total_coeff_modulus_bit_count()))
+        // Check that scale is positive, normal, and not too large
+        if (!isnormal(scale) || scale <= 0 ||
+            (static_cast<int>(log2(scale)) + 1 >= context_data.total_coeff_modulus_bit_count()))
         {
             throw invalid_argument("scale out of bounds");
         }

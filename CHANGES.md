@@ -6,6 +6,7 @@
 - Fixed `util::sample_poly_normal` to round the noise to the nearest integer instead of truncating it, which reduced its standard deviation from 3.2 to about 2.83. This affected only builds with `SEAL_USE_GAUSSIAN_NOISE=ON` ([PR #765](https://github.com/microsoft/SEAL/pull/765)).
 - Loading no longer interprets arbitrary data as a Microsoft SEAL 3.4 header, and accepts Microsoft SEAL 3.x headers only from versions 3.4 through 3.7.
 - Fixed `Evaluator::mod_switch_to_inplace` for plaintexts to throw `std::invalid_argument` for an invalid plaintext, as documented, also when the plaintext is already at the target level.
+- Fixed `CKKSEncoder::encode` for a single `double` to accept the same scales as the other overloads. It also accepted subnormal scales and scales one bit larger than the others allow.
 
 ## Version 4.7.1
 
