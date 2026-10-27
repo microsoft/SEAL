@@ -55,7 +55,7 @@ namespace seal
                 0, global_variables::noise_standard_deviation, global_variables::noise_max_deviation);
 
             SEAL_ITERATE(iter(destination), coeff_count, [&](auto &I) {
-                int64_t noise = static_cast<int64_t>(dist(engine));
+                int64_t noise = static_cast<int64_t>(round(dist(engine)));
                 uint64_t flag = static_cast<uint64_t>(-static_cast<int64_t>(noise < 0));
                 SEAL_ITERATE(
                     iter(StrideIter<uint64_t *>(&I, coeff_count), coeff_modulus), coeff_modulus_size,
