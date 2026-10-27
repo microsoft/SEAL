@@ -7339,6 +7339,28 @@ namespace sealtest
         ASSERT_THROW(evaluator.mod_reduce_to_inplace(encrypted, same_parms_id), invalid_argument);
     }
 
+    TEST(EvaluatorTest, ModSwitchToValidatesPlaintext)
+    {
+        EncryptionParameters parms(scheme_type::ckks);
+        parms.set_poly_modulus_degree(128);
+        parms.set_coeff_modulus(CoeffModulus::Create(128, { 40, 40, 40 }));
+        SEALContext context(parms, true, sec_level_type::none);
+
+        CKKSEncoder encoder(context);
+        Evaluator evaluator(context);
+
+        Plaintext plain;
+        encoder.encode(1.0, pow(2.0, 20), plain);
+        auto same_parms_id = plain.parms_id();
+        ASSERT_NO_THROW(evaluator.mod_switch_to_inplace(plain, same_parms_id));
+
+        plain[0] = context.get_context_data(same_parms_id)->parms().coeff_modulus()[0].value();
+        ASSERT_FALSE(is_valid_for(plain, context));
+
+        // Switching to the level the plaintext already occupies performs no iterations.
+        ASSERT_THROW(evaluator.mod_switch_to_inplace(plain, same_parms_id), invalid_argument);
+    }
+
     TEST(EvaluatorTest, MultiplyPlainValidatesBeforeTransforming)
     {
         EncryptionParameters parms(scheme_type::bfv);

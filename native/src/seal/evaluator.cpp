@@ -1469,6 +1469,13 @@ namespace seal
             throw invalid_argument("cannot switch to higher level modulus");
         }
 
+        // The loop below performs no iterations when plain is already at the target level, so validate it here;
+        // otherwise mod_switch_to_next_inplace validates it.
+        if (plain.parms_id() == parms_id && !is_valid_for(plain, context_))
+        {
+            throw invalid_argument("plain is not valid for encryption parameters");
+        }
+
         while (plain.parms_id() != parms_id)
         {
             mod_switch_to_next_inplace(plain);
