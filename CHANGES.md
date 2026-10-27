@@ -1,5 +1,10 @@
 # List of Changes
 
+## Version 4.7.2
+
+- Fixed an off-by-one error in the rejection sampling of `util::sample_poly_uniform`, which made its output very slightly non-uniform ([PR #764](https://github.com/microsoft/SEAL/pull/764)).
+- Fixed `util::sample_poly_normal` to round the noise to the nearest integer instead of truncating it, which reduced its standard deviation from 3.2 to about 2.83. This affected only builds with `SEAL_USE_GAUSSIAN_NOISE=ON` ([PR #765](https://github.com/microsoft/SEAL/pull/765)).
+
 ## Version 4.7.1
 
 - Vectorized modular addition, subtraction, and negation of polynomials, which speeds up for example `Evaluator::add`, `Evaluator::sub`, and `Evaluator::negate`. This uses NEON on AArch64, except with MSVC, and on x86-64 AVX-512 or AVX2 when the compiler targets them, for example with `-march=native`, and SSE2 otherwise. It requires `SEAL_USE_INTRIN=ON`, the default. With Intel HEXL, addition and subtraction still use Intel HEXL. The results do not change.
