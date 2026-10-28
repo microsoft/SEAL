@@ -19,6 +19,12 @@
 
 #define SEAL_FORCE_INLINE inline __attribute__((always_inline))
 
+// GCC 15 miscompiles the complex multiply-adds in DWTHandler on x86-64 when it fuses them into FMA instructions,
+// for example with -march=x86-64-v3 or -march=native, so these functions are compiled without contraction
+#if (__GNUC__ >= 15) && defined(__x86_64__)
+#define SEAL_NO_FP_CONTRACT __attribute__((optimize("fp-contract=off")))
+#endif
+
 #ifdef SEAL_USE_ALIGNED_ALLOC
 #ifdef _WIN32
 // The Windows C runtime provides no std::aligned_alloc; _aligned_malloc results must be

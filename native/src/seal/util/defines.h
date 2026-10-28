@@ -133,6 +133,11 @@ namespace seal
 #define SEAL_FORCE_INLINE inline
 #endif
 
+// Compile a function without floating-point contraction
+#ifndef SEAL_NO_FP_CONTRACT
+#define SEAL_NO_FP_CONTRACT
+#endif
+
 // Use `if constexpr' from C++17
 #ifdef SEAL_USE_IF_CONSTEXPR
 #define SEAL_IF_CONSTEXPR if constexpr

@@ -91,7 +91,7 @@ namespace seal
             @param[roots] powers of a root in bit-reversed order
             @param[scalar] an optional scalar that is multiplied to all output values
             */
-            void transform_to_rev(
+            SEAL_NO_FP_CONTRACT void transform_to_rev(
                 ValueType *values, int log_n, const RootType *roots, const ScalarType *scalar = nullptr) const
             {
                 // constant transform size
@@ -199,7 +199,7 @@ namespace seal
             @param[roots] powers of a root in scrambled order
             @param[scalar] an optional scalar that is multiplied to all output values
             */
-            void transform_from_rev(
+            SEAL_NO_FP_CONTRACT void transform_from_rev(
                 ValueType *values, int log_n, const RootType *roots, const ScalarType *scalar = nullptr) const
             {
                 // constant transform size

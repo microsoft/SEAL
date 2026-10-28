@@ -2,6 +2,7 @@
 
 ## Version 4.7.2
 
+- Worked around a GCC 15 bug that made `CKKSEncoder::decode` return incorrect results on x86-64 when FMA instructions are enabled, for example with `-march=native` or `-march=x86-64-v3`.
 - Fixed an off-by-one error in the rejection sampling of `util::sample_poly_uniform`, which made its output very slightly non-uniform ([PR #764](https://github.com/microsoft/SEAL/pull/764)).
 - Fixed `util::sample_poly_normal` to round the noise to the nearest integer instead of truncating it, which reduced its standard deviation from 3.2 to about 2.83. This affected only builds with `SEAL_USE_GAUSSIAN_NOISE=ON` ([PR #765](https://github.com/microsoft/SEAL/pull/765)).
 - Loading no longer interprets arbitrary data as a Microsoft SEAL 3.4 header, and accepts Microsoft SEAL 3.x headers only from versions 3.4 through 3.7.
